@@ -3,7 +3,7 @@ import React from 'react';
 import { CourseSelector } from './CourseSelector';
 import { ScoreCard } from './ScoreCard';
 import { Button } from './ui/button';
-import { Trophy, ArrowUpRight, Golf } from 'lucide-react';
+import { Trophy, ArrowUpRight, Award } from 'lucide-react';
 
 export const MainContent = () => {
   return (
@@ -12,7 +12,7 @@ export const MainContent = () => {
         <div className="flex flex-col">
           <div className="flex items-center gap-3 mb-2">
             <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-accent shadow-lg">
-              <Golf className="w-8 h-8 text-white transform -rotate-12" />
+              <Award className="w-8 h-8 text-white transform -rotate-12" />
             </div>
             <h1 className="text-5xl font-bold text-accent tracking-tight">
               BirdieBoard
