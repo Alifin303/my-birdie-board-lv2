@@ -6,7 +6,7 @@ const Index = () => {
     <div 
       className="min-h-screen bg-cover bg-center bg-no-repeat"
       style={{
-        backgroundImage: `linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8)), url('https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&q=80')`,
+        backgroundImage: `linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85)), url('https://images.unsplash.com/photo-1600170384787-dbab8b355c79?auto=format&fit=crop&q=80')`,
       }}
     >
       <MainContent />
