@@ -1,43 +1,44 @@
 
 import React from 'react';
-import { CourseSelector } from './CourseSelector';
-import { ScoreCard } from './ScoreCard';
 import { Button } from './ui/button';
-import { Trophy, ArrowUpRight, Award } from 'lucide-react';
+import { UserPlus, HelpCircle } from 'lucide-react';
 
 export const MainContent = () => {
   return (
-    <div className="container max-w-7xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-accent shadow-lg">
-              <Award className="w-8 h-8 text-white transform -rotate-12" />
-            </div>
-            <h1 className="text-5xl font-bold text-accent tracking-tight">
-              BirdieBoard
-            </h1>
+    <div className="text-center px-4">
+      <div className="mb-12">
+        <div className="flex items-center justify-center gap-3 mb-6">
+          <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm">
+            <img 
+              src="https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/favicon.ico" 
+              alt="BirdieBoard" 
+              className="w-10 h-10"
+            />
           </div>
-          <p className="text-primary/80 mt-2 text-lg">
-            Track your scores. Challenge your friends. Improve your game.
-          </p>
+          <h1 className="text-6xl font-bold text-white tracking-tight">
+            BirdieBoard
+          </h1>
         </div>
-        <Button variant="outline" className="flex items-center gap-2 backdrop-blur-sm bg-white/70">
-          View Leaderboard
-          <ArrowUpRight className="w-4 h-4" />
-        </Button>
+        <p className="text-xl text-white/90 font-medium">
+          Your personal golf scorecard in the cloud
+        </p>
       </div>
 
-      <CourseSelector />
-      <ScoreCard />
-
-      <div className="mt-8 text-center">
-        <Button
-          variant="secondary"
-          className="flex items-center gap-2 mx-auto shadow-lg hover:shadow-xl transition-all duration-300"
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <Button 
+          size="lg"
+          className="bg-white text-accent hover:bg-white/90 text-lg px-8 h-12"
         >
-          <Trophy className="w-4 h-4" />
-          Upgrade to Pro
+          <UserPlus className="mr-2" />
+          Sign up
+        </Button>
+        <Button 
+          variant="outline" 
+          size="lg"
+          className="bg-transparent border-white text-white hover:bg-white/10 text-lg px-8 h-12"
+        >
+          <HelpCircle className="mr-2" />
+          What is BirdieBoard?
         </Button>
       </div>
     </div>
