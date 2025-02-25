@@ -40,7 +40,7 @@ export const ScoreCard = () => {
   };
 
   return (
-    <Card className="p-6 animate-fade-in">
+    <Card className="p-6 animate-fade-in backdrop-blur-sm bg-white/90 border-0 shadow-lg">
       <div className="text-center mb-6">
         <h2 className="text-2xl font-semibold text-accent mb-2">{courseName}</h2>
         <div className="flex items-center justify-center gap-2 text-lg">
@@ -52,7 +52,7 @@ export const ScoreCard = () => {
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
         {holes.map((hole) => (
           <div key={hole.number} className="text-center">
-            <label className="block text-sm font-medium text-gray-600 mb-1">
+            <label className="block text-sm font-medium text-accent/80 mb-1">
               Hole {hole.number}
             </label>
             <Input
@@ -61,10 +61,10 @@ export const ScoreCard = () => {
               max="20"
               value={hole.score || ''}
               onChange={(e) => handleScoreChange(hole.number, e.target.value)}
-              className="w-full text-center"
+              className="w-full text-center bg-white/80 border-accent/20 focus:border-accent/40"
               placeholder="0"
             />
-            <span className="text-xs text-gray-500 mt-1 block">
+            <span className="text-xs text-accent/60 mt-1 block">
               Par {hole.par}
             </span>
           </div>
@@ -72,7 +72,7 @@ export const ScoreCard = () => {
       </div>
 
       <div className="mt-6 flex justify-center">
-        <Button className="bg-primary hover:bg-primary/90 text-white">
+        <Button className="bg-accent hover:bg-accent/90 text-white shadow-md hover:shadow-lg transition-all duration-300">
           Save Round
         </Button>
       </div>
