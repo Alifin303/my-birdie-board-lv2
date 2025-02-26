@@ -1,7 +1,8 @@
 
 import { Button } from "@/components/ui/button";
-import { LogIn, UserPlus } from "lucide-react";
+import { LogIn } from "lucide-react";
 import { Link } from "react-router-dom";
+import { SignUpDialog } from "@/components/SignUpDialog";
 
 const About = () => {
   return (
@@ -51,13 +52,7 @@ const About = () => {
           </div>
 
           <div className="mt-8 text-center">
-            <Button 
-              size="lg"
-              className="bg-white text-accent hover:bg-white/90 text-lg px-8 h-12"
-            >
-              <UserPlus className="mr-2" />
-              Sign up
-            </Button>
+            <SignUpDialog />
           </div>
         </div>
       </div>
