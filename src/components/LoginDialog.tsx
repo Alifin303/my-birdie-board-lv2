@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Button } from "./ui/button";
@@ -10,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { LogIn } from "lucide-react";
 import { useToast } from "./ui/use-toast";
 import { SignUpDialog } from "./SignUpDialog";
+import { useNavigate } from "react-router-dom";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -21,6 +21,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export function LoginDialog() {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -40,6 +41,7 @@ export function LoginDialog() {
       });
       setOpen(false);
       form.reset();
+      navigate("/dashboard");
     } catch (error) {
       toast({
         title: "Error",
