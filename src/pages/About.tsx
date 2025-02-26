@@ -1,8 +1,8 @@
 
 import { Button } from "@/components/ui/button";
-import { LogIn } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SignUpDialog } from "@/components/SignUpDialog";
+import { LoginDialog } from "@/components/LoginDialog";
 
 const About = () => {
   return (
@@ -13,14 +13,7 @@ const About = () => {
       }}
     >
       <div className="absolute top-4 right-4">
-        <Button 
-          variant="ghost" 
-          size="lg"
-          className="text-white hover:bg-white/10 border border-white/20"
-        >
-          <LogIn className="mr-2 h-5 w-5" />
-          Log in
-        </Button>
+        <LoginDialog />
       </div>
       <div className="container max-w-4xl mx-auto px-4 py-16">
         <Link to="/" className="text-white/80 hover:text-white mb-8 inline-block">

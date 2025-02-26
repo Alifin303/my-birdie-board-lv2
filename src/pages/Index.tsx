@@ -1,7 +1,6 @@
 
 import { MainContent } from "@/components/MainContent";
-import { Button } from "@/components/ui/button";
-import { LogIn } from "lucide-react";
+import { LoginDialog } from "@/components/LoginDialog";
 
 const Index = () => {
   return (
@@ -12,14 +11,7 @@ const Index = () => {
       }}
     >
       <div className="absolute top-4 right-4">
-        <Button 
-          variant="ghost" 
-          size="lg"
-          className="text-white hover:bg-white/10 border border-white/20"
-        >
-          <LogIn className="mr-2 h-5 w-5" />
-          Log in
-        </Button>
+        <LoginDialog />
       </div>
       <div className="min-h-screen flex items-center justify-center">
         <MainContent />
