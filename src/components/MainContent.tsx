@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { Button } from './ui/button';
-import { UserPlus, HelpCircle } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SignUpDialog } from './SignUpDialog';
 
 export const MainContent = () => {
   return (
@@ -26,13 +27,7 @@ export const MainContent = () => {
       </div>
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-        <Button 
-          size="lg"
-          className="bg-white text-accent hover:bg-white/90 text-lg px-8 h-12"
-        >
-          <UserPlus className="mr-2" />
-          Sign up
-        </Button>
+        <SignUpDialog />
         <Link to="/about">
           <Button 
             variant="outline" 
