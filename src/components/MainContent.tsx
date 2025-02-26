@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from './ui/button';
 import { UserPlus, HelpCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const MainContent = () => {
   return (
@@ -32,14 +33,16 @@ export const MainContent = () => {
           <UserPlus className="mr-2" />
           Sign up
         </Button>
-        <Button 
-          variant="outline" 
-          size="lg"
-          className="bg-transparent border-white text-white hover:bg-white/10 text-lg px-8 h-12"
-        >
-          <HelpCircle className="mr-2" />
-          What is BirdieBoard?
-        </Button>
+        <Link to="/about">
+          <Button 
+            variant="outline" 
+            size="lg"
+            className="bg-transparent border-white text-white hover:bg-white/10 text-lg px-8 h-12"
+          >
+            <HelpCircle className="mr-2" />
+            What is BirdieBoard?
+          </Button>
+        </Link>
       </div>
     </div>
   );
