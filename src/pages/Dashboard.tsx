@@ -1,29 +1,74 @@
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Activity, Award, TrendingDown } from "lucide-react";
+import { Plus, Activity, Award, TrendingDown, ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
 const Dashboard = () => {
   // This would come from your backend in a real application
   const stats = {
     roundsPlayed: 24,
-    bestScore: 72,
+    bestGrossScore: 72,
+    bestNetScore: 65,
+    bestToPar: -2,
     handicap: 8.4
   };
 
-  const courses = [
-    { id: 1, name: "Pine Valley Golf Club", roundsPlayed: 8, bestScore: 75 },
-    { id: 2, name: "Augusta National Golf Club", roundsPlayed: 6, bestScore: 78 },
-    { id: 3, name: "St Andrews Links", roundsPlayed: 10, bestScore: 72 },
+  // Initial courses data
+  const initialCourses = [
+    { id: 1, name: "Pine Valley Golf Club", roundsPlayed: 8, bestGrossScore: 75, bestNetScore: 68, bestToPar: 3 },
+    { id: 2, name: "Augusta National Golf Club", roundsPlayed: 6, bestGrossScore: 78, bestNetScore: 71, bestToPar: 6 },
+    { id: 3, name: "St Andrews Links", roundsPlayed: 10, bestGrossScore: 72, bestNetScore: 65, bestToPar: -2 },
   ];
+
+  // State for courses and sorting
+  const [courses, setCourses] = useState(initialCourses);
+  const [sortConfig, setSortConfig] = useState<{
+    key: string;
+    direction: 'ascending' | 'descending';
+  } | null>(null);
+
+  // Sorting function
+  const requestSort = (key: string) => {
+    let direction: 'ascending' | 'descending' = 'ascending';
+    
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    
+    setSortConfig({ key, direction });
+    
+    const sortedCourses = [...courses].sort((a, b) => {
+      if (a[key as keyof typeof a] < b[key as keyof typeof b]) {
+        return direction === 'ascending' ? -1 : 1;
+      }
+      if (a[key as keyof typeof a] > b[key as keyof typeof b]) {
+        return direction === 'ascending' ? 1 : -1;
+      }
+      return 0;
+    });
+    
+    setCourses(sortedCourses);
+  };
+
+  // Get sort direction icon
+  const getSortDirectionIcon = (columnName: string) => {
+    if (!sortConfig || sortConfig.key !== columnName) {
+      return <ArrowUpDown className="h-4 w-4 ml-1" />;
+    }
+    
+    return sortConfig.direction === 'ascending' 
+      ? <ArrowUp className="h-4 w-4 ml-1" /> 
+      : <ArrowDown className="h-4 w-4 ml-1" />;
+  };
 
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-8">Welcome back, Golfer!</h1>
       
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3 mb-8">
+      <div className="grid gap-4 md:grid-cols-4 mb-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Rounds Played</CardTitle>
@@ -36,11 +81,33 @@ const Dashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Best Score</CardTitle>
+            <CardTitle className="text-sm font-medium">Best Gross Score</CardTitle>
             <Award className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.bestScore}</div>
+            <div className="text-2xl font-bold">{stats.bestGrossScore}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Best Net Score</CardTitle>
+            <Award className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.bestNetScore}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Best To Par</CardTitle>
+            <TrendingDown className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${stats.bestToPar <= 0 ? "text-green-500" : "text-red-500"}`}>
+              {stats.bestToPar <= 0 ? stats.bestToPar : `+${stats.bestToPar}`}
+            </div>
           </CardContent>
         </Card>
 
@@ -68,9 +135,36 @@ const Dashboard = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Course Name</TableHead>
-              <TableHead className="text-right">Rounds Played</TableHead>
-              <TableHead className="text-right">Best Score</TableHead>
+              <TableHead onClick={() => requestSort('name')} className="cursor-pointer">
+                <div className="flex items-center">
+                  Course Name
+                  {getSortDirectionIcon('name')}
+                </div>
+              </TableHead>
+              <TableHead onClick={() => requestSort('roundsPlayed')} className="text-right cursor-pointer">
+                <div className="flex items-center justify-end">
+                  Rounds Played
+                  {getSortDirectionIcon('roundsPlayed')}
+                </div>
+              </TableHead>
+              <TableHead onClick={() => requestSort('bestGrossScore')} className="text-right cursor-pointer">
+                <div className="flex items-center justify-end">
+                  Best Gross
+                  {getSortDirectionIcon('bestGrossScore')}
+                </div>
+              </TableHead>
+              <TableHead onClick={() => requestSort('bestNetScore')} className="text-right cursor-pointer">
+                <div className="flex items-center justify-end">
+                  Best Net
+                  {getSortDirectionIcon('bestNetScore')}
+                </div>
+              </TableHead>
+              <TableHead onClick={() => requestSort('bestToPar')} className="text-right cursor-pointer">
+                <div className="flex items-center justify-end">
+                  To Par
+                  {getSortDirectionIcon('bestToPar')}
+                </div>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -78,7 +172,11 @@ const Dashboard = () => {
               <TableRow key={course.id}>
                 <TableCell className="font-medium">{course.name}</TableCell>
                 <TableCell className="text-right">{course.roundsPlayed}</TableCell>
-                <TableCell className="text-right">{course.bestScore}</TableCell>
+                <TableCell className="text-right">{course.bestGrossScore}</TableCell>
+                <TableCell className="text-right">{course.bestNetScore}</TableCell>
+                <TableCell className={`text-right ${course.bestToPar <= 0 ? "text-green-500" : "text-red-500"}`}>
+                  {course.bestToPar <= 0 ? course.bestToPar : `+${course.bestToPar}`}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
