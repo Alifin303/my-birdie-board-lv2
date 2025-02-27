@@ -125,9 +125,9 @@ const Dashboard = () => {
       if (!userData?.id) return null;
       
       // Count total rounds played
-      const { data: roundsCount, error: roundsError } = await supabase
+      const { count: roundsCount, error: roundsError } = await supabase
         .from('rounds')
-        .select('id', { count: 'exact' })
+        .select('id', { count: 'exact', head: true })
         .eq('user_id', userData.id);
         
       if (roundsError) throw roundsError;
@@ -162,7 +162,7 @@ const Dashboard = () => {
       if (parNetError) throw parNetError;
       
       return {
-        roundsPlayed: roundsCount?.length || 0,
+        roundsPlayed: roundsCount || 0,
         bestGrossScore: bestScores?.[0]?.gross_score || 0,
         bestNetScore: bestScores?.[0]?.net_score || 0,
         bestToParGross: bestToParGross?.[0]?.to_par_gross || 0,
@@ -178,19 +178,22 @@ const Dashboard = () => {
     queryFn: async () => {
       if (!userData?.id) return [];
       
-      // First get all the distinct courses the user has played
-      const { data: courseIds, error: courseIdsError } = await supabase
+      // First get all the courses the user has played using a modified query
+      // We'll use a simpler approach - get all rounds, then extract unique course IDs
+      const { data: rounds, error: roundsError } = await supabase
         .from('rounds')
         .select('course_id')
-        .eq('user_id', userData.id)
-        .distinct();
+        .eq('user_id', userData.id);
         
-      if (courseIdsError) throw courseIdsError;
+      if (roundsError) throw roundsError;
       
-      if (!courseIds.length) return [];
+      // Extract unique course IDs
+      const uniqueCourseIds = [...new Set(rounds.map(round => round.course_id))];
+      
+      if (uniqueCourseIds.length === 0) return [];
       
       // For each course, get stats
-      const coursePromises = courseIds.map(async ({ course_id }) => {
+      const coursePromises = uniqueCourseIds.map(async (course_id) => {
         // Get course details
         const { data: course, error: courseError } = await supabase
           .from('courses')
@@ -201,9 +204,9 @@ const Dashboard = () => {
         if (courseError) throw courseError;
         
         // Count rounds played at this course
-        const { data: roundsCount, error: countError } = await supabase
+        const { count: roundsCount, error: countError } = await supabase
           .from('rounds')
-          .select('id', { count: 'exact' })
+          .select('id', { count: 'exact', head: true })
           .eq('user_id', userData.id)
           .eq('course_id', course_id);
           
@@ -232,7 +235,7 @@ const Dashboard = () => {
         if (netError) throw netError;
         
         // Get all rounds for this course
-        const { data: rounds, error: roundsError } = await supabase
+        const { data: courseRounds, error: roundsError } = await supabase
           .from('rounds')
           .select('date, gross_score, net_score, to_par_gross, to_par_net')
           .eq('user_id', userData.id)
@@ -244,12 +247,12 @@ const Dashboard = () => {
         return {
           id: course_id,
           name: course.name,
-          roundsPlayed: roundsCount?.length || 0,
+          roundsPlayed: roundsCount || 0,
           bestGrossScore: bestGross?.[0]?.gross_score || 0,
           bestNetScore: bestNet?.[0]?.net_score || 0,
           bestToParGross: bestGross?.[0]?.to_par_gross || 0,
           bestToParNet: bestNet?.[0]?.to_par_net || 0,
-          rounds: rounds.map(round => ({
+          rounds: courseRounds.map(round => ({
             date: round.date,
             grossScore: round.gross_score,
             netScore: round.net_score,
