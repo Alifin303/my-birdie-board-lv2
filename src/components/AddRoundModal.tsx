@@ -726,6 +726,17 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   const renderHorizontalScorecard = () => {
     if (!selectedCourse) return null;
     
+    // Create a function to generate display text based on hole selection
+    // This helps avoid TypeScript narrowing issues in the JSX
+    const getHolesDisplayText = () => {
+      switch(holeSelection) {
+        case 'all': return 'All 18 Holes';
+        case 'front9': return 'Front 9 Holes';
+        case 'back9': return 'Back 9 Holes';
+        default: return 'All 18 Holes'; // Default fallback
+      }
+    };
+
     // When rendering all 18 holes, split into front 9 and back 9
     if (holeSelection === 'all') {
       const frontNine = scores.slice(0, 9);
@@ -763,8 +774,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="mt-1">
-                    {holeSelection === 'all' ? 'All 18 Holes' : 
-                     holeSelection === 'front9' ? 'Front 9 Holes' : 'Back 9 Holes'}
+                    {getHolesDisplayText()}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -998,8 +1008,8 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                 {scores.reduce((sum, score) => sum + (score.strokes || 0), 0) - 
                   scores.reduce((sum, score) => sum + score.par, 0)}
               </div>
-              {/* Fixed TypeScript issue here - use a type assertion to clarify type */}
-              {(holeSelection as HoleSelection) !== 'all' && (
+              {/* Use a string literal check rather than relying on type narrowing */}
+              {holeSelection !== "all" && (
                 <div className="col-span-2 text-amber-600">
                   <p className="text-sm">
                     Note: 9-hole rounds will not contribute to handicap calculations.
@@ -1046,8 +1056,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="mt-1">
-                    {holeSelection === 'all' ? 'All 18 Holes' : 
-                     holeSelection === 'front9' ? 'Front 9 Holes' : 'Back 9 Holes'}
+                    {getHolesDisplayText()}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -1230,12 +1239,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="mt-1">
-                    {/* Use explicit type guard to avoid TypeScript errors */}
-                    {(() => {
-                      const selection = holeSelection as HoleSelection;
-                      return selection === 'all' ? 'All 18 Holes' : 
-                             selection === 'front9' ? 'Front 9 Holes' : 'Back 9 Holes';
-                    })()}
+                    {getHolesDisplayText()}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
