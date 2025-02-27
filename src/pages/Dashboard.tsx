@@ -4,7 +4,27 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Activity, Award, TrendingDown, Download, ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { Plus, Activity, Award, TrendingDown, Download, ArrowDown, ArrowUp, ArrowUpDown, User, LogOut } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -13,6 +33,7 @@ const Dashboard = () => {
   const user = {
     firstName: "John",
     lastName: "Smith",
+    email: "john.smith@example.com",
     handicap: 8.4
   };
   
@@ -83,6 +104,19 @@ const Dashboard = () => {
   
   // State for the selected course (for detail view)
   const [selectedCourse, setSelectedCourse] = useState<typeof initialCourses[0] | null>(null);
+  
+  // State for profile edit mode
+  const [profileEditMode, setProfileEditMode] = useState<"password" | "email" | null>(null);
+
+  // Profile form
+  const profileForm = useForm({
+    defaultValues: {
+      email: user.email,
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
 
   // Sorting function
   const requestSort = (key: string) => {
@@ -152,6 +186,144 @@ const Dashboard = () => {
     alert(`Navigating to leaderboard for course ${courseId}...`);
     // This would be implemented with React Router navigation
     // navigate(`/leaderboard/${courseId}`);
+  };
+  
+  // Handle logout
+  const handleLogout = () => {
+    alert("Logging out...");
+    // In a real app, this would clear the user session and redirect to login
+    // navigate("/login");
+  };
+  
+  // Handle profile form submission
+  const handleProfileSubmit = (data: any) => {
+    if (profileEditMode === "email") {
+      alert(`Email updated to: ${data.email}`);
+    } else if (profileEditMode === "password") {
+      alert("Password updated successfully");
+    }
+    
+    setProfileEditMode(null);
+    profileForm.reset();
+  };
+  
+  // Render profile content
+  const renderProfileContent = () => {
+    return (
+      <div className="space-y-4">
+        {profileEditMode === null && (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>First Name</Label>
+                <div className="text-lg font-medium">{user.firstName}</div>
+              </div>
+              <div>
+                <Label>Last Name</Label>
+                <div className="text-lg font-medium">{user.lastName}</div>
+              </div>
+            </div>
+            
+            <div>
+              <Label>Email Address</Label>
+              <div className="text-lg font-medium">{user.email}</div>
+            </div>
+            
+            <div className="flex gap-4 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setProfileEditMode("email")}
+              >
+                Change Email
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setProfileEditMode("password")}
+              >
+                Change Password
+              </Button>
+            </div>
+          </>
+        )}
+        
+        {profileEditMode !== null && (
+          <Form {...profileForm}>
+            <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)} className="space-y-4">
+              {profileEditMode === "email" && (
+                <FormField
+                  control={profileForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>New Email Address</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="email" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              
+              {profileEditMode === "password" && (
+                <>
+                  <FormField
+                    control={profileForm.control}
+                    name="currentPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Current Password</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="password" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={profileForm.control}
+                    name="newPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>New Password</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="password" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={profileForm.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm New Password</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="password" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
+              
+              <DialogFooter className="pt-4">
+                <Button type="button" variant="outline" onClick={() => setProfileEditMode(null)}>
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  Save Changes
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        )}
+      </div>
+    );
   };
   
   // Render the course detail view
@@ -403,6 +575,41 @@ const Dashboard = () => {
 
   return (
     <div className="container mx-auto py-8 px-4">
+      {/* User Account Menu */}
+      <div className="absolute top-4 right-4 z-10">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
+              <User className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <Dialog>
+              <DialogTrigger asChild>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile Settings</span>
+                </DropdownMenuItem>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Profile Settings</DialogTitle>
+                  <DialogDescription>
+                    Update your profile information
+                  </DialogDescription>
+                </DialogHeader>
+                {renderProfileContent()}
+              </DialogContent>
+            </Dialog>
+            
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Logout</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      
       {selectedCourse ? renderCourseDetail() : renderDashboard()}
     </div>
   );
