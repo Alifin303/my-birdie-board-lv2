@@ -63,6 +63,12 @@ const Dashboard = () => {
       : <ArrowDown className="h-4 w-4 ml-1" />;
   };
 
+  // Helper function to format par scores
+  const formatParScore = (score: number | undefined): string => {
+    if (score === undefined || score === null) return "N/A";
+    return score <= 0 ? score.toString() : `+${score}`;
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-8">Welcome back, Golfer!</h1>
@@ -108,7 +114,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className={`text-2xl font-bold ${stats.bestToPar <= 0 ? "text-green-500" : "text-red-500"}`}>
-                {stats.bestToPar <= 0 ? stats.bestToPar : `+${stats.bestToPar}`}
+                {formatParScore(stats.bestToPar)}
               </div>
             </CardContent>
           </Card>
@@ -182,10 +188,10 @@ const Dashboard = () => {
                 <TableCell className="text-right">{course.bestGrossScore}</TableCell>
                 <TableCell className="text-right">{course.bestNetScore}</TableCell>
                 <TableCell className={`text-right ${course.bestToParGross <= 0 ? "text-green-500" : "text-red-500"}`}>
-                  {course.bestToParGross <= 0 ? course.bestToParGross : `+${course.bestToParGross}`}
+                  {formatParScore(course.bestToParGross)}
                 </TableCell>
                 <TableCell className={`text-right ${course.bestToParNet <= 0 ? "text-green-500" : "text-red-500"}`}>
-                  {course.bestToParNet <= 0 ? course.bestToParNet : `+${course.bestToParNet}`}
+                  {formatParScore(course.bestToParNet)}
                 </TableCell>
               </TableRow>
             ))}
