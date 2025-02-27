@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LogIn } from "lucide-react";
-import { useToast } from "./ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { SignUpDialog } from "./SignUpDialog";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,6 +44,9 @@ export function LoginDialog() {
       });
 
       if (error) {
+        if (error.message.includes("Email not confirmed")) {
+          throw new Error("Your email has not been verified. Please check your inbox for the verification link or request a new one.");
+        }
         throw error;
       }
 
@@ -61,6 +64,7 @@ export function LoginDialog() {
         title: "Error",
         description: error.message || "Invalid email or password.",
         variant: "destructive",
+        duration: 5000,
       });
     } finally {
       setIsLoading(false);
@@ -99,6 +103,49 @@ export function LoginDialog() {
       toast({
         title: "Password Reset",
         description: "If an account exists, we'll send you reset instructions.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendVerificationEmail = async () => {
+    const email = form.getValues("email");
+    
+    if (!email || !z.string().email().safeParse(email).success) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/confirm`,
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Verification Email Sent",
+        description: "Please check your inbox for the verification link.",
+        duration: 5000,
+      });
+    } catch (error: any) {
+      console.error("Resend verification error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to resend verification email. Please try again later.",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -155,14 +202,24 @@ export function LoginDialog() {
           </form>
         </Form>
         <div className="mt-4 space-y-2">
-          <Button 
-            variant="link" 
-            className="text-sm text-muted-foreground hover:text-primary p-0 h-auto"
-            onClick={handleForgotPassword}
-            disabled={isLoading}
-          >
-            Forgot your password?
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button 
+              variant="link" 
+              className="text-sm text-muted-foreground hover:text-primary p-0 h-auto"
+              onClick={handleForgotPassword}
+              disabled={isLoading}
+            >
+              Forgot your password?
+            </Button>
+            <Button 
+              variant="link" 
+              className="text-sm text-muted-foreground hover:text-primary p-0 h-auto"
+              onClick={handleResendVerificationEmail}
+              disabled={isLoading}
+            >
+              Resend verification email
+            </Button>
+          </div>
           <div className="text-sm text-muted-foreground">
             Don't have an account?{" "}
             <Button

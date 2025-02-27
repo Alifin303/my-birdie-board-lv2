@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserPlus } from "lucide-react";
-import { useToast } from "./ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
@@ -51,6 +51,7 @@ export function SignUpDialog() {
             first_name: data.firstName,
             last_name: data.lastName,
           },
+          emailRedirectTo: `${window.location.origin}/auth/confirm`,
         },
       });
 
@@ -60,12 +61,12 @@ export function SignUpDialog() {
 
       toast({
         title: "Account created!",
-        description: "Please check your email to verify your account.",
+        description: "Please check your email to verify your account before logging in. You'll need to verify your email before you can access your account.",
+        duration: 10000, // longer duration so user can read the message
       });
       
       setOpen(false);
       form.reset();
-      navigate("/dashboard");
     } catch (error: any) {
       console.error("Sign up error:", error);
       toast({
