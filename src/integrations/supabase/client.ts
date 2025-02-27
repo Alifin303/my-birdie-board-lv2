@@ -13,9 +13,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     flowType: 'pkce',
     autoRefreshToken: true,
     persistSession: true,
-    // The correct place for redirectTo is inside options
-    options: {
-      redirectTo: SITE_URL ? `${SITE_URL}/auth/confirm` : undefined
+  },
+  global: {
+    headers: {
+      'x-application-name': 'birdieboard'
     }
-  }
+  },
+  // Correctly configuring redirectUrl at the component level when using auth methods
 });
