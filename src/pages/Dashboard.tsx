@@ -45,6 +45,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AddRoundModal } from "@/components/AddRoundModal";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -53,12 +54,21 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [addRoundModalOpen, setAddRoundModalOpen] = useState(false);
   const queryClient = useQueryClient();
+  const [apiErrors, setApiErrors] = useState<string[]>([]);
   
   // Get user data on mount
   useEffect(() => {
     const getUserData = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        console.log("Fetching user session...");
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          throw sessionError;
+        }
+        
+        console.log("Session data:", session ? "Session exists" : "No session");
         
         if (!session) {
           navigate("/");
@@ -66,6 +76,7 @@ const Dashboard = () => {
         }
         
         // Get user profile from profiles table
+        console.log("Fetching user profile...");
         const { data: profile, error } = await supabase
           .from('profiles')
           .select('*')
@@ -77,6 +88,8 @@ const Dashboard = () => {
           throw error;
         }
         
+        console.log("User profile data:", profile);
+        
         setUserData({
           id: session.user.id,
           email: session.user.email,
@@ -85,8 +98,9 @@ const Dashboard = () => {
           username: profile?.username || '',
           handicap: profile?.handicap || 0
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching user data:", error);
+        setApiErrors(prev => [...prev, `User data error: ${error.message || "Unknown error"}`]);
         toast({
           title: "Error",
           description: "Failed to load your profile. Please try again later.",
@@ -102,6 +116,7 @@ const Dashboard = () => {
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log("Auth state changed:", event);
         if (event === 'SIGNED_OUT') {
           navigate("/");
         } else if (session) {
@@ -133,150 +148,286 @@ const Dashboard = () => {
   }, [navigate, toast]);
 
   // Fetch user stats from database
-  const { data: statsData, isLoading: statsLoading } = useQuery({
+  const { data: statsData, isLoading: statsLoading, error: statsError } = useQuery({
     queryKey: ['userStats', userData?.id],
     queryFn: async () => {
+      console.log("Fetching user stats for user ID:", userData?.id);
       if (!userData?.id) return null;
       
-      // Count total rounds played
-      const { count: roundsCount, error: roundsError } = await supabase
-        .from('rounds')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', userData.id);
-        
-      if (roundsError) throw roundsError;
+      try {
+        // Check if rounds table exists
+        console.log("Checking rounds table...");
+        try {
+          const { count, error } = await supabase
+            .from('rounds')
+            .select('*', { count: 'exact', head: true });
+          
+          if (error) {
+            console.error("Error checking rounds table:", error);
+            setApiErrors(prev => [...prev, `Rounds table check error: ${error.message}`]);
+            throw error;
+          }
+          
+          console.log("Rounds table exists with count:", count);
+        } catch (e) {
+          console.error("Rounds table may not exist:", e);
+          setApiErrors(prev => [...prev, "Rounds table may not exist in the database"]);
+          // Continue execution to gather more diagnostics
+        }
       
-      // Get best gross and net scores
-      const { data: bestScores, error: scoresError } = await supabase
-        .from('rounds')
-        .select('gross_score, net_score, to_par_gross, to_par_net')
-        .eq('user_id', userData.id)
-        .order('gross_score', { ascending: true })
-        .limit(1);
+        // Count total rounds played
+        console.log("Counting user rounds...");
+        const { count: roundsCount, error: roundsError } = await supabase
+          .from('rounds')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', userData.id);
+          
+        if (roundsError) {
+          console.error("Error counting rounds:", roundsError);
+          setApiErrors(prev => [...prev, `Rounds count error: ${roundsError.message}`]);
+          throw roundsError;
+        }
         
-      if (scoresError) throw scoresError;
-      
-      // Get best to par scores
-      const { data: bestToParGross, error: parGrossError } = await supabase
-        .from('rounds')
-        .select('to_par_gross')
-        .eq('user_id', userData.id)
-        .order('to_par_gross', { ascending: true })
-        .limit(1);
+        console.log("User rounds count:", roundsCount);
         
-      if (parGrossError) throw parGrossError;
-      
-      const { data: bestToParNet, error: parNetError } = await supabase
-        .from('rounds')
-        .select('to_par_net')
-        .eq('user_id', userData.id)
-        .order('to_par_net', { ascending: true })
-        .limit(1);
+        // Get best gross and net scores
+        console.log("Fetching best scores...");
+        const { data: bestScores, error: scoresError } = await supabase
+          .from('rounds')
+          .select('gross_score, net_score, to_par_gross, to_par_net')
+          .eq('user_id', userData.id)
+          .order('gross_score', { ascending: true })
+          .limit(1);
+          
+        if (scoresError) {
+          console.error("Error fetching best scores:", scoresError);
+          setApiErrors(prev => [...prev, `Best scores error: ${scoresError.message}`]);
+          throw scoresError;
+        }
         
-      if (parNetError) throw parNetError;
-      
-      return {
-        roundsPlayed: roundsCount || 0,
-        bestGrossScore: bestScores?.[0]?.gross_score || 0,
-        bestNetScore: bestScores?.[0]?.net_score || 0,
-        bestToParGross: bestToParGross?.[0]?.to_par_gross || 0,
-        bestToParNet: bestToParNet?.[0]?.to_par_net || 0,
-      };
+        console.log("Best scores data:", bestScores);
+        
+        // Get best to par scores
+        console.log("Fetching best to par gross...");
+        const { data: bestToParGross, error: parGrossError } = await supabase
+          .from('rounds')
+          .select('to_par_gross')
+          .eq('user_id', userData.id)
+          .order('to_par_gross', { ascending: true })
+          .limit(1);
+          
+        if (parGrossError) {
+          console.error("Error fetching best to par gross:", parGrossError);
+          setApiErrors(prev => [...prev, `Best to par gross error: ${parGrossError.message}`]);
+          throw parGrossError;
+        }
+        
+        console.log("Best to par gross data:", bestToParGross);
+        
+        console.log("Fetching best to par net...");
+        const { data: bestToParNet, error: parNetError } = await supabase
+          .from('rounds')
+          .select('to_par_net')
+          .eq('user_id', userData.id)
+          .order('to_par_net', { ascending: true })
+          .limit(1);
+          
+        if (parNetError) {
+          console.error("Error fetching best to par net:", parNetError);
+          setApiErrors(prev => [...prev, `Best to par net error: ${parNetError.message}`]);
+          throw parNetError;
+        }
+        
+        console.log("Best to par net data:", bestToParNet);
+        
+        return {
+          roundsPlayed: roundsCount || 0,
+          bestGrossScore: bestScores?.[0]?.gross_score || 0,
+          bestNetScore: bestScores?.[0]?.net_score || 0,
+          bestToParGross: bestToParGross?.[0]?.to_par_gross || 0,
+          bestToParNet: bestToParNet?.[0]?.to_par_net || 0,
+        };
+      } catch (error: any) {
+        console.error("Stats fetch error:", error);
+        setApiErrors(prev => [...prev, `Stats error: ${error.message || "Unknown error"}`]);
+        return {
+          roundsPlayed: 0,
+          bestGrossScore: 0,
+          bestNetScore: 0,
+          bestToParGross: 0,
+          bestToParNet: 0,
+          error: error.message
+        };
+      }
     },
     enabled: !!userData?.id,
   });
   
   // Fetch user's courses from database
-  const { data: coursesData, isLoading: coursesLoading } = useQuery({
+  const { data: coursesData, isLoading: coursesLoading, error: coursesError } = useQuery({
     queryKey: ['userCourses', userData?.id],
     queryFn: async () => {
+      console.log("Fetching user courses for user ID:", userData?.id);
       if (!userData?.id) return [];
       
-      // First get all the courses the user has played using a modified query
-      // We'll use a simpler approach - get all rounds, then extract unique course IDs
-      const { data: rounds, error: roundsError } = await supabase
-        .from('rounds')
-        .select('course_id')
-        .eq('user_id', userData.id);
-        
-      if (roundsError) throw roundsError;
-      
-      // Extract unique course IDs
-      const uniqueCourseIds = [...new Set(rounds.map(round => round.course_id))];
-      
-      if (uniqueCourseIds.length === 0) return [];
-      
-      // For each course, get stats
-      const coursePromises = uniqueCourseIds.map(async (course_id) => {
-        // Get course details
-        const { data: course, error: courseError } = await supabase
-          .from('courses')
-          .select('*')
-          .eq('id', course_id)
-          .single();
-          
-        if (courseError) throw courseError;
-        
-        // Count rounds played at this course
-        const { count: roundsCount, error: countError } = await supabase
+      try {
+        // First get all the courses the user has played using a modified query
+        // We'll use a simpler approach - get all rounds, then extract unique course IDs
+        console.log("Fetching user rounds to extract course IDs...");
+        const { data: rounds, error: roundsError } = await supabase
           .from('rounds')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', userData.id)
-          .eq('course_id', course_id);
+          .select('course_id')
+          .eq('user_id', userData.id);
           
-        if (countError) throw countError;
+        if (roundsError) {
+          console.error("Error fetching rounds for courses:", roundsError);
+          setApiErrors(prev => [...prev, `Rounds/courses error: ${roundsError.message}`]);
+          throw roundsError;
+        }
         
-        // Get best gross score
-        const { data: bestGross, error: grossError } = await supabase
-          .from('rounds')
-          .select('gross_score, to_par_gross')
-          .eq('user_id', userData.id)
-          .eq('course_id', course_id)
-          .order('gross_score', { ascending: true })
-          .limit(1);
+        console.log("User rounds data for courses:", rounds);
+        
+        // Extract unique course IDs
+        const uniqueCourseIds = [...new Set(rounds?.map(round => round.course_id) || [])];
+        console.log("Unique course IDs:", uniqueCourseIds);
+        
+        if (uniqueCourseIds.length === 0) return [];
+        
+        // Check if courses table exists
+        try {
+          console.log("Checking courses table...");
+          const { count, error } = await supabase
+            .from('courses')
+            .select('*', { count: 'exact', head: true });
           
-        if (grossError) throw grossError;
-        
-        // Get best net score
-        const { data: bestNet, error: netError } = await supabase
-          .from('rounds')
-          .select('net_score, to_par_net')
-          .eq('user_id', userData.id)
-          .eq('course_id', course_id)
-          .order('net_score', { ascending: true })
-          .limit(1);
+          if (error) {
+            console.error("Error checking courses table:", error);
+            setApiErrors(prev => [...prev, `Courses table check error: ${error.message}`]);
+            throw error;
+          }
           
-        if (netError) throw netError;
+          console.log("Courses table exists with count:", count);
+        } catch (e) {
+          console.error("Courses table may not exist:", e);
+          setApiErrors(prev => [...prev, "Courses table may not exist in the database"]);
+          return [];
+        }
         
-        // Get all rounds for this course
-        const { data: courseRounds, error: roundsError } = await supabase
-          .from('rounds')
-          .select('date, gross_score, net_score, to_par_gross, to_par_net')
-          .eq('user_id', userData.id)
-          .eq('course_id', course_id)
-          .order('date', { ascending: false });
-          
-        if (roundsError) throw roundsError;
+        // For each course, get stats
+        const coursePromises = uniqueCourseIds.map(async (course_id) => {
+          try {
+            // Get course details
+            console.log(`Fetching details for course ID: ${course_id}`);
+            const { data: course, error: courseError } = await supabase
+              .from('courses')
+              .select('*')
+              .eq('id', course_id)
+              .single();
+              
+            if (courseError) {
+              console.error(`Error fetching course ${course_id}:`, courseError);
+              throw courseError;
+            }
+            
+            console.log(`Course details for ${course_id}:`, course);
+            
+            // Count rounds played at this course
+            console.log(`Counting rounds for course ${course_id}...`);
+            const { count: roundsCount, error: countError } = await supabase
+              .from('rounds')
+              .select('id', { count: 'exact', head: true })
+              .eq('user_id', userData.id)
+              .eq('course_id', course_id);
+              
+            if (countError) {
+              console.error(`Error counting rounds for course ${course_id}:`, countError);
+              throw countError;
+            }
+            
+            console.log(`Rounds count for course ${course_id}:`, roundsCount);
+            
+            // Get best gross score
+            console.log(`Fetching best gross score for course ${course_id}...`);
+            const { data: bestGross, error: grossError } = await supabase
+              .from('rounds')
+              .select('gross_score, to_par_gross')
+              .eq('user_id', userData.id)
+              .eq('course_id', course_id)
+              .order('gross_score', { ascending: true })
+              .limit(1);
+              
+            if (grossError) {
+              console.error(`Error fetching best gross for course ${course_id}:`, grossError);
+              throw grossError;
+            }
+            
+            console.log(`Best gross for course ${course_id}:`, bestGross);
+            
+            // Get best net score
+            console.log(`Fetching best net score for course ${course_id}...`);
+            const { data: bestNet, error: netError } = await supabase
+              .from('rounds')
+              .select('net_score, to_par_net')
+              .eq('user_id', userData.id)
+              .eq('course_id', course_id)
+              .order('net_score', { ascending: true })
+              .limit(1);
+              
+            if (netError) {
+              console.error(`Error fetching best net for course ${course_id}:`, netError);
+              throw netError;
+            }
+            
+            console.log(`Best net for course ${course_id}:`, bestNet);
+            
+            // Get all rounds for this course
+            console.log(`Fetching all rounds for course ${course_id}...`);
+            const { data: courseRounds, error: roundsError } = await supabase
+              .from('rounds')
+              .select('date, gross_score, net_score, to_par_gross, to_par_net')
+              .eq('user_id', userData.id)
+              .eq('course_id', course_id)
+              .order('date', { ascending: false });
+              
+            if (roundsError) {
+              console.error(`Error fetching rounds for course ${course_id}:`, roundsError);
+              throw roundsError;
+            }
+            
+            console.log(`All rounds for course ${course_id}:`, courseRounds);
+            
+            return {
+              id: course_id,
+              name: course.name,
+              roundsPlayed: roundsCount || 0,
+              bestGrossScore: bestGross?.[0]?.gross_score || 0,
+              bestNetScore: bestNet?.[0]?.net_score || 0,
+              bestToParGross: bestGross?.[0]?.to_par_gross || 0,
+              bestToParNet: bestNet?.[0]?.to_par_net || 0,
+              rounds: courseRounds?.map(round => ({
+                date: round.date,
+                grossScore: round.gross_score,
+                netScore: round.net_score,
+                toParGross: round.to_par_gross,
+                toParNet: round.to_par_net
+              })) || []
+            };
+          } catch (error: any) {
+            console.error(`Error processing course ${course_id}:`, error);
+            setApiErrors(prev => [...prev, `Course ${course_id} error: ${error.message}`]);
+            return null;
+          }
+        });
         
-        return {
-          id: course_id,
-          name: course.name,
-          roundsPlayed: roundsCount || 0,
-          bestGrossScore: bestGross?.[0]?.gross_score || 0,
-          bestNetScore: bestNet?.[0]?.net_score || 0,
-          bestToParGross: bestGross?.[0]?.to_par_gross || 0,
-          bestToParNet: bestNet?.[0]?.to_par_net || 0,
-          rounds: courseRounds.map(round => ({
-            date: round.date,
-            grossScore: round.gross_score,
-            netScore: round.net_score,
-            toParGross: round.to_par_gross,
-            toParNet: round.to_par_net
-          }))
-        };
-      });
-      
-      return await Promise.all(coursePromises);
+        const coursesResults = await Promise.all(coursePromises);
+        const validCourses = coursesResults.filter(course => course !== null) as any[];
+        console.log("Final courses data:", validCourses);
+        return validCourses;
+      } catch (error: any) {
+        console.error("Courses fetch error:", error);
+        setApiErrors(prev => [...prev, `Courses error: ${error.message || "Unknown error"}`]);
+        return [];
+      }
     },
     enabled: !!userData?.id,
   });
@@ -364,6 +515,44 @@ const Dashboard = () => {
       });
     }
   }, [userData, profileForm, emailForm]);
+
+  // Function to test database tables
+  const checkDatabaseTables = async () => {
+    const tables = ['profiles', 'rounds', 'courses'];
+    const results: Record<string, any> = {};
+    
+    console.log("Testing database tables...");
+    
+    for (const table of tables) {
+      try {
+        console.log(`Checking table: ${table}`);
+        const { count, error } = await supabase
+          .from(table)
+          .select('*', { count: 'exact', head: true });
+        
+        if (error) {
+          console.error(`Error with table ${table}:`, error);
+          results[table] = { exists: false, error: error.message };
+        } else {
+          console.log(`Table ${table} exists with ${count} records`);
+          results[table] = { exists: true, count };
+        }
+      } catch (error: any) {
+        console.error(`Error checking table ${table}:`, error);
+        results[table] = { exists: false, error: error.message };
+      }
+    }
+    
+    console.log("Database table check results:", results);
+    toast({
+      title: "Database Check",
+      description: `Results: ${Object.entries(results).map(([table, result]) => 
+        `${table}: ${(result as any).exists ? 'OK' : 'Missing'}`).join(', ')}`,
+      duration: 5000,
+    });
+    
+    return results;
+  };
 
   // Sorting function
   const requestSort = (key: string) => {
@@ -810,7 +999,14 @@ const Dashboard = () => {
   // Render the main dashboard view
   const renderDashboard = () => {
     if (isLoading || !userData) {
-      return <div className="flex items-center justify-center h-screen">Loading user data...</div>;
+      return (
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <Activity className="h-10 w-10 animate-spin text-primary mx-auto mb-4" />
+            <p>Loading user data...</p>
+          </div>
+        </div>
+      );
     }
 
     // Get stats from query data or use placeholders
@@ -829,6 +1025,30 @@ const Dashboard = () => {
       <div className="animate-fade-in">
         <h1 className="text-3xl font-bold mb-2">{userData.firstName} {userData.lastName}'s Clubhouse</h1>
         <p className="text-muted-foreground mb-8">Welcome back to your golf dashboard</p>
+        
+        {/* API Test Section */}
+        {apiErrors.length > 0 && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertDescription>
+              <div>
+                <p className="font-semibold mb-1">API Diagnostic Information:</p>
+                <ul className="list-disc pl-5 space-y-1 text-sm">
+                  {apiErrors.map((error, index) => (
+                    <li key={index}>{error}</li>
+                  ))}
+                </ul>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2" 
+                  onClick={checkDatabaseTables}
+                >
+                  Test Database Tables
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
         
         {/* Stats Section with Handicap Circle and Stats Grid */}
         <div className="flex flex-col md:flex-row gap-6 mb-8">
