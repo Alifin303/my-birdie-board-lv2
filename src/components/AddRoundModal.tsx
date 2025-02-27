@@ -85,6 +85,8 @@ interface RoundFormData {
 }
 
 export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+  console.log("AddRoundModal rendered with open:", open);
+  
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [searchResults, setSearchResults] = useState<GolfCourse[]>([]);
@@ -100,6 +102,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
 
   // Reset form when modal is closed
   useEffect(() => {
+    console.log("AddRoundModal open state changed to:", open);
     if (!open) {
       setSearchQuery("");
       setSearchResults([]);
@@ -113,7 +116,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   // Search for courses as user types
   useEffect(() => {
     const searchCourses = async () => {
-      if (!debouncedSearchQuery || debouncedSearchQuery.length < 3) {
+      if (!open || !debouncedSearchQuery || debouncedSearchQuery.length < 3) {
         setSearchResults([]);
         setSearchError(null);
         return;
@@ -157,7 +160,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     };
 
     searchCourses();
-  }, [debouncedSearchQuery, toast]);
+  }, [debouncedSearchQuery, toast, open]);
 
   // Fetch course details when a course is selected
   const handleCourseSelect = async (courseId: string) => {
@@ -366,9 +369,15 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     }
   };
 
+  // Handle modal close button click
+  const handleCloseModal = () => {
+    console.log("Manually closing modal");
+    onOpenChange(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="sm:max-w-3xl" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Add a New Round</DialogTitle>
           <DialogDescription>
@@ -522,12 +531,13 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={handleCloseModal} type="button">
             Cancel
           </Button>
           <Button 
             onClick={handleSaveRound} 
             disabled={isLoading || !selectedCourse || scores.some(score => score.strokes === 0)}
+            type="button"
           >
             {isLoading ? (
               <>
