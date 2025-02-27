@@ -30,23 +30,127 @@ import {
   getCourseDetails, 
   generateMockCourseDetails, 
   GolfCourse, 
-  CourseDetail 
+  CourseDetail,
+  TeeBox
 } from "@/services/golfCourseApi";
+
+// Define local types that match the component's expectations
+interface SimplifiedGolfCourse {
+  id: string | number;
+  name: string;
+  city: string;
+  state: string;
+  country?: string;
+}
+
+interface SimplifiedTee {
+  id: string;
+  name: string;
+  rating: number;
+  slope: number;
+  par: number;
+}
+
+interface SimplifiedHole {
+  number: number;
+  par: number;
+}
+
+interface SimplifiedCourseDetail {
+  id: string | number;
+  name: string;
+  city: string;
+  state: string;
+  country?: string;
+  tees: SimplifiedTee[];
+  holes: SimplifiedHole[];
+}
+
+// Utility functions to convert between API and component formats
+const convertToSimplifiedCourse = (course: GolfCourse): SimplifiedGolfCourse => {
+  return {
+    id: course.id,
+    name: course.course_name || course.club_name,
+    city: course.location.city || '',
+    state: course.location.state || '',
+    country: course.location.country
+  };
+};
+
+const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[] => {
+  const tees: SimplifiedTee[] = [];
+  
+  // Add male tees with unique IDs
+  if (courseDetail.tees.male) {
+    courseDetail.tees.male.forEach((tee, index) => {
+      tees.push({
+        id: `m-${index}`,
+        name: tee.tee_name,
+        rating: tee.course_rating,
+        slope: tee.slope_rating,
+        par: tee.par_total
+      });
+    });
+  }
+  
+  // Add female tees with unique IDs
+  if (courseDetail.tees.female) {
+    courseDetail.tees.female.forEach((tee, index) => {
+      tees.push({
+        id: `f-${index}`,
+        name: tee.tee_name + " (W)",
+        rating: tee.course_rating,
+        slope: tee.slope_rating,
+        par: tee.par_total
+      });
+    });
+  }
+  
+  return tees;
+};
+
+const extractHolesFromApiResponse = (courseDetail: CourseDetail): SimplifiedHole[] => {
+  // Find the first available tee data to extract holes
+  let holesData: Array<{par: number, yardage: number, handicap: number}> = [];
+  
+  if (courseDetail.tees.male && courseDetail.tees.male.length > 0) {
+    holesData = courseDetail.tees.male[0].holes;
+  } else if (courseDetail.tees.female && courseDetail.tees.female.length > 0) {
+    holesData = courseDetail.tees.female[0].holes;
+  }
+  
+  return holesData.map((hole, index) => ({
+    number: index + 1,
+    par: hole.par
+  }));
+};
+
+const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): SimplifiedCourseDetail => {
+  return {
+    id: courseDetail.id,
+    name: courseDetail.course_name || courseDetail.club_name,
+    city: courseDetail.location.city || '',
+    state: courseDetail.location.state || '',
+    country: courseDetail.location.country,
+    tees: extractTeesFromApiResponse(courseDetail),
+    holes: extractHolesFromApiResponse(courseDetail)
+  };
+};
 
 export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   console.log("AddRoundModal rendered with open:", open);
   
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
-  const [searchResults, setSearchResults] = useState<GolfCourse[]>([]);
+  const [searchResults, setSearchResults] = useState<SimplifiedGolfCourse[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState<CourseDetail | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<SimplifiedCourseDetail | null>(null);
   const [selectedTeeId, setSelectedTeeId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [scores, setScores] = useState<{ hole: number; par: number; strokes: number; putts: number; }[]>([]);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<'search' | 'scorecard'>('search');
-  const [previouslyPlayedCourses, setPreviouslyPlayedCourses] = useState<GolfCourse[]>([]);
+  const [previouslyPlayedCourses, setPreviouslyPlayedCourses] = useState<SimplifiedGolfCourse[]>([]);
   const [roundDate, setRoundDate] = useState<Date>(new Date());
   const [isManualSearch, setIsManualSearch] = useState(false);
   
@@ -91,7 +195,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       
       if (data && data.length > 0) {
         // Convert to expected format
-        const formattedCourses: GolfCourse[] = data.map(course => ({
+        const formattedCourses: SimplifiedGolfCourse[] = data.map(course => ({
           id: course.id.toString(),
           name: course.name,
           city: course.city || '',
@@ -124,8 +228,11 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       // Search for courses via API
       const courses = await searchCourses(searchQuery);
       
-      if (courses.length > 0) {
-        setSearchResults(courses);
+      // Convert to simplified format for component use
+      const simplifiedCourses = courses.map(convertToSimplifiedCourse);
+      
+      if (simplifiedCourses.length > 0) {
+        setSearchResults(simplifiedCourses);
       } else {
         // If API returns no results, show error
         setSearchError("No courses found. Please try a different search term.");
@@ -152,7 +259,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   };
 
   // Fetch course details when a course is selected
-  const handleCourseSelect = async (course: GolfCourse) => {
+  const handleCourseSelect = async (course: SimplifiedGolfCourse) => {
     setIsLoading(true);
     setSearchError(null);
     
@@ -160,12 +267,25 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       console.log("Selected course:", course);
       
       // Try to get course details from API
-      let courseDetail = await getCourseDetails(course.id);
+      let apiCourseDetail = await getCourseDetails(course.id);
       
       // If API fails or returns null, generate mock data
-      if (!courseDetail) {
+      if (!apiCourseDetail) {
         console.log("Using mock data for course details");
-        courseDetail = generateMockCourseDetails(course);
+        
+        // Create a GolfCourse object from SimplifiedGolfCourse
+        const golfCourse: GolfCourse = {
+          id: Number(course.id),
+          club_name: course.name,
+          course_name: course.name,
+          location: {
+            city: course.city,
+            state: course.state,
+            country: course.country || 'United States'
+          }
+        };
+        
+        apiCourseDetail = generateMockCourseDetails(golfCourse);
         
         toast({
           title: "Note",
@@ -174,15 +294,17 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         });
       }
       
-      setSelectedCourse(courseDetail);
+      // Convert API response to the format expected by the component
+      const simplifiedCourseDetail = convertToSimplifiedCourseDetail(apiCourseDetail);
+      setSelectedCourse(simplifiedCourseDetail);
       
       // Set default tee if available
-      if (courseDetail.tees && courseDetail.tees.length > 0) {
-        setSelectedTeeId(courseDetail.tees[0].id);
+      if (simplifiedCourseDetail.tees && simplifiedCourseDetail.tees.length > 0) {
+        setSelectedTeeId(simplifiedCourseDetail.tees[0].id);
       }
 
       // Initialize scores for all holes
-      const initialScores = courseDetail.holes.map(hole => ({
+      const initialScores = simplifiedCourseDetail.holes.map(hole => ({
         hole: hole.number,
         par: hole.par,
         strokes: 0,
@@ -193,7 +315,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       
       // Clear search results
       setSearchResults([]);
-      setSearchQuery(courseDetail.name);
+      setSearchQuery(simplifiedCourseDetail.name);
       
       // Move to scorecard step
       setCurrentStep('scorecard');
@@ -305,7 +427,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         const { data: newCourse, error: newCourseError } = await supabase
           .from('courses')
           .insert({
-            api_course_id: selectedCourse.id,
+            api_course_id: selectedCourse.id.toString(),
             name: selectedCourse.name,
             city: selectedCourse.city,
             state: selectedCourse.state,
@@ -386,7 +508,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         <div className="border rounded-md p-2 bg-muted/50 grid gap-2">
           {previouslyPlayedCourses.slice(0, 3).map((course) => (
             <button
-              key={course.id}
+              key={course.id.toString()}
               className="text-left px-3 py-2 rounded-md hover:bg-background transition-colors"
               onClick={() => handleCourseSelect(course)}
             >
@@ -663,7 +785,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                       <div className="space-y-3 max-h-60 overflow-y-auto">
                         {searchResults.map((course) => (
                           <div 
-                            key={course.id}
+                            key={course.id.toString()}
                             className="p-3 border rounded-md hover:bg-muted cursor-pointer transition-colors"
                             onClick={() => handleCourseSelect(course)}
                           >
