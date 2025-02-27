@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      courses: {
+        Row: {
+          api_course_id: string | null
+          city: string | null
+          created_at: string
+          id: number
+          name: string
+          state: string | null
+          updated_at: string
+        }
+        Insert: {
+          api_course_id?: string | null
+          city?: string | null
+          created_at?: string
+          id?: number
+          name: string
+          state?: string | null
+          updated_at?: string
+        }
+        Update: {
+          api_course_id?: string | null
+          city?: string | null
+          created_at?: string
+          id?: number
+          name?: string
+          state?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -38,6 +68,62 @@ export type Database = {
           username?: string | null
         }
         Relationships: []
+      }
+      rounds: {
+        Row: {
+          course_id: number
+          created_at: string
+          date: string
+          gross_score: number
+          hole_scores: Json | null
+          id: number
+          net_score: number | null
+          tee_id: string | null
+          tee_name: string | null
+          to_par_gross: number | null
+          to_par_net: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          course_id: number
+          created_at?: string
+          date?: string
+          gross_score: number
+          hole_scores?: Json | null
+          id?: number
+          net_score?: number | null
+          tee_id?: string | null
+          tee_name?: string | null
+          to_par_gross?: number | null
+          to_par_net?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: number
+          created_at?: string
+          date?: string
+          gross_score?: number
+          hole_scores?: Json | null
+          id?: number
+          net_score?: number | null
+          tee_id?: string | null
+          tee_name?: string | null
+          to_par_gross?: number | null
+          to_par_net?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rounds_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
