@@ -46,6 +46,7 @@ import {
 interface SimplifiedGolfCourse {
   id: string | number;
   name: string;
+  clubName: string;
   city: string;
   state: string;
   country?: string;
@@ -72,6 +73,7 @@ interface SimplifiedHole {
 interface SimplifiedCourseDetail {
   id: string | number;
   name: string;
+  clubName: string;
   city: string;
   state: string;
   country?: string;
@@ -85,7 +87,8 @@ type HoleSelection = 'all' | 'front9' | 'back9';
 const convertToSimplifiedCourse = (course: GolfCourse): SimplifiedGolfCourse => {
   return {
     id: course.id,
-    name: course.course_name || course.club_name,
+    name: course.course_name || "Unknown Course",
+    clubName: course.club_name || "Unknown Club",
     city: course.location.city || '',
     state: course.location.state || '',
     country: course.location.country
@@ -198,7 +201,11 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
   }));
 };
 
-const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail, courseName: string): SimplifiedCourseDetail => {
+const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): SimplifiedCourseDetail => {
+  // Store the course name correctly using club_name and course_name
+  const name = courseDetail.course_name || "Unknown Course";
+  const clubName = courseDetail.club_name || "Unknown Club";
+  
   const tees = extractTeesFromApiResponse(courseDetail);
   
   // For initial holes data, use the first tee (if available)
@@ -216,10 +223,11 @@ const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail, courseName:
     }));
   }
   
-  // Use the passed courseName to ensure we don't show "Unknown Course"
-  const simplifiedCourseDetail = {
+  // Create course detail with correct name info
+  const simplifiedCourseDetail: SimplifiedCourseDetail = {
     id: courseDetail.id || 0,
-    name: courseName, // Use the name passed from the selected course
+    name: name,
+    clubName: clubName,
     city: courseDetail.location?.city || '',
     state: courseDetail.location?.state || '',
     country: courseDetail.location?.country || 'United States',
@@ -294,8 +302,9 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         const formattedCourses: SimplifiedGolfCourse[] = data.map(course => ({
           id: course.id.toString(),
           name: course.name,
+          clubName: course.name, // Use the same name since we don't have the club name in the DB
           city: course.city || '',
-          state: course.state || ''
+          state: course.state || '',
         }));
         
         setPreviouslyPlayedCourses(formattedCourses);
@@ -377,7 +386,16 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     console.log("All holes data:", allHolesData);
     
     // Filter holes based on user selection (front 9, back 9, or all)
-    const filteredHoles = getHolesBasedOnSelection(allHolesData, selection);
+    let filteredHoles: SimplifiedHole[] = [];
+    
+    if (selection === 'front9') {
+      filteredHoles = allHolesData.slice(0, 9);
+    } else if (selection === 'back9') {
+      filteredHoles = allHolesData.slice(9, 18);
+    } else {
+      filteredHoles = allHolesData;
+    }
+    
     console.log(`Filtered holes for ${selection}:`, filteredHoles);
     
     // Create scores array with par values from the selected tee
@@ -409,7 +427,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     console.log("Changing hole selection to:", selection);
     setHoleSelection(selection);
     
-    if (selectedTeeId) {
+    if (selectedTeeId && originalCourseDetail) {
       updateScorecardForTee(selectedTeeId, selection);
     }
   };
@@ -433,7 +451,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         // Create a GolfCourse object from SimplifiedGolfCourse
         const golfCourse: GolfCourse = {
           id: typeof course.id === 'string' ? parseInt(course.id) : course.id,
-          club_name: course.name,
+          club_name: course.clubName,
           course_name: course.name,
           location: {
             city: course.city,
@@ -456,8 +474,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       setOriginalCourseDetail(apiCourseDetail);
       
       // Convert API response to the format expected by the component
-      // Pass the original course name to ensure it's preserved
-      const simplifiedCourseDetail = convertToSimplifiedCourseDetail(apiCourseDetail, course.name);
+      const simplifiedCourseDetail = convertToSimplifiedCourseDetail(apiCourseDetail);
       setSelectedCourse(simplifiedCourseDetail);
       
       // Set default tee if available
@@ -465,8 +482,9 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         const defaultTeeId = simplifiedCourseDetail.tees[0].id;
         setSelectedTeeId(defaultTeeId);
         
-        // Update the scorecard based on the selected tee
-        updateScorecardForTee(defaultTeeId, holeSelection);
+        // Update the scorecard based on the selected tee - always default to 'all' 18 holes
+        updateScorecardForTee(defaultTeeId, 'all');
+        setHoleSelection('all');
       } else {
         // If no tees available, create a default scorecard
         const defaultScores = Array(18).fill(null).map((_, idx) => ({
@@ -479,7 +497,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       
       // Clear search results
       setSearchResults([]);
-      setSearchQuery(simplifiedCourseDetail.name);
+      setSearchQuery(`${simplifiedCourseDetail.clubName} - ${simplifiedCourseDetail.name}`);
       
       // Move to scorecard step
       setCurrentStep('scorecard');
@@ -610,18 +628,20 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       const { data: existingCourse } = await supabase
         .from('courses')
         .select('id')
-        .eq('name', selectedCourse.name)
+        .eq('name', `${selectedCourse.clubName} - ${selectedCourse.name}`)
         .maybeSingle();
         
       if (existingCourse) {
         courseDbId = existingCourse.id;
       } else {
-        // Insert course
+        // Insert course - store the combined name
+        const courseName = `${selectedCourse.clubName} - ${selectedCourse.name}`;
+        
         const { data: newCourse, error: newCourseError } = await supabase
           .from('courses')
           .insert({
             api_course_id: selectedCourse.id.toString(),
-            name: selectedCourse.name,
+            name: courseName,
             city: selectedCourse.city,
             state: selectedCourse.state,
           })
@@ -727,7 +747,6 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     if (!selectedCourse) return null;
     
     // Create a function to generate display text based on hole selection
-    // This helps avoid TypeScript narrowing issues in the JSX
     const getHolesDisplayText = () => {
       switch(holeSelection) {
         case 'all': return 'All 18 Holes';
@@ -1008,7 +1027,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                 {scores.reduce((sum, score) => sum + (score.strokes || 0), 0) - 
                   scores.reduce((sum, score) => sum + score.par, 0)}
               </div>
-              {/* Use a string literal check rather than relying on type narrowing */}
+              {/* Only show this message for front9 or back9 selections */}
               {holeSelection !== "all" && (
                 <div className="col-span-2 text-amber-600">
                   <p className="text-sm">
@@ -1205,7 +1224,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       );
     } else {
       // Back 9 only
-      const backNine = scores.slice(0, 9); // The scores array already only contains the back 9 holes
+      const backNine = scores;
       
       return (
         <div className="space-y-6">
@@ -1456,7 +1475,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                             className="p-3 border rounded-md hover:bg-muted cursor-pointer transition-colors"
                             onClick={() => handleCourseSelect(course)}
                           >
-                            <p className="font-medium">{course.name}</p>
+                            <p className="font-medium">{course.clubName} - {course.name}</p>
                             <p className="text-xs text-muted-foreground">
                               {course.city}{course.state ? `, ${course.state}` : ''}
                               {course.country && course.country !== 'USA' ? `, ${course.country}` : ''}
@@ -1484,7 +1503,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
             <>
               <div className="mb-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">{selectedCourse.name}</h3>
+                  <h3 className="text-lg font-semibold">{selectedCourse.clubName} - {selectedCourse.name}</h3>
                   <Button variant="outline" size="sm" onClick={handleBackToSearch}>
                     Change Course
                   </Button>
