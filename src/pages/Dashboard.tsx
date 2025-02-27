@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,17 +25,97 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
-import { useUser, useClerk } from "@clerk/clerk-react";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, isLoaded: isUserLoaded } = useUser();
-  const { signOut } = useClerk();
   const { toast } = useToast();
+  const [userData, setUserData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Get user data on mount
+  useEffect(() => {
+    const getUserData = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          navigate("/");
+          return;
+        }
+        
+        // Get user profile from profiles table
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (error) {
+          console.error("Error fetching profile:", error);
+          throw error;
+        }
+        
+        setUserData({
+          id: session.user.id,
+          email: session.user.email,
+          firstName: profile?.first_name || '',
+          lastName: profile?.last_name || '',
+          username: profile?.username || '',
+          handicap: profile?.handicap || 0
+        });
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load your profile. Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    getUserData();
+    
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_OUT') {
+          navigate("/");
+        } else if (session) {
+          // Update user data when auth state changes
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+            
+          if (profile) {
+            setUserData({
+              id: session.user.id,
+              email: session.user.email,
+              firstName: profile.first_name || '',
+              lastName: profile.last_name || '',
+              username: profile.username || '',
+              handicap: profile.handicap || 0
+            });
+          }
+        }
+      }
+    );
+    
+    // Clean up subscription
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate, toast]);
   
   // Mock golf data - would come from your backend in a real application
-  const handicap = 8.4;
+  const handicap = userData?.handicap || 0;
   
   // This would come from your backend in a real application
   const stats = {
@@ -106,17 +186,68 @@ const Dashboard = () => {
   const [selectedCourse, setSelectedCourse] = useState<typeof initialCourses[0] | null>(null);
   
   // State for profile edit mode
-  const [profileEditMode, setProfileEditMode] = useState<"password" | "email" | null>(null);
+  const [profileEditMode, setProfileEditMode] = useState<"password" | "email" | "profile" | null>(null);
+
+  // Create schema for profile updates
+  const profileSchema = z.object({
+    firstName: z.string().min(2, "First name must be at least 2 characters"),
+    lastName: z.string().min(2, "Last name must be at least 2 characters"),
+    username: z.string().min(3, "Username must be at least 3 characters"),
+  });
+
+  const emailSchema = z.object({
+    email: z.string().email("Please enter a valid email address"),
+  });
+
+  const passwordSchema = z.object({
+    currentPassword: z.string().min(1, "Current password is required"),
+    newPassword: z.string().min(8, "New password must be at least 8 characters"),
+    confirmPassword: z.string().min(8, "Confirm password must be at least 8 characters"),
+  }).refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
   // Profile form
   const profileForm = useForm({
+    resolver: zodResolver(profileSchema),
     defaultValues: {
-      email: user?.primaryEmailAddress?.emailAddress || "",
+      firstName: userData?.firstName || "",
+      lastName: userData?.lastName || "",
+      username: userData?.username || "",
+    },
+  });
+
+  const emailForm = useForm({
+    resolver: zodResolver(emailSchema),
+    defaultValues: {
+      email: userData?.email || "",
+    },
+  });
+
+  const passwordForm = useForm({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
       currentPassword: "",
       newPassword: "",
       confirmPassword: "",
     },
   });
+
+  // Update forms when userData changes
+  useEffect(() => {
+    if (userData) {
+      profileForm.reset({
+        firstName: userData.firstName || "",
+        lastName: userData.lastName || "",
+        username: userData.username || "",
+      });
+      
+      emailForm.reset({
+        email: userData.email || "",
+      });
+    }
+  }, [userData, profileForm, emailForm]);
 
   // Sorting function
   const requestSort = (key: string) => {
@@ -197,13 +328,18 @@ const Dashboard = () => {
   // Handle logout
   const handleLogout = async () => {
     try {
-      await signOut();
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        throw error;
+      }
+      
       toast({
         title: "Logged out",
         description: "You have been successfully logged out.",
       });
       navigate("/");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error signing out:", error);
       toast({
         title: "Error",
@@ -216,16 +352,55 @@ const Dashboard = () => {
   // Handle profile form submission
   const handleProfileSubmit = async (data: any) => {
     try {
-      if (profileEditMode === "email") {
-        // In a real app with Clerk, we would update the email
-        // await user?.update({ email: data.email });
+      if (profileEditMode === "profile") {
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            first_name: data.firstName,
+            last_name: data.lastName,
+            username: data.username,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', userData.id);
+          
+        if (error) {
+          throw error;
+        }
+        
+        // Update local user data
+        setUserData({
+          ...userData,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          username: data.username,
+        });
+        
         toast({
-          title: "Email updated",
-          description: `Email updated to: ${data.email}`,
+          title: "Profile updated",
+          description: "Your profile has been successfully updated.",
+        });
+      } else if (profileEditMode === "email") {
+        const { error } = await supabase.auth.updateUser({
+          email: data.email,
+        });
+        
+        if (error) {
+          throw error;
+        }
+        
+        toast({
+          title: "Email update initiated",
+          description: "Please check your email to confirm the change.",
         });
       } else if (profileEditMode === "password") {
-        // In a real app with Clerk, we would update the password
-        // await user?.update({ password: data.newPassword });
+        const { error } = await supabase.auth.updateUser({
+          password: data.newPassword,
+        });
+        
+        if (error) {
+          throw error;
+        }
+        
         toast({
           title: "Password updated",
           description: "Your password has been successfully updated.",
@@ -234,11 +409,13 @@ const Dashboard = () => {
       
       setProfileEditMode(null);
       profileForm.reset();
-    } catch (error) {
+      emailForm.reset();
+      passwordForm.reset();
+    } catch (error: any) {
       console.error("Error updating profile:", error);
       toast({
         title: "Error",
-        description: "Failed to update profile. Please try again.",
+        description: error.message || "Failed to update profile. Please try again.",
         variant: "destructive",
       });
     }
@@ -246,7 +423,7 @@ const Dashboard = () => {
   
   // Render profile content
   const renderProfileContent = () => {
-    if (!isUserLoaded || !user) {
+    if (isLoading || !userData) {
       return <div>Loading user data...</div>;
     }
 
@@ -257,20 +434,31 @@ const Dashboard = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>First Name</Label>
-                <div className="text-lg font-medium">{user.firstName}</div>
+                <div className="text-lg font-medium">{userData.firstName}</div>
               </div>
               <div>
                 <Label>Last Name</Label>
-                <div className="text-lg font-medium">{user.lastName}</div>
+                <div className="text-lg font-medium">{userData.lastName}</div>
               </div>
             </div>
             
             <div>
+              <Label>Username</Label>
+              <div className="text-lg font-medium">{userData.username}</div>
+            </div>
+            
+            <div>
               <Label>Email Address</Label>
-              <div className="text-lg font-medium">{user.primaryEmailAddress?.emailAddress}</div>
+              <div className="text-lg font-medium">{userData.email}</div>
             </div>
             
             <div className="flex gap-4 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setProfileEditMode("profile")}
+              >
+                Edit Profile
+              </Button>
               <Button 
                 variant="outline" 
                 onClick={() => setProfileEditMode("email")}
@@ -287,77 +475,136 @@ const Dashboard = () => {
           </>
         )}
         
-        {profileEditMode !== null && (
+        {profileEditMode === "profile" && (
           <Form {...profileForm}>
             <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)} className="space-y-4">
-              {profileEditMode === "email" && (
-                <FormField
-                  control={profileForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>New Email Address</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="email" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-              
-              {profileEditMode === "password" && (
-                <>
-                  <FormField
-                    control={profileForm.control}
-                    name="currentPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Current Password</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="password" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={profileForm.control}
-                    name="newPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>New Password</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="password" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={profileForm.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirm New Password</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="password" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </>
-              )}
-              
+              <FormField
+                control={profileForm.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={profileForm.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>First Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={profileForm.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <DialogFooter className="pt-4">
                 <Button type="button" variant="outline" onClick={() => setProfileEditMode(null)}>
                   Cancel
                 </Button>
                 <Button type="submit">
                   Save Changes
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        )}
+        
+        {profileEditMode === "email" && (
+          <Form {...emailForm}>
+            <form onSubmit={emailForm.handleSubmit(handleProfileSubmit)} className="space-y-4">
+              <FormField
+                control={emailForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>New Email Address</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="email" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter className="pt-4">
+                <Button type="button" variant="outline" onClick={() => setProfileEditMode(null)}>
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  Update Email
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        )}
+        
+        {profileEditMode === "password" && (
+          <Form {...passwordForm}>
+            <form onSubmit={passwordForm.handleSubmit(handleProfileSubmit)} className="space-y-4">
+              <FormField
+                control={passwordForm.control}
+                name="currentPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Current Password</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="password" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={passwordForm.control}
+                name="newPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>New Password</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="password" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={passwordForm.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm New Password</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="password" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter className="pt-4">
+                <Button type="button" variant="outline" onClick={() => setProfileEditMode(null)}>
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  Update Password
                 </Button>
               </DialogFooter>
             </form>
@@ -445,13 +692,13 @@ const Dashboard = () => {
   
   // Render the main dashboard view
   const renderDashboard = () => {
-    if (!isUserLoaded || !user) {
-      return <div>Loading user data...</div>;
+    if (isLoading || !userData) {
+      return <div className="flex items-center justify-center h-screen">Loading user data...</div>;
     }
 
     return (
       <div className="animate-fade-in">
-        <h1 className="text-3xl font-bold mb-2">{user.firstName} {user.lastName}'s Clubhouse</h1>
+        <h1 className="text-3xl font-bold mb-2">{userData.firstName} {userData.lastName}'s Clubhouse</h1>
         <p className="text-muted-foreground mb-8">Welcome back to your golf dashboard</p>
         
         {/* Stats Section with Handicap Circle and Stats Grid */}
@@ -618,15 +865,8 @@ const Dashboard = () => {
     );
   };
 
-  // If user data isn't loaded yet, show a loading message
-  if (!isUserLoaded) {
+  if (isLoading) {
     return <div className="flex items-center justify-center h-screen">Loading user data...</div>;
-  }
-
-  // If there's no user, they shouldn't be on this page
-  if (!user) {
-    navigate("/");
-    return null;
   }
 
   return (

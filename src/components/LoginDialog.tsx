@@ -11,7 +11,7 @@ import { LogIn } from "lucide-react";
 import { useToast } from "./ui/use-toast";
 import { SignUpDialog } from "./SignUpDialog";
 import { useNavigate } from "react-router-dom";
-import { useSignIn } from "@clerk/clerk-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -25,7 +25,6 @@ export function LoginDialog() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { signIn, isLoaded: isClerkLoaded } = useSignIn();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -36,10 +35,45 @@ export function LoginDialog() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    if (!isClerkLoaded || !signIn) {
+    try {
+      setIsLoading(true);
+      
+      const { error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully logged in.",
+      });
+      
+      setOpen(false);
+      form.reset();
+      navigate("/dashboard");
+    } catch (error: any) {
+      console.error("Login error:", error);
       toast({
         title: "Error",
-        description: "Authentication system is not ready. Please try again.",
+        description: error.message || "Invalid email or password.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    const email = form.getValues("email");
+    
+    if (!email || !z.string().email().safeParse(email).success) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid email address.",
         variant: "destructive",
       });
       return;
@@ -47,33 +81,24 @@ export function LoginDialog() {
 
     try {
       setIsLoading(true);
-      const result = await signIn.create({
-        identifier: data.email,
-        password: data.password,
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
       });
 
-      if (result.status === "complete") {
-        toast({
-          title: "Welcome back!",
-          description: "You have successfully logged in.",
-        });
-        setOpen(false);
-        form.reset();
-        navigate("/dashboard");
-      } else {
-        // Handle incomplete sign-in (e.g., 2FA required)
-        console.log("Incomplete sign-in status:", result);
-        toast({
-          title: "Additional verification required",
-          description: "Please complete the verification process.",
-        });
+      if (error) {
+        throw error;
       }
-    } catch (error) {
-      console.error("Login error:", error);
+
       toast({
-        title: "Error",
-        description: "Invalid email or password.",
-        variant: "destructive",
+        title: "Password Reset",
+        description: "If an account exists, we'll send you reset instructions.",
+      });
+    } catch (error: any) {
+      console.error("Password reset error:", error);
+      // Still show success message to prevent user enumeration
+      toast({
+        title: "Password Reset",
+        description: "If an account exists, we'll send you reset instructions.",
       });
     } finally {
       setIsLoading(false);
@@ -133,13 +158,8 @@ export function LoginDialog() {
           <Button 
             variant="link" 
             className="text-sm text-muted-foreground hover:text-primary p-0 h-auto"
-            onClick={() => {
-              // Clerk reset password functionality would be added here
-              toast({
-                title: "Password Reset",
-                description: "If an account exists, we'll send you reset instructions.",
-              });
-            }}
+            onClick={handleForgotPassword}
+            disabled={isLoading}
           >
             Forgot your password?
           </Button>
