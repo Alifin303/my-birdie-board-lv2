@@ -899,7 +899,11 @@ const Dashboard = () => {
           <Button 
             size="lg" 
             className="gap-2"
-            onClick={() => setAddRoundModalOpen(true)}
+            onClick={(e) => {
+              e.preventDefault(); // Prevent default navigation
+              setAddRoundModalOpen(true);
+            }}
+            type="button"
           >
             <Plus className="h-5 w-5" />
             Add a new round
@@ -926,7 +930,14 @@ const Dashboard = () => {
         ) : courses.length === 0 ? (
           <div className="text-center p-8 border rounded-md bg-muted/10">
             <p className="text-muted-foreground mb-4">You haven't played any courses yet.</p>
-            <Button onClick={() => setAddRoundModalOpen(true)} className="gap-2">
+            <Button 
+              onClick={(e) => {
+                e.preventDefault(); // Prevent default navigation
+                setAddRoundModalOpen(true);
+              }}
+              className="gap-2"
+              type="button"
+            >
               <Plus className="h-4 w-4" />
               Add your first round
             </Button>

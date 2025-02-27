@@ -93,6 +93,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   const [selectedTeeId, setSelectedTeeId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [scores, setScores] = useState<{ hole: number; par: number; strokes: number; putts: number; }[]>([]);
+  const [searchError, setSearchError] = useState<string | null>(null);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -105,6 +106,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       setSelectedCourse(null);
       setSelectedTeeId("");
       setScores([]);
+      setSearchError(null);
     }
   }, [open]);
 
@@ -113,11 +115,15 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     const searchCourses = async () => {
       if (!debouncedSearchQuery || debouncedSearchQuery.length < 3) {
         setSearchResults([]);
+        setSearchError(null);
         return;
       }
 
       setIsSearching(true);
+      setSearchError(null);
+      
       try {
+        console.log("Searching for courses with query:", debouncedSearchQuery);
         const response = await fetch(`https://golfcourseapi.com/api/v1/courses?search=${encodeURIComponent(debouncedSearchQuery)}`, {
           headers: {
             'Authorization': 'Key 7GG4N6R5NOXNHW7H5A7EQVGL2U'
@@ -129,9 +135,17 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         }
 
         const data = await response.json();
-        setSearchResults(data.courses || []);
+        console.log("Search results:", data);
+        
+        if (data.courses && data.courses.length > 0) {
+          setSearchResults(data.courses);
+        } else {
+          setSearchResults([]);
+          setSearchError("No courses found. Please try a different search term.");
+        }
       } catch (error) {
         console.error("Course search error:", error);
+        setSearchError("Failed to search for courses. Please try again.");
         toast({
           title: "Search Error",
           description: "Failed to search for courses. Please try again.",
@@ -148,7 +162,10 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   // Fetch course details when a course is selected
   const handleCourseSelect = async (courseId: string) => {
     setIsLoading(true);
+    setSearchError(null);
+    
     try {
+      console.log("Fetching details for course ID:", courseId);
       const response = await fetch(`https://golfcourseapi.com/api/v1/courses/${courseId}`, {
         headers: {
           'Authorization': 'Key 7GG4N6R5NOXNHW7H5A7EQVGL2U'
@@ -160,6 +177,8 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       }
 
       const courseDetail = await response.json();
+      console.log("Course details:", courseDetail);
+      
       setSelectedCourse(courseDetail);
       
       // Set default tee if available
@@ -182,6 +201,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       setSearchQuery(courseDetail.name);
     } catch (error) {
       console.error("Course detail error:", error);
+      setSearchError("Failed to load course details. Please try again.");
       toast({
         title: "Error",
         description: "Failed to load course details. Please try again.",
@@ -378,6 +398,13 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                 </div>
               )}
             </div>
+            
+            {/* Search Error Message */}
+            {searchError && (
+              <div className="text-destructive text-sm mt-2">
+                {searchError}
+              </div>
+            )}
             
             {/* Search Results Dropdown */}
             {searchResults.length > 0 && !selectedCourse && (
