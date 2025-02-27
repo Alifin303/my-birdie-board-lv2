@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 215 14% 34%;
 
-    --primary: 142 7% 53%;
+    --primary: 142 35% 23%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 33 29% 86%;
@@ -31,7 +31,7 @@
 
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 142 7% 53%;
+    --ring: 142 35% 23%;
 
     --radius: 0.75rem;
   }
@@ -55,5 +55,19 @@
 
   input[type="number"] {
     -moz-appearance: textfield;
+  }
+}
+
+@layer utilities {
+  .glass-card {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-xl;
+  }
+  
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+  
+  .transition-all-slow {
+    @apply transition-all duration-300 ease-in-out;
   }
 }

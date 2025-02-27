@@ -4,7 +4,21 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Activity, Award, TrendingDown, Download, ArrowDown, ArrowUp, ArrowUpDown, User, LogOut } from "lucide-react";
+import { 
+  Plus, 
+  Activity, 
+  Award, 
+  TrendingDown, 
+  Download, 
+  ArrowDown, 
+  ArrowUp, 
+  ArrowUpDown, 
+  User, 
+  LogOut,
+  Eye,
+  Golf,
+  ArrowLeft
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
