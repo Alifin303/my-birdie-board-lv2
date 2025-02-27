@@ -110,7 +110,11 @@ export const searchCourses = async (query: string): Promise<GolfCourse[]> => {
         method: 'GET',
         headers: API_CONFIG.headers,
         // Add a timeout to prevent long waiting times
-        signal: AbortSignal.timeout(5000) 
+        signal: AbortSignal.timeout(5000),
+        // Explicitly set mode to cors to ensure CORS handling
+        mode: 'cors',
+        // Don't include credentials
+        credentials: 'omit'
       }
     );
     
@@ -148,9 +152,30 @@ export const searchCourses = async (query: string): Promise<GolfCourse[]> => {
       country: course.country || 'USA'
     }));
     
-    return courses.length > 0 ? courses : getMockSearchResults(query);
+    if (courses.length === 0) {
+      console.log('No courses found in API response, falling back to mock data');
+      const mockResults = getMockSearchResults(query);
+      if (mockResults.length > 0) {
+        toast({
+          title: "Using Sample Data",
+          description: "No courses found in the database. Showing sample courses instead.",
+          variant: "default",
+        });
+        return mockResults;
+      }
+    }
+    
+    console.log('Successfully retrieved', courses.length, 'courses from API');
+    return courses;
   } catch (error) {
     console.error('Golf course search error:', error);
+    
+    // Log the specific error type and message for debugging
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      console.error('Network error - This may be a CORS issue or the API may be unavailable');
+    }
+    
+    // Provide a user-friendly notification
     toast({
       title: "API Connection Issue",
       description: "Unable to connect to the golf course database. Using sample data instead.",
@@ -206,7 +231,11 @@ export const getCourseDetails = async (courseId: string): Promise<CourseDetail |
         method: 'GET',
         headers: API_CONFIG.headers,
         // Add a timeout to prevent long waiting times
-        signal: AbortSignal.timeout(5000)
+        signal: AbortSignal.timeout(5000),
+        // Explicitly set mode to cors to handle CORS properly
+        mode: 'cors',
+        // Don't include credentials
+        credentials: 'omit'
       }
     );
     
