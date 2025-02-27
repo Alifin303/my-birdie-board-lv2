@@ -13,7 +13,7 @@ const ApiTest = () => {
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [courseDetails, setCourseDetails] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [apiResponse, setApiResponse] = useState<any | null>(null);
+  const [rawResponse, setRawResponse] = useState<string | null>(null);
 
   const handleSearch = async () => {
     if (!searchQuery) return;
@@ -22,7 +22,7 @@ const ApiTest = () => {
     setError(null);
     setSearchResults([]);
     setCourseDetails(null);
-    setApiResponse(null);
+    setRawResponse(null);
     
     try {
       console.log("Testing searchCourses API with query:", searchQuery);
@@ -31,7 +31,7 @@ const ApiTest = () => {
       setSearchResults(courses);
       
       if (courses.length === 0) {
-        setError("No courses found with that name.");
+        setError("No courses found with that name. Try a different search term.");
       }
     } catch (err: any) {
       console.error("API search error:", err);
@@ -46,7 +46,7 @@ const ApiTest = () => {
     setError(null);
     setCourseDetails(null);
     setSelectedCourseId(courseId);
-    setApiResponse(null);
+    setRawResponse(null);
     
     try {
       console.log("Testing getCourseDetails API with id:", courseId);
@@ -55,11 +55,56 @@ const ApiTest = () => {
       setCourseDetails(details);
       
       if (!details) {
-        setError("Failed to get course details.");
+        setError("Failed to get course details. Try again or select a different course.");
       }
     } catch (err: any) {
       console.error("API details error:", err);
       setError(`An error occurred while fetching course details: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRawRequest = async () => {
+    if (!searchQuery) return;
+    
+    setIsLoading(true);
+    setError(null);
+    setRawResponse(null);
+    
+    try {
+      // Direct API call to see raw response
+      const response = await fetch(
+        `https://golfcourseapi.com/api/v1/courses?search=${encodeURIComponent(searchQuery)}`,
+        { 
+          method: 'GET',
+          headers: {
+            'Authorization': 'Key 7GG4N6R5NOXNHW7H5A7EQVGL2U',
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      const responseText = await response.text();
+      let formattedResponse;
+      
+      try {
+        // Try to parse as JSON for nice formatting
+        const jsonResponse = JSON.parse(responseText);
+        formattedResponse = JSON.stringify(jsonResponse, null, 2);
+      } catch {
+        // If it's not JSON, just use the text
+        formattedResponse = responseText;
+      }
+      
+      setRawResponse(formattedResponse);
+      
+      if (!response.ok) {
+        setError(`API Error: ${response.status} ${response.statusText}`);
+      }
+    } catch (err: any) {
+      console.error("Raw request error:", err);
+      setError(`An error occurred during raw request: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -89,12 +134,33 @@ const ApiTest = () => {
           </Button>
         </div>
         
+        <div className="flex space-x-2 mt-2 mb-4">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRawRequest}
+            disabled={isLoading || !searchQuery}
+          >
+            Test Raw API Request
+          </Button>
+        </div>
+        
         {/* Error Display */}
         {error && (
           <Alert variant="destructive" className="mb-4">
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
+        )}
+        
+        {/* Raw Response Display */}
+        {rawResponse && (
+          <div className="mt-4 mb-4">
+            <h3 className="text-lg font-medium mb-2">Raw API Response:</h3>
+            <div className="bg-muted p-4 rounded-md overflow-x-auto">
+              <pre className="text-xs whitespace-pre-wrap">{rawResponse}</pre>
+            </div>
+          </div>
         )}
         
         {/* Search Results */}
@@ -117,16 +183,6 @@ const ApiTest = () => {
                 </div>
               ))}
             </div>
-          </div>
-        )}
-        
-        {/* API Response Debug (for development) */}
-        {apiResponse && (
-          <div className="mt-4 p-4 border rounded-md bg-muted">
-            <h4 className="font-medium mb-2">Raw API Response:</h4>
-            <pre className="text-xs overflow-auto max-h-40">
-              {JSON.stringify(apiResponse, null, 2)}
-            </pre>
           </div>
         )}
       </div>
@@ -186,6 +242,16 @@ const ApiTest = () => {
           </div>
         </div>
       )}
+      
+      <div className="mt-6 p-4 border rounded-md bg-muted/30">
+        <h3 className="font-medium mb-2">API Integration Notes:</h3>
+        <ul className="list-disc pl-5 space-y-1 text-sm">
+          <li>Make sure your network connection allows outbound requests to golfcourseapi.com</li>
+          <li>The API requires the Authorization header with the correct API key</li>
+          <li>If you're still having issues, try testing with common golf course names like "Augusta National" or "Pebble Beach"</li>
+          <li>For persistent issues, contact GolfCourseAPI support with the error details shown above</li>
+        </ul>
+      </div>
     </div>
   );
 };

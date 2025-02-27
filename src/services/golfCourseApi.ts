@@ -43,7 +43,11 @@ export interface CourseDetail {
 const API_CONFIG = {
   baseUrl: 'https://golfcourseapi.com/api/v1',
   searchEndpoint: '/courses',
-  courseDetailsEndpoint: '/courses'
+  courseDetailsEndpoint: '/courses',
+  headers: {
+    'Authorization': 'Key 7GG4N6R5NOXNHW7H5A7EQVGL2U',
+    'Content-Type': 'application/json'
+  }
 };
 
 /**
@@ -55,12 +59,18 @@ export const searchCourses = async (query: string): Promise<GolfCourse[]> => {
   try {
     console.log(`Searching for courses with query: ${query}`);
     
-    // Original API endpoint
+    // Original API endpoint with authorization header
     const response = await fetch(
-      `${API_CONFIG.baseUrl}${API_CONFIG.searchEndpoint}?search=${encodeURIComponent(query)}`
+      `${API_CONFIG.baseUrl}${API_CONFIG.searchEndpoint}?search=${encodeURIComponent(query)}`,
+      { 
+        method: 'GET',
+        headers: API_CONFIG.headers 
+      }
     );
     
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`API Error (${response.status}): ${errorText}`);
       throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
     
@@ -68,13 +78,18 @@ export const searchCourses = async (query: string): Promise<GolfCourse[]> => {
     console.log("API response:", data);
     
     // Map API response to our GolfCourse interface
-    const courses: GolfCourse[] = data.data?.map((course: any) => ({
+    if (!data.data || !Array.isArray(data.data)) {
+      console.warn("Unexpected API response format:", data);
+      return [];
+    }
+    
+    const courses: GolfCourse[] = data.data.map((course: any) => ({
       id: course.id.toString(),
       name: course.name,
       city: course.city || '',
       state: course.state || '',
       country: course.country || 'USA'
-    })) || [];
+    }));
     
     return courses;
   } catch (error) {
@@ -94,10 +109,16 @@ export const getCourseDetails = async (courseId: string): Promise<CourseDetail |
     console.log(`Fetching details for course ID: ${courseId}`);
     
     const response = await fetch(
-      `${API_CONFIG.baseUrl}${API_CONFIG.courseDetailsEndpoint}/${courseId}`
+      `${API_CONFIG.baseUrl}${API_CONFIG.courseDetailsEndpoint}/${courseId}`,
+      { 
+        method: 'GET',
+        headers: API_CONFIG.headers 
+      }
     );
     
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`API Error (${response.status}): ${errorText}`);
       throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
     
@@ -105,6 +126,11 @@ export const getCourseDetails = async (courseId: string): Promise<CourseDetail |
     console.log("Course details API response:", data);
     
     // Original API response structure
+    if (!data.data) {
+      console.warn("Unexpected API response format:", data);
+      return null;
+    }
+    
     const course = data.data;
     
     // Map API response to our CourseDetail interface
