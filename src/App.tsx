@@ -6,7 +6,7 @@ import About from "@/pages/About";
 import NotFound from "@/pages/NotFound";
 import AuthRedirect from "@/pages/AuthRedirect";
 import AuthConfirm from "@/pages/AuthConfirm";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ApiTest from "@/pages/ApiTest";
