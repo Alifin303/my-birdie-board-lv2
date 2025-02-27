@@ -39,9 +39,9 @@ export interface CourseDetail {
   tees: CourseTee[];
 }
 
-// API configuration for golfcourseapi.com
+// API configuration for golfcourseapi.com - FIXED API ENDPOINT
 const API_CONFIG = {
-  baseUrl: 'https://golfcourseapi.com/api/v1',
+  baseUrl: 'https://api.golfcourseapi.com/api/v1',
   searchEndpoint: '/courses',
   courseDetailsEndpoint: '/courses',
   headers: {
@@ -102,70 +102,93 @@ export const searchCourses = async (query: string): Promise<GolfCourse[]> => {
     const requestUrl = `${API_CONFIG.baseUrl}${API_CONFIG.searchEndpoint}?search=${encodeURIComponent(query)}`;
     console.log('API Request URL:', requestUrl);
     console.log('API Request Headers:', API_CONFIG.headers);
-    
-    // Test direct fetch to log full response
-    try {
-      const testResponse = await fetch(requestUrl, { 
+
+    // Make the API request with proper CORS handling
+    const response = await fetch(
+      requestUrl,
+      { 
         method: 'GET',
         headers: API_CONFIG.headers,
         mode: 'cors',
         credentials: 'omit',
         signal: AbortSignal.timeout(10000)
-      });
-      
-      console.log('Direct API test status:', testResponse.status);
-      console.log('Direct API test headers:', Object.fromEntries(testResponse.headers.entries()));
-      
-      // Try to get response text for diagnosis
-      try {
-        const responseText = await testResponse.text();
-        console.log('Direct API test response text:', responseText);
-        
-        // Try to parse as JSON if possible
-        try {
-          const jsonData = JSON.parse(responseText);
-          console.log('Parsed JSON response:', jsonData);
-        } catch (parseError) {
-          console.log('Response is not valid JSON');
-        }
-      } catch (textError) {
-        console.error('Could not read response text:', textError);
       }
-    } catch (testError) {
-      console.error('Direct API test failed:', testError);
+    );
+    
+    // Log the response status and headers for debugging
+    console.log('API Response Status:', response.status);
+    console.log('API Response Headers:', Object.fromEntries(response.headers.entries()));
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`API Error (${response.status}): ${errorText}`);
+      
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
     
-    // After direct test, fall back to mock data for now to ensure functionality
-    console.log('Falling back to mock data while API issues are being resolved');
-    const mockResults = getMockSearchResults(query);
+    const responseText = await response.text();
+    console.log('API Response Body:', responseText);
     
-    if (mockResults.length > 0) {
+    // Try to parse the response as JSON
+    let data;
+    try {
+      data = JSON.parse(responseText);
+      console.log("Parsed API response data:", data);
+    } catch (parseError) {
+      console.error("Failed to parse API response as JSON:", parseError);
+      throw new Error("Invalid API response format");
+    }
+    
+    // Map API response to our GolfCourse interface
+    if (!data.data || !Array.isArray(data.data)) {
+      console.warn("Unexpected API response format:", data);
+      throw new Error("API response missing expected data array");
+    }
+    
+    const courses: GolfCourse[] = data.data.map((course: any) => ({
+      id: course.id ? course.id.toString() : "",
+      name: course.name || "Unknown Course",
+      city: course.city || '',
+      state: course.state || '',
+      country: course.country || 'USA'
+    }));
+    
+    // If no courses found, provide specific feedback
+    if (courses.length === 0) {
+      console.log(`No courses found matching "${query}"`);
       toast({
-        title: "Using Sample Data",
-        description: "The Golf Course API appears to be unavailable. Using sample courses instead.",
+        title: "No Results",
+        description: `No golf courses found matching "${query}". Try a different search term.`,
         variant: "default",
       });
-      return mockResults;
-    } else {
-      return [];
     }
+    
+    return courses;
   } catch (error) {
     console.error('Golf course search error:', error);
     
-    // Log the specific error type and message for debugging
-    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+    // Log specific error details for debugging
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
       console.error('Network error - This may be a CORS issue or the API may be unavailable');
+      toast({
+        title: "Connection Error",
+        description: "Unable to connect to the golf course database. Using sample data instead.",
+        variant: "destructive",
+      });
+      
+      // Return mock data when API is unavailable due to network issues
+      return getMockSearchResults(query);
+    } else {
+      // For other errors, provide a more specific message
+      toast({
+        title: "API Error",
+        description: `Error searching for golf courses: ${error instanceof Error ? error.message : 'Unknown error'}. Using sample data instead.`,
+        variant: "destructive",
+      });
+      
+      // Return mock data for other API errors
+      return getMockSearchResults(query);
     }
-    
-    // Provide a user-friendly notification
-    toast({
-      title: "API Connection Issue",
-      description: "Unable to connect to the golf course database. Using sample data instead.",
-      variant: "destructive",
-    });
-    
-    // Return mock data when API is unavailable
-    return getMockSearchResults(query);
   }
 };
 
@@ -207,32 +230,117 @@ export const getCourseDetails = async (courseId: string): Promise<CourseDetail |
     console.log('API Request URL:', requestUrl);
     console.log('API Request Headers:', API_CONFIG.headers);
     
-    // After direct test, fall back to mock data for now to ensure functionality
-    console.log('Falling back to mock data while API issues are being resolved');
+    // Make the API request with proper CORS handling
+    const response = await fetch(
+      requestUrl,
+      { 
+        method: 'GET',
+        headers: API_CONFIG.headers,
+        mode: 'cors',
+        credentials: 'omit',
+        signal: AbortSignal.timeout(10000)
+      }
+    );
     
-    // Find if we have a mock course that matches
-    if (mockCourse) {
-      toast({
-        title: "Using Sample Data",
-        description: "We're using sample course data as the golf course database is currently unavailable.",
-        variant: "default",
-      });
-      return generateMockCourseDetails(mockCourse);
+    // Log the response status and headers for debugging
+    console.log('API Response Status:', response.status);
+    console.log('API Response Headers:', Object.fromEntries(response.headers.entries()));
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`API Error (${response.status}): ${errorText}`);
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
     
-    // Return null on error if no mock data available
-    return null;
+    const responseText = await response.text();
+    console.log('API Response Body:', responseText);
+    
+    // Try to parse the response as JSON
+    let data;
+    try {
+      data = JSON.parse(responseText);
+      console.log("Parsed API response data:", data);
+    } catch (parseError) {
+      console.error("Failed to parse API response as JSON:", parseError);
+      throw new Error("Invalid API response format");
+    }
+    
+    // Check the response structure
+    if (!data.data) {
+      console.warn("Unexpected API response format:", data);
+      throw new Error("API response missing expected data object");
+    }
+    
+    const course = data.data;
+    
+    // Map API response to our CourseDetail interface
+    const courseDetail: CourseDetail = {
+      id: course.id ? course.id.toString() : "",
+      name: course.name || "Unknown Course",
+      city: course.city || '',
+      state: course.state || '',
+      country: course.country || 'USA',
+      
+      // Map tees
+      tees: Array.isArray(course.tees) ? course.tees.map((tee: any) => ({
+        id: tee.id ? tee.id.toString() : "",
+        name: tee.name || "Unknown Tee",
+        gender: tee.gender || 'M',
+        rating: parseFloat(tee.rating) || 72,
+        slope: parseInt(tee.slope) || 113,
+        par: parseInt(tee.par) || 72
+      })) : [],
+      
+      // Map holes
+      holes: Array.isArray(course.holes) ? course.holes.map((hole: any) => {
+        const yards: {[teeId: string]: number} = {};
+        
+        // Create yards object with each tee's yardage for this hole
+        if (Array.isArray(course.tees)) {
+          course.tees.forEach((tee: any) => {
+            const teeId = tee.id ? tee.id.toString() : "";
+            if (hole.teeBoxes && hole.teeBoxes[teeId] !== undefined) {
+              yards[teeId] = parseInt(hole.teeBoxes[teeId]) || 0;
+            } else {
+              yards[teeId] = 0;
+            }
+          });
+        }
+        
+        return {
+          id: hole.number ? hole.number.toString() : "",
+          number: parseInt(hole.number) || 0,
+          par: parseInt(hole.par) || 4,
+          handicap: parseInt(hole.handicap) || 0,
+          yards: yards
+        };
+      }) : []
+    };
+    
+    return courseDetail;
   } catch (error) {
     console.error('Golf course details error:', error);
+    
+    // Log specific error details for debugging
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      console.error('Network error - This may be a CORS issue or the API may be unavailable');
+      toast({
+        title: "Connection Error",
+        description: "Unable to connect to the golf course database. Using sample data instead.",
+        variant: "destructive",
+      });
+    } else {
+      // For other errors, provide a more specific message
+      toast({
+        title: "API Error",
+        description: `Error retrieving course details: ${error instanceof Error ? error.message : 'Unknown error'}. Using sample data instead.`,
+        variant: "destructive",
+      });
+    }
     
     // Find if we have a mock course that matches
     const mockCourse = MOCK_COURSES.find(course => course.id === courseId);
     if (mockCourse) {
-      toast({
-        title: "Using Sample Data",
-        description: "We're using sample course data as the golf course database is currently unavailable.",
-        variant: "default",
-      });
       return generateMockCourseDetails(mockCourse);
     }
     
