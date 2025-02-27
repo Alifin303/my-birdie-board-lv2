@@ -9,7 +9,13 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIU
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    // Use the current domain for redirects instead of hardcoding localhost:3000
-    redirectTo: SITE_URL ? `${SITE_URL}/auth/confirm` : undefined
+    detectSessionInUrl: true,
+    flowType: 'pkce',
+    autoRefreshToken: true,
+    persistSession: true,
+    // The correct place for redirectTo is inside options
+    options: {
+      redirectTo: SITE_URL ? `${SITE_URL}/auth/confirm` : undefined
+    }
   }
 });
