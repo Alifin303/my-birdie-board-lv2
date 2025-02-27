@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ export default function Dashboard() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
+  const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
 
   useEffect(() => {
     console.log("Modal state changed:", isModalOpen);
@@ -143,32 +145,56 @@ export default function Dashboard() {
     };
   };
 
-  const renderStats = () => {
+  const renderHandicapCircle = () => {
     if (!userRounds) return null;
     
     const stats = calculateStats(userRounds);
+    const handicap = stats.handicapIndex;
     
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="bg-background border rounded-lg p-4">
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">Rounds Played</h3>
-          <p className="text-2xl font-bold">{stats.totalRounds}</p>
+      <div className="flex flex-col items-center justify-center mb-6">
+        <div className="relative mb-2">
+          <div className="flex items-center gap-2 mb-2">
+            <button 
+              onClick={() => setScoreType('gross')} 
+              className={`px-3 py-1 rounded-full text-sm font-medium ${scoreType === 'gross' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+            >
+              Gross
+            </button>
+            <button 
+              onClick={() => setScoreType('net')} 
+              className={`px-3 py-1 rounded-full text-sm font-medium ${scoreType === 'net' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+            >
+              Net
+            </button>
+          </div>
         </div>
-        <div className="bg-background border rounded-lg p-4">
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">Best Gross Score</h3>
-          <p className="text-2xl font-bold flex items-center">
-            {stats.bestGrossScore} <Trophy className="ml-2 h-5 w-5 text-yellow-500" />
-          </p>
-        </div>
-        <div className="bg-background border rounded-lg p-4">
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">Best Net Score</h3>
-          <p className="text-2xl font-bold flex items-center">
-            {stats.bestNetScore} <Star className="ml-2 h-5 w-5 text-yellow-500" />
-          </p>
-        </div>
-        <div className="bg-background border rounded-lg p-4">
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">Handicap Index</h3>
-          <p className="text-2xl font-bold">{stats.handicapIndex}</p>
+        <div className="flex items-center justify-center">
+          <div className="relative">
+            <div className="w-44 h-44 rounded-full border-8 border-primary flex items-center justify-center">
+              <div className="text-center">
+                <p className="text-sm font-medium text-muted-foreground">Handicap Index</p>
+                <p className="text-4xl font-bold">{handicap}</p>
+                <p className="text-sm text-muted-foreground mt-1">Based on {stats.totalRounds} rounds</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="ml-8 space-y-5">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Best {scoreType === 'gross' ? 'Gross' : 'Net'} Score</p>
+              <p className="text-2xl font-bold flex items-center">
+                {scoreType === 'gross' ? stats.bestGrossScore : stats.bestNetScore}
+                <Trophy className="ml-2 h-5 w-5 text-yellow-500" />
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Average Score</p>
+              <p className="text-2xl font-bold">
+                {Math.round(stats.averageScore)}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -295,11 +321,6 @@ export default function Dashboard() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold">Welcome, {profile?.first_name || 'Golfer'}!</h1>
-            {profile?.handicap && (
-              <p className="text-muted-foreground mt-1">
-                Current Handicap Index: {profile.handicap}
-              </p>
-            )}
           </div>
           <Button 
             onClick={handleOpenModal}
@@ -309,8 +330,10 @@ export default function Dashboard() {
           </Button>
         </div>
 
-        {renderStats()}
+        {/* Handicap Circle */}
+        {renderHandicapCircle()}
         
+        {/* Recent Rounds Table */}
         <div className="space-y-4">
           <h2 className="text-2xl font-semibold">Your Rounds</h2>
           {renderRoundsTable()}

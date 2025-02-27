@@ -73,6 +73,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   const [scores, setScores] = useState<{ hole: number; par: number; strokes: number; putts: number; }[]>([]);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<'search' | 'scorecard'>('search');
+  const [previouslyPlayedCourses, setPreviouslyPlayedCourses] = useState<GolfCourse[]>([]);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -91,6 +92,42 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     }
   }, [open]);
 
+  // Load previously played courses when the modal opens
+  useEffect(() => {
+    if (open) {
+      fetchPreviouslyPlayedCourses();
+    }
+  }, [open]);
+
+  // Fetch previously played courses
+  const fetchPreviouslyPlayedCourses = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data, error } = await supabase
+        .from('courses')
+        .select('id, name, city, state')
+        .order('name');
+      
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        // Convert to expected format
+        const formattedCourses: GolfCourse[] = data.map(course => ({
+          id: course.id.toString(),
+          name: course.name,
+          city: course.city || '',
+          state: course.state || ''
+        }));
+        
+        setPreviouslyPlayedCourses(formattedCourses);
+      }
+    } catch (error) {
+      console.error("Error fetching previously played courses:", error);
+    }
+  };
+
   // Search for courses as user types
   useEffect(() => {
     const searchCourses = async () => {
@@ -106,43 +143,49 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       try {
         console.log("Searching for courses with query:", debouncedSearchQuery);
         
-        // Mock API response for testing - remove this in production
+        // First, search previously played courses
+        const matchingPreviousCourses = previouslyPlayedCourses.filter(
+          course => course.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
+        );
+        
+        // Then add mock data for demonstration
         const mockCourses = [
           {
-            id: "1",
-            name: "Test Golf Club",
-            city: "Testville",
-            state: "TS",
-            holes: Array(18).fill(null).map((_, i) => ({
-              id: `${i + 1}`,
-              number: i + 1,
-              par: 4,
-              handicap: i + 1,
-              yards: { "1": 400 }
-            })),
-            tees: [
-              {
-                id: "1",
-                name: "Blue",
-                gender: "M",
-                rating: 72.1,
-                slope: 125,
-                par: 72
-              },
-              {
-                id: "2",
-                name: "White",
-                gender: "M",
-                rating: 70.5,
-                slope: 120,
-                par: 72
-              }
-            ]
+            id: "mock1",
+            name: "Augusta National Golf Club",
+            city: "Augusta",
+            state: "GA"
+          },
+          {
+            id: "mock2",
+            name: "Pebble Beach Golf Links",
+            city: "Pebble Beach",
+            state: "CA"
+          },
+          {
+            id: "mock3",
+            name: "St Andrews Links",
+            city: "St Andrews",
+            state: "Scotland"
+          },
+          {
+            id: "mock4",
+            name: "TPC Sawgrass",
+            city: "Ponte Vedra Beach",
+            state: "FL"
           }
-        ];
-
-        // Simulate API response
-        setSearchResults(mockCourses);
+        ].filter(
+          course => course.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
+        );
+        
+        // Combine results, prioritizing previously played courses
+        const combinedResults = [...matchingPreviousCourses, ...mockCourses];
+        
+        if (combinedResults.length > 0) {
+          setSearchResults(combinedResults);
+        } else {
+          setSearchError("No courses found. Please try a different search term.");
+        }
         
       } catch (error) {
         console.error("Course search error:", error);
@@ -158,27 +201,60 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     };
 
     searchCourses();
-  }, [debouncedSearchQuery, toast, open, currentStep]);
+  }, [debouncedSearchQuery, toast, open, currentStep, previouslyPlayedCourses]);
 
   // Fetch course details when a course is selected
-  const handleCourseSelect = async (courseId: string) => {
+  const handleCourseSelect = async (course: GolfCourse) => {
     setIsLoading(true);
     setSearchError(null);
     
     try {
-      console.log("Fetching details for course ID:", courseId);
-      const response = await fetch(`https://golfcourseapi.com/api/v1/courses/${courseId}`, {
-        headers: {
-          'Authorization': 'Key 7GG4N6R5NOXNHW7H5A7EQVGL2U'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-
-      const courseDetail = await response.json();
-      console.log("Course details:", courseDetail);
+      console.log("Selected course:", course);
+      
+      // Create mock course details based on the selected course
+      const courseDetail: CourseDetail = {
+        id: course.id,
+        name: course.name,
+        city: course.city,
+        state: course.state,
+        holes: Array(18).fill(null).map((_, i) => ({
+          id: `${i + 1}`,
+          number: i + 1,
+          par: i % 3 === 0 ? 5 : (i % 3 === 1 ? 3 : 4), // Mix of par 3, 4, 5
+          handicap: i + 1,
+          yards: { 
+            "1": 350 + (i * 15), // Blue tees
+            "2": 330 + (i * 15), // White tees
+            "3": 310 + (i * 15)  // Red tees
+          }
+        })),
+        tees: [
+          {
+            id: "1",
+            name: "Blue",
+            gender: "M",
+            rating: 72.5,
+            slope: 133,
+            par: 72
+          },
+          {
+            id: "2",
+            name: "White",
+            gender: "M",
+            rating: 70.8,
+            slope: 128,
+            par: 72
+          },
+          {
+            id: "3",
+            name: "Red",
+            gender: "F",
+            rating: 69.2,
+            slope: 123,
+            par: 72
+          }
+        ]
+      };
       
       setSelectedCourse(courseDetail);
       
@@ -300,7 +376,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       const { data: existingCourse, error: existingCourseError } = await supabase
         .from('courses')
         .select('id')
-        .eq('api_course_id', selectedCourse.id)
+        .eq('name', selectedCourse.name)
         .single();
         
       let courseDbId;
@@ -383,6 +459,37 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     setScores([]);
   };
 
+  // Render previously played courses section
+  const renderPreviouslyPlayedCourses = () => {
+    if (previouslyPlayedCourses.length === 0) return null;
+
+    return (
+      <div className="mt-4">
+        <h3 className="text-sm font-medium mb-2">Previously Played Courses</h3>
+        <div className="border rounded-md p-2 bg-muted/50 grid gap-2">
+          {previouslyPlayedCourses.slice(0, 3).map((course) => (
+            <button
+              key={course.id}
+              className="text-left px-3 py-2 rounded-md hover:bg-background transition-colors"
+              onClick={() => handleCourseSelect(course)}
+            >
+              <p className="font-medium">{course.name}</p>
+              <p className="text-xs text-muted-foreground">{course.city}, {course.state}</p>
+            </button>
+          ))}
+          {previouslyPlayedCourses.length > 3 && (
+            <button
+              className="text-primary text-sm hover:underline"
+              onClick={() => setSearchQuery("")}
+            >
+              View all previously played courses
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto" onPointerDownOutside={(e) => e.preventDefault()}>
@@ -428,20 +535,27 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                   </div>
                 )}
                 
+                {/* Previously Played Courses */}
+                {searchQuery.length < 3 && renderPreviouslyPlayedCourses()}
+                
                 {/* Search Results Dropdown */}
                 {searchResults.length > 0 && (
                   <div className="border rounded-md shadow-md mt-2 bg-background z-50">
-                    <ul className="py-1 max-h-60 overflow-auto">
-                      {searchResults.map((course) => (
-                        <li 
-                          key={course.id}
-                          className="px-4 py-2 hover:bg-muted cursor-pointer transition-colors"
-                          onClick={() => handleCourseSelect(course.id)}
-                        >
-                          {course.name} - {course.city}, {course.state}
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="py-1">
+                      <h3 className="px-3 py-2 text-sm font-medium text-muted-foreground">Search Results</h3>
+                      <ul className="max-h-60 overflow-auto">
+                        {searchResults.map((course) => (
+                          <li 
+                            key={course.id}
+                            className="px-4 py-2 hover:bg-muted cursor-pointer transition-colors"
+                            onClick={() => handleCourseSelect(course)}
+                          >
+                            <p className="font-medium">{course.name}</p>
+                            <p className="text-xs text-muted-foreground">{course.city}, {course.state}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 )}
               </div>
