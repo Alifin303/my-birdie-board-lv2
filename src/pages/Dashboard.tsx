@@ -28,6 +28,9 @@ const Dashboard = () => {
     key: string;
     direction: 'ascending' | 'descending';
   } | null>(null);
+  
+  // State for view mode: "gross" or "net"
+  const [viewMode, setViewMode] = useState<"gross" | "net">("gross");
 
   // Sorting function
   const requestSort = (key: string) => {
@@ -67,6 +70,11 @@ const Dashboard = () => {
   const formatParScore = (score: number | undefined): string => {
     if (score === undefined || score === null) return "N/A";
     return score <= 0 ? score.toString() : `+${score}`;
+  };
+
+  // Toggle view mode between gross and net
+  const toggleViewMode = () => {
+    setViewMode(viewMode === "gross" ? "net" : "gross");
   };
 
   return (
@@ -137,6 +145,18 @@ const Dashboard = () => {
         </Button>
       </div>
 
+      {/* Table Controls with Toggle Button */}
+      <div className="flex justify-end mb-4">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={toggleViewMode}
+          className="text-xs"
+        >
+          Show {viewMode === "gross" ? "Net" : "Gross"} Scores
+        </Button>
+      </div>
+
       {/* Courses Table */}
       <div className="rounded-md border">
         <Table>
@@ -154,28 +174,22 @@ const Dashboard = () => {
                   {getSortDirectionIcon('roundsPlayed')}
                 </div>
               </TableHead>
-              <TableHead onClick={() => requestSort('bestGrossScore')} className="text-right cursor-pointer">
+              <TableHead 
+                onClick={() => requestSort(viewMode === "gross" ? 'bestGrossScore' : 'bestNetScore')} 
+                className="text-right cursor-pointer"
+              >
                 <div className="flex items-center justify-end">
-                  Best Gross
-                  {getSortDirectionIcon('bestGrossScore')}
+                  Best {viewMode === "gross" ? "Gross" : "Net"}
+                  {getSortDirectionIcon(viewMode === "gross" ? 'bestGrossScore' : 'bestNetScore')}
                 </div>
               </TableHead>
-              <TableHead onClick={() => requestSort('bestNetScore')} className="text-right cursor-pointer">
+              <TableHead 
+                onClick={() => requestSort(viewMode === "gross" ? 'bestToParGross' : 'bestToParNet')} 
+                className="text-right cursor-pointer"
+              >
                 <div className="flex items-center justify-end">
-                  Best Net
-                  {getSortDirectionIcon('bestNetScore')}
-                </div>
-              </TableHead>
-              <TableHead onClick={() => requestSort('bestToParGross')} className="text-right cursor-pointer">
-                <div className="flex items-center justify-end">
-                  To Par (Gross)
-                  {getSortDirectionIcon('bestToParGross')}
-                </div>
-              </TableHead>
-              <TableHead onClick={() => requestSort('bestToParNet')} className="text-right cursor-pointer">
-                <div className="flex items-center justify-end">
-                  To Par (Net)
-                  {getSortDirectionIcon('bestToParNet')}
+                  To Par ({viewMode === "gross" ? "Gross" : "Net"})
+                  {getSortDirectionIcon(viewMode === "gross" ? 'bestToParGross' : 'bestToParNet')}
                 </div>
               </TableHead>
             </TableRow>
@@ -185,13 +199,17 @@ const Dashboard = () => {
               <TableRow key={course.id}>
                 <TableCell className="font-medium">{course.name}</TableCell>
                 <TableCell className="text-right">{course.roundsPlayed}</TableCell>
-                <TableCell className="text-right">{course.bestGrossScore}</TableCell>
-                <TableCell className="text-right">{course.bestNetScore}</TableCell>
-                <TableCell className={`text-right ${course.bestToParGross <= 0 ? "text-green-500" : "text-red-500"}`}>
-                  {formatParScore(course.bestToParGross)}
+                <TableCell className="text-right">
+                  {viewMode === "gross" ? course.bestGrossScore : course.bestNetScore}
                 </TableCell>
-                <TableCell className={`text-right ${course.bestToParNet <= 0 ? "text-green-500" : "text-red-500"}`}>
-                  {formatParScore(course.bestToParNet)}
+                <TableCell 
+                  className={`text-right ${
+                    (viewMode === "gross" ? course.bestToParGross : course.bestToParNet) <= 0 
+                    ? "text-green-500" 
+                    : "text-red-500"
+                  }`}
+                >
+                  {formatParScore(viewMode === "gross" ? course.bestToParGross : course.bestToParNet)}
                 </TableCell>
               </TableRow>
             ))}
