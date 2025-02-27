@@ -105,25 +105,45 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       
       try {
         console.log("Searching for courses with query:", debouncedSearchQuery);
-        const response = await fetch(`https://golfcourseapi.com/api/v1/courses?search=${encodeURIComponent(debouncedSearchQuery)}`, {
-          headers: {
-            'Authorization': 'Key 7GG4N6R5NOXNHW7H5A7EQVGL2U'
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log("Search results:", data);
         
-        if (data.courses && data.courses.length > 0) {
-          setSearchResults(data.courses);
-        } else {
-          setSearchResults([]);
-          setSearchError("No courses found. Please try a different search term.");
-        }
+        // Mock API response for testing - remove this in production
+        const mockCourses = [
+          {
+            id: "1",
+            name: "Test Golf Club",
+            city: "Testville",
+            state: "TS",
+            holes: Array(18).fill(null).map((_, i) => ({
+              id: `${i + 1}`,
+              number: i + 1,
+              par: 4,
+              handicap: i + 1,
+              yards: { "1": 400 }
+            })),
+            tees: [
+              {
+                id: "1",
+                name: "Blue",
+                gender: "M",
+                rating: 72.1,
+                slope: 125,
+                par: 72
+              },
+              {
+                id: "2",
+                name: "White",
+                gender: "M",
+                rating: 70.5,
+                slope: 120,
+                par: 72
+              }
+            ]
+          }
+        ];
+
+        // Simulate API response
+        setSearchResults(mockCourses);
+        
       } catch (error) {
         console.error("Course search error:", error);
         setSearchError("Failed to search for courses. Please try again.");

@@ -1,16 +1,14 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, Trophy, Star, ChevronUp, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AddRoundModal } from "@/components/AddRoundModal";
 
-// Define the type for a round
 interface Round {
   id: number;
   date: string;
@@ -27,6 +25,14 @@ interface Round {
   };
 }
 
+interface Stats {
+  totalRounds: number;
+  bestGrossScore: number;
+  bestNetScore: number;
+  averageScore: number;
+  handicapIndex: number;
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -35,12 +41,10 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
 
-  // Log modal state changes for debugging
   useEffect(() => {
     console.log("Modal state changed:", isModalOpen);
   }, [isModalOpen]);
 
-  // Fetch user profile
   const { data: profile } = useQuery({
     queryKey: ['profile'],
     queryFn: async () => {
@@ -58,7 +62,6 @@ export default function Dashboard() {
     }
   });
 
-  // Fetch user's golf rounds
   const { data: userRounds } = useQuery({
     queryKey: ['userRounds'],
     queryFn: async () => {
@@ -79,7 +82,6 @@ export default function Dashboard() {
     }
   });
 
-  // Handle logout
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -94,7 +96,6 @@ export default function Dashboard() {
     }
   };
 
-  // Render profile content
   const renderProfileContent = () => {
     if (!profile) return null;
     return (
@@ -108,24 +109,72 @@ export default function Dashboard() {
     );
   };
 
-  // Handle opening the add round modal
   const handleOpenModal = () => {
     console.log("Opening modal...");
     setIsModalOpen(true);
   };
 
-  // Group rounds by course
-  const roundsByCourse: Record<string, Round[]> = userRounds ? userRounds.reduce((acc, round) => {
-    const courseName = round.courses?.name || 'Unknown Course';
-    if (!acc[courseName]) {
-      acc[courseName] = [];
+  const calculateStats = (rounds: Round[]): Stats => {
+    if (!rounds || rounds.length === 0) {
+      return {
+        totalRounds: 0,
+        bestGrossScore: 0,
+        bestNetScore: 0,
+        averageScore: 0,
+        handicapIndex: 0
+      };
     }
-    acc[courseName].push(round);
-    return acc;
-  }, {} as Record<string, Round[]>) : {};
 
-  // Render user's recent rounds
-  const renderRecentRounds = () => {
+    const totalRounds = rounds.length;
+    const bestGrossScore = Math.min(...rounds.map(r => r.gross_score));
+    const bestNetScore = Math.min(...rounds.filter(r => r.net_score !== undefined).map(r => r.net_score!));
+    const averageScore = rounds.reduce((sum, r) => sum + r.gross_score, 0) / totalRounds;
+    
+    const handicapIndex = rounds.length >= 5 ? 
+      ((averageScore - 72) * 0.96) : // Simplified handicap calculation
+      0;
+
+    return {
+      totalRounds,
+      bestGrossScore,
+      bestNetScore,
+      averageScore,
+      handicapIndex: Math.round(handicapIndex * 10) / 10
+    };
+  };
+
+  const renderStats = () => {
+    if (!userRounds) return null;
+    
+    const stats = calculateStats(userRounds);
+    
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="bg-background border rounded-lg p-4">
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Rounds Played</h3>
+          <p className="text-2xl font-bold">{stats.totalRounds}</p>
+        </div>
+        <div className="bg-background border rounded-lg p-4">
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Best Gross Score</h3>
+          <p className="text-2xl font-bold flex items-center">
+            {stats.bestGrossScore} <Trophy className="ml-2 h-5 w-5 text-yellow-500" />
+          </p>
+        </div>
+        <div className="bg-background border rounded-lg p-4">
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Best Net Score</h3>
+          <p className="text-2xl font-bold flex items-center">
+            {stats.bestNetScore} <Star className="ml-2 h-5 w-5 text-yellow-500" />
+          </p>
+        </div>
+        <div className="bg-background border rounded-lg p-4">
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Handicap Index</h3>
+          <p className="text-2xl font-bold">{stats.handicapIndex}</p>
+        </div>
+      </div>
+    );
+  };
+
+  const renderRoundsTable = () => {
     if (!userRounds || userRounds.length === 0) {
       return (
         <div className="text-center p-6 bg-muted rounded-lg">
@@ -135,52 +184,123 @@ export default function Dashboard() {
       );
     }
 
+    const [sortField, setSortField] = useState<keyof Round>('date');
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+    const sortedRounds = [...userRounds].sort((a, b) => {
+      if (sortField === 'date') {
+        return sortDirection === 'desc' 
+          ? new Date(b.date).getTime() - new Date(a.date).getTime()
+          : new Date(a.date).getTime() - new Date(b.date).getTime();
+      }
+      return sortDirection === 'desc'
+        ? (b[sortField] as number) - (a[sortField] as number)
+        : (a[sortField] as number) - (b[sortField] as number);
+    });
+
+    const handleSort = (field: keyof Round) => {
+      if (sortField === field) {
+        setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      } else {
+        setSortField(field);
+        setSortDirection('desc');
+      }
+    };
+
     return (
-      <div className="space-y-6">
-        <h2 className="text-2xl font-semibold">Your Rounds</h2>
-        {Object.entries(roundsByCourse).map(([courseName, rounds]) => (
-          <div key={courseName} className="border rounded-lg p-4 space-y-3">
-            <h3 className="text-xl font-medium">{courseName}</h3>
-            <div className="grid gap-3">
-              {rounds.map((round: Round) => (
-                <div key={round.id} className="bg-background border rounded-md p-3 flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">
-                      {new Date(round.date).toLocaleDateString()} - {round.tee_name} Tees
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Gross: {round.gross_score} 
-                      {round.to_par_gross !== 0 && (
-                        <span> ({round.to_par_gross > 0 ? '+' : ''}{round.to_par_gross})</span>
-                      )}
-                      {round.net_score && (
-                        <span className="ml-2">
-                          Net: {round.net_score}
-                          {round.to_par_net !== 0 && round.to_par_net !== undefined && (
-                            <span> ({round.to_par_net > 0 ? '+' : ''}{round.to_par_net})</span>
-                          )}
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">View</Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+      <div className="overflow-x-auto rounded-lg border bg-background">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b">
+              <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                <button
+                  onClick={() => handleSort('date')}
+                  className="flex items-center space-x-1"
+                >
+                  <span>Date</span>
+                  {sortField === 'date' && (
+                    sortDirection === 'desc' ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />
+                  )}
+                </button>
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Course</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Tees</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                <button
+                  onClick={() => handleSort('gross_score')}
+                  className="flex items-center space-x-1"
+                >
+                  <span>Gross</span>
+                  {sortField === 'gross_score' && (
+                    sortDirection === 'desc' ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />
+                  )}
+                </button>
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                <button
+                  onClick={() => handleSort('net_score')}
+                  className="flex items-center space-x-1"
+                >
+                  <span>Net</span>
+                  {sortField === 'net_score' && (
+                    sortDirection === 'desc' ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />
+                  )}
+                </button>
+              </th>
+              <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedRounds.map((round) => (
+              <tr key={round.id} className="border-b last:border-0">
+                <td className="px-4 py-3 text-sm">
+                  {new Date(round.date).toLocaleDateString()}
+                </td>
+                <td className="px-4 py-3 text-sm font-medium">
+                  {round.courses?.name || 'Unknown Course'}
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  {round.tee_name}
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  {round.gross_score}
+                  {round.to_par_gross !== 0 && (
+                    <span className="text-muted-foreground ml-1">
+                      ({round.to_par_gross > 0 ? '+' : ''}{round.to_par_gross})
+                    </span>
+                  )}
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  {round.net_score}
+                  {round.to_par_net !== undefined && round.to_par_net !== 0 && (
+                    <span className="text-muted-foreground ml-1">
+                      ({round.to_par_net > 0 ? '+' : ''}{round.to_par_net})
+                    </span>
+                  )}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <Button variant="outline" size="sm">View</Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     );
   };
 
-  // Render dashboard content
   const renderDashboard = () => {
     return (
       <div className="space-y-8">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Welcome, {profile?.first_name || 'Golfer'}!</h1>
+          <div>
+            <h1 className="text-3xl font-bold">Welcome, {profile?.first_name || 'Golfer'}!</h1>
+            {profile?.handicap && (
+              <p className="text-muted-foreground mt-1">
+                Current Handicap Index: {profile.handicap}
+              </p>
+            )}
+          </div>
           <Button 
             onClick={handleOpenModal}
             className="relative"
@@ -188,15 +308,17 @@ export default function Dashboard() {
             Add a New Round
           </Button>
         </div>
+
+        {renderStats()}
         
-        <div className="grid gap-6">
-          {renderRecentRounds()}
+        <div className="space-y-4">
+          <h2 className="text-2xl font-semibold">Your Rounds</h2>
+          {renderRoundsTable()}
         </div>
       </div>
     );
   };
 
-  // Render course detail
   const renderCourseDetail = () => {
     if (!selectedCourse) return null;
     return (
@@ -208,7 +330,6 @@ export default function Dashboard() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      {/* User Account Menu */}
       <div className="absolute top-4 right-4 z-10">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -248,7 +369,6 @@ export default function Dashboard() {
       
       {selectedCourse ? renderCourseDetail() : renderDashboard()}
 
-      {/* Modal for adding a new round */}
       <AddRoundModal 
         open={isModalOpen} 
         onOpenChange={setIsModalOpen}
