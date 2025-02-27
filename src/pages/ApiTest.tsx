@@ -13,6 +13,7 @@ const ApiTest = () => {
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [courseDetails, setCourseDetails] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [apiResponse, setApiResponse] = useState<any | null>(null);
 
   const handleSearch = async () => {
     if (!searchQuery) return;
@@ -21,6 +22,7 @@ const ApiTest = () => {
     setError(null);
     setSearchResults([]);
     setCourseDetails(null);
+    setApiResponse(null);
     
     try {
       console.log("Testing searchCourses API with query:", searchQuery);
@@ -31,9 +33,9 @@ const ApiTest = () => {
       if (courses.length === 0) {
         setError("No courses found with that name.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("API search error:", err);
-      setError("An error occurred while searching for courses.");
+      setError(`An error occurred while searching for courses: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -44,6 +46,7 @@ const ApiTest = () => {
     setError(null);
     setCourseDetails(null);
     setSelectedCourseId(courseId);
+    setApiResponse(null);
     
     try {
       console.log("Testing getCourseDetails API with id:", courseId);
@@ -54,9 +57,9 @@ const ApiTest = () => {
       if (!details) {
         setError("Failed to get course details.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("API details error:", err);
-      setError("An error occurred while fetching course details.");
+      setError(`An error occurred while fetching course details: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -75,6 +78,7 @@ const ApiTest = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Enter course name (e.g., Augusta National)"
             className="flex-1"
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           />
           <Button 
             onClick={handleSearch} 
@@ -109,9 +113,20 @@ const ApiTest = () => {
                     {course.city}{course.state ? `, ${course.state}` : ''}
                     {course.country && course.country !== 'USA' ? `, ${course.country}` : ''}
                   </p>
+                  <p className="text-xs text-muted-foreground mt-1">ID: {course.id}</p>
                 </div>
               ))}
             </div>
+          </div>
+        )}
+        
+        {/* API Response Debug (for development) */}
+        {apiResponse && (
+          <div className="mt-4 p-4 border rounded-md bg-muted">
+            <h4 className="font-medium mb-2">Raw API Response:</h4>
+            <pre className="text-xs overflow-auto max-h-40">
+              {JSON.stringify(apiResponse, null, 2)}
+            </pre>
           </div>
         )}
       </div>

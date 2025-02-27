@@ -42,12 +42,12 @@ export interface CourseDetail {
 // RapidAPI key for Golf Course Finder API
 const RAPID_API_KEY = '12ed9a1bcemsh31a6ac7723dd5e3p17afabjsn0655c3579cfc';
 
-// Updated API configuration
+// Updated API configuration with the correct host and endpoints
 const API_CONFIG = {
-  baseUrl: 'https://golf-course-finder.p.rapidapi.com',
+  baseUrl: 'https://golf-courses-api.p.rapidapi.com',
   headers: {
     'X-RapidAPI-Key': RAPID_API_KEY,
-    'X-RapidAPI-Host': 'golf-course-finder.p.rapidapi.com'
+    'X-RapidAPI-Host': 'golf-courses-api.p.rapidapi.com'
   }
 };
 
@@ -60,9 +60,9 @@ export const searchCourses = async (query: string): Promise<GolfCourse[]> => {
   try {
     console.log(`Searching for courses with query: ${query}`);
     
-    // Updated endpoint (check RapidAPI docs for the correct endpoint)
+    // Correct endpoint for the Golf Courses API
     const response = await fetch(
-      `${API_CONFIG.baseUrl}/course/search?name=${encodeURIComponent(query)}`,
+      `${API_CONFIG.baseUrl}/courses?search=${encodeURIComponent(query)}`,
       { headers: API_CONFIG.headers }
     );
     
@@ -74,6 +74,7 @@ export const searchCourses = async (query: string): Promise<GolfCourse[]> => {
     console.log("API response:", data);
     
     // Map API response to our GolfCourse interface
+    // The structure is different from the previous API
     const courses: GolfCourse[] = data.courses?.map((course: any) => ({
       id: course.id.toString(),
       name: course.name,
@@ -99,8 +100,9 @@ export const getCourseDetails = async (courseId: string): Promise<CourseDetail |
   try {
     console.log(`Fetching details for course ID: ${courseId}`);
     
+    // Correct endpoint for course details
     const response = await fetch(
-      `${API_CONFIG.baseUrl}/course/details?courseId=${courseId}`,
+      `${API_CONFIG.baseUrl}/courses/${courseId}`,
       { headers: API_CONFIG.headers }
     );
     
@@ -111,41 +113,49 @@ export const getCourseDetails = async (courseId: string): Promise<CourseDetail |
     const data = await response.json();
     console.log("Course details API response:", data);
     
+    // The API structure might be different, adjust mapping accordingly
+    // This is a basic mapping, you may need to adjust based on the actual API response
+    const course = data.data || data.course || data;
+    
     // Map API response to our CourseDetail interface
     const courseDetail: CourseDetail = {
-      id: data.course.id.toString(),
-      name: data.course.name,
-      city: data.course.city || '',
-      state: data.course.state || '',
-      country: data.course.country || 'USA',
+      id: course.id.toString(),
+      name: course.name,
+      city: course.city || '',
+      state: course.state || '',
+      country: course.country || 'USA',
       
-      // Map tees
-      tees: data.course.teeBoxes.map((tee: any) => ({
+      // Map tees - adjust based on actual API response structure
+      tees: (course.tees || course.teeBoxes || []).map((tee: any) => ({
         id: tee.id.toString(),
-        name: tee.teeType,
+        name: tee.teeType || tee.name,
         gender: tee.gender || 'M',
-        rating: tee.courseRating || 72,
-        slope: tee.slopeRating || 113,
+        rating: tee.rating || tee.courseRating || 72,
+        slope: tee.slope || tee.slopeRating || 113,
         par: tee.par || 72
       })),
       
-      // Map holes
-      holes: data.course.holes.map((hole: any) => {
+      // Map holes - adjust based on actual API response structure
+      holes: (course.holes || []).map((hole: any) => {
         const yards: {[teeId: string]: number} = {};
         
         // Create yards object with each tee's yardage for this hole
-        data.course.teeBoxes.forEach((tee: any) => {
-          const teeYardage = tee.holeYardages.find((y: any) => y.holeNumber === hole.holeNumber);
+        // Adjust based on actual API response structure
+        (course.tees || course.teeBoxes || []).forEach((tee: any) => {
+          const teeYardage = (tee.holes || tee.holeYardages || []).find((y: any) => 
+            y.holeNumber === hole.holeNumber || y.number === hole.number
+          );
+          
           if (teeYardage) {
-            yards[tee.id.toString()] = teeYardage.yards;
+            yards[tee.id.toString()] = teeYardage.yards || teeYardage.distance || 0;
           }
         });
         
         return {
-          id: `${hole.holeNumber}`,
-          number: hole.holeNumber,
+          id: `${hole.number || hole.holeNumber}`,
+          number: hole.number || hole.holeNumber,
           par: hole.par,
-          handicap: hole.handicap || hole.holeNumber,
+          handicap: hole.handicap || (hole.number || hole.holeNumber),
           yards: yards
         };
       })
