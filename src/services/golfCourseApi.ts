@@ -50,6 +50,45 @@ const API_CONFIG = {
   }
 };
 
+// Mock data for when the API is unavailable
+const MOCK_COURSES = [
+  {
+    id: "1",
+    name: "Pebble Beach Golf Links",
+    city: "Pebble Beach",
+    state: "CA",
+    country: "USA"
+  },
+  {
+    id: "2",
+    name: "St Andrews Links - Old Course",
+    city: "St Andrews",
+    state: "",
+    country: "Scotland"
+  },
+  {
+    id: "3",
+    name: "Augusta National Golf Club",
+    city: "Augusta",
+    state: "GA",
+    country: "USA"
+  },
+  {
+    id: "4",
+    name: "Torrey Pines Golf Course",
+    city: "La Jolla",
+    state: "CA",
+    country: "USA"
+  },
+  {
+    id: "5",
+    name: "TPC Sawgrass",
+    city: "Ponte Vedra Beach",
+    state: "FL",
+    country: "USA"
+  }
+];
+
 /**
  * Search for golf courses by name
  * @param query Course name query
@@ -59,28 +98,46 @@ export const searchCourses = async (query: string): Promise<GolfCourse[]> => {
   try {
     console.log(`Searching for courses with query: ${query}`);
     
+    // Log the complete request details for debugging
+    const requestUrl = `${API_CONFIG.baseUrl}${API_CONFIG.searchEndpoint}?search=${encodeURIComponent(query)}`;
+    console.log('API Request URL:', requestUrl);
+    console.log('API Request Headers:', API_CONFIG.headers);
+    
     // Original API endpoint with authorization header
     const response = await fetch(
-      `${API_CONFIG.baseUrl}${API_CONFIG.searchEndpoint}?search=${encodeURIComponent(query)}`,
+      requestUrl,
       { 
         method: 'GET',
-        headers: API_CONFIG.headers 
+        headers: API_CONFIG.headers,
+        // Add a timeout to prevent long waiting times
+        signal: AbortSignal.timeout(5000) 
       }
     );
+    
+    // Log the response status and headers for debugging
+    console.log('API Response Status:', response.status);
+    console.log('API Response Headers:', Object.fromEntries(response.headers.entries()));
     
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`API Error (${response.status}): ${errorText}`);
+      
+      // Check if API is down or returning errors
+      if (response.status === 404 || response.status === 500) {
+        console.log('API is unavailable, falling back to mock data');
+        return getMockSearchResults(query);
+      }
+      
       throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
     
     const data = await response.json();
-    console.log("API response:", data);
+    console.log("API response data:", data);
     
     // Map API response to our GolfCourse interface
     if (!data.data || !Array.isArray(data.data)) {
       console.warn("Unexpected API response format:", data);
-      return [];
+      return getMockSearchResults(query);
     }
     
     const courses: GolfCourse[] = data.data.map((course: any) => ({
@@ -91,12 +148,35 @@ export const searchCourses = async (query: string): Promise<GolfCourse[]> => {
       country: course.country || 'USA'
     }));
     
-    return courses;
+    return courses.length > 0 ? courses : getMockSearchResults(query);
   } catch (error) {
     console.error('Golf course search error:', error);
-    // Return empty array on error
-    return [];
+    toast({
+      title: "API Connection Issue",
+      description: "Unable to connect to the golf course database. Using sample data instead.",
+      variant: "destructive",
+    });
+    
+    // Return mock data when API is unavailable
+    return getMockSearchResults(query);
   }
+};
+
+/**
+ * Filter mock courses based on search query
+ * @param query Search query
+ * @returns Filtered mock courses
+ */
+const getMockSearchResults = (query: string): GolfCourse[] => {
+  console.log('Using mock data for search results');
+  
+  if (!query) return [];
+  
+  const normalizedQuery = query.toLowerCase();
+  return MOCK_COURSES.filter(course => 
+    course.name.toLowerCase().includes(normalizedQuery) ||
+    course.city.toLowerCase().includes(normalizedQuery)
+  );
 };
 
 /**
@@ -108,17 +188,41 @@ export const getCourseDetails = async (courseId: string): Promise<CourseDetail |
   try {
     console.log(`Fetching details for course ID: ${courseId}`);
     
+    // Check if we're using a mock course ID
+    const mockCourse = MOCK_COURSES.find(course => course.id === courseId);
+    if (mockCourse) {
+      console.log('Using mock data for course details');
+      return generateMockCourseDetails(mockCourse);
+    }
+    
+    // Log the complete request details for debugging
+    const requestUrl = `${API_CONFIG.baseUrl}${API_CONFIG.courseDetailsEndpoint}/${courseId}`;
+    console.log('API Request URL:', requestUrl);
+    console.log('API Request Headers:', API_CONFIG.headers);
+    
     const response = await fetch(
-      `${API_CONFIG.baseUrl}${API_CONFIG.courseDetailsEndpoint}/${courseId}`,
+      requestUrl,
       { 
         method: 'GET',
-        headers: API_CONFIG.headers 
+        headers: API_CONFIG.headers,
+        // Add a timeout to prevent long waiting times
+        signal: AbortSignal.timeout(5000)
       }
     );
+    
+    // Log the response status and headers for debugging
+    console.log('API Response Status:', response.status);
+    console.log('API Response Headers:', Object.fromEntries(response.headers.entries()));
     
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`API Error (${response.status}): ${errorText}`);
+      
+      // For any mock course, return generated data
+      if (mockCourse) {
+        return generateMockCourseDetails(mockCourse);
+      }
+      
       throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
     
@@ -173,7 +277,19 @@ export const getCourseDetails = async (courseId: string): Promise<CourseDetail |
     return courseDetail;
   } catch (error) {
     console.error('Golf course details error:', error);
-    // Return null on error, which will trigger mock data generation
+    
+    // Find if we have a mock course that matches
+    const mockCourse = MOCK_COURSES.find(course => course.id === courseId);
+    if (mockCourse) {
+      toast({
+        title: "Using Sample Data",
+        description: "We're using sample course data as the golf course database is currently unavailable.",
+        variant: "default",
+      });
+      return generateMockCourseDetails(mockCourse);
+    }
+    
+    // Return null on error if no mock data available
     return null;
   }
 };
