@@ -127,16 +127,8 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       if (courses.length > 0) {
         setSearchResults(courses);
       } else {
-        // If API returns no results, try matching previously played courses
-        const matchingPreviousCourses = previouslyPlayedCourses.filter(
-          course => course.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        
-        if (matchingPreviousCourses.length > 0) {
-          setSearchResults(matchingPreviousCourses);
-        } else {
-          setSearchError("No courses found. Please try a different search term.");
-        }
+        // If API returns no results, show error
+        setSearchError("No courses found. Please try a different search term.");
       }
     } catch (error) {
       console.error("Course search error:", error);
@@ -298,16 +290,17 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       const netScore = totalStrokes - handicapStrokes;
       const toParNet = netScore - totalPar;
 
-      // First, let's add the course to the database if it doesn't exist
-      const { data: existingCourse, error: existingCourseError } = await supabase
+      // First, check if the course exists in the database
+      let courseDbId: number;
+      const { data: existingCourse } = await supabase
         .from('courses')
         .select('id')
         .eq('name', selectedCourse.name)
-        .single();
+        .maybeSingle();
         
-      let courseDbId;
-      
-      if (!existingCourse) {
+      if (existingCourse) {
+        courseDbId = existingCourse.id;
+      } else {
         // Insert course
         const { data: newCourse, error: newCourseError } = await supabase
           .from('courses')
@@ -325,8 +318,6 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         }
         
         courseDbId = newCourse.id;
-      } else {
-        courseDbId = existingCourse.id;
       }
 
       // Save the round

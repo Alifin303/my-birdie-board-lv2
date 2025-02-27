@@ -42,7 +42,7 @@ export interface CourseDetail {
 // RapidAPI key for Golf Course Finder API
 const RAPID_API_KEY = '12ed9a1bcemsh31a6ac7723dd5e3p17afabjsn0655c3579cfc';
 
-// API configuration
+// Updated API configuration
 const API_CONFIG = {
   baseUrl: 'https://golf-course-finder.p.rapidapi.com',
   headers: {
@@ -60,8 +60,9 @@ export const searchCourses = async (query: string): Promise<GolfCourse[]> => {
   try {
     console.log(`Searching for courses with query: ${query}`);
     
+    // Updated endpoint (check RapidAPI docs for the correct endpoint)
     const response = await fetch(
-      `${API_CONFIG.baseUrl}/courses?name=${encodeURIComponent(query)}&radius=100`,
+      `${API_CONFIG.baseUrl}/course/search?name=${encodeURIComponent(query)}`,
       { headers: API_CONFIG.headers }
     );
     
@@ -70,16 +71,16 @@ export const searchCourses = async (query: string): Promise<GolfCourse[]> => {
     }
     
     const data = await response.json();
+    console.log("API response:", data);
     
     // Map API response to our GolfCourse interface
-    // Note: Adjust this mapping based on the actual API response structure
-    const courses: GolfCourse[] = data.courses.map((course: any) => ({
+    const courses: GolfCourse[] = data.courses?.map((course: any) => ({
       id: course.id.toString(),
       name: course.name,
       city: course.city || '',
       state: course.state || '',
       country: course.country || 'USA'
-    }));
+    })) || [];
     
     return courses;
   } catch (error) {
@@ -108,9 +109,9 @@ export const getCourseDetails = async (courseId: string): Promise<CourseDetail |
     }
     
     const data = await response.json();
+    console.log("Course details API response:", data);
     
     // Map API response to our CourseDetail interface
-    // Note: Adjust this mapping based on the actual API response structure
     const courseDetail: CourseDetail = {
       id: data.course.id.toString(),
       name: data.course.name,
@@ -153,7 +154,7 @@ export const getCourseDetails = async (courseId: string): Promise<CourseDetail |
     return courseDetail;
   } catch (error) {
     console.error('Golf course details error:', error);
-    // Return null on error
+    // Return null on error, which will trigger mock data generation
     return null;
   }
 };
