@@ -1,10 +1,13 @@
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { SignUpDialog } from "@/components/SignUpDialog";
 import { LoginDialog } from "@/components/LoginDialog";
 
 const About = () => {
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+
   return (
     <div 
       className="min-h-screen bg-cover bg-center bg-fixed bg-no-repeat relative"
@@ -13,7 +16,14 @@ const About = () => {
       }}
     >
       <div className="absolute top-4 right-4">
-        <LoginDialog />
+        <Button 
+          variant="ghost" 
+          className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all"
+          onClick={() => setShowLoginDialog(true)}
+        >
+          Log In
+        </Button>
+        <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
       </div>
       <div className="container max-w-4xl mx-auto px-4 py-16">
         <Link to="/" className="text-white/80 hover:text-white mb-8 inline-block">

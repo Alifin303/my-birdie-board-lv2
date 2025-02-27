@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from './ui/button';
-import { HelpCircle, Trophy, ArrowRight, Calendar, Golf } from 'lucide-react';
+import { HelpCircle, Trophy, ArrowRight, Calendar, Compass } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SignUpDialog } from './SignUpDialog';
 import { Card, CardContent } from './ui/card';
@@ -67,7 +67,7 @@ export const MainContent = () => {
         <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300">
           <CardContent className="p-6 flex flex-col">
             <div className="bg-accent/20 rounded-full p-3 w-fit mb-4">
-              <Trophy className="h-8 w-8 text-white" />
+              <Compass className="h-8 w-8 text-white" />
             </div>
             <h3 className="text-xl font-bold text-white mb-2">Join Competitions</h3>
             <p className="text-white/80 mb-4">Compete with friends or join global leaderboards to test your skills against golfers worldwide.</p>
