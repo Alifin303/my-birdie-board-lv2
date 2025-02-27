@@ -358,7 +358,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     if (selectedCourse) {
       setSelectedCourse({
         ...selectedCourse,
-        holes: filteredHoles
+        holes: allHolesData // Keep all holes in the course object but display only selected ones
       });
     }
   };
@@ -414,6 +414,8 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       // Convert API response to the format expected by the component
       const simplifiedCourseDetail = convertToSimplifiedCourseDetail(apiCourseDetail);
       setSelectedCourse(simplifiedCourseDetail);
+      
+      console.log("Converted course detail:", simplifiedCourseDetail);
       
       // Set default tee if available
       if (simplifiedCourseDetail.tees && simplifiedCourseDetail.tees.length > 0) {
@@ -674,24 +676,8 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   const renderHorizontalScorecard = () => {
     if (!selectedCourse) return null;
 
-    // Group scores based on selection
-    const scoresToRender = [...scores];
-
-    // Determine if we're showing front nine, back nine, or all holes
-    let frontNine: typeof scores = [];
-    let backNine: typeof scores = [];
-
-    if (holeSelection === 'front9') {
-      frontNine = scoresToRender;
-      backNine = [];
-    } else if (holeSelection === 'back9') {
-      frontNine = [];
-      backNine = scoresToRender;
-    } else {
-      // For 'all', divide scores into front and back nine
-      frontNine = scoresToRender.slice(0, 9);
-      backNine = scoresToRender.slice(9, 18);
-    }
+    // Get scores based on hole selection
+    let scoresToRender = [...scores];
 
     return (
       <div className="space-y-6">
@@ -746,52 +732,56 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         </div>
 
         <div className="space-y-8">
-          {/* Front Nine - Only render if we have front nine data */}
-          {frontNine.length > 0 && (
+          {/* Only render the scorecard table if we have scores */}
+          {scoresToRender.length > 0 && (
             <div className="border rounded-md overflow-x-auto">
               <table className="w-full">
                 <thead className="border-b">
                   <tr>
-                    <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-left">Front</th>
-                    {frontNine.map(score => (
+                    <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-left">
+                      {holeSelection === 'back9' ? 'Back' : 'Front'}
+                    </th>
+                    {scoresToRender.map(score => (
                       <th key={`hole-${score.hole}`} className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">
                         {score.hole}
                       </th>
                     ))}
-                    <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">Out</th>
+                    <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">
+                      {holeSelection === 'back9' ? 'In' : 'Out'}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-b">
                     <td className="text-sm font-medium text-muted-foreground px-2 py-2">Par</td>
-                    {frontNine.map(score => (
+                    {scoresToRender.map(score => (
                       <td key={`par-${score.hole}`} className="text-sm text-center px-2 py-2">
                         {score.par}
                       </td>
                     ))}
                     <td className="text-sm font-medium px-2 py-2 text-center">
-                      {frontNine.reduce((sum, s) => sum + s.par, 0)}
+                      {scoresToRender.reduce((sum, s) => sum + s.par, 0)}
                     </td>
                   </tr>
                   {/* Yardage row - only show if we have yards data */}
-                  {frontNine.some(score => score.yards) && (
+                  {scoresToRender.some(score => score.yards) && (
                     <tr className="border-b">
                       <td className="text-sm font-medium text-muted-foreground px-2 py-2">Yards</td>
-                      {frontNine.map(score => (
+                      {scoresToRender.map(score => (
                         <td key={`yards-${score.hole}`} className="text-sm text-center px-2 py-2">
                           {score.yards || '-'}
                         </td>
                       ))}
                       <td className="text-sm font-medium px-2 py-2 text-center">
-                        {frontNine.reduce((sum, s) => sum + (s.yards || 0), 0)}
+                        {scoresToRender.reduce((sum, s) => sum + (s.yards || 0), 0)}
                       </td>
                     </tr>
                   )}
                   {/* Handicap row - only show if we have handicap data */}
-                  {frontNine.some(score => score.handicap) && (
+                  {scoresToRender.some(score => score.handicap) && (
                     <tr className="border-b">
                       <td className="text-sm font-medium text-muted-foreground px-2 py-2">HCP</td>
-                      {frontNine.map(score => (
+                      {scoresToRender.map(score => (
                         <td key={`handicap-${score.hole}`} className="text-sm text-center px-2 py-2">
                           {score.handicap || '-'}
                         </td>
@@ -803,7 +793,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                   )}
                   <tr className="border-b">
                     <td className="text-sm font-medium text-muted-foreground px-2 py-2">Strokes</td>
-                    {frontNine.map((score, index) => (
+                    {scoresToRender.map((score, index) => (
                       <td key={`strokes-${score.hole}`} className="text-center px-2 py-2">
                         <Input
                           type="number"
@@ -816,12 +806,12 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                       </td>
                     ))}
                     <td className="text-sm font-medium px-2 py-2 text-center">
-                      {frontNine.reduce((sum, s) => sum + (s.strokes || 0), 0)}
+                      {scoresToRender.reduce((sum, s) => sum + (s.strokes || 0), 0)}
                     </td>
                   </tr>
                   <tr>
                     <td className="text-sm font-medium text-muted-foreground px-2 py-2">Putts (optional)</td>
-                    {frontNine.map((score, index) => (
+                    {scoresToRender.map((score, index) => (
                       <td key={`putts-${score.hole}`} className="text-center px-2 py-2">
                         <Input
                           type="number"
@@ -834,111 +824,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                       </td>
                     ))}
                     <td className="text-sm font-medium px-2 py-2 text-center">
-                      {frontNine.reduce((sum, s) => sum + (s.putts || 0), 0)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* Back Nine - Only render if we have back nine data */}
-          {backNine.length > 0 && (
-            <div className="border rounded-md overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b">
-                  <tr>
-                    <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-left">Back</th>
-                    {backNine.map(score => (
-                      <th key={`hole-${score.hole}`} className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">
-                        {score.hole}
-                      </th>
-                    ))}
-                    <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">In</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b">
-                    <td className="text-sm font-medium text-muted-foreground px-2 py-2">Par</td>
-                    {backNine.map(score => (
-                      <td key={`par-${score.hole}`} className="text-sm text-center px-2 py-2">
-                        {score.par}
-                      </td>
-                    ))}
-                    <td className="text-sm font-medium px-2 py-2 text-center">
-                      {backNine.reduce((sum, s) => sum + s.par, 0)}
-                    </td>
-                  </tr>
-                  {/* Yardage row - only show if we have yards data */}
-                  {backNine.some(score => score.yards) && (
-                    <tr className="border-b">
-                      <td className="text-sm font-medium text-muted-foreground px-2 py-2">Yards</td>
-                      {backNine.map(score => (
-                        <td key={`yards-${score.hole}`} className="text-sm text-center px-2 py-2">
-                          {score.yards || '-'}
-                        </td>
-                      ))}
-                      <td className="text-sm font-medium px-2 py-2 text-center">
-                        {backNine.reduce((sum, s) => sum + (s.yards || 0), 0)}
-                      </td>
-                    </tr>
-                  )}
-                  {/* Handicap row - only show if we have handicap data */}
-                  {backNine.some(score => score.handicap) && (
-                    <tr className="border-b">
-                      <td className="text-sm font-medium text-muted-foreground px-2 py-2">HCP</td>
-                      {backNine.map(score => (
-                        <td key={`handicap-${score.hole}`} className="text-sm text-center px-2 py-2">
-                          {score.handicap || '-'}
-                        </td>
-                      ))}
-                      <td className="text-sm font-medium px-2 py-2 text-center">
-                        -
-                      </td>
-                    </tr>
-                  )}
-                  <tr className="border-b">
-                    <td className="text-sm font-medium text-muted-foreground px-2 py-2">Strokes</td>
-                    {backNine.map((score, index) => {
-                      // Calculate the actual index in the scores array based on hole selection
-                      const scoreIndex = holeSelection === 'back9' ? index : index + 9;
-                      return (
-                        <td key={`strokes-${score.hole}`} className="text-center px-2 py-2">
-                          <Input
-                            type="number"
-                            min="1"
-                            value={score.strokes || ""}
-                            onChange={(e) => handleScoreChange(scoreIndex, 'strokes', e.target.value)}
-                            className="w-12 h-8 text-center"
-                            required
-                          />
-                        </td>
-                      );
-                    })}
-                    <td className="text-sm font-medium px-2 py-2 text-center">
-                      {backNine.reduce((sum, s) => sum + (s.strokes || 0), 0)}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-sm font-medium text-muted-foreground px-2 py-2">Putts (optional)</td>
-                    {backNine.map((score, index) => {
-                      // Calculate the actual index in the scores array based on hole selection
-                      const scoreIndex = holeSelection === 'back9' ? index : index + 9;
-                      return (
-                        <td key={`putts-${score.hole}`} className="text-center px-2 py-2">
-                          <Input
-                            type="number"
-                            min="0"
-                            value={score.putts !== undefined ? score.putts : ""}
-                            onChange={(e) => handleScoreChange(scoreIndex, 'putts', e.target.value)}
-                            className="w-12 h-8 text-center"
-                            placeholder="-"
-                          />
-                        </td>
-                      );
-                    })}
-                    <td className="text-sm font-medium px-2 py-2 text-center">
-                      {backNine.reduce((sum, s) => sum + (s.putts || 0), 0)}
+                      {scoresToRender.reduce((sum, s) => sum + (s.putts || 0), 0)}
                     </td>
                   </tr>
                 </tbody>
