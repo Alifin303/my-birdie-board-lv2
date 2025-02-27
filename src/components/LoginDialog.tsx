@@ -85,8 +85,12 @@ export function LoginDialog() {
 
     try {
       setIsLoading(true);
+      
+      // Get the current domain
+      const currentDomain = window.location.origin;
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${currentDomain}/reset-password`,
       });
 
       if (error) {
@@ -123,11 +127,15 @@ export function LoginDialog() {
 
     try {
       setIsLoading(true);
+      
+      // Get the current domain
+      const currentDomain = window.location.origin;
+      
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email: email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm`,
+          emailRedirectTo: `${currentDomain}/auth/confirm`,
         }
       });
 

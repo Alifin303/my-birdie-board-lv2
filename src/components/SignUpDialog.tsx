@@ -42,6 +42,10 @@ export function SignUpDialog() {
   const onSubmit = async (data: SignUpFormData) => {
     try {
       setIsLoading(true);
+      
+      // Get the current domain rather than hardcoding localhost:3000
+      const currentDomain = window.location.origin;
+      
       const { error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
@@ -51,7 +55,7 @@ export function SignUpDialog() {
             first_name: data.firstName,
             last_name: data.lastName,
           },
-          emailRedirectTo: `${window.location.origin}/auth/confirm`,
+          emailRedirectTo: `${currentDomain}/auth/confirm`,
         },
       });
 
