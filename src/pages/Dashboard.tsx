@@ -1286,14 +1286,16 @@ const Dashboard = () => {
       
       {selectedCourse ? renderCourseDetail() : renderDashboard()}
       
-      {/* Add Round Modal */}
-      <AddRoundModal 
-        open={addRoundModalOpen} 
-        onOpenChange={(open) => {
-          console.log("Modal open state changing to:", open);
-          setAddRoundModalOpen(open);
-        }} 
-      />
+      {/* Add Round Modal - Fixed positioning */}
+      {addRoundModalOpen && (
+        <AddRoundModal 
+          open={addRoundModalOpen} 
+          onOpenChange={(open) => {
+            console.log("Modal open state changing to:", open);
+            setAddRoundModalOpen(open);
+          }} 
+        />
+      )}
     </div>
   );
 };
