@@ -1,4 +1,4 @@
-<lov-code>
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -738,6 +738,7 @@ const Dashboard = () => {
       <div className="animate-fade-in">
         <div className="flex items-center mb-6">
           <Button variant="outline" onClick={handleBackClick} className="mr-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
           <h2 className="text-2xl font-bold">{selectedCourse.name}</h2>
@@ -806,7 +807,7 @@ const Dashboard = () => {
     );
   };
   
-  // Modified renderDashboard function to replace Golf icon with Compass
+  // Render the main dashboard view
   const renderDashboard = () => {
     if (isLoading || !userData) {
       return <div className="flex items-center justify-center h-screen">Loading user data...</div>;
@@ -824,7 +825,6 @@ const Dashboard = () => {
     // Get handicap from user data
     const handicap = userData?.handicap || 0;
 
-    // Just replace the Golf icon with Compass in the empty state
     return (
       <div className="animate-fade-in">
         <h1 className="text-3xl font-bold mb-2">{userData.firstName} {userData.lastName}'s Clubhouse</h1>
@@ -966,4 +966,116 @@ const Dashboard = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead onClick={() => request
+                  <TableHead onClick={() => requestSort('name')} className="cursor-pointer">
+                    <div className="flex items-center">
+                      Course Name
+                      {getSortDirectionIcon('name')}
+                    </div>
+                  </TableHead>
+                  <TableHead onClick={() => requestSort('roundsPlayed')} className="text-right cursor-pointer">
+                    <div className="flex items-center justify-end">
+                      Rounds Played
+                      {getSortDirectionIcon('roundsPlayed')}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    onClick={() => requestSort(viewMode === "gross" ? 'bestGrossScore' : 'bestNetScore')} 
+                    className="text-right cursor-pointer"
+                  >
+                    <div className="flex items-center justify-end">
+                      Best {viewMode === "gross" ? "Gross" : "Net"}
+                      {getSortDirectionIcon(viewMode === "gross" ? 'bestGrossScore' : 'bestNetScore')}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    onClick={() => requestSort(viewMode === "gross" ? 'bestToParGross' : 'bestToParNet')} 
+                    className="text-right cursor-pointer"
+                  >
+                    <div className="flex items-center justify-end">
+                      To Par ({viewMode === "gross" ? "Gross" : "Net"})
+                      {getSortDirectionIcon(viewMode === "gross" ? 'bestToParGross' : 'bestToParNet')}
+                    </div>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {courses.map((course) => (
+                  <TableRow key={course.id} className="cursor-pointer hover:bg-muted/60" onClick={() => handleCourseClick(course)}>
+                    <TableCell className="font-medium text-primary">
+                      {course.name}
+                    </TableCell>
+                    <TableCell className="text-right">{course.roundsPlayed}</TableCell>
+                    <TableCell className="text-right">
+                      {viewMode === "gross" ? course.bestGrossScore : course.bestNetScore}
+                    </TableCell>
+                    <TableCell 
+                      className={`text-right ${
+                        (viewMode === "gross" ? course.bestToParGross : course.bestToParNet) <= 0 
+                        ? "text-green-500" 
+                        : "text-red-500"
+                      }`}
+                    >
+                      {formatParScore(viewMode === "gross" ? course.bestToParGross : course.bestToParNet)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="container mx-auto py-8 px-4">
+      {/* User Account Menu */}
+      <div className="absolute top-4 right-4 z-10">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
+              <User className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <Dialog>
+              <DialogTrigger asChild>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile Settings</span>
+                </DropdownMenuItem>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Profile Settings</DialogTitle>
+                  <DialogDescription>
+                    Update your profile information
+                  </DialogDescription>
+                </DialogHeader>
+                {renderProfileContent()}
+              </DialogContent>
+            </Dialog>
+            
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Logout</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      
+      {selectedCourse ? renderCourseDetail() : renderDashboard()}
+      
+      {/* Add Round Modal */}
+      <AddRoundModal 
+        open={addRoundModalOpen} 
+        onOpenChange={(open) => {
+          console.log("Modal open state changing to:", open);
+          setAddRoundModalOpen(open);
+        }} 
+      />
+    </div>
+  );
+};
+
+export default Dashboard;
