@@ -13,13 +13,13 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     flowType: 'pkce',
     autoRefreshToken: true,
     persistSession: true,
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined
   },
   global: {
     headers: {
       'x-application-name': 'birdieboard'
     }
   },
-  // Correctly configuring redirectUrl at the component level when using auth methods
 });
 
 // Export a function to get the site URL that can be used across the app
