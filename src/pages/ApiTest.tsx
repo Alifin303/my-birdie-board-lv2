@@ -82,13 +82,19 @@ const ApiTest = () => {
       diagInfo.push(`Search query: "${searchQuery}"`);
       diagInfo.push(`Time: ${new Date().toISOString()}`);
       
-      // Direct API call to see raw response
-      const requestUrl = `https://golfcourseapi.com/api/v1/courses?search=${encodeURIComponent(searchQuery)}`;
+      // Direct API call with correct endpoint
+      const searchParams = new URLSearchParams({
+        q: searchQuery.trim(),
+        limit: '20'
+      });
+      
+      const requestUrl = `https://api.golfcourseapi.com/v1/search/courses?${searchParams}`;
       diagInfo.push(`Request URL: ${requestUrl}`);
       
       const headers = {
         'Authorization': 'Key 7GG4N6R5NOXNHW7H5A7EQVGL2U',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       };
       diagInfo.push(`Request headers: ${JSON.stringify(headers)}`);
       
@@ -110,30 +116,36 @@ const ApiTest = () => {
       
       const responseText = await response.text();
       diagInfo.push(`Response body length: ${responseText.length} bytes`);
+      diagInfo.push(`Raw response: ${responseText}`);
       
       setDiagnosticInfo(diagInfo.join('\n'));
       
       try {
-        // Try to parse as JSON for nice formatting
         const jsonResponse = JSON.parse(responseText);
         setRawResponse(JSON.stringify(jsonResponse, null, 2));
         
-        // Log useful information about the response
-        if (jsonResponse.data && Array.isArray(jsonResponse.data)) {
-          diagInfo.push(`Found ${jsonResponse.data.length} courses in response`);
+        if (jsonResponse.courses && Array.isArray(jsonResponse.courses)) {
+          diagInfo.push(`Found ${jsonResponse.courses.length} courses in response`);
         } else {
           diagInfo.push(`Response doesn't contain an array of courses`);
         }
-      } catch {
-        // If it's not JSON, just use the text
+      } catch (parseError) {
         setRawResponse(responseText);
-        diagInfo.push(`Response is not valid JSON`);
+        diagInfo.push(`Response is not valid JSON: ${parseError.message}`);
       }
       
       setDiagnosticInfo(diagInfo.join('\n'));
       
       if (!response.ok) {
-        setError(`API Error: ${response.status} ${response.statusText}`);
+        if (response.status === 404) {
+          setError(`No courses found matching "${searchQuery}"`);
+        } else if (response.status === 401) {
+          setError('Invalid or expired API key. Please check your authorization.');
+        } else if (response.status === 429) {
+          setError('API rate limit exceeded. Please try again later.');
+        } else {
+          setError(`API Error: ${response.status} ${response.statusText}`);
+        }
       }
     } catch (err: any) {
       console.error("Raw request error:", err);

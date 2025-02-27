@@ -1,4 +1,3 @@
-
 import { toast } from "@/hooks/use-toast";
 
 // Types for Golf Course API responses
@@ -39,14 +38,15 @@ export interface CourseDetail {
   tees: CourseTee[];
 }
 
-// API configuration for golfcourseapi.com - FIXED API ENDPOINT
+// API configuration for golfcourseapi.com - FIXED ENDPOINT
 const API_CONFIG = {
-  baseUrl: 'https://api.golfcourseapi.com/api/v1',
-  searchEndpoint: '/courses',
+  baseUrl: 'https://api.golfcourseapi.com/v1',  // Removed extra 'api' from path
+  searchEndpoint: '/search/courses',  // Changed to correct search endpoint
   courseDetailsEndpoint: '/courses',
   headers: {
     'Authorization': 'Key 7GG4N6R5NOXNHW7H5A7EQVGL2U',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'  // Added Accept header
   }
 };
 
@@ -95,11 +95,21 @@ const MOCK_COURSES = [
  * @returns Array of matching golf courses
  */
 export const searchCourses = async (query: string): Promise<GolfCourse[]> => {
+  if (!query || query.trim().length < 3) {
+    console.warn('Search query must be at least 3 characters');
+    return [];
+  }
+
   try {
     console.log(`Searching for courses with query: ${query}`);
     
-    // Log the complete request details for debugging
-    const requestUrl = `${API_CONFIG.baseUrl}${API_CONFIG.searchEndpoint}?search=${encodeURIComponent(query)}`;
+    // Build search URL with proper encoding
+    const searchParams = new URLSearchParams({
+      q: query.trim(),
+      limit: '20'  // Added limit parameter
+    });
+    
+    const requestUrl = `${API_CONFIG.baseUrl}${API_CONFIG.searchEndpoint}?${searchParams}`;
     console.log('API Request URL:', requestUrl);
     console.log('API Request Headers:', API_CONFIG.headers);
 
@@ -115,80 +125,72 @@ export const searchCourses = async (query: string): Promise<GolfCourse[]> => {
       }
     );
     
-    // Log the response status and headers for debugging
+    // Log detailed response information
     console.log('API Response Status:', response.status);
     console.log('API Response Headers:', Object.fromEntries(response.headers.entries()));
     
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`API Error (${response.status}): ${errorText}`);
-      
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    // Handle specific HTTP status codes
+    if (response.status === 404) {
+      console.warn('No courses found for the search term');
+      return [];
     }
     
-    const responseText = await response.text();
-    console.log('API Response Body:', responseText);
+    if (response.status === 401) {
+      throw new Error('Invalid or expired API key. Please check your authorization.');
+    }
     
-    // Try to parse the response as JSON
+    if (response.status === 429) {
+      throw new Error('API rate limit exceeded. Please try again later.');
+    }
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`API Error (${response.status}):`, errorText);
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    }
+
+    // Parse and validate response
+    const responseText = await response.text();
+    console.log('API Raw Response:', responseText);
+    
     let data;
     try {
       data = JSON.parse(responseText);
-      console.log("Parsed API response data:", data);
+      console.log('Parsed API Response:', data);
     } catch (parseError) {
-      console.error("Failed to parse API response as JSON:", parseError);
-      throw new Error("Invalid API response format");
+      console.error('Failed to parse API response:', parseError);
+      throw new Error('Invalid API response format');
     }
     
-    // Map API response to our GolfCourse interface
-    if (!data.data || !Array.isArray(data.data)) {
-      console.warn("Unexpected API response format:", data);
-      throw new Error("API response missing expected data array");
+    // Validate response structure
+    if (!data.courses || !Array.isArray(data.courses)) {
+      console.warn('Unexpected API response format:', data);
+      throw new Error('API response missing courses array');
     }
     
-    const courses: GolfCourse[] = data.data.map((course: any) => ({
-      id: course.id ? course.id.toString() : "",
+    // Map API response to our interface
+    const courses: GolfCourse[] = data.courses.map((course: any) => ({
+      id: course.id?.toString() || "",
       name: course.name || "Unknown Course",
       city: course.city || '',
       state: course.state || '',
       country: course.country || 'USA'
     }));
     
-    // If no courses found, provide specific feedback
     if (courses.length === 0) {
       console.log(`No courses found matching "${query}"`);
-      toast({
-        title: "No Results",
-        description: `No golf courses found matching "${query}". Try a different search term.`,
-        variant: "default",
-      });
     }
     
     return courses;
   } catch (error) {
     console.error('Golf course search error:', error);
     
-    // Log specific error details for debugging
     if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-      console.error('Network error - This may be a CORS issue or the API may be unavailable');
-      toast({
-        title: "Connection Error",
-        description: "Unable to connect to the golf course database. Using sample data instead.",
-        variant: "destructive",
-      });
-      
-      // Return mock data when API is unavailable due to network issues
-      return getMockSearchResults(query);
-    } else {
-      // For other errors, provide a more specific message
-      toast({
-        title: "API Error",
-        description: `Error searching for golf courses: ${error instanceof Error ? error.message : 'Unknown error'}. Using sample data instead.`,
-        variant: "destructive",
-      });
-      
-      // Return mock data for other API errors
-      return getMockSearchResults(query);
+      console.error('Network error - API may be unreachable');
+      throw new Error('Unable to connect to the golf course database. Please check your internet connection.');
     }
+    
+    throw error; // Re-throw the error for the component to handle
   }
 };
 
