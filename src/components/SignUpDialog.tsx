@@ -9,7 +9,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, getSiteUrl } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
 const signUpSchema = z.object({
@@ -43,8 +43,8 @@ export function SignUpDialog() {
     try {
       setIsLoading(true);
       
-      // Get the current domain rather than hardcoding localhost:3000
-      const currentDomain = window.location.origin;
+      // Get site URL dynamically
+      const siteUrl = getSiteUrl();
       
       const { error } = await supabase.auth.signUp({
         email: data.email,
@@ -55,7 +55,8 @@ export function SignUpDialog() {
             first_name: data.firstName,
             last_name: data.lastName,
           },
-          emailRedirectTo: `${currentDomain}/auth/confirm`,
+          // Use /auth/callback for a consistent redirect path
+          emailRedirectTo: `${siteUrl}/auth/callback`,
         },
       });
 

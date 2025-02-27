@@ -21,3 +21,14 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
   // Correctly configuring redirectUrl at the component level when using auth methods
 });
+
+// Export a function to get the site URL that can be used across the app
+export const getSiteUrl = () => {
+  // For server-side code (during build time), provide a fallback
+  if (typeof window === 'undefined') {
+    return process.env.SITE_URL || 'https://your-production-url.com';
+  }
+  
+  // For client-side code, use the current origin
+  return window.location.origin;
+};

@@ -6,6 +6,7 @@ import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuthConfirm } from "./pages/AuthConfirm";
+import AuthRedirect from "./pages/AuthRedirect";
 
 function App() {
   return (
@@ -13,6 +14,12 @@ function App() {
       <Route path="/" element={<Index />} />
       <Route path="/about" element={<About />} />
       <Route path="/auth/confirm" element={<AuthConfirm />} />
+      {/* Add catchall route for Supabase auth redirects */}
+      <Route path="/auth/callback" element={<AuthRedirect />} />
+      {/* Add root level route to catch redirects to / with code param */}
+      <Route path="/" element={<AuthRedirect />}>
+        <Route path="?code=*" element={<AuthRedirect />} />
+      </Route>
       <Route path="/dashboard" element={
         <ProtectedRoute>
           <Dashboard />

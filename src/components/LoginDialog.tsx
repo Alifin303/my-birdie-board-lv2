@@ -11,7 +11,7 @@ import { LogIn } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SignUpDialog } from "./SignUpDialog";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, getSiteUrl } from "@/integrations/supabase/client";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -86,11 +86,11 @@ export function LoginDialog() {
     try {
       setIsLoading(true);
       
-      // Get the current domain
-      const currentDomain = window.location.origin;
+      // Get the site URL dynamically
+      const siteUrl = getSiteUrl();
       
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${currentDomain}/reset-password`,
+        redirectTo: `${siteUrl}/auth/callback`,
       });
 
       if (error) {
@@ -128,14 +128,14 @@ export function LoginDialog() {
     try {
       setIsLoading(true);
       
-      // Get the current domain
-      const currentDomain = window.location.origin;
+      // Get the site URL dynamically
+      const siteUrl = getSiteUrl();
       
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email: email,
         options: {
-          emailRedirectTo: `${currentDomain}/auth/confirm`,
+          emailRedirectTo: `${siteUrl}/auth/callback`,
         }
       });
 
