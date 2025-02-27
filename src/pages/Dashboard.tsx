@@ -17,9 +17,9 @@ const Dashboard = () => {
 
   // Initial courses data
   const initialCourses = [
-    { id: 1, name: "Pine Valley Golf Club", roundsPlayed: 8, bestGrossScore: 75, bestNetScore: 68, bestToPar: 3 },
-    { id: 2, name: "Augusta National Golf Club", roundsPlayed: 6, bestGrossScore: 78, bestNetScore: 71, bestToPar: 6 },
-    { id: 3, name: "St Andrews Links", roundsPlayed: 10, bestGrossScore: 72, bestNetScore: 65, bestToPar: -2 },
+    { id: 1, name: "Pine Valley Golf Club", roundsPlayed: 8, bestGrossScore: 75, bestNetScore: 68, bestToPar: 3, bestToParNet: -4, bestToParGross: 3 },
+    { id: 2, name: "Augusta National Golf Club", roundsPlayed: 6, bestGrossScore: 78, bestNetScore: 71, bestToPar: 6, bestToParNet: -1, bestToParGross: 6 },
+    { id: 3, name: "St Andrews Links", roundsPlayed: 10, bestGrossScore: 72, bestNetScore: 65, bestToPar: -2, bestToParNet: -7, bestToParGross: -2 },
   ];
 
   // State for courses and sorting
@@ -160,10 +160,16 @@ const Dashboard = () => {
                   {getSortDirectionIcon('bestNetScore')}
                 </div>
               </TableHead>
-              <TableHead onClick={() => requestSort('bestToPar')} className="text-right cursor-pointer">
+              <TableHead onClick={() => requestSort('bestToParGross')} className="text-right cursor-pointer">
                 <div className="flex items-center justify-end">
-                  To Par
-                  {getSortDirectionIcon('bestToPar')}
+                  To Par (Gross)
+                  {getSortDirectionIcon('bestToParGross')}
+                </div>
+              </TableHead>
+              <TableHead onClick={() => requestSort('bestToParNet')} className="text-right cursor-pointer">
+                <div className="flex items-center justify-end">
+                  To Par (Net)
+                  {getSortDirectionIcon('bestToParNet')}
                 </div>
               </TableHead>
             </TableRow>
@@ -175,8 +181,11 @@ const Dashboard = () => {
                 <TableCell className="text-right">{course.roundsPlayed}</TableCell>
                 <TableCell className="text-right">{course.bestGrossScore}</TableCell>
                 <TableCell className="text-right">{course.bestNetScore}</TableCell>
-                <TableCell className={`text-right ${course.bestToPar <= 0 ? "text-green-500" : "text-red-500"}`}>
-                  {course.bestToPar <= 0 ? course.bestToPar : `+${course.bestToPar}`}
+                <TableCell className={`text-right ${course.bestToParGross <= 0 ? "text-green-500" : "text-red-500"}`}>
+                  {course.bestToParGross <= 0 ? course.bestToParGross : `+${course.bestToParGross}`}
+                </TableCell>
+                <TableCell className={`text-right ${course.bestToParNet <= 0 ? "text-green-500" : "text-red-500"}`}>
+                  {course.bestToParNet <= 0 ? course.bestToParNet : `+${course.bestToParNet}`}
                 </TableCell>
               </TableRow>
             ))}
