@@ -26,15 +26,19 @@ import { Input } from "@/components/ui/input";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AddRoundModal } from "@/components/AddRoundModal";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [userData, setUserData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [addRoundModalOpen, setAddRoundModalOpen] = useState(false);
+  const queryClient = useQueryClient();
   
   // Get user data on mount
   useEffect(() => {
@@ -113,77 +117,172 @@ const Dashboard = () => {
       subscription.unsubscribe();
     };
   }, [navigate, toast]);
-  
-  // Mock golf data - would come from your backend in a real application
-  const handicap = userData?.handicap || 0;
-  
-  // This would come from your backend in a real application
-  const stats = {
-    roundsPlayed: 24,
-    bestGrossScore: 72,
-    bestNetScore: 65,
-    bestToParGross: 1,
-    bestToParNet: -2,
-  };
 
-  // Initial courses data with dates for the detail view
-  const initialCourses = [
-    { 
-      id: 1, 
-      name: "Pine Valley Golf Club", 
-      roundsPlayed: 8, 
-      bestGrossScore: 75, 
-      bestNetScore: 68, 
-      bestToParGross: 3, 
-      bestToParNet: -4,
-      rounds: [
-        { date: "2023-08-15", grossScore: 75, netScore: 68, toParGross: 3, toParNet: -4 },
-        { date: "2023-07-22", grossScore: 78, netScore: 71, toParGross: 6, toParNet: -1 },
-        { date: "2023-06-10", grossScore: 79, netScore: 72, toParGross: 7, toParNet: 0 }
-      ]
+  // Fetch user stats from database
+  const { data: statsData, isLoading: statsLoading } = useQuery({
+    queryKey: ['userStats', userData?.id],
+    queryFn: async () => {
+      if (!userData?.id) return null;
+      
+      // Count total rounds played
+      const { data: roundsCount, error: roundsError } = await supabase
+        .from('rounds')
+        .select('id', { count: 'exact' })
+        .eq('user_id', userData.id);
+        
+      if (roundsError) throw roundsError;
+      
+      // Get best gross and net scores
+      const { data: bestScores, error: scoresError } = await supabase
+        .from('rounds')
+        .select('gross_score, net_score, to_par_gross, to_par_net')
+        .eq('user_id', userData.id)
+        .order('gross_score', { ascending: true })
+        .limit(1);
+        
+      if (scoresError) throw scoresError;
+      
+      // Get best to par scores
+      const { data: bestToParGross, error: parGrossError } = await supabase
+        .from('rounds')
+        .select('to_par_gross')
+        .eq('user_id', userData.id)
+        .order('to_par_gross', { ascending: true })
+        .limit(1);
+        
+      if (parGrossError) throw parGrossError;
+      
+      const { data: bestToParNet, error: parNetError } = await supabase
+        .from('rounds')
+        .select('to_par_net')
+        .eq('user_id', userData.id)
+        .order('to_par_net', { ascending: true })
+        .limit(1);
+        
+      if (parNetError) throw parNetError;
+      
+      return {
+        roundsPlayed: roundsCount?.length || 0,
+        bestGrossScore: bestScores?.[0]?.gross_score || 0,
+        bestNetScore: bestScores?.[0]?.net_score || 0,
+        bestToParGross: bestToParGross?.[0]?.to_par_gross || 0,
+        bestToParNet: bestToParNet?.[0]?.to_par_net || 0,
+      };
     },
-    { 
-      id: 2, 
-      name: "Augusta National Golf Club", 
-      roundsPlayed: 6, 
-      bestGrossScore: 78, 
-      bestNetScore: 71, 
-      bestToParGross: 6, 
-      bestToParNet: -1,
-      rounds: [
-        { date: "2023-09-05", grossScore: 78, netScore: 71, toParGross: 6, toParNet: -1 },
-        { date: "2023-08-12", grossScore: 80, netScore: 73, toParGross: 8, toParNet: 1 }
-      ]
+    enabled: !!userData?.id,
+  });
+  
+  // Fetch user's courses from database
+  const { data: coursesData, isLoading: coursesLoading } = useQuery({
+    queryKey: ['userCourses', userData?.id],
+    queryFn: async () => {
+      if (!userData?.id) return [];
+      
+      // First get all the distinct courses the user has played
+      const { data: courseIds, error: courseIdsError } = await supabase
+        .from('rounds')
+        .select('course_id')
+        .eq('user_id', userData.id)
+        .distinct();
+        
+      if (courseIdsError) throw courseIdsError;
+      
+      if (!courseIds.length) return [];
+      
+      // For each course, get stats
+      const coursePromises = courseIds.map(async ({ course_id }) => {
+        // Get course details
+        const { data: course, error: courseError } = await supabase
+          .from('courses')
+          .select('*')
+          .eq('id', course_id)
+          .single();
+          
+        if (courseError) throw courseError;
+        
+        // Count rounds played at this course
+        const { data: roundsCount, error: countError } = await supabase
+          .from('rounds')
+          .select('id', { count: 'exact' })
+          .eq('user_id', userData.id)
+          .eq('course_id', course_id);
+          
+        if (countError) throw countError;
+        
+        // Get best gross score
+        const { data: bestGross, error: grossError } = await supabase
+          .from('rounds')
+          .select('gross_score, to_par_gross')
+          .eq('user_id', userData.id)
+          .eq('course_id', course_id)
+          .order('gross_score', { ascending: true })
+          .limit(1);
+          
+        if (grossError) throw grossError;
+        
+        // Get best net score
+        const { data: bestNet, error: netError } = await supabase
+          .from('rounds')
+          .select('net_score, to_par_net')
+          .eq('user_id', userData.id)
+          .eq('course_id', course_id)
+          .order('net_score', { ascending: true })
+          .limit(1);
+          
+        if (netError) throw netError;
+        
+        // Get all rounds for this course
+        const { data: rounds, error: roundsError } = await supabase
+          .from('rounds')
+          .select('date, gross_score, net_score, to_par_gross, to_par_net')
+          .eq('user_id', userData.id)
+          .eq('course_id', course_id)
+          .order('date', { ascending: false });
+          
+        if (roundsError) throw roundsError;
+        
+        return {
+          id: course_id,
+          name: course.name,
+          roundsPlayed: roundsCount?.length || 0,
+          bestGrossScore: bestGross?.[0]?.gross_score || 0,
+          bestNetScore: bestNet?.[0]?.net_score || 0,
+          bestToParGross: bestGross?.[0]?.to_par_gross || 0,
+          bestToParNet: bestNet?.[0]?.to_par_net || 0,
+          rounds: rounds.map(round => ({
+            date: round.date,
+            grossScore: round.gross_score,
+            netScore: round.net_score,
+            toParGross: round.to_par_gross,
+            toParNet: round.to_par_net
+          }))
+        };
+      });
+      
+      return await Promise.all(coursePromises);
     },
-    { 
-      id: 3, 
-      name: "St Andrews Links", 
-      roundsPlayed: 10, 
-      bestGrossScore: 72, 
-      bestNetScore: 65, 
-      bestToParGross: -2, 
-      bestToParNet: -7,
-      rounds: [
-        { date: "2023-09-20", grossScore: 72, netScore: 65, toParGross: -2, toParNet: -7 },
-        { date: "2023-08-30", grossScore: 74, netScore: 67, toParGross: 0, toParNet: -5 },
-        { date: "2023-07-15", grossScore: 76, netScore: 69, toParGross: 2, toParNet: -3 },
-        { date: "2023-06-22", grossScore: 77, netScore: 70, toParGross: 3, toParNet: -2 }
-      ]
-    },
-  ];
-
+    enabled: !!userData?.id,
+  });
+  
   // State for courses and sorting
-  const [courses, setCourses] = useState(initialCourses);
+  const [courses, setCourses] = useState<any[]>([]);
   const [sortConfig, setSortConfig] = useState<{
     key: string;
     direction: 'ascending' | 'descending';
   } | null>(null);
   
+  // Update courses state when data changes
+  useEffect(() => {
+    if (coursesData) {
+      setCourses(coursesData);
+    }
+  }, [coursesData]);
+  
   // State for view mode: "gross" or "net"
   const [viewMode, setViewMode] = useState<"gross" | "net">("gross");
   
   // State for the selected course (for detail view)
-  const [selectedCourse, setSelectedCourse] = useState<typeof initialCourses[0] | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<any | null>(null);
   
   // State for profile edit mode
   const [profileEditMode, setProfileEditMode] = useState<"password" | "email" | "profile" | null>(null);
@@ -295,7 +394,7 @@ const Dashboard = () => {
   };
   
   // Handle course click to show detail view
-  const handleCourseClick = (course: typeof initialCourses[0]) => {
+  const handleCourseClick = (course: any) => {
     setSelectedCourse(course);
   };
   
@@ -666,7 +765,7 @@ const Dashboard = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {selectedCourse.rounds.map((round, index) => (
+              {selectedCourse.rounds.map((round: any, index: number) => (
                 <TableRow key={index}>
                   <TableCell>{new Date(round.date).toLocaleDateString()}</TableCell>
                   <TableCell className="text-right">
@@ -695,6 +794,18 @@ const Dashboard = () => {
     if (isLoading || !userData) {
       return <div className="flex items-center justify-center h-screen">Loading user data...</div>;
     }
+
+    // Get stats from query data or use placeholders
+    const stats = statsData || {
+      roundsPlayed: 0,
+      bestGrossScore: 0,
+      bestNetScore: 0,
+      bestToParGross: 0,
+      bestToParNet: 0,
+    };
+
+    // Get handicap from user data
+    const handicap = userData?.handicap || 0;
 
     return (
       <div className="animate-fade-in">
@@ -782,7 +893,11 @@ const Dashboard = () => {
 
         {/* Add New Round Button */}
         <div className="mb-8">
-          <Button size="lg" className="gap-2">
+          <Button 
+            size="lg" 
+            className="gap-2"
+            onClick={() => setAddRoundModalOpen(true)}
+          >
             <Plus className="h-5 w-5" />
             Add a new round
           </Button>
@@ -801,66 +916,80 @@ const Dashboard = () => {
         </div>
 
         {/* Courses Table */}
-        <div className="rounded-md border mb-8">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead onClick={() => requestSort('name')} className="cursor-pointer">
-                  <div className="flex items-center">
-                    Course Name
-                    {getSortDirectionIcon('name')}
-                  </div>
-                </TableHead>
-                <TableHead onClick={() => requestSort('roundsPlayed')} className="text-right cursor-pointer">
-                  <div className="flex items-center justify-end">
-                    Rounds Played
-                    {getSortDirectionIcon('roundsPlayed')}
-                  </div>
-                </TableHead>
-                <TableHead 
-                  onClick={() => requestSort(viewMode === "gross" ? 'bestGrossScore' : 'bestNetScore')} 
-                  className="text-right cursor-pointer"
-                >
-                  <div className="flex items-center justify-end">
-                    Best {viewMode === "gross" ? "Gross" : "Net"}
-                    {getSortDirectionIcon(viewMode === "gross" ? 'bestGrossScore' : 'bestNetScore')}
-                  </div>
-                </TableHead>
-                <TableHead 
-                  onClick={() => requestSort(viewMode === "gross" ? 'bestToParGross' : 'bestToParNet')} 
-                  className="text-right cursor-pointer"
-                >
-                  <div className="flex items-center justify-end">
-                    To Par ({viewMode === "gross" ? "Gross" : "Net"})
-                    {getSortDirectionIcon(viewMode === "gross" ? 'bestToParGross' : 'bestToParNet')}
-                  </div>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {courses.map((course) => (
-                <TableRow key={course.id} className="cursor-pointer hover:bg-muted/60" onClick={() => handleCourseClick(course)}>
-                  <TableCell className="font-medium text-primary">
-                    {course.name}
-                  </TableCell>
-                  <TableCell className="text-right">{course.roundsPlayed}</TableCell>
-                  <TableCell className="text-right">
-                    {viewMode === "gross" ? course.bestGrossScore : course.bestNetScore}
-                  </TableCell>
-                  <TableCell 
-                    className={`text-right ${
-                      (viewMode === "gross" ? course.bestToParGross : course.bestToParNet) <= 0 
-                      ? "text-green-500" 
-                      : "text-red-500"
-                    }`}
+        {coursesLoading ? (
+          <div className="flex justify-center items-center p-8">
+            <Activity className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : courses.length === 0 ? (
+          <div className="text-center p-8 border rounded-md bg-muted/10">
+            <p className="text-muted-foreground mb-4">You haven't played any courses yet.</p>
+            <Button onClick={() => setAddRoundModalOpen(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Add your first round
+            </Button>
+          </div>
+        ) : (
+          <div className="rounded-md border mb-8">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead onClick={() => requestSort('name')} className="cursor-pointer">
+                    <div className="flex items-center">
+                      Course Name
+                      {getSortDirectionIcon('name')}
+                    </div>
+                  </TableHead>
+                  <TableHead onClick={() => requestSort('roundsPlayed')} className="text-right cursor-pointer">
+                    <div className="flex items-center justify-end">
+                      Rounds Played
+                      {getSortDirectionIcon('roundsPlayed')}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    onClick={() => requestSort(viewMode === "gross" ? 'bestGrossScore' : 'bestNetScore')} 
+                    className="text-right cursor-pointer"
                   >
-                    {formatParScore(viewMode === "gross" ? course.bestToParGross : course.bestToParNet)}
-                  </TableCell>
+                    <div className="flex items-center justify-end">
+                      Best {viewMode === "gross" ? "Gross" : "Net"}
+                      {getSortDirectionIcon(viewMode === "gross" ? 'bestGrossScore' : 'bestNetScore')}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    onClick={() => requestSort(viewMode === "gross" ? 'bestToParGross' : 'bestToParNet')} 
+                    className="text-right cursor-pointer"
+                  >
+                    <div className="flex items-center justify-end">
+                      To Par ({viewMode === "gross" ? "Gross" : "Net"})
+                      {getSortDirectionIcon(viewMode === "gross" ? 'bestToParGross' : 'bestToParNet')}
+                    </div>
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {courses.map((course) => (
+                  <TableRow key={course.id} className="cursor-pointer hover:bg-muted/60" onClick={() => handleCourseClick(course)}>
+                    <TableCell className="font-medium text-primary">
+                      {course.name}
+                    </TableCell>
+                    <TableCell className="text-right">{course.roundsPlayed}</TableCell>
+                    <TableCell className="text-right">
+                      {viewMode === "gross" ? course.bestGrossScore : course.bestNetScore}
+                    </TableCell>
+                    <TableCell 
+                      className={`text-right ${
+                        (viewMode === "gross" ? course.bestToParGross : course.bestToParNet) <= 0 
+                        ? "text-green-500" 
+                        : "text-red-500"
+                      }`}
+                    >
+                      {formatParScore(viewMode === "gross" ? course.bestToParGross : course.bestToParNet)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </div>
     );
   };
@@ -907,6 +1036,12 @@ const Dashboard = () => {
       </div>
       
       {selectedCourse ? renderCourseDetail() : renderDashboard()}
+      
+      {/* Add Round Modal */}
+      <AddRoundModal 
+        open={addRoundModalOpen} 
+        onOpenChange={setAddRoundModalOpen} 
+      />
     </div>
   );
 };
