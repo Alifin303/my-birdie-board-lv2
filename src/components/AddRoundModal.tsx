@@ -71,18 +71,21 @@ interface CourseDetail {
   tees: CourseTee[];
 }
 
-// Types for the form
-interface RoundFormData {
-  courseId: string;
-  teeId: string;
-  date: string;
-  scores: {
-    hole: number;
-    par: number;
-    strokes: number;
-    putts: number;
-  }[];
-}
+// Form schema
+const formSchema = z.object({
+  courseId: z.string().optional(),
+  teeId: z.string().optional(),
+  scores: z.array(
+    z.object({
+      hole: z.number(),
+      par: z.number(),
+      strokes: z.number().min(1, "Strokes are required"),
+      putts: z.number().min(0, "Putts cannot be negative")
+    })
+  ).optional()
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   console.log("AddRoundModal rendered with open:", open);
@@ -96,9 +99,20 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   const [isLoading, setIsLoading] = useState(false);
   const [scores, setScores] = useState<{ hole: number; par: number; strokes: number; putts: number; }[]>([]);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [currentStep, setCurrentStep] = useState<'search' | 'scorecard'>('search');
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Initialize react-hook-form
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      courseId: '',
+      teeId: '',
+      scores: []
+    }
+  });
 
   // Reset form when modal is closed
   useEffect(() => {
@@ -110,13 +124,15 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       setSelectedTeeId("");
       setScores([]);
       setSearchError(null);
+      setCurrentStep('search');
+      form.reset();
     }
-  }, [open]);
+  }, [open, form]);
 
   // Search for courses as user types
   useEffect(() => {
     const searchCourses = async () => {
-      if (!open || !debouncedSearchQuery || debouncedSearchQuery.length < 3) {
+      if (!open || !debouncedSearchQuery || debouncedSearchQuery.length < 3 || currentStep !== 'search') {
         setSearchResults([]);
         setSearchError(null);
         return;
@@ -160,7 +176,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     };
 
     searchCourses();
-  }, [debouncedSearchQuery, toast, open]);
+  }, [debouncedSearchQuery, toast, open, currentStep]);
 
   // Fetch course details when a course is selected
   const handleCourseSelect = async (courseId: string) => {
@@ -183,10 +199,12 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       console.log("Course details:", courseDetail);
       
       setSelectedCourse(courseDetail);
+      form.setValue('courseId', courseDetail.id);
       
       // Set default tee if available
       if (courseDetail.tees && courseDetail.tees.length > 0) {
         setSelectedTeeId(courseDetail.tees[0].id);
+        form.setValue('teeId', courseDetail.tees[0].id);
       }
 
       // Initialize scores for all holes
@@ -198,10 +216,14 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       }));
       
       setScores(initialScores);
+      form.setValue('scores', initialScores);
       
       // Clear search results
       setSearchResults([]);
       setSearchQuery(courseDetail.name);
+      
+      // Move to scorecard step
+      setCurrentStep('scorecard');
     } catch (error) {
       console.error("Course detail error:", error);
       setSearchError("Failed to load course details. Please try again.");
@@ -218,6 +240,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   // Handle tee selection
   const handleTeeChange = (teeId: string) => {
     setSelectedTeeId(teeId);
+    form.setValue('teeId', teeId);
   };
 
   // Handle score input
@@ -234,6 +257,17 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       };
       return newScores;
     });
+    
+    // Update form values
+    const currentScores = form.getValues('scores') || [];
+    const newScores = [...currentScores];
+    if (newScores[holeIndex]) {
+      newScores[holeIndex] = {
+        ...newScores[holeIndex], 
+        [field]: numValue
+      };
+      form.setValue('scores', newScores);
+    }
   };
 
   // Validate and save the round
@@ -375,75 +409,100 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     onOpenChange(false);
   };
 
+  // Handle back button click when in scorecard step
+  const handleBackToSearch = () => {
+    setCurrentStep('search');
+    setSelectedCourse(null);
+    setSelectedTeeId("");
+    setScores([]);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl" onPointerDownOutside={(e) => e.preventDefault()}>
+      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Add a New Round</DialogTitle>
           <DialogDescription>
-            Search for a golf course, select tees, and enter your scores.
+            {currentStep === 'search' 
+              ? "Search for a golf course, select tees, and enter your scores."
+              : "Enter your scores for each hole."
+            }
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6">
-          {/* Course Search */}
-          <div className="space-y-2">
-            <FormLabel>Search for a Golf Course</FormLabel>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <Search className="h-4 w-4 text-muted-foreground" />
+          {currentStep === 'search' && (
+            <>
+              {/* Course Search */}
+              <div className="space-y-2">
+                <FormLabel>Search for a Golf Course</FormLabel>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <Search className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <Input
+                    type="search"
+                    placeholder="Type to search for a golf course..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                    disabled={isLoading}
+                  />
+                  {isSearching && (
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+                
+                {/* Search Error Message */}
+                {searchError && (
+                  <div className="text-destructive text-sm mt-2">
+                    {searchError}
+                  </div>
+                )}
+                
+                {/* Search Results Dropdown */}
+                {searchResults.length > 0 && (
+                  <div className="border rounded-md shadow-md mt-2 bg-background z-50">
+                    <ul className="py-1 max-h-60 overflow-auto">
+                      {searchResults.map((course) => (
+                        <li 
+                          key={course.id}
+                          className="px-4 py-2 hover:bg-muted cursor-pointer transition-colors"
+                          onClick={() => handleCourseSelect(course.id)}
+                        >
+                          {course.name} - {course.city}, {course.state}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
-              <Input
-                type="search"
-                placeholder="Type to search for a golf course..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-                disabled={isLoading || !!selectedCourse}
-              />
-              {isSearching && (
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              
+              {/* Loading State */}
+              {isLoading && (
+                <div className="flex justify-center items-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <span className="ml-2">Loading course data...</span>
                 </div>
               )}
-            </div>
-            
-            {/* Search Error Message */}
-            {searchError && (
-              <div className="text-destructive text-sm mt-2">
-                {searchError}
-              </div>
-            )}
-            
-            {/* Search Results Dropdown */}
-            {searchResults.length > 0 && !selectedCourse && (
-              <div className="absolute z-10 w-full bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
-                <ul className="py-1">
-                  {searchResults.map((course) => (
-                    <li 
-                      key={course.id}
-                      className="px-4 py-2 hover:bg-muted cursor-pointer"
-                      onClick={() => handleCourseSelect(course.id)}
-                    >
-                      {course.name} - {course.city}, {course.state}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-          
-          {/* Loading State */}
-          {isLoading && (
-            <div className="flex justify-center items-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <span className="ml-2">Loading course data...</span>
-            </div>
+            </>
           )}
           
           {/* Course Details and Score Entry */}
-          {selectedCourse && !isLoading && (
+          {selectedCourse && currentStep === 'scorecard' && !isLoading && (
             <>
+              <div className="mb-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">{selectedCourse.name}</h3>
+                  <Button variant="outline" size="sm" onClick={handleBackToSearch}>
+                    Change Course
+                  </Button>
+                </div>
+                <p className="text-muted-foreground">{selectedCourse.city}, {selectedCourse.state}</p>
+              </div>
+            
               {/* Tee Selection */}
               <div className="space-y-2">
                 <FormLabel>Select Tees</FormLabel>
@@ -466,11 +525,11 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                 <FormLabel>Enter Your Scores</FormLabel>
                 <div className="border rounded-md overflow-auto max-h-96">
                   <Table>
-                    <TableHeader>
+                    <TableHeader className="sticky top-0 bg-background">
                       <TableRow>
                         <TableHead className="w-20">Hole</TableHead>
                         <TableHead className="w-20">Par</TableHead>
-                        <TableHead>Strokes</TableHead>
+                        <TableHead>Strokes*</TableHead>
                         <TableHead>Putts</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -486,6 +545,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                               value={score.strokes || ""}
                               onChange={(e) => handleScoreChange(index, 'strokes', e.target.value)}
                               className="w-20"
+                              required
                             />
                           </TableCell>
                           <TableCell>
@@ -502,6 +562,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                     </TableBody>
                   </Table>
                 </div>
+                <p className="text-xs text-muted-foreground">* Strokes are required for all holes</p>
               </div>
               
               {/* Totals */}
@@ -534,20 +595,23 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
           <Button variant="outline" onClick={handleCloseModal} type="button">
             Cancel
           </Button>
-          <Button 
-            onClick={handleSaveRound} 
-            disabled={isLoading || !selectedCourse || scores.some(score => score.strokes === 0)}
-            type="button"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              "Save Round"
-            )}
-          </Button>
+          
+          {currentStep === 'scorecard' && (
+            <Button 
+              onClick={handleSaveRound} 
+              disabled={isLoading || !selectedCourse || scores.some(score => score.strokes === 0)}
+              type="button"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Round"
+              )}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
