@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User, LogOut, Trophy, Star, ChevronUp, ChevronDown } from "lucide-react";
+import { User, LogOut, Trophy, ChevronUp, ChevronDown, Flag, CalendarDays } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -26,22 +26,39 @@ interface Round {
   };
 }
 
+interface CourseStats {
+  courseId: number;
+  courseName: string;
+  city?: string;
+  state?: string;
+  roundsPlayed: number;
+  bestGrossScore: number;
+  bestNetScore: number | null;
+  bestToPar: number;
+  bestToParNet: number | null;
+}
+
 interface Stats {
   totalRounds: number;
   bestGrossScore: number;
-  bestNetScore: number;
+  bestNetScore: number | null;
+  bestToPar: number;
+  bestToParNet: number | null;
   averageScore: number;
   handicapIndex: number;
+  roundsNeededForHandicap: number;
 }
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
+  const [sortField, setSortField] = useState<keyof CourseStats>('courseName');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     console.log("Modal state changed:", isModalOpen);
@@ -64,7 +81,7 @@ export default function Dashboard() {
     }
   });
 
-  const { data: userRounds } = useQuery({
+  const { data: userRounds, isLoading: roundsLoading } = useQuery({
     queryKey: ['userRounds'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -116,45 +133,189 @@ export default function Dashboard() {
     setIsModalOpen(true);
   };
 
+  // Calculate overall user stats from rounds
   const calculateStats = (rounds: Round[]): Stats => {
+    const ROUNDS_NEEDED_FOR_HANDICAP = 5;
+    
     if (!rounds || rounds.length === 0) {
       return {
         totalRounds: 0,
         bestGrossScore: 0,
-        bestNetScore: 0,
+        bestNetScore: null,
+        bestToPar: 0,
+        bestToParNet: null,
         averageScore: 0,
-        handicapIndex: 0
+        handicapIndex: 0,
+        roundsNeededForHandicap: ROUNDS_NEEDED_FOR_HANDICAP
       };
     }
 
     const totalRounds = rounds.length;
     const bestGrossScore = Math.min(...rounds.map(r => r.gross_score));
-    const bestNetScore = Math.min(...rounds.filter(r => r.net_score !== undefined).map(r => r.net_score!));
+    const bestToPar = Math.min(...rounds.map(r => r.to_par_gross));
+    
+    // Net scores may not be available for all rounds
+    const roundsWithNetScore = rounds.filter(r => r.net_score !== undefined && r.to_par_net !== undefined);
+    const bestNetScore = roundsWithNetScore.length > 0 ? 
+      Math.min(...roundsWithNetScore.map(r => r.net_score!)) : null;
+    const bestToParNet = roundsWithNetScore.length > 0 ? 
+      Math.min(...roundsWithNetScore.map(r => r.to_par_net!)) : null;
+    
     const averageScore = rounds.reduce((sum, r) => sum + r.gross_score, 0) / totalRounds;
     
-    const handicapIndex = rounds.length >= 5 ? 
-      ((averageScore - 72) * 0.96) : // Simplified handicap calculation
-      0;
+    // Calculate handicap based on official handicap system
+    // This is a simplified version - the actual calculation would use the best 8 of last 20 rounds
+    const differentials = rounds.map(round => (round.to_par_gross));
+    differentials.sort((a, b) => a - b);
+    
+    const bestDifferentials = differentials.slice(0, Math.min(8, Math.ceil(totalRounds * 0.4)));
+    const averageDifferential = bestDifferentials.length > 0 ? 
+      bestDifferentials.reduce((sum, diff) => sum + diff, 0) / bestDifferentials.length : 0;
+    
+    // Apply handicap formula (simplified)
+    const handicapIndex = totalRounds >= ROUNDS_NEEDED_FOR_HANDICAP ? 
+      Math.max(0, Math.round(averageDifferential * 0.96 * 10) / 10) : 0;
+      
+    const roundsNeededForHandicap = totalRounds >= ROUNDS_NEEDED_FOR_HANDICAP ? 
+      0 : ROUNDS_NEEDED_FOR_HANDICAP - totalRounds;
 
     return {
       totalRounds,
       bestGrossScore,
       bestNetScore,
+      bestToPar,
+      bestToParNet,
       averageScore,
-      handicapIndex: Math.round(handicapIndex * 10) / 10
+      handicapIndex,
+      roundsNeededForHandicap
     };
   };
 
-  const renderHandicapCircle = () => {
-    if (!userRounds) return null;
+  // Group rounds by course and calculate course stats
+  const calculateCourseStats = (rounds: Round[]): CourseStats[] => {
+    if (!rounds || rounds.length === 0) return [];
+  
+    // Group rounds by course
+    const courseMap = new Map<number, Round[]>();
     
+    rounds.forEach(round => {
+      if (round.courses) {
+        const courseId = round.courses.id;
+        if (!courseMap.has(courseId)) {
+          courseMap.set(courseId, []);
+        }
+        courseMap.get(courseId)!.push(round);
+      }
+    });
+  
+    // Calculate stats for each course
+    return Array.from(courseMap.entries()).map(([courseId, courseRounds]) => {
+      const firstRound = courseRounds[0]; // For course name and details
+      
+      const roundsPlayed = courseRounds.length;
+      const bestGrossScore = Math.min(...courseRounds.map(r => r.gross_score));
+      const bestToPar = Math.min(...courseRounds.map(r => r.to_par_gross));
+      
+      // Net scores may not be available for all rounds
+      const roundsWithNetScore = courseRounds.filter(r => r.net_score !== undefined && r.to_par_net !== undefined);
+      const bestNetScore = roundsWithNetScore.length > 0 ? 
+        Math.min(...roundsWithNetScore.map(r => r.net_score!)) : null;
+      const bestToParNet = roundsWithNetScore.length > 0 ? 
+        Math.min(...roundsWithNetScore.map(r => r.to_par_net!)) : null;
+  
+      return {
+        courseId,
+        courseName: firstRound.courses?.name || 'Unknown Course',
+        city: firstRound.courses?.city,
+        state: firstRound.courses?.state,
+        roundsPlayed,
+        bestGrossScore,
+        bestNetScore,
+        bestToPar,
+        bestToParNet
+      };
+    });
+  };
+
+  // Main Stats Display
+  const renderMainStats = () => {
+    if (roundsLoading || !userRounds) {
+      return (
+        <div className="grid grid-cols-3 gap-6 mb-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-background/50 animate-pulse h-24 rounded-lg border"></div>
+          ))}
+        </div>
+      );
+    }
+
     const stats = calculateStats(userRounds);
-    const handicap = stats.handicapIndex;
     
     return (
-      <div className="flex flex-col items-center justify-center mb-6">
-        <div className="relative mb-2">
-          <div className="flex items-center gap-2 mb-2">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div className="bg-background rounded-lg p-5 border">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Rounds Played</p>
+              <p className="text-3xl font-bold">{stats.totalRounds}</p>
+            </div>
+            <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary/10">
+              <CalendarDays className="h-6 w-6 text-primary" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-background rounded-lg p-5 border">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Best Score</p>
+              <p className="text-3xl font-bold">{scoreType === 'gross' ? stats.bestGrossScore : (stats.bestNetScore || '-')}</p>
+            </div>
+            <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary/10">
+              <Trophy className="h-6 w-6 text-primary" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-background rounded-lg p-5 border">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Best to Par</p>
+              <p className="text-3xl font-bold">
+                {scoreType === 'gross' 
+                  ? (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar 
+                  : stats.bestToParNet !== null 
+                    ? (stats.bestToParNet > 0 ? '+' : '') + stats.bestToParNet 
+                    : '-'}
+              </p>
+            </div>
+            <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary/10">
+              <Flag className="h-6 w-6 text-primary" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Handicap Circle Display
+  const renderHandicapCircle = () => {
+    if (roundsLoading || !userRounds) {
+      return (
+        <div className="flex justify-center mb-8">
+          <div className="w-60 h-60 rounded-full border-8 border-muted animate-pulse flex items-center justify-center">
+          </div>
+        </div>
+      );
+    }
+    
+    const stats = calculateStats(userRounds);
+    const hasHandicap = stats.roundsNeededForHandicap === 0;
+    
+    return (
+      <div className="flex flex-col items-center justify-center mb-8">
+        <div className="relative mb-3">
+          <div className="flex items-center gap-2">
             <button 
               onClick={() => setScoreType('gross')} 
               className={`px-3 py-1 rounded-full text-sm font-medium ${scoreType === 'gross' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
@@ -169,38 +330,29 @@ export default function Dashboard() {
             </button>
           </div>
         </div>
-        <div className="flex items-center justify-center">
-          <div className="relative">
-            <div className="w-44 h-44 rounded-full border-8 border-primary flex items-center justify-center">
-              <div className="text-center">
+        
+        <div className="w-60 h-60 rounded-full border-8 border-primary flex items-center justify-center">
+          <div className="text-center px-6">
+            {hasHandicap ? (
+              <>
                 <p className="text-sm font-medium text-muted-foreground">Handicap Index</p>
-                <p className="text-4xl font-bold">{handicap}</p>
-                <p className="text-sm text-muted-foreground mt-1">Based on {stats.totalRounds} rounds</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="ml-8 space-y-5">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Best {scoreType === 'gross' ? 'Gross' : 'Net'} Score</p>
-              <p className="text-2xl font-bold flex items-center">
-                {scoreType === 'gross' ? stats.bestGrossScore : stats.bestNetScore}
-                <Trophy className="ml-2 h-5 w-5 text-yellow-500" />
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Average Score</p>
-              <p className="text-2xl font-bold">
-                {Math.round(stats.averageScore)}
-              </p>
-            </div>
+                <p className="text-5xl font-bold my-2">{stats.handicapIndex}</p>
+                <p className="text-sm text-muted-foreground">Based on {stats.totalRounds} rounds</p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-muted-foreground">Handicap Status</p>
+                <p className="text-xl font-bold my-3">You still need to register {stats.roundsNeededForHandicap} more {stats.roundsNeededForHandicap === 1 ? 'round' : 'rounds'} to get your handicap.</p>
+              </>
+            )}
           </div>
         </div>
       </div>
     );
   };
 
-  const renderRoundsTable = () => {
+  // Course Stats Table
+  const renderCourseStatsTable = () => {
     if (!userRounds || userRounds.length === 0) {
       return (
         <div className="text-center p-6 bg-muted rounded-lg">
@@ -210,27 +362,37 @@ export default function Dashboard() {
       );
     }
 
-    const [sortField, setSortField] = useState<keyof Round>('date');
-    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-
-    const sortedRounds = [...userRounds].sort((a, b) => {
-      if (sortField === 'date') {
-        return sortDirection === 'desc' 
-          ? new Date(b.date).getTime() - new Date(a.date).getTime()
-          : new Date(a.date).getTime() - new Date(b.date).getTime();
+    const courseStats = calculateCourseStats(userRounds);
+    
+    // Sort course stats
+    const sortedCourseStats = [...courseStats].sort((a, b) => {
+      const aValue = a[sortField];
+      const bValue = b[sortField];
+      
+      if (aValue === null) return 1;
+      if (bValue === null) return -1;
+      
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortDirection === 'asc' 
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
       }
-      return sortDirection === 'desc'
-        ? (b[sortField] as number) - (a[sortField] as number)
-        : (a[sortField] as number) - (b[sortField] as number);
+      
+      // @ts-ignore - we know these are numbers at this point
+      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
     });
 
-    const handleSort = (field: keyof Round) => {
+    const handleSort = (field: keyof CourseStats) => {
       if (sortField === field) {
         setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
       } else {
         setSortField(field);
-        setSortDirection('desc');
+        setSortDirection('asc');
       }
+    };
+
+    const handleCourseClick = (courseId: number) => {
+      setSelectedCourseId(courseId);
     };
 
     return (
@@ -240,72 +402,78 @@ export default function Dashboard() {
             <tr className="border-b">
               <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
                 <button
-                  onClick={() => handleSort('date')}
+                  onClick={() => handleSort('courseName')}
                   className="flex items-center space-x-1"
                 >
-                  <span>Date</span>
-                  {sortField === 'date' && (
-                    sortDirection === 'desc' ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />
-                  )}
-                </button>
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Course</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Tees</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
-                <button
-                  onClick={() => handleSort('gross_score')}
-                  className="flex items-center space-x-1"
-                >
-                  <span>Gross</span>
-                  {sortField === 'gross_score' && (
+                  <span>Course</span>
+                  {sortField === 'courseName' && (
                     sortDirection === 'desc' ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />
                   )}
                 </button>
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
                 <button
-                  onClick={() => handleSort('net_score')}
+                  onClick={() => handleSort('roundsPlayed')}
                   className="flex items-center space-x-1"
                 >
-                  <span>Net</span>
-                  {sortField === 'net_score' && (
+                  <span>Rounds Played</span>
+                  {sortField === 'roundsPlayed' && (
                     sortDirection === 'desc' ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />
                   )}
                 </button>
               </th>
-              <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Actions</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                <button
+                  onClick={() => handleSort(scoreType === 'gross' ? 'bestGrossScore' : 'bestNetScore')}
+                  className="flex items-center space-x-1"
+                >
+                  <span>Best Score</span>
+                  {(sortField === 'bestGrossScore' || sortField === 'bestNetScore') && (
+                    sortDirection === 'desc' ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />
+                  )}
+                </button>
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                <button
+                  onClick={() => handleSort(scoreType === 'gross' ? 'bestToPar' : 'bestToParNet')}
+                  className="flex items-center space-x-1"
+                >
+                  <span>Best to Par</span>
+                  {(sortField === 'bestToPar' || sortField === 'bestToParNet') && (
+                    sortDirection === 'desc' ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />
+                  )}
+                </button>
+              </th>
             </tr>
           </thead>
           <tbody>
-            {sortedRounds.map((round) => (
-              <tr key={round.id} className="border-b last:border-0">
-                <td className="px-4 py-3 text-sm">
-                  {new Date(round.date).toLocaleDateString()}
-                </td>
+            {sortedCourseStats.map((courseStat) => (
+              <tr key={courseStat.courseId} className="border-b last:border-0">
                 <td className="px-4 py-3 text-sm font-medium">
-                  {round.courses?.name || 'Unknown Course'}
+                  <button 
+                    className="hover:underline text-primary"
+                    onClick={() => handleCourseClick(courseStat.courseId)}
+                  >
+                    {courseStat.courseName}
+                  </button>
+                  <p className="text-xs text-muted-foreground">
+                    {courseStat.city}{courseStat.state ? `, ${courseStat.state}` : ''}
+                  </p>
                 </td>
                 <td className="px-4 py-3 text-sm">
-                  {round.tee_name}
+                  {courseStat.roundsPlayed}
                 </td>
                 <td className="px-4 py-3 text-sm">
-                  {round.gross_score}
-                  {round.to_par_gross !== 0 && (
-                    <span className="text-muted-foreground ml-1">
-                      ({round.to_par_gross > 0 ? '+' : ''}{round.to_par_gross})
-                    </span>
-                  )}
+                  {scoreType === 'gross' 
+                    ? courseStat.bestGrossScore 
+                    : courseStat.bestNetScore !== null ? courseStat.bestNetScore : '-'}
                 </td>
                 <td className="px-4 py-3 text-sm">
-                  {round.net_score}
-                  {round.to_par_net !== undefined && round.to_par_net !== 0 && (
-                    <span className="text-muted-foreground ml-1">
-                      ({round.to_par_net > 0 ? '+' : ''}{round.to_par_net})
-                    </span>
-                  )}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <Button variant="outline" size="sm">View</Button>
+                  {scoreType === 'gross' 
+                    ? (courseStat.bestToPar > 0 ? '+' : '') + courseStat.bestToPar
+                    : courseStat.bestToParNet !== null 
+                      ? (courseStat.bestToParNet > 0 ? '+' : '') + courseStat.bestToParNet
+                      : '-'}
                 </td>
               </tr>
             ))}
@@ -315,6 +483,65 @@ export default function Dashboard() {
     );
   };
 
+  // Course Round History
+  const renderCourseRoundHistory = () => {
+    if (!userRounds || !selectedCourseId) return null;
+    
+    const courseRounds = userRounds.filter(
+      round => round.courses && round.courses.id === selectedCourseId
+    );
+    
+    if (courseRounds.length === 0) return null;
+    
+    const courseName = courseRounds[0].courses?.name || 'Course';
+    
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-semibold flex items-center">
+            <button 
+              className="mr-2 p-1 hover:bg-muted rounded"
+              onClick={() => setSelectedCourseId(null)}
+            >
+              <ChevronUp className="h-5 w-5" />
+            </button>
+            {courseName} Rounds
+          </h2>
+        </div>
+        
+        <div className="space-y-4">
+          {courseRounds.map((round) => (
+            <div key={round.id} className="bg-background border rounded-md p-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="font-medium">{new Date(round.date).toLocaleDateString()}</p>
+                  <p className="text-sm text-muted-foreground">{round.tee_name} Tees</p>
+                </div>
+                <div className="text-right">
+                  <p>
+                    Gross: {round.gross_score} 
+                    <span className="text-muted-foreground ml-1">
+                      ({round.to_par_gross > 0 ? '+' : ''}{round.to_par_gross})
+                    </span>
+                  </p>
+                  {round.net_score !== undefined && (
+                    <p>
+                      Net: {round.net_score}
+                      <span className="text-muted-foreground ml-1">
+                        ({round.to_par_net !== undefined ? (round.to_par_net > 0 ? '+' : '') + round.to_par_net : ''})
+                      </span>
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // Main dashboard content
   const renderDashboard = () => {
     return (
       <div className="space-y-8">
@@ -329,24 +556,25 @@ export default function Dashboard() {
             Add a New Round
           </Button>
         </div>
-
+        
+        {/* Main Stats Display */}
+        {renderMainStats()}
+        
         {/* Handicap Circle */}
         {renderHandicapCircle()}
         
-        {/* Recent Rounds Table */}
+        {/* Course Stats or Round History */}
         <div className="space-y-4">
-          <h2 className="text-2xl font-semibold">Your Rounds</h2>
-          {renderRoundsTable()}
+          {selectedCourseId 
+            ? renderCourseRoundHistory() 
+            : (
+              <>
+                <h2 className="text-2xl font-semibold">Your Courses</h2>
+                {renderCourseStatsTable()}
+              </>
+            )
+          }
         </div>
-      </div>
-    );
-  };
-
-  const renderCourseDetail = () => {
-    if (!selectedCourse) return null;
-    return (
-      <div>
-        {/* Course detail content here */}
       </div>
     );
   };
@@ -390,7 +618,7 @@ export default function Dashboard() {
         </DropdownMenu>
       </div>
       
-      {selectedCourse ? renderCourseDetail() : renderDashboard()}
+      {renderDashboard()}
 
       <AddRoundModal 
         open={isModalOpen} 
