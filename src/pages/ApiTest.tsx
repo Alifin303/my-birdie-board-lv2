@@ -92,7 +92,7 @@ const ApiTest = () => {
       diagInfo.push(`Request URL: ${requestUrl}`);
       
       const headers = {
-        'Authorization': 'Key 7GG4N6R5NOXNHW7H5A7EQVGL2U',
+        'Authorization': 'Key GZQVPVDJB4DPZAQYIR6M64J2NQ',
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       };

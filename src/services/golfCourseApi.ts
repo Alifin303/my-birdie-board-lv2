@@ -1,3 +1,4 @@
+
 import { toast } from "@/hooks/use-toast";
 
 // Types for Golf Course API responses
@@ -38,15 +39,15 @@ export interface CourseDetail {
   tees: CourseTee[];
 }
 
-// API configuration for golfcourseapi.com - FIXED ENDPOINT
+// API configuration for golfcourseapi.com - UPDATED API KEY
 const API_CONFIG = {
-  baseUrl: 'https://api.golfcourseapi.com/v1',  // Removed extra 'api' from path
-  searchEndpoint: '/search/courses',  // Changed to correct search endpoint
+  baseUrl: 'https://api.golfcourseapi.com/v1',
+  searchEndpoint: '/search/courses',
   courseDetailsEndpoint: '/courses',
   headers: {
-    'Authorization': 'Key 7GG4N6R5NOXNHW7H5A7EQVGL2U',
+    'Authorization': 'Key GZQVPVDJB4DPZAQYIR6M64J2NQ',  // Updated API key
     'Content-Type': 'application/json',
-    'Accept': 'application/json'  // Added Accept header
+    'Accept': 'application/json'
   }
 };
 
