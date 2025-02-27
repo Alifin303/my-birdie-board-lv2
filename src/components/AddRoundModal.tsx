@@ -83,6 +83,7 @@ type HoleSelection = 'all' | 'front9' | 'back9';
 
 // Utility functions to convert between API and component formats
 const convertToSimplifiedCourse = (course: GolfCourse): SimplifiedGolfCourse => {
+  console.log("Converting course to simplified format:", course);
   return {
     id: course.id,
     name: course.course_name || course.club_name,
@@ -93,6 +94,7 @@ const convertToSimplifiedCourse = (course: GolfCourse): SimplifiedGolfCourse => 
 };
 
 const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[] => {
+  console.log("Extracting tees from API response:", courseDetail);
   const tees: SimplifiedTee[] = [];
   
   // Add male tees with unique IDs
@@ -101,9 +103,9 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
       tees.push({
         id: `m-${index}`,
         name: tee.tee_name,
-        rating: tee.course_rating,
-        slope: tee.slope_rating,
-        par: tee.par_total,
+        rating: tee.course_rating || 72,
+        slope: tee.slope_rating || 113,
+        par: tee.par_total || 72,
         yards: tee.total_yards,
         gender: 'male',
         originalIndex: index
@@ -117,9 +119,9 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
       tees.push({
         id: `f-${index}`,
         name: tee.tee_name + " (W)",
-        rating: tee.course_rating,
-        slope: tee.slope_rating,
-        par: tee.par_total,
+        rating: tee.course_rating || 72,
+        slope: tee.slope_rating || 113,
+        par: tee.par_total || 72,
         yards: tee.total_yards,
         gender: 'female',
         originalIndex: index
@@ -127,10 +129,12 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
     });
   }
   
+  console.log("Extracted tees:", tees);
   return tees;
 };
 
 const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): SimplifiedHole[] => {
+  console.log("Extracting holes for tee:", teeId, courseDetail);
   // Parse the tee ID to get gender and index
   const [gender, indexStr] = teeId.split('-');
   const index = parseInt(indexStr);
@@ -143,35 +147,52 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
     teeData = courseDetail.tees.female[index];
   }
   
+  console.log("Selected tee data:", teeData);
+
   // If we found the tee data and it has holes, convert them
   if (teeData && teeData.holes && teeData.holes.length > 0) {
+    console.log("Using holes from selected tee");
     return teeData.holes.map((hole, idx) => ({
       number: idx + 1,
-      par: hole.par,
+      par: hole.par || 4,
       yards: hole.yardage,
       handicap: hole.handicap
     }));
   }
   
   // Default fallback: use the first available tee data
-  let holesData: Array<{par: number, yardage: number, handicap: number}> = [];
+  let holesData: Array<{par: number, yardage?: number, handicap?: number}> = [];
   
   if (courseDetail.tees.male && courseDetail.tees.male.length > 0 && courseDetail.tees.male[0].holes) {
+    console.log("Using holes from first male tee");
     holesData = courseDetail.tees.male[0].holes;
   } else if (courseDetail.tees.female && courseDetail.tees.female.length > 0 && courseDetail.tees.female[0].holes) {
+    console.log("Using holes from first female tee");
     holesData = courseDetail.tees.female[0].holes;
   }
   
   // Map the holes data to our simplified format
-  return holesData.map((hole, idx) => ({
+  if (holesData.length > 0) {
+    return holesData.map((hole, idx) => ({
+      number: idx + 1,
+      par: hole.par || 4,
+      yards: hole.yardage,
+      handicap: hole.handicap
+    }));
+  }
+  
+  // If we still don't have holes data, create default 18 holes
+  console.log("No holes data found, creating default");
+  return Array(18).fill(null).map((_, idx) => ({
     number: idx + 1,
-    par: hole.par,
-    yards: hole.yardage,
-    handicap: hole.handicap
+    par: 4,
+    yards: 400,
+    handicap: idx + 1
   }));
 };
 
 const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): SimplifiedCourseDetail => {
+  console.log("Converting course detail to simplified format:", courseDetail);
   const tees = extractTeesFromApiResponse(courseDetail);
   
   // For initial holes data, use the first tee (if available)
@@ -189,7 +210,7 @@ const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): Simplified
     }));
   }
   
-  return {
+  const simplifiedCourseDetail = {
     id: courseDetail.id,
     name: courseDetail.course_name || courseDetail.club_name,
     city: courseDetail.location.city || '',
@@ -198,6 +219,9 @@ const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): Simplified
     tees: tees,
     holes: holes
   };
+  
+  console.log("Simplified course detail:", simplifiedCourseDetail);
+  return simplifiedCourseDetail;
 };
 
 export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
@@ -294,6 +318,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     try {
       // Search for courses via API
       const courses = await searchCourses(searchQuery);
+      console.log("API search results:", courses);
       
       // Convert to simplified format for component use
       const simplifiedCourses = courses.map(convertToSimplifiedCourse);
@@ -325,22 +350,30 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     }
   };
 
+  // Generate holes data based on selection (front 9, back 9, or all)
+  const getHolesBasedOnSelection = (allHoles: SimplifiedHole[], selection: HoleSelection): SimplifiedHole[] => {
+    if (selection === 'front9') {
+      return allHoles.slice(0, 9);
+    } else if (selection === 'back9') {
+      return allHoles.slice(9, 18);
+    }
+    return allHoles;
+  };
+
   // Update scorecard when tee selection changes
   const updateScorecardForTee = (teeId: string, selection: HoleSelection = 'all') => {
-    if (!originalCourseDetail) return;
+    if (!originalCourseDetail) {
+      console.error("No original course detail available");
+      return;
+    }
     
     // Get holes data for the selected tee
     const allHolesData = extractHolesForTee(originalCourseDetail, teeId);
+    console.log("All holes data:", allHolesData);
     
     // Filter holes based on user selection (front 9, back 9, or all)
-    let filteredHoles: SimplifiedHole[];
-    if (selection === 'front9') {
-      filteredHoles = allHolesData.slice(0, 9);
-    } else if (selection === 'back9') {
-      filteredHoles = allHolesData.slice(9, 18);
-    } else {
-      filteredHoles = allHolesData;
-    }
+    const filteredHoles = getHolesBasedOnSelection(allHolesData, selection);
+    console.log(`Filtered holes for ${selection}:`, filteredHoles);
     
     // Create scores array with par values from the selected tee
     const newScores = filteredHoles.map(hole => ({
@@ -351,20 +384,25 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       yards: hole.yards,
       handicap: hole.handicap
     }));
+    console.log("New scores array:", newScores);
     
     setScores(newScores);
     
     // Also update the holes in the selected course object
     if (selectedCourse) {
-      setSelectedCourse({
-        ...selectedCourse,
-        holes: allHolesData // Keep all holes in the course object but display only selected ones
+      setSelectedCourse(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          holes: allHolesData
+        };
       });
     }
   };
 
   // Handle hole selection change (front 9, back 9, all)
   const handleHoleSelectionChange = (selection: HoleSelection) => {
+    console.log("Changing hole selection to:", selection);
     setHoleSelection(selection);
     
     if (selectedTeeId) {
@@ -382,6 +420,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       
       // Try to get course details from API
       let apiCourseDetail = await getCourseDetails(course.id);
+      console.log("API course details:", apiCourseDetail);
       
       // If API fails or returns null, generate mock data
       if (!apiCourseDetail) {
@@ -389,7 +428,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         
         // Create a GolfCourse object from SimplifiedGolfCourse
         const golfCourse: GolfCourse = {
-          id: Number(course.id),
+          id: typeof course.id === 'string' ? parseInt(course.id) : course.id,
           club_name: course.name,
           course_name: course.name,
           location: {
@@ -400,6 +439,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         };
         
         apiCourseDetail = generateMockCourseDetails(golfCourse);
+        console.log("Generated mock data:", apiCourseDetail);
         
         toast({
           title: "Note",
@@ -414,8 +454,6 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       // Convert API response to the format expected by the component
       const simplifiedCourseDetail = convertToSimplifiedCourseDetail(apiCourseDetail);
       setSelectedCourse(simplifiedCourseDetail);
-      
-      console.log("Converted course detail:", simplifiedCourseDetail);
       
       // Set default tee if available
       if (simplifiedCourseDetail.tees && simplifiedCourseDetail.tees.length > 0) {
@@ -675,113 +713,115 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   // Render horizontal scorecard
   const renderHorizontalScorecard = () => {
     if (!selectedCourse) return null;
-
-    // Get scores based on hole selection
-    let scoresToRender = [...scores];
-
-    return (
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">Round Date</p>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="mt-1"
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {format(roundDate, "PPP")}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={roundDate}
-                  onSelect={(date) => date && setRoundDate(date)}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+    
+    // Get the appropriate scores to display based on hole selection
+    const displayScores = [...scores];
+    
+    // When rendering all 18 holes, split into front 9 and back 9
+    if (holeSelection === 'all') {
+      const frontNine = displayScores.slice(0, 9);
+      const backNine = displayScores.slice(9, 18);
+      
+      return (
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Round Date</p>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="mt-1"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {format(roundDate, "PPP")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={roundDate}
+                    onSelect={(date) => date && setRoundDate(date)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Holes to Play</p>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="mt-1">
+                    {holeSelection === 'all' ? 'All 18 Holes' : 
+                     holeSelection === 'front9' ? 'Front 9 Holes' : 'Back 9 Holes'}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>Select Holes</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => handleHoleSelectionChange('all')}>
+                    All 18 Holes
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleHoleSelectionChange('front9')}>
+                    Front 9 Holes
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleHoleSelectionChange('back9')}>
+                    Back 9 Holes
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
-          
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">Holes to Play</p>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="mt-1">
-                  {holeSelection === 'all' ? 'All 18 Holes' : 
-                   holeSelection === 'front9' ? 'Front 9 Holes' : 'Back 9 Holes'}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>Select Holes</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleHoleSelectionChange('all')}>
-                  All 18 Holes
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleHoleSelectionChange('front9')}>
-                  Front 9 Holes
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleHoleSelectionChange('back9')}>
-                  Back 9 Holes
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
 
-        <div className="space-y-8">
-          {/* Only render the scorecard table if we have scores */}
-          {scoresToRender.length > 0 && (
+          <div className="space-y-8">
+            {/* Front Nine */}
             <div className="border rounded-md overflow-x-auto">
               <table className="w-full">
                 <thead className="border-b">
                   <tr>
-                    <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-left">
-                      {holeSelection === 'back9' ? 'Back' : 'Front'}
-                    </th>
-                    {scoresToRender.map(score => (
+                    <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-left">Front</th>
+                    {frontNine.map(score => (
                       <th key={`hole-${score.hole}`} className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">
                         {score.hole}
                       </th>
                     ))}
                     <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">
-                      {holeSelection === 'back9' ? 'In' : 'Out'}
+                      Out
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-b">
                     <td className="text-sm font-medium text-muted-foreground px-2 py-2">Par</td>
-                    {scoresToRender.map(score => (
+                    {frontNine.map(score => (
                       <td key={`par-${score.hole}`} className="text-sm text-center px-2 py-2">
                         {score.par}
                       </td>
                     ))}
                     <td className="text-sm font-medium px-2 py-2 text-center">
-                      {scoresToRender.reduce((sum, s) => sum + s.par, 0)}
+                      {frontNine.reduce((sum, s) => sum + s.par, 0)}
                     </td>
                   </tr>
                   {/* Yardage row - only show if we have yards data */}
-                  {scoresToRender.some(score => score.yards) && (
+                  {frontNine.some(score => score.yards) && (
                     <tr className="border-b">
                       <td className="text-sm font-medium text-muted-foreground px-2 py-2">Yards</td>
-                      {scoresToRender.map(score => (
+                      {frontNine.map(score => (
                         <td key={`yards-${score.hole}`} className="text-sm text-center px-2 py-2">
                           {score.yards || '-'}
                         </td>
                       ))}
                       <td className="text-sm font-medium px-2 py-2 text-center">
-                        {scoresToRender.reduce((sum, s) => sum + (s.yards || 0), 0)}
+                        {frontNine.reduce((sum, s) => sum + (s.yards || 0), 0)}
                       </td>
                     </tr>
                   )}
                   {/* Handicap row - only show if we have handicap data */}
-                  {scoresToRender.some(score => score.handicap) && (
+                  {frontNine.some(score => score.handicap) && (
                     <tr className="border-b">
                       <td className="text-sm font-medium text-muted-foreground px-2 py-2">HCP</td>
-                      {scoresToRender.map(score => (
+                      {frontNine.map(score => (
                         <td key={`handicap-${score.hole}`} className="text-sm text-center px-2 py-2">
                           {score.handicap || '-'}
                         </td>
@@ -793,7 +833,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                   )}
                   <tr className="border-b">
                     <td className="text-sm font-medium text-muted-foreground px-2 py-2">Strokes</td>
-                    {scoresToRender.map((score, index) => (
+                    {frontNine.map((score, index) => (
                       <td key={`strokes-${score.hole}`} className="text-center px-2 py-2">
                         <Input
                           type="number"
@@ -806,12 +846,12 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                       </td>
                     ))}
                     <td className="text-sm font-medium px-2 py-2 text-center">
-                      {scoresToRender.reduce((sum, s) => sum + (s.strokes || 0), 0)}
+                      {frontNine.reduce((sum, s) => sum + (s.strokes || 0), 0)}
                     </td>
                   </tr>
                   <tr>
                     <td className="text-sm font-medium text-muted-foreground px-2 py-2">Putts (optional)</td>
-                    {scoresToRender.map((score, index) => (
+                    {frontNine.map((score, index) => (
                       <td key={`putts-${score.hole}`} className="text-center px-2 py-2">
                         <Input
                           type="number"
@@ -824,46 +864,334 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                       </td>
                     ))}
                     <td className="text-sm font-medium px-2 py-2 text-center">
-                      {scoresToRender.reduce((sum, s) => sum + (s.putts || 0), 0)}
+                      {frontNine.reduce((sum, s) => sum + (s.putts || 0), 0)}
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
-          )}
-        </div>
 
-        {/* Totals */}
-        <div className="border rounded-md p-4 bg-muted/50">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <span className="font-medium">Total Strokes:</span>{" "}
-              {scores.reduce((sum, score) => sum + (score.strokes || 0), 0)}
+            {/* Back Nine */}
+            <div className="border rounded-md overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b">
+                  <tr>
+                    <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-left">Back</th>
+                    {backNine.map(score => (
+                      <th key={`hole-${score.hole}`} className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">
+                        {score.hole}
+                      </th>
+                    ))}
+                    <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">
+                      In
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b">
+                    <td className="text-sm font-medium text-muted-foreground px-2 py-2">Par</td>
+                    {backNine.map(score => (
+                      <td key={`par-${score.hole}`} className="text-sm text-center px-2 py-2">
+                        {score.par}
+                      </td>
+                    ))}
+                    <td className="text-sm font-medium px-2 py-2 text-center">
+                      {backNine.reduce((sum, s) => sum + s.par, 0)}
+                    </td>
+                  </tr>
+                  {/* Yardage row - only show if we have yards data */}
+                  {backNine.some(score => score.yards) && (
+                    <tr className="border-b">
+                      <td className="text-sm font-medium text-muted-foreground px-2 py-2">Yards</td>
+                      {backNine.map(score => (
+                        <td key={`yards-${score.hole}`} className="text-sm text-center px-2 py-2">
+                          {score.yards || '-'}
+                        </td>
+                      ))}
+                      <td className="text-sm font-medium px-2 py-2 text-center">
+                        {backNine.reduce((sum, s) => sum + (s.yards || 0), 0)}
+                      </td>
+                    </tr>
+                  )}
+                  {/* Handicap row - only show if we have handicap data */}
+                  {backNine.some(score => score.handicap) && (
+                    <tr className="border-b">
+                      <td className="text-sm font-medium text-muted-foreground px-2 py-2">HCP</td>
+                      {backNine.map(score => (
+                        <td key={`handicap-${score.hole}`} className="text-sm text-center px-2 py-2">
+                          {score.handicap || '-'}
+                        </td>
+                      ))}
+                      <td className="text-sm font-medium px-2 py-2 text-center">
+                        -
+                      </td>
+                    </tr>
+                  )}
+                  <tr className="border-b">
+                    <td className="text-sm font-medium text-muted-foreground px-2 py-2">Strokes</td>
+                    {backNine.map((score, index) => (
+                      <td key={`strokes-${score.hole}`} className="text-center px-2 py-2">
+                        <Input
+                          type="number"
+                          min="1"
+                          value={score.strokes || ""}
+                          onChange={(e) => handleScoreChange(index + 9, 'strokes', e.target.value)}
+                          className="w-12 h-8 text-center"
+                          required
+                        />
+                      </td>
+                    ))}
+                    <td className="text-sm font-medium px-2 py-2 text-center">
+                      {backNine.reduce((sum, s) => sum + (s.strokes || 0), 0)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="text-sm font-medium text-muted-foreground px-2 py-2">Putts (optional)</td>
+                    {backNine.map((score, index) => (
+                      <td key={`putts-${score.hole}`} className="text-center px-2 py-2">
+                        <Input
+                          type="number"
+                          min="0"
+                          value={score.putts !== undefined ? score.putts : ""}
+                          onChange={(e) => handleScoreChange(index + 9, 'putts', e.target.value)}
+                          className="w-12 h-8 text-center"
+                          placeholder="-"
+                        />
+                      </td>
+                    ))}
+                    <td className="text-sm font-medium px-2 py-2 text-center">
+                      {backNine.reduce((sum, s) => sum + (s.putts || 0), 0)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <div>
-              <span className="font-medium">Total Putts:</span>{" "}
-              {scores.reduce((sum, score) => sum + (score.putts || 0), 0)}
+          </div>
+
+          {/* Totals */}
+          <div className="border rounded-md p-4 bg-muted/50">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <span className="font-medium">Total Strokes:</span>{" "}
+                {scores.reduce((sum, score) => sum + (score.strokes || 0), 0)}
+              </div>
+              <div>
+                <span className="font-medium">Total Putts:</span>{" "}
+                {scores.reduce((sum, score) => sum + (score.putts || 0), 0)}
+              </div>
+              <div>
+                <span className="font-medium">Total Par:</span>{" "}
+                {scores.reduce((sum, score) => sum + score.par, 0)}
+              </div>
+              <div>
+                <span className="font-medium">To Par:</span>{" "}
+                {scores.reduce((sum, score) => sum + (score.strokes || 0), 0) - 
+                  scores.reduce((sum, score) => sum + score.par, 0)}
+              </div>
+              {holeSelection !== 'all' && (
+                <div className="col-span-2 text-amber-600">
+                  <p className="text-sm">
+                    Note: 9-hole rounds will not contribute to handicap calculations.
+                  </p>
+                </div>
+              )}
             </div>
+          </div>
+        </div>
+      );
+    } else {
+      // For front 9 or back 9 only, show single table
+      const tableName = holeSelection === 'front9' ? 'Front' : 'Back';
+      const summaryName = holeSelection === 'front9' ? 'Out' : 'In';
+      
+      return (
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div>
-              <span className="font-medium">Total Par:</span>{" "}
-              {scores.reduce((sum, score) => sum + score.par, 0)}
+              <p className="text-sm font-medium text-muted-foreground">Round Date</p>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="mt-1"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {format(roundDate, "PPP")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={roundDate}
+                    onSelect={(date) => date && setRoundDate(date)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
+            
             <div>
-              <span className="font-medium">To Par:</span>{" "}
-              {scores.reduce((sum, score) => sum + (score.strokes || 0), 0) - 
-                scores.reduce((sum, score) => sum + score.par, 0)}
+              <p className="text-sm font-medium text-muted-foreground">Holes to Play</p>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="mt-1">
+                    {holeSelection === 'all' ? 'All 18 Holes' : 
+                     holeSelection === 'front9' ? 'Front 9 Holes' : 'Back 9 Holes'}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>Select Holes</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => handleHoleSelectionChange('all')}>
+                    All 18 Holes
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleHoleSelectionChange('front9')}>
+                    Front 9 Holes
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleHoleSelectionChange('back9')}>
+                    Back 9 Holes
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-            {holeSelection !== 'all' && (
+          </div>
+
+          <div className="space-y-8">
+            {/* Single 9-hole table */}
+            <div className="border rounded-md overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b">
+                  <tr>
+                    <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-left">{tableName}</th>
+                    {displayScores.map(score => (
+                      <th key={`hole-${score.hole}`} className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">
+                        {score.hole}
+                      </th>
+                    ))}
+                    <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">
+                      {summaryName}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b">
+                    <td className="text-sm font-medium text-muted-foreground px-2 py-2">Par</td>
+                    {displayScores.map(score => (
+                      <td key={`par-${score.hole}`} className="text-sm text-center px-2 py-2">
+                        {score.par}
+                      </td>
+                    ))}
+                    <td className="text-sm font-medium px-2 py-2 text-center">
+                      {displayScores.reduce((sum, s) => sum + s.par, 0)}
+                    </td>
+                  </tr>
+                  {/* Yardage row - only show if we have yards data */}
+                  {displayScores.some(score => score.yards) && (
+                    <tr className="border-b">
+                      <td className="text-sm font-medium text-muted-foreground px-2 py-2">Yards</td>
+                      {displayScores.map(score => (
+                        <td key={`yards-${score.hole}`} className="text-sm text-center px-2 py-2">
+                          {score.yards || '-'}
+                        </td>
+                      ))}
+                      <td className="text-sm font-medium px-2 py-2 text-center">
+                        {displayScores.reduce((sum, s) => sum + (s.yards || 0), 0)}
+                      </td>
+                    </tr>
+                  )}
+                  {/* Handicap row - only show if we have handicap data */}
+                  {displayScores.some(score => score.handicap) && (
+                    <tr className="border-b">
+                      <td className="text-sm font-medium text-muted-foreground px-2 py-2">HCP</td>
+                      {displayScores.map(score => (
+                        <td key={`handicap-${score.hole}`} className="text-sm text-center px-2 py-2">
+                          {score.handicap || '-'}
+                        </td>
+                      ))}
+                      <td className="text-sm font-medium px-2 py-2 text-center">
+                        -
+                      </td>
+                    </tr>
+                  )}
+                  <tr className="border-b">
+                    <td className="text-sm font-medium text-muted-foreground px-2 py-2">Strokes</td>
+                    {displayScores.map((score, index) => {
+                      // Calculate the actual index in the scores array based on hole selection
+                      const actualIndex = holeSelection === 'back9' ? index + 9 : index;
+                      return (
+                        <td key={`strokes-${score.hole}`} className="text-center px-2 py-2">
+                          <Input
+                            type="number"
+                            min="1"
+                            value={score.strokes || ""}
+                            onChange={(e) => handleScoreChange(actualIndex, 'strokes', e.target.value)}
+                            className="w-12 h-8 text-center"
+                            required
+                          />
+                        </td>
+                      );
+                    })}
+                    <td className="text-sm font-medium px-2 py-2 text-center">
+                      {displayScores.reduce((sum, s) => sum + (s.strokes || 0), 0)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="text-sm font-medium text-muted-foreground px-2 py-2">Putts (optional)</td>
+                    {displayScores.map((score, index) => {
+                      // Calculate the actual index in the scores array based on hole selection
+                      const actualIndex = holeSelection === 'back9' ? index + 9 : index;
+                      return (
+                        <td key={`putts-${score.hole}`} className="text-center px-2 py-2">
+                          <Input
+                            type="number"
+                            min="0"
+                            value={score.putts !== undefined ? score.putts : ""}
+                            onChange={(e) => handleScoreChange(actualIndex, 'putts', e.target.value)}
+                            className="w-12 h-8 text-center"
+                            placeholder="-"
+                          />
+                        </td>
+                      );
+                    })}
+                    <td className="text-sm font-medium px-2 py-2 text-center">
+                      {displayScores.reduce((sum, s) => sum + (s.putts || 0), 0)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Totals */}
+          <div className="border rounded-md p-4 bg-muted/50">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <span className="font-medium">Total Strokes:</span>{" "}
+                {scores.reduce((sum, score) => sum + (score.strokes || 0), 0)}
+              </div>
+              <div>
+                <span className="font-medium">Total Putts:</span>{" "}
+                {scores.reduce((sum, score) => sum + (score.putts || 0), 0)}
+              </div>
+              <div>
+                <span className="font-medium">Total Par:</span>{" "}
+                {scores.reduce((sum, score) => sum + score.par, 0)}
+              </div>
+              <div>
+                <span className="font-medium">To Par:</span>{" "}
+                {scores.reduce((sum, score) => sum + (score.strokes || 0), 0) - 
+                  scores.reduce((sum, score) => sum + score.par, 0)}
+              </div>
               <div className="col-span-2 text-amber-600">
                 <p className="text-sm">
                   Note: 9-hole rounds will not contribute to handicap calculations.
                 </p>
               </div>
-            )}
+            </div>
           </div>
         </div>
-      </div>
-    );
+      );
+    }
   };
 
   return (
