@@ -22,46 +22,16 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useDebounce } from "@/hooks/use-debounce";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-
-// Types for Golf Course API responses
-interface GolfCourse {
-  id: string;
-  name: string;
-  city: string;
-  state: string;
-}
-
-interface CourseTee {
-  id: string;
-  name: string;
-  gender: string;
-  rating: number;
-  slope: number;
-  par: number;
-}
-
-interface CourseHole {
-  id: string;
-  number: number;
-  par: number;
-  handicap: number;
-  yards: {
-    [teeId: string]: number;
-  };
-}
-
-interface CourseDetail {
-  id: string;
-  name: string;
-  city: string;
-  state: string;
-  holes: CourseHole[];
-  tees: CourseTee[];
-}
+import { 
+  searchCourses, 
+  getCourseDetails, 
+  generateMockCourseDetails, 
+  GolfCourse, 
+  CourseDetail 
+} from "@/services/golfCourseApi";
 
 export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   console.log("AddRoundModal rendered with open:", open);
@@ -78,6 +48,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   const [currentStep, setCurrentStep] = useState<'search' | 'scorecard'>('search');
   const [previouslyPlayedCourses, setPreviouslyPlayedCourses] = useState<GolfCourse[]>([]);
   const [roundDate, setRoundDate] = useState<Date>(new Date());
+  const [isManualSearch, setIsManualSearch] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -94,6 +65,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       setSearchError(null);
       setCurrentStep('search');
       setRoundDate(new Date());
+      setIsManualSearch(false);
     }
   }, [open]);
 
@@ -133,80 +105,59 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     }
   };
 
-  // Search for courses as user types
-  useEffect(() => {
-    const searchCourses = async () => {
-      if (!open || !debouncedSearchQuery || debouncedSearchQuery.length < 3 || currentStep !== 'search') {
-        setSearchResults([]);
-        setSearchError(null);
-        return;
-      }
-
-      setIsSearching(true);
-      setSearchError(null);
+  // Handle search button click or Enter key
+  const handleSearch = async () => {
+    if (!searchQuery || searchQuery.length < 3) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter at least 3 characters to search",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsManualSearch(true);
+    setIsSearching(true);
+    setSearchError(null);
+    
+    try {
+      // Search for courses via API
+      const courses = await searchCourses(searchQuery);
       
-      try {
-        console.log("Searching for courses with query:", debouncedSearchQuery);
-        
-        // First, search previously played courses
+      if (courses.length > 0) {
+        setSearchResults(courses);
+      } else {
+        // If API returns no results, try matching previously played courses
         const matchingPreviousCourses = previouslyPlayedCourses.filter(
-          course => course.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
+          course => course.name.toLowerCase().includes(searchQuery.toLowerCase())
         );
         
-        // Then add mock data for demonstration
-        const mockCourses = [
-          {
-            id: "mock1",
-            name: "Augusta National Golf Club",
-            city: "Augusta",
-            state: "GA"
-          },
-          {
-            id: "mock2",
-            name: "Pebble Beach Golf Links",
-            city: "Pebble Beach",
-            state: "CA"
-          },
-          {
-            id: "mock3",
-            name: "St Andrews Links",
-            city: "St Andrews",
-            state: "Scotland"
-          },
-          {
-            id: "mock4",
-            name: "TPC Sawgrass",
-            city: "Ponte Vedra Beach",
-            state: "FL"
-          }
-        ].filter(
-          course => course.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
-        );
-        
-        // Combine results, prioritizing previously played courses
-        const combinedResults = [...matchingPreviousCourses, ...mockCourses];
-        
-        if (combinedResults.length > 0) {
-          setSearchResults(combinedResults);
+        if (matchingPreviousCourses.length > 0) {
+          setSearchResults(matchingPreviousCourses);
         } else {
           setSearchError("No courses found. Please try a different search term.");
         }
-        
-      } catch (error) {
-        console.error("Course search error:", error);
-        setSearchError("Failed to search for courses. Please try again.");
-        toast({
-          title: "Search Error",
-          description: "Failed to search for courses. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsSearching(false);
       }
-    };
+    } catch (error) {
+      console.error("Course search error:", error);
+      setSearchError("Failed to search for courses. Please try again.");
+      toast({
+        title: "Search Error",
+        description: "Failed to search for courses. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
-    searchCourses();
-  }, [debouncedSearchQuery, toast, open, currentStep, previouslyPlayedCourses]);
+  // Handle key press on search input
+  const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch();
+    }
+  };
 
   // Fetch course details when a course is selected
   const handleCourseSelect = async (course: GolfCourse) => {
@@ -216,50 +167,20 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     try {
       console.log("Selected course:", course);
       
-      // Create mock course details based on the selected course
-      const courseDetail: CourseDetail = {
-        id: course.id,
-        name: course.name,
-        city: course.city,
-        state: course.state,
-        holes: Array(18).fill(null).map((_, i) => ({
-          id: `${i + 1}`,
-          number: i + 1,
-          par: i % 3 === 0 ? 5 : (i % 3 === 1 ? 3 : 4), // Mix of par 3, 4, 5
-          handicap: i + 1,
-          yards: { 
-            "1": 350 + (i * 15), // Blue tees
-            "2": 330 + (i * 15), // White tees
-            "3": 310 + (i * 15)  // Red tees
-          }
-        })),
-        tees: [
-          {
-            id: "1",
-            name: "Blue",
-            gender: "M",
-            rating: 72.5,
-            slope: 133,
-            par: 72
-          },
-          {
-            id: "2",
-            name: "White",
-            gender: "M",
-            rating: 70.8,
-            slope: 128,
-            par: 72
-          },
-          {
-            id: "3",
-            name: "Red",
-            gender: "F",
-            rating: 69.2,
-            slope: 123,
-            par: 72
-          }
-        ]
-      };
+      // Try to get course details from API
+      let courseDetail = await getCourseDetails(course.id);
+      
+      // If API fails or returns null, generate mock data
+      if (!courseDetail) {
+        console.log("Using mock data for course details");
+        courseDetail = generateMockCourseDetails(course);
+        
+        toast({
+          title: "Note",
+          description: "Using sample course data. Some details may not be accurate.",
+          variant: "default",
+        });
+      }
       
       setSelectedCourse(courseDetail);
       
@@ -707,23 +628,30 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
               {/* Course Search */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Search for a Golf Course</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <Search className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <Input
-                    type="search"
-                    placeholder="Type to search for a golf course..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                    disabled={isLoading}
-                  />
-                  {isSearching && (
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <Search className="h-4 w-4 text-muted-foreground" />
                     </div>
-                  )}
+                    <Input
+                      type="search"
+                      placeholder="Type golf course name..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={handleSearchKeyPress}
+                      className="pl-10"
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <Button 
+                    onClick={handleSearch}
+                    disabled={isLoading || searchQuery.length < 3}
+                  >
+                    {isSearching ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : null}
+                    Search
+                  </Button>
                 </div>
                 
                 {/* Search Error Message */}
@@ -734,25 +662,28 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                 )}
                 
                 {/* Previously Played Courses */}
-                {searchQuery.length < 3 && renderPreviouslyPlayedCourses()}
+                {!isManualSearch && searchQuery.length < 3 && renderPreviouslyPlayedCourses()}
                 
-                {/* Search Results Dropdown */}
+                {/* Search Results */}
                 {searchResults.length > 0 && (
-                  <div className="border rounded-md shadow-md mt-2 bg-background z-50">
-                    <div className="py-1">
-                      <h3 className="px-3 py-2 text-sm font-medium text-muted-foreground">Search Results</h3>
-                      <ul className="max-h-60 overflow-auto">
+                  <div className="border rounded-md mt-4">
+                    <div className="p-4">
+                      <h3 className="text-sm font-medium mb-3">Search Results</h3>
+                      <div className="space-y-3 max-h-60 overflow-y-auto">
                         {searchResults.map((course) => (
-                          <li 
+                          <div 
                             key={course.id}
-                            className="px-4 py-2 hover:bg-muted cursor-pointer transition-colors"
+                            className="p-3 border rounded-md hover:bg-muted cursor-pointer transition-colors"
                             onClick={() => handleCourseSelect(course)}
                           >
                             <p className="font-medium">{course.name}</p>
-                            <p className="text-xs text-muted-foreground">{course.city}, {course.state}</p>
-                          </li>
+                            <p className="text-xs text-muted-foreground">
+                              {course.city}{course.state ? `, ${course.state}` : ''}
+                              {course.country && course.country !== 'USA' ? `, ${course.country}` : ''}
+                            </p>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -778,7 +709,10 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                     Change Course
                   </Button>
                 </div>
-                <p className="text-muted-foreground">{selectedCourse.city}, {selectedCourse.state}</p>
+                <p className="text-muted-foreground">
+                  {selectedCourse.city}{selectedCourse.state ? `, ${selectedCourse.state}` : ''}
+                  {selectedCourse.country && selectedCourse.country !== 'USA' ? `, ${selectedCourse.country}` : ''}
+                </p>
               </div>
             
               {/* Tee Selection */}
