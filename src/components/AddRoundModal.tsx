@@ -159,7 +159,7 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
   
   // Get the correct tee data
   let teeData: TeeBox | undefined;
-  let holesData: Array<{par: number, yardage?: number, handicap?: number}> = [];
+  let holesData: Array<{par?: number, yardage?: number, handicap?: number}> = [];
   
   if (courseDetail.tees) {
     if (gender === 'm' && courseDetail.tees.male && courseDetail.tees.male.length > index) {
@@ -174,6 +174,8 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
       }
     }
   }
+
+  console.log("Extracted holes data for tee:", teeId, holesData);
   
   // If we found hole data for the specific tee, use it
   if (holesData.length > 0) {
@@ -589,6 +591,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   // Handle date selection
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
+      console.log("Date selected:", date);
       setRoundDate(date);
       setCalendarOpen(false); // Close the calendar after selection
     }
@@ -807,6 +810,9 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                   selected={roundDate}
                   onSelect={handleDateSelect}
                   initialFocus
+                  defaultMonth={roundDate}
+                  fromYear={2000}
+                  toYear={new Date().getFullYear()}
                 />
               </PopoverContent>
             </Popover>
@@ -1084,6 +1090,9 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                   selected={roundDate}
                   onSelect={handleDateSelect}
                   initialFocus
+                  defaultMonth={roundDate}
+                  fromYear={2000}
+                  toYear={new Date().getFullYear()}
                 />
               </PopoverContent>
             </Popover>
@@ -1222,7 +1231,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
             </div>
             <div>
               <span className="font-medium">Total Putts:</span>{" "}
-              {scores.reduce((sum, score) => sum + (score.putts || 0), 0)}
+              {scores.reduce((sum, score) => sum + (s.putts || 0), 0)}
             </div>
             <div>
               <span className="font-medium">Total Par:</span>{" "}
@@ -1270,6 +1279,9 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                   selected={roundDate}
                   onSelect={handleDateSelect}
                   initialFocus
+                  defaultMonth={roundDate}
+                  fromYear={2000}
+                  toYear={new Date().getFullYear()}
                 />
               </PopoverContent>
             </Popover>
