@@ -67,59 +67,60 @@ const Dashboard = () => {
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-8">Welcome back, Golfer!</h1>
       
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4 mb-8">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Rounds Played</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.roundsPlayed}</div>
-          </CardContent>
-        </Card>
+      {/* Stats Section with Handicap Circle and Stats Grid */}
+      <div className="flex flex-col md:flex-row gap-6 mb-8">
+        {/* Main Stats Grid in 2x2 formation */}
+        <div className="flex-grow grid grid-cols-2 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Rounds Played</CardTitle>
+              <Activity className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.roundsPlayed}</div>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Best Gross Score</CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.bestGrossScore}</div>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Best Gross Score</CardTitle>
+              <Award className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.bestGrossScore}</div>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Best Net Score</CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.bestNetScore}</div>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Best Net Score</CardTitle>
+              <Award className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.bestNetScore}</div>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Best To Par</CardTitle>
-            <TrendingDown className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${stats.bestToPar <= 0 ? "text-green-500" : "text-red-500"}`}>
-              {stats.bestToPar <= 0 ? stats.bestToPar : `+${stats.bestToPar}`}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Handicap</CardTitle>
-            <TrendingDown className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.handicap}</div>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Best To Par</CardTitle>
+              <TrendingDown className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${stats.bestToPar <= 0 ? "text-green-500" : "text-red-500"}`}>
+                {stats.bestToPar <= 0 ? stats.bestToPar : `+${stats.bestToPar}`}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Handicap Circle */}
+        <div className="flex items-center justify-center md:w-48">
+          <div className="flex flex-col items-center justify-center rounded-full bg-primary w-36 h-36 shadow-lg">
+            <span className="text-sm text-white font-medium mb-1">Handicap</span>
+            <span className="text-4xl text-white font-bold">{stats.handicap}</span>
+          </div>
+        </div>
       </div>
 
       {/* Add New Round Button */}
