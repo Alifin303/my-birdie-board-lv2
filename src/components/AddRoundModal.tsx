@@ -10,14 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from "@/components/ui/form";
+import { Loader2, Search } from "lucide-react";
 import { 
   Select,
   SelectContent,
@@ -25,10 +18,6 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Loader2, Search } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -71,22 +60,6 @@ interface CourseDetail {
   tees: CourseTee[];
 }
 
-// Form schema
-const formSchema = z.object({
-  courseId: z.string().optional(),
-  teeId: z.string().optional(),
-  scores: z.array(
-    z.object({
-      hole: z.number(),
-      par: z.number(),
-      strokes: z.number().min(1, "Strokes are required"),
-      putts: z.number().min(0, "Putts cannot be negative")
-    })
-  ).optional()
-});
-
-type FormData = z.infer<typeof formSchema>;
-
 export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   console.log("AddRoundModal rendered with open:", open);
   
@@ -104,16 +77,6 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Initialize react-hook-form
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      courseId: '',
-      teeId: '',
-      scores: []
-    }
-  });
-
   // Reset form when modal is closed
   useEffect(() => {
     console.log("AddRoundModal open state changed to:", open);
@@ -125,9 +88,8 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       setScores([]);
       setSearchError(null);
       setCurrentStep('search');
-      form.reset();
     }
-  }, [open, form]);
+  }, [open]);
 
   // Search for courses as user types
   useEffect(() => {
@@ -199,12 +161,10 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       console.log("Course details:", courseDetail);
       
       setSelectedCourse(courseDetail);
-      form.setValue('courseId', courseDetail.id);
       
       // Set default tee if available
       if (courseDetail.tees && courseDetail.tees.length > 0) {
         setSelectedTeeId(courseDetail.tees[0].id);
-        form.setValue('teeId', courseDetail.tees[0].id);
       }
 
       // Initialize scores for all holes
@@ -216,7 +176,6 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       }));
       
       setScores(initialScores);
-      form.setValue('scores', initialScores);
       
       // Clear search results
       setSearchResults([]);
@@ -240,7 +199,6 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   // Handle tee selection
   const handleTeeChange = (teeId: string) => {
     setSelectedTeeId(teeId);
-    form.setValue('teeId', teeId);
   };
 
   // Handle score input
@@ -257,17 +215,6 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       };
       return newScores;
     });
-    
-    // Update form values
-    const currentScores = form.getValues('scores') || [];
-    const newScores = [...currentScores];
-    if (newScores[holeIndex]) {
-      newScores[holeIndex] = {
-        ...newScores[holeIndex], 
-        [field]: numValue
-      };
-      form.setValue('scores', newScores);
-    }
   };
 
   // Validate and save the round
@@ -389,8 +336,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       onOpenChange(false);
       
       // Refresh data
-      queryClient.invalidateQueries({queryKey: ['userCourses']});
-      queryClient.invalidateQueries({queryKey: ['userStats']});
+      queryClient.invalidateQueries({queryKey: ['userRounds']});
     } catch (error: any) {
       console.error("Save round error:", error);
       toast({
@@ -435,7 +381,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
             <>
               {/* Course Search */}
               <div className="space-y-2">
-                <FormLabel>Search for a Golf Course</FormLabel>
+                <label className="text-sm font-medium">Search for a Golf Course</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <Search className="h-4 w-4 text-muted-foreground" />
@@ -505,7 +451,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
             
               {/* Tee Selection */}
               <div className="space-y-2">
-                <FormLabel>Select Tees</FormLabel>
+                <label className="text-sm font-medium">Select Tees</label>
                 <Select value={selectedTeeId} onValueChange={handleTeeChange}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select tees" />
@@ -522,7 +468,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
               
               {/* Score Entry Table */}
               <div className="space-y-2">
-                <FormLabel>Enter Your Scores</FormLabel>
+                <label className="text-sm font-medium">Enter Your Scores</label>
                 <div className="border rounded-md overflow-auto max-h-96">
                   <Table>
                     <TableHeader className="sticky top-0 bg-background">
