@@ -1,8 +1,10 @@
+
 import { useState } from "react";
 import { MainContent } from "@/components/MainContent";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
@@ -30,14 +32,24 @@ const Index = () => {
                   BirdieBoard
                 </h1>
               </div>
-              <Button 
-                onClick={() => setShowLoginDialog(true)}
-                variant="ghost" 
-                className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all"
-              >
-                <User className="mr-2 h-5 w-5" />
-                Log In
-              </Button>
+              <div className="flex items-center gap-3">
+                <Link to="/api-test">
+                  <Button 
+                    variant="outline" 
+                    className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all"
+                  >
+                    Test API
+                  </Button>
+                </Link>
+                <Button 
+                  onClick={() => setShowLoginDialog(true)}
+                  variant="ghost" 
+                  className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all"
+                >
+                  <User className="mr-2 h-5 w-5" />
+                  Log In
+                </Button>
+              </div>
             </nav>
           </div>
         </header>
