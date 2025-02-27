@@ -10,6 +10,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AddRoundModal } from "@/components/AddRoundModal";
 
+// Define the type for a round
+interface Round {
+  id: number;
+  date: string;
+  tee_name: string;
+  gross_score: number;
+  net_score?: number;
+  to_par_gross: number;
+  to_par_net?: number;
+  courses?: {
+    id: number;
+    name: string;
+    city?: string;
+    state?: string;
+  };
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -58,7 +75,7 @@ export default function Dashboard() {
         .order('date', { ascending: false });
         
       if (error) throw error;
-      return data || [];
+      return data as Round[] || [];
     }
   });
 
@@ -98,14 +115,14 @@ export default function Dashboard() {
   };
 
   // Group rounds by course
-  const roundsByCourse = userRounds ? userRounds.reduce((acc, round) => {
+  const roundsByCourse: Record<string, Round[]> = userRounds ? userRounds.reduce((acc, round) => {
     const courseName = round.courses?.name || 'Unknown Course';
     if (!acc[courseName]) {
       acc[courseName] = [];
     }
     acc[courseName].push(round);
     return acc;
-  }, {}) : {};
+  }, {} as Record<string, Round[]>) : {};
 
   // Render user's recent rounds
   const renderRecentRounds = () => {
@@ -125,7 +142,7 @@ export default function Dashboard() {
           <div key={courseName} className="border rounded-lg p-4 space-y-3">
             <h3 className="text-xl font-medium">{courseName}</h3>
             <div className="grid gap-3">
-              {rounds.map((round: any) => (
+              {rounds.map((round: Round) => (
                 <div key={round.id} className="bg-background border rounded-md p-3 flex justify-between items-center">
                   <div>
                     <p className="font-medium">
@@ -139,7 +156,7 @@ export default function Dashboard() {
                       {round.net_score && (
                         <span className="ml-2">
                           Net: {round.net_score}
-                          {round.to_par_net !== 0 && (
+                          {round.to_par_net !== 0 && round.to_par_net !== undefined && (
                             <span> ({round.to_par_net > 0 ? '+' : ''}{round.to_par_net})</span>
                           )}
                         </span>
