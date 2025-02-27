@@ -190,9 +190,16 @@ const Dashboard = () => {
   
   // Handle logout
   const handleLogout = () => {
-    alert("Logging out...");
-    // In a real app, this would clear the user session and redirect to login
-    // navigate("/login");
+    // Remove any stored user data from localStorage
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    
+    // Clear any user context/state if you have an auth context
+    // For example: logout() if using an AuthContext
+    
+    // Redirect to the login page
+    console.log("User logged out successfully");
+    navigate("/");
   };
   
   // Handle profile form submission
