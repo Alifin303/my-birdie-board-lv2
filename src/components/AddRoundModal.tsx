@@ -998,7 +998,8 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                 {scores.reduce((sum, score) => sum + (score.strokes || 0), 0) - 
                   scores.reduce((sum, score) => sum + score.par, 0)}
               </div>
-              {holeSelection !== 'all' && (
+              {/* Fixed TypeScript issue here - use a type assertion to clarify type */}
+              {(holeSelection as HoleSelection) !== 'all' && (
                 <div className="col-span-2 text-amber-600">
                   <p className="text-sm">
                     Note: 9-hole rounds will not contribute to handicap calculations.
@@ -1195,7 +1196,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       );
     } else {
       // Back 9 only
-      const backNine = scores.slice(0, 9); // We're actually showing the first 9 scores, which are the back 9 when this selection is made
+      const backNine = scores.slice(0, 9); // The scores array already only contains the back 9 holes
       
       return (
         <div className="space-y-6">
@@ -1229,8 +1230,12 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="mt-1">
-                    {holeSelection === 'all' ? 'All 18 Holes' : 
-                     holeSelection === 'front9' ? 'Front 9 Holes' : 'Back 9 Holes'}
+                    {/* Use explicit type guard to avoid TypeScript errors */}
+                    {(() => {
+                      const selection = holeSelection as HoleSelection;
+                      return selection === 'all' ? 'All 18 Holes' : 
+                             selection === 'front9' ? 'Front 9 Holes' : 'Back 9 Holes';
+                    })()}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
