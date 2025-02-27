@@ -14,6 +14,7 @@ const ApiTest = () => {
   const [courseDetails, setCourseDetails] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [rawResponse, setRawResponse] = useState<string | null>(null);
+  const [diagnosticInfo, setDiagnosticInfo] = useState<string | null>(null);
 
   const handleSearch = async () => {
     if (!searchQuery) return;
@@ -23,6 +24,7 @@ const ApiTest = () => {
     setSearchResults([]);
     setCourseDetails(null);
     setRawResponse(null);
+    setDiagnosticInfo(null);
     
     try {
       console.log("Testing searchCourses API with query:", searchQuery);
@@ -31,11 +33,11 @@ const ApiTest = () => {
       setSearchResults(courses);
       
       if (courses.length === 0) {
-        setError("No courses found with that name. Try a different search term.");
+        setError(`No courses found matching "${searchQuery}". Try a different search term.`);
       }
     } catch (err: any) {
       console.error("API search error:", err);
-      setError(`An error occurred while searching for courses: ${err.message}`);
+      setError(`Error connecting to Golf Course API: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -71,40 +73,72 @@ const ApiTest = () => {
     setIsLoading(true);
     setError(null);
     setRawResponse(null);
+    setDiagnosticInfo(null);
     
     try {
+      // Start capturing diagnostic info
+      let diagInfo = [];
+      diagInfo.push(`Testing direct API request to Golf Course API`);
+      diagInfo.push(`Search query: "${searchQuery}"`);
+      diagInfo.push(`Time: ${new Date().toISOString()}`);
+      
       // Direct API call to see raw response
+      const requestUrl = `https://golfcourseapi.com/api/v1/courses?search=${encodeURIComponent(searchQuery)}`;
+      diagInfo.push(`Request URL: ${requestUrl}`);
+      
+      const headers = {
+        'Authorization': 'Key 7GG4N6R5NOXNHW7H5A7EQVGL2U',
+        'Content-Type': 'application/json'
+      };
+      diagInfo.push(`Request headers: ${JSON.stringify(headers)}`);
+      
+      diagInfo.push(`Sending request...`);
       const response = await fetch(
-        `https://golfcourseapi.com/api/v1/courses?search=${encodeURIComponent(searchQuery)}`,
+        requestUrl,
         { 
           method: 'GET',
-          headers: {
-            'Authorization': 'Key 7GG4N6R5NOXNHW7H5A7EQVGL2U',
-            'Content-Type': 'application/json'
-          }
+          headers: headers,
+          mode: 'cors',
+          credentials: 'omit',
+          signal: AbortSignal.timeout(10000)
         }
       );
       
+      diagInfo.push(`Response received`);
+      diagInfo.push(`Status: ${response.status} ${response.statusText}`);
+      diagInfo.push(`Response headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()))}`);
+      
       const responseText = await response.text();
-      let formattedResponse;
+      diagInfo.push(`Response body length: ${responseText.length} bytes`);
+      
+      setDiagnosticInfo(diagInfo.join('\n'));
       
       try {
         // Try to parse as JSON for nice formatting
         const jsonResponse = JSON.parse(responseText);
-        formattedResponse = JSON.stringify(jsonResponse, null, 2);
+        setRawResponse(JSON.stringify(jsonResponse, null, 2));
+        
+        // Log useful information about the response
+        if (jsonResponse.data && Array.isArray(jsonResponse.data)) {
+          diagInfo.push(`Found ${jsonResponse.data.length} courses in response`);
+        } else {
+          diagInfo.push(`Response doesn't contain an array of courses`);
+        }
       } catch {
         // If it's not JSON, just use the text
-        formattedResponse = responseText;
+        setRawResponse(responseText);
+        diagInfo.push(`Response is not valid JSON`);
       }
       
-      setRawResponse(formattedResponse);
+      setDiagnosticInfo(diagInfo.join('\n'));
       
       if (!response.ok) {
         setError(`API Error: ${response.status} ${response.statusText}`);
       }
     } catch (err: any) {
       console.error("Raw request error:", err);
-      setError(`An error occurred during raw request: ${err.message}`);
+      setError(`Connection error: ${err.message}`);
+      setDiagnosticInfo(`Error during API request: ${err.toString()}\n\nThis may indicate a CORS issue or that the API is unreachable.`);
     } finally {
       setIsLoading(false);
     }
@@ -151,6 +185,16 @@ const ApiTest = () => {
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
+        )}
+        
+        {/* Diagnostic Info */}
+        {diagnosticInfo && (
+          <div className="mt-4 mb-4">
+            <h3 className="text-lg font-medium mb-2">API Diagnostic Information:</h3>
+            <div className="bg-muted p-4 rounded-md overflow-x-auto">
+              <pre className="text-xs whitespace-pre-wrap">{diagnosticInfo}</pre>
+            </div>
+          </div>
         )}
         
         {/* Raw Response Display */}
