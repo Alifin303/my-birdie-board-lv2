@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
-import { searchCourses, getCourseDetails } from "@/services/golfCourseApi";
+import { searchCourses, getCourseDetails, GolfCourse, CourseDetail } from "@/services/golfCourseApi";
 
 const ApiTest = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
-  const [courseDetails, setCourseDetails] = useState<any | null>(null);
+  const [searchResults, setSearchResults] = useState<GolfCourse[]>([]);
+  const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
+  const [courseDetails, setCourseDetails] = useState<CourseDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [rawResponse, setRawResponse] = useState<string | null>(null);
   const [diagnosticInfo, setDiagnosticInfo] = useState<string | null>(null);
@@ -43,7 +43,7 @@ const ApiTest = () => {
     }
   };
 
-  const handleGetDetails = async (courseId: string) => {
+  const handleGetDetails = async (courseId: number) => {
     setIsLoading(true);
     setError(null);
     setCourseDetails(null);
@@ -82,13 +82,12 @@ const ApiTest = () => {
       diagInfo.push(`Search query: "${searchQuery}"`);
       diagInfo.push(`Time: ${new Date().toISOString()}`);
       
-      // Direct API call with correct endpoint
+      // Direct API call with correct endpoint from API spec
       const searchParams = new URLSearchParams({
-        q: searchQuery.trim(),
-        limit: '20'
+        search_query: searchQuery.trim()
       });
       
-      const requestUrl = `https://api.golfcourseapi.com/v1/search/courses?${searchParams}`;
+      const requestUrl = `https://api.golfcourseapi.com/v1/search?${searchParams}`;
       diagInfo.push(`Request URL: ${requestUrl}`);
       
       const headers = {
@@ -230,10 +229,11 @@ const ApiTest = () => {
                   className={`p-4 hover:bg-muted cursor-pointer ${selectedCourseId === course.id ? 'bg-muted' : ''}`}
                   onClick={() => handleGetDetails(course.id)}
                 >
-                  <p className="font-medium">{course.name}</p>
+                  <p className="font-medium">{course.course_name}</p>
+                  <p className="text-sm">{course.club_name}</p>
                   <p className="text-sm text-muted-foreground">
-                    {course.city}{course.state ? `, ${course.state}` : ''}
-                    {course.country && course.country !== 'USA' ? `, ${course.country}` : ''}
+                    {course.location.city}{course.location.state ? `, ${course.location.state}` : ''}
+                    {course.location.country && course.location.country !== 'United States' ? `, ${course.location.country}` : ''}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">ID: {course.id}</p>
                 </div>
@@ -249,52 +249,96 @@ const ApiTest = () => {
           <h2 className="text-xl font-semibold mb-4">Course Details</h2>
           
           <div className="mb-4">
-            <h3 className="text-lg font-medium mb-1">{courseDetails.name}</h3>
+            <h3 className="text-lg font-medium mb-1">{courseDetails.course_name}</h3>
+            <p className="text-md mb-1">{courseDetails.club_name}</p>
             <p className="text-muted-foreground mb-4">
-              {courseDetails.city}{courseDetails.state ? `, ${courseDetails.state}` : ''}
-              {courseDetails.country && courseDetails.country !== 'USA' ? `, ${courseDetails.country}` : ''}
+              {courseDetails.location.city}{courseDetails.location.state ? `, ${courseDetails.location.state}` : ''}
+              {courseDetails.location.country && courseDetails.location.country !== 'United States' ? `, ${courseDetails.location.country}` : ''}
             </p>
             
-            {/* Tees */}
-            <h4 className="font-medium mb-2">Tees:</h4>
-            <div className="grid gap-2 mb-6">
-              {courseDetails.tees.map((tee: any) => (
-                <div key={tee.id} className="p-3 border rounded-md bg-background">
-                  <p className="font-medium">{tee.name}</p>
-                  <p className="text-sm">Rating: {tee.rating}, Slope: {tee.slope}, Par: {tee.par}</p>
+            {/* Male Tees */}
+            {courseDetails.tees.male && courseDetails.tees.male.length > 0 && (
+              <>
+                <h4 className="font-medium mb-2">Men's Tees:</h4>
+                <div className="grid gap-2 mb-6">
+                  {courseDetails.tees.male.map((tee, index) => (
+                    <div key={index} className="p-3 border rounded-md bg-background">
+                      <p className="font-medium">{tee.tee_name}</p>
+                      <p className="text-sm">Rating: {tee.course_rating}, Slope: {tee.slope_rating}, Par: {tee.par_total}</p>
+                      <p className="text-sm">Total Yards: {tee.total_yards}</p>
+                      
+                      {/* Holes for this tee */}
+                      {tee.holes && tee.holes.length > 0 && (
+                        <div className="mt-2 overflow-x-auto">
+                          <table className="w-full text-xs border-collapse">
+                            <thead>
+                              <tr className="border-b">
+                                <th className="text-left py-1 px-2">Hole</th>
+                                <th className="text-left py-1 px-2">Par</th>
+                                <th className="text-left py-1 px-2">Yards</th>
+                                <th className="text-left py-1 px-2">Handicap</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y">
+                              {tee.holes.map((hole, holeIndex) => (
+                                <tr key={holeIndex} className="hover:bg-muted/30">
+                                  <td className="py-1 px-2">{holeIndex + 1}</td>
+                                  <td className="py-1 px-2">{hole.par}</td>
+                                  <td className="py-1 px-2">{hole.yardage}</td>
+                                  <td className="py-1 px-2">{hole.handicap}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            )}
             
-            {/* Holes */}
-            <h4 className="font-medium mb-2">Holes:</h4>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2 px-4">Hole</th>
-                    <th className="text-left py-2 px-4">Par</th>
-                    <th className="text-left py-2 px-4">Handicap</th>
-                    <th className="text-left py-2 px-4">Yards (First Tee)</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {courseDetails.holes.map((hole: any) => {
-                    const firstTeeId = courseDetails.tees[0]?.id;
-                    const yards = firstTeeId ? hole.yards[firstTeeId] : '-';
-                    
-                    return (
-                      <tr key={hole.id} className="hover:bg-muted/50">
-                        <td className="py-2 px-4">{hole.number}</td>
-                        <td className="py-2 px-4">{hole.par}</td>
-                        <td className="py-2 px-4">{hole.handicap}</td>
-                        <td className="py-2 px-4">{yards}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            {/* Female Tees */}
+            {courseDetails.tees.female && courseDetails.tees.female.length > 0 && (
+              <>
+                <h4 className="font-medium mb-2">Women's Tees:</h4>
+                <div className="grid gap-2 mb-6">
+                  {courseDetails.tees.female.map((tee, index) => (
+                    <div key={index} className="p-3 border rounded-md bg-background">
+                      <p className="font-medium">{tee.tee_name}</p>
+                      <p className="text-sm">Rating: {tee.course_rating}, Slope: {tee.slope_rating}, Par: {tee.par_total}</p>
+                      <p className="text-sm">Total Yards: {tee.total_yards}</p>
+                      
+                      {/* Holes for this tee */}
+                      {tee.holes && tee.holes.length > 0 && (
+                        <div className="mt-2 overflow-x-auto">
+                          <table className="w-full text-xs border-collapse">
+                            <thead>
+                              <tr className="border-b">
+                                <th className="text-left py-1 px-2">Hole</th>
+                                <th className="text-left py-1 px-2">Par</th>
+                                <th className="text-left py-1 px-2">Yards</th>
+                                <th className="text-left py-1 px-2">Handicap</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y">
+                              {tee.holes.map((hole, holeIndex) => (
+                                <tr key={holeIndex} className="hover:bg-muted/30">
+                                  <td className="py-1 px-2">{holeIndex + 1}</td>
+                                  <td className="py-1 px-2">{hole.par}</td>
+                                  <td className="py-1 px-2">{hole.yardage}</td>
+                                  <td className="py-1 px-2">{hole.handicap}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -304,6 +348,7 @@ const ApiTest = () => {
         <ul className="list-disc pl-5 space-y-1 text-sm">
           <li>Make sure your network connection allows outbound requests to golfcourseapi.com</li>
           <li>The API requires the Authorization header with the correct API key</li>
+          <li>Search parameter is 'search_query' according to the API specification</li>
           <li>If you're still having issues, try testing with common golf course names like "Augusta National" or "Pebble Beach"</li>
           <li>For persistent issues, contact GolfCourseAPI support with the error details shown above</li>
         </ul>
