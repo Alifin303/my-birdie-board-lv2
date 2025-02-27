@@ -39,8 +39,8 @@ export interface CourseDetail {
   tees: CourseTee[];
 }
 
-// Replace this with your actual RapidAPI key
-const RAPID_API_KEY = 'YOUR_RAPIDAPI_KEY';
+// RapidAPI key for Golf Course Finder API
+const RAPID_API_KEY = '12ed9a1bcemsh31a6ac7723dd5e3p17afabjsn0655c3579cfc';
 
 // API configuration
 const API_CONFIG = {
