@@ -25,17 +25,17 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
+import { useUser, useClerk } from "@clerk/clerk-react";
+import { useToast } from "@/components/ui/use-toast";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user, isLoaded: isUserLoaded } = useUser();
+  const { signOut } = useClerk();
+  const { toast } = useToast();
   
-  // Mock user data - would come from your authentication system in a real app
-  const user = {
-    firstName: "John",
-    lastName: "Smith",
-    email: "john.smith@example.com",
-    handicap: 8.4
-  };
+  // Mock golf data - would come from your backend in a real application
+  const handicap = 8.4;
   
   // This would come from your backend in a real application
   const stats = {
@@ -111,7 +111,7 @@ const Dashboard = () => {
   // Profile form
   const profileForm = useForm({
     defaultValues: {
-      email: user.email,
+      email: user?.primaryEmailAddress?.emailAddress || "",
       currentPassword: "",
       newPassword: "",
       confirmPassword: "",
@@ -176,46 +176,80 @@ const Dashboard = () => {
   // Handle download handicap certificate
   const handleDownloadCertificate = () => {
     // In a real app, this would generate a PDF with the user's handicap information
-    alert("Downloading handicap certificate...");
+    toast({
+      title: "Downloading certificate",
+      description: "Your handicap certificate is being generated.",
+    });
     // This would be implemented with a PDF generation library like jsPDF
   };
   
   // Handle view leaderboard button click
   const handleViewLeaderboard = (courseId: number) => {
     // In a real app, this would navigate to the leaderboard page for the course
-    alert(`Navigating to leaderboard for course ${courseId}...`);
+    toast({
+      title: "Leaderboard",
+      description: `Viewing leaderboard for course ${courseId}`,
+    });
     // This would be implemented with React Router navigation
     // navigate(`/leaderboard/${courseId}`);
   };
   
   // Handle logout
-  const handleLogout = () => {
-    // Remove any stored user data from localStorage
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    
-    // Clear any user context/state if you have an auth context
-    // For example: logout() if using an AuthContext
-    
-    // Redirect to the login page
-    console.log("User logged out successfully");
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+      navigate("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast({
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   // Handle profile form submission
-  const handleProfileSubmit = (data: any) => {
-    if (profileEditMode === "email") {
-      alert(`Email updated to: ${data.email}`);
-    } else if (profileEditMode === "password") {
-      alert("Password updated successfully");
+  const handleProfileSubmit = async (data: any) => {
+    try {
+      if (profileEditMode === "email") {
+        // In a real app with Clerk, we would update the email
+        // await user?.update({ email: data.email });
+        toast({
+          title: "Email updated",
+          description: `Email updated to: ${data.email}`,
+        });
+      } else if (profileEditMode === "password") {
+        // In a real app with Clerk, we would update the password
+        // await user?.update({ password: data.newPassword });
+        toast({
+          title: "Password updated",
+          description: "Your password has been successfully updated.",
+        });
+      }
+      
+      setProfileEditMode(null);
+      profileForm.reset();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
     }
-    
-    setProfileEditMode(null);
-    profileForm.reset();
   };
   
   // Render profile content
   const renderProfileContent = () => {
+    if (!isUserLoaded || !user) {
+      return <div>Loading user data...</div>;
+    }
+
     return (
       <div className="space-y-4">
         {profileEditMode === null && (
@@ -233,7 +267,7 @@ const Dashboard = () => {
             
             <div>
               <Label>Email Address</Label>
-              <div className="text-lg font-medium">{user.email}</div>
+              <div className="text-lg font-medium">{user.primaryEmailAddress?.emailAddress}</div>
             </div>
             
             <div className="flex gap-4 pt-4">
@@ -411,6 +445,10 @@ const Dashboard = () => {
   
   // Render the main dashboard view
   const renderDashboard = () => {
+    if (!isUserLoaded || !user) {
+      return <div>Loading user data...</div>;
+    }
+
     return (
       <div className="animate-fade-in">
         <h1 className="text-3xl font-bold mb-2">{user.firstName} {user.lastName}'s Clubhouse</h1>
@@ -481,7 +519,7 @@ const Dashboard = () => {
           <div className="flex flex-col items-center justify-center gap-4">
             <div className="flex flex-col items-center justify-center rounded-full bg-primary w-36 h-36 shadow-lg">
               <span className="text-sm text-white font-medium mb-1">Handicap</span>
-              <span className="text-4xl text-white font-bold">{user.handicap}</span>
+              <span className="text-4xl text-white font-bold">{handicap}</span>
             </div>
             <Button 
               variant="outline" 
@@ -579,6 +617,17 @@ const Dashboard = () => {
       </div>
     );
   };
+
+  // If user data isn't loaded yet, show a loading message
+  if (!isUserLoaded) {
+    return <div className="flex items-center justify-center h-screen">Loading user data...</div>;
+  }
+
+  // If there's no user, they shouldn't be on this page
+  if (!user) {
+    navigate("/");
+    return null;
+  }
 
   return (
     <div className="container mx-auto py-8 px-4">

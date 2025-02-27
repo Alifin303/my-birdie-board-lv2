@@ -9,6 +9,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserPlus } from "lucide-react";
 import { useToast } from "./ui/use-toast";
+import { useSignUp } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 
 const signUpSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters").max(20, "Username must be less than 20 characters"),
@@ -22,7 +24,10 @@ type SignUpFormData = z.infer<typeof signUpSchema>;
 
 export function SignUpDialog() {
   const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { signUp, isLoaded: isClerkLoaded } = useSignUp();
+  const navigate = useNavigate();
 
   const form = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
@@ -36,21 +41,46 @@ export function SignUpDialog() {
   });
 
   const onSubmit = async (data: SignUpFormData) => {
-    try {
-      // TODO: Implement actual signup logic here
-      console.log("Sign up data:", data);
-      toast({
-        title: "Account created!",
-        description: "Welcome to BirdieBoard!",
-      });
-      setOpen(false);
-      form.reset();
-    } catch (error) {
+    if (!isClerkLoaded || !signUp) {
       toast({
         title: "Error",
-        description: "Something went wrong. Please try again.",
+        description: "Authentication system is not ready. Please try again.",
         variant: "destructive",
       });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const result = await signUp.create({
+        emailAddress: data.email,
+        password: data.password,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        username: data.username,
+      });
+
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+
+      toast({
+        title: "Account created!",
+        description: "Please check your email to verify your account.",
+      });
+      
+      setOpen(false);
+      form.reset();
+
+      // You might want to redirect to a verification page instead
+      navigate("/dashboard");
+    } catch (error: any) {
+      console.error("Sign up error:", error);
+      toast({
+        title: "Error",
+        description: error.errors?.[0]?.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -136,7 +166,9 @@ export function SignUpDialog() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">Create Account</Button>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Creating Account..." : "Create Account"}
+            </Button>
           </form>
         </Form>
       </DialogContent>

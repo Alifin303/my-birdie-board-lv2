@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Button } from "./ui/button";
@@ -10,6 +11,7 @@ import { LogIn } from "lucide-react";
 import { useToast } from "./ui/use-toast";
 import { SignUpDialog } from "./SignUpDialog";
 import { useNavigate } from "react-router-dom";
+import { useSignIn } from "@clerk/clerk-react";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -20,8 +22,10 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginDialog() {
   const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { signIn, isLoaded: isClerkLoaded } = useSignIn();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -32,22 +36,47 @@ export function LoginDialog() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    try {
-      // TODO: Implement actual login logic here
-      console.log("Login data:", data);
+    if (!isClerkLoaded || !signIn) {
       toast({
-        title: "Welcome back!",
-        description: "You have successfully logged in.",
+        title: "Error",
+        description: "Authentication system is not ready. Please try again.",
+        variant: "destructive",
       });
-      setOpen(false);
-      form.reset();
-      navigate("/dashboard");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const result = await signIn.create({
+        identifier: data.email,
+        password: data.password,
+      });
+
+      if (result.status === "complete") {
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully logged in.",
+        });
+        setOpen(false);
+        form.reset();
+        navigate("/dashboard");
+      } else {
+        // Handle incomplete sign-in (e.g., 2FA required)
+        console.log("Incomplete sign-in status:", result);
+        toast({
+          title: "Additional verification required",
+          description: "Please complete the verification process.",
+        });
+      }
     } catch (error) {
+      console.error("Login error:", error);
       toast({
         title: "Error",
         description: "Invalid email or password.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -95,7 +124,9 @@ export function LoginDialog() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">Log in</Button>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Logging in..." : "Log in"}
+            </Button>
           </form>
         </Form>
         <div className="mt-4 space-y-2">
@@ -103,7 +134,7 @@ export function LoginDialog() {
             variant="link" 
             className="text-sm text-muted-foreground hover:text-primary p-0 h-auto"
             onClick={() => {
-              // TODO: Implement password reset logic
+              // Clerk reset password functionality would be added here
               toast({
                 title: "Password Reset",
                 description: "If an account exists, we'll send you reset instructions.",
