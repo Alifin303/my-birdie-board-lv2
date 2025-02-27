@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, CalendarIcon } from "lucide-react";
 import { 
   Select,
   SelectContent,
@@ -23,6 +23,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
 
 // Types for Golf Course API responses
 interface GolfCourse {
@@ -74,6 +77,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   const [searchError, setSearchError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<'search' | 'scorecard'>('search');
   const [previouslyPlayedCourses, setPreviouslyPlayedCourses] = useState<GolfCourse[]>([]);
+  const [roundDate, setRoundDate] = useState<Date>(new Date());
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -89,6 +93,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       setScores([]);
       setSearchError(null);
       setCurrentStep('search');
+      setRoundDate(new Date());
     }
   }, [open]);
 
@@ -409,7 +414,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         .insert({
           user_id: session.user.id,
           course_id: courseDbId,
-          date: new Date().toISOString(),
+          date: roundDate.toISOString(),
           tee_id: selectedTeeId,
           tee_name: selectedTee.name,
           gross_score: totalStrokes,
@@ -490,9 +495,202 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     );
   };
 
+  // Render horizontal scorecard
+  const renderHorizontalScorecard = () => {
+    if (!selectedCourse) return null;
+
+    // Group scores in sets of 9 holes
+    const frontNine = scores.slice(0, 9);
+    const backNine = scores.slice(9, 18);
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">Round Date</p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="mt-1"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {format(roundDate, "PPP")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={roundDate}
+                  onSelect={(date) => date && setRoundDate(date)}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+
+        <div className="space-y-8">
+          {/* Front Nine */}
+          <div className="border rounded-md overflow-x-auto">
+            <table className="w-full">
+              <thead className="border-b">
+                <tr>
+                  <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-left">Front</th>
+                  {frontNine.map(score => (
+                    <th key={`hole-${score.hole}`} className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">
+                      {score.hole}
+                    </th>
+                  ))}
+                  <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">Out</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b">
+                  <td className="text-sm font-medium text-muted-foreground px-2 py-2">Par</td>
+                  {frontNine.map(score => (
+                    <td key={`par-${score.hole}`} className="text-sm text-center px-2 py-2">
+                      {score.par}
+                    </td>
+                  ))}
+                  <td className="text-sm font-medium px-2 py-2 text-center">
+                    {frontNine.reduce((sum, s) => sum + s.par, 0)}
+                  </td>
+                </tr>
+                <tr className="border-b">
+                  <td className="text-sm font-medium text-muted-foreground px-2 py-2">Strokes</td>
+                  {frontNine.map((score, index) => (
+                    <td key={`strokes-${score.hole}`} className="text-center px-2 py-2">
+                      <Input
+                        type="number"
+                        min="1"
+                        value={score.strokes || ""}
+                        onChange={(e) => handleScoreChange(index, 'strokes', e.target.value)}
+                        className="w-12 h-8 text-center"
+                        required
+                      />
+                    </td>
+                  ))}
+                  <td className="text-sm font-medium px-2 py-2 text-center">
+                    {frontNine.reduce((sum, s) => sum + (s.strokes || 0), 0)}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="text-sm font-medium text-muted-foreground px-2 py-2">Putts</td>
+                  {frontNine.map((score, index) => (
+                    <td key={`putts-${score.hole}`} className="text-center px-2 py-2">
+                      <Input
+                        type="number"
+                        min="0"
+                        value={score.putts || ""}
+                        onChange={(e) => handleScoreChange(index, 'putts', e.target.value)}
+                        className="w-12 h-8 text-center"
+                      />
+                    </td>
+                  ))}
+                  <td className="text-sm font-medium px-2 py-2 text-center">
+                    {frontNine.reduce((sum, s) => sum + (s.putts || 0), 0)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* Back Nine */}
+          <div className="border rounded-md overflow-x-auto">
+            <table className="w-full">
+              <thead className="border-b">
+                <tr>
+                  <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-left">Back</th>
+                  {backNine.map(score => (
+                    <th key={`hole-${score.hole}`} className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">
+                      {score.hole}
+                    </th>
+                  ))}
+                  <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">In</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b">
+                  <td className="text-sm font-medium text-muted-foreground px-2 py-2">Par</td>
+                  {backNine.map(score => (
+                    <td key={`par-${score.hole}`} className="text-sm text-center px-2 py-2">
+                      {score.par}
+                    </td>
+                  ))}
+                  <td className="text-sm font-medium px-2 py-2 text-center">
+                    {backNine.reduce((sum, s) => sum + s.par, 0)}
+                  </td>
+                </tr>
+                <tr className="border-b">
+                  <td className="text-sm font-medium text-muted-foreground px-2 py-2">Strokes</td>
+                  {backNine.map((score, index) => (
+                    <td key={`strokes-${score.hole}`} className="text-center px-2 py-2">
+                      <Input
+                        type="number"
+                        min="1"
+                        value={score.strokes || ""}
+                        onChange={(e) => handleScoreChange(index + 9, 'strokes', e.target.value)}
+                        className="w-12 h-8 text-center"
+                        required
+                      />
+                    </td>
+                  ))}
+                  <td className="text-sm font-medium px-2 py-2 text-center">
+                    {backNine.reduce((sum, s) => sum + (s.strokes || 0), 0)}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="text-sm font-medium text-muted-foreground px-2 py-2">Putts</td>
+                  {backNine.map((score, index) => (
+                    <td key={`putts-${score.hole}`} className="text-center px-2 py-2">
+                      <Input
+                        type="number"
+                        min="0"
+                        value={score.putts || ""}
+                        onChange={(e) => handleScoreChange(index + 9, 'putts', e.target.value)}
+                        className="w-12 h-8 text-center"
+                      />
+                    </td>
+                  ))}
+                  <td className="text-sm font-medium px-2 py-2 text-center">
+                    {backNine.reduce((sum, s) => sum + (s.putts || 0), 0)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Totals */}
+        <div className="border rounded-md p-4 bg-muted/50">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <span className="font-medium">Total Strokes:</span>{" "}
+              {scores.reduce((sum, score) => sum + (score.strokes || 0), 0)}
+            </div>
+            <div>
+              <span className="font-medium">Total Putts:</span>{" "}
+              {scores.reduce((sum, score) => sum + (score.putts || 0), 0)}
+            </div>
+            <div>
+              <span className="font-medium">Total Par:</span>{" "}
+              {scores.reduce((sum, score) => sum + score.par, 0)}
+            </div>
+            <div>
+              <span className="font-medium">To Par:</span>{" "}
+              {scores.reduce((sum, score) => sum + (score.strokes || 0), 0) - 
+                scores.reduce((sum, score) => sum + score.par, 0)}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto" onPointerDownOutside={(e) => e.preventDefault()}>
+      <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-y-auto" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Add a New Round</DialogTitle>
           <DialogDescription>
@@ -600,73 +798,8 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                 </Select>
               </div>
               
-              {/* Score Entry Table */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Enter Your Scores</label>
-                <div className="border rounded-md overflow-auto max-h-96">
-                  <Table>
-                    <TableHeader className="sticky top-0 bg-background">
-                      <TableRow>
-                        <TableHead className="w-20">Hole</TableHead>
-                        <TableHead className="w-20">Par</TableHead>
-                        <TableHead>Strokes*</TableHead>
-                        <TableHead>Putts</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {scores.map((score, index) => (
-                        <TableRow key={index}>
-                          <TableCell>{score.hole}</TableCell>
-                          <TableCell>{score.par}</TableCell>
-                          <TableCell>
-                            <Input
-                              type="number"
-                              min="1"
-                              value={score.strokes || ""}
-                              onChange={(e) => handleScoreChange(index, 'strokes', e.target.value)}
-                              className="w-20"
-                              required
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input
-                              type="number"
-                              min="0"
-                              value={score.putts || ""}
-                              onChange={(e) => handleScoreChange(index, 'putts', e.target.value)}
-                              className="w-20"
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-                <p className="text-xs text-muted-foreground">* Strokes are required for all holes</p>
-              </div>
-              
-              {/* Totals */}
-              <div className="border rounded-md p-4 bg-muted/50">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <span className="font-medium">Total Strokes:</span>{" "}
-                    {scores.reduce((sum, score) => sum + (score.strokes || 0), 0)}
-                  </div>
-                  <div>
-                    <span className="font-medium">Total Putts:</span>{" "}
-                    {scores.reduce((sum, score) => sum + (score.putts || 0), 0)}
-                  </div>
-                  <div>
-                    <span className="font-medium">Total Par:</span>{" "}
-                    {scores.reduce((sum, score) => sum + score.par, 0)}
-                  </div>
-                  <div>
-                    <span className="font-medium">To Par:</span>{" "}
-                    {scores.reduce((sum, score) => sum + (score.strokes || 0), 0) - 
-                     scores.reduce((sum, score) => sum + score.par, 0)}
-                  </div>
-                </div>
-              </div>
+              {/* Horizontal Scorecard */}
+              {renderHorizontalScorecard()}
             </>
           )}
         </div>
