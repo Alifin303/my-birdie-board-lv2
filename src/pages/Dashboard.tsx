@@ -1,7 +1,8 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { User, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -15,6 +16,11 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Log modal state changes for debugging
+  useEffect(() => {
+    console.log("Modal state changed:", isModalOpen);
+  }, [isModalOpen]);
 
   // Fetch user profile
   const { data: profile } = useQuery({
@@ -63,13 +69,22 @@ export default function Dashboard() {
     );
   };
 
+  // Handle opening the add round modal
+  const handleOpenModal = () => {
+    console.log("Opening modal...");
+    setIsModalOpen(true);
+  };
+
   // Render dashboard content
   const renderDashboard = () => {
     return (
       <div className="space-y-8">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Welcome, {profile?.first_name || 'Golfer'}!</h1>
-          <Button onClick={() => setIsModalOpen(true)}>
+          <Button 
+            onClick={handleOpenModal}
+            className="relative" // Making sure the button has position context
+          >
             Add a New Round
           </Button>
         </div>
@@ -103,6 +118,12 @@ export default function Dashboard() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <Dialog>
+              <DialogTrigger asChild>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile Settings</span>
+                </DropdownMenuItem>
+              </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                   <DialogTitle>Profile Settings</DialogTitle>
@@ -124,6 +145,7 @@ export default function Dashboard() {
       
       {selectedCourse ? renderCourseDetail() : renderDashboard()}
 
+      {/* Modal for adding a new round - only render it when needed */}
       <AddRoundModal 
         open={isModalOpen} 
         onOpenChange={setIsModalOpen}
