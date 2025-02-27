@@ -49,11 +49,16 @@ interface SimplifiedTee {
   rating: number;
   slope: number;
   par: number;
+  yards?: number;
+  gender: 'male' | 'female';
+  originalIndex: number;
 }
 
 interface SimplifiedHole {
   number: number;
   par: number;
+  yards?: number;
+  handicap?: number;
 }
 
 interface SimplifiedCourseDetail {
@@ -88,7 +93,10 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
         name: tee.tee_name,
         rating: tee.course_rating,
         slope: tee.slope_rating,
-        par: tee.par_total
+        par: tee.par_total,
+        yards: tee.total_yards,
+        gender: 'male',
+        originalIndex: index
       });
     });
   }
@@ -101,7 +109,10 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
         name: tee.tee_name + " (W)",
         rating: tee.course_rating,
         slope: tee.slope_rating,
-        par: tee.par_total
+        par: tee.par_total,
+        yards: tee.total_yards,
+        gender: 'female',
+        originalIndex: index
       });
     });
   }
@@ -109,31 +120,73 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
   return tees;
 };
 
-const extractHolesFromApiResponse = (courseDetail: CourseDetail): SimplifiedHole[] => {
-  // Find the first available tee data to extract holes
+const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): SimplifiedHole[] => {
+  // Parse the tee ID to get gender and index
+  const [gender, indexStr] = teeId.split('-');
+  const index = parseInt(indexStr);
+  
+  // Get the correct tee data
+  let teeData: TeeBox | undefined;
+  if (gender === 'm' && courseDetail.tees.male && courseDetail.tees.male.length > index) {
+    teeData = courseDetail.tees.male[index];
+  } else if (gender === 'f' && courseDetail.tees.female && courseDetail.tees.female.length > index) {
+    teeData = courseDetail.tees.female[index];
+  }
+  
+  // If we found the tee data and it has holes, convert them
+  if (teeData && teeData.holes && teeData.holes.length > 0) {
+    return teeData.holes.map((hole, idx) => ({
+      number: idx + 1,
+      par: hole.par,
+      yards: hole.yardage,
+      handicap: hole.handicap
+    }));
+  }
+  
+  // Default fallback: use the first available tee data
   let holesData: Array<{par: number, yardage: number, handicap: number}> = [];
   
-  if (courseDetail.tees.male && courseDetail.tees.male.length > 0) {
+  if (courseDetail.tees.male && courseDetail.tees.male.length > 0 && courseDetail.tees.male[0].holes) {
     holesData = courseDetail.tees.male[0].holes;
-  } else if (courseDetail.tees.female && courseDetail.tees.female.length > 0) {
+  } else if (courseDetail.tees.female && courseDetail.tees.female.length > 0 && courseDetail.tees.female[0].holes) {
     holesData = courseDetail.tees.female[0].holes;
   }
   
-  return holesData.map((hole, index) => ({
-    number: index + 1,
-    par: hole.par
+  // Map the holes data to our simplified format
+  return holesData.map((hole, idx) => ({
+    number: idx + 1,
+    par: hole.par,
+    yards: hole.yardage,
+    handicap: hole.handicap
   }));
 };
 
 const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): SimplifiedCourseDetail => {
+  const tees = extractTeesFromApiResponse(courseDetail);
+  
+  // For initial holes data, use the first tee (if available)
+  let holes: SimplifiedHole[] = [];
+  if (tees.length > 0) {
+    const firstTeeId = tees[0].id;
+    holes = extractHolesForTee(courseDetail, firstTeeId);
+  } else {
+    // Fallback if no tees available: create default 18 holes
+    holes = Array(18).fill(null).map((_, idx) => ({
+      number: idx + 1,
+      par: 4,
+      yards: 400,
+      handicap: idx + 1
+    }));
+  }
+  
   return {
     id: courseDetail.id,
     name: courseDetail.course_name || courseDetail.club_name,
     city: courseDetail.location.city || '',
     state: courseDetail.location.state || '',
     country: courseDetail.location.country,
-    tees: extractTeesFromApiResponse(courseDetail),
-    holes: extractHolesFromApiResponse(courseDetail)
+    tees: tees,
+    holes: holes
   };
 };
 
@@ -146,8 +199,9 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   const [isSearching, setIsSearching] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<SimplifiedCourseDetail | null>(null);
   const [selectedTeeId, setSelectedTeeId] = useState<string>("");
+  const [originalCourseDetail, setOriginalCourseDetail] = useState<CourseDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [scores, setScores] = useState<{ hole: number; par: number; strokes: number; putts: number; }[]>([]);
+  const [scores, setScores] = useState<{ hole: number; par: number; strokes: number; putts: number; yards?: number; handicap?: number; }[]>([]);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<'search' | 'scorecard'>('search');
   const [previouslyPlayedCourses, setPreviouslyPlayedCourses] = useState<SimplifiedGolfCourse[]>([]);
@@ -164,6 +218,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       setSearchQuery("");
       setSearchResults([]);
       setSelectedCourse(null);
+      setOriginalCourseDetail(null);
       setSelectedTeeId("");
       setScores([]);
       setSearchError(null);
@@ -258,6 +313,42 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     }
   };
 
+  // Update scorecard when tee selection changes
+  const updateScorecardForTee = (teeId: string, holeCount: number = 18) => {
+    if (!originalCourseDetail) return;
+    
+    // Get holes data for the selected tee
+    const holesData = extractHolesForTee(originalCourseDetail, teeId);
+    
+    // Ensure we have the correct number of holes (default 18)
+    const normalizedHoles = holesData.length === holeCount 
+      ? holesData 
+      : Array(holeCount).fill(null).map((_, idx) => {
+          if (idx < holesData.length) return holesData[idx];
+          return { number: idx + 1, par: 4, yards: 400, handicap: idx + 1 };
+        });
+    
+    // Create scores array with par values from the selected tee
+    const newScores = normalizedHoles.map(hole => ({
+      hole: hole.number,
+      par: hole.par,
+      strokes: 0,
+      putts: 0,
+      yards: hole.yards,
+      handicap: hole.handicap
+    }));
+    
+    setScores(newScores);
+    
+    // Also update the holes in the selected course object
+    if (selectedCourse) {
+      setSelectedCourse({
+        ...selectedCourse,
+        holes: normalizedHoles
+      });
+    }
+  };
+
   // Fetch course details when a course is selected
   const handleCourseSelect = async (course: SimplifiedGolfCourse) => {
     setIsLoading(true);
@@ -294,24 +385,30 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         });
       }
       
+      // Save the original API course detail for reference
+      setOriginalCourseDetail(apiCourseDetail);
+      
       // Convert API response to the format expected by the component
       const simplifiedCourseDetail = convertToSimplifiedCourseDetail(apiCourseDetail);
       setSelectedCourse(simplifiedCourseDetail);
       
       // Set default tee if available
       if (simplifiedCourseDetail.tees && simplifiedCourseDetail.tees.length > 0) {
-        setSelectedTeeId(simplifiedCourseDetail.tees[0].id);
+        const defaultTeeId = simplifiedCourseDetail.tees[0].id;
+        setSelectedTeeId(defaultTeeId);
+        
+        // Update the scorecard based on the selected tee
+        updateScorecardForTee(defaultTeeId);
+      } else {
+        // If no tees available, create a default scorecard
+        const defaultScores = Array(18).fill(null).map((_, idx) => ({
+          hole: idx + 1,
+          par: 4,
+          strokes: 0,
+          putts: 0
+        }));
+        setScores(defaultScores);
       }
-
-      // Initialize scores for all holes
-      const initialScores = simplifiedCourseDetail.holes.map(hole => ({
-        hole: hole.number,
-        par: hole.par,
-        strokes: 0,
-        putts: 0
-      }));
-      
-      setScores(initialScores);
       
       // Clear search results
       setSearchResults([]);
@@ -334,7 +431,11 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
 
   // Handle tee selection
   const handleTeeChange = (teeId: string) => {
+    console.log("Selected tee ID:", teeId);
     setSelectedTeeId(teeId);
+    
+    // Update the scorecard based on the new selected tee
+    updateScorecardForTee(teeId);
   };
 
   // Handle score input
@@ -442,7 +543,16 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         courseDbId = newCourse.id;
       }
 
-      // Save the round
+      // Save the round with enhanced hole scores including par, yards, and handicap
+      const enhancedScores = scores.map(score => ({
+        hole: score.hole,
+        par: score.par,
+        strokes: score.strokes,
+        putts: score.putts,
+        yards: score.yards,
+        handicap: score.handicap
+      }));
+
       const { error: roundError } = await supabase
         .from('rounds')
         .insert({
@@ -455,7 +565,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
           net_score: netScore,
           to_par_gross: toParGross,
           to_par_net: toParNet,
-          hole_scores: scores,
+          hole_scores: enhancedScores,
         });
         
       if (roundError) {
@@ -494,6 +604,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   const handleBackToSearch = () => {
     setCurrentStep('search');
     setSelectedCourse(null);
+    setOriginalCourseDetail(null);
     setSelectedTeeId("");
     setScores([]);
   };
@@ -591,6 +702,34 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                     {frontNine.reduce((sum, s) => sum + s.par, 0)}
                   </td>
                 </tr>
+                {/* Yardage row - only show if we have yards data */}
+                {frontNine.some(score => score.yards) && (
+                  <tr className="border-b">
+                    <td className="text-sm font-medium text-muted-foreground px-2 py-2">Yards</td>
+                    {frontNine.map(score => (
+                      <td key={`yards-${score.hole}`} className="text-sm text-center px-2 py-2">
+                        {score.yards || '-'}
+                      </td>
+                    ))}
+                    <td className="text-sm font-medium px-2 py-2 text-center">
+                      {frontNine.reduce((sum, s) => sum + (s.yards || 0), 0)}
+                    </td>
+                  </tr>
+                )}
+                {/* Handicap row - only show if we have handicap data */}
+                {frontNine.some(score => score.handicap) && (
+                  <tr className="border-b">
+                    <td className="text-sm font-medium text-muted-foreground px-2 py-2">HCP</td>
+                    {frontNine.map(score => (
+                      <td key={`handicap-${score.hole}`} className="text-sm text-center px-2 py-2">
+                        {score.handicap || '-'}
+                      </td>
+                    ))}
+                    <td className="text-sm font-medium px-2 py-2 text-center">
+                      -
+                    </td>
+                  </tr>
+                )}
                 <tr className="border-b">
                   <td className="text-sm font-medium text-muted-foreground px-2 py-2">Strokes</td>
                   {frontNine.map((score, index) => (
@@ -656,6 +795,34 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                     {backNine.reduce((sum, s) => sum + s.par, 0)}
                   </td>
                 </tr>
+                {/* Yardage row - only show if we have yards data */}
+                {backNine.some(score => score.yards) && (
+                  <tr className="border-b">
+                    <td className="text-sm font-medium text-muted-foreground px-2 py-2">Yards</td>
+                    {backNine.map(score => (
+                      <td key={`yards-${score.hole}`} className="text-sm text-center px-2 py-2">
+                        {score.yards || '-'}
+                      </td>
+                    ))}
+                    <td className="text-sm font-medium px-2 py-2 text-center">
+                      {backNine.reduce((sum, s) => sum + (s.yards || 0), 0)}
+                    </td>
+                  </tr>
+                )}
+                {/* Handicap row - only show if we have handicap data */}
+                {backNine.some(score => score.handicap) && (
+                  <tr className="border-b">
+                    <td className="text-sm font-medium text-muted-foreground px-2 py-2">HCP</td>
+                    {backNine.map(score => (
+                      <td key={`handicap-${score.hole}`} className="text-sm text-center px-2 py-2">
+                        {score.handicap || '-'}
+                      </td>
+                    ))}
+                    <td className="text-sm font-medium px-2 py-2 text-center">
+                      -
+                    </td>
+                  </tr>
+                )}
                 <tr className="border-b">
                   <td className="text-sm font-medium text-muted-foreground px-2 py-2">Strokes</td>
                   {backNine.map((score, index) => (
@@ -838,11 +1005,33 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                   <SelectContent>
                     {selectedCourse.tees.map((tee) => (
                       <SelectItem key={tee.id} value={tee.id}>
-                        {tee.name} - Rating: {tee.rating}, Slope: {tee.slope}
+                        {tee.name} - Rating: {tee.rating.toFixed(1)}, Slope: {tee.slope}
+                        {tee.yards ? `, ${tee.yards} yards` : ''}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                
+                {/* Selected Tee Details */}
+                {selectedCourse.tees.length > 0 && selectedTeeId && (
+                  <div className="mt-4 p-3 border rounded-md bg-muted/30">
+                    <h4 className="font-medium mb-1">Selected Tee Details</h4>
+                    {(() => {
+                      const tee = selectedCourse.tees.find(t => t.id === selectedTeeId);
+                      if (!tee) return null;
+                      return (
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                          <div><span className="font-medium">Tee:</span> {tee.name}</div>
+                          <div><span className="font-medium">Gender:</span> {tee.gender === 'male' ? 'Men\'s' : 'Women\'s'}</div>
+                          <div><span className="font-medium">Course Rating:</span> {tee.rating.toFixed(1)}</div>
+                          <div><span className="font-medium">Slope Rating:</span> {tee.slope}</div>
+                          <div><span className="font-medium">Par:</span> {tee.par}</div>
+                          {tee.yards && <div><span className="font-medium">Total Yards:</span> {tee.yards}</div>}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
               </div>
               
               {/* Horizontal Scorecard */}
