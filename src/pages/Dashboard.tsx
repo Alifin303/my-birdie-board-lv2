@@ -16,6 +16,7 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
 
   // Log modal state changes for debugging
   useEffect(() => {
@@ -37,6 +38,27 @@ export default function Dashboard() {
         
       if (error) throw error;
       return data;
+    }
+  });
+
+  // Fetch user's golf rounds
+  const { data: userRounds } = useQuery({
+    queryKey: ['userRounds'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session found');
+      
+      const { data, error } = await supabase
+        .from('rounds')
+        .select(`
+          *,
+          courses:course_id(id, name, city, state)
+        `)
+        .eq('user_id', session.user.id)
+        .order('date', { ascending: false });
+        
+      if (error) throw error;
+      return data || [];
     }
   });
 
@@ -75,6 +97,67 @@ export default function Dashboard() {
     setIsModalOpen(true);
   };
 
+  // Group rounds by course
+  const roundsByCourse = userRounds ? userRounds.reduce((acc, round) => {
+    const courseName = round.courses?.name || 'Unknown Course';
+    if (!acc[courseName]) {
+      acc[courseName] = [];
+    }
+    acc[courseName].push(round);
+    return acc;
+  }, {}) : {};
+
+  // Render user's recent rounds
+  const renderRecentRounds = () => {
+    if (!userRounds || userRounds.length === 0) {
+      return (
+        <div className="text-center p-6 bg-muted rounded-lg">
+          <p className="text-lg">You haven't added any rounds yet.</p>
+          <p className="text-muted-foreground">Click "Add a New Round" to get started!</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        <h2 className="text-2xl font-semibold">Your Rounds</h2>
+        {Object.entries(roundsByCourse).map(([courseName, rounds]) => (
+          <div key={courseName} className="border rounded-lg p-4 space-y-3">
+            <h3 className="text-xl font-medium">{courseName}</h3>
+            <div className="grid gap-3">
+              {rounds.map((round: any) => (
+                <div key={round.id} className="bg-background border rounded-md p-3 flex justify-between items-center">
+                  <div>
+                    <p className="font-medium">
+                      {new Date(round.date).toLocaleDateString()} - {round.tee_name} Tees
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Gross: {round.gross_score} 
+                      {round.to_par_gross !== 0 && (
+                        <span> ({round.to_par_gross > 0 ? '+' : ''}{round.to_par_gross})</span>
+                      )}
+                      {round.net_score && (
+                        <span className="ml-2">
+                          Net: {round.net_score}
+                          {round.to_par_net !== 0 && (
+                            <span> ({round.to_par_net > 0 ? '+' : ''}{round.to_par_net})</span>
+                          )}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">View</Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   // Render dashboard content
   const renderDashboard = () => {
     return (
@@ -83,14 +166,14 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold">Welcome, {profile?.first_name || 'Golfer'}!</h1>
           <Button 
             onClick={handleOpenModal}
-            className="relative" // Making sure the button has position context
+            className="relative"
           >
             Add a New Round
           </Button>
         </div>
         
         <div className="grid gap-6">
-          {/* Dashboard content here */}
+          {renderRecentRounds()}
         </div>
       </div>
     );
@@ -117,9 +200,12 @@ export default function Dashboard() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <Dialog>
+            <Dialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen}>
               <DialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <DropdownMenuItem onSelect={(e) => {
+                  e.preventDefault();
+                  setProfileDialogOpen(true);
+                }}>
                   <User className="mr-2 h-4 w-4" />
                   <span>Profile Settings</span>
                 </DropdownMenuItem>
@@ -145,7 +231,7 @@ export default function Dashboard() {
       
       {selectedCourse ? renderCourseDetail() : renderDashboard()}
 
-      {/* Modal for adding a new round - only render it when needed */}
+      {/* Modal for adding a new round */}
       <AddRoundModal 
         open={isModalOpen} 
         onOpenChange={setIsModalOpen}
