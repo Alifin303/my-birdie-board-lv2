@@ -382,13 +382,8 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
       // Set today's date when modal opens
       setRoundDate(new Date());
       console.log("Modal opened, setting today's date:", new Date());
-    }
-  }, [open]);
-
-  // Load previously played courses when the modal opens
-  useEffect(() => {
-    if (open) {
-      console.log("Modal opened, fetching previously played courses");
+      
+      // Fetch previously played courses when the modal opens
       fetchPreviouslyPlayedCourses();
     }
   }, [open]);
@@ -741,21 +736,32 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
 
   // Validate and save the round
   const handleSaveRound = async () => {
+    // Validate course selection
+    if (!selectedCourse) {
+      toast({
+        title: "Validation Error",
+        description: "Please select a course.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate tee selection
+    if (!selectedTeeId) {
+      toast({
+        title: "Validation Error",
+        description: "Please select a tee box.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Validate scores
     const invalidScores = scores.filter(score => score.strokes === 0);
     if (invalidScores.length > 0) {
       toast({
         title: "Validation Error",
         description: `Please enter strokes for all holes.`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!selectedCourse || !selectedTeeId) {
-      toast({
-        title: "Validation Error",
-        description: "Please select a course and tee.",
         variant: "destructive",
       });
       return;
@@ -1516,7 +1522,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
           {currentStep === 'scorecard' && (
             <Button 
               onClick={handleSaveRound} 
-              disabled={isLoading || !selectedCourse || scores.some(score => score.strokes === 0)}
+              disabled={isLoading || !selectedCourse || !selectedTeeId || scores.some(score => score.strokes === 0)}
               type="button"
             >
               {isLoading ? (
