@@ -24,6 +24,7 @@ const ApiTest = () => {
   const [rawResponse, setRawResponse] = useState<string | null>(null);
   const [diagnosticInfo, setDiagnosticInfo] = useState<string | null>(null);
   const [location, setLocation] = useState<string>("");
+  const [apiStatus, setApiStatus] = useState<'checking' | 'success' | 'error' | 'idle'>('idle');
 
   // Predefined locations for quick searching
   const popularLocations = [
@@ -38,6 +39,46 @@ const ApiTest = () => {
     { label: "London, UK", value: "london" },
     { label: "Las Vegas, NV", value: "las vegas" }
   ];
+
+  // Check API status on component mount
+  useEffect(() => {
+    checkApiStatus();
+  }, []);
+
+  // Function to check if the API is available
+  const checkApiStatus = async () => {
+    setApiStatus('checking');
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const response = await fetch(`${API_CONFIG.API_URL}/status`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Key ${API_CONFIG.API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        setApiStatus('success');
+        setDiagnosticInfo(`API Status Check: Success (${new Date().toISOString()})
+API is responding properly.`);
+      } else {
+        setApiStatus('error');
+        setDiagnosticInfo(`API Status Check: Error (${new Date().toISOString()})
+API returned status code ${response.status}.`);
+      }
+    } catch (err) {
+      setApiStatus('error');
+      setDiagnosticInfo(`API Status Check: Error (${new Date().toISOString()})
+${err instanceof Error ? err.message : 'Unknown error occurred'}.
+This may be due to CORS restrictions, API unavailability, or network issues.`);
+    }
+  };
 
   const handleSearch = async () => {
     if (!searchQuery) return;
@@ -84,7 +125,29 @@ const ApiTest = () => {
       }
     } catch (err: any) {
       console.error("API search error:", err);
-      setError(`Error connecting to Golf Course API: ${err.message}`);
+      
+      // Enhanced error message with more context
+      let errorMessage = `Error connecting to Golf Course API: ${err.message}`;
+      
+      // Add suggestions based on error
+      if (err.message.includes('Failed to fetch') || err.message.includes('Network')) {
+        errorMessage += `\n\nPossible causes:
+- The API server may be down or unreachable
+- Network connectivity issues
+- CORS policy restrictions
+- API endpoint has changed or is unavailable`;
+      }
+      
+      setError(errorMessage);
+      
+      // Add diagnostic info about the failed request
+      setDiagnosticInfo(`Failed API request details:
+- Time: ${new Date().toISOString()}
+- Search query: "${searchQuery}"
+- API URL: ${API_CONFIG.API_URL}/courses/search
+- Error: ${err.message}
+- Using API Key: ${API_CONFIG.API_KEY.substring(0, 4)}...${API_CONFIG.API_KEY.substring(API_CONFIG.API_KEY.length - 4)}
+- Current proxy status: ${API_CONFIG.PROXY_URL ? 'Enabled with ' + API_CONFIG.PROXY_URL : 'Disabled'}`);
     } finally {
       setIsLoading(false);
     }
@@ -112,7 +175,29 @@ const ApiTest = () => {
       }
     } catch (err: any) {
       console.error("API details error:", err);
-      setError(`An error occurred while fetching course details: ${err.message}`);
+      
+      // Enhanced error message with more context
+      let errorMessage = `An error occurred while fetching course details: ${err.message}`;
+      
+      // Add suggestions based on error
+      if (err.message.includes('Failed to fetch') || err.message.includes('Network')) {
+        errorMessage += `\n\nPossible causes:
+- The API server may be down or unreachable
+- Network connectivity issues
+- CORS policy restrictions
+- API endpoint has changed or is unavailable`;
+      }
+      
+      setError(errorMessage);
+      
+      // Add diagnostic info about the failed request
+      setDiagnosticInfo(`Failed course details request:
+- Time: ${new Date().toISOString()}
+- Course ID: ${courseId}
+- API URL: ${API_CONFIG.API_URL}/courses/${courseId}
+- Error: ${err.message}
+- Using API Key: ${API_CONFIG.API_KEY.substring(0, 4)}...${API_CONFIG.API_KEY.substring(API_CONFIG.API_KEY.length - 4)}
+- Current proxy status: ${API_CONFIG.PROXY_URL ? 'Enabled with ' + API_CONFIG.PROXY_URL : 'Disabled'}`);
     } finally {
       setIsLoading(false);
     }
@@ -127,6 +212,35 @@ const ApiTest = () => {
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <h1 className="text-2xl font-bold mb-6">Golf Course API Test</h1>
+      
+      {/* API Status Indicator */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2">
+          <div className={`w-3 h-3 rounded-full ${
+            apiStatus === 'checking' ? 'bg-yellow-500 animate-pulse' : 
+            apiStatus === 'success' ? 'bg-green-500' : 
+            apiStatus === 'error' ? 'bg-red-500' : 'bg-gray-300'
+          }`}></div>
+          <h2 className="text-lg font-semibold">
+            API Status: {
+              apiStatus === 'checking' ? 'Checking...' : 
+              apiStatus === 'success' ? 'Available' : 
+              apiStatus === 'error' ? 'Connection Issues' : 'Unknown'
+            }
+          </h2>
+        </div>
+        <div className="mt-2 flex gap-2">
+          <Button 
+            size="sm" 
+            onClick={checkApiStatus} 
+            variant="outline" 
+            disabled={apiStatus === 'checking'}
+          >
+            {apiStatus === 'checking' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+            Check API Connection
+          </Button>
+        </div>
+      </div>
       
       {/* Search Section */}
       <div className="border rounded-lg p-6 mb-8 bg-card">
@@ -184,7 +298,7 @@ const ApiTest = () => {
         {error && (
           <Alert variant="destructive" className="mb-4">
             <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription className="whitespace-pre-line">{error}</AlertDescription>
           </Alert>
         )}
         
@@ -364,13 +478,13 @@ const ApiTest = () => {
       )}
       
       <div className="mt-6 p-4 border rounded-md bg-muted/30">
-        <h3 className="font-medium mb-2">API Integration Notes:</h3>
+        <h3 className="font-medium mb-2">API Integration Troubleshooting:</h3>
         <ul className="list-disc pl-5 space-y-1 text-sm">
-          <li>All mock data has been removed - only using live API</li>
           <li>API URL: {API_CONFIG.API_URL}</li>
-          <li>API Key: Using provided key with "Key" authentication format</li>
-          <li>Try searching for locations like "Dallas", "Augusta", "Rayleigh", or "Pebble Beach"</li>
-          <li>All search and details requests are made directly to the API</li>
+          <li>API Key Format: Using "Key {API_CONFIG.API_KEY.substring(0, 4)}..." in Authorization header</li>
+          <li>If you're experiencing connection issues, this may be due to CORS restrictions</li>
+          <li>The API might require a proxy server for browser-based requests</li>
+          <li>Current status: {apiStatus === 'success' ? '✅ Connected' : apiStatus === 'error' ? '❌ Experiencing connection issues' : '⏳ Not yet tested'}</li>
         </ul>
       </div>
     </div>

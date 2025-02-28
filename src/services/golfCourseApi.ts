@@ -75,10 +75,12 @@ export const API_CONFIG = {
   // The base URL for the golf course API
   API_URL: "https://golf-courses-api.herokuapp.com/api/v1",
   // API key for authentication
-  API_KEY: "GZQVPVDJB4DPZAQYIR6M64J2NQ"
+  API_KEY: "GZQVPVDJB4DPZAQYIR6M64J2NQ",
+  // Proxy URL to avoid CORS issues (set to empty if not needed)
+  PROXY_URL: "https://cors-anywhere.herokuapp.com/"
 };
 
-// Search courses function - now only using the live API
+// Search courses function - now with improved error handling and CORS proxy
 export async function searchCourses(query: string, includeMockData: boolean = false): Promise<{ mockCourses: GolfCourse[], results: GolfCourse[] }> {
   console.log(`Searching for courses with query: ${query}`);
   const normalizedQuery = query.toLowerCase().trim();
@@ -86,19 +88,21 @@ export async function searchCourses(query: string, includeMockData: boolean = fa
   let apiResults: GolfCourse[] = [];
   
   try {
-    // Make request to the API
-    console.log(`Making live API request to ${API_CONFIG.API_URL}/courses/search`);
-    
     // Build query parameters
     const searchParams = new URLSearchParams({
       q: normalizedQuery,
       limit: '50'
     });
     
-    // Make API request with the correct authorization header format
-    const response = await fetch(
-      `${API_CONFIG.API_URL}/courses/search?${searchParams.toString()}`,
-      {
+    // API URL with optional proxy
+    const apiUrl = `${API_CONFIG.API_URL}/courses/search?${searchParams.toString()}`;
+    
+    console.log(`Making API request to: ${apiUrl}`);
+    console.log(`Using authorization header: Key ${API_CONFIG.API_KEY}`);
+    
+    // Try the request without proxy first
+    try {
+      const response = await fetch(apiUrl, {
         method: 'GET',
         headers: {
           'Authorization': `Key ${API_CONFIG.API_KEY}`,
@@ -107,30 +111,69 @@ export async function searchCourses(query: string, includeMockData: boolean = fa
         },
         mode: 'cors',
         signal: AbortSignal.timeout(15000) // 15 second timeout
+      });
+      
+      console.log(`API response status: ${response.status}`);
+      
+      if (!response.ok) {
+        throw new Error(`API returned error status: ${response.status}`);
       }
-    );
-    
-    console.log(`Live API response status: ${response.status}`);
-    
-    if (!response.ok) {
-      throw new Error(`API returned error status: ${response.status}`);
+      
+      const data = await response.json();
+      console.log(`API response data:`, data);
+      
+      // Process the API response based on its structure
+      if (data.courses && Array.isArray(data.courses)) {
+        apiResults = data.courses;
+      } else if (data.data && Array.isArray(data.data)) {
+        apiResults = data.data;
+      } else if (Array.isArray(data)) {
+        apiResults = data;
+      } else {
+        throw new Error('API response format did not match expected structure');
+      }
+    } catch (directError) {
+      console.error("Direct API call failed:", directError);
+      
+      // If this is not a CORS error, or if we don't have a proxy URL, rethrow
+      if (!API_CONFIG.PROXY_URL || !(directError instanceof TypeError)) {
+        throw directError;
+      }
+      
+      // Try with proxy as fallback for CORS issues
+      console.log("Retrying with CORS proxy...");
+      const proxyUrl = `${API_CONFIG.PROXY_URL}${apiUrl}`;
+      
+      const proxyResponse = await fetch(proxyUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Key ${API_CONFIG.API_KEY}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        signal: AbortSignal.timeout(15000)
+      });
+      
+      if (!proxyResponse.ok) {
+        throw new Error(`Proxy API returned error status: ${proxyResponse.status}`);
+      }
+      
+      const proxyData = await proxyResponse.json();
+      
+      // Process the API response
+      if (proxyData.courses && Array.isArray(proxyData.courses)) {
+        apiResults = proxyData.courses;
+      } else if (proxyData.data && Array.isArray(proxyData.data)) {
+        apiResults = proxyData.data;
+      } else if (Array.isArray(proxyData)) {
+        apiResults = proxyData;
+      } else {
+        throw new Error('Proxy API response format did not match expected structure');
+      }
     }
     
-    const data = await response.json();
-    console.log(`Live API response data:`, data);
-    
-    // Process the API response based on its structure
-    if (data.courses && Array.isArray(data.courses)) {
-      apiResults = data.courses;
-    } else if (data.data && Array.isArray(data.data)) {
-      apiResults = data.data;
-    } else if (Array.isArray(data)) {
-      apiResults = data;
-    } else {
-      throw new Error('API response format did not match expected structure');
-    }
-    
-    console.log(`Found ${apiResults.length} courses from live API`);
+    console.log(`Found ${apiResults.length} courses from API`);
     
     // Map API results to our expected format if needed
     apiResults = apiResults.map(course => {
@@ -150,25 +193,33 @@ export async function searchCourses(query: string, includeMockData: boolean = fa
     });
   } catch (error) {
     console.error(`Error calling golf course API:`, error);
-    throw new Error(`Failed to search for courses: ${(error as Error).message}`);
+    
+    // Add more context to the error
+    const enhancedError = new Error(`Failed to search for courses: ${(error as Error).message}. Please check your network connection and ensure the API is available.`);
+    (enhancedError as any).originalError = error;
+    throw enhancedError;
   }
   
   // Return empty array for mockCourses as we've removed all mock data
   return { mockCourses: [], results: apiResults };
 }
 
-// Get course details function - now only using the live API
+// Get course details function - with improved error handling and CORS proxy
 export async function getCourseDetails(courseId: number | string): Promise<CourseDetail> {
   console.log(`Fetching details for course ID: ${courseId}`);
   
   try {
-    // Request course details from the API
-    console.log(`Making live API request to ${API_CONFIG.API_URL}/courses/${courseId}`);
+    // API URL with optional proxy
+    const apiUrl = `${API_CONFIG.API_URL}/courses/${courseId}`;
     
-    // Make API request for course details with the correct authorization header format
-    const response = await fetch(
-      `${API_CONFIG.API_URL}/courses/${courseId}`,
-      {
+    console.log(`Making API request to: ${apiUrl}`);
+    
+    let response;
+    let data;
+    
+    // Try direct request first
+    try {
+      response = await fetch(apiUrl, {
         method: 'GET',
         headers: {
           'Authorization': `Key ${API_CONFIG.API_KEY}`,
@@ -177,17 +228,44 @@ export async function getCourseDetails(courseId: number | string): Promise<Cours
         },
         mode: 'cors',
         signal: AbortSignal.timeout(15000) // 15 second timeout
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API returned error status: ${response.status}`);
       }
-    );
-    
-    console.log(`Live API response status: ${response.status}`);
-    
-    if (!response.ok) {
-      throw new Error(`API returned error status: ${response.status}`);
+      
+      data = await response.json();
+    } catch (directError) {
+      console.error("Direct API call for course details failed:", directError);
+      
+      // If this is not a CORS error, or if we don't have a proxy URL, rethrow
+      if (!API_CONFIG.PROXY_URL || !(directError instanceof TypeError)) {
+        throw directError;
+      }
+      
+      // Try with proxy as fallback for CORS issues
+      console.log("Retrying course details with CORS proxy...");
+      const proxyUrl = `${API_CONFIG.PROXY_URL}${apiUrl}`;
+      
+      const proxyResponse = await fetch(proxyUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Key ${API_CONFIG.API_KEY}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        signal: AbortSignal.timeout(15000)
+      });
+      
+      if (!proxyResponse.ok) {
+        throw new Error(`Proxy API returned error status: ${proxyResponse.status}`);
+      }
+      
+      data = await proxyResponse.json();
     }
     
-    const data = await response.json();
-    console.log(`Live API course details data:`, data);
+    console.log(`API course details data:`, data);
     
     // The API should return a Course object directly according to the spec
     let courseDetail: CourseDetail = data;
@@ -222,7 +300,9 @@ export async function getCourseDetails(courseId: number | string): Promise<Cours
     return courseDetail;
   } catch (error) {
     console.error(`Error fetching course details from API:`, error);
-    throw new Error(`Failed to get course details: ${(error as Error).message}`);
+    const enhancedError = new Error(`Failed to get course details: ${(error as Error).message}. Please check your network connection and ensure the API is available.`);
+    (enhancedError as any).originalError = error;
+    throw enhancedError;
   }
 }
 
