@@ -52,7 +52,7 @@ interface SimplifiedGolfCourse {
   country?: string;
 }
 
-// Interface for tee box data
+// Interface for the tee box data
 interface SimplifiedTee {
   id: string;
   name: string;
@@ -283,6 +283,10 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Get today's date for max date validation
+  const today = new Date();
+  today.setHours(23, 59, 59, 999);
 
   // Reset form when modal is closed
   useEffect(() => {
@@ -812,7 +816,8 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                   initialFocus
                   defaultMonth={roundDate}
                   fromYear={2000}
-                  toYear={new Date().getFullYear()}
+                  toYear={today.getFullYear()}
+                  disabled={(date) => date > today}
                 />
               </PopoverContent>
             </Popover>
@@ -1092,7 +1097,8 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                   initialFocus
                   defaultMonth={roundDate}
                   fromYear={2000}
-                  toYear={new Date().getFullYear()}
+                  toYear={today.getFullYear()}
+                  disabled={(date) => date > today}
                 />
               </PopoverContent>
             </Popover>
@@ -1281,7 +1287,8 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                   initialFocus
                   defaultMonth={roundDate}
                   fromYear={2000}
-                  toYear={new Date().getFullYear()}
+                  toYear={today.getFullYear()}
+                  disabled={(date) => date > today}
                 />
               </PopoverContent>
             </Popover>
