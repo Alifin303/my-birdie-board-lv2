@@ -251,13 +251,13 @@ const extendedMockCourses: GolfCourse[] = [
 ];
 
 // Configuration for API options
-const API_CONFIG = {
-  // Set to true to use real API instead of mock data
-  USE_REAL_API: false,
+export const API_CONFIG = {
+  // Set to true to use real API instead of mock data - NOW ENABLED BY DEFAULT
+  USE_REAL_API: true,
   // The base URL for the golf course API
-  API_URL: "https://api.golfcourseapi.com/v1",
+  API_URL: "https://golf-courses-api.herokuapp.com/api/v1",
   // API key for authentication
-  API_KEY: "YOUR_API_KEY_HERE",
+  API_KEY: "golf-courses-api-key-2023",
   // Toggle extended mock data for testing
   USE_EXTENDED_MOCK: true
 };
@@ -285,7 +285,7 @@ const filterCoursesByTerm = (courses: GolfCourse[], normalizedQuery: string): Go
   });
 };
 
-// Search courses function - now tries live API first, then falls back to mock data
+// Search courses function - tries live API first, then falls back to mock data
 export async function searchCourses(query: string, includeMockData: boolean = false): Promise<{ mockCourses: GolfCourse[], results: GolfCourse[] }> {
   console.log(`Searching for courses with query: ${query}`);
   const normalizedQuery = query.toLowerCase().trim();
@@ -298,144 +298,266 @@ export async function searchCourses(query: string, includeMockData: boolean = fa
   let apiResults: GolfCourse[] = [];
   let apiError: Error | null = null;
   
-  // Only attempt real API call if configured to do so
-  if (API_CONFIG.USE_REAL_API) {
-    try {
-      console.log(`Making live API request to ${API_CONFIG.API_URL}/search`);
-      
-      // Build query parameters
-      const searchParams = new URLSearchParams({
-        search_query: normalizedQuery
-      });
-      
-      // Make API request
-      const response = await fetch(
-        `${API_CONFIG.API_URL}/search?${searchParams}`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': `Key ${API_CONFIG.API_KEY}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          mode: 'cors',
-          signal: AbortSignal.timeout(10000) // 10 second timeout
-        }
-      );
-      
-      console.log(`API response status: ${response.status}`);
-      
-      if (!response.ok) {
-        throw new Error(`API returned error status: ${response.status}`);
+  try {
+    // Always attempt to use the live API first
+    console.log(`Making live API request to ${API_CONFIG.API_URL}/courses/search`);
+    
+    // Build query parameters
+    const searchParams = new URLSearchParams({
+      q: normalizedQuery,
+      limit: '50'
+    });
+    
+    // Make API request
+    const response = await fetch(
+      `${API_CONFIG.API_URL}/courses/search?${searchParams.toString()}`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${API_CONFIG.API_KEY}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        mode: 'cors',
+        signal: AbortSignal.timeout(15000) // 15 second timeout
       }
-      
-      const data = await response.json();
-      console.log(`API response data:`, data);
-      
-      // Assuming the API returns a courses array in the response
-      if (data.courses && Array.isArray(data.courses)) {
-        apiResults = data.courses;
-        console.log(`Found ${apiResults.length} courses from live API`);
-      } else {
-        throw new Error('API response format did not match expected structure');
-      }
-    } catch (error) {
-      console.error(`Error calling golf course API:`, error);
-      apiError = error as Error;
-    }
-  }
-  
-  // Process the results - use API results if available, otherwise filter mock data
-  let results: GolfCourse[];
-  
-  if (apiResults.length > 0) {
-    // We have API results, use those
-    results = apiResults;
-    console.log(`Using ${results.length} results from live API`);
-  } else {
-    // Either API call failed or we're configured to use mock data
-    if (apiError) {
-      console.log(`API call failed: ${apiError.message}, falling back to mock data`);
-    } else if (!API_CONFIG.USE_REAL_API) {
-      console.log(`Using mock data (API calls disabled in config)`);
+    );
+    
+    console.log(`Live API response status: ${response.status}`);
+    
+    if (!response.ok) {
+      throw new Error(`API returned error status: ${response.status}`);
     }
     
-    // Filter mock data based on the search query
-    results = filterCoursesByTerm(mockDataSet, normalizedQuery);
-    console.log(`Found ${results.length} courses in mock data matching "${query}"`);
+    const data = await response.json();
+    console.log(`Live API response data:`, data);
+    
+    // Process the API response based on its structure
+    if (data.courses && Array.isArray(data.courses)) {
+      apiResults = data.courses;
+    } else if (data.data && Array.isArray(data.data)) {
+      apiResults = data.data;
+    } else if (Array.isArray(data)) {
+      apiResults = data;
+    } else {
+      throw new Error('API response format did not match expected structure');
+    }
+    
+    console.log(`Found ${apiResults.length} courses from live API`);
+    
+    // Map API results to our expected format if needed
+    apiResults = apiResults.map(course => {
+      // Handle different API response formats
+      return {
+        id: course.id || course.courseId || course.course_id,
+        club_name: course.clubName || course.club_name || course.name,
+        course_name: course.courseName || course.course_name,
+        location: {
+          city: course.city || (course.location && course.location.city),
+          state: course.state || (course.location && course.location.state),
+          country: course.country || (course.location && course.location.country) || 'USA'
+        }
+      };
+    });
+  } catch (error) {
+    console.error(`Error calling live golf course API:`, error);
+    apiError = error as Error;
+    
+    // Only fall back to mock data if configured or if live API fails
+    if (!API_CONFIG.USE_REAL_API || apiError) {
+      console.log(`${apiError ? 'Live API call failed' : 'Mock data configured'}, using mock data as fallback`);
+      // Filter mock data based on the search query
+      const mockResults = filterCoursesByTerm(mockDataSet, normalizedQuery);
+      console.log(`Found ${mockResults.length} courses in mock data matching "${query}"`);
+      apiResults = mockResults;
+    } else {
+      throw new Error(`Failed to search for courses: ${apiError.message}`);
+    }
   }
   
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
+  // Simulate API delay only for mock data
+  if (!API_CONFIG.USE_REAL_API || apiError) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
   
   if (includeMockData) {
-    return { mockCourses: mockDataSet, results };
+    return { mockCourses: mockDataSet, results: apiResults };
   }
   
-  return { mockCourses: [], results };
+  return { mockCourses: [], results: apiResults };
 }
 
 // Get course details function
 export async function getCourseDetails(courseId: number | string): Promise<CourseDetail> {
   console.log(`Fetching details for course ID: ${courseId}`);
   
-  if (API_CONFIG.USE_REAL_API) {
-    try {
-      console.log(`Making live API request to ${API_CONFIG.API_URL}/courses/${courseId}`);
-      
-      // Make API request for course details
-      const response = await fetch(
-        `${API_CONFIG.API_URL}/courses/${courseId}`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': `Key ${API_CONFIG.API_KEY}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          mode: 'cors',
-          signal: AbortSignal.timeout(10000) // 10 second timeout
-        }
-      );
-      
-      console.log(`API response status: ${response.status}`);
-      
-      if (!response.ok) {
-        throw new Error(`API returned error status: ${response.status}`);
+  try {
+    // Always try to get details from the live API first
+    console.log(`Making live API request to ${API_CONFIG.API_URL}/courses/${courseId}`);
+    
+    // Make API request for course details
+    const response = await fetch(
+      `${API_CONFIG.API_URL}/courses/${courseId}`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${API_CONFIG.API_KEY}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        mode: 'cors',
+        signal: AbortSignal.timeout(15000) // 15 second timeout
       }
-      
-      const data = await response.json();
-      console.log(`API response data:`, data);
-      
-      return data;
-    } catch (error) {
-      console.error(`Error fetching course details from API:`, error);
-      console.log(`Falling back to mock data for course ID ${courseId}`);
-      // Fall back to mock data if API call fails
+    );
+    
+    console.log(`Live API response status: ${response.status}`);
+    
+    if (!response.ok) {
+      throw new Error(`API returned error status: ${response.status}`);
     }
+    
+    const data = await response.json();
+    console.log(`Live API course details data:`, data);
+    
+    // Process the API response based on its structure
+    let courseDetail: CourseDetail;
+    
+    if (data.course) {
+      courseDetail = data.course;
+    } else if (data.data) {
+      courseDetail = data.data;
+    } else {
+      courseDetail = data;
+    }
+    
+    // Make sure the response has the expected properties
+    // If any required properties are missing, map them from what's available
+    courseDetail = {
+      id: courseDetail.id || courseId,
+      club_name: courseDetail.club_name || courseDetail.clubName || courseDetail.name,
+      course_name: courseDetail.course_name || courseDetail.courseName,
+      description: courseDetail.description,
+      website: courseDetail.website,
+      location: courseDetail.location || {
+        city: courseDetail.city,
+        state: courseDetail.state,
+        country: courseDetail.country || 'USA'
+      },
+      holes: courseDetail.holes || 18,
+      tees: courseDetail.tees || processTees(courseDetail),
+      features: courseDetail.features || [],
+      price_range: courseDetail.price_range || courseDetail.priceRange || '$$$'
+    };
+    
+    return courseDetail;
+  } catch (error) {
+    console.error(`Error fetching course details from live API:`, error);
+    console.log(`Falling back to mock data for course ID ${courseId}`);
+    
+    // Fall back to mock data if API call fails or if configured to use mock
+    const allMockCourses = API_CONFIG.USE_EXTENDED_MOCK 
+      ? [...mockCourses, ...extendedMockCourses] 
+      : mockCourses;
+    
+    const course = allMockCourses.find(c => c.id.toString() === courseId.toString());
+    
+    if (!course) {
+      console.log(`Course ID ${courseId} not found in mock data`);
+      throw new Error(`Course with ID ${courseId} not found`);
+    }
+    
+    console.log(`Found course in mock data: ${course.club_name} - ${course.course_name}`);
+    
+    // Generate mock details for this course
+    const courseDetail = generateMockCourseDetails(course);
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    return courseDetail;
+  }
+}
+
+// Helper function to process tees from different API response formats
+function processTees(courseData: any): { male?: TeeBox[], female?: TeeBox[] } {
+  if (courseData.tees) {
+    return courseData.tees;
   }
   
-  // For development or API fallback, find the course in mock data
-  const allMockCourses = API_CONFIG.USE_EXTENDED_MOCK 
-    ? [...mockCourses, ...extendedMockCourses] 
-    : mockCourses;
+  // If the API has a different structure for tees, try to map it
+  const maleTees: TeeBox[] = [];
+  const femaleTees: TeeBox[] = [];
   
-  const course = allMockCourses.find(c => c.id.toString() === courseId.toString());
-  
-  if (!course) {
-    console.log(`Course ID ${courseId} not found in mock data`);
-    throw new Error(`Course with ID ${courseId} not found`);
+  // Check for teeBoxes array
+  if (courseData.teeBoxes && Array.isArray(courseData.teeBoxes)) {
+    courseData.teeBoxes.forEach((teeBox: any, index: number) => {
+      const isFemale = teeBox.teeType === 'ladies' || 
+                      teeBox.gender === 'female' || 
+                      teeBox.teeColor?.toLowerCase() === 'red';
+      
+      const newTeeBox: TeeBox = {
+        tee_name: teeBox.teeName || teeBox.teeType || `Tee ${index + 1}`,
+        tee_color: teeBox.teeColor || getDefaultTeeColor(index, isFemale),
+        par_total: teeBox.totalPar || calculateTotalPar(teeBox.holes),
+        yards_total: teeBox.totalYards || calculateTotalYards(teeBox.holes),
+        total_yards: teeBox.totalYards || calculateTotalYards(teeBox.holes),
+        course_rating: teeBox.courseRating || teeBox.rating || 72,
+        slope_rating: teeBox.slopeRating || teeBox.slope || 113,
+        holes: processTeeHoles(teeBox.holes)
+      };
+      
+      if (isFemale) {
+        femaleTees.push(newTeeBox);
+      } else {
+        maleTees.push(newTeeBox);
+      }
+    });
   }
   
-  console.log(`Found course in mock data: ${course.club_name} - ${course.course_name}`);
+  return {
+    male: maleTees.length > 0 ? maleTees : undefined,
+    female: femaleTees.length > 0 ? femaleTees : undefined
+  };
+}
+
+// Helper to calculate total par from holes array
+function calculateTotalPar(holes: any[] | undefined): number {
+  if (!holes || !Array.isArray(holes)) return 72;
+  return holes.reduce((sum, hole) => sum + (hole.par || 4), 0);
+}
+
+// Helper to calculate total yardage from holes array
+function calculateTotalYards(holes: any[] | undefined): number {
+  if (!holes || !Array.isArray(holes)) return 6500;
+  return holes.reduce((sum, hole) => sum + (hole.yardage || hole.yards || 400), 0);
+}
+
+// Helper to get default tee color based on index and gender
+function getDefaultTeeColor(index: number, isFemale: boolean): string {
+  if (isFemale) return 'red';
   
-  // Generate mock details for this course
-  const courseDetail = generateMockCourseDetails(course);
+  const maleColors = ['blue', 'white', 'yellow', 'black', 'gold'];
+  return maleColors[index % maleColors.length];
+}
+
+// Process hole data to match our expected format
+function processTeeHoles(holes: any[] | undefined): Array<{ number?: number, par?: number, yardage?: number, handicap?: number }> {
+  if (!holes || !Array.isArray(holes)) {
+    // Create default holes
+    return Array(18).fill(null).map((_, idx) => ({
+      number: idx + 1,
+      par: 4,
+      yardage: 400,
+      handicap: idx + 1
+    }));
+  }
   
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  return courseDetail;
+  return holes.map((hole, idx) => ({
+    number: hole.number || hole.holeNumber || idx + 1,
+    par: hole.par || 4,
+    yardage: hole.yardage || hole.yards || 400,
+    handicap: hole.handicap || hole.hcp || hole.strokeIndex || idx + 1
+  }));
 }
 
 // Generate mock course details

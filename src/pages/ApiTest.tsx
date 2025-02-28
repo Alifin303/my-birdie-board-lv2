@@ -1,10 +1,10 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
-import { searchCourses, getCourseDetails, GolfCourse, CourseDetail } from "@/services/golfCourseApi";
+import { searchCourses, getCourseDetails, GolfCourse, CourseDetail, API_CONFIG } from "@/services/golfCourseApi";
 import { 
   Select,
   SelectContent,
@@ -26,6 +26,7 @@ const ApiTest = () => {
   const [diagnosticInfo, setDiagnosticInfo] = useState<string | null>(null);
   const [location, setLocation] = useState<string>("");
   const [useExtendedMock, setUseExtendedMock] = useState<boolean>(true);
+  const [useRealApi, setUseRealApi] = useState<boolean>(API_CONFIG.USE_REAL_API);
 
   // Predefined locations for quick searching
   const popularLocations = [
@@ -37,6 +38,12 @@ const ApiTest = () => {
     { label: "Rayleigh, UK", value: "rayleigh" },
     { label: "New York, NY", value: "new york" }
   ];
+
+  // Initialize with current API_CONFIG settings
+  useEffect(() => {
+    setUseRealApi(API_CONFIG.USE_REAL_API);
+    setUseExtendedMock(API_CONFIG.USE_EXTENDED_MOCK);
+  }, []);
 
   const handleSearch = async () => {
     if (!searchQuery) return;
@@ -57,20 +64,29 @@ const ApiTest = () => {
       console.log("Available mock courses:", mockCourses);
       console.log("API search response:", results);
       
+      // Store raw response for debugging
+      setRawResponse(JSON.stringify(results, null, 2));
+      
       setSearchResults(results);
       
       // Add diagnostic info about the search
       const diagInfo = [
         `Search query: "${searchQuery}"`,
         `Search performed: ${new Date().toISOString()}`,
+        `Live API enabled: ${API_CONFIG.USE_REAL_API ? 'Yes' : 'No'}`,
         `Available courses in mock data: ${mockCourses.length}`,
         `Matching courses found: ${results.length}`,
         `Search is case-insensitive: Yes`,
         `Search looks for partial matches: Yes`,
       ];
       
-      if (mockCourses.length > 0) {
-        diagInfo.push(`\nSample of available courses:`);
+      if (API_CONFIG.USE_REAL_API) {
+        diagInfo.push(`API URL: ${API_CONFIG.API_URL}/courses/search`);
+        diagInfo.push(`Request params: q=${searchQuery}, limit=50`);
+      }
+      
+      if (mockCourses.length > 0 && !API_CONFIG.USE_REAL_API) {
+        diagInfo.push(`\nSample of available mock courses:`);
         mockCourses.slice(0, 5).forEach((course, idx) => {
           diagInfo.push(`${idx + 1}. ${course.club_name} - ${course.course_name} (ID: ${course.id}, Location: ${course.location?.city}, ${course.location?.state})`);
         });
@@ -112,6 +128,10 @@ const ApiTest = () => {
       console.log("Testing getCourseDetails API with id:", courseId);
       const details = await getCourseDetails(courseId);
       console.log("API details response:", details);
+      
+      // Store raw response for debugging
+      setRawResponse(JSON.stringify(details, null, 2));
+      
       setCourseDetails(details);
       
       if (!details) {
@@ -136,11 +156,17 @@ const ApiTest = () => {
     setUseExtendedMock(newValue);
     
     // Update the global config
-    const apiModule = require('@/services/golfCourseApi');
-    if (apiModule.API_CONFIG) {
-      apiModule.API_CONFIG.USE_EXTENDED_MOCK = newValue;
-      console.log(`Extended mock data ${newValue ? 'enabled' : 'disabled'}`);
-    }
+    API_CONFIG.USE_EXTENDED_MOCK = newValue;
+    console.log(`Extended mock data ${newValue ? 'enabled' : 'disabled'}`);
+  };
+
+  const toggleRealApi = () => {
+    const newValue = !useRealApi;
+    setUseRealApi(newValue);
+    
+    // Update the global config
+    API_CONFIG.USE_REAL_API = newValue;
+    console.log(`Live API ${newValue ? 'enabled' : 'disabled'}`);
   };
 
   return (
@@ -151,16 +177,31 @@ const ApiTest = () => {
       <div className="border rounded-lg p-6 mb-8 bg-card">
         <h2 className="text-xl font-semibold mb-4">Test Course Search</h2>
         
-        {/* Extended Mock Data Toggle */}
-        <div className="flex items-center space-x-2 mb-4">
-          <Switch
-            id="extended-mock"
-            checked={useExtendedMock}
-            onCheckedChange={toggleExtendedMock}
-          />
-          <Label htmlFor="extended-mock">
-            Use Extended Mock Data (Includes Texas, Florida, and more locations)
-          </Label>
+        {/* API Configuration Toggles */}
+        <div className="space-y-3 mb-4 border-b pb-4">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="live-api"
+              checked={useRealApi}
+              onCheckedChange={toggleRealApi}
+            />
+            <Label htmlFor="live-api" className="font-medium">
+              Use Live API (Search real golf course data)
+            </Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="extended-mock"
+              checked={useExtendedMock}
+              onCheckedChange={toggleExtendedMock}
+            />
+            <Label htmlFor="extended-mock">
+              Use Extended Mock Data (Fallback if API fails)
+            </Label>
+          </div>
+          <div className="text-xs text-muted-foreground italic">
+            Current API URL: {API_CONFIG.API_URL}
+          </div>
         </div>
         
         {/* Search Input */}
@@ -386,11 +427,11 @@ const ApiTest = () => {
       <div className="mt-6 p-4 border rounded-md bg-muted/30">
         <h3 className="font-medium mb-2">API Integration Notes:</h3>
         <ul className="list-disc pl-5 space-y-1 text-sm">
-          <li>Currently using mock data for all searches while API integration is being completed</li>
-          <li>Use the Extended Mock Data toggle to access additional mock courses in major cities</li>
+          <li>Live API is now {API_CONFIG.USE_REAL_API ? 'enabled' : 'disabled'} for all searches</li>
+          <li>Mock data will be used as a fallback if the live API search fails</li>
+          <li>The API URL is configured to: {API_CONFIG.API_URL}</li>
           <li>Try searching for locations like "Dallas", "Augusta", "Rayleigh", or "Pebble Beach"</li>
-          <li>Course details include full information on tees, holes, par values, and yardage</li>
-          <li>In production, this will connect to a live golf course database API</li>
+          <li>You can toggle between using the live API and mock data using the switches above</li>
         </ul>
       </div>
     </div>
