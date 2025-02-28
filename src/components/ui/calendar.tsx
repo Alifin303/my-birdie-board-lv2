@@ -14,29 +14,16 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
-  // Create a root ref to manage event handling
-  const rootRef = React.useRef<HTMLDivElement>(null);
-
-  // Add a click handler to the root to stop propagation
-  React.useEffect(() => {
-    const rootElement = rootRef.current;
-    if (!rootElement) return;
-
-    const handleClick = (e: MouseEvent) => {
-      console.log("Calendar root click handler");
-      e.stopPropagation();
-    };
-
-    rootElement.addEventListener("click", handleClick, { capture: true });
-    return () => {
-      rootElement.removeEventListener("click", handleClick, { capture: true });
-    };
-  }, []);
+  const handleDaySelect = (day: Date | undefined) => {
+    console.log("Calendar day selected:", day);
+    if (props.onSelect) {
+      props.onSelect(day);
+    }
+  };
 
   return (
     <div 
-      ref={rootRef}
-      className="relative bg-background rounded-md shadow-md" 
+      className="relative bg-white rounded-md shadow-md overflow-hidden" 
       style={{ pointerEvents: 'auto' }}
       onClick={(e) => {
         console.log("Calendar container clicked");
@@ -46,121 +33,53 @@ function Calendar({
       <DayPicker
         showOutsideDays={showOutsideDays}
         className={cn("p-3", className)}
+        onSelect={handleDaySelect}
         classNames={{
           months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
           month: "space-y-4",
           caption: "flex justify-center pt-1 relative items-center",
-          caption_label: "text-sm font-medium",
+          caption_label: "text-sm font-medium text-[#333333]",
           nav: "space-x-1 flex items-center",
           nav_button: cn(
             buttonVariants({ variant: "outline" }),
-            "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 cursor-pointer"
+            "h-7 w-7 bg-white p-0 text-[#333333] hover:bg-[#f1f1f1] cursor-pointer"
           ),
           nav_button_previous: "absolute left-1",
           nav_button_next: "absolute right-1",
           table: "w-full border-collapse space-y-1",
           head_row: "flex",
           head_cell:
-            "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+            "text-[#555555] rounded-md w-9 font-normal text-[0.8rem]",
           row: "flex w-full mt-2",
-          cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+          cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected])]:bg-white first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
           day: cn(
             buttonVariants({ variant: "ghost" }),
-            "h-9 w-9 p-0 font-normal aria-selected:opacity-100 cursor-pointer"
+            "h-9 w-9 p-0 font-normal aria-selected:opacity-100 cursor-pointer bg-white text-[#333333]"
           ),
           day_selected:
-            "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-          day_today: "bg-accent text-accent-foreground",
+            "bg-white text-[#333333] hover:bg-white hover:text-[#333333] border-2 border-primary focus:bg-white focus:text-[#333333] font-semibold",
+          day_today: "bg-[#f1f1f1] text-[#333333] font-medium",
           day_outside:
-            "text-muted-foreground opacity-50",
-          day_disabled: "text-muted-foreground opacity-50 cursor-not-allowed",
+            "text-[#8a898c] opacity-50",
+          day_disabled: "text-[#9f9ea1] opacity-50 cursor-not-allowed",
           day_range_middle:
-            "aria-selected:bg-accent aria-selected:text-accent-foreground",
+            "aria-selected:bg-white aria-selected:text-[#333333]",
           day_hidden: "invisible",
           ...classNames,
         }}
         components={{
           IconLeft: ({ ...iconProps }) => (
-            <div onClick={(e) => {
+            <ChevronLeft className="h-4 w-4 text-[#333333]" onClick={(e) => {
               console.log("Previous month clicked");
               e.stopPropagation();
-            }}>
-              <ChevronLeft className="h-4 w-4" {...iconProps} />
-            </div>
+            }} {...iconProps} />
           ),
           IconRight: ({ ...iconProps }) => (
-            <div onClick={(e) => {
+            <ChevronRight className="h-4 w-4 text-[#333333]" onClick={(e) => {
               console.log("Next month clicked");
               e.stopPropagation();
-            }}>
-              <ChevronRight className="h-4 w-4" {...iconProps} />
-            </div>
+            }} {...iconProps} />
           ),
-          Day: ({ 
-            date, 
-            displayMonth,
-            ...dayProps 
-          }: React.ComponentPropsWithoutRef<"button"> & { 
-            date: Date; 
-            displayMonth: Date;
-            selected?: boolean;
-            today?: boolean;
-            disabled?: boolean; 
-          }) => {
-            // Check if this day is in the current displayed month
-            const isOutsideMonth = displayMonth && date ? 
-              date.getMonth() !== displayMonth.getMonth() : false;
-            
-            // Check if day is disabled
-            const isDisabled = typeof props.disabled === "function" ? 
-              props.disabled(date) : false;
-            
-            // Get selected and today state from props or use false as default
-            const isSelected = dayProps.selected || false;
-            const isToday = dayProps.today || false;
-            
-            return (
-              <button
-                type="button"
-                className={cn(
-                  buttonVariants({ variant: "ghost" }),
-                  "h-9 w-9 p-0 font-normal cursor-pointer",
-                  isOutsideMonth && "text-muted-foreground opacity-50",
-                  isDisabled && "text-muted-foreground opacity-50 cursor-not-allowed",
-                  isSelected && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
-                  isToday && !isSelected && "bg-accent text-accent-foreground"
-                )}
-                disabled={isDisabled}
-                aria-selected={isSelected}
-                onClick={(e) => {
-                  console.log("Day clicked:", date);
-                  e.stopPropagation();
-                  e.preventDefault();
-                  
-                  if (typeof dayProps.onClick === "function") {
-                    dayProps.onClick(e);
-                  }
-                }}
-                {...dayProps}
-              >
-                {date?.getDate()}
-              </button>
-            );
-          }
-        }}
-        onDayClick={(day, modifiers, e) => {
-          console.log("Day clicked:", day, modifiers);
-          
-          // Explicitly stop propagation
-          if (e) {
-            e.stopPropagation();
-            e.preventDefault();
-          }
-          
-          // Call the original onDayClick handler if it exists
-          if (props.onDayClick) {
-            props.onDayClick(day, modifiers, e);
-          }
         }}
         {...props}
       />

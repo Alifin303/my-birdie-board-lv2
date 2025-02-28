@@ -78,6 +78,47 @@
     cursor: not-allowed;
     background-color: transparent;
   }
+
+  /* Custom calendar styles */
+  .rdp-day {
+    @apply text-[#333333] !important;
+    border-radius: 4px !important;
+  }
+
+  .rdp-day:hover:not([disabled]) {
+    @apply bg-[#f1f1f1] !important;
+    @apply border border-[#ccc] !important;
+  }
+
+  .rdp-day_selected {
+    @apply bg-white !important;
+    @apply text-[#333333] !important;
+    @apply border-2 border-primary !important;
+    @apply font-semibold !important;
+  }
+
+  .rdp-day_today {
+    @apply bg-[#f1f1f1] !important; 
+    @apply text-[#333333] !important;
+    @apply font-medium !important;
+  }
+
+  .rdp-button {
+    @apply text-[#333333] !important;
+  }
+
+  .rdp-nav_button:hover {
+    @apply bg-[#f1f1f1] !important;
+  }
+
+  .rdp-caption {
+    @apply font-medium !important;
+  }
+
+  .rdp-head_cell {
+    @apply font-semibold !important;
+    @apply text-[#555555] !important;
+  }
 }
 
 @layer utilities {
