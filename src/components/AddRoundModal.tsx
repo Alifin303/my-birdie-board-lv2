@@ -110,7 +110,6 @@ interface Score {
 
 type HoleSelection = 'all' | 'front9' | 'back9';
 
-// Fixed function to properly extract hole data for a specific tee
 const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): SimplifiedHole[] => {
   console.log("Extracting holes for tee:", teeId, "from course detail:", courseDetail);
   
@@ -124,11 +123,9 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
     }));
   }
   
-  // Parse the tee ID to get gender and index
   const [gender, indexStr] = teeId.split('-');
   const index = parseInt(indexStr);
   
-  // Get the correct tee data
   let teeData: TeeBox | undefined;
   let holesData: Array<{number?: number, par?: number, yardage?: number, handicap?: number}> = [];
   
@@ -148,7 +145,6 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
 
   console.log("Extracted holes data for tee:", teeId, holesData);
   
-  // If we found hole data for the specific tee, use it
   if (holesData && holesData.length > 0) {
     const mappedHoles = holesData.map((hole, idx) => ({
       number: hole.number || idx + 1,
@@ -161,11 +157,9 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
     return mappedHoles;
   }
   
-  // Fallback: try to find any hole data in any tee
   if (courseDetail.tees) {
     console.log("Looking for hole data in any tee");
     
-    // Try the specific gender tees first based on teeId
     const genderTees = gender === 'm' ? courseDetail.tees.male : courseDetail.tees.female;
     if (genderTees) {
       for (const tee of genderTees) {
@@ -184,7 +178,6 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
       }
     }
     
-    // If no holes found in the gender-specific tees, try the other gender
     const otherGenderTees = gender === 'm' ? courseDetail.tees.female : courseDetail.tees.male;
     if (otherGenderTees) {
       for (const tee of otherGenderTees) {
@@ -205,7 +198,6 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
   }
   
   console.log("No hole data found, creating default holes");
-  // Last resort: create default holes
   const defaultHoles = Array(18).fill(null).map((_, idx) => ({
     number: idx + 1,
     par: 4,
@@ -217,38 +209,28 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
   return defaultHoles;
 };
 
-// Fixed function to properly associate holes with each tee
 const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): SimplifiedCourseDetail => {
   console.log("Converting course detail to simplified format:", courseDetail);
   
-  // Get course name and club name from the API response
   const name = courseDetail.course_name || "Unknown Course";
   const clubName = courseDetail.club_name || "Unknown Club";
   
   console.log("Course name:", name);
   console.log("Club name:", clubName);
   
-  // Extract tee boxes
   const tees = extractTeesFromApiResponse(courseDetail);
   
-  // For each tee, extract the holes data and store it with the tee
   const simplifiedTees = tees.map(tee => {
-    // Extract specific holes data for this tee
     const teeHoles = extractHolesForTee(courseDetail, tee.id);
-    
-    // Return the tee with its holes data
     return { ...tee, holes: teeHoles };
   });
   
-  // Use the first tee's holes as default for the course
   let holes: SimplifiedHole[] = [];
   if (simplifiedTees.length > 0) {
     const firstTee = simplifiedTees[0];
-    // Use the holes we already extracted for this tee
     holes = firstTee.holes || [];
     
     if (!holes || holes.length === 0) {
-      // If we somehow don't have holes data, generate defaults
       holes = Array(18).fill(null).map((_, idx) => ({
         number: idx + 1,
         par: 4,
@@ -257,7 +239,6 @@ const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): Simplified
       }));
     }
   } else {
-    // Default holes if no tees available
     console.log("No tees available, creating default holes");
     holes = Array(18).fill(null).map((_, idx) => ({
       number: idx + 1,
@@ -287,7 +268,6 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
   const tees: SimplifiedTee[] = [];
   
   if (courseDetail.tees) {
-    // Process male tees
     if (courseDetail.tees.male && courseDetail.tees.male.length > 0) {
       courseDetail.tees.male.forEach((tee, index) => {
         tees.push({
@@ -303,7 +283,6 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
       });
     }
     
-    // Process female tees
     if (courseDetail.tees.female && courseDetail.tees.female.length > 0) {
       courseDetail.tees.female.forEach((tee, index) => {
         tees.push({
@@ -395,7 +374,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     try {
       const results = await searchCourses(query);
       
-      // Enhance results with localStorage data
       const enhancedResults = results.map(course => {
         const metadata = getCourseMetadataFromLocalStorage(course.id);
         return {
@@ -420,7 +398,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     }
   };
 
-  // Fixed function to handle course selection with proper par data initialization
   const handleCourseSelect = async (course: SimplifiedGolfCourse) => {
     setIsLoading(true);
     setSearchError(null);
@@ -431,9 +408,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
       
       let simplifiedCourseDetail: SimplifiedCourseDetail;
       
-      // If it's a user-added course from our database
       if (course.isUserAdded) {
-        // Your existing user course handling code is fine
         console.log("Loading user-added course from database:", course);
         
         const cachedCourseDetail = loadUserAddedCourseDetails(course.id);
@@ -492,25 +467,20 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
           }
         }
       } 
-      // If it's a course from the API that's not yet in our database
       else {
         console.log("Loading course from API:", course);
         
         try {
-          // If the course has an API ID, fetch details from the API
           const courseId = course.apiCourseId || course.id;
           console.log("Fetching API course details for ID:", courseId);
           
           const apiCourseDetail = await getCourseDetails(courseId);
           console.log("API course details (raw):", apiCourseDetail);
           
-          // Save the original API course detail for reference
           setOriginalCourseDetail(apiCourseDetail);
           
-          // Convert API response to simplified format with hole data for each tee
           simplifiedCourseDetail = convertToSimplifiedCourseDetail(apiCourseDetail);
           
-          // Make sure course and club names are set properly
           if (!simplifiedCourseDetail.name && course.name) {
             console.log("Setting missing course name from search result:", course.name);
             simplifiedCourseDetail.name = course.name;
@@ -520,7 +490,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
             simplifiedCourseDetail.clubName = course.clubName;
           }
           
-          // Set apiCourseId to ensure we can reference this later
           simplifiedCourseDetail.apiCourseId = courseId.toString();
           
           console.log("Final course detail after processing:", simplifiedCourseDetail);
@@ -529,7 +498,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
           setDataLoadingError(`Failed to load course details. The API may be unavailable.
 Try selecting a different course or adding this course manually.`);
           
-          // Create a minimal course detail with defaults since the API failed
           const defaultHoles = Array(18).fill(null).map((_, idx) => ({
             number: idx + 1,
             par: 4,
@@ -564,7 +532,6 @@ Try selecting a different course or adding this course manually.`);
       console.log("Setting selected course:", simplifiedCourseDetail);
       setSelectedCourse(simplifiedCourseDetail);
       
-      // Clear search results and update search query
       setSearchResults([]);
       const displayName = course.clubName !== course.name 
         ? `${course.clubName} - ${course.name}`
@@ -572,13 +539,11 @@ Try selecting a different course or adding this course manually.`);
       console.log("Setting search query to:", displayName);
       setSearchQuery(displayName);
       
-      // Set default tee if available
       if (simplifiedCourseDetail.tees && simplifiedCourseDetail.tees.length > 0) {
         const defaultTeeId = simplifiedCourseDetail.tees[0].id;
         console.log("Setting default tee ID:", defaultTeeId);
         setSelectedTeeId(defaultTeeId);
         
-        // Wait for state to be updated
         setTimeout(() => {
           console.log("Updating scorecard with tee ID:", defaultTeeId);
           updateScorecardForTee(defaultTeeId, 'all');
@@ -586,7 +551,6 @@ Try selecting a different course or adding this course manually.`);
         }, 0);
       }
       
-      // Move to scorecard step
       setCurrentStep('scorecard');
     } catch (error: any) {
       console.error("Course detail error:", error);
@@ -644,7 +608,6 @@ Try selecting a different course or adding this course manually.`);
           isUserAdded: true
         };
         
-        // Store course details in localStorage
         try {
           localStorage.setItem(
             `course_details_${data.id}`, 
@@ -663,7 +626,6 @@ Try selecting a different course or adding this course manually.`);
           console.error("Error saving to localStorage:", e);
         }
         
-        // Select the new course
         await handleCourseSelect(newCourse);
         
         toast({
@@ -688,18 +650,14 @@ Try selecting a different course or adding this course manually.`);
     setCalendarOpen(false);
   };
 
-  // Fixed function to properly handle tee selection and update par data
   const handleTeeChange = (teeId: string) => {
     console.log("Selected tee ID:", teeId);
     setSelectedTeeId(teeId);
     
-    // Ensure we use the specific tee's hole data for updating the scorecard
     if (selectedCourse) {
       const selectedTee = selectedCourse.tees.find(t => t.id === teeId);
       if (selectedTee && selectedTee.holes) {
         console.log("Using specific hole data from selected tee:", selectedTee.name);
-        
-        // Immediately update the scorecard with the selected tee's hole data
         updateScorecardForTee(teeId, holeSelection);
       } else {
         console.log("No specific hole data found for selected tee, using course defaults");
@@ -708,7 +666,6 @@ Try selecting a different course or adding this course manually.`);
     }
   };
 
-  // Fixed function to get hole data specific to the selected tee
   const getHolesForTee = (teeId: string): SimplifiedHole[] => {
     console.log("Getting holes for tee:", teeId);
     
@@ -717,25 +674,21 @@ Try selecting a different course or adding this course manually.`);
       return [];
     }
     
-    // Find the selected tee
     const selectedTee = selectedCourse.tees.find(t => t.id === teeId);
     if (!selectedTee) {
       console.error(`Tee with ID ${teeId} not found`);
       return selectedCourse.holes;
     }
     
-    // Check if this tee has specific hole data
     if (selectedTee.holes && selectedTee.holes.length > 0) {
       console.log("Using hole data specific to the selected tee:", selectedTee.holes);
       return selectedTee.holes;
     }
     
-    // If the tee doesn't have specific hole data, use the course's default holes
     console.log("Tee doesn't have specific hole data, using course's default holes");
     return selectedCourse.holes;
   };
 
-  // Fixed function to update scorecard for selected tee
   const updateScorecardForTee = (teeId: string, selection: HoleSelection = 'all') => {
     console.log("Updating scorecard for tee", teeId, "with selection", selection);
     
@@ -744,12 +697,10 @@ Try selecting a different course or adding this course manually.`);
       return;
     }
     
-    // Get holes data for the selected tee
     const allHolesData = getHolesForTee(teeId);
     
     console.log("All holes data for selected tee:", allHolesData);
     
-    // Filter holes based on user selection
     let filteredHoles: SimplifiedHole[] = [];
     
     if (selection === 'front9') {
@@ -763,7 +714,6 @@ Try selecting a different course or adding this course manually.`);
       console.log("Using all 18 holes");
     }
     
-    // If we have no holes or not enough holes, create defaults
     if (!filteredHoles.length) {
       console.log("No filtered holes, creating defaults");
       if (selection === 'front9') {
@@ -790,7 +740,6 @@ Try selecting a different course or adding this course manually.`);
       }
     }
     
-    // Create scores array with par values from the selected tee
     const newScores = filteredHoles.map(hole => ({
       hole: hole.number,
       par: hole.par,
@@ -803,7 +752,6 @@ Try selecting a different course or adding this course manually.`);
     console.log("New scores array with proper par data:", newScores);
     setScores(newScores);
     
-    // Update the active tab to match the selection
     if (selection !== 'all') {
       setActiveScoreTab(selection === 'front9' ? "front9" : "back9");
     }
@@ -971,7 +919,6 @@ Try selecting a different course or adding this course manually.`);
                 </Button>
               </div>
               
-              {/* "Add a new course" button */}
               <div className="mt-2 mb-4 text-center">
                 <Button 
                   variant="outline" 
@@ -980,18 +927,16 @@ Try selecting a different course or adding this course manually.`);
                   className="w-full"
                 >
                   <PlusCircle className="mr-2 h-4 w-4" />
-                  Can't find your course? Add it now
+                  Can&apos;t find your course? Add it now
                 </Button>
               </div>
               
-              {/* Search Error */}
               {searchError && (
                 <div className="bg-destructive/10 border border-destructive/30 rounded-md p-3 text-center">
                   <p className="text-sm text-destructive">{searchError}</p>
                 </div>
               )}
               
-              {/* Search Results */}
               {searchResults.length > 0 && (
                 <div>
                   <h3 className="text-lg font-medium mb-2">Search Results</h3>
@@ -1020,7 +965,6 @@ Try selecting a different course or adding this course manually.`);
                             size="icon"
                             onClick={(e) => {
                               e.stopPropagation();
-                              // Edit course functionality
                             }}
                           >
                             <Edit className="h-4 w-4" />
@@ -1035,7 +979,6 @@ Try selecting a different course or adding this course manually.`);
           </>
         ) : (
           <>
-            {/* Scorecard View */}
             {selectedCourse && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -1059,7 +1002,6 @@ Try selecting a different course or adding this course manually.`);
                   </Button>
                 </div>
                 
-                {/* Data Loading Error Alert */}
                 {dataLoadingError && (
                   <Alert variant="destructive" className="mb-2">
                     <AlertCircle className="h-4 w-4" />
@@ -1069,11 +1011,8 @@ Try selecting a different course or adding this course manually.`);
                   </Alert>
                 )}
                 
-                {/* Improved Landscape Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                  {/* Left Column: Course & Date Info */}
                   <div className="lg:col-span-3 space-y-3">
-                    {/* Date Selector */}
                     <div>
                       <label className="text-sm font-medium mb-1 block">Date Played</label>
                       <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
@@ -1100,7 +1039,6 @@ Try selecting a different course or adding this course manually.`);
                       </Popover>
                     </div>
                     
-                    {/* Tee Box Selector */}
                     <div>
                       <label className="text-sm font-medium mb-1 block">Tee Played</label>
                       <Select value={selectedTeeId || undefined} onValueChange={handleTeeChange}>
@@ -1134,7 +1072,6 @@ Try selecting a different course or adding this course manually.`);
                       </Select>
                     </div>
                     
-                    {/* Hole Selection */}
                     <div>
                       <label className="text-sm font-medium mb-1 block">Holes Played</label>
                       <div className="flex space-x-1">
@@ -1166,9 +1103,7 @@ Try selecting a different course or adding this course manually.`);
                     </div>
                   </div>
                   
-                  {/* Middle Column: Tee Details & Stats */}
                   <div className="lg:col-span-3 space-y-3">
-                    {/* Selected Tee Info Card */}
                     {selectedTeeId && (
                       <Card className="p-3 h-full">
                         <h3 className="text-sm font-medium mb-2">Tee Details</h3>
@@ -1202,9 +1137,7 @@ Try selecting a different course or adding this course manually.`);
                     )}
                   </div>
                   
-                  {/* Right Column: Round Summary & Actions */}
                   <div className="lg:col-span-3 space-y-3">
-                    {/* Round Summary */}
                     <Card className="p-3">
                       <h3 className="text-sm font-medium mb-2">Round Summary</h3>
                       <div className="grid grid-cols-2 gap-2 text-sm">
@@ -1239,7 +1172,6 @@ Try selecting a different course or adding this course manually.`);
                       </div>
                     </Card>
                     
-                    {/* Action Buttons */}
                     <div className="flex justify-between space-x-2 pt-2">
                       <Button variant="outline" onClick={handleCloseModal} size="sm" className="flex-1">
                         Cancel
@@ -1257,9 +1189,7 @@ Try selecting a different course or adding this course manually.`);
                     </div>
                   </div>
                   
-                  {/* Bottom: Scorecard */}
                   <div className="lg:col-span-12">
-                    {/* Tabs for Front/Back Nine */}
                     {holeSelection === 'all' ? (
                       <Tabs defaultValue="front9" value={activeScoreTab} onValueChange={(value) => setActiveScoreTab(value as "front9" | "back9")}>
                         <TabsList className="w-full">
@@ -1267,7 +1197,6 @@ Try selecting a different course or adding this course manually.`);
                           <TabsTrigger value="back9" className="flex-1">Back 9</TabsTrigger>
                         </TabsList>
                         <TabsContent value="front9" className="mt-2">
-                          {/* Front Nine Scorecard */}
                           <div className="border rounded-md">
                             <div className="overflow-x-auto">
                               <table className="w-full border-collapse">
@@ -1312,7 +1241,6 @@ Try selecting a different course or adding this course manually.`);
                           </div>
                         </TabsContent>
                         <TabsContent value="back9" className="mt-2">
-                          {/* Back Nine Scorecard */}
                           <div className="border rounded-md">
                             <div className="overflow-x-auto">
                               <table className="w-full border-collapse">
@@ -1338,7 +1266,6 @@ Try selecting a different course or adding this course manually.`);
                                   <tr className="border-b">
                                     <td className="px-2 py-2 text-sm font-medium">Strokes</td>
                                     {scores.filter(score => score.hole > 9).map((score, index) => {
-                                      // Adjust the index to account for front nine
                                       const adjustedIndex = index + scores.filter(s => s.hole <= 9).length;
                                       return (
                                         <td key={`strokes-${score.hole}`} className="px-1 py-2 text-center">
