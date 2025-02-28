@@ -1403,14 +1403,6 @@ Try selecting a different course or adding this course manually.`);
                       '-'}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Total Putts:</span>
-                  <span className="font-medium">
-                    {scoreSummary.puttsRecorded ? 
-                      scoreSummary.totalPutts : 
-                      'None'}
-                  </span>
-                </div>
               </div>
             </Card>
             
@@ -1501,3 +1493,4 @@ Try selecting a different course or adding this course manually.`);
     </>
   );
 }
+
