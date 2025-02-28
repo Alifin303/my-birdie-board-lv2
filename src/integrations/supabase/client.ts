@@ -34,10 +34,75 @@ export const getSiteUrl = () => {
 
 // Helper function to format course name for storage and display
 export const formatCourseName = (clubName: string, courseName: string) => {
+  // Debug log to trace what's being passed to formatCourseName
+  console.log("formatCourseName input:", { clubName, courseName });
+  
   // If the club name and course name are the same, just use one
   if (clubName === courseName) {
     return clubName;
   }
   // Otherwise format as "Club Name - Course Name"
-  return `${clubName} - ${courseName}`;
+  const formattedName = `${clubName} - ${courseName}`;
+  console.log("Formatted course name:", formattedName);
+  return formattedName;
+};
+
+// Helper function to parse stored course name back into club and course
+export const parseCourseName = (storedName: string): { clubName: string, courseName: string } => {
+  console.log("Parsing stored course name:", storedName);
+  
+  // If the name contains a separator, split it
+  if (storedName.includes(' - ')) {
+    const [clubName, courseName] = storedName.split(' - ', 2);
+    console.log("Parsed course name:", { clubName, courseName });
+    return { clubName, courseName };
+  }
+  
+  // If no separator, use the entire name as both club and course name
+  console.log("No separator found, using entire name for both club and course");
+  return { clubName: storedName, courseName: storedName };
+};
+
+// Helper for debugging Supabase operations
+export const logSupabaseOperation = (operation: string, data: any, error: any = null) => {
+  if (error) {
+    console.error(`Supabase ${operation} failed:`, error);
+    console.error("Failed operation data:", data);
+    return;
+  }
+  
+  console.log(`Supabase ${operation} successful:`, data);
+};
+
+// Helper to fetch course details from database
+export const fetchCourseById = async (courseId: number) => {
+  console.log(`Fetching course details for database ID: ${courseId}`);
+  
+  const { data, error } = await supabase
+    .from('courses')
+    .select('*')
+    .eq('id', courseId)
+    .single();
+    
+  if (error) {
+    console.error("Error fetching course:", error);
+    return null;
+  }
+  
+  console.log("Course data from database:", data);
+  
+  // Parse the stored name
+  if (data && data.name) {
+    const parsedName = parseCourseName(data.name);
+    console.log("Database course with parsed name:", {
+      ...data,
+      ...parsedName
+    });
+    return {
+      ...data,
+      ...parsedName
+    };
+  }
+  
+  return data;
 };

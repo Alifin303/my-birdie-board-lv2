@@ -6,9 +6,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { User, LogOut, Trophy, ChevronUp, ChevronDown, Flag, CalendarDays } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, parseCourseName } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AddRoundModal } from "@/components/AddRoundModal";
+import { DebugPanel } from "@/components/DebugPanel";
 
 interface Round {
   id: number;
@@ -29,6 +30,7 @@ interface Round {
 interface CourseStats {
   courseId: number;
   courseName: string;
+  clubName: string; // Added for clarity
   city?: string;
   state?: string;
   roundsPlayed: number;
@@ -59,6 +61,9 @@ export default function Dashboard() {
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
   const [sortField, setSortField] = useState<keyof CourseStats>('courseName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  
+  // Debug flag for development
+  const [showDebugPanel, setShowDebugPanel] = useState(true);
 
   useEffect(() => {
     console.log("Modal state changed:", isModalOpen);
@@ -87,6 +92,7 @@ export default function Dashboard() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session found');
       
+      console.log("Fetching user rounds...");
       const { data, error } = await supabase
         .from('rounds')
         .select(`
@@ -96,9 +102,35 @@ export default function Dashboard() {
         .eq('user_id', session.user.id)
         .order('date', { ascending: false });
         
-      if (error) throw error;
-      console.log("Fetched rounds data:", data);
-      return data as Round[] || [];
+      if (error) {
+        console.error("Error fetching user rounds:", error);
+        throw error;
+      }
+      
+      console.log("Fetched rounds data from Supabase:", data);
+      
+      // Process rounds to include parsed course names
+      const processedRounds = data?.map(round => {
+        let parsedNames = { clubName: "Unknown Club", courseName: "Unknown Course" };
+        
+        // Try to parse the course name if available
+        if (round.courses && round.courses.name) {
+          parsedNames = parseCourseName(round.courses.name);
+        }
+        
+        return {
+          ...round,
+          courses: round.courses ? {
+            ...round.courses,
+            clubName: parsedNames.clubName,
+            courseName: parsedNames.courseName
+          } : undefined
+        };
+      }) || [];
+      
+      console.log("Processed rounds with parsed course names:", processedRounds);
+      
+      return processedRounds as Round[];
     }
   });
 
@@ -215,15 +247,16 @@ export default function Dashboard() {
       
       // Get course name, handling possible formatting in the database
       let courseName = "Unknown Course";
+      let clubName = "Unknown Club";
+      
       if (firstRound.courses) {
         if (firstRound.courses.name) {
-          // If the name contains ' - ', it's likely stored as "ClubName - CourseName"
-          const nameParts = firstRound.courses.name.split(' - ');
-          if (nameParts.length > 1) {
-            courseName = firstRound.courses.name; // Use the full formatted name
-          } else {
-            courseName = firstRound.courses.name;
-          }
+          // Parse the stored name into club and course components
+          const { clubName: parsedClub, courseName: parsedCourse } = parseCourseName(firstRound.courses.name);
+          clubName = parsedClub;
+          courseName = parsedCourse;
+          
+          console.log(`Course ID ${courseId} parsed as: Club = "${clubName}", Course = "${courseName}"`);
         }
       }
       
@@ -241,6 +274,7 @@ export default function Dashboard() {
       return {
         courseId,
         courseName,
+        clubName,
         city: firstRound.courses?.city,
         state: firstRound.courses?.state,
         roundsPlayed,
@@ -378,6 +412,7 @@ export default function Dashboard() {
     }
 
     const courseStats = calculateCourseStats(userRounds);
+    console.log("Calculated course stats:", courseStats);
     
     // Sort course stats
     const sortedCourseStats = [...courseStats].sort((a, b) => {
@@ -469,7 +504,9 @@ export default function Dashboard() {
                     className="hover:underline text-primary"
                     onClick={() => handleCourseClick(courseStat.courseId)}
                   >
-                    {courseStat.courseName}
+                    {courseStat.clubName !== courseStat.courseName 
+                      ? `${courseStat.clubName} - ${courseStat.courseName}`
+                      : courseStat.courseName}
                   </button>
                   <p className="text-xs text-muted-foreground">
                     {courseStat.city}{courseStat.state ? `, ${courseStat.state}` : ''}
@@ -510,9 +547,17 @@ export default function Dashboard() {
     
     // Get course name, properly formatted
     let courseName = "Course";
+    let clubName = "Unknown Club";
+    
     if (courseRounds[0].courses?.name) {
-      courseName = courseRounds[0].courses.name;
+      const { clubName: parsedClub, courseName: parsedCourse } = parseCourseName(courseRounds[0].courses.name);
+      clubName = parsedClub;
+      courseName = parsedCourse;
     }
+    
+    const displayName = clubName !== courseName 
+      ? `${clubName} - ${courseName}`
+      : courseName;
     
     return (
       <div className="space-y-4">
@@ -524,7 +569,7 @@ export default function Dashboard() {
             >
               <ChevronUp className="h-5 w-5" />
             </button>
-            {courseName} Rounds
+            {displayName} Rounds
           </h2>
         </div>
         
@@ -643,6 +688,9 @@ export default function Dashboard() {
         open={isModalOpen} 
         onOpenChange={setIsModalOpen}
       />
+      
+      {/* Debug Panel for development */}
+      {showDebugPanel && <DebugPanel />}
     </div>
   );
 }
