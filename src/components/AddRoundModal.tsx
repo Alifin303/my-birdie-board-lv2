@@ -449,11 +449,11 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
         ...userAddedCourses, 
         ...apiResults.map(course => ({
           id: typeof course.id === 'string' ? parseInt(course.id) : course.id,
-          name: course.name,
-          clubName: course.club_name || course.name,
-          city: course.city || '',
-          state: course.state || '',
-          country: course.country || 'United States',
+          name: course.course_name || (course as any).name || '',
+          clubName: course.club_name || (course as any).name || '',
+          city: course.location?.city || '',
+          state: course.location?.state || '',
+          country: course.location?.country || 'United States',
           isUserAdded: false,
           apiCourseId: course.id?.toString()
         }))
@@ -984,7 +984,7 @@ Try selecting a different course or adding this course manually.`);
             course_id: selectedCourse.id,
             date: roundDate.toISOString(),
             tee_name: selectedTee.name,
-            tee_id: selectedTee.id,
+            tee_id: selectedTeeId,
             gross_score: totalStrokes,
             to_par_gross: toParGross,
             net_score: null,
