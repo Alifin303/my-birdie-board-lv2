@@ -36,7 +36,8 @@ const ApiTest = () => {
     { label: "Augusta, GA", value: "augusta" },
     { label: "St Andrews, Scotland", value: "st andrews" },
     { label: "Rayleigh, UK", value: "rayleigh" },
-    { label: "New York, NY", value: "new york" }
+    { label: "New York, NY", value: "new york" },
+    { label: "Liverpool, UK", value: "liverpool" }
   ];
 
   // Initialize with current API_CONFIG settings

@@ -1,3 +1,4 @@
+
 // Type definitions
 export interface GolfCourse {
   id: number | string;
@@ -263,8 +264,8 @@ const extendedMockCourses: GolfCourse[] = [
 export const API_CONFIG = {
   // Set to true to use real API instead of mock data - NOW ENABLED BY DEFAULT
   USE_REAL_API: true,
-  // The base URL for the golf course API
-  API_URL: "https://api.golfcourseapi.com/v1",
+  // The base URL for the golf course API - using the original URL that was working
+  API_URL: "https://golf-courses-api.herokuapp.com/api/v1",
   // API key for authentication
   API_KEY: "golf-courses-api-key-2023",
   // Toggle extended mock data for testing
@@ -309,20 +310,22 @@ export async function searchCourses(query: string, includeMockData: boolean = fa
   
   try {
     // Always attempt to use the live API first
-    console.log(`Making live API request to ${API_CONFIG.API_URL}/search`);
+    // Using the original endpoint path and parameters that were working
+    console.log(`Making live API request to ${API_CONFIG.API_URL}/courses/search`);
     
-    // Build query parameters according to the API spec
+    // Build query parameters - reverting to what worked previously
     const searchParams = new URLSearchParams({
-      search_query: normalizedQuery
+      q: normalizedQuery,
+      limit: '50'
     });
     
     // Make API request
     const response = await fetch(
-      `${API_CONFIG.API_URL}/search?${searchParams.toString()}`,
+      `${API_CONFIG.API_URL}/courses/search?${searchParams.toString()}`,
       {
         method: 'GET',
         headers: {
-          'Authorization': `Key ${API_CONFIG.API_KEY}`,
+          'Authorization': `Bearer ${API_CONFIG.API_KEY}`,
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
@@ -340,9 +343,11 @@ export async function searchCourses(query: string, includeMockData: boolean = fa
     const data = await response.json();
     console.log(`Live API response data:`, data);
     
-    // Process the API response based on its structure as defined in the OpenAPI spec
+    // Process the API response based on its structure
     if (data.courses && Array.isArray(data.courses)) {
       apiResults = data.courses;
+    } else if (data.data && Array.isArray(data.data)) {
+      apiResults = data.data;
     } else if (Array.isArray(data)) {
       apiResults = data;
     } else {
@@ -356,12 +361,12 @@ export async function searchCourses(query: string, includeMockData: boolean = fa
       // Handle different API response formats - using proper typings for our interface
       const mappedCourse: GolfCourse = {
         id: course.id || (course as any).courseId || (course as any).course_id,
-        club_name: (course as any).club_name || (course as any).clubName || (course as any).name,
-        course_name: (course as any).course_name || (course as any).courseName,
+        club_name: (course as any).clubName || course.club_name || (course as any).name,
+        course_name: (course as any).courseName || course.course_name,
         location: {
-          city: (course.location && course.location.city) || (course as any).city,
-          state: (course.location && course.location.state) || (course as any).state,
-          country: (course.location && course.location.country) || (course as any).country || 'USA',
+          city: (course as any).city || (course.location && course.location.city),
+          state: (course as any).state || (course.location && course.location.state),
+          country: (course as any).country || (course.location && course.location.country) || 'USA',
           address: (course.location && course.location.address) || (course as any).address
         }
       };
@@ -409,7 +414,7 @@ export async function getCourseDetails(courseId: number | string): Promise<Cours
       {
         method: 'GET',
         headers: {
-          'Authorization': `Key ${API_CONFIG.API_KEY}`,
+          'Authorization': `Bearer ${API_CONFIG.API_KEY}`,
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
@@ -588,7 +593,7 @@ export function generateMockCourseDetails(course: GolfCourse): CourseDetail {
         tee_name: "White",
         tee_color: "white",
         par_total: 72,
-        yards_total: 6800,
+        total_yards: 6800,
         course_rating: 72.1,
         slope_rating: 131,
         holes: Array(18).fill(null).map((_, idx) => {
@@ -615,7 +620,7 @@ export function generateMockCourseDetails(course: GolfCourse): CourseDetail {
         tee_name: "Yellow",
         tee_color: "yellow",
         par_total: 72,
-        yards_total: 6500,
+        total_yards: 6500,
         course_rating: 71.3,
         slope_rating: 128,
         holes: Array(18).fill(null).map((_, idx) => {
@@ -645,7 +650,7 @@ export function generateMockCourseDetails(course: GolfCourse): CourseDetail {
         tee_name: "Red",
         tee_color: "red",
         par_total: 71,  // Different total par for red tees
-        yards_total: 5800,
+        total_yards: 5800,
         course_rating: 73.1,
         slope_rating: 125,
         holes: Array(18).fill(null).map((_, idx) => {
@@ -695,7 +700,7 @@ export function generateMockCourseDetails(course: GolfCourse): CourseDetail {
         tee_name: "White",
         tee_color: "white",
         par_total: 72,
-        yards_total: 6925,
+        total_yards: 6925,
         course_rating: 72.3,
         slope_rating: 133,
         holes: Array(18).fill(null).map((_, idx) => {
@@ -713,7 +718,7 @@ export function generateMockCourseDetails(course: GolfCourse): CourseDetail {
         tee_name: "Yellow",
         tee_color: "yellow",
         par_total: 72,
-        yards_total: 6723,
+        total_yards: 6723,
         course_rating: 71.6,
         slope_rating: 129,
         holes: Array(18).fill(null).map((_, idx) => {
@@ -734,7 +739,7 @@ export function generateMockCourseDetails(course: GolfCourse): CourseDetail {
         tee_name: "Red",
         tee_color: "red",
         par_total: 73,  // Different total par
-        yards_total: 5955,
+        total_yards: 5955,
         course_rating: 74.2,
         slope_rating: 127,
         holes: Array(18).fill(null).map((_, idx) => {
@@ -780,7 +785,7 @@ export function generateMockCourseDetails(course: GolfCourse): CourseDetail {
         tee_name: "White",
         tee_color: "white",
         par_total: 72,
-        yards_total: 6800,
+        total_yards: 6800,
         course_rating: 72.1,
         slope_rating: 131,
         holes: Array(18).fill(null).map((_, idx) => {
@@ -798,7 +803,7 @@ export function generateMockCourseDetails(course: GolfCourse): CourseDetail {
         tee_name: "Yellow",
         tee_color: "yellow",
         par_total: 72,
-        yards_total: 6500,
+        total_yards: 6500,
         course_rating: 71.3,
         slope_rating: 128,
         holes: Array(18).fill(null).map((_, idx) => {
@@ -819,7 +824,7 @@ export function generateMockCourseDetails(course: GolfCourse): CourseDetail {
         tee_name: "Red",
         tee_color: "red",
         par_total: 73,
-        yards_total: 5900,
+        total_yards: 5900,
         course_rating: 73.1,
         slope_rating: 125,
         holes: Array(18).fill(null).map((_, idx) => {
@@ -871,7 +876,7 @@ export function generateMockCourseDetails(course: GolfCourse): CourseDetail {
         tee_name: "Championship",
         tee_color: "black",
         par_total: 72,
-        yards_total: 7100,
+        total_yards: 7100,
         course_rating: 74.5,
         slope_rating: 138,
         holes: Array(18).fill(null).map((_, idx) => {
@@ -890,7 +895,7 @@ export function generateMockCourseDetails(course: GolfCourse): CourseDetail {
         tee_name: "Blue",
         tee_color: "blue",
         par_total: 72,
-        yards_total: 6700,
+        total_yards: 6700,
         course_rating: 72.8,
         slope_rating: 132,
         holes: Array(18).fill(null).map((_, idx) => {
@@ -912,7 +917,7 @@ export function generateMockCourseDetails(course: GolfCourse): CourseDetail {
         tee_name: "Gold",
         tee_color: "gold",
         par_total: 72,
-        yards_total: 5800,
+        total_yards: 5800,
         course_rating: 73.4,
         slope_rating: 126,
         holes: Array(18).fill(null).map((_, idx) => {
@@ -1029,8 +1034,7 @@ function generateMockTeeBox(name: string, color: string, par: number, totalYards
     tee_name: name,
     tee_color: color,
     par_total: par,
-    yards_total: totalYards,
-    total_yards: calculatedYardsTotal,
+    total_yards: totalYards,
     course_rating: Math.round((totalYards / 113) * 10) / 10,
     slope_rating: Math.round(113 + (totalYards - 6000) / 100),
     front_nine_yards: frontNineYards,
