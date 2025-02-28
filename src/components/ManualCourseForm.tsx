@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { 
   Dialog,
@@ -25,12 +26,13 @@ import { TeeSelection } from "./course-form/TeeSelection";
 import { TeeConfiguration } from "./course-form/TeeConfiguration";
 import { HoleInputs } from "./course-form/HoleInputs";
 import { TeeSummary } from "./course-form/TeeSummary";
-import { createDefaultTee } from "./course-form/course-utils";
+import { createDefaultTee, calculateRatings } from "./course-form/course-utils";
 import { 
   ManualCourseFormProps, 
   ManualCourseData,
   TeeData,
-  HoleData
+  HoleData,
+  teeOptions
 } from "./course-form/types";
 
 export function ManualCourseForm({ 
@@ -387,9 +389,6 @@ export function ManualCourseForm({
       setIsLoading(false);
     }
   };
-  
-  // Import necessary components for types
-  const { teeOptions } = require('./course-form/types');
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
