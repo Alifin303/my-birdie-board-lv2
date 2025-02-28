@@ -38,6 +38,14 @@ export function HoleInputs({
                   onChange={(e) => handleHoleChange(hole.number - 1, 'par', e.target.value)}
                   className="w-12 h-8 text-center"
                   required
+                  // Prevent form submission on enter
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      return false;
+                    }
+                    return true;
+                  }}
                 />
               </td>
             ))}
@@ -54,6 +62,14 @@ export function HoleInputs({
                   onChange={(e) => handleHoleChange(hole.number - 1, 'yards', e.target.value)}
                   className="w-12 h-8 text-center"
                   required
+                  // Prevent form submission on enter
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      return false;
+                    }
+                    return true;
+                  }}
                 />
               </td>
             ))}
@@ -70,6 +86,14 @@ export function HoleInputs({
                   onChange={(e) => handleHoleChange(hole.number - 1, 'handicap', e.target.value)}
                   className="w-12 h-8 text-center"
                   required
+                  // Prevent form submission on enter
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      return false;
+                    }
+                    return true;
+                  }}
                 />
               </td>
             ))}

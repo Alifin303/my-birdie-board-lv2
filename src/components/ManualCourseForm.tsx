@@ -290,7 +290,12 @@ export function ManualCourseForm({
   };
   
   // Handle form submission
-  const handleSubmit = async () => {
+  const handleSubmit = async (e?: React.FormEvent) => {
+    // Prevent default if event is provided (for form submissions)
+    if (e) {
+      e.preventDefault();
+    }
+    
     if (!validateForm()) return;
     
     setIsLoading(true);
@@ -390,10 +395,20 @@ export function ManualCourseForm({
     }
   };
 
+  // Prevent form submission on Enter key
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      return false;
+    }
+    return true;
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
         className="sm:max-w-5xl max-h-[90vh] overflow-y-auto"
+        onKeyDown={handleKeyDown}
       >
         <DialogHeader>
           <DialogTitle>{existingCourse ? "Edit Course" : "Add a New Course"}</DialogTitle>
@@ -405,7 +420,13 @@ export function ManualCourseForm({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-6">
+        <form 
+          className="space-y-6" 
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit(e);
+          }}
+        >
           {/* Course Information */}
           <CourseInformation 
             formData={formData}
@@ -432,8 +453,8 @@ export function ManualCourseForm({
               
               <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
                 <TabsList className="grid grid-cols-2">
-                  <TabsTrigger value="front9">Front Nine</TabsTrigger>
-                  <TabsTrigger value="back9">Back Nine</TabsTrigger>
+                  <TabsTrigger value="front9" type="button">Front Nine</TabsTrigger>
+                  <TabsTrigger value="back9" type="button">Back Nine</TabsTrigger>
                 </TabsList>
                 <TabsContent value="front9">
                   <HoleInputs 
@@ -456,27 +477,27 @@ export function ManualCourseForm({
               <TeeSummary currentTee={formData.tees[currentTeeIndex]} />
             </div>
           )}
-        </div>
         
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} type="button">
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={isLoading}
-            type="button"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {existingCourse ? "Updating..." : "Creating..."}
-              </>
-            ) : (
-              existingCourse ? "Update Course" : "Create Course"
-            )}
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => onOpenChange(false)} type="button">
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => handleSubmit()}
+              disabled={isLoading}
+              type="submit"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {existingCourse ? "Updating..." : "Creating..."}
+                </>
+              ) : (
+                existingCourse ? "Update Course" : "Create Course"
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

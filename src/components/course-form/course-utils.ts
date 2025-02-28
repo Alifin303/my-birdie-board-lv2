@@ -19,9 +19,14 @@ export function createDefaultTee(): TeeData {
 
 // Calculate course rating and slope for a tee (simplified algorithm)
 export const calculateRatings = (tee: TeeData) => {
+  // Add a safety check to prevent errors when holes is undefined or has undefined elements
+  if (!tee || !tee.holes || tee.holes.some(hole => !hole)) {
+    return { rating: 0, slope: 113, par: 0, yards: 0 };
+  }
+  
   // This is a simplified algorithm - in reality, course ratings are much more complex
-  const totalYards = tee.holes.reduce((sum, hole) => sum + hole.yards, 0);
-  const totalPar = tee.holes.reduce((sum, hole) => sum + hole.par, 0);
+  const totalYards = tee.holes.reduce((sum, hole) => sum + (hole.yards || 0), 0);
+  const totalPar = tee.holes.reduce((sum, hole) => sum + (hole.par || 0), 0);
   
   // Simulated rating based on total yards and par
   const rating = parseFloat(((totalYards / 100) * 0.56 + totalPar * 0.24).toFixed(1));

@@ -8,6 +8,18 @@ interface TeeSummaryProps {
 }
 
 export function TeeSummary({ currentTee }: TeeSummaryProps) {
+  // Add a safety check - if currentTee is not fully formed, don't try to calculate ratings
+  if (!currentTee || !currentTee.holes || currentTee.holes.length === 0) {
+    return (
+      <div className="border rounded-md p-4 bg-muted/30">
+        <h3 className="text-sm font-medium mb-2">Tee Summary</h3>
+        <p className="text-sm text-muted-foreground">
+          Loading tee data...
+        </p>
+      </div>
+    );
+  }
+  
   const { rating, slope, par, yards } = calculateRatings(currentTee);
   
   return (
