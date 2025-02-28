@@ -42,6 +42,7 @@ import {
   TeeBox
 } from "@/services/golfCourseApi";
 import { ManualCourseForm } from "@/components/ManualCourseForm";
+import { Card } from "@/components/ui/card";
 
 // Define interface for course search results
 interface SimplifiedGolfCourse {
@@ -94,6 +95,15 @@ type HoleSelection = 'all' | 'front9' | 'back9';
 export interface AddRoundModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+// Interface for score summary
+interface ScoreSummary {
+  totalStrokes: number;
+  totalPar: number;
+  totalPutts: number;
+  toPar: number;
+  puttsRecorded: boolean;
 }
 
 // Convert API course search result to simplified format
@@ -344,6 +354,27 @@ const loadUserAddedCourseDetails = (courseId: number): { tees: SimplifiedTee[], 
     console.error("Error loading user-added course details:", error);
     return null;
   }
+};
+
+// Calculate score summary
+const calculateScoreSummary = (
+  scores: { hole: number; par: number; strokes: number; putts?: number; }[]
+): ScoreSummary => {
+  const totalStrokes = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
+  const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
+  const toPar = totalStrokes - totalPar;
+  
+  const puttsRecorded = scores.some(score => score.putts !== undefined);
+  const totalPutts = puttsRecorded ? 
+    scores.reduce((sum, score) => sum + (score.putts || 0), 0) : 0;
+  
+  return {
+    totalStrokes,
+    totalPar,
+    totalPutts,
+    toPar,
+    puttsRecorded
+  };
 };
 
 export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
@@ -1186,7 +1217,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     );
   };
 
-  // Render scorecard step
+  // Render scorecard step with improved layout
   const renderScorecardStep = () => {
     if (!selectedCourse) return null;
     
@@ -1197,6 +1228,27 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     // Show front 9, back 9, or both based on hole selection
     const showFrontNine = holeSelection === 'all' || holeSelection === 'front9';
     const showBackNine = holeSelection === 'all' || holeSelection === 'back9';
+
+    // Calculate front 9 summary
+    const frontNineSummary = showFrontNine ? calculateScoreSummary(frontNine) : {
+      totalStrokes: 0,
+      totalPar: 0,
+      totalPutts: 0,
+      toPar: 0,
+      puttsRecorded: false
+    };
+    
+    // Calculate back 9 summary
+    const backNineSummary = showBackNine ? calculateScoreSummary(backNine) : {
+      totalStrokes: 0,
+      totalPar: 0,
+      totalPutts: 0,
+      toPar: 0,
+      puttsRecorded: false
+    };
+    
+    // Calculate total summary
+    const totalSummary = calculateScoreSummary(scores);
 
     return (
       <div className="space-y-5">
@@ -1311,174 +1363,292 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
           </div>
         </div>
         
-        {/* Scorecard Table - Front 9 */}
-        {showFrontNine && frontNine.length > 0 && (
-          <div>
-            <h3 className="text-sm font-medium mb-2">Front Nine</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b">
-                    <th className="pl-2 pr-4 py-2 text-left text-sm font-medium whitespace-nowrap">Hole</th>
-                    {frontNine.map(score => (
-                      <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b">
-                    <td className="pl-2 pr-4 py-2 text-sm font-medium">Par</td>
-                    {frontNine.map(score => (
-                      <td key={`par-${score.hole}`} className="px-2 py-2 text-center">
-                        <div className="bg-muted/40 border border-muted rounded-md w-8 h-8 flex items-center justify-center font-medium mx-auto">
-                          {score.par}
-                        </div>
-                      </td>
-                    ))}
-                  </tr>
-                  <tr className="border-b">
-                    <td className="pl-2 pr-4 py-2 text-sm font-medium">Strokes</td>
-                    {frontNine.map((score, index) => (
-                      <td key={`strokes-${score.hole}`} className="px-2 py-2 text-center">
-                        <Input
-                          type="number"
-                          min="1"
-                          max="20"
-                          value={score.strokes || ''}
-                          onChange={(e) => handleScoreChange(index, 'strokes', e.target.value)}
-                          className="w-10 h-8 text-center mx-auto"
-                          inputMode="numeric"
-                        />
-                      </td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <td className="pl-2 pr-4 py-2 text-sm font-medium">Putts</td>
-                    {frontNine.map((score, index) => (
-                      <td key={`putts-${score.hole}`} className="px-2 py-2 text-center">
-                        <Input
-                          type="number"
-                          min="0"
-                          max="10"
-                          value={score.putts || ''}
-                          onChange={(e) => handleScoreChange(index, 'putts', e.target.value)}
-                          className="w-10 h-8 text-center mx-auto"
-                          inputMode="numeric"
-                          placeholder="-"
-                        />
-                      </td>
-                    ))}
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+        {/* Improved Scorecard Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          {/* Scorecards Column */}
+          <div className="lg:col-span-3 space-y-4">
+            {/* Front Nine Scorecard */}
+            {showFrontNine && frontNine.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium mb-2">Front Nine</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="pl-2 pr-4 py-2 text-left text-sm font-medium whitespace-nowrap">Hole</th>
+                        {frontNine.map(score => (
+                          <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b">
+                        <td className="pl-2 pr-4 py-2 text-sm font-medium">Par</td>
+                        {frontNine.map(score => (
+                          <td key={`par-${score.hole}`} className="px-2 py-2 text-center">
+                            <div className="bg-muted/40 border border-muted rounded-md w-7 h-7 flex items-center justify-center font-medium mx-auto">
+                              {score.par}
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+                      <tr className="border-b">
+                        <td className="pl-2 pr-4 py-2 text-sm font-medium">Strokes</td>
+                        {frontNine.map((score, index) => (
+                          <td key={`strokes-${score.hole}`} className="px-2 py-2 text-center">
+                            <Input
+                              type="number"
+                              min="1"
+                              max="20"
+                              value={score.strokes || ''}
+                              onChange={(e) => handleScoreChange(index, 'strokes', e.target.value)}
+                              className="w-9 h-7 text-center mx-auto px-1"
+                              inputMode="numeric"
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                      <tr>
+                        <td className="pl-2 pr-4 py-2 text-sm font-medium">Putts</td>
+                        {frontNine.map((score, index) => (
+                          <td key={`putts-${score.hole}`} className="px-2 py-2 text-center">
+                            <Input
+                              type="number"
+                              min="0"
+                              max="10"
+                              value={score.putts || ''}
+                              onChange={(e) => handleScoreChange(index, 'putts', e.target.value)}
+                              className="w-9 h-7 text-center mx-auto px-1"
+                              inputMode="numeric"
+                              placeholder="-"
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+            
+            {/* Back Nine Scorecard */}
+            {showBackNine && backNine.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium mb-2">Back Nine</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="pl-2 pr-4 py-2 text-left text-sm font-medium whitespace-nowrap">Hole</th>
+                        {backNine.map(score => (
+                          <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b">
+                        <td className="pl-2 pr-4 py-2 text-sm font-medium">Par</td>
+                        {backNine.map(score => (
+                          <td key={`par-${score.hole}`} className="px-2 py-2 text-center">
+                            <div className="bg-muted/40 border border-muted rounded-md w-7 h-7 flex items-center justify-center font-medium mx-auto">
+                              {score.par}
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+                      <tr className="border-b">
+                        <td className="pl-2 pr-4 py-2 text-sm font-medium">Strokes</td>
+                        {backNine.map((score, index) => {
+                          // Adjust the index to account for front nine
+                          const adjustedIndex = index + frontNine.length;
+                          return (
+                            <td key={`strokes-${score.hole}`} className="px-2 py-2 text-center">
+                              <Input
+                                type="number"
+                                min="1"
+                                max="20"
+                                value={score.strokes || ''}
+                                onChange={(e) => handleScoreChange(adjustedIndex, 'strokes', e.target.value)}
+                                className="w-9 h-7 text-center mx-auto px-1"
+                                inputMode="numeric"
+                              />
+                            </td>
+                          );
+                        })}
+                      </tr>
+                      <tr>
+                        <td className="pl-2 pr-4 py-2 text-sm font-medium">Putts</td>
+                        {backNine.map((score, index) => {
+                          // Adjust the index to account for front nine
+                          const adjustedIndex = index + frontNine.length;
+                          return (
+                            <td key={`putts-${score.hole}`} className="px-2 py-2 text-center">
+                              <Input
+                                type="number"
+                                min="0"
+                                max="10"
+                                value={score.putts || ''}
+                                onChange={(e) => handleScoreChange(adjustedIndex, 'putts', e.target.value)}
+                                className="w-9 h-7 text-center mx-auto px-1"
+                                inputMode="numeric"
+                                placeholder="-"
+                              />
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
-        )}
-        
-        {/* Scorecard Table - Back 9 */}
-        {showBackNine && backNine.length > 0 && (
-          <div>
-            <h3 className="text-sm font-medium mb-2">Back Nine</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b">
-                    <th className="pl-2 pr-4 py-2 text-left text-sm font-medium whitespace-nowrap">Hole</th>
-                    {backNine.map(score => (
-                      <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b">
-                    <td className="pl-2 pr-4 py-2 text-sm font-medium">Par</td>
-                    {backNine.map(score => (
-                      <td key={`par-${score.hole}`} className="px-2 py-2 text-center">
-                        <div className="bg-muted/40 border border-muted rounded-md w-8 h-8 flex items-center justify-center font-medium mx-auto">
-                          {score.par}
-                        </div>
-                      </td>
-                    ))}
-                  </tr>
-                  <tr className="border-b">
-                    <td className="pl-2 pr-4 py-2 text-sm font-medium">Strokes</td>
-                    {backNine.map((score, index) => {
-                      // Adjust the index to account for front nine
-                      const adjustedIndex = index + frontNine.length;
-                      return (
-                        <td key={`strokes-${score.hole}`} className="px-2 py-2 text-center">
-                          <Input
-                            type="number"
-                            min="1"
-                            max="20"
-                            value={score.strokes || ''}
-                            onChange={(e) => handleScoreChange(adjustedIndex, 'strokes', e.target.value)}
-                            className="w-10 h-8 text-center mx-auto"
-                            inputMode="numeric"
-                          />
-                        </td>
-                      );
-                    })}
-                  </tr>
-                  <tr>
-                    <td className="pl-2 pr-4 py-2 text-sm font-medium">Putts</td>
-                    {backNine.map((score, index) => {
-                      // Adjust the index to account for front nine
-                      const adjustedIndex = index + frontNine.length;
-                      return (
-                        <td key={`putts-${score.hole}`} className="px-2 py-2 text-center">
-                          <Input
-                            type="number"
-                            min="0"
-                            max="10"
-                            value={score.putts || ''}
-                            onChange={(e) => handleScoreChange(adjustedIndex, 'putts', e.target.value)}
-                            className="w-10 h-8 text-center mx-auto"
-                            inputMode="numeric"
-                            placeholder="-"
-                          />
-                        </td>
-                      );
-                    })}
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          
+          {/* Side Summaries Column */}
+          <div className="space-y-4">
+            {/* Front Nine Summary */}
+            {showFrontNine && (
+              <Card className="p-3">
+                <h3 className="text-sm font-medium mb-2">Front Nine Summary</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Total Par:</span>
+                    <span className="font-medium">{frontNineSummary.totalPar}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Strokes:</span>
+                    <span className="font-medium">
+                      {frontNineSummary.totalStrokes || '-'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">To Par:</span>
+                    <span className="font-medium">
+                      {frontNineSummary.totalStrokes ? 
+                        (frontNineSummary.toPar > 0 ? 
+                          `+${frontNineSummary.toPar}` : 
+                          frontNineSummary.toPar) : 
+                        '-'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Putts:</span>
+                    <span className="font-medium">
+                      {frontNineSummary.puttsRecorded ? 
+                        frontNineSummary.totalPutts : 
+                        'Not Recorded'}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+            )}
+            
+            {/* Back Nine Summary */}
+            {showBackNine && (
+              <Card className="p-3">
+                <h3 className="text-sm font-medium mb-2">Back Nine Summary</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Total Par:</span>
+                    <span className="font-medium">{backNineSummary.totalPar}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Strokes:</span>
+                    <span className="font-medium">
+                      {backNineSummary.totalStrokes || '-'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">To Par:</span>
+                    <span className="font-medium">
+                      {backNineSummary.totalStrokes ? 
+                        (backNineSummary.toPar > 0 ? 
+                          `+${backNineSummary.toPar}` : 
+                          backNineSummary.toPar) : 
+                        '-'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Putts:</span>
+                    <span className="font-medium">
+                      {backNineSummary.puttsRecorded ? 
+                        backNineSummary.totalPutts : 
+                        'Not Recorded'}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+            )}
+            
+            {/* Selected Tee Info */}
+            {selectedTeeId && (
+              <Card className="p-3">
+                <h3 className="text-sm font-medium mb-2">Tee Details</h3>
+                {selectedCourse.tees.filter(tee => tee.id === selectedTeeId).map(tee => (
+                  <div key={tee.id} className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Tee Name:</span>
+                      <span className="font-medium">{tee.name}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Rating:</span>
+                      <span className="font-medium">{tee.rating}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Slope:</span>
+                      <span className="font-medium">{tee.slope}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Par:</span>
+                      <span className="font-medium">{tee.par}</span>
+                    </div>
+                    {tee.yards && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Total Yards:</span>
+                        <span className="font-medium">{tee.yards}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </Card>
+            )}
           </div>
-        )}
+        </div>
         
-        {/* Score Summary */}
-        <div className="bg-muted/20 rounded-md p-4 border">
+        {/* Total Round Summary */}
+        <Card className="p-4">
           <h3 className="text-sm font-medium mb-2">Round Summary</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="text-sm">
+              <span className="text-muted-foreground">Total Par:</span>{' '}
+              <span className="font-medium">{totalSummary.totalPar}</span>
+            </div>
             <div className="text-sm">
               <span className="text-muted-foreground">Gross Score:</span>{' '}
               <span className="font-medium">
-                {scores.reduce((sum, score) => sum + (score.strokes || 0), 0) || '-'}
+                {totalSummary.totalStrokes || '-'}
               </span>
             </div>
             <div className="text-sm">
               <span className="text-muted-foreground">To Par:</span>{' '}
               <span className="font-medium">
-                {(() => {
-                  const totalStrokes = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
-                  const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
-                  if (!totalStrokes) return '-';
-                  const toPar = totalStrokes - totalPar;
-                  return toPar > 0 ? `+${toPar}` : toPar;
-                })()}
+                {totalSummary.totalStrokes ? 
+                  (totalSummary.toPar > 0 ? 
+                    `+${totalSummary.toPar}` : 
+                    totalSummary.toPar) : 
+                  '-'}
               </span>
             </div>
             <div className="text-sm">
               <span className="text-muted-foreground">Total Putts:</span>{' '}
               <span className="font-medium">
-                {scores.some(s => s.putts !== undefined) ? 
-                  scores.reduce((sum, score) => sum + (score.putts || 0), 0) : 
+                {totalSummary.puttsRecorded ? 
+                  totalSummary.totalPutts : 
                   'Not Recorded'}
               </span>
             </div>
           </div>
-        </div>
+        </Card>
         
         <div className="flex justify-end space-x-2 pt-4">
           <Button variant="outline" onClick={handleCloseModal} type="button">
@@ -1501,7 +1671,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`sm:max-w-[600px] ${currentStep === 'scorecard' ? 'sm:max-w-[650px]' : ''}`}>
+      <DialogContent className={`sm:max-w-[600px] ${currentStep === 'scorecard' ? 'sm:max-w-[800px]' : ''}`}>
         <DialogHeader>
           <DialogTitle>{currentStep === 'search' ? "Add a New Round" : "Enter Scores"}</DialogTitle>
           <DialogDescription>
