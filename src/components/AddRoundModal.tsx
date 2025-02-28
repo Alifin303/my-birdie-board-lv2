@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   Dialog,
   DialogContent,
@@ -964,10 +964,10 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   };
 
   // Create a div ref for the calendar container to apply styles dynamically
-  const calendarContainerRef = React.useRef<HTMLDivElement>(null);
+  const calendarContainerRef = useRef<HTMLDivElement>(null);
   
   // Apply styles to hide background elements when calendar is open
-  React.useEffect(() => {
+  useEffect(() => {
     function applyCalendarOverlay() {
       const scorecard = document.querySelector('.scorecard-container');
       if (scorecard && calendarOpen) {
@@ -987,6 +987,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
           scorecard.removeChild(overlay);
         };
       }
+      return undefined;
     }
     
     const cleanup = applyCalendarOverlay();

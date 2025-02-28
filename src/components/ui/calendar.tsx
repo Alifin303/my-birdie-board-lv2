@@ -96,16 +96,28 @@ function Calendar({
               <ChevronRight className="h-4 w-4" {...iconProps} />
             </div>
           ),
-          Day: ({ ...dayProps }) => {
-            const { date, displayMonth } = dayProps;
-            
+          Day: ({ 
+            date, 
+            displayMonth,
+            ...dayProps 
+          }: React.ComponentPropsWithoutRef<"button"> & { 
+            date: Date; 
+            displayMonth: Date;
+            selected?: boolean;
+            today?: boolean;
+            disabled?: boolean; 
+          }) => {
             // Check if this day is in the current displayed month
             const isOutsideMonth = displayMonth && date ? 
               date.getMonth() !== displayMonth.getMonth() : false;
             
             // Check if day is disabled
-            const isDisabled = props.disabled ? 
-              props.disabled(date as Date) : false;
+            const isDisabled = typeof props.disabled === "function" ? 
+              props.disabled(date) : false;
+            
+            // Get selected and today state from props or use false as default
+            const isSelected = dayProps.selected || false;
+            const isToday = dayProps.today || false;
             
             return (
               <button
@@ -115,21 +127,21 @@ function Calendar({
                   "h-9 w-9 p-0 font-normal cursor-pointer",
                   isOutsideMonth && "text-muted-foreground opacity-50",
                   isDisabled && "text-muted-foreground opacity-50 cursor-not-allowed",
-                  dayProps.selected && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
-                  dayProps.today && !dayProps.selected && "bg-accent text-accent-foreground"
+                  isSelected && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+                  isToday && !isSelected && "bg-accent text-accent-foreground"
                 )}
                 disabled={isDisabled}
-                aria-selected={dayProps.selected}
-                {...dayProps}
+                aria-selected={isSelected}
                 onClick={(e) => {
                   console.log("Day clicked:", date);
                   e.stopPropagation();
                   e.preventDefault();
                   
-                  if (dayProps.onClick) {
+                  if (typeof dayProps.onClick === "function") {
                     dayProps.onClick(e);
                   }
                 }}
+                {...dayProps}
               >
                 {date?.getDate()}
               </button>
