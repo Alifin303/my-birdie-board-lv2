@@ -1,4 +1,3 @@
-
 // Type definitions
 export interface GolfCourse {
   id: number | string;
@@ -12,17 +11,26 @@ export interface GolfCourse {
     postal_code?: string;
     latitude?: number;
     longitude?: number;
+    address?: string;
   };
 }
 
 export interface TeeBox {
   tee_name?: string;
   tee_color?: string;
-  par_total?: number;
-  yards_total?: number;
-  total_yards?: number;
   course_rating?: number;
   slope_rating?: number;
+  bogey_rating?: number;
+  par_total?: number;
+  total_yards?: number;
+  total_meters?: number;
+  number_of_holes?: number;
+  front_course_rating?: number;
+  front_slope_rating?: number;
+  front_bogey_rating?: number;
+  back_course_rating?: number;
+  back_slope_rating?: number;
+  back_bogey_rating?: number;
   front_nine_yards?: number;
   back_nine_yards?: number;
   holes?: Array<{
@@ -48,6 +56,7 @@ export interface CourseDetail {
     postal_code?: string;
     latitude?: number;
     longitude?: number;
+    address?: string;
   };
   holes?: number;
   tees?: {
@@ -255,7 +264,7 @@ export const API_CONFIG = {
   // Set to true to use real API instead of mock data - NOW ENABLED BY DEFAULT
   USE_REAL_API: true,
   // The base URL for the golf course API
-  API_URL: "https://golf-courses-api.herokuapp.com/api/v1",
+  API_URL: "https://api.golfcourseapi.com/v1",
   // API key for authentication
   API_KEY: "golf-courses-api-key-2023",
   // Toggle extended mock data for testing
@@ -300,21 +309,20 @@ export async function searchCourses(query: string, includeMockData: boolean = fa
   
   try {
     // Always attempt to use the live API first
-    console.log(`Making live API request to ${API_CONFIG.API_URL}/courses/search`);
+    console.log(`Making live API request to ${API_CONFIG.API_URL}/search`);
     
-    // Build query parameters
+    // Build query parameters according to the API spec
     const searchParams = new URLSearchParams({
-      q: normalizedQuery,
-      limit: '50'
+      search_query: normalizedQuery
     });
     
     // Make API request
     const response = await fetch(
-      `${API_CONFIG.API_URL}/courses/search?${searchParams.toString()}`,
+      `${API_CONFIG.API_URL}/search?${searchParams.toString()}`,
       {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${API_CONFIG.API_KEY}`,
+          'Authorization': `Key ${API_CONFIG.API_KEY}`,
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
@@ -332,11 +340,9 @@ export async function searchCourses(query: string, includeMockData: boolean = fa
     const data = await response.json();
     console.log(`Live API response data:`, data);
     
-    // Process the API response based on its structure
+    // Process the API response based on its structure as defined in the OpenAPI spec
     if (data.courses && Array.isArray(data.courses)) {
       apiResults = data.courses;
-    } else if (data.data && Array.isArray(data.data)) {
-      apiResults = data.data;
     } else if (Array.isArray(data)) {
       apiResults = data;
     } else {
@@ -350,12 +356,13 @@ export async function searchCourses(query: string, includeMockData: boolean = fa
       // Handle different API response formats - using proper typings for our interface
       const mappedCourse: GolfCourse = {
         id: course.id || (course as any).courseId || (course as any).course_id,
-        club_name: (course as any).clubName || course.club_name || (course as any).name,
-        course_name: (course as any).courseName || course.course_name,
+        club_name: (course as any).club_name || (course as any).clubName || (course as any).name,
+        course_name: (course as any).course_name || (course as any).courseName,
         location: {
-          city: (course as any).city || (course.location && course.location.city),
-          state: (course as any).state || (course.location && course.location.state),
-          country: (course as any).country || (course.location && course.location.country) || 'USA'
+          city: (course.location && course.location.city) || (course as any).city,
+          state: (course.location && course.location.state) || (course as any).state,
+          country: (course.location && course.location.country) || (course as any).country || 'USA',
+          address: (course.location && course.location.address) || (course as any).address
         }
       };
       return mappedCourse;
@@ -402,7 +409,7 @@ export async function getCourseDetails(courseId: number | string): Promise<Cours
       {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${API_CONFIG.API_KEY}`,
+          'Authorization': `Key ${API_CONFIG.API_KEY}`,
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
@@ -420,15 +427,14 @@ export async function getCourseDetails(courseId: number | string): Promise<Cours
     const data = await response.json();
     console.log(`Live API course details data:`, data);
     
-    // Process the API response based on its structure
-    let courseDetail: CourseDetail;
+    // The API should return a Course object directly according to the spec
+    let courseDetail: CourseDetail = data;
     
+    // If the API returns a nested structure, handle it
     if (data.course) {
       courseDetail = data.course;
     } else if (data.data) {
       courseDetail = data.data;
-    } else {
-      courseDetail = data;
     }
     
     // Make sure the response has the expected properties
@@ -442,7 +448,8 @@ export async function getCourseDetails(courseId: number | string): Promise<Cours
       location: courseDetail.location || {
         city: (courseDetail as any).city,
         state: (courseDetail as any).state,
-        country: (courseDetail as any).country || 'USA'
+        country: (courseDetail as any).country || 'USA',
+        address: (courseDetail as any).address
       },
       holes: courseDetail.holes || 18,
       tees: courseDetail.tees || processTees(courseDetail),
@@ -497,13 +504,21 @@ function processTees(courseData: any): { male?: TeeBox[], female?: TeeBox[] } {
                       teeBox.teeColor?.toLowerCase() === 'red';
       
       const newTeeBox: TeeBox = {
-        tee_name: teeBox.teeName || teeBox.teeType || `Tee ${index + 1}`,
+        tee_name: teeBox.tee_name || teeBox.teeName || teeBox.teeType || `Tee ${index + 1}`,
         tee_color: teeBox.teeColor || getDefaultTeeColor(index, isFemale),
-        par_total: teeBox.totalPar || calculateTotalPar(teeBox.holes),
-        yards_total: teeBox.totalYards || calculateTotalYards(teeBox.holes),
-        total_yards: teeBox.totalYards || calculateTotalYards(teeBox.holes),
-        course_rating: teeBox.courseRating || teeBox.rating || 72,
-        slope_rating: teeBox.slopeRating || teeBox.slope || 113,
+        course_rating: teeBox.course_rating || teeBox.courseRating || teeBox.rating || 72,
+        slope_rating: teeBox.slope_rating || teeBox.slopeRating || teeBox.slope || 113,
+        bogey_rating: teeBox.bogey_rating || teeBox.bogeyRating,
+        par_total: teeBox.par_total || teeBox.totalPar || calculateTotalPar(teeBox.holes),
+        total_yards: teeBox.total_yards || teeBox.totalYards || calculateTotalYards(teeBox.holes),
+        total_meters: teeBox.total_meters || teeBox.totalMeters,
+        number_of_holes: teeBox.number_of_holes || teeBox.numberOfHoles || 18,
+        front_course_rating: teeBox.front_course_rating || teeBox.frontCourseRating,
+        front_slope_rating: teeBox.front_slope_rating || teeBox.frontSlopeRating,
+        front_bogey_rating: teeBox.front_bogey_rating || teeBox.frontBogeyRating,
+        back_course_rating: teeBox.back_course_rating || teeBox.backCourseRating,
+        back_slope_rating: teeBox.back_slope_rating || teeBox.backSlopeRating,
+        back_bogey_rating: teeBox.back_bogey_rating || teeBox.backBogeyRating,
         holes: processTeeHoles(teeBox.holes)
       };
       
