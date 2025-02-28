@@ -36,7 +36,6 @@ import { format } from "date-fns";
 import { 
   searchCourses, 
   getCourseDetails, 
-  generateMockCourseDetails, 
   GolfCourse, 
   CourseDetail,
   TeeBox
