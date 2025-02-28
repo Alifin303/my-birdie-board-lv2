@@ -460,12 +460,12 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
         });
       }
       
-      // Search for courses via API
-      const apiCourses = await searchCourses(searchQuery);
-      console.log("API search results (raw):", apiCourses);
+      // Search for courses via API - now returns { mockCourses, results }
+      const apiSearchResponse = await searchCourses(searchQuery);
+      console.log("API search results (raw):", apiSearchResponse);
       
-      // Convert to simplified format for component use
-      const simplifiedApiCourses = apiCourses.map(convertToSimplifiedCourse);
+      // Convert the results property to simplified format for component use
+      const simplifiedApiCourses = apiSearchResponse.results.map(convertToSimplifiedCourse);
       
       // Combine user-added courses with API results
       const combinedResults = [...userAddedCourses, ...simplifiedApiCourses];
