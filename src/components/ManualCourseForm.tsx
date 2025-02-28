@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   Dialog,
@@ -9,16 +8,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Loader2, Plus, Trash } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Tabs,
   TabsContent,
   TabsList,
@@ -28,55 +19,19 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCourseName } from "@/integrations/supabase/client";
 
-// Define interface for tee data
-interface TeeData {
-  id: string;
-  name: string;
-  color: string;
-  gender: 'male' | 'female';
-  holes: HoleData[];
-}
-
-// Interface for hole data
-interface HoleData {
-  number: number;
-  par: number;
-  yards: number;
-  handicap: number;
-}
-
-// Define interface for manual course data
-interface ManualCourseData {
-  name: string;
-  city: string;
-  state: string;
-  tees: TeeData[];
-}
-
-// Available tee options with standard colors
-const teeOptions = [
-  { name: 'Black', color: '#000000', gender: 'male' },
-  { name: 'Blue', color: '#0000FF', gender: 'male' },
-  { name: 'White', color: '#FFFFFF', gender: 'male' },
-  { name: 'Yellow', color: '#FFFF00', gender: 'male' },
-  { name: 'Red', color: '#FF0000', gender: 'female' },
-  { name: 'Green', color: '#008000', gender: 'female' },
-  { name: 'Gold', color: '#FFD700', gender: 'male' },
-  { name: 'Silver', color: '#C0C0C0', gender: 'female' },
-];
-
-interface ManualCourseFormProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onCourseCreated: (courseId: number, courseName: string) => void;
-  existingCourse?: {
-    id: number;
-    name: string;
-    city?: string;
-    state?: string;
-    tees?: TeeData[];
-  };
-}
+// Import our newly created components
+import { CourseInformation } from "./course-form/CourseInformation";
+import { TeeSelection } from "./course-form/TeeSelection";
+import { TeeConfiguration } from "./course-form/TeeConfiguration";
+import { HoleInputs } from "./course-form/HoleInputs";
+import { TeeSummary } from "./course-form/TeeSummary";
+import { createDefaultTee } from "./course-form/course-utils";
+import { 
+  ManualCourseFormProps, 
+  ManualCourseData,
+  TeeData,
+  HoleData
+} from "./course-form/types";
 
 export function ManualCourseForm({ 
   open, 
@@ -178,22 +133,6 @@ export function ManualCourseForm({
       setCurrentTab('front9');
     }
   }, [open, existingCourse]);
-  
-  // Create a default tee with 18 holes
-  function createDefaultTee(): TeeData {
-    return {
-      id: `tee-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      name: 'White',
-      color: '#FFFFFF',
-      gender: 'male',
-      holes: Array(18).fill(null).map((_, idx) => ({
-        number: idx + 1,
-        par: 4,
-        yards: 350,
-        handicap: idx + 1
-      }))
-    };
-  }
   
   // Handle form field changes
   const handleInputChange = (field: keyof ManualCourseData, value: string) => {
@@ -304,21 +243,6 @@ export function ManualCourseForm({
     if (currentTeeIndex >= teeIndex && currentTeeIndex > 0) {
       setCurrentTeeIndex(currentTeeIndex - 1);
     }
-  };
-  
-  // Calculate course rating and slope for a tee (simplified algorithm)
-  const calculateRatings = (tee: TeeData) => {
-    // This is a simplified algorithm - in reality, course ratings are much more complex
-    const totalYards = tee.holes.reduce((sum, hole) => sum + hole.yards, 0);
-    const totalPar = tee.holes.reduce((sum, hole) => sum + hole.par, 0);
-    
-    // Simulated rating based on total yards and par
-    const rating = parseFloat(((totalYards / 100) * 0.56 + totalPar * 0.24).toFixed(1));
-    
-    // Simulated slope based on total yards
-    const slope = Math.round(113 + (totalYards - 6000) * 0.05);
-    
-    return { rating, slope, par: totalPar, yards: totalYards };
   };
   
   // Validate the form before submission
@@ -464,77 +388,8 @@ export function ManualCourseForm({
     }
   };
   
-  // Render hole input fields for the current tee
-  const renderHoleInputs = (teeIndex: number, holeStart: number, holeEnd: number) => {
-    const holes = formData.tees[teeIndex].holes.slice(holeStart, holeEnd);
-    
-    return (
-      <div className="border rounded-md overflow-x-auto mt-4">
-        <table className="w-full">
-          <thead className="border-b">
-            <tr>
-              <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-left">Hole</th>
-              {holes.map(hole => (
-                <th key={`header-${hole.number}`} className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">
-                  {hole.number}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-b">
-              <td className="text-sm font-medium text-muted-foreground px-2 py-2">Par</td>
-              {holes.map((hole) => (
-                <td key={`par-${hole.number}`} className="text-center px-2 py-2">
-                  <Input
-                    type="number"
-                    min="2"
-                    max="6"
-                    value={hole.par}
-                    onChange={(e) => handleHoleChange(teeIndex, hole.number - 1, 'par', e.target.value)}
-                    className="w-12 h-8 text-center"
-                    required
-                  />
-                </td>
-              ))}
-            </tr>
-            <tr className="border-b">
-              <td className="text-sm font-medium text-muted-foreground px-2 py-2">Yards</td>
-              {holes.map((hole) => (
-                <td key={`yards-${hole.number}`} className="text-center px-2 py-2">
-                  <Input
-                    type="number"
-                    min="0"
-                    max="999"
-                    value={hole.yards}
-                    onChange={(e) => handleHoleChange(teeIndex, hole.number - 1, 'yards', e.target.value)}
-                    className="w-12 h-8 text-center"
-                    required
-                  />
-                </td>
-              ))}
-            </tr>
-            <tr>
-              <td className="text-sm font-medium text-muted-foreground px-2 py-2">Handicap</td>
-              {holes.map((hole) => (
-                <td key={`handicap-${hole.number}`} className="text-center px-2 py-2">
-                  <Input
-                    type="number"
-                    min="1"
-                    max="18"
-                    value={hole.handicap}
-                    onChange={(e) => handleHoleChange(teeIndex, hole.number - 1, 'handicap', e.target.value)}
-                    className="w-12 h-8 text-center"
-                    required
-                  />
-                </td>
-              ))}
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    );
-  };
+  // Import necessary components for types
+  const { teeOptions } = require('./course-form/types');
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -553,136 +408,28 @@ export function ManualCourseForm({
         
         <div className="space-y-6">
           {/* Course Information */}
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Course Name</label>
-              <Input
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                placeholder="Enter course name"
-                className="mt-1"
-                required
-                disabled={isEditMode} // Disable editing for existing courses
-              />
-              {isEditMode && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  Course name cannot be changed after creation
-                </p>
-              )}
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">City</label>
-                <Input
-                  value={formData.city}
-                  onChange={(e) => handleInputChange('city', e.target.value)}
-                  placeholder="Enter city"
-                  className="mt-1"
-                  required
-                  disabled={isEditMode} // Disable editing for existing courses
-                />
-                {isEditMode && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    City cannot be changed after creation
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="text-sm font-medium">State</label>
-                <Input
-                  value={formData.state}
-                  onChange={(e) => handleInputChange('state', e.target.value)}
-                  placeholder="Enter state (optional)"
-                  className="mt-1"
-                />
-              </div>
-            </div>
-          </div>
+          <CourseInformation 
+            formData={formData}
+            handleInputChange={handleInputChange}
+            isEditMode={isEditMode}
+          />
           
           {/* Tee Selection */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="text-sm font-medium">Tee Boxes</label>
-              <Button 
-                size="sm" 
-                variant="outline" 
-                onClick={handleAddTee}
-                className="flex items-center gap-1"
-              >
-                <Plus className="h-4 w-4" />
-                Add Tee
-              </Button>
-            </div>
-            
-            <div className="flex flex-wrap gap-2 mt-2">
-              {formData.tees.map((tee, index) => (
-                <div key={tee.id} className="flex items-center">
-                  <Button
-                    variant={currentTeeIndex === index ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setCurrentTeeIndex(index)}
-                    className="flex items-center gap-1"
-                    style={{ 
-                      borderColor: tee.color,
-                      boxShadow: currentTeeIndex === index ? `0 0 0 1px ${tee.color}` : 'none'
-                    }}
-                  >
-                    {tee.name}
-                    
-                    {formData.tees.length > 1 && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-4 w-4 ml-1 p-0"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveTee(index);
-                        }}
-                      >
-                        <Trash className="h-3 w-3" />
-                      </Button>
-                    )}
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </div>
+          <TeeSelection 
+            tees={formData.tees}
+            currentTeeIndex={currentTeeIndex}
+            setCurrentTeeIndex={setCurrentTeeIndex}
+            handleAddTee={handleAddTee}
+            handleRemoveTee={handleRemoveTee}
+          />
           
           {/* Current Tee Details */}
           {formData.tees.length > 0 && (
             <div className="space-y-4 border-t pt-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  Configure {formData.tees[currentTeeIndex].name} Tee Box
-                </label>
-                
-                <Select
-                  value={formData.tees[currentTeeIndex].name}
-                  onValueChange={(value) => handleTeeChange(currentTeeIndex, value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select tee color" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {teeOptions.map((tee) => (
-                      <SelectItem key={tee.name} value={tee.name}>
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="w-3 h-3 rounded-full" 
-                            style={{ backgroundColor: tee.color, border: tee.color === '#FFFFFF' ? '1px solid #ccc' : 'none' }} 
-                          />
-                          {tee.name} ({tee.gender === 'male' ? 'Men\'s' : 'Women\'s'})
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                <p className="text-xs text-muted-foreground mt-1">
-                  The community benefits from having all relevant tees added — feel free to add more!
-                </p>
-              </div>
+              <TeeConfiguration 
+                currentTee={formData.tees[currentTeeIndex]} 
+                handleTeeChange={(teeName) => handleTeeChange(currentTeeIndex, teeName)}
+              />
               
               <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
                 <TabsList className="grid grid-cols-2">
@@ -690,33 +437,24 @@ export function ManualCourseForm({
                   <TabsTrigger value="back9">Back Nine</TabsTrigger>
                 </TabsList>
                 <TabsContent value="front9">
-                  {renderHoleInputs(currentTeeIndex, 0, 9)}
+                  <HoleInputs 
+                    holes={formData.tees[currentTeeIndex].holes.slice(0, 9)}
+                    handleHoleChange={(holeIndex, field, value) => 
+                      handleHoleChange(currentTeeIndex, holeIndex, field, value)
+                    }
+                  />
                 </TabsContent>
                 <TabsContent value="back9">
-                  {renderHoleInputs(currentTeeIndex, 9, 18)}
+                  <HoleInputs 
+                    holes={formData.tees[currentTeeIndex].holes.slice(9, 18)}
+                    handleHoleChange={(holeIndex, field, value) => 
+                      handleHoleChange(currentTeeIndex, holeIndex + 9, field, value)
+                    }
+                  />
                 </TabsContent>
               </Tabs>
               
-              <div className="border rounded-md p-4 bg-muted/30">
-                <h3 className="text-sm font-medium mb-2">Tee Summary</h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  {(() => {
-                    const { rating, slope, par, yards } = calculateRatings(formData.tees[currentTeeIndex]);
-                    return (
-                      <>
-                        <div><span className="font-medium">Total Par:</span> {par}</div>
-                        <div><span className="font-medium">Total Yards:</span> {yards}</div>
-                        <div><span className="font-medium">Course Rating:</span> {rating}</div>
-                        <div><span className="font-medium">Slope Rating:</span> {slope}</div>
-                      </>
-                    );
-                  })()}
-                </div>
-                <p className="text-xs text-muted-foreground mt-3">
-                  Note: Course and slope ratings are automatically calculated based on the hole data.
-                  These are approximate values and may differ from official ratings.
-                </p>
-              </div>
+              <TeeSummary currentTee={formData.tees[currentTeeIndex]} />
             </div>
           )}
         </div>
