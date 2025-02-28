@@ -103,9 +103,12 @@ const convertToSimplifiedCourse = (course: GolfCourse): SimplifiedGolfCourse => 
 const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[] => {
   const tees: SimplifiedTee[] = [];
   
+  console.log("Extracting tees from course detail:", courseDetail);
+  
   // Add male tees with unique IDs
   if (courseDetail.tees && courseDetail.tees.male && courseDetail.tees.male.length > 0) {
     courseDetail.tees.male.forEach((tee, index) => {
+      console.log("Adding male tee:", tee.tee_name || `Tee ${index + 1}`);
       tees.push({
         id: `m-${index}`,
         name: tee.tee_name || `Tee ${index + 1}`,
@@ -122,6 +125,7 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
   // Add female tees with unique IDs
   if (courseDetail.tees && courseDetail.tees.female && courseDetail.tees.female.length > 0) {
     courseDetail.tees.female.forEach((tee, index) => {
+      console.log("Adding female tee:", tee.tee_name || `Tee ${index + 1}`);
       tees.push({
         id: `f-${index}`,
         name: (tee.tee_name || `Tee ${index + 1}`) + " (W)",
@@ -137,6 +141,7 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
   
   // If no tees were found, create a default tee
   if (tees.length === 0) {
+    console.log("No tees found, creating default tee");
     tees.push({
       id: 'm-0',
       name: 'Default Tees',
@@ -148,11 +153,14 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
     });
   }
   
+  console.log("Extracted tees:", tees);
   return tees;
 };
 
 // Extract hole data for a specific tee
 const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): SimplifiedHole[] => {
+  console.log("Extracting holes for tee:", teeId, "from course detail:", courseDetail);
+  
   // Parse the tee ID to get gender and index
   const [gender, indexStr] = teeId.split('-');
   const index = parseInt(indexStr);
@@ -178,7 +186,7 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
   console.log("Extracted holes data for tee:", teeId, holesData);
   
   // If we found hole data for the specific tee, use it
-  if (holesData.length > 0) {
+  if (holesData && holesData.length > 0) {
     return holesData.map((hole, idx) => ({
       number: idx + 1,
       par: hole.par || 4,
@@ -218,6 +226,7 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
     }
   }
   
+  console.log("No hole data found, creating default holes");
   // Last resort: create default holes
   return Array(18).fill(null).map((_, idx) => ({
     number: idx + 1,
@@ -397,16 +406,6 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     }
   };
 
-  // Filter holes based on selection (front 9, back 9, or all)
-  const getHolesBasedOnSelection = (allHoles: SimplifiedHole[], selection: HoleSelection): SimplifiedHole[] => {
-    if (selection === 'front9') {
-      return allHoles.slice(0, 9);
-    } else if (selection === 'back9') {
-      return allHoles.slice(9, 18);
-    }
-    return allHoles;
-  };
-
   // Update scorecard when tee selection changes
   const updateScorecardForTee = (teeId: string, selection: HoleSelection = 'all') => {
     if (!originalCourseDetail) {
@@ -478,7 +477,9 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       console.log("API course details:", apiCourseDetail);
       
       // If API fails or returns null, generate mock data
-      if (!apiCourseDetail) {
+      if (!apiCourseDetail || 
+          !apiCourseDetail.tees || 
+          (!apiCourseDetail.tees.male && !apiCourseDetail.tees.female)) {
         console.log("Using mock data for course details");
         
         // Create a GolfCourse object from SimplifiedGolfCourse
@@ -567,27 +568,32 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
 
   // Handle score input
   const handleScoreChange = (holeIndex: number, field: 'strokes' | 'putts', value: string) => {
-    const numValue = parseInt(value);
+    console.log(`Updating ${field} for hole index ${holeIndex} to ${value}`);
     
+    // Handle empty input
+    if (value === '') {
+      setScores(prevScores => {
+        const newScores = [...prevScores];
+        if (field === 'putts') {
+          newScores[holeIndex] = {
+            ...newScores[holeIndex],
+            putts: undefined
+          };
+        }
+        return newScores;
+      });
+      return;
+    }
+    
+    const numValue = parseInt(value);
     if (isNaN(numValue) || numValue < 0) return;
     
     setScores(prevScores => {
       const newScores = [...prevScores];
-      
-      // For the putts field, allow empty input to make it optional
-      if (field === 'putts' && value === '') {
-        // Set to undefined to make it optional
-        newScores[holeIndex] = {
-          ...newScores[holeIndex],
-          putts: undefined
-        };
-      } else {
-        newScores[holeIndex] = {
-          ...newScores[holeIndex],
-          [field]: numValue
-        };
-      }
-      
+      newScores[holeIndex] = {
+        ...newScores[holeIndex],
+        [field]: numValue
+      };
       return newScores;
     });
   };
@@ -625,6 +631,14 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
 
     setIsLoading(true);
     try {
+      console.log("Saving round with data:", {
+        course: selectedCourse,
+        teeId: selectedTeeId,
+        date: roundDate,
+        scores,
+        holeSelection
+      });
+      
       // Get user session
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -698,8 +712,21 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         courseDbId = newCourse.id;
       }
 
+      console.log("Saving round with calculated data:", {
+        userId: session.user.id,
+        courseId: courseDbId,
+        date: roundDate.toISOString(),
+        teeId: selectedTeeId,
+        teeName: selectedTee.name,
+        grossScore: totalStrokes,
+        netScore,
+        toParGross,
+        toParNet,
+        holeScores: scores
+      });
+
       // Save the round
-      const { error: roundError } = await supabase
+      const { data: savedRound, error: roundError } = await supabase
         .from('rounds')
         .insert({
           user_id: session.user.id,
@@ -712,12 +739,15 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
           to_par_gross: toParGross,
           to_par_net: toParNet,
           hole_scores: scores,
-        });
+        })
+        .select();
         
       if (roundError) {
         throw roundError;
       }
 
+      console.log("Round saved successfully:", savedRound);
+      
       toast({
         title: "Round Saved",
         description: "Your round has been successfully saved.",
