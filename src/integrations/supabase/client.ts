@@ -65,6 +65,35 @@ export function formatCourseName(clubName: string, courseName: string): string {
   return `${clubName} - ${courseName}`;
 }
 
+// Helper function to check if a course is user-added
+export function isUserAddedCourse(courseName: string): boolean {
+  return courseName.includes('[User added course]');
+}
+
+// Helper function to get course metadata from localStorage
+export function getCourseMetadataFromLocalStorage(courseId: number | string): any {
+  try {
+    // Normalize courseId to string for consistent key lookup
+    const courseIdStr = courseId.toString();
+    
+    // Try different possible storage keys
+    const courseDetailsKey = `course_details_${courseIdStr}`;
+    const courseMetadataKey = `course_metadata_${courseIdStr}`;
+    
+    // Get stored details
+    const storedDetails = localStorage.getItem(courseDetailsKey) || localStorage.getItem(courseMetadataKey);
+    
+    if (!storedDetails) {
+      return null;
+    }
+    
+    return JSON.parse(storedDetails);
+  } catch (error) {
+    console.error("Error getting course metadata from localStorage:", error);
+    return null;
+  }
+}
+
 export type DatabaseError = {
   code: string;
   details: string;
