@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   Dialog,
@@ -699,8 +698,8 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
 
   // Handle date selection
   const handleDateSelect = (date: Date | undefined) => {
+    console.log("Date selected in calendar:", date);
     if (date) {
-      console.log("Date selected:", date);
       setRoundDate(date);
       setCalendarOpen(false); // Close the calendar after selection
     }
@@ -948,7 +947,6 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                 <Button
                   variant="outline"
                   className="mt-1"
-                  onClick={() => setCalendarOpen(true)}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {format(roundDate, "PPP")}
