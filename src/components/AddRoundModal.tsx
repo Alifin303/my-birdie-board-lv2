@@ -1,4 +1,4 @@
-<lov-code>
+
 import React, { useState, useEffect, useRef } from "react";
 import { 
   Dialog,
@@ -915,3 +915,503 @@ Try selecting a different course or adding this course manually.`);
     } catch (error: any) {
       console.error("Error saving round:", error);
       toast({
+        title: "Error",
+        description: error.message || "Failed to save round. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[900px] p-4 max-h-[90vh] overflow-y-auto">
+        {currentStep === 'search' ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>Add a New Round</DialogTitle>
+              <DialogDescription>
+                Search for a golf course or add a new one
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <div className="relative rounded-md bg-background shadow-sm">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <Search className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <Input
+                    type="text"
+                    placeholder="Search for a course..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  Enter a course name or location and press Enter to search
+                </p>
+              </div>
+              
+              <div className="flex justify-center">
+                <Button
+                  onClick={() => handleSearch(searchQuery)}
+                  disabled={isLoading || searchQuery.length < 3}
+                  className="w-full md:w-auto"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Searching...
+                    </>
+                  ) : (
+                    "Search"
+                  )}
+                </Button>
+              </div>
+              
+              {/* "Add a new course" button */}
+              <div className="mt-2 mb-4 text-center">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => {}}
+                  className="w-full"
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Can't find your course? Add it now
+                </Button>
+              </div>
+              
+              {/* Search Error */}
+              {searchError && (
+                <div className="bg-destructive/10 border border-destructive/30 rounded-md p-3 text-center">
+                  <p className="text-sm text-destructive">{searchError}</p>
+                </div>
+              )}
+              
+              {/* Search Results */}
+              {searchResults.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-medium mb-2">Search Results</h3>
+                  <div className="border rounded-md divide-y">
+                    {searchResults.map((course) => (
+                      <div 
+                        key={course.id.toString()}
+                        className="flex justify-between items-center px-4 py-3 hover:bg-muted cursor-pointer"
+                        onClick={() => handleCourseSelect(course)}
+                      >
+                        <div>
+                          <p className="font-medium">
+                            {course.clubName !== course.name 
+                              ? `${course.clubName} - ${course.name}`
+                              : course.name}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {course.city}{course.state ? `, ${course.state}` : ''}
+                            {course.isUserAdded && <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">User Added</span>}
+                          </p>
+                        </div>
+                        
+                        {course.isUserAdded && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Edit course functionality
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Scorecard View */}
+            {selectedCourse && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold">{selectedCourse.clubName !== selectedCourse.name ? 
+                      `${selectedCourse.clubName} - ${selectedCourse.name}` : 
+                      selectedCourse.name}
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedCourse.city}{selectedCourse.state ? `, ${selectedCourse.state}` : ''}
+                      {selectedCourse.isUserAdded && <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">User Added</span>}
+                    </p>
+                  </div>
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleBackToSearch}
+                  >
+                    Change Course
+                  </Button>
+                </div>
+                
+                {/* Data Loading Error Alert */}
+                {dataLoadingError && (
+                  <Alert variant="destructive" className="mb-2">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="ml-2">
+                      {dataLoadingError}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
+                {/* Improved Landscape Layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                  {/* Left Column: Course & Date Info */}
+                  <div className="lg:col-span-3 space-y-3">
+                    {/* Date Selector */}
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">Date Played</label>
+                      <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full justify-start text-left font-normal"
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {roundDate ? format(roundDate, "PPP") : "Select date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={roundDate}
+                            onSelect={handleDateSelect}
+                            disabled={(date) => date > today}
+                            initialFocus
+                            className="z-50"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    
+                    {/* Tee Box Selector */}
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">Tee Played</label>
+                      <Select value={selectedTeeId || undefined} onValueChange={handleTeeChange}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="Select a tee box" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {selectedCourse.tees.map((tee) => (
+                            <SelectItem key={tee.id} value={tee.id}>
+                              <div className="flex items-center">
+                                <div 
+                                  className="w-3 h-3 rounded-full mr-2"
+                                  style={{
+                                    backgroundColor: tee.gender === 'male' ? 
+                                      (tee.name.toLowerCase().includes('black') ? '#000' : 
+                                      tee.name.toLowerCase().includes('blue') ? '#005' : 
+                                      tee.name.toLowerCase().includes('white') ? '#fff' : 
+                                      tee.name.toLowerCase().includes('gold') ? '#FB0' : 
+                                      tee.name.toLowerCase().includes('green') ? '#060' : 
+                                      tee.name.toLowerCase().includes('yellow') ? '#FF0' : '#777') :
+                                      (tee.name.toLowerCase().includes('red') ? '#C00' : 
+                                      tee.name.toLowerCase().includes('gold') ? '#FB0' : '#FAA'),
+                                    border: tee.name.toLowerCase().includes('white') ? '1px solid #ccc' : 'none'
+                                  }}
+                                ></div>
+                                {tee.name}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    {/* Hole Selection */}
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">Holes Played</label>
+                      <div className="flex space-x-1">
+                        <Button 
+                          variant={holeSelection === 'all' ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handleHoleSelectionChange('all')}
+                          className="flex-1 h-9 px-2"
+                        >
+                          All 18
+                        </Button>
+                        <Button 
+                          variant={holeSelection === 'front9' ? "default" : "outline"} 
+                          size="sm"
+                          onClick={() => handleHoleSelectionChange('front9')}
+                          className="flex-1 h-9 px-2"
+                        >
+                          Front 9
+                        </Button>
+                        <Button 
+                          variant={holeSelection === 'back9' ? "default" : "outline"} 
+                          size="sm"
+                          onClick={() => handleHoleSelectionChange('back9')}
+                          className="flex-1 h-9 px-2"
+                        >
+                          Back 9
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Middle Column: Tee Details & Stats */}
+                  <div className="lg:col-span-3 space-y-3">
+                    {/* Selected Tee Info Card */}
+                    {selectedTeeId && (
+                      <Card className="p-3 h-full">
+                        <h3 className="text-sm font-medium mb-2">Tee Details</h3>
+                        {selectedCourse.tees.filter(tee => tee.id === selectedTeeId).map(tee => (
+                          <div key={tee.id} className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Name:</span>
+                              <span className="font-medium">{tee.name}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Rating:</span>
+                              <span className="font-medium">{tee.rating}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Slope:</span>
+                              <span className="font-medium">{tee.slope}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Par:</span>
+                              <span className="font-medium">{tee.par}</span>
+                            </div>
+                            {tee.yards && (
+                              <div className="flex justify-between col-span-2">
+                                <span className="text-muted-foreground">Total Yards:</span>
+                                <span className="font-medium">{tee.yards}</span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </Card>
+                    )}
+                  </div>
+                  
+                  {/* Right Column: Round Summary & Actions */}
+                  <div className="lg:col-span-3 space-y-3">
+                    {/* Round Summary */}
+                    <Card className="p-3">
+                      <h3 className="text-sm font-medium mb-2">Round Summary</h3>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Total Par:</span>
+                          <span className="font-medium">{scores.reduce((sum, s) => sum + s.par, 0)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Gross Score:</span>
+                          <span className="font-medium">
+                            {scores.reduce((sum, s) => sum + (s.strokes || 0), 0) || '-'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">To Par:</span>
+                          <span className="font-medium">
+                            {scores.reduce((sum, s) => sum + (s.strokes || 0), 0) ? 
+                              (scores.reduce((sum, s) => sum + (s.strokes || 0), 0) - scores.reduce((sum, s) => sum + s.par, 0) > 0 ? 
+                                `+${scores.reduce((sum, s) => sum + (s.strokes || 0), 0) - scores.reduce((sum, s) => sum + s.par, 0)}` : 
+                                scores.reduce((sum, s) => sum + (s.strokes || 0), 0) - scores.reduce((sum, s) => sum + s.par, 0)) : 
+                              '-'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Total Putts:</span>
+                          <span className="font-medium">
+                            {scores.some(s => s.putts !== undefined) ? 
+                              scores.reduce((sum, s) => sum + (s.putts || 0), 0) : 
+                              'None'}
+                          </span>
+                        </div>
+                      </div>
+                    </Card>
+                    
+                    {/* Action Buttons */}
+                    <div className="flex justify-between space-x-2 pt-2">
+                      <Button variant="outline" onClick={handleCloseModal} size="sm" className="flex-1">
+                        Cancel
+                      </Button>
+                      <Button onClick={handleSaveRound} disabled={isLoading} size="sm" className="flex-1">
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          "Save Round"
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Bottom: Scorecard */}
+                  <div className="lg:col-span-12">
+                    {/* Tabs for Front/Back Nine */}
+                    {holeSelection === 'all' ? (
+                      <Tabs defaultValue="front9" value={activeScoreTab} onValueChange={(value) => setActiveScoreTab(value as "front9" | "back9")}>
+                        <TabsList className="w-full">
+                          <TabsTrigger value="front9" className="flex-1">Front 9</TabsTrigger>
+                          <TabsTrigger value="back9" className="flex-1">Back 9</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="front9" className="mt-2">
+                          {/* Front Nine Scorecard */}
+                          <div className="border rounded-md">
+                            <div className="overflow-x-auto">
+                              <table className="w-full border-collapse">
+                                <thead>
+                                  <tr className="border-b bg-muted/50">
+                                    <th className="px-2 py-2 text-left text-sm font-medium whitespace-nowrap">Hole</th>
+                                    {scores.filter(score => score.hole <= 9).map(score => (
+                                      <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
+                                    ))}
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr className="border-b">
+                                    <td className="px-2 py-2 text-sm font-medium">Par</td>
+                                    {scores.filter(score => score.hole <= 9).map(score => (
+                                      <td key={`par-${score.hole}`} className="px-1 py-2 text-center">
+                                        <div className="bg-muted/40 border border-muted rounded-md w-7 h-7 flex items-center justify-center font-medium mx-auto">
+                                          {score.par}
+                                        </div>
+                                      </td>
+                                    ))}
+                                  </tr>
+                                  <tr className="border-b">
+                                    <td className="px-2 py-2 text-sm font-medium">Strokes</td>
+                                    {scores.filter(score => score.hole <= 9).map((score, index) => (
+                                      <td key={`strokes-${score.hole}`} className="px-1 py-2 text-center">
+                                        <Input
+                                          type="number"
+                                          min="1"
+                                          max="20"
+                                          value={score.strokes || ''}
+                                          onChange={(e) => handleScoreChange(index, 'strokes', e.target.value)}
+                                          className="w-9 h-7 text-center mx-auto px-1"
+                                          inputMode="numeric"
+                                        />
+                                      </td>
+                                    ))}
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </TabsContent>
+                        <TabsContent value="back9" className="mt-2">
+                          {/* Back Nine Scorecard */}
+                          <div className="border rounded-md">
+                            <div className="overflow-x-auto">
+                              <table className="w-full border-collapse">
+                                <thead>
+                                  <tr className="border-b bg-muted/50">
+                                    <th className="px-2 py-2 text-left text-sm font-medium whitespace-nowrap">Hole</th>
+                                    {scores.filter(score => score.hole > 9).map(score => (
+                                      <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
+                                    ))}
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr className="border-b">
+                                    <td className="px-2 py-2 text-sm font-medium">Par</td>
+                                    {scores.filter(score => score.hole > 9).map(score => (
+                                      <td key={`par-${score.hole}`} className="px-1 py-2 text-center">
+                                        <div className="bg-muted/40 border border-muted rounded-md w-7 h-7 flex items-center justify-center font-medium mx-auto">
+                                          {score.par}
+                                        </div>
+                                      </td>
+                                    ))}
+                                  </tr>
+                                  <tr className="border-b">
+                                    <td className="px-2 py-2 text-sm font-medium">Strokes</td>
+                                    {scores.filter(score => score.hole > 9).map((score, index) => {
+                                      // Adjust the index to account for front nine
+                                      const adjustedIndex = index + scores.filter(s => s.hole <= 9).length;
+                                      return (
+                                        <td key={`strokes-${score.hole}`} className="px-1 py-2 text-center">
+                                          <Input
+                                            type="number"
+                                            min="1"
+                                            max="20"
+                                            value={score.strokes || ''}
+                                            onChange={(e) => handleScoreChange(adjustedIndex, 'strokes', e.target.value)}
+                                            className="w-9 h-7 text-center mx-auto px-1"
+                                            inputMode="numeric"
+                                          />
+                                        </td>
+                                      );
+                                    })}
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </TabsContent>
+                      </Tabs>
+                    ) : (
+                      <div className="border rounded-md">
+                        <div className="overflow-x-auto">
+                          <table className="w-full border-collapse">
+                            <thead>
+                              <tr className="border-b bg-muted/50">
+                                <th className="px-2 py-2 text-left text-sm font-medium whitespace-nowrap">Hole</th>
+                                {scores.map(score => (
+                                  <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr className="border-b">
+                                <td className="px-2 py-2 text-sm font-medium">Par</td>
+                                {scores.map(score => (
+                                  <td key={`par-${score.hole}`} className="px-1 py-2 text-center">
+                                    <div className="bg-muted/40 border border-muted rounded-md w-7 h-7 flex items-center justify-center font-medium mx-auto">
+                                      {score.par}
+                                    </div>
+                                  </td>
+                                ))}
+                              </tr>
+                              <tr className="border-b">
+                                <td className="px-2 py-2 text-sm font-medium">Strokes</td>
+                                {scores.map((score, index) => (
+                                  <td key={`strokes-${score.hole}`} className="px-1 py-2 text-center">
+                                    <Input
+                                      type="number"
+                                      min="1"
+                                      max="20"
+                                      value={score.strokes || ''}
+                                      onChange={(e) => handleScoreChange(index, 'strokes', e.target.value)}
+                                      className="w-9 h-7 text-center mx-auto px-1"
+                                      inputMode="numeric"
+                                    />
+                                  </td>
+                                ))}
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
