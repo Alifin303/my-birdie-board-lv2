@@ -113,6 +113,7 @@ export function ManualCourseForm({
   // Set initial state when form opens or when existingCourse changes
   useEffect(() => {
     if (open) {
+      console.log("ManualCourseForm opened, existingCourse:", existingCourse);
       if (existingCourse) {
         console.log("Loading existing course data:", existingCourse);
         setIsEditMode(true);
@@ -538,10 +539,7 @@ export function ManualCourseForm({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="sm:max-w-5xl max-h-[90vh] overflow-y-auto" 
-        onPointerDownOutside={(e) => {
-          e.preventDefault();
-        }}
+        className="sm:max-w-5xl max-h-[90vh] overflow-y-auto"
       >
         <DialogHeader>
           <DialogTitle>{existingCourse ? "Edit Course" : "Add a New Course"}</DialogTitle>
