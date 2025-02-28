@@ -161,6 +161,16 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
 const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): SimplifiedHole[] => {
   console.log("Extracting holes for tee:", teeId, "from course detail:", courseDetail);
   
+  if (!courseDetail) {
+    console.error("No course detail provided");
+    return Array(18).fill(null).map((_, idx) => ({
+      number: idx + 1,
+      par: 4,
+      yards: 400,
+      handicap: idx + 1
+    }));
+  }
+  
   // Parse the tee ID to get gender and index
   const [gender, indexStr] = teeId.split('-');
   const index = parseInt(indexStr);
@@ -172,12 +182,12 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
   if (courseDetail.tees) {
     if (gender === 'm' && courseDetail.tees.male && courseDetail.tees.male.length > index) {
       teeData = courseDetail.tees.male[index];
-      if (teeData.holes && teeData.holes.length > 0) {
+      if (teeData && teeData.holes && teeData.holes.length > 0) {
         holesData = teeData.holes;
       }
     } else if (gender === 'f' && courseDetail.tees.female && courseDetail.tees.female.length > index) {
       teeData = courseDetail.tees.female[index];
-      if (teeData.holes && teeData.holes.length > 0) {
+      if (teeData && teeData.holes && teeData.holes.length > 0) {
         holesData = teeData.holes;
       }
     }
@@ -297,6 +307,10 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   const today = new Date();
   today.setHours(23, 59, 59, 999);
 
+  useEffect(() => {
+    console.log("AddRoundModal rendered, open state:", open);
+  }, [open]);
+
   // Reset form when modal is closed
   useEffect(() => {
     if (!open) {
@@ -318,6 +332,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   // Load previously played courses when the modal opens
   useEffect(() => {
     if (open) {
+      console.log("Modal opened, fetching previously played courses");
       fetchPreviouslyPlayedCourses();
     }
   }, [open]);
@@ -325,17 +340,25 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
   // Fetch previously played courses from database
   const fetchPreviouslyPlayedCourses = async () => {
     try {
+      console.log("Fetching previously played courses");
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) {
+        console.log("No session found, can't fetch courses");
+        return;
+      }
 
       const { data, error } = await supabase
         .from('courses')
         .select('id, name, city, state')
         .order('name');
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching courses:", error);
+        throw error;
+      }
       
       if (data && data.length > 0) {
+        console.log("Found previously played courses:", data);
         // Convert to expected format
         const formattedCourses: SimplifiedGolfCourse[] = data.map(course => {
           // Split the name if it contains a dash (club - course format)
@@ -350,6 +373,8 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         });
         
         setPreviouslyPlayedCourses(formattedCourses);
+      } else {
+        console.log("No previously played courses found");
       }
     } catch (error) {
       console.error("Error fetching previously played courses:", error);
@@ -372,6 +397,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     setSearchError(null);
     
     try {
+      console.log("Searching for courses with query:", searchQuery);
       // Search for courses via API
       const courses = await searchCourses(searchQuery);
       console.log("API search results:", courses);
@@ -413,6 +439,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       return;
     }
     
+    console.log("Updating scorecard for tee", teeId, "with selection", selection);
     // Get holes data for the selected tee
     const allHolesData = extractHolesForTee(originalCourseDetail, teeId);
     console.log("All holes data:", allHolesData);
@@ -473,8 +500,14 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       console.log("Selected course:", course);
       
       // Try to get course details from API
-      let apiCourseDetail = await getCourseDetails(course.id);
-      console.log("API course details:", apiCourseDetail);
+      let apiCourseDetail;
+      try {
+        apiCourseDetail = await getCourseDetails(course.id);
+        console.log("API course details:", apiCourseDetail);
+      } catch (error) {
+        console.error("Error fetching course details from API:", error);
+        apiCourseDetail = null;
+      }
       
       // If API fails or returns null, generate mock data
       if (!apiCourseDetail || 
@@ -523,6 +556,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       // Set default tee if available
       if (simplifiedCourseDetail.tees && simplifiedCourseDetail.tees.length > 0) {
         const defaultTeeId = simplifiedCourseDetail.tees[0].id;
+        console.log("Setting default tee ID:", defaultTeeId);
         setSelectedTeeId(defaultTeeId);
         
         // Update the scorecard based on the selected tee - always default to 'all' 18 holes
@@ -530,6 +564,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         setHoleSelection('all');
       } else {
         // If no tees available, create a default scorecard
+        console.log("No tees available, creating default scorecard");
         const defaultScores = Array(18).fill(null).map((_, idx) => ({
           hole: idx + 1,
           par: 4,
@@ -578,6 +613,11 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
           newScores[holeIndex] = {
             ...newScores[holeIndex],
             putts: undefined
+          };
+        } else {
+          newScores[holeIndex] = {
+            ...newScores[holeIndex],
+            strokes: 0
           };
         }
         return newScores;
@@ -666,6 +706,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         .single();
         
       if (profileError) {
+        console.error("Error fetching user profile:", profileError);
         throw profileError;
       }
       
@@ -692,8 +733,10 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         
       if (existingCourse) {
         courseDbId = existingCourse.id;
+        console.log("Found existing course in database:", courseDbId);
       } else {
         // Insert course
+        console.log("Course not found in database, creating new course");
         const { data: newCourse, error: newCourseError } = await supabase
           .from('courses')
           .insert({
@@ -706,10 +749,12 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
           .single();
           
         if (newCourseError) {
+          console.error("Error creating new course:", newCourseError);
           throw newCourseError;
         }
         
         courseDbId = newCourse.id;
+        console.log("Created new course with ID:", courseDbId);
       }
 
       console.log("Saving round with calculated data:", {
@@ -743,6 +788,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         .select();
         
       if (roundError) {
+        console.error("Error saving round:", roundError);
         throw roundError;
       }
 
@@ -772,11 +818,13 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
 
   // Handle modal close button click
   const handleCloseModal = () => {
+    console.log("Closing modal");
     onOpenChange(false);
   };
 
   // Handle back button click when in scorecard step
   const handleBackToSearch = () => {
+    console.log("Going back to search");
     setCurrentStep('search');
     setSelectedCourse(null);
     setOriginalCourseDetail(null);
