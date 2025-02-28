@@ -358,7 +358,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   const [scores, setScores] = useState<{ hole: number; par: number; strokes: number; putts?: number; yards?: number; handicap?: number; }[]>([]);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<'search' | 'scorecard'>('search');
-  const [previouslyPlayedCourses, setPreviouslyPlayedCourses] = useState<SimplifiedGolfCourse[]>([]);
   const [roundDate, setRoundDate] = useState<Date>(new Date());
   const [isManualSearch, setIsManualSearch] = useState(false);
   const [holeSelection, setHoleSelection] = useState<HoleSelection>('all');
@@ -400,61 +399,8 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
       // Set today's date when modal opens
       setRoundDate(new Date());
       console.log("Modal opened, setting today's date:", new Date());
-      
-      // Fetch previously played courses when the modal opens
-      fetchPreviouslyPlayedCourses();
     }
   }, [open]);
-
-  // Fetch previously played courses from database
-  const fetchPreviouslyPlayedCourses = async () => {
-    try {
-      console.log("Fetching previously played courses");
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        console.log("No session found, can't fetch courses");
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('courses')
-        .select('id, name, city, state')
-        .order('name');
-      
-      if (error) {
-        console.error("Error fetching courses:", error);
-        throw error;
-      }
-      
-      if (data && data.length > 0) {
-        console.log("Found previously played courses:", data);
-        // Convert to expected format
-        const formattedCourses: SimplifiedGolfCourse[] = data.map(course => {
-          // Check if it's a user-added course
-          const isUserAdded = course.name.includes('[User added course]');
-          
-          // Split the name if it contains a dash (club - course format)
-          const nameParts = parseCourseName(course.name);
-          
-          return {
-            id: course.id.toString(),
-            name: nameParts.courseName.replace(' [User added course]', ''),
-            clubName: nameParts.clubName.replace(' [User added course]', ''),
-            city: course.city || '',
-            state: course.state || '',
-            isUserAdded
-          };
-        });
-        
-        console.log("Formatted previously played courses:", formattedCourses);
-        setPreviouslyPlayedCourses(formattedCourses);
-      } else {
-        console.log("No previously played courses found");
-      }
-    } catch (error) {
-      console.error("Error fetching previously played courses:", error);
-    }
-  };
 
   // Handle search button click or Enter key
   const handleSearch = async () => {
@@ -944,9 +890,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     
     // Select the course
     handleCourseSelect(newCourse);
-    
-    // Refresh previously played courses
-    fetchPreviouslyPlayedCourses();
   };
 
   // Validate and save the round
@@ -1168,48 +1111,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setScores([]);
   };
 
-  // Render previously played courses section
-  const renderPreviouslyPlayedCourses = () => {
-    if (previouslyPlayedCourses.length === 0) return null;
-
-    return (
-      <div className="mt-4">
-        <h3 className="text-sm font-medium mb-2">Previously Played Courses</h3>
-        <div className="border rounded-md p-2 bg-muted/50 grid gap-2">
-          {previouslyPlayedCourses.slice(0, 5).map((course) => (
-            <div key={course.id.toString()} className="flex justify-between items-center">
-              <button
-                className="text-sm text-left text-primary hover:underline"
-                onClick={() => handleCourseSelect(course)}
-              >
-                {course.clubName !== course.name 
-                  ? `${course.clubName} - ${course.name}`
-                  : course.name}
-                <span className="text-xs block text-muted-foreground">
-                  {course.city}{course.state ? `, ${course.state}` : ''}
-                </span>
-              </button>
-              
-              {course.isUserAdded && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleEditCourse(course);
-                  }}
-                  className="h-8 w-8"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
   // Render course search step
   const renderSearchStep = () => {
     return (
@@ -1314,9 +1215,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
           </div>
         )}
         
-        {/* Previously Played Courses */}
-        {!isManualSearch && !searchResults.length && renderPreviouslyPlayedCourses()}
-        
         {/* Manual Course Entry Form Dialog */}
         <ManualCourseForm
           open={manualCourseFormOpen}
@@ -1336,6 +1234,14 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   // Render scorecard step
   const renderScorecardStep = () => {
     if (!selectedCourse) return null;
+    
+    // Get all holes and split them into front 9 and back 9
+    const frontNine = scores.filter(score => score.hole <= 9);
+    const backNine = scores.filter(score => score.hole > 9);
+    
+    // Show front 9, back 9, or both based on hole selection
+    const showFrontNine = holeSelection === 'all' || holeSelection === 'front9';
+    const showBackNine = holeSelection === 'all' || holeSelection === 'back9';
 
     return (
       <div className="space-y-5">
@@ -1450,57 +1356,141 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
           </div>
         </div>
         
-        {/* Scorecard Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b">
-                <th className="pl-2 pr-4 py-2 text-left text-sm font-medium whitespace-nowrap">Hole</th>
-                <th className="px-4 py-2 text-left text-sm font-medium">Par</th>
-                <th className="px-4 py-2 text-left text-sm font-medium">Strokes</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {scores.map((scoreEntry, index) => (
-                <tr key={index} className="border-b">
-                  <td className="pl-2 pr-4 py-2 font-medium">
-                    {scoreEntry.hole}
-                    {scoreEntry.handicap && (
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        SI: {scoreEntry.handicap}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-2">
-                    <div className="bg-muted/40 border border-muted rounded-md w-10 h-8 flex items-center justify-center font-medium">
-                      {scoreEntry.par}
-                    </div>
-                  </td>
-                  <td className="px-4 py-2">
-                    <Input
-                      type="number"
-                      min="1"
-                      max="20"
-                      value={scoreEntry.strokes || ''}
-                      onChange={(e) => handleScoreChange(index, 'strokes', e.target.value)}
-                      className="w-14 h-8 text-center"
-                      inputMode="numeric"
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="border-t-2 font-medium">
-                <td className="pl-2 pr-4 py-2 text-left">Total</td>
-                <td className="px-4 py-2 text-left">{scores.reduce((sum, score) => sum + score.par, 0)}</td>
-                <td className="px-4 py-2 text-left">
-                  {scores.reduce((sum, score) => sum + (score.strokes || 0), 0) || '-'}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
+        {/* Scorecard Table - Front 9 */}
+        {showFrontNine && frontNine.length > 0 && (
+          <div>
+            <h3 className="text-sm font-medium mb-2">Front Nine</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b">
+                    <th className="pl-2 pr-4 py-2 text-left text-sm font-medium whitespace-nowrap">Hole</th>
+                    {frontNine.map(score => (
+                      <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b">
+                    <td className="pl-2 pr-4 py-2 text-sm font-medium">Par</td>
+                    {frontNine.map(score => (
+                      <td key={`par-${score.hole}`} className="px-2 py-2 text-center">
+                        <div className="bg-muted/40 border border-muted rounded-md w-8 h-8 flex items-center justify-center font-medium mx-auto">
+                          {score.par}
+                        </div>
+                      </td>
+                    ))}
+                  </tr>
+                  <tr className="border-b">
+                    <td className="pl-2 pr-4 py-2 text-sm font-medium">Strokes</td>
+                    {frontNine.map((score, index) => (
+                      <td key={`strokes-${score.hole}`} className="px-2 py-2 text-center">
+                        <Input
+                          type="number"
+                          min="1"
+                          max="20"
+                          value={score.strokes || ''}
+                          onChange={(e) => handleScoreChange(index, 'strokes', e.target.value)}
+                          className="w-10 h-8 text-center mx-auto"
+                          inputMode="numeric"
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="pl-2 pr-4 py-2 text-sm font-medium">Putts</td>
+                    {frontNine.map((score, index) => (
+                      <td key={`putts-${score.hole}`} className="px-2 py-2 text-center">
+                        <Input
+                          type="number"
+                          min="0"
+                          max="10"
+                          value={score.putts || ''}
+                          onChange={(e) => handleScoreChange(index, 'putts', e.target.value)}
+                          className="w-10 h-8 text-center mx-auto"
+                          inputMode="numeric"
+                          placeholder="-"
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+        
+        {/* Scorecard Table - Back 9 */}
+        {showBackNine && backNine.length > 0 && (
+          <div>
+            <h3 className="text-sm font-medium mb-2">Back Nine</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b">
+                    <th className="pl-2 pr-4 py-2 text-left text-sm font-medium whitespace-nowrap">Hole</th>
+                    {backNine.map(score => (
+                      <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b">
+                    <td className="pl-2 pr-4 py-2 text-sm font-medium">Par</td>
+                    {backNine.map(score => (
+                      <td key={`par-${score.hole}`} className="px-2 py-2 text-center">
+                        <div className="bg-muted/40 border border-muted rounded-md w-8 h-8 flex items-center justify-center font-medium mx-auto">
+                          {score.par}
+                        </div>
+                      </td>
+                    ))}
+                  </tr>
+                  <tr className="border-b">
+                    <td className="pl-2 pr-4 py-2 text-sm font-medium">Strokes</td>
+                    {backNine.map((score, index) => {
+                      // Adjust the index to account for front nine
+                      const adjustedIndex = index + frontNine.length;
+                      return (
+                        <td key={`strokes-${score.hole}`} className="px-2 py-2 text-center">
+                          <Input
+                            type="number"
+                            min="1"
+                            max="20"
+                            value={score.strokes || ''}
+                            onChange={(e) => handleScoreChange(adjustedIndex, 'strokes', e.target.value)}
+                            className="w-10 h-8 text-center mx-auto"
+                            inputMode="numeric"
+                          />
+                        </td>
+                      );
+                    })}
+                  </tr>
+                  <tr>
+                    <td className="pl-2 pr-4 py-2 text-sm font-medium">Putts</td>
+                    {backNine.map((score, index) => {
+                      // Adjust the index to account for front nine
+                      const adjustedIndex = index + frontNine.length;
+                      return (
+                        <td key={`putts-${score.hole}`} className="px-2 py-2 text-center">
+                          <Input
+                            type="number"
+                            min="0"
+                            max="10"
+                            value={score.putts || ''}
+                            onChange={(e) => handleScoreChange(adjustedIndex, 'putts', e.target.value)}
+                            className="w-10 h-8 text-center mx-auto"
+                            inputMode="numeric"
+                            placeholder="-"
+                          />
+                        </td>
+                      );
+                    })}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
         
         {/* Score Summary */}
         <div className="bg-muted/20 rounded-md p-4 border">
@@ -1522,6 +1512,14 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
                   const toPar = totalStrokes - totalPar;
                   return toPar > 0 ? `+${toPar}` : toPar;
                 })()}
+              </span>
+            </div>
+            <div className="text-sm">
+              <span className="text-muted-foreground">Total Putts:</span>{' '}
+              <span className="font-medium">
+                {scores.some(s => s.putts !== undefined) ? 
+                  scores.reduce((sum, score) => sum + (score.putts || 0), 0) : 
+                  'Not Recorded'}
               </span>
             </div>
           </div>
