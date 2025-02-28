@@ -121,12 +121,14 @@ export async function searchCourses(query: string, includeMockData: boolean = fa
     console.log(`API response data:`, data);
     
     // Process the API response based on its structure from the OpenAPI spec
+    // Ensure we always have an array of courses, even if the API returns an empty array or has a different structure
     if (data.courses && Array.isArray(data.courses)) {
       apiResults = data.courses;
     } else if (Array.isArray(data)) {
       apiResults = data;
     } else {
-      throw new Error('API response format did not match expected structure');
+      console.warn('API response format did not match expected structure, using empty array');
+      apiResults = [];
     }
     
     console.log(`Found ${apiResults.length} courses from API`);
@@ -173,24 +175,27 @@ export async function searchCourses(query: string, includeMockData: boolean = fa
         } else if (Array.isArray(fallbackData)) {
           apiResults = fallbackData;
         } else {
-          throw new Error('Fallback API response format did not match expected structure');
+          console.warn('Fallback API response format did not match expected structure, using empty array');
+          apiResults = [];
         }
         
         console.log(`Found ${apiResults.length} courses from fallback API`);
       } catch (fallbackError) {
         console.error(`Error calling fallback golf course API:`, fallbackError);
-        throw new Error(`Failed to search for courses: Network error. The Golf Course API servers might be down or unreachable.`);
+        // Even if both APIs fail, return an empty array instead of throwing an error
+        apiResults = [];
+        console.warn("Both primary and fallback APIs failed, returning empty results");
       }
     } else {
       // Add more context to other types of errors
       console.error(`Error calling golf course API:`, error);
-      const enhancedError = new Error(`Failed to search for courses: ${(error as Error).message}. Please check your network connection and ensure the API is available.`);
-      (enhancedError as any).originalError = error;
-      throw enhancedError;
+      // Return empty array instead of throwing error to avoid breaking the UI
+      apiResults = [];
+      console.warn("API error occurred, returning empty results");
     }
   }
   
-  // Return empty array for mockCourses as we've removed all mock data
+  // Always return a valid structure with empty arrays as fallback
   return { mockCourses: [], results: apiResults };
 }
 

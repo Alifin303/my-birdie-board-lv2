@@ -248,8 +248,12 @@ const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): Simplified
     }));
   }
   
-  const simplified = {
-    id: courseDetail.id || 0,
+  // Fix: Ensure id is always a number
+  const courseId = typeof courseDetail.id === 'string' ? parseInt(courseDetail.id, 10) : 
+                   typeof courseDetail.id === 'number' ? courseDetail.id : 0;
+
+  const simplified: SimplifiedCourseDetail = {
+    id: courseId,
     name,
     clubName,
     city: courseDetail.location?.city || '',
@@ -257,7 +261,7 @@ const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): Simplified
     country: courseDetail.location?.country || 'United States',
     tees: simplifiedTees,
     holes,
-    apiCourseId: courseDetail.id.toString()
+    apiCourseId: courseDetail.id ? courseDetail.id.toString() : ''
   };
   
   console.log("Simplified course detail:", simplified);
@@ -273,12 +277,13 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
         tees.push({
           id: `m-${index}`,
           name: tee.tee_name || 'Unknown Tee',
-          rating: tee.rating || 72,
-          slope: tee.slope || 113,
-          par: tee.par || 72,
+          // Fix: Using proper TeeBox properties
+          rating: tee.course_rating ?? 72,
+          slope: tee.slope_rating ?? 113,
+          par: tee.par_total ?? 72,
           gender: 'male',
           originalIndex: index,
-          yards: tee.total_yardage
+          yards: tee.total_yards
         });
       });
     }
@@ -288,12 +293,13 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
         tees.push({
           id: `f-${index}`,
           name: tee.tee_name || 'Unknown Tee',
-          rating: tee.rating || 72,
-          slope: tee.slope || 113,
-          par: tee.par || 72,
+          // Fix: Using proper TeeBox properties
+          rating: tee.course_rating ?? 72,
+          slope: tee.slope_rating ?? 113,
+          par: tee.par_total ?? 72,
           gender: 'female',
           originalIndex: index,
-          yards: tee.total_yardage
+          yards: tee.total_yards
         });
       });
     }
@@ -372,19 +378,44 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setSearchError(null);
     
     try {
-      const results = await searchCourses(query);
+      // Fix: Get the search results and ensure we're handling the response correctly
+      const response = await searchCourses(query);
       
-      const enhancedResults = results.map(course => {
-        const metadata = getCourseMetadataFromLocalStorage(course.id);
+      console.log("Search response:", response);
+      
+      // Ensure we always have a valid array of results
+      const apiResults = Array.isArray(response.results) ? response.results : [];
+      
+      // Transform API golf courses to simplified format
+      const transformedResults: SimplifiedGolfCourse[] = apiResults.map(course => {
+        // Ensure course ID is always a number
+        const courseId = typeof course.id === 'string' ? parseInt(course.id, 10) : 
+                        typeof course.id === 'number' ? course.id : 0;
+                        
+        const { clubName, courseName } = parseCourseName(course.course_name || course.club_name || '');
+        
         return {
-          ...course,
-          city: course.city || metadata?.city,
-          state: course.state || metadata?.state,
-          isUserAdded: isUserAddedCourse(course.name)
+          id: courseId,
+          name: courseName || course.course_name || "Unknown Course",
+          clubName: clubName || course.club_name || "Unknown Club",
+          city: course.location?.city || '',
+          state: course.location?.state || '',
+          country: course.location?.country || '',
+          apiCourseId: course.id?.toString() || '',
+          isUserAdded: false
         };
       });
       
-      setSearchResults(enhancedResults);
+      console.log("Transformed search results:", transformedResults);
+      setSearchResults(transformedResults);
+      
+      if (transformedResults.length === 0) {
+        // No results found, show a message
+        toast({
+          title: "No results found",
+          description: "No golf courses found matching your search. Try a different search term or add a new course manually.",
+        });
+      }
     } catch (error: any) {
       console.error("Search error:", error);
       setSearchError(error.message || "Failed to fetch courses. Please try again.");
@@ -471,7 +502,10 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
         console.log("Loading course from API:", course);
         
         try {
-          const courseId = course.apiCourseId || course.id;
+          // Convert courseId to a proper format
+          const courseIdRaw = course.apiCourseId || course.id;
+          const courseId = typeof courseIdRaw === 'string' ? courseIdRaw : courseIdRaw.toString();
+          
           console.log("Fetching API course details for ID:", courseId);
           
           const apiCourseDetail = await getCourseDetails(courseId);
@@ -516,8 +550,11 @@ Try selecting a different course or adding this course manually.`);
             holes: defaultHoles
           };
           
+          // Ensure course.id is a number
+          const courseId = typeof course.id === 'string' ? parseInt(course.id, 10) : course.id;
+          
           simplifiedCourseDetail = {
-            id: course.id,
+            id: courseId,
             name: course.name,
             clubName: course.clubName,
             city: course.city,
@@ -761,7 +798,7 @@ Try selecting a different course or adding this course manually.`);
     const newScores = [...scores];
     const parsedValue = value === '' ? undefined : parseInt(value, 10);
     
-    if (!isNaN(parsedValue) || value === '') {
+    if (!isNaN(parsedValue as number) || value === '') {
       newScores[index] = {
         ...newScores[index],
         [field]: parsedValue,
@@ -858,7 +895,8 @@ Try selecting a different course or adding this course manually.`);
         description: "Round saved successfully!",
       });
       
-      queryClient.invalidateQueries(['userRounds']);
+      // Fix: Using correct format for invalidateQueries
+      queryClient.invalidateQueries({ queryKey: ['userRounds'] });
       handleCloseModal();
     } catch (error: any) {
       console.error("Error saving round:", error);
