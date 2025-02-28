@@ -347,17 +347,18 @@ export async function searchCourses(query: string, includeMockData: boolean = fa
     
     // Map API results to our expected format if needed
     apiResults = apiResults.map(course => {
-      // Handle different API response formats
-      return {
-        id: course.id || course.courseId || course.course_id,
-        club_name: course.clubName || course.club_name || course.name,
-        course_name: course.courseName || course.course_name,
+      // Handle different API response formats - using proper typings for our interface
+      const mappedCourse: GolfCourse = {
+        id: course.id || (course as any).courseId || (course as any).course_id,
+        club_name: (course as any).clubName || course.club_name || (course as any).name,
+        course_name: (course as any).courseName || course.course_name,
         location: {
-          city: course.city || (course.location && course.location.city),
-          state: course.state || (course.location && course.location.state),
-          country: course.country || (course.location && course.location.country) || 'USA'
+          city: (course as any).city || (course.location && course.location.city),
+          state: (course as any).state || (course.location && course.location.state),
+          country: (course as any).country || (course.location && course.location.country) || 'USA'
         }
       };
+      return mappedCourse;
     });
   } catch (error) {
     console.error(`Error calling live golf course API:`, error);
@@ -434,19 +435,19 @@ export async function getCourseDetails(courseId: number | string): Promise<Cours
     // If any required properties are missing, map them from what's available
     courseDetail = {
       id: courseDetail.id || courseId,
-      club_name: courseDetail.club_name || courseDetail.clubName || courseDetail.name,
-      course_name: courseDetail.course_name || courseDetail.courseName,
+      club_name: courseDetail.club_name || (courseDetail as any).clubName || (courseDetail as any).name,
+      course_name: courseDetail.course_name || (courseDetail as any).courseName,
       description: courseDetail.description,
       website: courseDetail.website,
       location: courseDetail.location || {
-        city: courseDetail.city,
-        state: courseDetail.state,
-        country: courseDetail.country || 'USA'
+        city: (courseDetail as any).city,
+        state: (courseDetail as any).state,
+        country: (courseDetail as any).country || 'USA'
       },
       holes: courseDetail.holes || 18,
       tees: courseDetail.tees || processTees(courseDetail),
       features: courseDetail.features || [],
-      price_range: courseDetail.price_range || courseDetail.priceRange || '$$$'
+      price_range: courseDetail.price_range || (courseDetail as any).priceRange || '$$$'
     };
     
     return courseDetail;
