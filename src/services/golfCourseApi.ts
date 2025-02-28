@@ -72,15 +72,15 @@ export interface CourseDetail {
 export const API_CONFIG = {
   // Always use real API
   USE_REAL_API: true,
-  // The base URL for the golf course API
-  API_URL: "https://golf-courses-api.herokuapp.com/api/v1",
+  // The base URL for the golf course API - updated based on OpenAPI spec
+  API_URL: "https://api.golfcourseapi.com/v1",
   // API key for authentication
   API_KEY: "GZQVPVDJB4DPZAQYIR6M64J2NQ",
   // Proxy URL to avoid CORS issues (set to empty if not needed)
-  PROXY_URL: "https://cors-anywhere.herokuapp.com/"
+  PROXY_URL: ""
 };
 
-// Search courses function - now with improved error handling and CORS proxy
+// Search courses function - updated to match OpenAPI spec
 export async function searchCourses(query: string, includeMockData: boolean = false): Promise<{ mockCourses: GolfCourse[], results: GolfCourse[] }> {
   console.log(`Searching for courses with query: ${query}`);
   const normalizedQuery = query.toLowerCase().trim();
@@ -88,184 +88,145 @@ export async function searchCourses(query: string, includeMockData: boolean = fa
   let apiResults: GolfCourse[] = [];
   
   try {
-    // Build query parameters
+    // Build query parameters according to the API spec
     const searchParams = new URLSearchParams({
-      q: normalizedQuery,
-      limit: '50'
+      search_query: normalizedQuery
     });
     
-    // API URL with optional proxy
-    const apiUrl = `${API_CONFIG.API_URL}/courses/search?${searchParams.toString()}`;
+    // API URL with search endpoint from the OpenAPI spec
+    const apiUrl = `${API_CONFIG.API_URL}/search?${searchParams.toString()}`;
     
     console.log(`Making API request to: ${apiUrl}`);
     console.log(`Using authorization header: Key ${API_CONFIG.API_KEY}`);
     
-    // Try the request without proxy first
-    try {
-      const response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Key ${API_CONFIG.API_KEY}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        mode: 'cors',
-        signal: AbortSignal.timeout(15000) // 15 second timeout
-      });
-      
-      console.log(`API response status: ${response.status}`);
-      
-      if (!response.ok) {
-        throw new Error(`API returned error status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      console.log(`API response data:`, data);
-      
-      // Process the API response based on its structure
-      if (data.courses && Array.isArray(data.courses)) {
-        apiResults = data.courses;
-      } else if (data.data && Array.isArray(data.data)) {
-        apiResults = data.data;
-      } else if (Array.isArray(data)) {
-        apiResults = data;
-      } else {
-        throw new Error('API response format did not match expected structure');
-      }
-    } catch (directError) {
-      console.error("Direct API call failed:", directError);
-      
-      // If this is not a CORS error, or if we don't have a proxy URL, rethrow
-      if (!API_CONFIG.PROXY_URL || !(directError instanceof TypeError)) {
-        throw directError;
-      }
-      
-      // Try with proxy as fallback for CORS issues
-      console.log("Retrying with CORS proxy...");
-      const proxyUrl = `${API_CONFIG.PROXY_URL}${apiUrl}`;
-      
-      const proxyResponse = await fetch(proxyUrl, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Key ${API_CONFIG.API_KEY}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        signal: AbortSignal.timeout(15000)
-      });
-      
-      if (!proxyResponse.ok) {
-        throw new Error(`Proxy API returned error status: ${proxyResponse.status}`);
-      }
-      
-      const proxyData = await proxyResponse.json();
-      
-      // Process the API response
-      if (proxyData.courses && Array.isArray(proxyData.courses)) {
-        apiResults = proxyData.courses;
-      } else if (proxyData.data && Array.isArray(proxyData.data)) {
-        apiResults = proxyData.data;
-      } else if (Array.isArray(proxyData)) {
-        apiResults = proxyData;
-      } else {
-        throw new Error('Proxy API response format did not match expected structure');
-      }
+    // Make the API request with the proper Authorization header format
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Key ${API_CONFIG.API_KEY}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      mode: 'cors',
+      signal: AbortSignal.timeout(15000) // 15 second timeout
+    });
+    
+    console.log(`API response status: ${response.status}`);
+    
+    if (!response.ok) {
+      throw new Error(`API returned error status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log(`API response data:`, data);
+    
+    // Process the API response based on its structure from the OpenAPI spec
+    if (data.courses && Array.isArray(data.courses)) {
+      apiResults = data.courses;
+    } else if (Array.isArray(data)) {
+      apiResults = data;
+    } else {
+      throw new Error('API response format did not match expected structure');
     }
     
     console.log(`Found ${apiResults.length} courses from API`);
-    
-    // Map API results to our expected format if needed
-    apiResults = apiResults.map(course => {
-      // Handle different API response formats - using proper typings for our interface
-      const mappedCourse: GolfCourse = {
-        id: course.id || (course as any).courseId || (course as any).course_id,
-        club_name: (course as any).clubName || course.club_name || (course as any).name,
-        course_name: (course as any).courseName || course.course_name,
-        location: {
-          city: (course as any).city || (course.location && course.location.city),
-          state: (course as any).state || (course.location && course.location.state),
-          country: (course as any).country || (course.location && course.location.country) || 'USA',
-          address: (course.location && course.location.address) || (course as any).address
-        }
-      };
-      return mappedCourse;
-    });
   } catch (error) {
-    console.error(`Error calling golf course API:`, error);
-    
-    // Add more context to the error
-    const enhancedError = new Error(`Failed to search for courses: ${(error as Error).message}. Please check your network connection and ensure the API is available.`);
-    (enhancedError as any).originalError = error;
-    throw enhancedError;
+    // Check if we received a network error
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      console.error(`Network error calling golf course API:`, error);
+      
+      // Try alternative API URL (old one) as fallback in case new one doesn't work
+      try {
+        console.log("Trying alternative API URL as fallback...");
+        
+        const fallbackUrl = "https://golf-courses-api.herokuapp.com/api/v1/courses/search";
+        const searchParams = new URLSearchParams({
+          q: normalizedQuery,
+          limit: '50'
+        });
+        
+        const fallbackApiUrl = `${fallbackUrl}?${searchParams.toString()}`;
+        
+        console.log(`Making fallback API request to: ${fallbackApiUrl}`);
+        
+        const fallbackResponse = await fetch(fallbackApiUrl, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Key ${API_CONFIG.API_KEY}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          mode: 'cors',
+          signal: AbortSignal.timeout(15000)
+        });
+        
+        if (!fallbackResponse.ok) {
+          throw new Error(`Fallback API returned error status: ${fallbackResponse.status}`);
+        }
+        
+        const fallbackData = await fallbackResponse.json();
+        
+        if (fallbackData.courses && Array.isArray(fallbackData.courses)) {
+          apiResults = fallbackData.courses;
+        } else if (fallbackData.data && Array.isArray(fallbackData.data)) {
+          apiResults = fallbackData.data;
+        } else if (Array.isArray(fallbackData)) {
+          apiResults = fallbackData;
+        } else {
+          throw new Error('Fallback API response format did not match expected structure');
+        }
+        
+        console.log(`Found ${apiResults.length} courses from fallback API`);
+      } catch (fallbackError) {
+        console.error(`Error calling fallback golf course API:`, fallbackError);
+        throw new Error(`Failed to search for courses: Network error. The Golf Course API servers might be down or unreachable.`);
+      }
+    } else {
+      // Add more context to other types of errors
+      console.error(`Error calling golf course API:`, error);
+      const enhancedError = new Error(`Failed to search for courses: ${(error as Error).message}. Please check your network connection and ensure the API is available.`);
+      (enhancedError as any).originalError = error;
+      throw enhancedError;
+    }
   }
   
   // Return empty array for mockCourses as we've removed all mock data
   return { mockCourses: [], results: apiResults };
 }
 
-// Get course details function - with improved error handling and CORS proxy
+// Get course details function - updated to match OpenAPI spec
 export async function getCourseDetails(courseId: number | string): Promise<CourseDetail> {
   console.log(`Fetching details for course ID: ${courseId}`);
   
   try {
-    // API URL with optional proxy
+    // API URL with course ID endpoint from the OpenAPI spec
     const apiUrl = `${API_CONFIG.API_URL}/courses/${courseId}`;
     
     console.log(`Making API request to: ${apiUrl}`);
     
-    let response;
-    let data;
+    // Make the API request with the proper Authorization header format
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Key ${API_CONFIG.API_KEY}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      mode: 'cors',
+      signal: AbortSignal.timeout(15000) // 15 second timeout
+    });
     
-    // Try direct request first
-    try {
-      response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Key ${API_CONFIG.API_KEY}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        mode: 'cors',
-        signal: AbortSignal.timeout(15000) // 15 second timeout
-      });
-      
-      if (!response.ok) {
-        throw new Error(`API returned error status: ${response.status}`);
-      }
-      
-      data = await response.json();
-    } catch (directError) {
-      console.error("Direct API call for course details failed:", directError);
-      
-      // If this is not a CORS error, or if we don't have a proxy URL, rethrow
-      if (!API_CONFIG.PROXY_URL || !(directError instanceof TypeError)) {
-        throw directError;
-      }
-      
-      // Try with proxy as fallback for CORS issues
-      console.log("Retrying course details with CORS proxy...");
-      const proxyUrl = `${API_CONFIG.PROXY_URL}${apiUrl}`;
-      
-      const proxyResponse = await fetch(proxyUrl, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Key ${API_CONFIG.API_KEY}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        signal: AbortSignal.timeout(15000)
-      });
-      
-      if (!proxyResponse.ok) {
-        throw new Error(`Proxy API returned error status: ${proxyResponse.status}`);
-      }
-      
-      data = await proxyResponse.json();
+    if (!response.ok) {
+      throw new Error(`API returned error status: ${response.status}`);
     }
     
+    const data = await response.json();
     console.log(`API course details data:`, data);
+    
+    // Check if we need to try a fallback API
+    if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
+      throw new Error('Empty response from API');
+    }
     
     // The API should return a Course object directly according to the spec
     let courseDetail: CourseDetail = data;
@@ -299,10 +260,145 @@ export async function getCourseDetails(courseId: number | string): Promise<Cours
     
     return courseDetail;
   } catch (error) {
-    console.error(`Error fetching course details from API:`, error);
-    const enhancedError = new Error(`Failed to get course details: ${(error as Error).message}. Please check your network connection and ensure the API is available.`);
-    (enhancedError as any).originalError = error;
-    throw enhancedError;
+    // Check if we received a network error
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      console.error(`Network error fetching course details:`, error);
+      
+      // Try alternative API URL (old one) as fallback
+      try {
+        console.log("Trying alternative API URL for course details as fallback...");
+        
+        const fallbackUrl = `https://golf-courses-api.herokuapp.com/api/v1/courses/${courseId}`;
+        
+        console.log(`Making fallback API request to: ${fallbackUrl}`);
+        
+        const fallbackResponse = await fetch(fallbackUrl, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Key ${API_CONFIG.API_KEY}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          mode: 'cors',
+          signal: AbortSignal.timeout(15000)
+        });
+        
+        if (!fallbackResponse.ok) {
+          throw new Error(`Fallback API returned error status: ${fallbackResponse.status}`);
+        }
+        
+        const fallbackData = await fallbackResponse.json();
+        
+        let courseDetail: CourseDetail;
+        
+        if (fallbackData.course) {
+          courseDetail = fallbackData.course;
+        } else if (fallbackData.data) {
+          courseDetail = fallbackData.data;
+        } else {
+          courseDetail = fallbackData;
+        }
+        
+        // Map the response
+        courseDetail = {
+          id: courseDetail.id || courseId,
+          club_name: courseDetail.club_name || (courseDetail as any).clubName || (courseDetail as any).name,
+          course_name: courseDetail.course_name || (courseDetail as any).courseName,
+          description: courseDetail.description,
+          website: courseDetail.website,
+          location: courseDetail.location || {
+            city: (courseDetail as any).city,
+            state: (courseDetail as any).state,
+            country: (courseDetail as any).country || 'USA',
+            address: (courseDetail as any).address
+          },
+          holes: courseDetail.holes || 18,
+          tees: courseDetail.tees || processTees(courseDetail),
+          features: courseDetail.features || [],
+          price_range: courseDetail.price_range || (courseDetail as any).priceRange || '$$$'
+        };
+        
+        return courseDetail;
+      } catch (fallbackError) {
+        console.error(`Error calling fallback course details API:`, fallbackError);
+        throw new Error(`Failed to get course details: Network error. The Golf Course API servers might be down or unreachable.`);
+      }
+    } else {
+      console.error(`Error fetching course details from API:`, error);
+      const enhancedError = new Error(`Failed to get course details: ${(error as Error).message}. Please check your network connection and ensure the API is available.`);
+      (enhancedError as any).originalError = error;
+      throw enhancedError;
+    }
+  }
+}
+
+// Check API health status
+export async function checkApiHealth(): Promise<{status: string, available: boolean}> {
+  try {
+    // API URL with healthcheck endpoint from the OpenAPI spec
+    const apiUrl = `${API_CONFIG.API_URL}/healthcheck`;
+    
+    console.log(`Checking API health at: ${apiUrl}`);
+    
+    // Make the API request with the proper Authorization header format
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Key ${API_CONFIG.API_KEY}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      mode: 'cors',
+      signal: AbortSignal.timeout(5000) // 5 second timeout
+    });
+    
+    if (!response.ok) {
+      return { status: `Error: ${response.status}`, available: false };
+    }
+    
+    const data = await response.json();
+    
+    return { 
+      status: data.status || 'unknown', 
+      available: data.status === 'available'
+    };
+  } catch (error) {
+    console.error(`Error checking API health:`, error);
+    
+    // Try alternative API URL as fallback
+    try {
+      const fallbackUrl = "https://golf-courses-api.herokuapp.com/api/v1/status";
+      
+      console.log(`Checking fallback API health at: ${fallbackUrl}`);
+      
+      const fallbackResponse = await fetch(fallbackUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Key ${API_CONFIG.API_KEY}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        mode: 'cors',
+        signal: AbortSignal.timeout(5000)
+      });
+      
+      if (!fallbackResponse.ok) {
+        return { status: `Fallback Error: ${fallbackResponse.status}`, available: false };
+      }
+      
+      const fallbackData = await fallbackResponse.json();
+      
+      return { 
+        status: fallbackData.status || 'unknown (fallback API)', 
+        available: true
+      };
+    } catch (fallbackError) {
+      console.error(`Error checking fallback API health:`, fallbackError);
+      return { 
+        status: `Network Error: ${(error as Error).message}`, 
+        available: false 
+      };
+    }
   }
 }
 
