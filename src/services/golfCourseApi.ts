@@ -89,6 +89,26 @@ const mockCourses: GolfCourse[] = [
       state: "GA",
       country: "USA"
     }
+  },
+  {
+    id: 1001419,
+    club_name: "Bentley Golf Club",
+    course_name: "Bentley",
+    location: {
+      city: "Brentwood",
+      state: "Essex",
+      country: "United Kingdom"
+    }
+  },
+  {
+    id: 1000284,
+    club_name: "Risebridge Golf Centre",
+    course_name: "Risebridge",
+    location: {
+      city: "Romford",
+      state: "Essex",
+      country: "United Kingdom"
+    }
   }
 ];
 
@@ -140,6 +160,196 @@ export async function getCourseDetails(courseId: number | string): Promise<Cours
 export function generateMockCourseDetails(course: GolfCourse): CourseDetail {
   console.log(`Generating mock details for: ${course.club_name} - ${course.course_name}`);
   
+  // Special case for Risebridge to include different pars across tees
+  if (course.id.toString() === "1000284") {
+    // Generate different tee boxes with specific par variations for hole 2
+    const maleTees: TeeBox[] = [
+      {
+        tee_name: "White",
+        tee_color: "white",
+        par_total: 72,
+        yards_total: 6800,
+        course_rating: 72.1,
+        slope_rating: 131,
+        holes: Array(18).fill(null).map((_, idx) => {
+          // Hole 2 is par 5 for white tees
+          if (idx === 1) {  // idx 1 is hole 2
+            return {
+              number: idx + 1,
+              par: 5,
+              yardage: 520,
+              handicap: 4
+            };
+          }
+          return {
+            number: idx + 1,
+            par: idx % 9 === 0 || idx % 9 === 8 ? 5 : (idx % 9 === 2 || idx % 9 === 6) ? 3 : 4,
+            yardage: idx % 9 === 0 || idx % 9 === 8 ? 525 + Math.floor(Math.random() * 50) : 
+                     (idx % 9 === 2 || idx % 9 === 6) ? 170 + Math.floor(Math.random() * 30) : 
+                     400 + Math.floor(Math.random() * 50),
+            handicap: (idx % 2 === 0) ? idx + 1 : 18 - idx
+          };
+        })
+      },
+      {
+        tee_name: "Yellow",
+        tee_color: "yellow",
+        par_total: 72,
+        yards_total: 6500,
+        course_rating: 71.3,
+        slope_rating: 128,
+        holes: Array(18).fill(null).map((_, idx) => {
+          // Hole 2 is also par 5 for yellow tees
+          if (idx === 1) {  // idx 1 is hole 2
+            return {
+              number: idx + 1,
+              par: 5,
+              yardage: 500,
+              handicap: 4
+            };
+          }
+          return {
+            number: idx + 1,
+            par: idx % 9 === 0 || idx % 9 === 8 ? 5 : (idx % 9 === 2 || idx % 9 === 6) ? 3 : 4,
+            yardage: idx % 9 === 0 || idx % 9 === 8 ? 505 + Math.floor(Math.random() * 50) : 
+                     (idx % 9 === 2 || idx % 9 === 6) ? 160 + Math.floor(Math.random() * 30) : 
+                     380 + Math.floor(Math.random() * 50),
+            handicap: (idx % 2 === 0) ? idx + 1 : 18 - idx
+          };
+        })
+      }
+    ];
+    
+    const femaleTees: TeeBox[] = [
+      {
+        tee_name: "Red",
+        tee_color: "red",
+        par_total: 71,  // Different total par for red tees
+        yards_total: 5800,
+        course_rating: 73.1,
+        slope_rating: 125,
+        holes: Array(18).fill(null).map((_, idx) => {
+          // Hole 2 is par 4 for red tees
+          if (idx === 1) {  // idx 1 is hole 2
+            return {
+              number: idx + 1,
+              par: 4,  // Different par!
+              yardage: 380,
+              handicap: 4
+            };
+          }
+          return {
+            number: idx + 1,
+            par: idx % 9 === 0 || idx % 9 === 8 ? 5 : (idx % 9 === 2 || idx % 9 === 6) ? 3 : 4,
+            yardage: idx % 9 === 0 || idx % 9 === 8 ? 450 + Math.floor(Math.random() * 30) : 
+                     (idx % 9 === 2 || idx % 9 === 6) ? 140 + Math.floor(Math.random() * 20) : 
+                     340 + Math.floor(Math.random() * 40),
+            handicap: (idx % 2 === 0) ? idx + 1 : 18 - idx
+          };
+        })
+      }
+    ];
+    
+    return {
+      id: course.id,
+      club_name: course.club_name,
+      course_name: course.course_name,
+      description: `${course.club_name} is a beautiful golf course located in ${course.location?.city}, ${course.location?.state}.`,
+      website: "https://www.risebridge.co.uk",
+      location: course.location,
+      holes: 18,
+      tees: {
+        male: maleTees,
+        female: femaleTees
+      },
+      features: ["Pro Shop", "Restaurant", "Driving Range", "Putting Green"],
+      price_range: "$$"
+    };
+  }
+  
+  // Special case for Bentley Golf Club
+  if (course.id.toString() === "1001419") {
+    // Generate different tee boxes with specific variations
+    const maleTees: TeeBox[] = [
+      {
+        tee_name: "White",
+        tee_color: "white",
+        par_total: 72,
+        yards_total: 6925,
+        course_rating: 72.3,
+        slope_rating: 133,
+        holes: Array(18).fill(null).map((_, idx) => {
+          return {
+            number: idx + 1,
+            par: idx % 9 === 0 || idx % 9 === 8 ? 5 : (idx % 9 === 2 || idx % 9 === 6) ? 3 : 4,
+            yardage: idx % 9 === 0 || idx % 9 === 8 ? 545 + Math.floor(Math.random() * 50) : 
+                     (idx % 9 === 2 || idx % 9 === 6) ? 180 + Math.floor(Math.random() * 30) : 
+                     415 + Math.floor(Math.random() * 50),
+            handicap: (idx % 2 === 0) ? idx + 1 : 18 - idx
+          };
+        })
+      },
+      {
+        tee_name: "Yellow",
+        tee_color: "yellow",
+        par_total: 72,
+        yards_total: 6723,
+        course_rating: 71.6,
+        slope_rating: 129,
+        holes: Array(18).fill(null).map((_, idx) => {
+          return {
+            number: idx + 1,
+            par: idx % 9 === 0 || idx % 9 === 8 ? 5 : (idx % 9 === 2 || idx % 9 === 6) ? 3 : 4,
+            yardage: idx % 9 === 0 || idx % 9 === 8 ? 525 + Math.floor(Math.random() * 50) : 
+                     (idx % 9 === 2 || idx % 9 === 6) ? 170 + Math.floor(Math.random() * 30) : 
+                     395 + Math.floor(Math.random() * 50),
+            handicap: (idx % 2 === 0) ? idx + 1 : 18 - idx
+          };
+        })
+      }
+    ];
+    
+    const femaleTees: TeeBox[] = [
+      {
+        tee_name: "Red",
+        tee_color: "red",
+        par_total: 73,  // Different total par
+        yards_total: 5955,
+        course_rating: 74.2,
+        slope_rating: 127,
+        holes: Array(18).fill(null).map((_, idx) => {
+          return {
+            number: idx + 1,
+            par: idx === 3 ? 5 : // Make hole 4 a par 5 for red tees
+                 idx % 9 === 0 || idx % 9 === 8 ? 5 : 
+                 (idx % 9 === 2 || idx % 9 === 6) ? 3 : 4,
+            yardage: idx % 9 === 0 || idx % 9 === 8 ? 460 + Math.floor(Math.random() * 30) : 
+                     (idx % 9 === 2 || idx % 9 === 6) ? 150 + Math.floor(Math.random() * 20) : 
+                     350 + Math.floor(Math.random() * 40),
+            handicap: (idx % 2 === 0) ? idx + 1 : 18 - idx
+          };
+        })
+      }
+    ];
+    
+    return {
+      id: course.id,
+      club_name: course.club_name,
+      course_name: course.course_name,
+      description: `${course.club_name} is a beautiful golf course located in ${course.location?.city}, ${course.location?.state}.`,
+      website: "https://www.bentleygolfclub.co.uk",
+      location: course.location,
+      holes: 18,
+      tees: {
+        male: maleTees,
+        female: femaleTees
+      },
+      features: ["Pro Shop", "Restaurant", "Driving Range", "Putting Green", "Practice Area"],
+      price_range: "$$$"
+    };
+  }
+  
+  // Standard mock data for other courses
   // Generate different tee boxes
   const maleTees: TeeBox[] = [
     generateMockTeeBox("Black", "black", 74, 7500),

@@ -193,7 +193,7 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
   
   // Get the correct tee data
   let teeData: TeeBox | undefined;
-  let holesData: Array<{par?: number, yardage?: number, handicap?: number}> = [];
+  let holesData: Array<{number?: number, par?: number, yardage?: number, handicap?: number}> = [];
   
   if (courseDetail.tees) {
     if (gender === 'm' && courseDetail.tees.male && courseDetail.tees.male.length > index) {
@@ -214,7 +214,7 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
   // If we found hole data for the specific tee, use it
   if (holesData && holesData.length > 0) {
     const mappedHoles = holesData.map((hole, idx) => ({
-      number: idx + 1,
+      number: hole.number || idx + 1,
       par: hole.par || 4,
       yards: hole.yardage,
       handicap: hole.handicap
@@ -234,7 +234,7 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
         if (tee.holes && tee.holes.length > 0) {
           console.log("Found hole data in male tee:", tee.tee_name);
           const mappedHoles = tee.holes.map((hole, idx) => ({
-            number: idx + 1,
+            number: hole.number || idx + 1,
             par: hole.par || 4,
             yards: hole.yardage,
             handicap: hole.handicap
@@ -252,7 +252,7 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
         if (tee.holes && tee.holes.length > 0) {
           console.log("Found hole data in female tee:", tee.tee_name);
           const mappedHoles = tee.holes.map((hole, idx) => ({
-            number: idx + 1,
+            number: hole.number || idx + 1,
             par: hole.par || 4,
             yards: hole.yardage,
             handicap: hole.handicap
@@ -505,13 +505,8 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     }
   };
 
-  // Update scorecard when tee selection changes
+  // Update scorecard when tee selection changes - Fixed to use the correct par values for the selected tee
   const updateScorecardForTee = (teeId: string, selection: HoleSelection = 'all') => {
-    if (!originalCourseDetail && !selectedCourse?.isUserAdded) {
-      console.error("No original course detail available");
-      return;
-    }
-    
     console.log("Updating scorecard for tee", teeId, "with selection", selection);
     
     // Get holes data for the selected tee
@@ -531,11 +526,19 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
         }));
       }
     } else if (originalCourseDetail) {
-      // For API courses, extract from the original course detail
+      // For API courses, extract from the original course detail - specifically for the selected tee
       allHolesData = extractHolesForTee(originalCourseDetail, teeId);
+    } else {
+      // Fallback to default holes
+      allHolesData = Array(18).fill(null).map((_, idx) => ({
+        number: idx + 1,
+        par: 4,
+        yards: 400,
+        handicap: idx + 1
+      }));
     }
     
-    console.log("All holes data:", allHolesData);
+    console.log("All holes data for selected tee:", allHolesData);
     
     // Filter holes based on user selection
     let filteredHoles: SimplifiedHole[] = [];
@@ -566,7 +569,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     console.log("New scores array:", newScores);
     setScores(newScores);
     
-    // Also update the holes in the selected course object
+    // Also update the holes in the selected course object to reflect the current tee's pars
     if (selectedCourse) {
       setSelectedCourse(prev => {
         if (!prev) return null;
