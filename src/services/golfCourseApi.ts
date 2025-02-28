@@ -1,3 +1,6 @@
+
+import axios from 'axios';
+
 // Define types for API response
 export interface GolfCourse {
   id: number;
@@ -183,5 +186,3 @@ export const generateMockCourseDetails = (course: GolfCourse): CourseDetail => {
   console.log(`[API] Generated mock course details:`, mockCourseDetail);
   return mockCourseDetail;
 };
-
-import axios from 'axios';
