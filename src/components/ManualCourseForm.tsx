@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, ReactNode } from "react";
 import { 
   Dialog,
   DialogContent,
@@ -64,7 +63,8 @@ export function ManualCourseForm({
   const [isLoading, setIsLoading] = useState(false);
   const [currentTab, setCurrentTab] = useState('front9');
   const [isEditMode, setIsEditMode] = useState(!!existingCourse);
-  
+  const manualCourseFormRef = useRef(null);
+
   const { toast } = useToast();
 
   // Set initial state when form opens or when existingCourse changes
@@ -194,8 +194,12 @@ export function ManualCourseForm({
       const updatedTees = [...prev.tees];
       const updatedHoles = [...updatedTees[teeIndex].holes];
       
-      updatedHoles[holeIndex] = {
-        ...updatedHoles[holeIndex],
+      // Get the actual hole we're updating - for Back 9, we need to add 9 to the index
+      // since holeIndex is relative to the active tab (0-8 for both Front and Back 9)
+      const actualHoleIndex = currentTab === 'back9' ? holeIndex + 9 : holeIndex;
+      
+      updatedHoles[actualHoleIndex] = {
+        ...updatedHoles[actualHoleIndex],
         [field]: numValue
       };
       
@@ -404,6 +408,63 @@ export function ManualCourseForm({
     return true;
   };
 
+  // Add a method to set the existing course from the ref
+  // This is used when editing a course from the AddRoundModal
+  React.useImperativeHandle(manualCourseFormRef, () => ({
+    setExistingCourse: (course: any) => {
+      console.log("Setting existing course via ref:", course);
+      if (course) {
+        setIsEditMode(true);
+        
+        // Get the tees from localStorage if they exist
+        const courseDetailsKey = `course_details_${course.id}`;
+        const storedDetails = localStorage.getItem(courseDetailsKey);
+        
+        if (storedDetails) {
+          try {
+            const parsedDetails = JSON.parse(storedDetails);
+            console.log("Found stored course details:", parsedDetails);
+            
+            // Use the stored tees or fallback to a default tee
+            const tees = parsedDetails.tees || [createDefaultTee()];
+            
+            setFormData({
+              name: course.name.replace(' [User added course]', ''),
+              city: course.city || '',
+              state: course.state || '',
+              tees: tees
+            });
+            
+            // Set the current tee to the first tee
+            if (tees.length > 0) {
+              setCurrentTeeIndex(0);
+            }
+          } catch (error) {
+            console.error("Error parsing stored course details:", error);
+            
+            // Fallback to default data with the course name/city/state
+            setFormData({
+              name: course.name.replace(' [User added course]', ''),
+              city: course.city || '',
+              state: course.state || '',
+              tees: [createDefaultTee()]
+            });
+          }
+        } else {
+          console.log("No stored details found for course:", course.id);
+          
+          // Fallback to default data with the course name/city/state
+          setFormData({
+            name: course.name.replace(' [User added course]', ''),
+            city: course.city || '',
+            state: course.state || '',
+            tees: [createDefaultTee()]
+          });
+        }
+      }
+    }
+  }));
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
@@ -468,7 +529,7 @@ export function ManualCourseForm({
                   <HoleInputs 
                     holes={formData.tees[currentTeeIndex].holes.slice(9, 18)}
                     handleHoleChange={(holeIndex, field, value) => 
-                      handleHoleChange(currentTeeIndex, holeIndex + 9, field, value)
+                      handleHoleChange(currentTeeIndex, holeIndex, field, value)
                     }
                   />
                 </TabsContent>

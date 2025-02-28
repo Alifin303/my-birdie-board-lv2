@@ -28,14 +28,14 @@ export function HoleInputs({
         <tbody>
           <tr className="border-b">
             <td className="text-sm font-medium text-muted-foreground px-2 py-2">Par</td>
-            {holes.map((hole) => (
+            {holes.map((hole, idx) => (
               <td key={`par-${hole.number}`} className="text-center px-2 py-2">
                 <Input
                   type="number"
                   min="2"
                   max="6"
                   value={hole.par}
-                  onChange={(e) => handleHoleChange(hole.number - 1, 'par', e.target.value)}
+                  onChange={(e) => handleHoleChange(idx, 'par', e.target.value)}
                   className="w-12 h-8 text-center"
                   required
                   // Prevent form submission on enter
@@ -52,14 +52,14 @@ export function HoleInputs({
           </tr>
           <tr className="border-b">
             <td className="text-sm font-medium text-muted-foreground px-2 py-2">Yards</td>
-            {holes.map((hole) => (
+            {holes.map((hole, idx) => (
               <td key={`yards-${hole.number}`} className="text-center px-2 py-2">
                 <Input
                   type="number"
                   min="0"
                   max="999"
                   value={hole.yards}
-                  onChange={(e) => handleHoleChange(hole.number - 1, 'yards', e.target.value)}
+                  onChange={(e) => handleHoleChange(idx, 'yards', e.target.value)}
                   className="w-12 h-8 text-center"
                   required
                   // Prevent form submission on enter
@@ -76,14 +76,14 @@ export function HoleInputs({
           </tr>
           <tr>
             <td className="text-sm font-medium text-muted-foreground px-2 py-2">Handicap</td>
-            {holes.map((hole) => (
+            {holes.map((hole, idx) => (
               <td key={`handicap-${hole.number}`} className="text-center px-2 py-2">
                 <Input
                   type="number"
                   min="1"
                   max="18"
                   value={hole.handicap}
-                  onChange={(e) => handleHoleChange(hole.number - 1, 'handicap', e.target.value)}
+                  onChange={(e) => handleHoleChange(idx, 'handicap', e.target.value)}
                   className="w-12 h-8 text-center"
                   required
                   // Prevent form submission on enter

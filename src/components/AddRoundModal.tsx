@@ -1129,7 +1129,26 @@ Try selecting a different course or adding this course manually.`);
                       size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // TODO: Implement edit functionality
+                        setManualCourseOpen(true);
+                        
+                        // Pass the existing course data to the manual course form
+                        const existingCourse = {
+                          id: course.id,
+                          name: course.name,
+                          city: course.city || '',
+                          state: course.state || ''
+                        };
+                        
+                        // Set a timeout to ensure the form is fully mounted
+                        setTimeout(() => {
+                          setManualCourseOpen(true);
+                          // Pass the existing course data to the form ref
+                          if (manualCourseFormRef.current) {
+                            manualCourseFormRef.current.setExistingCourse(existingCourse);
+                          } else {
+                            console.error("Manual course form ref not available");
+                          }
+                        }, 10);
                       }}
                     >
                       <Edit className="h-4 w-4" />
