@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, CalendarIcon } from "lucide-react";
+import { Loader2, Search, CalendarIcon, Edit, PlusCircle } from "lucide-react";
 import { 
   Select,
   SelectContent,
@@ -27,13 +27,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, formatCourseName, parseCourseName } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { formatCourseName } from "@/integrations/supabase/client";
 import { 
   searchCourses, 
   getCourseDetails, 
@@ -42,6 +41,7 @@ import {
   CourseDetail,
   TeeBox
 } from "@/services/golfCourseApi";
+import { ManualCourseForm } from "@/components/ManualCourseForm";
 
 // Define interface for course search results
 interface SimplifiedGolfCourse {
@@ -51,6 +51,7 @@ interface SimplifiedGolfCourse {
   city: string;
   state: string;
   country?: string;
+  isUserAdded?: boolean;
 }
 
 // Interface for the tee box data
@@ -83,6 +84,7 @@ interface SimplifiedCourseDetail {
   country?: string;
   tees: SimplifiedTee[];
   holes: SimplifiedHole[];
+  isUserAdded?: boolean;
 }
 
 // Type for hole selection (all 18, front 9, or back 9)
@@ -121,12 +123,6 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
   if (courseDetail.tees && courseDetail.tees.male && courseDetail.tees.male.length > 0) {
     courseDetail.tees.male.forEach((tee, index) => {
       console.log("Adding male tee:", tee.tee_name || `Tee ${index + 1}`);
-      console.log("Tee details:", {
-        rating: tee.course_rating,
-        slope: tee.slope_rating,
-        par: tee.par_total,
-        yards: tee.total_yards
-      });
       
       tees.push({
         id: `m-${index}`,
@@ -145,12 +141,6 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
   if (courseDetail.tees && courseDetail.tees.female && courseDetail.tees.female.length > 0) {
     courseDetail.tees.female.forEach((tee, index) => {
       console.log("Adding female tee:", tee.tee_name || `Tee ${index + 1}`);
-      console.log("Tee details:", {
-        rating: tee.course_rating,
-        slope: tee.slope_rating,
-        par: tee.par_total,
-        yards: tee.total_yards
-      });
       
       tees.push({
         id: `f-${index}`,
@@ -334,6 +324,28 @@ const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): Simplified
   return simplified;
 };
 
+// Load tee details from localStorage for a user-added course
+const loadUserAddedCourseDetails = (courseId: number): { tees: SimplifiedTee[], holes: SimplifiedHole[] } | null => {
+  try {
+    const courseDetailsKey = `course_details_${courseId}`;
+    const storedDetails = localStorage.getItem(courseDetailsKey);
+    
+    if (!storedDetails) return null;
+    
+    const parsedDetails = JSON.parse(storedDetails);
+    console.log("Loaded user-added course details:", parsedDetails);
+    
+    return {
+      tees: parsedDetails.tees || [],
+      holes: parsedDetails.tees && parsedDetails.tees.length > 0 ? 
+        parsedDetails.tees[0].holes || [] : []
+    };
+  } catch (error) {
+    console.error("Error loading user-added course details:", error);
+    return null;
+  }
+};
+
 export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
@@ -351,6 +363,9 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   const [isManualSearch, setIsManualSearch] = useState(false);
   const [holeSelection, setHoleSelection] = useState<HoleSelection>('all');
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [manualCourseFormOpen, setManualCourseFormOpen] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<SimplifiedGolfCourse | null>(null);
+  const [displayAddCourseOption, setDisplayAddCourseOption] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -378,6 +393,9 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
       setIsManualSearch(false);
       setHoleSelection('all');
       setCalendarOpen(false);
+      setManualCourseFormOpen(false);
+      setEditingCourse(null);
+      setDisplayAddCourseOption(false);
     } else {
       // Set today's date when modal opens
       setRoundDate(new Date());
@@ -412,14 +430,19 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
         console.log("Found previously played courses:", data);
         // Convert to expected format
         const formattedCourses: SimplifiedGolfCourse[] = data.map(course => {
+          // Check if it's a user-added course
+          const isUserAdded = course.name.includes('[User added course]');
+          
           // Split the name if it contains a dash (club - course format)
-          const nameParts = course.name.split(' - ');
+          const nameParts = parseCourseName(course.name);
+          
           return {
             id: course.id.toString(),
-            name: nameParts.length > 1 ? nameParts[1] : course.name,
-            clubName: nameParts.length > 1 ? nameParts[0] : course.name,
+            name: nameParts.courseName.replace(' [User added course]', ''),
+            clubName: nameParts.clubName.replace(' [User added course]', ''),
             city: course.city || '',
-            state: course.state || ''
+            state: course.state || '',
+            isUserAdded
           };
         });
         
@@ -447,27 +470,77 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setIsManualSearch(true);
     setIsSearching(true);
     setSearchError(null);
+    setDisplayAddCourseOption(false); // Reset the add course option
     
     try {
       console.log("Searching for courses with query:", searchQuery);
+      
+      // First, check the database for user-added courses
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.log("No session found, can't search database");
+        throw new Error("You must be logged in to search for courses");
+      }
+      
+      const { data: dbCourses, error: dbError } = await supabase
+        .from('courses')
+        .select('id, name, city, state')
+        .ilike('name', `%${searchQuery}%`)
+        .order('name');
+        
+      if (dbError) {
+        console.error("Error searching database courses:", dbError);
+        throw dbError;
+      }
+      
+      // Create array for user-added courses
+      const userAddedCourses: SimplifiedGolfCourse[] = [];
+      
+      // Process database courses
+      if (dbCourses && dbCourses.length > 0) {
+        console.log("Found courses in database:", dbCourses);
+        
+        dbCourses.forEach(course => {
+          // Check if it's a user-added course
+          const isUserAdded = course.name.includes('[User added course]');
+          if (isUserAdded) {
+            const nameParts = parseCourseName(course.name);
+            userAddedCourses.push({
+              id: course.id.toString(),
+              name: nameParts.courseName.replace(' [User added course]', ''),
+              clubName: nameParts.clubName.replace(' [User added course]', ''),
+              city: course.city || '',
+              state: course.state || '',
+              isUserAdded: true
+            });
+          }
+        });
+      }
+      
       // Search for courses via API
-      const courses = await searchCourses(searchQuery);
-      console.log("API search results (raw):", courses);
+      const apiCourses = await searchCourses(searchQuery);
+      console.log("API search results (raw):", apiCourses);
       
       // Convert to simplified format for component use
-      const simplifiedCourses = courses.map(convertToSimplifiedCourse);
+      const simplifiedApiCourses = apiCourses.map(convertToSimplifiedCourse);
       
-      if (simplifiedCourses.length > 0) {
-        console.log("Setting search results:", simplifiedCourses);
-        setSearchResults(simplifiedCourses);
+      // Combine user-added courses with API results
+      const combinedResults = [...userAddedCourses, ...simplifiedApiCourses];
+      
+      if (combinedResults.length > 0) {
+        console.log("Setting combined search results:", combinedResults);
+        setSearchResults(combinedResults);
+        setDisplayAddCourseOption(false); // Hide the add course option when we have results
       } else {
-        // If API returns no results, show error
+        // If no results, show error and option to add a course
         console.log("No courses found for query:", searchQuery);
-        setSearchError("No courses found. Please try a different search term.");
+        setSearchError("No courses found. Please try a different search term or add a new course.");
+        setDisplayAddCourseOption(true); // Show the add course option
       }
     } catch (error) {
       console.error("Course search error:", error);
       setSearchError("Failed to search for courses. Please try again.");
+      setDisplayAddCourseOption(true); // Show the add course option on error
       toast({
         title: "Search Error",
         description: "Failed to search for courses. Please try again.",
@@ -488,14 +561,34 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
 
   // Update scorecard when tee selection changes
   const updateScorecardForTee = (teeId: string, selection: HoleSelection = 'all') => {
-    if (!originalCourseDetail) {
+    if (!originalCourseDetail && !selectedCourse?.isUserAdded) {
       console.error("No original course detail available");
       return;
     }
     
     console.log("Updating scorecard for tee", teeId, "with selection", selection);
+    
     // Get holes data for the selected tee
-    const allHolesData = extractHolesForTee(originalCourseDetail, teeId);
+    let allHolesData: SimplifiedHole[] = [];
+    
+    if (selectedCourse?.isUserAdded) {
+      // For user-added courses, get holes from the selected tee in the course
+      const selectedTee = selectedCourse.tees.find(t => t.id === teeId);
+      if (selectedTee) {
+        allHolesData = selectedCourse.holes;
+      } else {
+        allHolesData = Array(18).fill(null).map((_, idx) => ({
+          number: idx + 1,
+          par: 4,
+          yards: 400,
+          handicap: idx + 1
+        }));
+      }
+    } else if (originalCourseDetail) {
+      // For API courses, extract from the original course detail
+      allHolesData = extractHolesForTee(originalCourseDetail, teeId);
+    }
+    
     console.log("All holes data:", allHolesData);
     
     // Filter holes based on user selection
@@ -544,7 +637,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     console.log("Changing hole selection to:", selection);
     setHoleSelection(selection);
     
-    if (selectedTeeId && originalCourseDetail) {
+    if (selectedTeeId) {
       updateScorecardForTee(selectedTeeId, selection);
     }
   };
@@ -557,87 +650,169 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     try {
       console.log("Selected course:", course);
       
-      // Try to get course details from API
-      let apiCourseDetail;
-      try {
-        console.log("Fetching course details for ID:", course.id);
-        apiCourseDetail = await getCourseDetails(course.id);
-        console.log("API course details (raw):", apiCourseDetail);
-      } catch (error) {
-        console.error("Error fetching course details from API:", error);
-        apiCourseDetail = null;
-      }
-      
-      // If API fails or returns null, generate mock data
-      if (!apiCourseDetail || 
-          !apiCourseDetail.tees || 
-          (!apiCourseDetail.tees.male && !apiCourseDetail.tees.female)) {
-        console.log("Using mock data for course details");
+      // If it's a user-added course, load from local storage or database
+      if (course.isUserAdded) {
+        console.log("Loading user-added course:", course);
         
-        // Create a GolfCourse object from SimplifiedGolfCourse
-        const golfCourse: GolfCourse = {
-          id: typeof course.id === 'string' ? parseInt(course.id) : course.id,
-          club_name: course.clubName,
-          course_name: course.name,
-          location: {
+        // Get course details from localStorage
+        const courseDetails = loadUserAddedCourseDetails(Number(course.id));
+        
+        let simplifiedCourseDetail: SimplifiedCourseDetail;
+        
+        if (courseDetails) {
+          console.log("User-added course details found:", courseDetails);
+          
+          simplifiedCourseDetail = {
+            id: course.id,
+            name: course.name,
+            clubName: course.clubName,
             city: course.city,
             state: course.state,
-            country: course.country || 'United States'
-          }
-        };
+            tees: courseDetails.tees,
+            holes: courseDetails.holes,
+            isUserAdded: true
+          };
+        } else {
+          // Create default course details if not found
+          console.log("No user-added course details found, creating defaults");
+          const defaultTee: SimplifiedTee = {
+            id: 'm-0',
+            name: 'White',
+            rating: 72,
+            slope: 113,
+            par: 72,
+            gender: 'male',
+            originalIndex: 0
+          };
+          
+          const defaultHoles = Array(18).fill(null).map((_, idx) => ({
+            number: idx + 1,
+            par: 4,
+            yards: 400,
+            handicap: idx + 1
+          }));
+          
+          simplifiedCourseDetail = {
+            id: course.id,
+            name: course.name,
+            clubName: course.clubName,
+            city: course.city,
+            state: course.state,
+            tees: [defaultTee],
+            holes: defaultHoles,
+            isUserAdded: true
+          };
+        }
         
-        apiCourseDetail = generateMockCourseDetails(golfCourse);
-        console.log("Generated mock data:", apiCourseDetail);
+        console.log("Using user-added course details:", simplifiedCourseDetail);
+        setSelectedCourse(simplifiedCourseDetail);
         
-        toast({
-          title: "Note",
-          description: "Using sample course data. Some details may not be accurate.",
-          variant: "default",
-        });
-      }
-      
-      // Save the original API course detail for reference
-      setOriginalCourseDetail(apiCourseDetail);
-      
-      // Convert API response to the format expected by the component
-      const simplifiedCourseDetail = convertToSimplifiedCourseDetail(apiCourseDetail);
-      
-      // Make sure course and club names are set properly
-      if (!simplifiedCourseDetail.name && course.name) {
-        console.log("Setting missing course name from search result:", course.name);
-        simplifiedCourseDetail.name = course.name;
-      }
-      if (!simplifiedCourseDetail.clubName && course.clubName) {
-        console.log("Setting missing club name from search result:", course.clubName);
-        simplifiedCourseDetail.clubName = course.clubName;
-      }
-      
-      console.log("Final course detail after processing:", simplifiedCourseDetail);
-      setSelectedCourse(simplifiedCourseDetail);
-      
-      // Set default tee if available
-      if (simplifiedCourseDetail.tees && simplifiedCourseDetail.tees.length > 0) {
-        const defaultTeeId = simplifiedCourseDetail.tees[0].id;
-        console.log("Setting default tee ID:", defaultTeeId);
-        setSelectedTeeId(defaultTeeId);
-        
-        // Update the scorecard based on the selected tee - always default to 'all' 18 holes
-        updateScorecardForTee(defaultTeeId, 'all');
-        setHoleSelection('all');
+        // Set default tee
+        if (simplifiedCourseDetail.tees.length > 0) {
+          const defaultTeeId = simplifiedCourseDetail.tees[0].id;
+          console.log("Setting default tee ID:", defaultTeeId);
+          setSelectedTeeId(defaultTeeId);
+          
+          // Update the scorecard
+          setHoleSelection('all');
+          
+          // Create scores array
+          const newScores = simplifiedCourseDetail.holes.map(hole => ({
+            hole: hole.number,
+            par: hole.par,
+            strokes: 0,
+            putts: undefined,
+            yards: hole.yards,
+            handicap: hole.handicap
+          }));
+          
+          setScores(newScores);
+        }
       } else {
-        // If no tees available, create a default scorecard
-        console.log("No tees available, creating default scorecard");
-        const defaultScores = Array(18).fill(null).map((_, idx) => ({
-          hole: idx + 1,
-          par: 4,
-          strokes: 0
-        }));
-        setScores(defaultScores);
+        // For courses from the database or API, fetch details
+        let apiCourseDetail;
+        
+        try {
+          // If this is a database entry with a valid ID, fetch details from the API
+          console.log("Fetching course details for ID:", course.id);
+          apiCourseDetail = await getCourseDetails(course.id);
+          console.log("API course details (raw):", apiCourseDetail);
+        } catch (error) {
+          console.error("Error fetching course details from API:", error);
+          apiCourseDetail = null;
+        }
+        
+        // If API fails or returns null, generate mock data
+        if (!apiCourseDetail || 
+            !apiCourseDetail.tees || 
+            (!apiCourseDetail.tees.male && !apiCourseDetail.tees.female)) {
+          console.log("Using mock data for course details");
+          
+          // Create a GolfCourse object from SimplifiedGolfCourse
+          const golfCourse: GolfCourse = {
+            id: typeof course.id === 'string' ? parseInt(course.id) : course.id,
+            club_name: course.clubName,
+            course_name: course.name,
+            location: {
+              city: course.city,
+              state: course.state,
+              country: course.country || 'United States'
+            }
+          };
+          
+          apiCourseDetail = generateMockCourseDetails(golfCourse);
+          console.log("Generated mock data:", apiCourseDetail);
+          
+          toast({
+            title: "Note",
+            description: "Using sample course data. Some details may not be accurate.",
+            variant: "default",
+          });
+        }
+        
+        // Save the original API course detail for reference
+        setOriginalCourseDetail(apiCourseDetail);
+        
+        // Convert API response to the format expected by the component
+        const simplifiedCourseDetail = convertToSimplifiedCourseDetail(apiCourseDetail);
+        
+        // Make sure course and club names are set properly
+        if (!simplifiedCourseDetail.name && course.name) {
+          console.log("Setting missing course name from search result:", course.name);
+          simplifiedCourseDetail.name = course.name;
+        }
+        if (!simplifiedCourseDetail.clubName && course.clubName) {
+          console.log("Setting missing club name from search result:", course.clubName);
+          simplifiedCourseDetail.clubName = course.clubName;
+        }
+        
+        console.log("Final course detail after processing:", simplifiedCourseDetail);
+        setSelectedCourse(simplifiedCourseDetail);
+        
+        // Set default tee if available
+        if (simplifiedCourseDetail.tees && simplifiedCourseDetail.tees.length > 0) {
+          const defaultTeeId = simplifiedCourseDetail.tees[0].id;
+          console.log("Setting default tee ID:", defaultTeeId);
+          setSelectedTeeId(defaultTeeId);
+          
+          // Update the scorecard based on the selected tee
+          updateScorecardForTee(defaultTeeId, 'all');
+          setHoleSelection('all');
+        } else {
+          // If no tees available, create a default scorecard
+          console.log("No tees available, creating default scorecard");
+          const defaultScores = Array(18).fill(null).map((_, idx) => ({
+            hole: idx + 1,
+            par: 4,
+            strokes: 0
+          }));
+          setScores(defaultScores);
+        }
       }
       
       // Clear search results and update search query with course name
       setSearchResults([]);
-      const displayName = `${simplifiedCourseDetail.clubName} - ${simplifiedCourseDetail.name}`;
+      const displayName = `${course.clubName} - ${course.name}`;
       console.log("Setting search query to:", displayName);
       setSearchQuery(displayName);
       
@@ -732,6 +907,46 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     // Force close the popover after successful selection
     console.log("Closing calendar popover");
     setCalendarOpen(false);
+  };
+
+  // Open the manual course form
+  const handleAddManualCourse = () => {
+    setManualCourseFormOpen(true);
+  };
+
+  // Open the edit course form
+  const handleEditCourse = (course: SimplifiedGolfCourse) => {
+    setEditingCourse(course);
+    setManualCourseFormOpen(true);
+  };
+
+  // Handle course creation or update
+  const handleCourseCreated = (courseId: number, courseName: string) => {
+    console.log("Course created/updated:", courseId, courseName);
+    
+    toast({
+      title: editingCourse ? "Course Updated" : "Course Created",
+      description: `The course has been successfully ${editingCourse ? 'updated' : 'created'}.`
+    });
+    
+    // Fetch the new course details and select it
+    const newCourse: SimplifiedGolfCourse = {
+      id: courseId.toString(),
+      name: courseName.replace(' [User added course]', ''),
+      clubName: courseName.replace(' [User added course]', ''),
+      city: '',
+      state: '',
+      isUserAdded: true
+    };
+    
+    // Reset editing course
+    setEditingCourse(null);
+    
+    // Select the course
+    handleCourseSelect(newCourse);
+    
+    // Refresh previously played courses
+    fetchPreviouslyPlayedCourses();
   };
 
   // Validate and save the round
@@ -833,7 +1048,10 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
 
       // First, check if the course exists in the database
       let courseDbId: number;
-      const courseName = formatCourseName(selectedCourse.clubName, selectedCourse.name);
+      const courseName = selectedCourse.isUserAdded ? 
+        `${selectedCourse.name} [User added course]` : 
+        formatCourseName(selectedCourse.clubName, selectedCourse.name);
+        
       console.log("Formatted course name for DB:", courseName);
       
       const { data: existingCourse } = await supabase
@@ -849,7 +1067,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
         // Insert course
         console.log("Course not found in database, creating new course");
         console.log("Course data to insert:", {
-          api_course_id: selectedCourse.id.toString(),
+          api_course_id: selectedCourse.isUserAdded ? null : selectedCourse.id.toString(),
           name: courseName,
           city: selectedCourse.city,
           state: selectedCourse.state,
@@ -858,7 +1076,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
         const { data: newCourse, error: newCourseError } = await supabase
           .from('courses')
           .insert({
-            api_course_id: selectedCourse.id.toString(),
+            api_course_id: selectedCourse.isUserAdded ? null : selectedCourse.id.toString(),
             name: courseName,
             city: selectedCourse.city,
             state: selectedCourse.state,
@@ -959,397 +1177,370 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
         <h3 className="text-sm font-medium mb-2">Previously Played Courses</h3>
         <div className="border rounded-md p-2 bg-muted/50 grid gap-2">
           {previouslyPlayedCourses.slice(0, 5).map((course) => (
-            <button
-              key={course.id.toString()}
-              className="text-left p-2 hover:bg-accent rounded-md transition-colors"
-              onClick={() => handleCourseSelect(course)}
-            >
-              <p className="font-medium">{course.clubName} - {course.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {course.city}{course.state ? `, ${course.state}` : ''}
-              </p>
-            </button>
+            <div key={course.id.toString()} className="flex justify-between items-center">
+              <button
+                className="text-sm text-left text-primary hover:underline"
+                onClick={() => handleCourseSelect(course)}
+              >
+                {course.clubName !== course.name 
+                  ? `${course.clubName} - ${course.name}`
+                  : course.name}
+                <span className="text-xs block text-muted-foreground">
+                  {course.city}{course.state ? `, ${course.state}` : ''}
+                </span>
+              </button>
+              
+              {course.isUserAdded && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEditCourse(course);
+                  }}
+                  className="h-8 w-8"
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           ))}
         </div>
       </div>
     );
   };
 
-  // Create a div ref for the calendar container to apply styles dynamically
-  const calendarContainerRef = useRef<HTMLDivElement>(null);
-  
-  // Apply styles to hide background elements when calendar is open
-  useEffect(() => {
-    function applyCalendarOverlay() {
-      const scorecard = document.querySelector('.scorecard-container');
-      if (scorecard && calendarOpen) {
-        // Add an overlay div that blocks interactions with elements below
-        const overlay = document.createElement('div');
-        overlay.className = 'calendar-overlay';
-        overlay.style.position = 'fixed';
-        overlay.style.inset = '0';
-        overlay.style.backgroundColor = 'transparent';
-        overlay.style.zIndex = '9998'; // Just below calendar
-        overlay.style.cursor = 'not-allowed';
-        overlay.style.pointerEvents = 'auto';
-        
-        scorecard.appendChild(overlay);
-        
-        return () => {
-          scorecard.removeChild(overlay);
-        };
-      }
-      return undefined;
-    }
-    
-    const cleanup = applyCalendarOverlay();
-    return () => {
-      if (cleanup) cleanup();
-    };
-  }, [calendarOpen]);
-
-  // Render scorecard with front 9 and back 9 layout
-  const renderScorecard = () => {
-    if (!selectedCourse) return null;
-    
-    // Get front 9 and back 9 holes
-    const frontNine = scores.length <= 9 ? scores : scores.slice(0, 9);
-    const backNine = scores.length <= 9 ? [] : scores.slice(9, 18);
-    
+  // Render course search step
+  const renderSearchStep = () => {
     return (
-      <div className="space-y-6 scorecard-container">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-          <div className="relative">
-            <p className="text-sm font-medium text-muted-foreground">Round Date</p>
-            <Popover 
-              open={calendarOpen} 
-              onOpenChange={(isOpen) => {
-                console.log("Popover state changing to:", isOpen);
-                setCalendarOpen(isOpen);
-              }}
-            >
+      <div className="space-y-4">
+        <div>
+          <div className="relative rounded-md bg-background shadow-sm">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <Search className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <Input
+              type="text"
+              placeholder="Search for a course..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearchKeyPress}
+              className="pl-10"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground mt-1.5">
+            Enter a course name or location and press Enter to search
+          </p>
+        </div>
+        
+        <div className="flex justify-center">
+          <Button
+            onClick={handleSearch}
+            disabled={isSearching || searchQuery.length < 3}
+            className="w-full md:w-auto"
+          >
+            {isSearching ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Searching...
+              </>
+            ) : (
+              "Search"
+            )}
+          </Button>
+        </div>
+        
+        {/* Search Error */}
+        {searchError && (
+          <div className="bg-destructive/10 border border-destructive/30 rounded-md p-3 text-center">
+            <p className="text-sm text-destructive">{searchError}</p>
+          </div>
+        )}
+
+        {/* "Add a course" option when no results are found */}
+        {displayAddCourseOption && (
+          <div className="mt-8 p-4 border rounded-md flex flex-col items-center bg-background/50">
+            <div className="mb-2 text-center">
+              <PlusCircle className="h-8 w-8 text-primary mx-auto mb-2" />
+              <h3 className="text-lg font-medium">Course not on our system?</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Add it now and help grow our community database!
+              </p>
+              <Button onClick={handleAddManualCourse}>
+                Add a New Course
+              </Button>
+            </div>
+          </div>
+        )}
+        
+        {/* Search Results */}
+        {searchResults.length > 0 && (
+          <div>
+            <h3 className="text-lg font-medium mb-2">Search Results</h3>
+            <div className="border rounded-md divide-y">
+              {searchResults.map((course) => (
+                <div 
+                  key={course.id.toString()}
+                  className="flex justify-between items-center px-4 py-3 hover:bg-muted cursor-pointer"
+                  onClick={() => handleCourseSelect(course)}
+                >
+                  <div>
+                    <p className="font-medium">
+                      {course.clubName !== course.name 
+                        ? `${course.clubName} - ${course.name}`
+                        : course.name}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {course.city}{course.state ? `, ${course.state}` : ''}
+                      {course.isUserAdded && <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">User Added</span>}
+                    </p>
+                  </div>
+                  
+                  {course.isUserAdded && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditCourse(course);
+                      }}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Previously Played Courses */}
+        {!isManualSearch && !searchResults.length && renderPreviouslyPlayedCourses()}
+        
+        {/* Manual Course Entry Form Dialog */}
+        <ManualCourseForm
+          open={manualCourseFormOpen}
+          onOpenChange={setManualCourseFormOpen}
+          onCourseCreated={handleCourseCreated}
+          existingCourse={editingCourse ? {
+            id: Number(editingCourse.id),
+            name: editingCourse.name,
+            city: editingCourse.city,
+            state: editingCourse.state
+          } : undefined}
+        />
+      </div>
+    );
+  };
+
+  // Render scorecard step
+  const renderScorecardStep = () => {
+    if (!selectedCourse) return null;
+
+    return (
+      <div className="space-y-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">{selectedCourse.clubName !== selectedCourse.name ? 
+              `${selectedCourse.clubName} - ${selectedCourse.name}` : 
+              selectedCourse.name}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {selectedCourse.city}{selectedCourse.state ? `, ${selectedCourse.state}` : ''}
+            </p>
+          </div>
+          
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleBackToSearch}
+          >
+            Change Course
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Date Selector */}
+          <div>
+            <label className="text-sm font-medium mb-1.5 block">Date Played</label>
+            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="mt-1"
-                  onClick={(e) => {
-                    e.stopPropagation(); 
-                    console.log("Date button clicked, opening calendar");
-                    setCalendarOpen(true);
-                  }}
+                  size="lg"
+                  className="w-full justify-start text-left font-normal"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {format(roundDate, "PPP")}
+                  {roundDate ? format(roundDate, "PPP") : "Select date"}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent 
-                className="w-auto p-0 bg-white shadow-xl border border-border z-[9999]" 
-                align="start"
-                onEscapeKeyDown={(e) => {
-                  console.log("Escape key pressed in popover");
-                  e.preventDefault(); // Prevent default escape behavior
-                  setCalendarOpen(false); // Manually close the popover
-                }}
-                onPointerDownOutside={(e) => {
-                  console.log("Pointer down outside popover");
-                  e.preventDefault(); // Prevent closing on outside click
-                }}
-                onFocusOutside={(e) => {
-                  console.log("Focus outside popover");
-                  e.preventDefault(); // Prevent closing on outside focus
-                }}
-                onClick={(e) => {
-                  console.log("Clicked inside PopoverContent");
-                  e.stopPropagation(); // Prevent propagation
-                }}
-                style={{ pointerEvents: 'auto' }}
-              >
-                <div 
-                  ref={calendarContainerRef}
-                  className="isolate pointer-events-auto" 
-                  style={{ 
-                    pointerEvents: 'auto', 
-                    cursor: 'auto',
-                    position: 'relative',
-                    zIndex: 9999
-                  }}
-                  onClick={(e) => {
-                    console.log("Calendar container clicked");
-                    e.stopPropagation();
-                  }}
-                >
-                  <Calendar
-                    mode="single"
-                    selected={roundDate}
-                    onSelect={handleDateSelect}
-                    initialFocus
-                    defaultMonth={roundDate}
-                    fromYear={2000}
-                    toYear={today.getFullYear()}
-                    disabled={(date) => {
-                      // Disable future dates
-                      return date > today;
-                    }}
-                  />
-                </div>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={roundDate}
+                  onSelect={handleDateSelect}
+                  disabled={(date) => date > today}
+                  initialFocus
+                  className="z-50"
+                />
               </PopoverContent>
             </Popover>
           </div>
           
+          {/* Tee Box Selector */}
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Holes to Play</p>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="mt-1">
-                  {holeSelection === 'all' ? 'All 18 Holes' : 
-                   holeSelection === 'front9' ? 'Front 9 Holes' : 'Back 9 Holes'}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>Select Holes</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleHoleSelectionChange('all')}>
-                  All 18 Holes
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleHoleSelectionChange('front9')}>
-                  Front 9 Holes
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleHoleSelectionChange('back9')}>
-                  Back 9 Holes
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <label className="text-sm font-medium mb-1.5 block">Tee Played</label>
+            <Select value={selectedTeeId} onValueChange={handleTeeChange}>
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder="Select a tee box" />
+              </SelectTrigger>
+              <SelectContent>
+                {selectedCourse.tees.map((tee) => (
+                  <SelectItem key={tee.id} value={tee.id}>
+                    <div className="flex items-center">
+                      <div 
+                        className="w-3 h-3 rounded-full mr-2"
+                        style={{
+                          backgroundColor: tee.gender === 'male' ? 
+                            (tee.name.toLowerCase().includes('black') ? '#000' : 
+                             tee.name.toLowerCase().includes('blue') ? '#005' : 
+                             tee.name.toLowerCase().includes('white') ? '#fff' : 
+                             tee.name.toLowerCase().includes('gold') ? '#FB0' : 
+                             tee.name.toLowerCase().includes('green') ? '#060' : 
+                             tee.name.toLowerCase().includes('yellow') ? '#FF0' : '#777') :
+                            (tee.name.toLowerCase().includes('red') ? '#C00' : 
+                             tee.name.toLowerCase().includes('gold') ? '#FB0' : '#FAA'),
+                          border: tee.name.toLowerCase().includes('white') ? '1px solid #ccc' : 'none'
+                        }}
+                      ></div>
+                      {tee.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
-
-        <div className="space-y-8" style={{ pointerEvents: calendarOpen ? 'none' : 'auto' }}>
-          {/* Front Nine */}
-          {frontNine.length > 0 && (
-            <div className="border rounded-md overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b">
-                  <tr>
-                    <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-left">Front</th>
-                    {frontNine.map(score => (
-                      <th key={`hole-${score.hole}`} className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">
-                        {score.hole}
-                      </th>
-                    ))}
-                    <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">
-                      Out
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b">
-                    <td className="text-sm font-medium text-muted-foreground px-2 py-2">Par</td>
-                    {frontNine.map(score => (
-                      <td key={`par-${score.hole}`} className="text-sm text-center px-2 py-2">
-                        {score.par}
-                      </td>
-                    ))}
-                    <td className="text-sm font-medium px-2 py-2 text-center">
-                      {frontNine.reduce((sum, s) => sum + s.par, 0)}
-                    </td>
-                  </tr>
-                  {/* Yardage row - only show if we have yards data */}
-                  {frontNine.some(score => score.yards) && (
-                    <tr className="border-b">
-                      <td className="text-sm font-medium text-muted-foreground px-2 py-2">Yards</td>
-                      {frontNine.map(score => (
-                        <td key={`yards-${score.hole}`} className="text-sm text-center px-2 py-2">
-                          {score.yards || '-'}
-                        </td>
-                      ))}
-                      <td className="text-sm font-medium px-2 py-2 text-center">
-                        {frontNine.reduce((sum, s) => sum + (s.yards || 0), 0)}
-                      </td>
-                    </tr>
-                  )}
-                  {/* Handicap row - only show if we have handicap data */}
-                  {frontNine.some(score => score.handicap) && (
-                    <tr className="border-b">
-                      <td className="text-sm font-medium text-muted-foreground px-2 py-2">HCP</td>
-                      {frontNine.map(score => (
-                        <td key={`handicap-${score.hole}`} className="text-sm text-center px-2 py-2">
-                          {score.handicap || '-'}
-                        </td>
-                      ))}
-                      <td className="text-sm font-medium px-2 py-2 text-center">
-                        -
-                      </td>
-                    </tr>
-                  )}
-                  <tr className="border-b">
-                    <td className="text-sm font-medium text-muted-foreground px-2 py-2">Strokes</td>
-                    {frontNine.map((score, index) => (
-                      <td key={`strokes-${score.hole}`} className="text-center px-2 py-2">
-                        <Input
-                          type="number"
-                          min="1"
-                          value={score.strokes || ""}
-                          onChange={(e) => handleScoreChange(index, 'strokes', e.target.value)}
-                          className="w-12 h-8 text-center"
-                          required
-                        />
-                      </td>
-                    ))}
-                    <td className="text-sm font-medium px-2 py-2 text-center">
-                      {frontNine.reduce((sum, s) => sum + (s.strokes || 0), 0)}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-sm font-medium text-muted-foreground px-2 py-2">Putts (optional)</td>
-                    {frontNine.map((score, index) => (
-                      <td key={`putts-${score.hole}`} className="text-center px-2 py-2">
-                        <Input
-                          type="number"
-                          min="0"
-                          value={score.putts !== undefined ? score.putts : ""}
-                          onChange={(e) => handleScoreChange(index, 'putts', e.target.value)}
-                          className="w-12 h-8 text-center"
-                          placeholder="-"
-                        />
-                      </td>
-                    ))}
-                    <td className="text-sm font-medium px-2 py-2 text-center">
-                      {frontNine.reduce((sum, s) => sum + (s.putts || 0), 0)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* Back Nine */}
-          {backNine.length > 0 && (
-            <div className="border rounded-md overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b">
-                  <tr>
-                    <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-left">Back</th>
-                    {backNine.map(score => (
-                      <th key={`hole-${score.hole}`} className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">
-                        {score.hole}
-                      </th>
-                    ))}
-                    <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">
-                      In
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b">
-                    <td className="text-sm font-medium text-muted-foreground px-2 py-2">Par</td>
-                    {backNine.map(score => (
-                      <td key={`par-${score.hole}`} className="text-sm text-center px-2 py-2">
-                        {score.par}
-                      </td>
-                    ))}
-                    <td className="text-sm font-medium px-2 py-2 text-center">
-                      {backNine.reduce((sum, s) => sum + s.par, 0)}
-                    </td>
-                  </tr>
-                  {/* Yardage row - only show if we have yards data */}
-                  {backNine.some(score => score.yards) && (
-                    <tr className="border-b">
-                      <td className="text-sm font-medium text-muted-foreground px-2 py-2">Yards</td>
-                      {backNine.map(score => (
-                        <td key={`yards-${score.hole}`} className="text-sm text-center px-2 py-2">
-                          {score.yards || '-'}
-                        </td>
-                      ))}
-                      <td className="text-sm font-medium px-2 py-2 text-center">
-                        {backNine.reduce((sum, s) => sum + (s.yards || 0), 0)}
-                      </td>
-                    </tr>
-                  )}
-                  {/* Handicap row - only show if we have handicap data */}
-                  {backNine.some(score => score.handicap) && (
-                    <tr className="border-b">
-                      <td className="text-sm font-medium text-muted-foreground px-2 py-2">HCP</td>
-                      {backNine.map(score => (
-                        <td key={`handicap-${score.hole}`} className="text-sm text-center px-2 py-2">
-                          {score.handicap || '-'}
-                        </td>
-                      ))}
-                      <td className="text-sm font-medium px-2 py-2 text-center">
-                        -
-                      </td>
-                    </tr>
-                  )}
-                  <tr className="border-b">
-                    <td className="text-sm font-medium text-muted-foreground px-2 py-2">Strokes</td>
-                    {backNine.map((score, index) => (
-                      <td key={`strokes-${score.hole}`} className="text-center px-2 py-2">
-                        <Input
-                          type="number"
-                          min="1"
-                          value={score.strokes || ""}
-                          onChange={(e) => handleScoreChange(index + 9, 'strokes', e.target.value)}
-                          className="w-12 h-8 text-center"
-                          required
-                        />
-                      </td>
-                    ))}
-                    <td className="text-sm font-medium px-2 py-2 text-center">
-                      {backNine.reduce((sum, s) => sum + (s.strokes || 0), 0)}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-sm font-medium text-muted-foreground px-2 py-2">Putts (optional)</td>
-                    {backNine.map((score, index) => (
-                      <td key={`putts-${score.hole}`} className="text-center px-2 py-2">
-                        <Input
-                          type="number"
-                          min="0"
-                          value={score.putts !== undefined ? score.putts : ""}
-                          onChange={(e) => handleScoreChange(index + 9, 'putts', e.target.value)}
-                          className="w-12 h-8 text-center"
-                          placeholder="-"
-                        />
-                      </td>
-                    ))}
-                    <td className="text-sm font-medium px-2 py-2 text-center">
-                      {backNine.reduce((sum, s) => sum + (s.putts || 0), 0)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          )}
+        
+        {/* Hole Selection */}
+        <div>
+          <label className="text-sm font-medium mb-1.5 block">Holes Played</label>
+          <div className="flex space-x-2">
+            <Button 
+              variant={holeSelection === 'all' ? "default" : "outline"}
+              size="sm"
+              onClick={() => handleHoleSelectionChange('all')}
+            >
+              All 18
+            </Button>
+            <Button 
+              variant={holeSelection === 'front9' ? "default" : "outline"} 
+              size="sm"
+              onClick={() => handleHoleSelectionChange('front9')}
+            >
+              Front 9
+            </Button>
+            <Button 
+              variant={holeSelection === 'back9' ? "default" : "outline"} 
+              size="sm"
+              onClick={() => handleHoleSelectionChange('back9')}
+            >
+              Back 9
+            </Button>
+          </div>
         </div>
-
-        {/* Totals */}
-        <div className="border rounded-md p-4 bg-muted/50" style={{ pointerEvents: calendarOpen ? 'none' : 'auto' }}>
+        
+        {/* Scorecard Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b">
+                <th className="pl-2 pr-4 py-2 text-left text-sm font-medium whitespace-nowrap">Hole</th>
+                <th className="px-4 py-2 text-left text-sm font-medium">Par</th>
+                <th className="px-4 py-2 text-left text-sm font-medium">Strokes</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {scores.map((scoreEntry, index) => (
+                <tr key={index} className="border-b">
+                  <td className="pl-2 pr-4 py-2 font-medium">
+                    {scoreEntry.hole}
+                    {scoreEntry.handicap && (
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        SI: {scoreEntry.handicap}
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2">
+                    <div className="bg-muted/40 border border-muted rounded-md w-10 h-8 flex items-center justify-center font-medium">
+                      {scoreEntry.par}
+                    </div>
+                  </td>
+                  <td className="px-4 py-2">
+                    <Input
+                      type="number"
+                      min="1"
+                      max="20"
+                      value={scoreEntry.strokes || ''}
+                      onChange={(e) => handleScoreChange(index, 'strokes', e.target.value)}
+                      className="w-14 h-8 text-center"
+                      inputMode="numeric"
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 font-medium">
+                <td className="pl-2 pr-4 py-2 text-left">Total</td>
+                <td className="px-4 py-2 text-left">{scores.reduce((sum, score) => sum + score.par, 0)}</td>
+                <td className="px-4 py-2 text-left">
+                  {scores.reduce((sum, score) => sum + (score.strokes || 0), 0) || '-'}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        
+        {/* Score Summary */}
+        <div className="bg-muted/20 rounded-md p-4 border">
+          <h3 className="text-sm font-medium mb-2">Round Summary</h3>
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <span className="font-medium">Total Strokes:</span>{" "}
-              {scores.reduce((sum, score) => sum + (score.strokes || 0), 0)}
+            <div className="text-sm">
+              <span className="text-muted-foreground">Gross Score:</span>{' '}
+              <span className="font-medium">
+                {scores.reduce((sum, score) => sum + (score.strokes || 0), 0) || '-'}
+              </span>
             </div>
-            <div>
-              <span className="font-medium">Total Putts:</span>{" "}
-              {scores.reduce((sum, score) => sum + (score.putts || 0), 0)}
+            <div className="text-sm">
+              <span className="text-muted-foreground">To Par:</span>{' '}
+              <span className="font-medium">
+                {(() => {
+                  const totalStrokes = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
+                  const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
+                  if (!totalStrokes) return '-';
+                  const toPar = totalStrokes - totalPar;
+                  return toPar > 0 ? `+${toPar}` : toPar;
+                })()}
+              </span>
             </div>
-            <div>
-              <span className="font-medium">Total Par:</span>{" "}
-              {scores.reduce((sum, score) => sum + score.par, 0)}
-            </div>
-            <div>
-              <span className="font-medium">To Par:</span>{" "}
-              {scores.reduce((sum, score) => sum + (score.strokes || 0), 0) - 
-                scores.reduce((sum, score) => sum + score.par, 0)}
-            </div>
-            
-            {/* Warning for 9-hole rounds */}
-            {holeSelection !== 'all' && (
-              <div className="col-span-2 text-amber-600">
-                <p className="text-sm">
-                  Note: 9-hole rounds will not contribute to handicap calculations.
-                </p>
-              </div>
-            )}
           </div>
+        </div>
+        
+        <div className="flex justify-end space-x-2 pt-4">
+          <Button variant="outline" onClick={handleCloseModal} type="button">
+            Cancel
+          </Button>
+          <Button onClick={handleSaveRound} disabled={isLoading} type="button">
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Round"
+            )}
+          </Button>
         </div>
       </div>
     );
@@ -1357,185 +1548,17 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="sm:max-w-5xl max-h-[90vh] overflow-y-auto" 
-        onPointerDownOutside={(e) => {
-          console.log("Pointer down outside dialog");
-          e.preventDefault();
-        }}
-      >
+      <DialogContent className={`sm:max-w-[600px] ${currentStep === 'scorecard' ? 'sm:max-w-[650px]' : ''}`}>
         <DialogHeader>
-          <DialogTitle>Add a New Round</DialogTitle>
+          <DialogTitle>{currentStep === 'search' ? "Add a New Round" : "Enter Scores"}</DialogTitle>
           <DialogDescription>
             {currentStep === 'search' 
-              ? "Search for a golf course, select tees, and enter your scores."
-              : "Enter your scores for each hole."
-            }
+              ? "Search for a course or select from your previously played courses."
+              : "Enter your scores for each hole."}
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-6">
-          {currentStep === 'search' && (
-            <>
-              {/* Course Search */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Search for a Golf Course</label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                      <Search className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <Input
-                      type="search"
-                      placeholder="Type golf course name..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyDown={handleSearchKeyPress}
-                      className="pl-10"
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <Button 
-                    onClick={handleSearch}
-                    disabled={isLoading || searchQuery.length < 3}
-                  >
-                    {isSearching ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : null}
-                    Search
-                  </Button>
-                </div>
-                
-                {/* Search Error Message */}
-                {searchError && (
-                  <div className="text-destructive text-sm mt-2">
-                    {searchError}
-                  </div>
-                )}
-                
-                {/* Previously Played Courses */}
-                {!isManualSearch && searchQuery.length < 3 && renderPreviouslyPlayedCourses()}
-                
-                {/* Search Results */}
-                {searchResults.length > 0 && (
-                  <div className="border rounded-md mt-4">
-                    <div className="p-4">
-                      <h3 className="text-sm font-medium mb-3">Search Results</h3>
-                      <div className="space-y-3 max-h-60 overflow-y-auto">
-                        {searchResults.map((course) => (
-                          <div 
-                            key={course.id.toString()}
-                            className="p-3 border rounded-md hover:bg-muted cursor-pointer transition-colors"
-                            onClick={() => handleCourseSelect(course)}
-                          >
-                            <p className="font-medium">{course.clubName} - {course.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {course.city}{course.state ? `, ${course.state}` : ''}
-                              {course.country && course.country !== 'USA' ? `, ${course.country}` : ''}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              {/* Loading State */}
-              {isLoading && (
-                <div className="flex justify-center items-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  <span className="ml-2">Loading course data...</span>
-                </div>
-              )}
-            </>
-          )}
-          
-          {/* Course Details and Score Entry */}
-          {selectedCourse && currentStep === 'scorecard' && !isLoading && (
-            <>
-              <div className="mb-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">
-                    {selectedCourse.clubName} {selectedCourse.name && selectedCourse.name !== selectedCourse.clubName ? `- ${selectedCourse.name}` : ''}
-                  </h3>
-                  <Button variant="outline" size="sm" onClick={handleBackToSearch}>
-                    Change Course
-                  </Button>
-                </div>
-                <p className="text-muted-foreground">
-                  {selectedCourse.city}{selectedCourse.state ? `, ${selectedCourse.state}` : ''}
-                  {selectedCourse.country && selectedCourse.country !== 'USA' && selectedCourse.country !== 'United States' ? `, ${selectedCourse.country}` : ''}
-                </p>
-              </div>
-            
-              {/* Tee Selection */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Select Tees</label>
-                <Select value={selectedTeeId} onValueChange={handleTeeChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select tees" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {selectedCourse.tees.map((tee) => (
-                      <SelectItem key={tee.id} value={tee.id}>
-                        {tee.name} - Rating: {tee.rating.toFixed(1)}, Slope: {tee.slope}
-                        {tee.yards ? `, ${tee.yards} yards` : ''}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                {/* Selected Tee Details */}
-                {selectedCourse.tees.length > 0 && selectedTeeId && (
-                  <div className="mt-4 p-3 border rounded-md bg-muted/30">
-                    <h4 className="font-medium mb-1">Selected Tee Details</h4>
-                    {(() => {
-                      const tee = selectedCourse.tees.find(t => t.id === selectedTeeId);
-                      if (!tee) return null;
-                      return (
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                          <div><span className="font-medium">Tee:</span> {tee.name}</div>
-                          <div><span className="font-medium">Gender:</span> {tee.gender === 'male' ? 'Men\'s' : 'Women\'s'}</div>
-                          <div><span className="font-medium">Course Rating:</span> {tee.rating.toFixed(1)}</div>
-                          <div><span className="font-medium">Slope Rating:</span> {tee.slope}</div>
-                          <div><span className="font-medium">Par:</span> {tee.par}</div>
-                          {tee.yards && <div><span className="font-medium">Total Yards:</span> {tee.yards}</div>}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
-              </div>
-              
-              {/* Scorecard */}
-              {renderScorecard()}
-            </>
-          )}
-        </div>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={handleCloseModal} type="button">
-            Cancel
-          </Button>
-          
-          {currentStep === 'scorecard' && (
-            <Button 
-              onClick={handleSaveRound} 
-              disabled={isLoading || !selectedCourse || !selectedTeeId || scores.some(score => score.strokes === 0)}
-              type="button"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                "Save Round"
-              )}
-            </Button>
-          )}
-        </DialogFooter>
+        {currentStep === 'search' ? renderSearchStep() : renderScorecardStep()}
       </DialogContent>
     </Dialog>
   );
