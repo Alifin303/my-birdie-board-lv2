@@ -109,20 +109,58 @@ const mockCourses: GolfCourse[] = [
       state: "Essex",
       country: "United Kingdom"
     }
+  },
+  {
+    id: 1001285,
+    club_name: "The Rayleigh Club",
+    course_name: "Rayleigh",
+    location: {
+      city: "Rayleigh",
+      state: "Essex",
+      country: "United Kingdom"
+    }
+  },
+  {
+    id: 1001286,
+    club_name: "Rayleigh Golf Club",
+    course_name: "East Course",
+    location: {
+      city: "Rayleigh",
+      state: "Essex",
+      country: "United Kingdom"
+    }
+  },
+  {
+    id: 1001287,
+    club_name: "Rayleigh Golf Range",
+    course_name: "Main Course",
+    location: {
+      city: "Rayleigh",
+      state: "Essex", 
+      country: "United Kingdom"
+    }
   }
 ];
 
 // Search courses function
-export async function searchCourses(query: string): Promise<GolfCourse[]> {
+export async function searchCourses(query: string, includeMockData: boolean = false): Promise<{ mockCourses: GolfCourse[], results: GolfCourse[] }> {
   console.log(`Searching for courses with query: ${query}`);
   
   // For development, return filtered mock data
-  const normalizedQuery = query.toLowerCase();
+  const normalizedQuery = query.toLowerCase().trim();
+  
+  // Improved search logic to check multiple fields with better matching
   const results = mockCourses.filter(course => {
-    return (course.club_name?.toLowerCase().includes(normalizedQuery) || 
-           course.course_name?.toLowerCase().includes(normalizedQuery) ||
-           course.location?.city?.toLowerCase().includes(normalizedQuery) ||
-           course.location?.state?.toLowerCase().includes(normalizedQuery));
+    const clubNameMatch = course.club_name?.toLowerCase().includes(normalizedQuery);
+    const courseNameMatch = course.course_name?.toLowerCase().includes(normalizedQuery);
+    const cityMatch = course.location?.city?.toLowerCase().includes(normalizedQuery);
+    const stateMatch = course.location?.state?.toLowerCase().includes(normalizedQuery);
+    
+    // Also match against full formatted name to catch partial phrases
+    const fullNameLower = `${course.club_name || ''} ${course.course_name || ''}`.toLowerCase();
+    const fullNameMatch = fullNameLower.includes(normalizedQuery);
+    
+    return clubNameMatch || courseNameMatch || cityMatch || stateMatch || fullNameMatch;
   });
   
   console.log(`Found ${results.length} courses matching "${query}"`);
@@ -130,7 +168,11 @@ export async function searchCourses(query: string): Promise<GolfCourse[]> {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 500));
   
-  return results;
+  if (includeMockData) {
+    return { mockCourses, results };
+  }
+  
+  return { mockCourses: [], results };
 }
 
 // Get course details function
@@ -346,6 +388,97 @@ export function generateMockCourseDetails(course: GolfCourse): CourseDetail {
       },
       features: ["Pro Shop", "Restaurant", "Driving Range", "Putting Green", "Practice Area"],
       price_range: "$$$"
+    };
+  }
+  
+  // Special case for The Rayleigh Club and other Rayleigh courses
+  if (course.id.toString() === "1001285" || 
+      course.id.toString() === "1001286" || 
+      course.id.toString() === "1001287") {
+    
+    // Generate different tee boxes for Rayleigh courses
+    const maleTees: TeeBox[] = [
+      {
+        tee_name: "White",
+        tee_color: "white",
+        par_total: 72,
+        yards_total: 6800,
+        course_rating: 72.1,
+        slope_rating: 131,
+        holes: Array(18).fill(null).map((_, idx) => {
+          return {
+            number: idx + 1,
+            par: idx % 9 === 0 || idx % 9 === 8 ? 5 : (idx % 9 === 2 || idx % 9 === 6) ? 3 : 4,
+            yardage: idx % 9 === 0 || idx % 9 === 8 ? 525 + Math.floor(Math.random() * 50) : 
+                     (idx % 9 === 2 || idx % 9 === 6) ? 170 + Math.floor(Math.random() * 30) : 
+                     400 + Math.floor(Math.random() * 50),
+            handicap: (idx % 2 === 0) ? idx + 1 : 18 - idx
+          };
+        })
+      },
+      {
+        tee_name: "Yellow",
+        tee_color: "yellow",
+        par_total: 72,
+        yards_total: 6500,
+        course_rating: 71.3,
+        slope_rating: 128,
+        holes: Array(18).fill(null).map((_, idx) => {
+          return {
+            number: idx + 1,
+            par: idx % 9 === 0 || idx % 9 === 8 ? 5 : (idx % 9 === 2 || idx % 9 === 6) ? 3 : 4,
+            yardage: idx % 9 === 0 || idx % 9 === 8 ? 505 + Math.floor(Math.random() * 50) : 
+                     (idx % 9 === 2 || idx % 9 === 6) ? 160 + Math.floor(Math.random() * 30) : 
+                     380 + Math.floor(Math.random() * 50),
+            handicap: (idx % 2 === 0) ? idx + 1 : 18 - idx
+          };
+        })
+      }
+    ];
+    
+    const femaleTees: TeeBox[] = [
+      {
+        tee_name: "Red",
+        tee_color: "red",
+        par_total: 73,
+        yards_total: 5900,
+        course_rating: 73.1,
+        slope_rating: 125,
+        holes: Array(18).fill(null).map((_, idx) => {
+          return {
+            number: idx + 1,
+            par: idx % 9 === 0 || idx % 9 === 8 ? 5 : (idx % 9 === 2 || idx % 9 === 6) ? 3 : 4,
+            yardage: idx % 9 === 0 || idx % 9 === 8 ? 450 + Math.floor(Math.random() * 30) : 
+                     (idx % 9 === 2 || idx % 9 === 6) ? 140 + Math.floor(Math.random() * 20) : 
+                     340 + Math.floor(Math.random() * 40),
+            handicap: (idx % 2 === 0) ? idx + 1 : 18 - idx
+          };
+        })
+      }
+    ];
+    
+    // Create website based on club name
+    let website = "https://www.";
+    if (course.club_name?.toLowerCase().includes("rayleigh")) {
+      website += "rayleighclub.co.uk";
+    } else {
+      website += "golfcourse.co.uk";
+    }
+    
+    return {
+      id: course.id,
+      club_name: course.club_name,
+      course_name: course.course_name,
+      description: `${course.club_name} is a beautiful golf course located in ${course.location?.city}, ${course.location?.state}.`,
+      website: website,
+      location: course.location,
+      holes: 18,
+      tees: {
+        male: maleTees,
+        female: femaleTees
+      },
+      features: ["Pro Shop", "Restaurant", "Driving Range", "Putting Green"],
+      price_range: "£££"
     };
   }
   

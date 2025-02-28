@@ -28,11 +28,47 @@ const ApiTest = () => {
     
     try {
       console.log("Testing searchCourses API with query:", searchQuery);
-      const courses = await searchCourses(searchQuery);
-      console.log("API search response:", courses);
-      setSearchResults(courses);
       
-      if (courses.length === 0) {
+      // Add diagnostic logging of the mock courses before filtering
+      const { mockCourses, results } = await searchCourses(searchQuery, true);
+      
+      console.log("Available mock courses:", mockCourses);
+      console.log("API search response:", results);
+      
+      setSearchResults(results);
+      
+      // Add diagnostic info about the search
+      const diagInfo = [
+        `Search query: "${searchQuery}"`,
+        `Search performed: ${new Date().toISOString()}`,
+        `Available courses in mock data: ${mockCourses.length}`,
+        `Matching courses found: ${results.length}`,
+        `Search is case-insensitive: Yes`,
+        `Search looks for partial matches: Yes`,
+      ];
+      
+      if (mockCourses.length > 0) {
+        diagInfo.push(`\nSample of available courses:`);
+        mockCourses.slice(0, 5).forEach((course, idx) => {
+          diagInfo.push(`${idx + 1}. ${course.club_name} - ${course.course_name} (ID: ${course.id})`);
+        });
+      }
+      
+      if (results.length > 0) {
+        diagInfo.push(`\nMatching courses:`);
+        results.forEach((course, idx) => {
+          diagInfo.push(`${idx + 1}. ${course.club_name} - ${course.course_name} (ID: ${course.id})`);
+        });
+      } else {
+        diagInfo.push(`\nSearch algorithm details:`);
+        diagInfo.push(`- Normalizes query to lowercase: "${searchQuery.toLowerCase()}"`);
+        diagInfo.push(`- Checks club_name, course_name, city, and state fields`);
+        diagInfo.push(`- Uses string.includes() for partial matching`);
+      }
+      
+      setDiagnosticInfo(diagInfo.join('\n'));
+      
+      if (results.length === 0) {
         setError(`No courses found matching "${searchQuery}". Try a different search term.`);
       }
     } catch (err: any) {
@@ -232,8 +268,8 @@ const ApiTest = () => {
                   <p className="font-medium">{course.course_name}</p>
                   <p className="text-sm">{course.club_name}</p>
                   <p className="text-sm text-muted-foreground">
-                    {course.location.city}{course.location.state ? `, ${course.location.state}` : ''}
-                    {course.location.country && course.location.country !== 'United States' ? `, ${course.location.country}` : ''}
+                    {course.location?.city}{course.location?.state ? `, ${course.location?.state}` : ''}
+                    {course.location?.country && course.location?.country !== 'United States' ? `, ${course.location?.country}` : ''}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">ID: {course.id}</p>
                 </div>
@@ -252,12 +288,12 @@ const ApiTest = () => {
             <h3 className="text-lg font-medium mb-1">{courseDetails.course_name}</h3>
             <p className="text-md mb-1">{courseDetails.club_name}</p>
             <p className="text-muted-foreground mb-4">
-              {courseDetails.location.city}{courseDetails.location.state ? `, ${courseDetails.location.state}` : ''}
-              {courseDetails.location.country && courseDetails.location.country !== 'United States' ? `, ${courseDetails.location.country}` : ''}
+              {courseDetails.location?.city}{courseDetails.location?.state ? `, ${courseDetails.location?.state}` : ''}
+              {courseDetails.location?.country && courseDetails.location?.country !== 'United States' ? `, ${courseDetails.location?.country}` : ''}
             </p>
             
             {/* Male Tees */}
-            {courseDetails.tees.male && courseDetails.tees.male.length > 0 && (
+            {courseDetails.tees?.male && courseDetails.tees.male.length > 0 && (
               <>
                 <h4 className="font-medium mb-2">Men's Tees:</h4>
                 <div className="grid gap-2 mb-6">
@@ -299,7 +335,7 @@ const ApiTest = () => {
             )}
             
             {/* Female Tees */}
-            {courseDetails.tees.female && courseDetails.tees.female.length > 0 && (
+            {courseDetails.tees?.female && courseDetails.tees.female.length > 0 && (
               <>
                 <h4 className="font-medium mb-2">Women's Tees:</h4>
                 <div className="grid gap-2 mb-6">
