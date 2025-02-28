@@ -364,7 +364,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [manualCourseFormOpen, setManualCourseFormOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<SimplifiedGolfCourse | null>(null);
-  const [displayAddCourseOption, setDisplayAddCourseOption] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -394,7 +393,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
       setCalendarOpen(false);
       setManualCourseFormOpen(false);
       setEditingCourse(null);
-      setDisplayAddCourseOption(false);
     } else {
       // Set today's date when modal opens
       setRoundDate(new Date());
@@ -416,7 +414,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setIsManualSearch(true);
     setIsSearching(true);
     setSearchError(null);
-    setDisplayAddCourseOption(false); // Reset the add course option
     
     try {
       console.log("Searching for courses with query:", searchQuery);
@@ -476,17 +473,14 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
       if (combinedResults.length > 0) {
         console.log("Setting combined search results:", combinedResults);
         setSearchResults(combinedResults);
-        setDisplayAddCourseOption(false); // Hide the add course option when we have results
       } else {
-        // If no results, show error and option to add a course
+        // If no results, show error message
         console.log("No courses found for query:", searchQuery);
         setSearchError("No courses found. Please try a different search term or add a new course.");
-        setDisplayAddCourseOption(true); // Show the add course option
       }
     } catch (error) {
       console.error("Course search error:", error);
       setSearchError("Failed to search for courses. Please try again.");
-      setDisplayAddCourseOption(true); // Show the add course option on error
       toast({
         title: "Search Error",
         description: "Failed to search for courses. Please try again.",
@@ -678,84 +672,45 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
           setScores(newScores);
         }
       } else {
-        // For courses from the database or API, fetch details
-        let apiCourseDetail;
-        
+        // For courses from the API, fetch details
         try {
-          // If this is a database entry with a valid ID, fetch details from the API
+          // Fetch details from the API
           console.log("Fetching course details for ID:", course.id);
-          apiCourseDetail = await getCourseDetails(course.id);
+          const apiCourseDetail = await getCourseDetails(course.id);
           console.log("API course details (raw):", apiCourseDetail);
+          
+          // Save the original API course detail for reference
+          setOriginalCourseDetail(apiCourseDetail);
+          
+          // Convert API response to the format expected by the component
+          const simplifiedCourseDetail = convertToSimplifiedCourseDetail(apiCourseDetail);
+          
+          // Make sure course and club names are set properly
+          if (!simplifiedCourseDetail.name && course.name) {
+            console.log("Setting missing course name from search result:", course.name);
+            simplifiedCourseDetail.name = course.name;
+          }
+          if (!simplifiedCourseDetail.clubName && course.clubName) {
+            console.log("Setting missing club name from search result:", course.clubName);
+            simplifiedCourseDetail.clubName = course.clubName;
+          }
+          
+          console.log("Final course detail after processing:", simplifiedCourseDetail);
+          setSelectedCourse(simplifiedCourseDetail);
+          
+          // Set default tee if available
+          if (simplifiedCourseDetail.tees && simplifiedCourseDetail.tees.length > 0) {
+            const defaultTeeId = simplifiedCourseDetail.tees[0].id;
+            console.log("Setting default tee ID:", defaultTeeId);
+            setSelectedTeeId(defaultTeeId);
+            
+            // Update the scorecard based on the selected tee
+            updateScorecardForTee(defaultTeeId, 'all');
+            setHoleSelection('all');
+          }
         } catch (error) {
           console.error("Error fetching course details from API:", error);
-          apiCourseDetail = null;
-        }
-        
-        // If API fails or returns null, generate mock data
-        if (!apiCourseDetail || 
-            !apiCourseDetail.tees || 
-            (!apiCourseDetail.tees.male && !apiCourseDetail.tees.female)) {
-          console.log("Using mock data for course details");
-          
-          // Create a GolfCourse object from SimplifiedGolfCourse
-          const golfCourse: GolfCourse = {
-            id: typeof course.id === 'string' ? parseInt(course.id) : course.id,
-            club_name: course.clubName,
-            course_name: course.name,
-            location: {
-              city: course.city,
-              state: course.state,
-              country: course.country || 'United States'
-            }
-          };
-          
-          apiCourseDetail = generateMockCourseDetails(golfCourse);
-          console.log("Generated mock data:", apiCourseDetail);
-          
-          toast({
-            title: "Note",
-            description: "Using sample course data. Some details may not be accurate.",
-            variant: "default",
-          });
-        }
-        
-        // Save the original API course detail for reference
-        setOriginalCourseDetail(apiCourseDetail);
-        
-        // Convert API response to the format expected by the component
-        const simplifiedCourseDetail = convertToSimplifiedCourseDetail(apiCourseDetail);
-        
-        // Make sure course and club names are set properly
-        if (!simplifiedCourseDetail.name && course.name) {
-          console.log("Setting missing course name from search result:", course.name);
-          simplifiedCourseDetail.name = course.name;
-        }
-        if (!simplifiedCourseDetail.clubName && course.clubName) {
-          console.log("Setting missing club name from search result:", course.clubName);
-          simplifiedCourseDetail.clubName = course.clubName;
-        }
-        
-        console.log("Final course detail after processing:", simplifiedCourseDetail);
-        setSelectedCourse(simplifiedCourseDetail);
-        
-        // Set default tee if available
-        if (simplifiedCourseDetail.tees && simplifiedCourseDetail.tees.length > 0) {
-          const defaultTeeId = simplifiedCourseDetail.tees[0].id;
-          console.log("Setting default tee ID:", defaultTeeId);
-          setSelectedTeeId(defaultTeeId);
-          
-          // Update the scorecard based on the selected tee
-          updateScorecardForTee(defaultTeeId, 'all');
-          setHoleSelection('all');
-        } else {
-          // If no tees available, create a default scorecard
-          console.log("No tees available, creating default scorecard");
-          const defaultScores = Array(18).fill(null).map((_, idx) => ({
-            hole: idx + 1,
-            par: 4,
-            strokes: 0
-          }));
-          setScores(defaultScores);
+          throw new Error(`Failed to load course details for ${course.name}. Please try again.`);
         }
       }
       
@@ -767,12 +722,12 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
       
       // Move to scorecard step
       setCurrentStep('scorecard');
-    } catch (error) {
+    } catch (error: any) {
       console.error("Course detail error:", error);
-      setSearchError("Failed to load course details. Please try again.");
+      setSearchError(error.message || "Failed to load course details. Please try again.");
       toast({
         title: "Error",
-        description: "Failed to load course details. Please try again.",
+        description: error.message || "Failed to load course details. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -1154,26 +1109,23 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
           </Button>
         </div>
         
+        {/* "Add a new course" always visible regardless of search results */}
+        <div className="mt-2 mb-4 text-center">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleAddManualCourse}
+            className="w-full"
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Can't find your course? Add it now
+          </Button>
+        </div>
+        
         {/* Search Error */}
         {searchError && (
           <div className="bg-destructive/10 border border-destructive/30 rounded-md p-3 text-center">
             <p className="text-sm text-destructive">{searchError}</p>
-          </div>
-        )}
-
-        {/* "Add a course" option when no results are found */}
-        {displayAddCourseOption && (
-          <div className="mt-8 p-4 border rounded-md flex flex-col items-center bg-background/50">
-            <div className="mb-2 text-center">
-              <PlusCircle className="h-8 w-8 text-primary mx-auto mb-2" />
-              <h3 className="text-lg font-medium">Course not on our system?</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Add it now and help grow our community database!
-              </p>
-              <Button onClick={handleAddManualCourse}>
-                Add a New Course
-              </Button>
-            </div>
           </div>
         )}
         
