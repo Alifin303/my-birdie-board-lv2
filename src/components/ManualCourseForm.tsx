@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Dialog,
   DialogContent,
@@ -106,8 +106,77 @@ export function ManualCourseForm({
   const [currentTeeIndex, setCurrentTeeIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [currentTab, setCurrentTab] = useState('front9');
+  const [isEditMode, setIsEditMode] = useState(!!existingCourse);
   
   const { toast } = useToast();
+
+  // Set initial state when form opens or when existingCourse changes
+  useEffect(() => {
+    if (open) {
+      if (existingCourse) {
+        console.log("Loading existing course data:", existingCourse);
+        setIsEditMode(true);
+        
+        // Get the tees from localStorage if they exist
+        const courseDetailsKey = `course_details_${existingCourse.id}`;
+        const storedDetails = localStorage.getItem(courseDetailsKey);
+        
+        if (storedDetails) {
+          try {
+            const parsedDetails = JSON.parse(storedDetails);
+            console.log("Found stored course details:", parsedDetails);
+            
+            // Use the stored tees or fallback to a default tee
+            const tees = parsedDetails.tees || [createDefaultTee()];
+            
+            setFormData({
+              name: existingCourse.name.replace(' [User added course]', ''),
+              city: existingCourse.city || '',
+              state: existingCourse.state || '',
+              tees: tees
+            });
+            
+            // Set the current tee to the first tee
+            if (tees.length > 0) {
+              setCurrentTeeIndex(0);
+            }
+          } catch (error) {
+            console.error("Error parsing stored course details:", error);
+            
+            // Fallback to default data with the course name/city/state
+            setFormData({
+              name: existingCourse.name.replace(' [User added course]', ''),
+              city: existingCourse.city || '',
+              state: existingCourse.state || '',
+              tees: [createDefaultTee()]
+            });
+          }
+        } else {
+          console.log("No stored details found for course:", existingCourse.id);
+          
+          // Fallback to default data with the course name/city/state
+          setFormData({
+            name: existingCourse.name.replace(' [User added course]', ''),
+            city: existingCourse.city || '',
+            state: existingCourse.state || '',
+            tees: [createDefaultTee()]
+          });
+        }
+      } else {
+        // New course - use defaults
+        setIsEditMode(false);
+        setFormData({
+          name: '',
+          city: '',
+          state: '',
+          tees: [createDefaultTee()]
+        });
+        setCurrentTeeIndex(0);
+      }
+      
+      setCurrentTab('front9');
+    }
+  }, [open, existingCourse]);
   
   // Create a default tee with 18 holes
   function createDefaultTee(): TeeData {
@@ -161,8 +230,23 @@ export function ManualCourseForm({
     field: keyof HoleData,
     value: string
   ) => {
-    const numValue = parseInt(value);
-    if (isNaN(numValue)) return;
+    let numValue: number;
+    
+    // Handle empty input
+    if (value === '') {
+      if (field === 'par') {
+        numValue = 4; // Default par value
+      } else if (field === 'yards') {
+        numValue = 0; // Allow zero yards
+      } else if (field === 'handicap') {
+        numValue = holeIndex + 1; // Default handicap is hole number
+      } else {
+        return; // Ignore other empty fields
+      }
+    } else {
+      numValue = parseInt(value);
+      if (isNaN(numValue)) return;
+    }
     
     setFormData(prev => {
       const updatedTees = [...prev.tees];
@@ -260,32 +344,14 @@ export function ManualCourseForm({
     for (let teeIndex = 0; teeIndex < formData.tees.length; teeIndex++) {
       const tee = formData.tees[teeIndex];
       
-      // Validate each hole
+      // Validate each hole's par (must be between 2 and 6)
       for (let holeIndex = 0; holeIndex < tee.holes.length; holeIndex++) {
         const hole = tee.holes[holeIndex];
         
-        if (hole.par < 3 || hole.par > 5) {
+        if (hole.par < 2 || hole.par > 6) {
           toast({
             title: "Validation Error",
-            description: `Hole ${hole.number} par should be between 3 and 5.`,
-            variant: "destructive",
-          });
-          return false;
-        }
-        
-        if (hole.yards < 100 || hole.yards > 700) {
-          toast({
-            title: "Validation Error",
-            description: `Hole ${hole.number} yardage should be between 100 and 700.`,
-            variant: "destructive",
-          });
-          return false;
-        }
-        
-        if (hole.handicap < 1 || hole.handicap > 18) {
-          toast({
-            title: "Validation Error",
-            description: `Hole ${hole.number} handicap should be between 1 and 18.`,
+            description: `Hole ${hole.number} par should be between 2 and 6.`,
             variant: "destructive",
           });
           return false;
@@ -302,6 +368,8 @@ export function ManualCourseForm({
     
     setIsLoading(true);
     try {
+      console.log("Saving course with data:", formData);
+      
       // Add "[User added course]" to the course name
       const userAddedName = formData.name + " [User added course]";
       
@@ -419,9 +487,9 @@ export function ManualCourseForm({
                 <td key={`par-${hole.number}`} className="text-center px-2 py-2">
                   <Input
                     type="number"
-                    min="3"
-                    max="5"
-                    value={hole.par || ""}
+                    min="2"
+                    max="6"
+                    value={hole.par}
                     onChange={(e) => handleHoleChange(teeIndex, hole.number - 1, 'par', e.target.value)}
                     className="w-12 h-8 text-center"
                     required
@@ -435,9 +503,9 @@ export function ManualCourseForm({
                 <td key={`yards-${hole.number}`} className="text-center px-2 py-2">
                   <Input
                     type="number"
-                    min="100"
-                    max="700"
-                    value={hole.yards || ""}
+                    min="0"
+                    max="999"
+                    value={hole.yards}
                     onChange={(e) => handleHoleChange(teeIndex, hole.number - 1, 'yards', e.target.value)}
                     className="w-12 h-8 text-center"
                     required
@@ -453,7 +521,7 @@ export function ManualCourseForm({
                     type="number"
                     min="1"
                     max="18"
-                    value={hole.handicap || ""}
+                    value={hole.handicap}
                     onChange={(e) => handleHoleChange(teeIndex, hole.number - 1, 'handicap', e.target.value)}
                     className="w-12 h-8 text-center"
                     required
@@ -496,7 +564,13 @@ export function ManualCourseForm({
                 placeholder="Enter course name"
                 className="mt-1"
                 required
+                disabled={isEditMode} // Disable editing for existing courses
               />
+              {isEditMode && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Course name cannot be changed after creation
+                </p>
+              )}
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -508,7 +582,13 @@ export function ManualCourseForm({
                   placeholder="Enter city"
                   className="mt-1"
                   required
+                  disabled={isEditMode} // Disable editing for existing courses
                 />
+                {isEditMode && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    City cannot be changed after creation
+                  </p>
+                )}
               </div>
               <div>
                 <label className="text-sm font-medium">State</label>
