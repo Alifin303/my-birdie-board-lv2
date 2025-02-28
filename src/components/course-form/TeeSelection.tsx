@@ -28,6 +28,7 @@ export function TeeSelection({
           variant="outline" 
           onClick={handleAddTee}
           className="flex items-center gap-1"
+          type="button" // Explicitly set type to button to prevent form submission
         >
           <Plus className="h-4 w-4" />
           Add Tee
@@ -46,6 +47,7 @@ export function TeeSelection({
                 borderColor: tee.color,
                 boxShadow: currentTeeIndex === index ? `0 0 0 1px ${tee.color}` : 'none'
               }}
+              type="button" // Prevent form submission
             >
               {tee.name}
               
@@ -54,6 +56,7 @@ export function TeeSelection({
                   variant="ghost"
                   size="icon"
                   className="h-4 w-4 ml-1 p-0"
+                  type="button" // Prevent form submission
                   onClick={(e) => {
                     e.stopPropagation();
                     handleRemoveTee(index);

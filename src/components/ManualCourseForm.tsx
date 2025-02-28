@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, ReactNode } from "react";
 import { 
   Dialog,
@@ -145,15 +146,15 @@ export function ManualCourseForm({
   };
   
   // Handle tee name selection
-  const handleTeeChange = (teeIndex: number, teeName: string) => {
+  const handleTeeChange = (teeName: string) => {
     const selectedTee = teeOptions.find(t => t.name === teeName);
     
     if (!selectedTee) return;
     
     setFormData(prev => {
       const updatedTees = [...prev.tees];
-      updatedTees[teeIndex] = {
-        ...updatedTees[teeIndex],
+      updatedTees[currentTeeIndex] = {
+        ...updatedTees[currentTeeIndex],
         name: selectedTee.name,
         color: selectedTee.color,
         gender: selectedTee.gender as 'male' | 'female'
@@ -167,7 +168,6 @@ export function ManualCourseForm({
   
   // Handle hole data changes
   const handleHoleChange = (
-    teeIndex: number,
     holeIndex: number,
     field: keyof HoleData,
     value: string
@@ -192,7 +192,7 @@ export function ManualCourseForm({
     
     setFormData(prev => {
       const updatedTees = [...prev.tees];
-      const updatedHoles = [...updatedTees[teeIndex].holes];
+      const updatedHoles = [...updatedTees[currentTeeIndex].holes];
       
       // Get the actual hole we're updating - for Back 9, we need to add 9 to the index
       // since holeIndex is relative to the active tab (0-8 for both Front and Back 9)
@@ -203,8 +203,8 @@ export function ManualCourseForm({
         [field]: numValue
       };
       
-      updatedTees[teeIndex] = {
-        ...updatedTees[teeIndex],
+      updatedTees[currentTeeIndex] = {
+        ...updatedTees[currentTeeIndex],
         holes: updatedHoles
       };
       
@@ -509,7 +509,7 @@ export function ManualCourseForm({
             <div className="space-y-4 border-t pt-4">
               <TeeConfiguration 
                 currentTee={formData.tees[currentTeeIndex]} 
-                handleTeeChange={(teeName) => handleTeeChange(currentTeeIndex, teeName)}
+                handleTeeChange={handleTeeChange}
               />
               
               <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
@@ -521,7 +521,7 @@ export function ManualCourseForm({
                   <HoleInputs 
                     holes={formData.tees[currentTeeIndex].holes.slice(0, 9)}
                     handleHoleChange={(holeIndex, field, value) => 
-                      handleHoleChange(currentTeeIndex, holeIndex, field, value)
+                      handleHoleChange(holeIndex, field, value)
                     }
                   />
                 </TabsContent>
@@ -529,7 +529,7 @@ export function ManualCourseForm({
                   <HoleInputs 
                     holes={formData.tees[currentTeeIndex].holes.slice(9, 18)}
                     handleHoleChange={(holeIndex, field, value) => 
-                      handleHoleChange(currentTeeIndex, holeIndex, field, value)
+                      handleHoleChange(holeIndex, field, value)
                     }
                   />
                 </TabsContent>
