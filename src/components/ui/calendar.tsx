@@ -1,7 +1,7 @@
 
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker } from "react-day-picker";
+import { DayPicker, DayClickEventHandler } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -14,13 +14,6 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
-  const handleDaySelect = (day: Date | undefined) => {
-    console.log("Calendar day selected:", day);
-    if (props.onSelect) {
-      props.onSelect(day);
-    }
-  };
-
   return (
     <div 
       className="relative bg-white rounded-md shadow-md overflow-hidden" 
@@ -33,7 +26,6 @@ function Calendar({
       <DayPicker
         showOutsideDays={showOutsideDays}
         className={cn("p-3", className)}
-        onSelect={handleDaySelect}
         classNames={{
           months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
           month: "space-y-4",
@@ -80,6 +72,19 @@ function Calendar({
               e.stopPropagation();
             }} {...iconProps} />
           ),
+        }}
+        modifiersStyles={{
+          selected: {
+            backgroundColor: "#ffffff",
+            color: "#333333",
+            border: "2px solid hsl(142 35% 23%)",
+            fontWeight: "bold"
+          },
+          today: {
+            backgroundColor: "#f1f1f1",
+            color: "#333333",
+            fontWeight: "500"
+          }
         }}
         {...props}
       />
