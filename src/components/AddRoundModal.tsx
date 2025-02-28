@@ -90,7 +90,9 @@ type HoleSelection = 'all' | 'front9' | 'back9';
 
 // Convert API course search result to simplified format
 const convertToSimplifiedCourse = (course: GolfCourse): SimplifiedGolfCourse => {
-  return {
+  console.log("Converting course to simplified format:", course);
+  
+  const simplified = {
     id: course.id,
     name: course.course_name || course.club_name || "Unknown Course",
     clubName: course.club_name || "Unknown Club",
@@ -98,6 +100,9 @@ const convertToSimplifiedCourse = (course: GolfCourse): SimplifiedGolfCourse => 
     state: course.location?.state || '',
     country: course.location?.country || ''
   };
+  
+  console.log("Simplified course:", simplified);
+  return simplified;
 };
 
 // Extract tee data from API response
@@ -110,6 +115,13 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
   if (courseDetail.tees && courseDetail.tees.male && courseDetail.tees.male.length > 0) {
     courseDetail.tees.male.forEach((tee, index) => {
       console.log("Adding male tee:", tee.tee_name || `Tee ${index + 1}`);
+      console.log("Tee details:", {
+        rating: tee.course_rating,
+        slope: tee.slope_rating,
+        par: tee.par_total,
+        yards: tee.total_yards
+      });
+      
       tees.push({
         id: `m-${index}`,
         name: tee.tee_name || `Tee ${index + 1}`,
@@ -127,6 +139,13 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
   if (courseDetail.tees && courseDetail.tees.female && courseDetail.tees.female.length > 0) {
     courseDetail.tees.female.forEach((tee, index) => {
       console.log("Adding female tee:", tee.tee_name || `Tee ${index + 1}`);
+      console.log("Tee details:", {
+        rating: tee.course_rating,
+        slope: tee.slope_rating,
+        par: tee.par_total,
+        yards: tee.total_yards
+      });
+      
       tees.push({
         id: `f-${index}`,
         name: (tee.tee_name || `Tee ${index + 1}`) + " (W)",
@@ -198,26 +217,35 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
   
   // If we found hole data for the specific tee, use it
   if (holesData && holesData.length > 0) {
-    return holesData.map((hole, idx) => ({
+    const mappedHoles = holesData.map((hole, idx) => ({
       number: idx + 1,
       par: hole.par || 4,
       yards: hole.yardage,
       handicap: hole.handicap
     }));
+    
+    console.log("Mapped holes for selected tee:", mappedHoles);
+    return mappedHoles;
   }
   
   // Fallback: try to find any hole data in any tee
   if (courseDetail.tees) {
+    console.log("Looking for hole data in any tee");
+    
     // Try male tees first
     if (courseDetail.tees.male) {
       for (const tee of courseDetail.tees.male) {
         if (tee.holes && tee.holes.length > 0) {
-          return tee.holes.map((hole, idx) => ({
+          console.log("Found hole data in male tee:", tee.tee_name);
+          const mappedHoles = tee.holes.map((hole, idx) => ({
             number: idx + 1,
             par: hole.par || 4,
             yards: hole.yardage,
             handicap: hole.handicap
           }));
+          
+          console.log("Mapped holes from alternative male tee:", mappedHoles);
+          return mappedHoles;
         }
       }
     }
@@ -226,12 +254,16 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
     if (courseDetail.tees.female) {
       for (const tee of courseDetail.tees.female) {
         if (tee.holes && tee.holes.length > 0) {
-          return tee.holes.map((hole, idx) => ({
+          console.log("Found hole data in female tee:", tee.tee_name);
+          const mappedHoles = tee.holes.map((hole, idx) => ({
             number: idx + 1,
             par: hole.par || 4,
             yards: hole.yardage,
             handicap: hole.handicap
           }));
+          
+          console.log("Mapped holes from alternative female tee:", mappedHoles);
+          return mappedHoles;
         }
       }
     }
@@ -239,19 +271,27 @@ const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): Simplifi
   
   console.log("No hole data found, creating default holes");
   // Last resort: create default holes
-  return Array(18).fill(null).map((_, idx) => ({
+  const defaultHoles = Array(18).fill(null).map((_, idx) => ({
     number: idx + 1,
     par: 4,
     yards: 400,
     handicap: idx + 1
   }));
+  
+  console.log("Created default holes:", defaultHoles);
+  return defaultHoles;
 };
 
 // Convert API course detail to simplified format
 const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): SimplifiedCourseDetail => {
+  console.log("Converting course detail to simplified format:", courseDetail);
+  
   // Get course name and club name from the API response
   const name = courseDetail.course_name || "Unknown Course";
   const clubName = courseDetail.club_name || "Unknown Club";
+  
+  console.log("Course name:", name);
+  console.log("Club name:", clubName);
   
   // Extract tee boxes
   const tees = extractTeesFromApiResponse(courseDetail);
@@ -260,9 +300,11 @@ const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): Simplified
   let holes: SimplifiedHole[] = [];
   if (tees.length > 0) {
     const firstTeeId = tees[0].id;
+    console.log("Getting holes for first tee:", firstTeeId);
     holes = extractHolesForTee(courseDetail, firstTeeId);
   } else {
     // Default holes if no tees available
+    console.log("No tees available, creating default holes");
     holes = Array(18).fill(null).map((_, idx) => ({
       number: idx + 1,
       par: 4,
@@ -271,7 +313,7 @@ const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): Simplified
     }));
   }
   
-  return {
+  const simplified = {
     id: courseDetail.id || 0,
     name,
     clubName,
@@ -281,6 +323,9 @@ const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): Simplified
     tees,
     holes
   };
+  
+  console.log("Simplified course detail:", simplified);
+  return simplified;
 };
 
 export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
@@ -373,6 +418,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
           };
         });
         
+        console.log("Formatted previously played courses:", formattedCourses);
         setPreviouslyPlayedCourses(formattedCourses);
       } else {
         console.log("No previously played courses found");
@@ -401,15 +447,17 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       console.log("Searching for courses with query:", searchQuery);
       // Search for courses via API
       const courses = await searchCourses(searchQuery);
-      console.log("API search results:", courses);
+      console.log("API search results (raw):", courses);
       
       // Convert to simplified format for component use
       const simplifiedCourses = courses.map(convertToSimplifiedCourse);
       
       if (simplifiedCourses.length > 0) {
+        console.log("Setting search results:", simplifiedCourses);
         setSearchResults(simplifiedCourses);
       } else {
         // If API returns no results, show error
+        console.log("No courses found for query:", searchQuery);
         setSearchError("No courses found. Please try a different search term.");
       }
     } catch (error) {
@@ -450,10 +498,13 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     
     if (selection === 'front9') {
       filteredHoles = allHolesData.slice(0, 9);
+      console.log("Filtered for front 9:", filteredHoles);
     } else if (selection === 'back9') {
       filteredHoles = allHolesData.slice(9, 18);
+      console.log("Filtered for back 9:", filteredHoles);
     } else {
       filteredHoles = allHolesData;
+      console.log("Using all 18 holes");
     }
     
     console.log(`Filtered holes for ${selection}:`, filteredHoles);
@@ -468,6 +519,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       handicap: hole.handicap
     }));
     
+    console.log("New scores array:", newScores);
     setScores(newScores);
     
     // Also update the holes in the selected course object
@@ -503,8 +555,9 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       // Try to get course details from API
       let apiCourseDetail;
       try {
+        console.log("Fetching course details for ID:", course.id);
         apiCourseDetail = await getCourseDetails(course.id);
-        console.log("API course details:", apiCourseDetail);
+        console.log("API course details (raw):", apiCourseDetail);
       } catch (error) {
         console.error("Error fetching course details from API:", error);
         apiCourseDetail = null;
@@ -546,12 +599,15 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       
       // Make sure course and club names are set properly
       if (!simplifiedCourseDetail.name && course.name) {
+        console.log("Setting missing course name from search result:", course.name);
         simplifiedCourseDetail.name = course.name;
       }
       if (!simplifiedCourseDetail.clubName && course.clubName) {
+        console.log("Setting missing club name from search result:", course.clubName);
         simplifiedCourseDetail.clubName = course.clubName;
       }
       
+      console.log("Final course detail after processing:", simplifiedCourseDetail);
       setSelectedCourse(simplifiedCourseDetail);
       
       // Set default tee if available
@@ -576,7 +632,9 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       
       // Clear search results and update search query with course name
       setSearchResults([]);
-      setSearchQuery(`${simplifiedCourseDetail.clubName} - ${simplifiedCourseDetail.name}`);
+      const displayName = `${simplifiedCourseDetail.clubName} - ${simplifiedCourseDetail.name}`;
+      console.log("Setting search query to:", displayName);
+      setSearchQuery(displayName);
       
       // Move to scorecard step
       setCurrentStep('scorecard');
@@ -725,6 +783,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       // First, check if the course exists in the database
       let courseDbId: number;
       const courseName = formatCourseName(selectedCourse.clubName, selectedCourse.name);
+      console.log("Formatted course name for DB:", courseName);
       
       const { data: existingCourse } = await supabase
         .from('courses')
@@ -738,6 +797,13 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
       } else {
         // Insert course
         console.log("Course not found in database, creating new course");
+        console.log("Course data to insert:", {
+          api_course_id: selectedCourse.id.toString(),
+          name: courseName,
+          city: selectedCourse.city,
+          state: selectedCourse.state,
+        });
+        
         const { data: newCourse, error: newCourseError } = await supabase
           .from('courses')
           .insert({
