@@ -32,7 +32,8 @@ import {
   formatCourseName, 
   parseCourseName, 
   getCourseMetadataFromLocalStorage,
-  isUserAddedCourse
+  isUserAddedCourse,
+  fetchCourseById
 } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -315,12 +316,30 @@ const calculateScoreSummary = (scores: Score[]) => {
   const toPar = totalStrokes - totalPar;
   const puttsRecorded = scores.some(score => score.putts !== undefined);
   
+  // Add front 9 and back 9 calculations
+  const front9Scores = scores.filter(score => score.hole <= 9);
+  const back9Scores = scores.filter(score => score.hole > 9);
+  
+  const front9Strokes = front9Scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
+  const front9Par = front9Scores.reduce((sum, score) => sum + score.par, 0);
+  const front9ToPar = front9Strokes - front9Par;
+  
+  const back9Strokes = back9Scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
+  const back9Par = back9Scores.reduce((sum, score) => sum + score.par, 0);
+  const back9ToPar = back9Strokes - back9Par;
+  
   return {
     totalStrokes,
     totalPar,
     totalPutts,
     toPar,
-    puttsRecorded
+    puttsRecorded,
+    front9Strokes,
+    front9Par,
+    front9ToPar,
+    back9Strokes,
+    back9Par,
+    back9ToPar
   };
 };
 
@@ -351,11 +370,13 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [dataLoadingError, setDataLoadingError] = useState<string | null>(null);
-  const [roundDate, setRoundDate] = useState<Date | undefined>(undefined);
+  const [roundDate, setRoundDate] = useState<Date | undefined>(new Date());
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [holeSelection, setHoleSelection] = useState<HoleSelection>('all');
   const [activeScoreTab, setActiveScoreTab] = useState<"front9" | "back9">("front9");
   const [originalCourseDetail, setOriginalCourseDetail] = useState<CourseDetail | null>(null);
+  const [noResults, setNoResults] = useState(false);
+  const [manualCourseOpen, setManualCourseOpen] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -370,58 +391,107 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     } else {
       setSearchResults([]);
       setSearchError(null);
+      setNoResults(false);
     }
   }, [debouncedSearchTerm]);
+
+  // Fetch user-added courses from the database
+  const fetchUserAddedCourses = async (query: string): Promise<SimplifiedGolfCourse[]> => {
+    try {
+      const { data, error } = await supabase
+        .from('courses')
+        .select('*')
+        .ilike('name', `%${query}%`);
+        
+      if (error) {
+        console.error("Error fetching user-added courses:", error);
+        return [];
+      }
+      
+      if (!data || data.length === 0) {
+        return [];
+      }
+      
+      return data.map(course => {
+        const { clubName, courseName } = parseCourseName(course.name);
+        return {
+          id: course.id,
+          name: courseName,
+          clubName: clubName,
+          city: course.city || '',
+          state: course.state || '',
+          country: 'United States',
+          isUserAdded: isUserAddedCourse(course.name),
+          apiCourseId: course.api_course_id
+        };
+      });
+    } catch (error) {
+      console.error("Error fetching user-added courses:", error);
+      return [];
+    }
+  };
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
     setSearchError(null);
+    setNoResults(false);
     
     try {
-      // Fix: Get the search results and ensure we're handling the response correctly
-      const response = await searchCourses(query);
+      // Fetch API courses
+      const apiResponse = await searchCourses(query);
+      const apiResults = Array.isArray(apiResponse.results) ? apiResponse.results : [];
       
-      console.log("Search response:", response);
+      // Fetch user-added courses
+      const userAddedCourses = await fetchUserAddedCourses(query);
       
-      // Ensure we always have a valid array of results
-      const apiResults = Array.isArray(response.results) ? response.results : [];
+      // Combine results
+      const combinedResults = [
+        ...userAddedCourses, 
+        ...apiResults.map(course => ({
+          id: typeof course.id === 'string' ? parseInt(course.id) : course.id,
+          name: course.name,
+          clubName: course.club_name || course.name,
+          city: course.city || '',
+          state: course.state || '',
+          country: course.country || 'United States',
+          isUserAdded: false,
+          apiCourseId: course.id?.toString()
+        }))
+      ];
       
-      // Transform API golf courses to simplified format
-      const transformedResults: SimplifiedGolfCourse[] = apiResults.map(course => {
-        // Ensure course ID is always a number
-        const courseId = typeof course.id === 'string' ? parseInt(course.id, 10) : 
-                        typeof course.id === 'number' ? course.id : 0;
-                        
-        const { clubName, courseName } = parseCourseName(course.course_name || course.club_name || '');
-        
+      const enhancedResults = combinedResults.map(course => {
+        const metadata = getCourseMetadataFromLocalStorage(course.id);
         return {
-          id: courseId,
-          name: courseName || course.course_name || "Unknown Course",
-          clubName: clubName || course.club_name || "Unknown Club",
-          city: course.location?.city || '',
-          state: course.location?.state || '',
-          country: course.location?.country || '',
-          apiCourseId: course.id?.toString() || '',
-          isUserAdded: false
+          ...course,
+          city: course.city || metadata?.city || '',
+          state: course.state || metadata?.state || '',
+          isUserAdded: course.isUserAdded || isUserAddedCourse(course.name)
         };
       });
       
-      console.log("Transformed search results:", transformedResults);
-      setSearchResults(transformedResults);
-      
-      if (transformedResults.length === 0) {
-        // No results found, show a message
-        toast({
-          title: "No results found",
-          description: "No golf courses found matching your search. Try a different search term or add a new course manually.",
-        });
-      }
+      setSearchResults(enhancedResults);
+      setNoResults(enhancedResults.length === 0);
     } catch (error: any) {
       console.error("Search error:", error);
       setSearchError(error.message || "Failed to fetch courses. Please try again.");
+      
+      // Try to at least get user-added courses if the API fails
+      try {
+        const userAddedCourses = await fetchUserAddedCourses(query);
+        if (userAddedCourses.length > 0) {
+          setSearchResults(userAddedCourses);
+          setNoResults(false);
+        } else {
+          setNoResults(true);
+        }
+      } catch (err) {
+        console.error("Failed to get user-added courses as fallback:", err);
+        setNoResults(true);
+      }
+      
       toast({
-        title: "Error",
-        description: error.message || "Failed to fetch courses. Please try again.",
+        title: "API Error",
+        description: error.message || "Failed to fetch courses from API. Showing local courses only.",
         variant: "destructive",
       });
     } finally {
@@ -599,6 +669,43 @@ Try selecting a different course or adding this course manually.`);
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleOpenManualCourseForm = () => {
+    setManualCourseOpen(true);
+  };
+
+  const handleCourseCreated = async (courseId: number, courseName: string) => {
+    setManualCourseOpen(false);
+    
+    try {
+      // Fetch the newly created course
+      const courseData = await fetchCourseById(courseId);
+      
+      if (courseData) {
+        const { clubName, courseName: name } = parseCourseName(courseData.name);
+        
+        const newCourse: SimplifiedGolfCourse = {
+          id: courseData.id,
+          name,
+          clubName,
+          city: courseData.city || '',
+          state: courseData.state || '',
+          country: 'United States',
+          isUserAdded: isUserAddedCourse(courseData.name)
+        };
+        
+        // Immediately select the new course
+        await handleCourseSelect(newCourse);
+      }
+    } catch (error) {
+      console.error("Error fetching newly created course:", error);
+      toast({
+        title: "Error",
+        description: "Course was created but could not be loaded automatically. Please search for it.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -822,9 +929,10 @@ Try selecting a different course or adding this course manually.`);
     setScores([]);
     setSearchError(null);
     setDataLoadingError(null);
-    setRoundDate(undefined);
+    setRoundDate(new Date());
     setHoleSelection('all');
     setActiveScoreTab("front9");
+    setManualCourseOpen(false);
   };
 
   const handleSaveRound = async () => {
@@ -876,10 +984,12 @@ Try selecting a different course or adding this course manually.`);
             course_id: selectedCourse.id,
             date: roundDate.toISOString(),
             tee_name: selectedTee.name,
+            tee_id: selectedTee.id,
             gross_score: totalStrokes,
             to_par_gross: toParGross,
             net_score: null,
             to_par_net: null,
+            hole_scores: JSON.stringify(scores)
           }
         ]);
         
@@ -910,473 +1020,484 @@ Try selecting a different course or adding this course manually.`);
     }
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[900px] p-4 max-h-[90vh] overflow-y-auto">
-        {currentStep === 'search' ? (
-          <>
-            <DialogHeader>
-              <DialogTitle>Add a New Round</DialogTitle>
-              <DialogDescription>
-                Search for a golf course or add a new one
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <div className="relative rounded-md bg-background shadow-sm">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <Search className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <Input
-                    type="text"
-                    placeholder="Search for a course..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground mt-1.5">
-                  Enter a course name or location and press Enter to search
-                </p>
-              </div>
-              
-              <div className="flex justify-center">
-                <Button
-                  onClick={() => handleSearch(searchQuery)}
-                  disabled={isLoading || searchQuery.length < 3}
-                  className="w-full md:w-auto"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Searching...
-                    </>
-                  ) : (
-                    "Search"
-                  )}
-                </Button>
-              </div>
-              
-              <div className="mt-2 mb-4 text-center">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => {}}
-                  className="w-full"
-                >
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Can&apos;t find your course? Add it now
-                </Button>
-              </div>
-              
-              {searchError && (
-                <div className="bg-destructive/10 border border-destructive/30 rounded-md p-3 text-center">
-                  <p className="text-sm text-destructive">{searchError}</p>
-                </div>
-              )}
-              
-              {searchResults.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-medium mb-2">Search Results</h3>
-                  <div className="border rounded-md divide-y">
-                    {searchResults.map((course) => (
-                      <div 
-                        key={course.id.toString()}
-                        className="flex justify-between items-center px-4 py-3 hover:bg-muted cursor-pointer"
-                        onClick={() => handleCourseSelect(course)}
-                      >
-                        <div>
-                          <p className="font-medium">
-                            {course.clubName !== course.name 
-                              ? `${course.clubName} - ${course.name}`
-                              : course.name}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {course.city}{course.state ? `, ${course.state}` : ''}
-                            {course.isUserAdded && <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">User Added</span>}
-                          </p>
-                        </div>
-                        
-                        {course.isUserAdded && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                            }}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+  // Calculate summary stats for front/back 9 and total
+  const scoreSummary = calculateScoreSummary(scores);
+
+  // Render the search step
+  const renderSearchStep = () => (
+    <>
+      <DialogHeader>
+        <DialogTitle>Add a New Round</DialogTitle>
+        <DialogDescription>
+          Search for a golf course or add a new one
+        </DialogDescription>
+      </DialogHeader>
+      <div className="space-y-4">
+        <div>
+          <div className="relative rounded-md bg-background shadow-sm">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <Search className="h-4 w-4 text-muted-foreground" />
             </div>
-          </>
-        ) : (
-          <>
-            {selectedCourse && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
+            <Input
+              type="text"
+              placeholder="Search for a course..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground mt-1.5">
+            Enter a course name or location and press Enter to search
+          </p>
+        </div>
+        
+        <div className="flex justify-center">
+          <Button
+            onClick={() => handleSearch(searchQuery)}
+            disabled={isLoading || searchQuery.length < 3}
+            className="w-full md:w-auto"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Searching...
+              </>
+            ) : (
+              "Search"
+            )}
+          </Button>
+        </div>
+        
+        <div className="mt-2 mb-4 text-center">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleOpenManualCourseForm}
+            className="w-full"
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Can&apos;t find your course? Add it now
+          </Button>
+        </div>
+        
+        {searchError && (
+          <div className="bg-destructive/10 border border-destructive/30 rounded-md p-3 text-center">
+            <p className="text-sm text-destructive">{searchError}</p>
+          </div>
+        )}
+        
+        {noResults && (
+          <div className="bg-muted/50 rounded-md p-4 text-center">
+            <p className="text-sm text-muted-foreground">No courses found matching your search.</p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleOpenManualCourseForm}
+              className="mt-2"
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add Your Course
+            </Button>
+          </div>
+        )}
+        
+        {searchResults.length > 0 && (
+          <div>
+            <h3 className="text-lg font-medium mb-2">Search Results</h3>
+            <div className="border rounded-md divide-y">
+              {searchResults.map((course) => (
+                <div 
+                  key={course.id.toString()}
+                  className="flex justify-between items-center px-4 py-3 hover:bg-muted cursor-pointer"
+                  onClick={() => handleCourseSelect(course)}
+                >
                   <div>
-                    <h2 className="text-lg font-semibold">{selectedCourse.clubName !== selectedCourse.name ? 
-                      `${selectedCourse.clubName} - ${selectedCourse.name}` : 
-                      selectedCourse.name}
-                    </h2>
+                    <p className="font-medium">
+                      {course.clubName !== course.name 
+                        ? `${course.clubName} - ${course.name}`
+                        : course.name}
+                    </p>
                     <p className="text-sm text-muted-foreground">
-                      {selectedCourse.city}{selectedCourse.state ? `, ${selectedCourse.state}` : ''}
-                      {selectedCourse.isUserAdded && <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">User Added</span>}
+                      {course.city}{course.state ? `, ${course.state}` : ''}
+                      {course.isUserAdded && <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">User Added</span>}
                     </p>
                   </div>
                   
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={handleBackToSearch}
-                  >
-                    Change Course
-                  </Button>
+                  {course.isUserAdded && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // TODO: Implement edit functionality
+                      }}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
-                
-                {dataLoadingError && (
-                  <Alert variant="destructive" className="mb-2">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription className="ml-2">
-                      {dataLoadingError}
-                    </AlertDescription>
-                  </Alert>
-                )}
-                
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                  <div className="lg:col-span-3 space-y-3">
-                    <div>
-                      <label className="text-sm font-medium mb-1 block">Date Played</label>
-                      <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full justify-start text-left font-normal"
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {roundDate ? format(roundDate, "PPP") : "Select date"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={roundDate}
-                            onSelect={handleDateSelect}
-                            disabled={(date) => date > today}
-                            initialFocus
-                            className="z-50"
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+
+  // Render the scorecard step with landscape layout
+  const renderScorecardStep = () => (
+    <>
+      {selectedCourse && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-semibold">{selectedCourse.clubName !== selectedCourse.name ? 
+                `${selectedCourse.clubName} - ${selectedCourse.name}` : 
+                selectedCourse.name}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {selectedCourse.city}{selectedCourse.state ? `, ${selectedCourse.state}` : ''}
+                {selectedCourse.isUserAdded && <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">User Added</span>}
+              </p>
+            </div>
+            
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleBackToSearch}
+            >
+              Change Course
+            </Button>
+          </div>
+          
+          {dataLoadingError && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="ml-2">
+                {dataLoadingError}
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {/* Top row: Controls in a horizontal layout */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Date Played</label>
+              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start text-left font-normal"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {roundDate ? format(roundDate, "PPP") : "Select date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={roundDate}
+                    onSelect={handleDateSelect}
+                    disabled={(date) => date > today}
+                    initialFocus
+                    className="z-50"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Tee Played</label>
+              <Select value={selectedTeeId || undefined} onValueChange={handleTeeChange}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Select a tee box" />
+                </SelectTrigger>
+                <SelectContent>
+                  {selectedCourse.tees.map((tee) => (
+                    <SelectItem key={tee.id} value={tee.id}>
+                      <div className="flex items-center">
+                        <div 
+                          className="w-3 h-3 rounded-full mr-2"
+                          style={{
+                            backgroundColor: tee.gender === 'male' ? 
+                              (tee.name.toLowerCase().includes('black') ? '#000' : 
+                              tee.name.toLowerCase().includes('blue') ? '#005' : 
+                              tee.name.toLowerCase().includes('white') ? '#fff' : 
+                              tee.name.toLowerCase().includes('gold') ? '#FB0' : 
+                              tee.name.toLowerCase().includes('green') ? '#060' : 
+                              tee.name.toLowerCase().includes('yellow') ? '#FF0' : '#777') :
+                              (tee.name.toLowerCase().includes('red') ? '#C00' : 
+                              tee.name.toLowerCase().includes('gold') ? '#FB0' : '#FAA'),
+                            border: tee.name.toLowerCase().includes('white') ? '1px solid #ccc' : 'none'
+                          }}
+                        ></div>
+                        {tee.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Holes Played</label>
+              <div className="flex space-x-1">
+                <Button 
+                  variant={holeSelection === 'all' ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleHoleSelectionChange('all')}
+                  className="flex-1 h-9 px-2"
+                >
+                  All 18
+                </Button>
+                <Button 
+                  variant={holeSelection === 'front9' ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => handleHoleSelectionChange('front9')}
+                  className="flex-1 h-9 px-2"
+                >
+                  Front 9
+                </Button>
+                <Button 
+                  variant={holeSelection === 'back9' ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => handleHoleSelectionChange('back9')}
+                  className="flex-1 h-9 px-2"
+                >
+                  Back 9
+                </Button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Middle section: Front 9 holes */}
+          <div className="mb-4">
+            <h3 className="text-sm font-medium mb-2">Front Nine</h3>
+            <div className="border rounded-md">
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <th className="px-2 py-2 text-left text-sm font-medium whitespace-nowrap">Hole</th>
+                      {scores.filter(score => score.hole <= 9).map(score => (
+                        <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
+                      ))}
+                      <th className="px-2 py-2 text-center text-sm font-medium">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b">
+                      <td className="px-2 py-2 text-sm font-medium">Par</td>
+                      {scores.filter(score => score.hole <= 9).map(score => (
+                        <td key={`par-${score.hole}`} className="px-1 py-2 text-center">
+                          <div className="bg-muted/40 border border-muted rounded-md w-7 h-7 flex items-center justify-center font-medium mx-auto">
+                            {score.par}
+                          </div>
+                        </td>
+                      ))}
+                      <td className="px-2 py-2 text-center font-medium">{scoreSummary.front9Par}</td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="px-2 py-2 text-sm font-medium">Strokes</td>
+                      {scores.filter(score => score.hole <= 9).map((score, index) => (
+                        <td key={`strokes-${score.hole}`} className="px-1 py-2 text-center">
+                          <Input
+                            type="number"
+                            min="1"
+                            max="20"
+                            value={score.strokes || ''}
+                            onChange={(e) => handleScoreChange(index, 'strokes', e.target.value)}
+                            className="w-9 h-7 text-center mx-auto px-1"
+                            inputMode="numeric"
                           />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm font-medium mb-1 block">Tee Played</label>
-                      <Select value={selectedTeeId || undefined} onValueChange={handleTeeChange}>
-                        <SelectTrigger className="h-9">
-                          <SelectValue placeholder="Select a tee box" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {selectedCourse.tees.map((tee) => (
-                            <SelectItem key={tee.id} value={tee.id}>
-                              <div className="flex items-center">
-                                <div 
-                                  className="w-3 h-3 rounded-full mr-2"
-                                  style={{
-                                    backgroundColor: tee.gender === 'male' ? 
-                                      (tee.name.toLowerCase().includes('black') ? '#000' : 
-                                      tee.name.toLowerCase().includes('blue') ? '#005' : 
-                                      tee.name.toLowerCase().includes('white') ? '#fff' : 
-                                      tee.name.toLowerCase().includes('gold') ? '#FB0' : 
-                                      tee.name.toLowerCase().includes('green') ? '#060' : 
-                                      tee.name.toLowerCase().includes('yellow') ? '#FF0' : '#777') :
-                                      (tee.name.toLowerCase().includes('red') ? '#C00' : 
-                                      tee.name.toLowerCase().includes('gold') ? '#FB0' : '#FAA'),
-                                    border: tee.name.toLowerCase().includes('white') ? '1px solid #ccc' : 'none'
-                                  }}
-                                ></div>
-                                {tee.name}
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm font-medium mb-1 block">Holes Played</label>
-                      <div className="flex space-x-1">
-                        <Button 
-                          variant={holeSelection === 'all' ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => handleHoleSelectionChange('all')}
-                          className="flex-1 h-9 px-2"
-                        >
-                          All 18
-                        </Button>
-                        <Button 
-                          variant={holeSelection === 'front9' ? "default" : "outline"} 
-                          size="sm"
-                          onClick={() => handleHoleSelectionChange('front9')}
-                          className="flex-1 h-9 px-2"
-                        >
-                          Front 9
-                        </Button>
-                        <Button 
-                          variant={holeSelection === 'back9' ? "default" : "outline"} 
-                          size="sm"
-                          onClick={() => handleHoleSelectionChange('back9')}
-                          className="flex-1 h-9 px-2"
-                        >
-                          Back 9
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="lg:col-span-3 space-y-3">
-                    {selectedTeeId && (
-                      <Card className="p-3 h-full">
-                        <h3 className="text-sm font-medium mb-2">Tee Details</h3>
-                        {selectedCourse.tees.filter(tee => tee.id === selectedTeeId).map(tee => (
-                          <div key={tee.id} className="grid grid-cols-2 gap-2 text-sm">
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Name:</span>
-                              <span className="font-medium">{tee.name}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Rating:</span>
-                              <span className="font-medium">{tee.rating}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Slope:</span>
-                              <span className="font-medium">{tee.slope}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Par:</span>
-                              <span className="font-medium">{tee.par}</span>
-                            </div>
-                            {tee.yards && (
-                              <div className="flex justify-between col-span-2">
-                                <span className="text-muted-foreground">Total Yards:</span>
-                                <span className="font-medium">{tee.yards}</span>
-                              </div>
-                            )}
+                        </td>
+                      ))}
+                      <td className="px-2 py-2 text-center font-medium">
+                        {scoreSummary.front9Strokes || '-'}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          
+          {/* Below Middle: Back 9 holes */}
+          <div className="mb-4">
+            <h3 className="text-sm font-medium mb-2">Back Nine</h3>
+            <div className="border rounded-md">
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <th className="px-2 py-2 text-left text-sm font-medium whitespace-nowrap">Hole</th>
+                      {scores.filter(score => score.hole > 9).map(score => (
+                        <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
+                      ))}
+                      <th className="px-2 py-2 text-center text-sm font-medium">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b">
+                      <td className="px-2 py-2 text-sm font-medium">Par</td>
+                      {scores.filter(score => score.hole > 9).map(score => (
+                        <td key={`par-${score.hole}`} className="px-1 py-2 text-center">
+                          <div className="bg-muted/40 border border-muted rounded-md w-7 h-7 flex items-center justify-center font-medium mx-auto">
+                            {score.par}
                           </div>
-                        ))}
-                      </Card>
-                    )}
-                  </div>
-                  
-                  <div className="lg:col-span-3 space-y-3">
-                    <Card className="p-3">
-                      <h3 className="text-sm font-medium mb-2">Round Summary</h3>
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Total Par:</span>
-                          <span className="font-medium">{scores.reduce((sum, s) => sum + s.par, 0)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Gross Score:</span>
-                          <span className="font-medium">
-                            {scores.reduce((sum, s) => sum + (s.strokes || 0), 0) || '-'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">To Par:</span>
-                          <span className="font-medium">
-                            {scores.reduce((sum, s) => sum + (s.strokes || 0), 0) ? 
-                              (scores.reduce((sum, s) => sum + (s.strokes || 0), 0) - scores.reduce((sum, s) => sum + s.par, 0) > 0 ? 
-                                `+${scores.reduce((sum, s) => sum + (s.strokes || 0), 0) - scores.reduce((sum, s) => sum + s.par, 0)}` : 
-                                scores.reduce((sum, s) => sum + (s.strokes || 0), 0) - scores.reduce((sum, s) => sum + s.par, 0)) : 
-                              '-'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Total Putts:</span>
-                          <span className="font-medium">
-                            {scores.some(s => s.putts !== undefined) ? 
-                              scores.reduce((sum, s) => sum + (s.putts || 0), 0) : 
-                              'None'}
-                          </span>
-                        </div>
-                      </div>
-                    </Card>
-                    
-                    <div className="flex justify-between space-x-2 pt-2">
-                      <Button variant="outline" onClick={handleCloseModal} size="sm" className="flex-1">
-                        Cancel
-                      </Button>
-                      <Button onClick={handleSaveRound} disabled={isLoading} size="sm" className="flex-1">
-                        {isLoading ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Saving...
-                          </>
-                        ) : (
-                          "Save Round"
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="lg:col-span-12">
-                    {holeSelection === 'all' ? (
-                      <Tabs defaultValue="front9" value={activeScoreTab} onValueChange={(value) => setActiveScoreTab(value as "front9" | "back9")}>
-                        <TabsList className="w-full">
-                          <TabsTrigger value="front9" className="flex-1">Front 9</TabsTrigger>
-                          <TabsTrigger value="back9" className="flex-1">Back 9</TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="front9" className="mt-2">
-                          <div className="border rounded-md">
-                            <div className="overflow-x-auto">
-                              <table className="w-full border-collapse">
-                                <thead>
-                                  <tr className="border-b bg-muted/50">
-                                    <th className="px-2 py-2 text-left text-sm font-medium whitespace-nowrap">Hole</th>
-                                    {scores.filter(score => score.hole <= 9).map(score => (
-                                      <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
-                                    ))}
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  <tr className="border-b">
-                                    <td className="px-2 py-2 text-sm font-medium">Par</td>
-                                    {scores.filter(score => score.hole <= 9).map(score => (
-                                      <td key={`par-${score.hole}`} className="px-1 py-2 text-center">
-                                        <div className="bg-muted/40 border border-muted rounded-md w-7 h-7 flex items-center justify-center font-medium mx-auto">
-                                          {score.par}
-                                        </div>
-                                      </td>
-                                    ))}
-                                  </tr>
-                                  <tr className="border-b">
-                                    <td className="px-2 py-2 text-sm font-medium">Strokes</td>
-                                    {scores.filter(score => score.hole <= 9).map((score, index) => (
-                                      <td key={`strokes-${score.hole}`} className="px-1 py-2 text-center">
-                                        <Input
-                                          type="number"
-                                          min="1"
-                                          max="20"
-                                          value={score.strokes || ''}
-                                          onChange={(e) => handleScoreChange(index, 'strokes', e.target.value)}
-                                          className="w-9 h-7 text-center mx-auto px-1"
-                                          inputMode="numeric"
-                                        />
-                                      </td>
-                                    ))}
-                                  </tr>
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        </TabsContent>
-                        <TabsContent value="back9" className="mt-2">
-                          <div className="border rounded-md">
-                            <div className="overflow-x-auto">
-                              <table className="w-full border-collapse">
-                                <thead>
-                                  <tr className="border-b bg-muted/50">
-                                    <th className="px-2 py-2 text-left text-sm font-medium whitespace-nowrap">Hole</th>
-                                    {scores.filter(score => score.hole > 9).map(score => (
-                                      <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
-                                    ))}
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  <tr className="border-b">
-                                    <td className="px-2 py-2 text-sm font-medium">Par</td>
-                                    {scores.filter(score => score.hole > 9).map(score => (
-                                      <td key={`par-${score.hole}`} className="px-1 py-2 text-center">
-                                        <div className="bg-muted/40 border border-muted rounded-md w-7 h-7 flex items-center justify-center font-medium mx-auto">
-                                          {score.par}
-                                        </div>
-                                      </td>
-                                    ))}
-                                  </tr>
-                                  <tr className="border-b">
-                                    <td className="px-2 py-2 text-sm font-medium">Strokes</td>
-                                    {scores.filter(score => score.hole > 9).map((score, index) => {
-                                      const adjustedIndex = index + scores.filter(s => s.hole <= 9).length;
-                                      return (
-                                        <td key={`strokes-${score.hole}`} className="px-1 py-2 text-center">
-                                          <Input
-                                            type="number"
-                                            min="1"
-                                            max="20"
-                                            value={score.strokes || ''}
-                                            onChange={(e) => handleScoreChange(adjustedIndex, 'strokes', e.target.value)}
-                                            className="w-9 h-7 text-center mx-auto px-1"
-                                            inputMode="numeric"
-                                          />
-                                        </td>
-                                      );
-                                    })}
-                                  </tr>
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        </TabsContent>
-                      </Tabs>
-                    ) : (
-                      <div className="border rounded-md">
-                        <div className="overflow-x-auto">
-                          <table className="w-full border-collapse">
-                            <thead>
-                              <tr className="border-b bg-muted/50">
-                                <th className="px-2 py-2 text-left text-sm font-medium whitespace-nowrap">Hole</th>
-                                {scores.map(score => (
-                                  <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
-                                ))}
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr className="border-b">
-                                <td className="px-2 py-2 text-sm font-medium">Par</td>
-                                {scores.map(score => (
-                                  <td key={`par-${score.hole}`} className="px-1 py-2 text-center">
-                                    <div className="bg-muted/40 border border-muted rounded-md w-7 h-7 flex items-center justify-center font-medium mx-auto">
-                                      {score.par}
-                                    </div>
-                                  </td>
-                                ))}
-                              </tr>
-                              <tr className="border-b">
-                                <td className="px-2 py-2 text-sm font-medium">Strokes</td>
-                                {scores.map((score, index) => (
-                                  <td key={`strokes-${score.hole}`} className="px-1 py-2 text-center">
-                                    <Input
-                                      type="number"
-                                      min="1"
-                                      max="20"
-                                      value={score.strokes || ''}
-                                      onChange={(e) => handleScoreChange(index, 'strokes', e.target.value)}
-                                      className="w-9 h-7 text-center mx-auto px-1"
-                                      inputMode="numeric"
-                                    />
-                                  </td>
-                                ))}
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                        </td>
+                      ))}
+                      <td className="px-2 py-2 text-center font-medium">{scoreSummary.back9Par}</td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="px-2 py-2 text-sm font-medium">Strokes</td>
+                      {scores.filter(score => score.hole > 9).map((score, index) => {
+                        const adjustedIndex = index + scores.filter(s => s.hole <= 9).length;
+                        return (
+                          <td key={`strokes-${score.hole}`} className="px-1 py-2 text-center">
+                            <Input
+                              type="number"
+                              min="1"
+                              max="20"
+                              value={score.strokes || ''}
+                              onChange={(e) => handleScoreChange(adjustedIndex, 'strokes', e.target.value)}
+                              className="w-9 h-7 text-center mx-auto px-1"
+                              inputMode="numeric"
+                            />
+                          </td>
+                        );
+                      })}
+                      <td className="px-2 py-2 text-center font-medium">
+                        {scoreSummary.back9Strokes || '-'}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          
+          {/* Bottom section: Round stats and summary */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 items-start">
+            <Card className="p-3">
+              <h3 className="text-sm font-medium mb-2">Round Summary</h3>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total Par:</span>
+                  <span className="font-medium">{scoreSummary.totalPar}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Gross Score:</span>
+                  <span className="font-medium">
+                    {scoreSummary.totalStrokes || '-'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">To Par:</span>
+                  <span className="font-medium">
+                    {scoreSummary.totalStrokes ? 
+                      (scoreSummary.toPar > 0 ? 
+                        `+${scoreSummary.toPar}` : 
+                        scoreSummary.toPar) : 
+                      '-'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total Putts:</span>
+                  <span className="font-medium">
+                    {scoreSummary.puttsRecorded ? 
+                      scoreSummary.totalPutts : 
+                      'None'}
+                  </span>
                 </div>
               </div>
-            )}
-          </>
-        )}
-      </DialogContent>
-    </Dialog>
+            </Card>
+            
+            <Card className="p-3">
+              <h3 className="text-sm font-medium mb-2">Front Nine Summary</h3>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Par:</span>
+                  <span className="font-medium">{scoreSummary.front9Par}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Score:</span>
+                  <span className="font-medium">{scoreSummary.front9Strokes || '-'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">To Par:</span>
+                  <span className="font-medium">
+                    {scoreSummary.front9Strokes ? 
+                      (scoreSummary.front9ToPar > 0 ? 
+                        `+${scoreSummary.front9ToPar}` : 
+                        scoreSummary.front9ToPar) : 
+                      '-'}
+                  </span>
+                </div>
+              </div>
+            </Card>
+            
+            <Card className="p-3">
+              <h3 className="text-sm font-medium mb-2">Back Nine Summary</h3>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Par:</span>
+                  <span className="font-medium">{scoreSummary.back9Par}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Score:</span>
+                  <span className="font-medium">{scoreSummary.back9Strokes || '-'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">To Par:</span>
+                  <span className="font-medium">
+                    {scoreSummary.back9Strokes ? 
+                      (scoreSummary.back9ToPar > 0 ? 
+                        `+${scoreSummary.back9ToPar}` : 
+                        scoreSummary.back9ToPar) : 
+                      '-'}
+                  </span>
+                </div>
+              </div>
+            </Card>
+          </div>
+          
+          {/* Button row */}
+          <div className="flex justify-between space-x-4 mt-6">
+            <Button variant="outline" onClick={handleCloseModal} className="flex-1">
+              Cancel
+            </Button>
+            <Button onClick={handleSaveRound} disabled={isLoading} className="flex-1">
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Round"
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[1000px] p-6 max-h-[90vh] overflow-y-auto">
+          {currentStep === 'search' ? renderSearchStep() : renderScorecardStep()}
+        </DialogContent>
+      </Dialog>
+      
+      {/* Manual Course Form */}
+      <ManualCourseForm
+        open={manualCourseOpen}
+        onOpenChange={setManualCourseOpen}
+        onCourseCreated={handleCourseCreated}
+      />
+    </>
   );
 }
