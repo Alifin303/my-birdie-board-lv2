@@ -56,6 +56,28 @@
   input[type="number"] {
     -moz-appearance: textfield;
   }
+  
+  /* Add calendar specific styles */
+  .react-calendar-popover {
+    position: relative;
+    z-index: 9999;
+    isolation: isolate;
+  }
+  
+  /* Block pointer events from elements behind the calendar when it's open */
+  .calendar-active .scorecard-table {
+    pointer-events: none !important;
+  }
+  
+  /* Style to ensure clicks don't pass through */
+  .calendar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    pointer-events: auto;
+    cursor: not-allowed;
+    background-color: transparent;
+  }
 }
 
 @layer utilities {
@@ -69,5 +91,9 @@
   
   .transition-all-slow {
     @apply transition-all duration-300 ease-in-out;
+  }
+  
+  .isolate {
+    isolation: isolate;
   }
 }

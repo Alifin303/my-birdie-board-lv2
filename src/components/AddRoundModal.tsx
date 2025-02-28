@@ -963,6 +963,38 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     );
   };
 
+  // Create a div ref for the calendar container to apply styles dynamically
+  const calendarContainerRef = React.useRef<HTMLDivElement>(null);
+  
+  // Apply styles to hide background elements when calendar is open
+  React.useEffect(() => {
+    function applyCalendarOverlay() {
+      const scorecard = document.querySelector('.scorecard-container');
+      if (scorecard && calendarOpen) {
+        // Add an overlay div that blocks interactions with elements below
+        const overlay = document.createElement('div');
+        overlay.className = 'calendar-overlay';
+        overlay.style.position = 'fixed';
+        overlay.style.inset = '0';
+        overlay.style.backgroundColor = 'transparent';
+        overlay.style.zIndex = '9998'; // Just below calendar
+        overlay.style.cursor = 'not-allowed';
+        overlay.style.pointerEvents = 'auto';
+        
+        scorecard.appendChild(overlay);
+        
+        return () => {
+          scorecard.removeChild(overlay);
+        };
+      }
+    }
+    
+    const cleanup = applyCalendarOverlay();
+    return () => {
+      if (cleanup) cleanup();
+    };
+  }, [calendarOpen]);
+
   // Render scorecard with front 9 and back 9 layout
   const renderScorecard = () => {
     if (!selectedCourse) return null;
@@ -972,9 +1004,9 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
     const backNine = scores.length <= 9 ? [] : scores.slice(9, 18);
     
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 scorecard-container">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-          <div>
+          <div className="relative">
             <p className="text-sm font-medium text-muted-foreground">Round Date</p>
             <Popover 
               open={calendarOpen} 
@@ -988,7 +1020,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                   variant="outline"
                   className="mt-1"
                   onClick={(e) => {
-                    e.stopPropagation(); // Prevent click from reaching elements behind
+                    e.stopPropagation(); 
                     console.log("Date button clicked, opening calendar");
                     setCalendarOpen(true);
                   }}
@@ -998,19 +1030,36 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                 </Button>
               </PopoverTrigger>
               <PopoverContent 
-                className="w-auto p-0" 
+                className="w-auto p-0 shadow-xl border border-border z-[9999]" 
                 align="start"
-                onInteractOutside={(e) => {
-                  console.log("Interact outside popover");
-                  e.preventDefault(); // Prevent the default behavior
+                onEscapeKeyDown={(e) => {
+                  console.log("Escape key pressed in popover");
+                  e.preventDefault(); // Prevent default escape behavior
+                  setCalendarOpen(false); // Manually close the popover
+                }}
+                onPointerDownOutside={(e) => {
+                  console.log("Pointer down outside popover");
+                  e.preventDefault(); // Prevent closing on outside click
+                }}
+                onFocusOutside={(e) => {
+                  console.log("Focus outside popover");
+                  e.preventDefault(); // Prevent closing on outside focus
                 }}
                 onClick={(e) => {
                   console.log("Clicked inside PopoverContent");
-                  e.stopPropagation(); // Prevent clicks inside from bubbling
+                  e.stopPropagation(); // Prevent propagation
                 }}
+                style={{ pointerEvents: 'auto' }}
               >
                 <div 
-                  className="bg-popover rounded-md cursor-pointer p-2" 
+                  ref={calendarContainerRef}
+                  className="isolate pointer-events-auto" 
+                  style={{ 
+                    pointerEvents: 'auto', 
+                    cursor: 'auto',
+                    position: 'relative',
+                    zIndex: 9999
+                  }}
                   onClick={(e) => {
                     console.log("Calendar container clicked");
                     e.stopPropagation();
@@ -1030,16 +1079,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
                     disabled={(date) => {
                       // Disable future dates
                       const isInFuture = date > today;
-                      console.log("Calendar checking date:", date.toDateString(), "Is future:", isInFuture);
                       return isInFuture;
-                    }}
-                    classNames={{
-                      day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-                      day_today: "bg-accent text-accent-foreground",
-                      day: "cursor-pointer h-9 w-9 p-0 font-normal aria-selected:opacity-100",
-                      nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 cursor-pointer",
-                      nav_button_previous: "absolute left-1",
-                      nav_button_next: "absolute right-1",
                     }}
                   />
                 </div>
@@ -1073,7 +1113,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
           </div>
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-8" style={{ pointerEvents: calendarOpen ? 'none' : 'auto' }}>
           {/* Front Nine */}
           {frontNine.length > 0 && (
             <div className="border rounded-md overflow-x-auto">
@@ -1272,7 +1312,7 @@ export function AddRoundModal({ open, onOpenChange }: { open: boolean; onOpenCha
         </div>
 
         {/* Totals */}
-        <div className="border rounded-md p-4 bg-muted/50">
+        <div className="border rounded-md p-4 bg-muted/50" style={{ pointerEvents: calendarOpen ? 'none' : 'auto' }}>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <span className="font-medium">Total Strokes:</span>{" "}

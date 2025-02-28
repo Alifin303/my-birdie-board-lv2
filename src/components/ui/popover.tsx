@@ -18,13 +18,39 @@ const PopoverContent = React.forwardRef<
       align={align}
       sideOffset={sideOffset}
       className={cn(
-        "z-[9999] w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        "z-[9999] w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 pointer-events-auto isolate",
         className
       )}
       onInteractOutside={(e) => {
-        // This prevents clicks outside the popover from dismissing it in some cases
+        console.log("Popover interact outside");
+        // Prevent interactions outside the popover when it's open
+        e.preventDefault();
         if (props.onInteractOutside) {
           props.onInteractOutside(e);
+        }
+      }}
+      onPointerDownOutside={(e) => {
+        console.log("Popover pointer down outside");
+        // Prevent click outside from dismissing the popover
+        e.preventDefault();
+        if (props.onPointerDownOutside) {
+          props.onPointerDownOutside(e);
+        }
+      }}
+      onFocusOutside={(e) => {
+        console.log("Popover focus outside");
+        // Prevent focus outside from dismissing the popover
+        e.preventDefault();
+        if (props.onFocusOutside) {
+          props.onFocusOutside(e);
+        }
+      }}
+      onClick={(e) => {
+        console.log("Popover clicked");
+        // Stop propagation to prevent clicks from reaching elements behind
+        e.stopPropagation();
+        if (props.onClick) {
+          props.onClick(e);
         }
       }}
       {...props}
