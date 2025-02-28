@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 // Get the current domain instead of hardcoding URLs
@@ -31,4 +30,14 @@ export const getSiteUrl = () => {
   
   // For client-side code, use the current origin
   return window.location.origin;
+};
+
+// Helper function to format course name for storage and display
+export const formatCourseName = (clubName: string, courseName: string) => {
+  // If the club name and course name are the same, just use one
+  if (clubName === courseName) {
+    return clubName;
+  }
+  // Otherwise format as "Club Name - Course Name"
+  return `${clubName} - ${courseName}`;
 };

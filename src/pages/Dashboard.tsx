@@ -97,6 +97,7 @@ export default function Dashboard() {
         .order('date', { ascending: false });
         
       if (error) throw error;
+      console.log("Fetched rounds data:", data);
       return data as Round[] || [];
     }
   });
@@ -212,6 +213,20 @@ export default function Dashboard() {
     return Array.from(courseMap.entries()).map(([courseId, courseRounds]) => {
       const firstRound = courseRounds[0]; // For course name and details
       
+      // Get course name, handling possible formatting in the database
+      let courseName = "Unknown Course";
+      if (firstRound.courses) {
+        if (firstRound.courses.name) {
+          // If the name contains ' - ', it's likely stored as "ClubName - CourseName"
+          const nameParts = firstRound.courses.name.split(' - ');
+          if (nameParts.length > 1) {
+            courseName = firstRound.courses.name; // Use the full formatted name
+          } else {
+            courseName = firstRound.courses.name;
+          }
+        }
+      }
+      
       const roundsPlayed = courseRounds.length;
       const bestGrossScore = Math.min(...courseRounds.map(r => r.gross_score));
       const bestToPar = Math.min(...courseRounds.map(r => r.to_par_gross));
@@ -225,7 +240,7 @@ export default function Dashboard() {
   
       return {
         courseId,
-        courseName: firstRound.courses?.name || 'Unknown Course',
+        courseName,
         city: firstRound.courses?.city,
         state: firstRound.courses?.state,
         roundsPlayed,
@@ -493,7 +508,11 @@ export default function Dashboard() {
     
     if (courseRounds.length === 0) return null;
     
-    const courseName = courseRounds[0].courses?.name || 'Course';
+    // Get course name, properly formatted
+    let courseName = "Course";
+    if (courseRounds[0].courses?.name) {
+      courseName = courseRounds[0].courses.name;
+    }
     
     return (
       <div className="space-y-4">
