@@ -1,4 +1,3 @@
-
 // Type definitions
 export interface GolfCourse {
   id: number | string;
@@ -67,6 +66,18 @@ export interface CourseDetail {
   features?: string[];
   price_range?: string;
 }
+
+// Configuration for API options
+export const API_CONFIG = {
+  // Set to true to use real API instead of mock data - NOW ENABLED BY DEFAULT
+  USE_REAL_API: true,
+  // The base URL for the golf course API - using the original URL that was working
+  API_URL: "https://golf-courses-api.herokuapp.com/api/v1",
+  // API key for authentication
+  API_KEY: "GZQVPVDJB4DPZAQYIR6M64J2NQ",
+  // Toggle extended mock data for testing
+  USE_EXTENDED_MOCK: true
+};
 
 // Mock API functions for development
 const mockCourses: GolfCourse[] = [
@@ -154,7 +165,6 @@ const mockCourses: GolfCourse[] = [
 
 // List of more extensive mock courses for popular locations
 const extendedMockCourses: GolfCourse[] = [
-  // Texas courses
   {
     id: 10001,
     club_name: "Dallas Country Club",
@@ -195,7 +205,6 @@ const extendedMockCourses: GolfCourse[] = [
       country: "USA"
     }
   },
-  // Florida courses
   {
     id: 10005,
     club_name: "TPC Sawgrass",
@@ -216,7 +225,6 @@ const extendedMockCourses: GolfCourse[] = [
       country: "USA"
     }
   },
-  // California courses
   {
     id: 10007,
     club_name: "Torrey Pines Golf Course",
@@ -237,7 +245,6 @@ const extendedMockCourses: GolfCourse[] = [
       country: "USA"
     }
   },
-  // New York courses
   {
     id: 10009,
     club_name: "Bethpage State Park",
@@ -259,18 +266,6 @@ const extendedMockCourses: GolfCourse[] = [
     }
   }
 ];
-
-// Configuration for API options
-export const API_CONFIG = {
-  // Set to true to use real API instead of mock data - NOW ENABLED BY DEFAULT
-  USE_REAL_API: true,
-  // The base URL for the golf course API - using the original URL that was working
-  API_URL: "https://golf-courses-api.herokuapp.com/api/v1",
-  // API key for authentication
-  API_KEY: "golf-courses-api-key-2023",
-  // Toggle extended mock data for testing
-  USE_EXTENDED_MOCK: true
-};
 
 // Helper function to check if a string includes a substring case-insensitively
 const includesToLowerCase = (source: string | undefined, searchTerm: string): boolean => {
@@ -310,22 +305,21 @@ export async function searchCourses(query: string, includeMockData: boolean = fa
   
   try {
     // Always attempt to use the live API first
-    // Using the original endpoint path and parameters that were working
     console.log(`Making live API request to ${API_CONFIG.API_URL}/courses/search`);
     
-    // Build query parameters - reverting to what worked previously
+    // Build query parameters
     const searchParams = new URLSearchParams({
       q: normalizedQuery,
       limit: '50'
     });
     
-    // Make API request
+    // Make API request with the correct authorization header format
     const response = await fetch(
       `${API_CONFIG.API_URL}/courses/search?${searchParams.toString()}`,
       {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${API_CONFIG.API_KEY}`,
+          'Authorization': `Key ${API_CONFIG.API_KEY}`,
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
@@ -408,13 +402,13 @@ export async function getCourseDetails(courseId: number | string): Promise<Cours
     // Always try to get details from the live API first
     console.log(`Making live API request to ${API_CONFIG.API_URL}/courses/${courseId}`);
     
-    // Make API request for course details
+    // Make API request for course details with the correct authorization header format
     const response = await fetch(
       `${API_CONFIG.API_URL}/courses/${courseId}`,
       {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${API_CONFIG.API_KEY}`,
+          'Authorization': `Key ${API_CONFIG.API_KEY}`,
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
