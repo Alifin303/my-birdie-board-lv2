@@ -7,6 +7,37 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// Helper function to get the site URL for authentication redirects
+export function getSiteUrl(): string {
+  // In a production environment, you'd want to use window.location.origin
+  // For development, we'll return a hardcoded value
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  return 'http://localhost:5173'; // Default for development
+}
+
+// Helper function to log Supabase operations for debugging
+export function logSupabaseOperation(operation: string, data: any): void {
+  console.log(`[Supabase ${operation}]`, data);
+}
+
+// Helper function to fetch a course by ID
+export async function fetchCourseById(courseId: number): Promise<any> {
+  const { data, error } = await supabase
+    .from('courses')
+    .select('*')
+    .eq('id', courseId)
+    .single();
+  
+  if (error) {
+    console.error("Error fetching course by ID:", error);
+    throw error;
+  }
+  
+  return data;
+}
+
 // Helper function to parse course name
 export function parseCourseName(fullName: string): { clubName: string; courseName: string } {
   if (!fullName) return { clubName: 'Unknown Club', courseName: 'Unknown Course' };

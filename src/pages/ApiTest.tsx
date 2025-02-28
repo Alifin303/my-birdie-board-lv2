@@ -226,8 +226,8 @@ const ApiTest = () => {
               {searchResults.map((course) => (
                 <div 
                   key={course.id} 
-                  className={`p-4 hover:bg-muted cursor-pointer ${selectedCourseId === course.id ? 'bg-muted' : ''}`}
-                  onClick={() => handleGetDetails(course.id)}
+                  className={`p-4 hover:bg-muted cursor-pointer ${selectedCourseId === Number(course.id) ? 'bg-muted' : ''}`}
+                  onClick={() => handleGetDetails(Number(course.id))}
                 >
                   <p className="font-medium">{course.course_name}</p>
                   <p className="text-sm">{course.club_name}</p>
