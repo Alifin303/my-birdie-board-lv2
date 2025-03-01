@@ -12,9 +12,9 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <div 
-        className="relative h-screen bg-cover bg-center bg-no-repeat"
+        className="relative min-h-screen bg-cover bg-center bg-no-repeat overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2)), url('https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&q=80')`,
+          backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1587174786073-797bc02ffd4a?auto=format&fit=crop&q=80')`,
         }}
       >
         <header className="absolute top-0 left-0 right-0 z-10">
@@ -32,30 +32,18 @@ const Index = () => {
                   BirdieBoard
                 </h1>
               </div>
-              <div className="flex items-center gap-3">
-                <Link to="/api-test">
-                  <Button 
-                    variant="outline" 
-                    className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all"
-                  >
-                    Test API
-                  </Button>
-                </Link>
-                <Button 
-                  onClick={() => setShowLoginDialog(true)}
-                  variant="ghost" 
-                  className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all"
-                >
-                  <User className="mr-2 h-5 w-5" />
-                  Log In
-                </Button>
-              </div>
+              <Button 
+                onClick={() => setShowLoginDialog(true)}
+                variant="ghost" 
+                className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all"
+              >
+                <User className="mr-2 h-5 w-5" />
+                Log In
+              </Button>
             </nav>
           </div>
         </header>
-        <div className="container mx-auto px-4 h-full flex items-center justify-center">
-          <MainContent />
-        </div>
+        <MainContent />
       </div>
       <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
     </div>
