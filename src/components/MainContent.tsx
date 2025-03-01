@@ -9,36 +9,36 @@ import { Card, CardContent } from './ui/card';
 export const MainContent = () => {
   return (
     <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
-      {/* Hero Section */}
-      <div className="flex-grow flex flex-col justify-center items-center px-4 py-12 text-center">
-        <div className="max-w-5xl mx-auto animate-fade-in mb-8">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-6 drop-shadow-md">
+      {/* Hero Section - Reduced padding */}
+      <div className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center">
+        <div className="max-w-5xl mx-auto animate-fade-in mb-4">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight mb-4 drop-shadow-md">
             Welcome to BirdieBoard – <br className="hidden sm:block" />Your Ultimate Golf Tracking Hub!
           </h1>
-          <p className="text-lg md:text-xl text-white/90 font-medium mb-10 max-w-3xl mx-auto">
+          <p className="text-base md:text-lg text-white/90 font-medium mb-6 max-w-3xl mx-auto">
             BirdieBoard is the all-in-one platform for golfers looking to track progress, analyze performance, and compete on leaderboards. Whether you're a casual weekend golfer or a dedicated player chasing lower scores, BirdieBoard helps you upload scorecards, track your handicap, and see your game improve over time.
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-4">
             <SignUpDialog />
           </div>
         </div>
       </div>
       
-      {/* Features Section */}
-      <div className="w-full max-w-5xl mx-auto px-4 pb-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left justify-center">
+      {/* Features Section - Reduced padding and card heights */}
+      <div className="w-full max-w-5xl mx-auto px-4 pb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-left justify-center">
           <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
-            <CardContent className="p-4 flex flex-col h-full">
-              <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
-                <Upload className="h-5 w-5 text-white" />
+            <CardContent className="p-3 flex flex-col h-full">
+              <div className="bg-accent/20 rounded-full p-2 w-fit mb-1">
+                <Upload className="h-4 w-4 text-white" />
               </div>
-              <h3 className="text-base font-bold text-white mb-1">Upload & Store Your Scorecards</h3>
-              <p className="text-white/80 mb-2 text-sm">Keep a history of your rounds and track stats effortlessly.</p>
-              <div className="mt-auto pt-2">
+              <h3 className="text-sm font-bold text-white mb-1">Upload & Store Your Scorecards</h3>
+              <p className="text-white/80 mb-1 text-xs">Keep a history of your rounds and track stats effortlessly.</p>
+              <div className="mt-auto pt-1">
                 <Link to="/about">
-                  <Button variant="link" className="text-white p-0 hover:text-white/80">
-                    Learn more <ArrowRight className="ml-2 h-4 w-4" />
+                  <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs">
+                    Learn more <ArrowRight className="ml-1 h-3 w-3" />
                   </Button>
                 </Link>
               </div>
@@ -46,16 +46,16 @@ export const MainContent = () => {
           </Card>
           
           <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
-            <CardContent className="p-4 flex flex-col h-full">
-              <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
-                <BarChart2 className="h-5 w-5 text-white" />
+            <CardContent className="p-3 flex flex-col h-full">
+              <div className="bg-accent/20 rounded-full p-2 w-fit mb-1">
+                <BarChart2 className="h-4 w-4 text-white" />
               </div>
-              <h3 className="text-base font-bold text-white mb-1">Visual Progress Tracking</h3>
-              <p className="text-white/80 mb-2 text-sm">Charts and graphs give you insights into your strengths and areas to improve.</p>
-              <div className="mt-auto pt-2">
+              <h3 className="text-sm font-bold text-white mb-1">Visual Progress Tracking</h3>
+              <p className="text-white/80 mb-1 text-xs">Charts and graphs give you insights into your strengths and areas to improve.</p>
+              <div className="mt-auto pt-1">
                 <Link to="/about">
-                  <Button variant="link" className="text-white p-0 hover:text-white/80">
-                    Learn more <ArrowRight className="ml-2 h-4 w-4" />
+                  <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs">
+                    Learn more <ArrowRight className="ml-1 h-3 w-3" />
                   </Button>
                 </Link>
               </div>
@@ -63,16 +63,16 @@ export const MainContent = () => {
           </Card>
           
           <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
-            <CardContent className="p-4 flex flex-col h-full">
-              <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
-                <Award className="h-5 w-5 text-white" />
+            <CardContent className="p-3 flex flex-col h-full">
+              <div className="bg-accent/20 rounded-full p-2 w-fit mb-1">
+                <Award className="h-4 w-4 text-white" />
               </div>
-              <h3 className="text-base font-bold text-white mb-1">Handicap Generator</h3>
-              <p className="text-white/80 mb-2 text-sm">Get an accurate handicap calculation based on your rounds.</p>
-              <div className="mt-auto pt-2">
+              <h3 className="text-sm font-bold text-white mb-1">Handicap Generator</h3>
+              <p className="text-white/80 mb-1 text-xs">Get an accurate handicap calculation based on your rounds.</p>
+              <div className="mt-auto pt-1">
                 <Link to="/about">
-                  <Button variant="link" className="text-white p-0 hover:text-white/80">
-                    Learn more <ArrowRight className="ml-2 h-4 w-4" />
+                  <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs">
+                    Learn more <ArrowRight className="ml-1 h-3 w-3" />
                   </Button>
                 </Link>
               </div>
@@ -80,16 +80,16 @@ export const MainContent = () => {
           </Card>
           
           <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
-            <CardContent className="p-4 flex flex-col h-full">
-              <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
-                <Trophy className="h-5 w-5 text-white" />
+            <CardContent className="p-3 flex flex-col h-full">
+              <div className="bg-accent/20 rounded-full p-2 w-fit mb-1">
+                <Trophy className="h-4 w-4 text-white" />
               </div>
-              <h3 className="text-base font-bold text-white mb-1">Course Leaderboards</h3>
-              <p className="text-white/80 mb-2 text-sm">Compete with friends and other golfers at your favorite courses.</p>
-              <div className="mt-auto pt-2">
+              <h3 className="text-sm font-bold text-white mb-1">Course Leaderboards</h3>
+              <p className="text-white/80 mb-1 text-xs">Compete with friends and other golfers at your favorite courses.</p>
+              <div className="mt-auto pt-1">
                 <Link to="/about">
-                  <Button variant="link" className="text-white p-0 hover:text-white/80">
-                    Learn more <ArrowRight className="ml-2 h-4 w-4" />
+                  <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs">
+                    Learn more <ArrowRight className="ml-1 h-3 w-3" />
                   </Button>
                 </Link>
               </div>
@@ -98,11 +98,11 @@ export const MainContent = () => {
         </div>
       </div>
       
-      {/* Call to action - Secondary Banner */}
-      <div className="w-full py-12 bg-black/30 backdrop-blur-sm mt-8">
+      {/* Call to action - Secondary Banner with reduced margins and padding */}
+      <div className="w-full py-6 bg-black/30 backdrop-blur-sm mt-3">
         <div className="max-w-5xl mx-auto text-center px-4">
-          <h2 className="text-2xl font-bold text-white mb-4">Ready to take your game to the next level?</h2>
-          <p className="text-xl text-white/90 mb-6">Sign up today and start tracking your journey to better golf!</p>
+          <h2 className="text-xl font-bold text-white mb-2">Ready to take your game to the next level?</h2>
+          <p className="text-base text-white/90 mb-3">Sign up today and start tracking your journey to better golf!</p>
           <SignUpDialog />
         </div>
       </div>

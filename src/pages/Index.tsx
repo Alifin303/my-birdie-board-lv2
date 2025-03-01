@@ -4,7 +4,6 @@ import { MainContent } from "@/components/MainContent";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
-import { Link } from "react-router-dom";
 
 const Index = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
@@ -22,26 +21,26 @@ const Index = () => {
         <div className="absolute inset-0 bg-black opacity-20 z-0"></div>
         
         <header className="absolute top-0 left-0 right-0 z-10">
-          <div className="container mx-auto px-4 py-4">
+          <div className="container mx-auto px-4 py-2">
             <nav className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <div className="bg-white/10 backdrop-blur-sm p-2 rounded-lg">
                   <img 
                     src="https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/favicon.ico" 
                     alt="BirdieBoard" 
-                    className="w-8 h-8"
+                    className="w-6 h-6"
                   />
                 </div>
-                <h1 className="text-2xl font-bold text-white tracking-tight">
+                <h1 className="text-xl font-bold text-white tracking-tight">
                   BirdieBoard
                 </h1>
               </div>
               <Button 
                 onClick={() => setShowLoginDialog(true)}
                 variant="ghost" 
-                className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all"
+                className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all text-sm py-1"
               >
-                <User className="mr-2 h-5 w-5" />
+                <User className="mr-1 h-4 w-4" />
                 Log In
               </Button>
             </nav>
