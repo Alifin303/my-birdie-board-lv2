@@ -14,12 +14,12 @@ const Index = () => {
       <div 
         className="relative min-h-screen bg-cover bg-center bg-no-repeat overflow-hidden"
         style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1501854140801-50d01698950b?ixlib=rb-4.0.3&auto=format&fit=crop&q=80')`,
+          backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
           backgroundColor: "#2C4A3B", // Fallback color if image fails to load
         }}
       >
         {/* Dark overlay div */}
-        <div className="absolute inset-0 bg-black opacity-15 z-0"></div>
+        <div className="absolute inset-0 bg-black opacity-20 z-0"></div>
         
         <header className="absolute top-0 left-0 right-0 z-10">
           <div className="container mx-auto px-4 py-4">
