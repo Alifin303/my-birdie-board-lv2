@@ -35,14 +35,16 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   const [error, setError] = useState<string | null>(null);
   const [noResultsFound, setNoResultsFound] = useState(false);
 
-  // Reset form when modal closes
+  // Debug log when modal opens/closes
   useEffect(() => {
+    console.log("AddRoundModal open state:", open);
     if (!open) {
       resetForm();
     }
   }, [open]);
 
   const resetForm = () => {
+    console.log("Resetting AddRoundModal form");
     setStep('course-search');
     setDate(new Date());
     setSelectedCourse(null);
@@ -63,6 +65,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   };
 
   const handleBackToSearch = () => {
+    console.log("Going back to course search");
     setStep('course-search');
   };
 
@@ -87,6 +90,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   };
 
   const handleSearchUpdate = (term: string, hasResults: boolean) => {
+    console.log(`Search update: term="${term}", hasResults=${hasResults}`);
     setSearchTerm(term);
     setNoResultsFound(!hasResults && term.length >= 3);
   };
@@ -217,13 +221,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
             <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5" />
             <div>
               <p className="font-medium">Course not found. Please check the name or add the course manually.</p>
-              <Button 
-                onClick={handleAddMissingCourse}
-                variant="outline" 
-                className="mt-3 w-full"
-              >
-                Can't find your course? Add it now: {searchTerm}
-              </Button>
             </div>
           </div>
         </div>

@@ -33,7 +33,6 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
   const [searchResults, setSearchResults] = useState<Course[]>([]);
   const [apiResults, setApiResults] = useState<GolfCourse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [showAddMissingCourse, setShowAddMissingCourse] = useState(false);
   const [hasPerformedSearch, setHasPerformedSearch] = useState(false);
 
   useEffect(() => {
@@ -46,11 +45,15 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
 
   useEffect(() => {
     if (searchTerm.length >= 3) {
-      searchCoursesHandler();
+      // Use a small delay to prevent rapid API calls while typing
+      const debounceTimer = setTimeout(() => {
+        searchCoursesHandler();
+      }, 300);
+      
+      return () => clearTimeout(debounceTimer);
     } else {
       setSearchResults([]);
       setApiResults([]);
-      setShowAddMissingCourse(false);
       if (onSearchUpdate) {
         onSearchUpdate(searchTerm, true); // No search performed yet
       }
@@ -59,7 +62,6 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
 
   const searchCoursesHandler = async () => {
     setIsLoading(true);
-    setShowAddMissingCourse(false);
     setHasPerformedSearch(true);
     
     try {
@@ -98,13 +100,8 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
       setSearchResults(dbCourses || []);
       setApiResults(filteredApiResults);
       
-      // Show "Add Missing Course" button if no matches found
-      const hasResults = (dbCourses?.length > 0 || filteredApiResults.length > 0);
-      setShowAddMissingCourse(
-        !hasResults && searchTerm.length >= 3
-      );
-
       // Update parent component about search results
+      const hasResults = (dbCourses?.length > 0 || filteredApiResults.length > 0);
       if (onSearchUpdate) {
         onSearchUpdate(searchTerm, hasResults);
       }
@@ -112,9 +109,6 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
       console.error('Error searching courses:', err);
       setSearchResults([]);
       setApiResults([]);
-      
-      // Still show "Add Missing Course" if API fails
-      setShowAddMissingCourse(searchTerm.length >= 3);
       
       // Update parent component about search results
       if (onSearchUpdate) {
@@ -131,7 +125,6 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
     setSearchTerm('');
     setSearchResults([]);
     setApiResults([]);
-    setShowAddMissingCourse(false);
     setHasPerformedSearch(false);
   };
 
@@ -163,7 +156,6 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
       setSearchTerm('');
       setSearchResults([]);
       setApiResults([]);
-      setShowAddMissingCourse(false);
       setHasPerformedSearch(false);
     } catch (err) {
       console.error('Error adding course from API:', err);
@@ -208,7 +200,6 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
         setSearchTerm('');
         setSearchResults([]);
         setApiResults([]);
-        setShowAddMissingCourse(false);
         setHasPerformedSearch(false);
       });
   };
@@ -234,7 +225,8 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
             value={searchTerm}
             onChange={handleSearchChange}
             placeholder="Search for a golf course..."
-            className="pl-10 border-accent/20 focus:border-accent/40"
+            className="pl-10 border-accent/20 focus:border-accent/40 h-10 w-full"
+            style={{ height: '40px' }} // Fixed height to prevent resizing
           />
         </div>
       </Card>
@@ -246,6 +238,19 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
           <p className="text-sm text-muted-foreground">
             {selectedCourse.city}{selectedCourse.state ? `, ${selectedCourse.state}` : ''}
           </p>
+        </div>
+      )}
+
+      {/* Search status indicators */}
+      {isLoading && (
+        <div className="p-2 text-center text-sm text-muted-foreground">
+          Searching courses...
+        </div>
+      )}
+
+      {searchTerm.length > 0 && searchTerm.length < 3 && (
+        <div className="p-2 text-center text-sm text-muted-foreground">
+          Enter at least 3 characters to search
         </div>
       )}
 
@@ -314,27 +319,12 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
                   `, ${course.location?.state}` : ''}
               </p>
             </div>
-          ))}
+          )}
         </div>
       )}
 
-      {/* Add Missing Course button - Make sure it's always visible even when no results found */}
-      {showAddMissingCourse && (
-        <div className="mt-2">
-          <Button 
-            variant="outline" 
-            className="w-full flex items-center justify-center gap-2"
-            onClick={handleAddMissingCourse}
-          >
-            <Plus className="h-4 w-4" />
-            Can't find your course? Add it now: {searchTerm}
-          </Button>
-        </div>
-      )}
-
-      {/* Always show the "Add Missing Course" button when searching with no results */}
-      {!showAddMissingCourse && hasPerformedSearch && searchTerm.length >= 3 && 
-       searchResults.length === 0 && apiResults.length === 0 && !isLoading && (
+      {/* "Add missing course" button - ALWAYS display it when search term has enough characters */}
+      {searchTerm.length >= 3 && !isLoading && (
         <div className="mt-2">
           <Button 
             variant="outline" 
@@ -347,15 +337,11 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
         </div>
       )}
 
-      {isLoading && (
-        <div className="p-2 text-center text-sm text-muted-foreground">
-          Searching courses...
-        </div>
-      )}
-
-      {searchTerm.length > 0 && searchTerm.length < 3 && (
-        <div className="p-2 text-center text-sm text-muted-foreground">
-          Enter at least 3 characters to search
+      {/* No results message */}
+      {hasPerformedSearch && searchTerm.length >= 3 && 
+       searchResults.length === 0 && apiResults.length === 0 && !isLoading && (
+        <div className="p-3 bg-amber-50 border border-amber-100 text-amber-800 rounded-md mt-2">
+          <p className="text-sm">Course not found. Please check the name or add the course manually.</p>
         </div>
       )}
     </div>

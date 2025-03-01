@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, PlusCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -58,8 +58,10 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
         </div>
         <Button 
           onClick={handleAddRound}
-          className="relative"
+          className="flex items-center gap-2"
+          size="lg"
         >
+          <PlusCircle className="h-5 w-5" />
           Add a New Round
         </Button>
       </div>
