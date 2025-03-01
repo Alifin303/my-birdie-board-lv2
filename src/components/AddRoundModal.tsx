@@ -21,6 +21,7 @@ interface AddRoundModalProps {
 
 export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   const queryClient = useQueryClient();
+  const [step, setStep] = useState<'course-search' | 'round-details'>('course-search');
   const [date, setDate] = useState<Date>(new Date());
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<any | null>(null);
@@ -39,6 +40,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   }, [open]);
 
   const resetForm = () => {
+    setStep('course-search');
     setDate(new Date());
     setSelectedCourse(null);
     setGrossScore("");
@@ -46,6 +48,15 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setTee("");
     setHoleScores("");
     setError(null);
+  };
+
+  const handleCourseSelect = (course: any) => {
+    setSelectedCourse(course);
+    setStep('round-details');
+  };
+
+  const handleBackToSearch = () => {
+    setStep('course-search');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -156,128 +167,172 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     }
   };
 
+  // Course search step content
+  const renderCourseSearch = () => (
+    <div className="space-y-4 py-4">
+      <div className="space-y-2">
+        <Label htmlFor="course">Search for a course</Label>
+        <CourseSelector 
+          selectedCourse={selectedCourse} 
+          onCourseChange={handleCourseSelect} 
+        />
+      </div>
+      
+      {error && (
+        <div className="text-destructive text-sm p-2 bg-destructive/10 rounded-md">
+          {error}
+        </div>
+      )}
+      
+      <div className="flex justify-end">
+        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          Cancel
+        </Button>
+      </div>
+    </div>
+  );
+
+  // Round details step content
+  const renderRoundDetails = () => (
+    <form onSubmit={handleSubmit} className="space-y-4 py-4">
+      {/* Selected Course Display */}
+      <div className="p-3 bg-primary/10 rounded-md mb-4">
+        <div className="flex justify-between items-start">
+          <div>
+            <p className="font-medium">{selectedCourse?.name}</p>
+            <p className="text-sm text-muted-foreground">
+              {selectedCourse?.city}{selectedCourse?.state ? `, ${selectedCourse?.state}` : ''}
+            </p>
+          </div>
+          <Button 
+            type="button" 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleBackToSearch}
+          >
+            Change Course
+          </Button>
+        </div>
+      </div>
+
+      {/* Date Picker */}
+      <div className="space-y-2">
+        <Label htmlFor="date">Date</Label>
+        <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              id="date"
+              variant="outline"
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !date && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {date ? format(date, "PPP") : "Select date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={(newDate) => {
+                newDate && setDate(newDate);
+                setDatePickerOpen(false);
+              }}
+              initialFocus
+              disabled={(date) => date > new Date()}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      {/* Gross Score */}
+      <div className="space-y-2">
+        <Label htmlFor="grossScore">Gross Score</Label>
+        <Input
+          id="grossScore"
+          type="number"
+          value={grossScore}
+          onChange={(e) => setGrossScore(e.target.value)}
+          min="18"
+          placeholder="Total score for the round"
+          required
+        />
+      </div>
+
+      {/* To Par */}
+      <div className="space-y-2">
+        <Label htmlFor="toPar">To Par</Label>
+        <Input
+          id="toPar"
+          type="number"
+          value={toPar}
+          onChange={(e) => setToPar(e.target.value)}
+          placeholder="Strokes relative to par (e.g., 5 for +5, -2 for 2 under)"
+        />
+      </div>
+
+      {/* Tee */}
+      <div className="space-y-2">
+        <Label htmlFor="tee">Tee Played</Label>
+        <Input
+          id="tee"
+          value={tee}
+          onChange={(e) => setTee(e.target.value)}
+          placeholder="E.g., Blue, White, Gold, etc."
+        />
+      </div>
+
+      {/* Hole by hole scores (optional) */}
+      <div className="space-y-2">
+        <Label htmlFor="holeScores">
+          Hole Scores (Optional)
+        </Label>
+        <Input
+          id="holeScores"
+          value={holeScores}
+          onChange={(e) => setHoleScores(e.target.value)}
+          placeholder="Comma-separated list, e.g., 4,5,3,4..."
+        />
+        <p className="text-xs text-muted-foreground">
+          Enter scores as a comma-separated list (e.g., 4,5,3,4...)
+        </p>
+      </div>
+
+      {/* Error message */}
+      {error && (
+        <div className="text-destructive text-sm p-2 bg-destructive/10 rounded-md">
+          {error}
+        </div>
+      )}
+
+      {/* Submit button */}
+      <div className="flex justify-end">
+        <Button type="button" variant="outline" className="mr-2" onClick={() => onOpenChange(false)}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Adding..." : "Add Round"}
+        </Button>
+      </div>
+    </form>
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
           <DialogTitle>Add New Round</DialogTitle>
           <DialogDescription>
-            Enter the details of your golf round below.
+            {step === 'course-search' 
+              ? "Search for the course you played at."
+              : "Enter the details of your golf round."
+            }
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 py-4">
-          {/* Course Selector */}
-          <div className="space-y-2">
-            <Label htmlFor="course">Course</Label>
-            <CourseSelector 
-              selectedCourse={selectedCourse} 
-              onCourseChange={setSelectedCourse} 
-            />
-          </div>
-
-          {/* Date Picker */}
-          <div className="space-y-2">
-            <Label htmlFor="date">Date</Label>
-            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  id="date"
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !date && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, "PPP") : "Select date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={(newDate) => {
-                    newDate && setDate(newDate);
-                    setDatePickerOpen(false);
-                  }}
-                  initialFocus
-                  disabled={(date) => date > new Date()}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          {/* Gross Score */}
-          <div className="space-y-2">
-            <Label htmlFor="grossScore">Gross Score</Label>
-            <Input
-              id="grossScore"
-              type="number"
-              value={grossScore}
-              onChange={(e) => setGrossScore(e.target.value)}
-              min="18"
-              placeholder="Total score for the round"
-              required
-            />
-          </div>
-
-          {/* To Par */}
-          <div className="space-y-2">
-            <Label htmlFor="toPar">To Par</Label>
-            <Input
-              id="toPar"
-              type="number"
-              value={toPar}
-              onChange={(e) => setToPar(e.target.value)}
-              placeholder="Strokes relative to par (e.g., 5 for +5, -2 for 2 under)"
-            />
-          </div>
-
-          {/* Tee */}
-          <div className="space-y-2">
-            <Label htmlFor="tee">Tee Played</Label>
-            <Input
-              id="tee"
-              value={tee}
-              onChange={(e) => setTee(e.target.value)}
-              placeholder="E.g., Blue, White, Gold, etc."
-            />
-          </div>
-
-          {/* Hole by hole scores (optional) */}
-          <div className="space-y-2">
-            <Label htmlFor="holeScores">
-              Hole Scores (Optional)
-            </Label>
-            <Input
-              id="holeScores"
-              value={holeScores}
-              onChange={(e) => setHoleScores(e.target.value)}
-              placeholder="Comma-separated list, e.g., 4,5,3,4..."
-            />
-            <p className="text-xs text-muted-foreground">
-              Enter scores as a comma-separated list (e.g., 4,5,3,4...)
-            </p>
-          </div>
-
-          {/* Error message */}
-          {error && (
-            <div className="text-destructive text-sm p-2 bg-destructive/10 rounded-md">
-              {error}
-            </div>
-          )}
-
-          {/* Submit button */}
-          <div className="flex justify-end">
-            <Button type="button" variant="outline" className="mr-2" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Adding..." : "Add Round"}
-            </Button>
-          </div>
-        </form>
+        {step === 'course-search' ? renderCourseSearch() : renderRoundDetails()}
       </DialogContent>
     </Dialog>
   );

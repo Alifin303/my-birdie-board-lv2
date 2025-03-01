@@ -10,6 +10,7 @@ import { CourseStatsTable, CourseRoundHistory } from "@/components/dashboard/Cou
 import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
 import { RoundScorecard } from "@/components/dashboard/RoundScorecard";
 import { toast } from "@/hooks/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface Round {
   id: number;
@@ -36,16 +37,16 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
   
-  // Added state for scorecard modal
+  // State for scorecard modal
   const [selectedRound, setSelectedRound] = useState<Round | null>(null);
   const [isScorecardOpen, setIsScorecardOpen] = useState(false);
   
+  // State for delete confirmation
+  const [roundToDelete, setRoundToDelete] = useState<number | null>(null);
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+  
   // Debug flag for development
-  const [showDebugPanel, setShowDebugPanel] = useState(true);
-
-  useEffect(() => {
-    console.log("Modal state changed:", isModalOpen);
-  }, [isModalOpen]);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
 
   const { data: profile } = useQuery({
     queryKey: ['profile'],
@@ -121,20 +122,28 @@ export default function Dashboard() {
     setScoreType(type);
   };
 
-  // New function to handle opening the scorecard
+  // Function to handle opening the scorecard
   const handleViewScorecard = (round: Round) => {
     console.log("Opening scorecard for round:", round);
     setSelectedRound(round);
     setIsScorecardOpen(true);
   };
 
-  // New function to handle round deletion
-  const handleDeleteRound = async (roundId: number) => {
+  // Function to handle round deletion confirmation
+  const handleConfirmDelete = (roundId: number) => {
+    setRoundToDelete(roundId);
+    setIsConfirmDeleteOpen(true);
+  };
+
+  // Function to handle round deletion
+  const handleDeleteRound = async () => {
+    if (!roundToDelete) return;
+    
     try {
       const { error } = await supabase
         .from('rounds')
         .delete()
-        .eq('id', roundId);
+        .eq('id', roundToDelete);
 
       if (error) {
         console.error("Error deleting round:", error);
@@ -159,6 +168,9 @@ export default function Dashboard() {
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsConfirmDeleteOpen(false);
+      setRoundToDelete(null);
     }
   };
 
@@ -201,7 +213,7 @@ export default function Dashboard() {
                 selectedCourseId={selectedCourseId}
                 onBackClick={() => setSelectedCourseId(null)}
                 onViewScorecard={handleViewScorecard}
-                onDeleteRound={handleDeleteRound}
+                onDeleteRound={handleConfirmDelete}
               /> 
             : (
               <>
@@ -237,6 +249,24 @@ export default function Dashboard() {
           onOpenChange={setIsScorecardOpen}
         />
       )}
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isConfirmDeleteOpen} onOpenChange={setIsConfirmDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Round</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this round? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteRound} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       
       {/* Debug Panel for development */}
       {showDebugPanel && <DebugPanel />}
