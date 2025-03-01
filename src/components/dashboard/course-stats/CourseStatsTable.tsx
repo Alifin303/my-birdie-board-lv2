@@ -76,14 +76,24 @@ export const CourseStatsTable = ({
     }, {} as Record<string, any>);
 
     // Calculate stats for each course
-    return Object.values(courseGroups).map(course => {
-      const stats = calculateCourseStats(course.rounds, scoreType);
+    const courseStats = Object.values(courseGroups).map(course => {
+      // Calculate course-specific stats
+      const courseStatsArray = calculateCourseStats(course.rounds, scoreType);
+      
+      // Find the specific course stats from the array (it will be the first and only item)
+      const statForCourse = courseStatsArray.find(stat => stat.courseId === course.id) || {
+        roundsPlayed: 0,
+        bestGrossScore: 0,
+        averageScore: 0,
+        bestToPar: 0
+      };
+      
       return {
         ...course,
-        roundsPlayed: stats.roundsPlayed,
-        bestScore: stats.bestScore,
-        averageScore: stats.averageScore || 0,
-        bestToPar: stats.bestToPar
+        roundsPlayed: statForCourse.roundsPlayed,
+        bestScore: statForCourse.bestGrossScore,
+        averageScore: statForCourse.averageScore || 0,
+        bestToPar: statForCourse.bestToPar
       };
     }).sort((a, b) => {
       let valueA = a[sortField] || 0;
@@ -101,6 +111,8 @@ export const CourseStatsTable = ({
         ? valueA - valueB
         : valueB - valueA;
     });
+    
+    return courseStats;
   }, [userRounds, calculateCourseStats, sortField, sortDirection, scoreType]);
 
   if (!userRounds || userRounds.length === 0) {

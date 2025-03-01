@@ -42,6 +42,14 @@ interface CourseStats {
   averageScore: number;
 }
 
+// Returns statistic data for one course or multiple rounds
+interface CourseStatistics {
+  roundsPlayed: number;
+  bestScore: number;
+  averageScore: number;
+  bestToPar: number;
+}
+
 // Calculate overall user stats from rounds
 export const calculateStats = (rounds: Round[]): Stats => {
   const ROUNDS_NEEDED_FOR_HANDICAP = 5;
@@ -130,8 +138,8 @@ export const calculateStats = (rounds: Round[]): Stats => {
   };
 };
 
-// Calculate course stats
-export const calculateCourseStats = (rounds: Round[], scoreType: 'gross' | 'net' = 'gross'): any => {
+// Calculate stats for a single course
+export const calculateSingleCourseStats = (rounds: Round[], scoreType: 'gross' | 'net' = 'gross'): CourseStatistics => {
   if (!rounds || rounds.length === 0) {
     return {
       roundsPlayed: 0,
@@ -185,7 +193,7 @@ export const calculateCourseStats = (rounds: Round[], scoreType: 'gross' | 'net'
   }
 };
 
-// Group rounds by course and calculate course stats
+// Group rounds by course and calculate course stats for all courses
 export const calculateCourseStats = (rounds: Round[], scoreType: 'gross' | 'net' = 'gross'): CourseStats[] => {
   if (!rounds || rounds.length === 0) return [];
 
@@ -228,7 +236,7 @@ export const calculateCourseStats = (rounds: Round[], scoreType: 'gross' | 'net'
     const roundsPlayed = courseRounds.length;
     
     // Calculate stats based on score type
-    const stats = calculateCourseStats(courseRounds, scoreType);
+    const stats = calculateSingleCourseStats(courseRounds, scoreType);
     
     return {
       courseId,
