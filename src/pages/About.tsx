@@ -30,7 +30,7 @@ const About = () => {
           ← Back to home
         </Link>
         <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 text-white">
-          <h1 className="text-4xl font-bold mb-6">About BirdieBoard</h1>
+          <h1 className="text-4xl font-bold mb-6">BirdieBoard</h1>
           
           <div className="space-y-6 text-white/90">
             <p>
