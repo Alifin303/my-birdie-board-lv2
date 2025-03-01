@@ -701,19 +701,12 @@ Try selecting a different course or adding this course manually.`);
     try {
       const { data, error } = await supabase
         .from('courses')
-        .insert([
-          {
-            name: formatCourseName(courseData.clubName, courseData.name),
-            city: courseData.city,
-            state: courseData.state,
-            country: courseData.country
-          }
-        ])
-        .select()
+        .select('*')
+        .eq('id', courseId)
         .single();
         
       if (error) {
-        console.error("Error adding manual course:", error);
+        console.error("Error fetching created course:", error);
         throw new Error(error.message);
       }
       
@@ -724,27 +717,9 @@ Try selecting a different course or adding this course manually.`);
           clubName: parseCourseName(data.name).clubName,
           city: data.city,
           state: data.state,
-          country: data.country,
+          country: 'United States',
           isUserAdded: true
         };
-        
-        try {
-          localStorage.setItem(
-            `course_details_${data.id}`, 
-            JSON.stringify({
-              id: data.id,
-              name: data.name,
-              clubName: parseCourseName(data.name).clubName,
-              city: data.city,
-              state: data.state,
-              country: data.country,
-              tees: [],
-              holes: []
-            })
-          );
-        } catch (e) {
-          console.error("Error saving to localStorage:", e);
-        }
         
         await handleCourseSelect(newCourse);
         

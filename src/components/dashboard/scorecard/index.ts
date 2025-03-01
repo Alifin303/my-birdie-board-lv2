@@ -1,3 +1,4 @@
 
 export { RoundScorecard } from './RoundScorecard';
-export type { Score, HoleScores } from './types';
+export type { HoleScore } from './types';
+
