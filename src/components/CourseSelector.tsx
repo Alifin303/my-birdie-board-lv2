@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from './ui/card';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Search, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { searchCourses } from '@/services/golfCourseApi';
+import { searchCourses, GolfCourse } from '@/services/golfCourseApi';
 
 interface Course {
   id: number;
@@ -65,7 +64,8 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
       
       // Filter API results to remove any that are already in the database
       const filteredApiResults = results.filter(apiCourse => {
-        const courseName = apiCourse.name || apiCourse.club_name || "";
+        // Fix: Get course name by checking different properties in GolfCourse type
+        const courseName = apiCourse.club_name || apiCourse.course_name || "";
         return !dbCoursesMap.has(courseName.toLowerCase());
       });
       
@@ -96,12 +96,12 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
     setShowAddMissingCourse(false);
   };
 
-  const handleSelectApiCourse = async (apiCourse: any) => {
+  const handleSelectApiCourse = async (apiCourse: GolfCourse) => {
     try {
-      // Extract course data from API result
-      const courseName = apiCourse.name || apiCourse.club_name || "Unknown Course";
-      const city = apiCourse.location?.city || apiCourse.city || "";
-      const state = apiCourse.location?.state || apiCourse.state || "";
+      // Extract course data from API result - Fix: Use correct properties
+      const courseName = apiCourse.club_name || apiCourse.course_name || "Unknown Course";
+      const city = apiCourse.location?.city || "";
+      const state = apiCourse.location?.state || "";
       
       // Insert the course into our database
       const { data: newCourse, error } = await supabase
@@ -220,11 +220,11 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
                   className="p-3 hover:bg-accent/10 cursor-pointer border-b last:border-b-0"
                   onClick={() => handleSelectApiCourse(course)}
                 >
-                  <p className="font-medium">{course.name || course.club_name}</p>
+                  <p className="font-medium">{course.club_name || course.course_name}</p>
                   <p className="text-sm text-muted-foreground">
-                    {course.location?.city || course.city}
-                    {(course.location?.state || course.state) ? 
-                      `, ${course.location?.state || course.state}` : ''}
+                    {course.location?.city}
+                    {course.location?.state ? 
+                      `, ${course.location?.state}` : ''}
                   </p>
                 </div>
               ))}
@@ -245,11 +245,11 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
               className="p-3 hover:bg-accent/10 cursor-pointer border-b last:border-b-0"
               onClick={() => handleSelectApiCourse(course)}
             >
-              <p className="font-medium">{course.name || course.club_name}</p>
+              <p className="font-medium">{course.club_name || course.course_name}</p>
               <p className="text-sm text-muted-foreground">
-                {course.location?.city || course.city}
-                {(course.location?.state || course.state) ? 
-                  `, ${course.location?.state || course.state}` : ''}
+                {course.location?.city}
+                {course.location?.state ? 
+                  `, ${course.location?.state}` : ''}
               </p>
             </div>
           ))}
