@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase, parseCourseName } from "@/integrations/supabase/client";
 import { AddRoundModal } from "@/components/AddRoundModal";
@@ -7,6 +7,8 @@ import { DebugPanel } from "@/components/DebugPanel";
 import { RoundScorecard } from "@/components/dashboard/RoundScorecard";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { DeleteRoundDialog } from "@/components/dashboard/DeleteRoundDialog";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface Round {
   id: number;
@@ -28,6 +30,7 @@ interface Round {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
   
@@ -39,26 +42,50 @@ export default function Dashboard() {
   
   const [showDebugPanel, setShowDebugPanel] = useState(false);
 
+  // Check authentication status on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please log in to view your dashboard");
+        navigate("/");
+      }
+    };
+    
+    checkAuth();
+  }, [navigate]);
+
   const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
     queryKey: ['profile'],
     queryFn: async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session) throw new Error('No session found');
+        if (!session) {
+          throw new Error('No session found');
+        }
         
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', session.user.id)
-          .single();
+          .maybeSingle();
           
         if (error) throw error;
-        return data;
+        
+        // Provide default values in case profile is null
+        return data || { 
+          id: session.user.id,
+          username: session.user.email?.split('@')[0] || 'golfer',
+          first_name: '',
+          last_name: '',
+          handicap: 0
+        };
       } catch (error) {
         console.error("Error fetching profile:", error);
         return null;
       }
-    }
+    },
+    retry: 2
   });
 
   const { data: userRounds, isLoading: roundsLoading, error: roundsError, refetch: refetchRounds } = useQuery({
@@ -110,7 +137,7 @@ export default function Dashboard() {
         return [];
       }
     },
-    retry: 1,
+    retry: 2,
     retryDelay: 1000
   });
 
@@ -146,12 +173,25 @@ export default function Dashboard() {
         <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md mb-6">
           <h3 className="text-lg font-medium">Error Loading Dashboard</h3>
           <p className="mt-2">There was a problem loading your dashboard data. Please try refreshing the page.</p>
+          <p className="mt-1 text-sm">{profileError?.message || roundsError?.message}</p>
           <button 
             onClick={() => window.location.reload()}
             className="mt-4 bg-red-100 hover:bg-red-200 text-red-800 px-4 py-2 rounded-md transition-colors"
           >
             Refresh Page
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state
+  if (profileLoading && !profile) {
+    return (
+      <div className="container mx-auto py-8 px-4 flex justify-center items-center min-h-[50vh]">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+          <p className="mt-4 text-muted-foreground">Loading your dashboard...</p>
         </div>
       </div>
     );

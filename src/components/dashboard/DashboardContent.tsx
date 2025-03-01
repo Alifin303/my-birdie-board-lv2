@@ -49,11 +49,18 @@ export const DashboardContent = ({
 
   // Make sure we always have a valid array for userRounds
   const validRounds = userRounds || [];
+  
+  // Check if we have a valid profile
+  const validProfile = profile || { 
+    username: 'golfer',
+    first_name: '',
+    last_name: ''
+  };
 
   return (
     <div className="space-y-8">
       <DashboardHeader 
-        profileData={profile} 
+        profileData={validProfile} 
         onAddRound={onAddRound} 
       />
       

@@ -53,7 +53,7 @@ export const CourseStatsTable = ({
   };
 
   const coursesData = useMemo(() => {
-    if (!userRounds) return [];
+    if (!userRounds || userRounds.length === 0) return [];
 
     // Group rounds by course
     const courseGroups = userRounds.reduce((acc, round) => {
@@ -82,12 +82,12 @@ export const CourseStatsTable = ({
         ...course,
         roundsPlayed: stats.roundsPlayed,
         bestScore: stats.bestScore,
-        averageScore: stats.averageScore,
+        averageScore: stats.averageScore || 0,
         bestToPar: stats.bestToPar
       };
     }).sort((a, b) => {
-      let valueA = a[sortField];
-      let valueB = b[sortField];
+      let valueA = a[sortField] || 0;
+      let valueB = b[sortField] || 0;
       
       // Special case for bestToPar - lower is better
       if (sortField === 'bestToPar') {
@@ -105,8 +105,9 @@ export const CourseStatsTable = ({
 
   if (!userRounds || userRounds.length === 0) {
     return (
-      <div className="text-center py-10">
-        <p className="text-gray-500">You haven't played any rounds yet.</p>
+      <div className="text-center py-10 border rounded-md p-6 bg-muted/20">
+        <p className="text-muted-foreground">You haven't played any rounds yet.</p>
+        <p className="text-sm text-muted-foreground mt-2">Add a round to see your stats here.</p>
       </div>
     );
   }
@@ -163,7 +164,7 @@ export const CourseStatsTable = ({
               </TableCell>
               <TableCell>{course.roundsPlayed}</TableCell>
               <TableCell>{course.bestScore}</TableCell>
-              <TableCell>{course.averageScore.toFixed(1)}</TableCell>
+              <TableCell>{typeof course.averageScore === 'number' ? course.averageScore.toFixed(1) : '0.0'}</TableCell>
               <TableCell>{course.bestToPar > 0 ? `+${course.bestToPar}` : course.bestToPar}</TableCell>
             </TableRow>
           ))}
