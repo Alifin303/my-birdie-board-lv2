@@ -1,13 +1,31 @@
 
 import { useState, useMemo } from "react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
+// Define proper type for user rounds
+interface Round {
+  id: number;
+  date: string;
+  tee_name: string;
+  gross_score: number;
+  net_score?: number;
+  to_par_gross: number;
+  to_par_net?: number;
+  courses?: {
+    id: number;
+    name: string;
+    clubName?: string;
+    courseName?: string;
+    city?: string;
+    state?: string;
+  };
+}
+
 interface CourseStatsTableProps {
-  userRounds: any[] | null;
+  userRounds: Round[] | null;
   scoreType: 'gross' | 'net';
-  calculateCourseStats: (rounds: any[], scoreType: 'gross' | 'net') => any;
+  calculateCourseStats: (rounds: Round[], scoreType: 'gross' | 'net') => any;
   onCourseClick: (courseId: number) => void;
 }
 
