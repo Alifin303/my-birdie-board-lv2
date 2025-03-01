@@ -323,8 +323,22 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
         </div>
       )}
 
-      {/* "Add missing course" button - ALWAYS display it when search term has enough characters */}
+      {/* "Add missing course" button - ALWAYS VISIBLE when search term has enough characters */}
       {searchTerm.length >= 3 && !isLoading && (
+        <div className="mt-2">
+          <Button 
+            variant="outline" 
+            className="w-full flex items-center justify-center gap-2"
+            onClick={onAddMissingCourse || handleAddMissingCourse}
+          >
+            <Plus className="h-4 w-4" />
+            Can&apos;t find your course? Add it now
+          </Button>
+        </div>
+      )}
+      
+      {/* Make the button ALWAYS VISIBLE, even when search term is less than 3 characters */}
+      {(!searchTerm || searchTerm.length < 3) && (
         <div className="mt-2">
           <Button 
             variant="outline" 
