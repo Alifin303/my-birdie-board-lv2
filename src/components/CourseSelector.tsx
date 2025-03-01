@@ -319,7 +319,7 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
                   `, ${course.location?.state}` : ''}
               </p>
             </div>
-          )}
+          ))}
         </div>
       )}
 
@@ -332,7 +332,7 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
             onClick={onAddMissingCourse || handleAddMissingCourse}
           >
             <Plus className="h-4 w-4" />
-            Can't find your course? Add it now
+            Can&apos;t find your course? Add it now
           </Button>
         </div>
       )}
