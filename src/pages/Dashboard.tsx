@@ -199,6 +199,7 @@ export default function Dashboard() {
                 onBackClick={() => setSelectedCourseId(null)}
                 onViewScorecard={handleViewScorecard}
                 onDeleteRound={handleConfirmDelete}
+                scoreType={scoreType}
               /> 
             : (
               <>

@@ -174,6 +174,7 @@ interface CourseRoundHistoryProps {
   onBackClick: () => void;
   onViewScorecard?: (round: Round) => void;
   onDeleteRound?: (roundId: number) => void;
+  scoreType?: 'gross' | 'net';
 }
 
 export const CourseRoundHistory = ({ 
@@ -181,7 +182,8 @@ export const CourseRoundHistory = ({
   selectedCourseId,
   onBackClick,
   onViewScorecard,
-  onDeleteRound
+  onDeleteRound,
+  scoreType = 'gross'
 }: CourseRoundHistoryProps) => {
   if (!userRounds) return null;
   
@@ -238,7 +240,7 @@ export const CourseRoundHistory = ({
         <div className="mb-6">
           <h4 className="text-lg font-medium mb-3">Score Progress</h4>
           <div className="h-[250px]">
-            <ScoreProgressChart rounds={courseRounds} />
+            <ScoreProgressChart rounds={courseRounds} scoreType={scoreType} />
           </div>
         </div>
         
