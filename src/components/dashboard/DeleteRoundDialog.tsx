@@ -70,4 +70,4 @@ export const DeleteRoundDialog = ({
       </AlertDialogContent>
     </AlertDialog>
   );
-};
+}

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase, parseCourseName } from "@/integrations/supabase/client";
@@ -122,6 +121,11 @@ export default function Dashboard() {
     setIsConfirmDeleteOpen(true);
   };
 
+  const handleRefetchRounds = async (): Promise<void> => {
+    await refetchRounds();
+    return;
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
       <DashboardContent
@@ -152,7 +156,7 @@ export default function Dashboard() {
         roundId={roundToDelete}
         isOpen={isConfirmDeleteOpen}
         onOpenChange={setIsConfirmDeleteOpen}
-        onSuccess={refetchRounds}
+        onSuccess={handleRefetchRounds}
       />
       
       {showDebugPanel && <DebugPanel />}
