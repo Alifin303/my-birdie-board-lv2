@@ -1,16 +1,12 @@
 
-import { useEffect, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase, parseCourseName } from "@/integrations/supabase/client";
 import { AddRoundModal } from "@/components/AddRoundModal";
 import { DebugPanel } from "@/components/DebugPanel";
-import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { MainStats, HandicapCircle } from "@/components/dashboard/StatsDisplay";
-import { CourseStatsTable, CourseRoundHistory } from "@/components/dashboard/course-stats";
-import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
 import { RoundScorecard } from "@/components/dashboard/RoundScorecard";
-import { toast } from "@/hooks/use-toast";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { DashboardContent } from "@/components/dashboard/DashboardContent";
+import { DeleteRoundDialog } from "@/components/dashboard/DeleteRoundDialog";
 
 interface Round {
   id: number;
@@ -32,8 +28,6 @@ interface Round {
 }
 
 export default function Dashboard() {
-  const queryClient = useQueryClient();
-  const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
   
@@ -128,100 +122,18 @@ export default function Dashboard() {
     setIsConfirmDeleteOpen(true);
   };
 
-  const handleDeleteRound = async () => {
-    if (!roundToDelete) return;
-    
-    try {
-      const { error } = await supabase
-        .from('rounds')
-        .delete()
-        .eq('id', roundToDelete);
-
-      if (error) {
-        console.error("Error deleting round:", error);
-        toast({
-          title: "Error",
-          description: "Failed to delete round. Please try again.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      await refetchRounds();
-      toast({
-        title: "Success",
-        description: "Round deleted successfully",
-      });
-    } catch (err) {
-      console.error("Error in delete operation:", err);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsConfirmDeleteOpen(false);
-      setRoundToDelete(null);
-    }
-  };
-
-  const renderDashboard = () => {
-    return (
-      <div className="space-y-8">
-        <DashboardHeader 
-          profileData={profile} 
-          onAddRound={handleOpenModal} 
-        />
-        
-        {!selectedCourseId && (
-          <>
-            <MainStats 
-              userRounds={userRounds}
-              roundsLoading={roundsLoading}
-              scoreType={scoreType}
-              calculateStats={calculateStats}
-            />
-            
-            <HandicapCircle 
-              userRounds={userRounds}
-              roundsLoading={roundsLoading}
-              scoreType={scoreType}
-              onScoreTypeChange={handleScoreTypeChange}
-              calculateStats={calculateStats}
-            />
-          </>
-        )}
-        
-        <div className="space-y-4">
-          {selectedCourseId 
-            ? <CourseRoundHistory 
-                userRounds={userRounds} 
-                selectedCourseId={selectedCourseId}
-                onBackClick={() => setSelectedCourseId(null)}
-                onViewScorecard={handleViewScorecard}
-                onDeleteRound={handleConfirmDelete}
-                scoreType={scoreType}
-              /> 
-            : (
-              <>
-                <h2 className="text-2xl font-semibold">Your Courses</h2>
-                <CourseStatsTable 
-                  userRounds={userRounds}
-                  scoreType={scoreType}
-                  calculateCourseStats={calculateCourseStats}
-                  onCourseClick={(courseId) => setSelectedCourseId(courseId)}
-                />
-              </>
-            )
-          }
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="container mx-auto py-8 px-4">
-      {renderDashboard()}
+      <DashboardContent
+        userRounds={userRounds}
+        roundsLoading={roundsLoading}
+        profile={profile}
+        scoreType={scoreType}
+        onScoreTypeChange={handleScoreTypeChange}
+        onAddRound={handleOpenModal}
+        onViewScorecard={handleViewScorecard}
+        onDeleteRound={handleConfirmDelete}
+      />
 
       <AddRoundModal 
         open={isModalOpen} 
@@ -236,22 +148,12 @@ export default function Dashboard() {
         />
       )}
       
-      <AlertDialog open={isConfirmDeleteOpen} onOpenChange={setIsConfirmDeleteOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Round</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this round? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteRound} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteRoundDialog
+        roundId={roundToDelete}
+        isOpen={isConfirmDeleteOpen}
+        onOpenChange={setIsConfirmDeleteOpen}
+        onSuccess={refetchRounds}
+      />
       
       {showDebugPanel && <DebugPanel />}
     </div>
