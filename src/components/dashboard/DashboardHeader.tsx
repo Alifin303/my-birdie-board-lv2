@@ -32,6 +32,11 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
     }
   };
 
+  const handleAddRound = () => {
+    console.log("Add Round button clicked");
+    onAddRound();
+  };
+
   const renderProfileContent = () => {
     if (!profileData) return null;
     return (
@@ -52,7 +57,7 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
           <h1 className="text-3xl font-bold">Welcome, {profileData?.first_name || 'Golfer'}!</h1>
         </div>
         <Button 
-          onClick={onAddRound}
+          onClick={handleAddRound}
           className="relative"
         >
           Add a New Round

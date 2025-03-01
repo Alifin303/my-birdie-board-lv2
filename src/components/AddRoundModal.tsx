@@ -12,7 +12,7 @@ import { CalendarIcon, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { CourseSelector } from "./CourseSelector";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { ManualCourseForm } from "./ManualCourseForm";
 
 interface AddRoundModalProps {
@@ -56,6 +56,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   };
 
   const handleCourseSelect = (course: any) => {
+    console.log("Course selected:", course);
     setSelectedCourse(course);
     setNoResultsFound(false);
     setStep('round-details');
@@ -66,6 +67,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   };
 
   const handleAddMissingCourse = () => {
+    console.log("Add missing course clicked. Search term:", searchTerm);
     setStep('add-course');
   };
 
@@ -76,14 +78,12 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
       name: courseName,
     };
     
+    console.log("Course created:", newCourse);
     setSelectedCourse(newCourse);
     setStep('round-details');
     
     // Show success message
-    toast({
-      title: "Course Added",
-      description: `"${courseName}" has been added successfully`,
-    });
+    toast.success(`"${courseName}" has been added successfully`);
   };
 
   const handleSearchUpdate = (term: string, hasResults: boolean) => {
@@ -186,10 +186,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
       // Success
       console.log("Round added successfully:", data);
       queryClient.invalidateQueries({ queryKey: ['userRounds'] });
-      toast({
-        title: "Success",
-        description: "Round added successfully",
-      });
+      toast.success("Round added successfully");
       onOpenChange(false);
     } catch (err: any) {
       console.error("Error adding round:", err);
@@ -209,6 +206,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
           onCourseChange={handleCourseSelect}
           onAddMissingCourse={handleAddMissingCourse}
           onSearchUpdate={handleSearchUpdate}
+          initialSearchTerm={searchTerm}
         />
       </div>
       

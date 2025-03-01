@@ -37,6 +37,14 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
   const [hasPerformedSearch, setHasPerformedSearch] = useState(false);
 
   useEffect(() => {
+    // Initialize with initial search term if provided
+    if (initialSearchTerm && initialSearchTerm.length >= 3) {
+      setSearchTerm(initialSearchTerm);
+      searchCoursesHandler();
+    }
+  }, [initialSearchTerm]);
+
+  useEffect(() => {
     if (searchTerm.length >= 3) {
       searchCoursesHandler();
     } else {
@@ -56,13 +64,19 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
     
     try {
       // First, search our Supabase database
+      console.log("Searching for courses with term:", searchTerm);
       const { data: dbCourses, error } = await supabase
         .from('courses')
         .select('id, name, city, state')
         .ilike('name', `%${searchTerm}%`)
         .limit(5);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Database search error:", error);
+        throw error;
+      }
+      
+      console.log("Database search results:", dbCourses);
       
       // Then, search the golf course API
       const { results } = await searchCourses(searchTerm);
@@ -112,6 +126,7 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
   };
 
   const handleSelectCourse = (course: Course) => {
+    console.log("Selected course from database:", course);
     onCourseChange(course);
     setSearchTerm('');
     setSearchResults([]);
@@ -122,6 +137,7 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
 
   const handleSelectApiCourse = async (apiCourse: GolfCourse) => {
     try {
+      console.log("Selected course from API:", apiCourse);
       // Extract course data from API result - Fix: Use correct properties
       const courseName = apiCourse.club_name || apiCourse.course_name || "Unknown Course";
       const city = apiCourse.location?.city || "";
@@ -141,6 +157,7 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
         
       if (error) throw error;
       
+      console.log("Added course from API to database:", newCourse);
       // Select the newly added course
       onCourseChange(newCourse);
       setSearchTerm('');
@@ -154,6 +171,7 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
   };
 
   const handleAddMissingCourse = () => {
+    console.log("Add missing course button clicked");
     if (onAddMissingCourse) {
       onAddMissingCourse();
       return;
@@ -184,6 +202,7 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
           return;
         }
         
+        console.log("Added missing course to database:", data);
         // Select the newly added course
         onCourseChange(data);
         setSearchTerm('');

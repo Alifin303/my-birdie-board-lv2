@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase, parseCourseName } from "@/integrations/supabase/client";
@@ -42,7 +41,6 @@ export default function Dashboard() {
   
   const [showDebugPanel, setShowDebugPanel] = useState(false);
 
-  // Check authentication status on mount
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -72,7 +70,6 @@ export default function Dashboard() {
           
         if (error) throw error;
         
-        // Provide default values in case profile is null
         return data || { 
           id: session.user.id,
           username: session.user.email?.split('@')[0] || 'golfer',
@@ -142,7 +139,7 @@ export default function Dashboard() {
   });
 
   const handleOpenModal = () => {
-    console.log("Opening modal...");
+    console.log("Opening Add Round modal...");
     setIsModalOpen(true);
   };
 
@@ -166,7 +163,6 @@ export default function Dashboard() {
     return;
   };
 
-  // If there's an error fetching data, display an error message instead of a blank screen
   if (profileError || roundsError) {
     return (
       <div className="container mx-auto py-8 px-4">
@@ -185,7 +181,6 @@ export default function Dashboard() {
     );
   }
 
-  // Show loading state
   if (profileLoading && !profile) {
     return (
       <div className="container mx-auto py-8 px-4 flex justify-center items-center min-h-[50vh]">
