@@ -34,23 +34,34 @@ const About = () => {
           
           <div className="space-y-6 text-white/90">
             <p>
-              Welcome to BirdieBoard, your personal golf score tracker designed to help you improve your game and stay motivated. Whether you're a casual player or a passionate golfer, BirdieBoard gives you the tools to track your rounds, monitor your progress, and compete with others.
+              At BirdieBoard, we believe every golfer deserves a smarter way to track their game. Keeping score on paper is a thing of the past—our digital platform allows you to store, analyze, and compete like never before.
             </p>
 
             <p>
-              With BirdieBoard, you can easily enter your scores — hole by hole — for any golf course you've played. We'll store your historic scores and highlight your best performances. Plus, you'll see what your best possible score could have been if you played your best on every hole, giving you a clear picture of your potential.
+              We built BirdieBoard with three goals in mind:
             </p>
 
-            <p>
-              Our leaderboards take the competition to the next level, letting you compare your scores not only against others at the same course but also within your handicap range. Whether it's daily, weekly, monthly, or all-time leaderboards, you'll see exactly how you stack up against golfers of a similar skill level — making every round feel like part of a bigger game.
-            </p>
+            <div className="pl-4 border-l-4 border-primary/60 my-6">
+              <h3 className="text-xl font-bold mb-2">🏆 Track Your Performance</h3>
+              <p>Upload scorecards from any course and get detailed insights into your game. Our intuitive graphs help you visualize progress, from tee shots to putting stats.</p>
+            </div>
+
+            <div className="pl-4 border-l-4 border-primary/60 my-6">
+              <h3 className="text-xl font-bold mb-2">⛳ Improve Your Handicap</h3>
+              <p>Our built-in handicap calculator provides an accurate reflection of your skill level based on your latest rounds—helping you compete fairly with others.</p>
+            </div>
+
+            <div className="pl-4 border-l-4 border-primary/60 my-6">
+              <h3 className="text-xl font-bold mb-2">📊 Compete with Friends & Leaderboards</h3>
+              <p>BirdieBoard connects golfers worldwide through course-based leaderboards. Compare your scores with other players at your favorite courses and challenge yourself to climb the ranks.</p>
+            </div>
 
             <p>
-              We also calculate your handicap based on the scores you enter, helping you track your improvement over time and better understand your playing ability.
+              Whether you're aiming for lower scores, a better handicap, or just bragging rights at the clubhouse, BirdieBoard is here to help you elevate your game.
             </p>
 
-            <p>
-              Track your rounds, climb the leaderboards, and push your game forward with BirdieBoard — where every swing counts.
+            <p className="font-bold text-center text-xl my-8">
+              📌 Join the BirdieBoard community today and start tracking your way to better golf!
             </p>
           </div>
 

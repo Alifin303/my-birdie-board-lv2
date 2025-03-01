@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from './ui/button';
-import { HelpCircle, ArrowRight, Upload, BarChart2, Award, Trophy } from 'lucide-react';
+import { ArrowRight, Upload, BarChart2, Award, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SignUpDialog } from './SignUpDialog';
 import { Card, CardContent } from './ui/card';
@@ -19,77 +19,75 @@ export const MainContent = () => {
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <SignUpDialog />
-          <Link to="/about">
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="bg-transparent border-white text-white hover:bg-white/10 text-lg px-8 h-12 transition-all duration-300"
-            >
-              <HelpCircle className="mr-2" />
-              What is BirdieBoard?
-            </Button>
-          </Link>
         </div>
       </div>
       
       {/* Features Section */}
-      <div className="mt-20 grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-        <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300">
-          <CardContent className="p-6 flex flex-col">
+      <div className="mt-20 flex flex-wrap gap-4 text-left justify-center">
+        <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 flex-1 min-w-[250px] max-w-[300px]">
+          <CardContent className="p-6 flex flex-col h-full">
             <div className="bg-accent/20 rounded-full p-3 w-fit mb-4">
               <Upload className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">🔹 Upload & Store Your Scorecards</h3>
+            <h3 className="text-xl font-bold text-white mb-2">Upload & Store Your Scorecards</h3>
             <p className="text-white/80 mb-4">Keep a history of your rounds and track stats effortlessly.</p>
             <div className="mt-auto">
-              <Button variant="link" className="text-white p-0 hover:text-white/80">
-                Learn more <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <Link to="/about">
+                <Button variant="link" className="text-white p-0 hover:text-white/80">
+                  Learn more <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300">
-          <CardContent className="p-6 flex flex-col">
+        <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 flex-1 min-w-[250px] max-w-[300px]">
+          <CardContent className="p-6 flex flex-col h-full">
             <div className="bg-accent/20 rounded-full p-3 w-fit mb-4">
               <BarChart2 className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">🔹 Visual Progress Tracking</h3>
+            <h3 className="text-xl font-bold text-white mb-2">Visual Progress Tracking</h3>
             <p className="text-white/80 mb-4">Charts and graphs give you insights into your strengths and areas to improve.</p>
             <div className="mt-auto">
-              <Button variant="link" className="text-white p-0 hover:text-white/80">
-                Learn more <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <Link to="/about">
+                <Button variant="link" className="text-white p-0 hover:text-white/80">
+                  Learn more <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300">
-          <CardContent className="p-6 flex flex-col">
+        <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 flex-1 min-w-[250px] max-w-[300px]">
+          <CardContent className="p-6 flex flex-col h-full">
             <div className="bg-accent/20 rounded-full p-3 w-fit mb-4">
               <Award className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">🔹 Handicap Generator</h3>
+            <h3 className="text-xl font-bold text-white mb-2">Handicap Generator</h3>
             <p className="text-white/80 mb-4">Get an accurate handicap calculation based on your rounds.</p>
             <div className="mt-auto">
-              <Button variant="link" className="text-white p-0 hover:text-white/80">
-                Learn more <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <Link to="/about">
+                <Button variant="link" className="text-white p-0 hover:text-white/80">
+                  Learn more <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300">
-          <CardContent className="p-6 flex flex-col">
+        <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 flex-1 min-w-[250px] max-w-[300px]">
+          <CardContent className="p-6 flex flex-col h-full">
             <div className="bg-accent/20 rounded-full p-3 w-fit mb-4">
               <Trophy className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">🔹 Course Leaderboards</h3>
+            <h3 className="text-xl font-bold text-white mb-2">Course Leaderboards</h3>
             <p className="text-white/80 mb-4">Compete with friends and other golfers at your favorite courses.</p>
             <div className="mt-auto">
-              <Button variant="link" className="text-white p-0 hover:text-white/80">
-                Learn more <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <Link to="/about">
+                <Button variant="link" className="text-white p-0 hover:text-white/80">
+                  Learn more <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
