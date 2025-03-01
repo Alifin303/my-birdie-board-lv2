@@ -147,9 +147,23 @@ export const calculateCourseStats = (rounds: Round[]): CourseStats[] => {
   return Array.from(courseMap.entries()).map(([courseId, courseRounds]) => {
     const firstRound = courseRounds[0]; // For course name and details
     
+    // Ensure we have valid course information
+    if (!firstRound.courses) {
+      return {
+        courseId,
+        courseName: "Unknown Course",
+        clubName: "Unknown Club",
+        roundsPlayed: courseRounds.length,
+        bestGrossScore: Math.min(...courseRounds.map(r => r.gross_score)),
+        bestNetScore: null,
+        bestToPar: Math.min(...courseRounds.map(r => r.to_par_gross)),
+        bestToParNet: null
+      };
+    }
+    
     // Get course name, handling possible formatting
-    let courseName = firstRound.courses?.courseName || "Unknown Course";
-    let clubName = firstRound.courses?.clubName || "Unknown Club";
+    let courseName = firstRound.courses.courseName || "Unknown Course";
+    let clubName = firstRound.courses.clubName || "Unknown Club";
     
     const roundsPlayed = courseRounds.length;
     const bestGrossScore = Math.min(...courseRounds.map(r => r.gross_score));
@@ -166,8 +180,8 @@ export const calculateCourseStats = (rounds: Round[]): CourseStats[] => {
       courseId,
       courseName,
       clubName,
-      city: firstRound.courses?.city,
-      state: firstRound.courses?.state,
+      city: firstRound.courses.city,
+      state: firstRound.courses.state,
       roundsPlayed,
       bestGrossScore,
       bestNetScore,

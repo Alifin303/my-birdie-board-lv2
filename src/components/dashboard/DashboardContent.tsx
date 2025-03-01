@@ -47,6 +47,9 @@ export const DashboardContent = ({
 }: DashboardContentProps) => {
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
 
+  // Make sure we always have a valid array for userRounds
+  const validRounds = userRounds || [];
+
   return (
     <div className="space-y-8">
       <DashboardHeader 
@@ -57,14 +60,14 @@ export const DashboardContent = ({
       {!selectedCourseId && (
         <>
           <MainStats 
-            userRounds={userRounds}
+            userRounds={validRounds}
             roundsLoading={roundsLoading}
             scoreType={scoreType}
             calculateStats={calculateStats}
           />
           
           <HandicapCircle 
-            userRounds={userRounds}
+            userRounds={validRounds}
             roundsLoading={roundsLoading}
             scoreType={scoreType}
             onScoreTypeChange={onScoreTypeChange}
@@ -76,7 +79,7 @@ export const DashboardContent = ({
       <div className="space-y-4">
         {selectedCourseId 
           ? <CourseRoundHistory 
-              userRounds={userRounds} 
+              userRounds={validRounds} 
               selectedCourseId={selectedCourseId}
               onBackClick={() => setSelectedCourseId(null)}
               onViewScorecard={onViewScorecard}
@@ -87,7 +90,7 @@ export const DashboardContent = ({
             <>
               <h2 className="text-2xl font-semibold">Your Courses</h2>
               <CourseStatsTable 
-                userRounds={userRounds}
+                userRounds={validRounds}
                 scoreType={scoreType}
                 calculateCourseStats={calculateCourseStats}
                 onCourseClick={(courseId) => setSelectedCourseId(courseId)}
