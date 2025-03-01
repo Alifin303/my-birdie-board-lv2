@@ -17,11 +17,14 @@ interface Round {
   net_score?: number;
   to_par_gross: number;
   to_par_net?: number;
+  hole_scores?: any;
   courses?: {
     id: number;
     name: string;
     city?: string;
     state?: string;
+    clubName?: string;
+    courseName?: string;
   };
 }
 
@@ -121,22 +124,27 @@ export default function Dashboard() {
           onAddRound={handleOpenModal} 
         />
         
-        {/* Main Stats Display */}
-        <MainStats 
-          userRounds={userRounds}
-          roundsLoading={roundsLoading}
-          scoreType={scoreType}
-          calculateStats={calculateStats}
-        />
-        
-        {/* Handicap Circle */}
-        <HandicapCircle 
-          userRounds={userRounds}
-          roundsLoading={roundsLoading}
-          scoreType={scoreType}
-          onScoreTypeChange={handleScoreTypeChange}
-          calculateStats={calculateStats}
-        />
+        {/* Only show the overall stats if not viewing a specific course */}
+        {!selectedCourseId && (
+          <>
+            {/* Main Stats Display */}
+            <MainStats 
+              userRounds={userRounds}
+              roundsLoading={roundsLoading}
+              scoreType={scoreType}
+              calculateStats={calculateStats}
+            />
+            
+            {/* Handicap Circle */}
+            <HandicapCircle 
+              userRounds={userRounds}
+              roundsLoading={roundsLoading}
+              scoreType={scoreType}
+              onScoreTypeChange={handleScoreTypeChange}
+              calculateStats={calculateStats}
+            />
+          </>
+        )}
         
         {/* Course Stats or Round History */}
         <div className="space-y-4">

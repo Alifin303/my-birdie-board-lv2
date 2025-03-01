@@ -1,6 +1,23 @@
 
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown, Trash, Eye } from "lucide-react";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
+import ScoreProgressChart from "./ScoreProgressChart";
+import { RoundScorecard } from "./RoundScorecard";
 
 interface Round {
   id: number;
@@ -10,6 +27,7 @@ interface Round {
   net_score?: number;
   to_par_gross: number;
   to_par_net?: number;
+  hole_scores?: any;
   courses?: {
     id: number;
     name: string;
@@ -179,6 +197,13 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
   selectedCourseId: number | null;
   onBackClick: () => void;
 }) => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
+  const [deletingRoundId, setDeletingRoundId] = useState<number | null>(null);
+  const [viewingRound, setViewingRound] = useState<Round | null>(null);
+  const [scorecardOpen, setScorecardOpen] = useState(false);
+  
   if (!userRounds || !selectedCourseId) return null;
   
   const courseRounds = userRounds.filter(
@@ -200,6 +225,64 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
     ? `${clubName} - ${courseName}`
     : courseName;
   
+  // Calculate course-specific stats
+  const calculateCourseSpecificStats = () => {
+    if (courseRounds.length === 0) return null;
+    
+    const roundsPlayed = courseRounds.length;
+    const bestGrossScore = Math.min(...courseRounds.map(r => r.gross_score));
+    const bestToPar = Math.min(...courseRounds.map(r => r.to_par_gross));
+    
+    // Net scores may not be available for all rounds
+    const roundsWithNetScore = courseRounds.filter(r => r.net_score !== undefined);
+    const bestNetScore = roundsWithNetScore.length > 0 ? 
+      Math.min(...roundsWithNetScore.map(r => r.net_score!)) : null;
+    
+    const roundsWithToParNet = courseRounds.filter(r => r.to_par_net !== undefined);
+    const bestToParNet = roundsWithToParNet.length > 0 ? 
+      Math.min(...roundsWithToParNet.map(r => r.to_par_net!)) : null;
+      
+    return { roundsPlayed, bestGrossScore, bestNetScore, bestToPar, bestToParNet };
+  };
+  
+  const stats = calculateCourseSpecificStats();
+  
+  const handleDeleteRound = async () => {
+    if (!deletingRoundId) return;
+    
+    try {
+      const { error } = await supabase
+        .from('rounds')
+        .delete()
+        .eq('id', deletingRoundId);
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Round deleted",
+        description: "The round has been permanently removed.",
+      });
+      
+      // Invalidate query cache to refresh data
+      queryClient.invalidateQueries({ queryKey: ['userRounds'] });
+      
+    } catch (error) {
+      console.error("Error deleting round:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete round. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingRoundId(null);
+    }
+  };
+  
+  const handleViewScorecard = (round: Round) => {
+    setViewingRound(round);
+    setScorecardOpen(true);
+  };
+  
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -210,11 +293,66 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
           >
             <ChevronUp className="h-5 w-5" />
           </button>
-          {displayName} Rounds
+          {displayName}
         </h2>
       </div>
       
-      <div className="space-y-4">
+      {/* Course-specific stats */}
+      {stats && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div className="bg-background border rounded-lg p-4 text-center">
+            <p className="text-sm text-muted-foreground">Rounds Played</p>
+            <p className="text-3xl font-bold">{stats.roundsPlayed}</p>
+          </div>
+          <div className="bg-background border rounded-lg p-4 text-center">
+            <p className="text-sm text-muted-foreground">Best Score</p>
+            <p className="text-3xl font-bold">
+              {scoreType === 'gross' 
+                ? stats.bestGrossScore 
+                : stats.bestNetScore !== null ? stats.bestNetScore : '-'}
+            </p>
+          </div>
+          <div className="bg-background border rounded-lg p-4 text-center">
+            <p className="text-sm text-muted-foreground">Best to Par</p>
+            <p className="text-3xl font-bold">
+              {scoreType === 'gross' 
+                ? (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar
+                : stats.bestToParNet !== null 
+                  ? (stats.bestToParNet > 0 ? '+' : '') + stats.bestToParNet
+                  : '-'}
+            </p>
+          </div>
+        </div>
+      )}
+      
+      {/* Score progress chart */}
+      <ScoreProgressChart 
+        rounds={courseRounds}
+        scoreType={scoreType}
+      />
+      
+      {/* Round history listing */}
+      <div className="space-y-4 mt-6">
+        <h3 className="text-lg font-medium">Round History</h3>
+        <div className="flex justify-end space-x-2 mb-2">
+          <Button 
+            variant={scoreType === 'gross' ? 'default' : 'outline'} 
+            size="sm"
+            onClick={() => setScoreType('gross')}
+            className="text-xs"
+          >
+            Gross Score
+          </Button>
+          <Button 
+            variant={scoreType === 'net' ? 'default' : 'outline'} 
+            size="sm"
+            onClick={() => setScoreType('net')}
+            className="text-xs"
+          >
+            Net Score
+          </Button>
+        </div>
+        
         {courseRounds.map((round) => (
           <div key={round.id} className="bg-background border rounded-md p-4">
             <div className="flex justify-between items-center">
@@ -238,10 +376,58 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
                   </p>
                 )}
               </div>
+              <div className="flex space-x-2 ml-4">
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => handleViewScorecard(round)}
+                  title="View scorecard"
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => setDeletingRoundId(round.id)}
+                      className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                      title="Delete round"
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure you want to delete this round?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the round
+                        data and remove it from all statistics.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={() => setDeletingRoundId(null)}>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeleteRound} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </div>
           </div>
         ))}
       </div>
+      
+      {/* Scorecard dialog */}
+      {viewingRound && (
+        <RoundScorecard 
+          round={viewingRound}
+          isOpen={scorecardOpen}
+          onOpenChange={setScorecardOpen}
+        />
+      )}
     </div>
   );
 };
