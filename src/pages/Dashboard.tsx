@@ -183,6 +183,19 @@ export default function Dashboard() {
       };
     }
 
+    // Filter out incomplete rounds and par-3 only courses for handicap calculation
+    const validRoundsForHandicap = rounds.filter(round => {
+      // Here we're assuming incomplete rounds would have either undefined scores
+      // or some indicator in the data structure. Adjust based on your data model.
+      const isComplete = round.gross_score > 0;
+      
+      // For par-3 courses, you'd need some indicator in your data model
+      // This is a placeholder - replace with actual logic based on your data
+      const isPar3OnlyCourse = false; // Implement actual check based on your data
+      
+      return isComplete && !isPar3OnlyCourse;
+    });
+
     const totalRounds = rounds.length;
     const bestGrossScore = Math.min(...rounds.map(r => r.gross_score));
     const bestToPar = Math.min(...rounds.map(r => r.to_par_gross));
@@ -197,20 +210,34 @@ export default function Dashboard() {
     const averageScore = rounds.reduce((sum, r) => sum + r.gross_score, 0) / totalRounds;
     
     // Calculate handicap based on official handicap system
-    // This is a simplified version - the actual calculation would use the best 8 of last 20 rounds
-    const differentials = rounds.map(round => (round.to_par_gross));
+    // This follows a simplified version of the World Handicap System
+    // Best 8 of last 20 rounds for established players
+    const validRoundsCount = validRoundsForHandicap.length;
+    
+    // Calculate differentials (adjusted gross score - course rating) * 113 / slope rating
+    // For simplicity we're using to_par_gross as a proxy for differentials
+    // In a real system, you'd need course rating and slope rating
+    const differentials = validRoundsForHandicap.map(round => (round.to_par_gross));
     differentials.sort((a, b) => a - b);
     
-    const bestDifferentials = differentials.slice(0, Math.min(8, Math.ceil(totalRounds * 0.4)));
+    // Number of scores to use depends on how many rounds are available
+    let scoresToUse = 0;
+    if (validRoundsCount >= 20) scoresToUse = 8;       // Use best 8 of 20
+    else if (validRoundsCount >= 15) scoresToUse = 6;  // Use best 6 of 15-19
+    else if (validRoundsCount >= 10) scoresToUse = 4;  // Use best 4 of 10-14
+    else if (validRoundsCount >= 5) scoresToUse = 3;   // Use best 3 of 5-9
+    else scoresToUse = 0;                             // Not enough rounds
+    
+    const bestDifferentials = differentials.slice(0, scoresToUse);
     const averageDifferential = bestDifferentials.length > 0 ? 
       bestDifferentials.reduce((sum, diff) => sum + diff, 0) / bestDifferentials.length : 0;
     
-    // Apply handicap formula (simplified)
-    const handicapIndex = totalRounds >= ROUNDS_NEEDED_FOR_HANDICAP ? 
+    // Apply handicap formula (0.96 multiplier as per WHS)
+    const handicapIndex = scoresToUse > 0 ? 
       Math.max(0, Math.round(averageDifferential * 0.96 * 10) / 10) : 0;
-      
-    const roundsNeededForHandicap = totalRounds >= ROUNDS_NEEDED_FOR_HANDICAP ? 
-      0 : ROUNDS_NEEDED_FOR_HANDICAP - totalRounds;
+    
+    const roundsNeededForHandicap = validRoundsCount >= ROUNDS_NEEDED_FOR_HANDICAP ? 
+      0 : ROUNDS_NEEDED_FOR_HANDICAP - validRoundsCount;
 
     return {
       totalRounds,
@@ -391,7 +418,7 @@ export default function Dashboard() {
             ) : (
               <>
                 <p className="text-sm font-medium text-muted-foreground">Handicap Status</p>
-                <p className="text-xl font-bold my-3">You still need to register {stats.roundsNeededForHandicap} more {stats.roundsNeededForHandicap === 1 ? 'round' : 'rounds'} to get your handicap.</p>
+                <p className="text-xl font-bold my-3">You need {stats.roundsNeededForHandicap} more {stats.roundsNeededForHandicap === 1 ? 'round' : 'rounds'} to get your handicap.</p>
               </>
             )}
           </div>
@@ -400,7 +427,7 @@ export default function Dashboard() {
     );
   };
 
-  // Course Stats Table
+  // Course Stats Table - updated to better show sortable columns
   const renderCourseStatsTable = () => {
     if (!userRounds || userRounds.length === 0) {
       return (
@@ -445,6 +472,16 @@ export default function Dashboard() {
       setSelectedCourseId(courseId);
     };
 
+    // Helper function to render sort indicator
+    const renderSortIndicator = (field: keyof CourseStats) => {
+      if (sortField !== field) {
+        return <span className="text-muted-foreground opacity-50 ml-1">↕️</span>;
+      }
+      return sortDirection === 'asc' 
+        ? <ChevronUp className="inline-block h-4 w-4 ml-1" /> 
+        : <ChevronDown className="inline-block h-4 w-4 ml-1" />;
+    };
+
     return (
       <div className="overflow-x-auto rounded-lg border bg-background">
         <table className="w-full">
@@ -453,45 +490,37 @@ export default function Dashboard() {
               <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
                 <button
                   onClick={() => handleSort('courseName')}
-                  className="flex items-center space-x-1"
+                  className="flex items-center cursor-pointer hover:text-primary transition-colors"
                 >
                   <span>Course</span>
-                  {sortField === 'courseName' && (
-                    sortDirection === 'desc' ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />
-                  )}
+                  {renderSortIndicator('courseName')}
                 </button>
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
                 <button
                   onClick={() => handleSort('roundsPlayed')}
-                  className="flex items-center space-x-1"
+                  className="flex items-center cursor-pointer hover:text-primary transition-colors"
                 >
                   <span>Rounds Played</span>
-                  {sortField === 'roundsPlayed' && (
-                    sortDirection === 'desc' ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />
-                  )}
+                  {renderSortIndicator('roundsPlayed')}
                 </button>
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
                 <button
                   onClick={() => handleSort(scoreType === 'gross' ? 'bestGrossScore' : 'bestNetScore')}
-                  className="flex items-center space-x-1"
+                  className="flex items-center cursor-pointer hover:text-primary transition-colors"
                 >
                   <span>Best Score</span>
-                  {(sortField === 'bestGrossScore' || sortField === 'bestNetScore') && (
-                    sortDirection === 'desc' ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />
-                  )}
+                  {renderSortIndicator(scoreType === 'gross' ? 'bestGrossScore' : 'bestNetScore')}
                 </button>
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
                 <button
                   onClick={() => handleSort(scoreType === 'gross' ? 'bestToPar' : 'bestToParNet')}
-                  className="flex items-center space-x-1"
+                  className="flex items-center cursor-pointer hover:text-primary transition-colors"
                 >
                   <span>Best to Par</span>
-                  {(sortField === 'bestToPar' || sortField === 'bestToParNet') && (
-                    sortDirection === 'desc' ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />
-                  )}
+                  {renderSortIndicator(scoreType === 'gross' ? 'bestToPar' : 'bestToParNet')}
                 </button>
               </th>
             </tr>
@@ -648,8 +677,8 @@ export default function Dashboard() {
       <div className="absolute top-4 right-4 z-10">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
-              <User className="h-5 w-5" />
+            <Button variant="ghost" size="lg" className="rounded-full h-12 w-12 flex items-center justify-center border border-muted bg-background/80 backdrop-blur-sm">
+              <User className="h-6 w-6" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
