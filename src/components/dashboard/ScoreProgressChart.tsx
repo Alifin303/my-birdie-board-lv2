@@ -7,6 +7,9 @@ interface Round {
   id: number;
   date: string;
   gross_score: number;
+  net_score?: number;
+  to_par_gross: number;
+  to_par_net?: number;
 }
 
 interface ScoreProgressChartProps {
