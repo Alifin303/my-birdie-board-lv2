@@ -64,7 +64,13 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setStep('add-course');
   };
 
-  const handleCourseAdded = (newCourse: any) => {
+  const handleCourseCreated = (courseId: number, courseName: string) => {
+    // Create a course object that matches the expected format
+    const newCourse = {
+      id: courseId,
+      name: courseName,
+    };
+    
     setSelectedCourse(newCourse);
     setStep('round-details');
   };
@@ -334,8 +340,13 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   const renderAddCourse = () => (
     <div className="space-y-4 py-4">
       <ManualCourseForm 
-        onCourseAdded={handleCourseAdded} 
-        onCancel={handleBackToSearch}
+        open={true}
+        onOpenChange={(open) => {
+          if (!open) {
+            setStep('course-search');
+          }
+        }}
+        onCourseCreated={handleCourseCreated}
       />
     </div>
   );
