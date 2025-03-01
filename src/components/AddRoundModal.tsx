@@ -353,6 +353,36 @@ const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDetail | 
     
     const parsedDetails = JSON.parse(storedDetails);
     console.log("Parsed course details from localStorage:", parsedDetails);
+    
+    // Ensure the course has at least one tee
+    if (!parsedDetails.tees || parsedDetails.tees.length === 0) {
+      console.log("No tees found in course details, creating default tee");
+      
+      const defaultHoles = Array(18).fill(null).map((_, idx) => ({
+        number: idx + 1,
+        par: 4,
+        yards: 400,
+        handicap: idx + 1
+      }));
+      
+      parsedDetails.tees = [{
+        id: `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        name: 'White',
+        rating: 72,
+        slope: 113,
+        par: 72,
+        gender: 'male',
+        originalIndex: 0,
+        holes: defaultHoles
+      }];
+      
+      parsedDetails.holes = defaultHoles;
+      
+      // Save updated details back to localStorage
+      localStorage.setItem(`course_details_${courseId}`, JSON.stringify(parsedDetails));
+      console.log("Updated course details saved to localStorage with default tee");
+    }
+    
     return parsedDetails as SimplifiedCourseDetail;
   } catch (error) {
     console.error("Error loading course details from localStorage:", error);
@@ -687,7 +717,7 @@ Try selecting a different course or adding this course manually.`);
         const { clubName, courseName: name } = parseCourseName(courseData.name);
         
         const newCourse: SimplifiedGolfCourse = {
-          id: courseData.id,
+          id: courseId,
           name,
           clubName,
           city: courseData.city || '',
@@ -753,19 +783,43 @@ Try selecting a different course or adding this course manually.`);
         };
         
         try {
+          // Create default tees and holes for the new course
+          const defaultHoles = Array(18).fill(null).map((_, idx) => ({
+            number: idx + 1,
+            par: 4,
+            yards: 400,
+            handicap: idx + 1
+          }));
+          
+          const defaultTee: SimplifiedTee = {
+            id: `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+            name: 'White',
+            rating: 72,
+            slope: 113,
+            par: 72,
+            gender: 'male',
+            originalIndex: 0,
+            holes: defaultHoles
+          };
+          
+          const courseDetails: SimplifiedCourseDetail = {
+            id: data.id,
+            name: parseCourseName(data.name).courseName,
+            clubName: parseCourseName(data.name).clubName,
+            city: data.city || '',
+            state: data.state || '',
+            country: data.country || 'United States',
+            tees: [defaultTee],
+            holes: defaultHoles,
+            isUserAdded: true
+          };
+          
           localStorage.setItem(
             `course_details_${data.id}`, 
-            JSON.stringify({
-              id: data.id,
-              name: data.name,
-              clubName: parseCourseName(data.name).clubName,
-              city: data.city,
-              state: data.state,
-              country: data.country,
-              tees: [],
-              holes: []
-            })
+            JSON.stringify(courseDetails)
           );
+          
+          console.log("Saved new course details to localStorage:", courseDetails);
         } catch (e) {
           console.error("Error saving to localStorage:", e);
         }
@@ -1512,4 +1566,3 @@ Try selecting a different course or adding this course manually.`);
     </>
   );
 }
-
