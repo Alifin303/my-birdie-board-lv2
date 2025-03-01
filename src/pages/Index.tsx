@@ -14,7 +14,7 @@ const Index = () => {
       <div 
         className="relative min-h-screen bg-cover bg-center bg-no-repeat overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1587174337441-31baf62f4daa?auto=format&fit=crop&q=80&w=2000')`,
+          backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2)), url('https://images.unsplash.com/photo-1592919505738-5d517b0da38e?auto=format&fit=crop&q=80&w=2000')`,
         }}
       >
         <header className="absolute top-0 left-0 right-0 z-10">
