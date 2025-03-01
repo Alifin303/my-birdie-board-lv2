@@ -248,7 +248,6 @@ const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): Simplified
     }));
   }
   
-  // Fix: Ensure id is always a number
   const courseId = typeof courseDetail.id === 'string' ? parseInt(courseDetail.id, 10) : 
                    typeof courseDetail.id === 'number' ? courseDetail.id : 0;
 
@@ -277,7 +276,6 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
         tees.push({
           id: `m-${index}`,
           name: tee.tee_name || 'Unknown Tee',
-          // Fix: Using proper TeeBox properties
           rating: tee.course_rating ?? 72,
           slope: tee.slope_rating ?? 113,
           par: tee.par_total ?? 72,
@@ -293,7 +291,6 @@ const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[]
         tees.push({
           id: `f-${index}`,
           name: tee.tee_name || 'Unknown Tee',
-          // Fix: Using proper TeeBox properties
           rating: tee.course_rating ?? 72,
           slope: tee.slope_rating ?? 113,
           par: tee.par_total ?? 72,
@@ -315,7 +312,6 @@ const calculateScoreSummary = (scores: Score[]) => {
   const toPar = totalStrokes - totalPar;
   const puttsRecorded = scores.some(score => score.putts !== undefined);
   
-  // Add front 9 and back 9 calculations
   const front9Scores = scores.filter(score => score.hole <= 9);
   const back9Scores = scores.filter(score => score.hole > 9);
   
@@ -353,7 +349,6 @@ const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDetail | 
     const parsedDetails = JSON.parse(storedDetails);
     console.log("Parsed course details from localStorage:", parsedDetails);
     
-    // Ensure tees exist and have proper structure
     if (!parsedDetails.tees || !Array.isArray(parsedDetails.tees) || parsedDetails.tees.length === 0) {
       console.log("No tees found in stored course details, creating default tee");
       
@@ -378,7 +373,6 @@ const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDetail | 
       parsedDetails.tees = [defaultTee];
       parsedDetails.holes = defaultHoles;
       
-      // Save updated details back to localStorage
       try {
         localStorage.setItem(`course_details_${courseId}`, JSON.stringify(parsedDetails));
         console.log("Updated course details saved to localStorage with default tee");
@@ -394,7 +388,7 @@ const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDetail | 
   }
 };
 
-export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
+const AddRoundModal = ({ open, onOpenChange }: AddRoundModalProps) => {
   const [currentStep, setCurrentStep] = useState<'search' | 'scorecard'>('search');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SimplifiedGolfCourse[]>([]);
@@ -429,7 +423,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     }
   }, [debouncedSearchTerm]);
 
-  // Fetch user-added courses from the database
   const fetchUserAddedCourses = async (query: string): Promise<SimplifiedGolfCourse[]> => {
     try {
       const { data, error } = await supabase
@@ -471,14 +464,11 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setNoResults(false);
     
     try {
-      // Fetch API courses
       const apiResponse = await searchCourses(query);
       const apiResults = Array.isArray(apiResponse.results) ? apiResponse.results : [];
       
-      // Fetch user-added courses
       const userAddedCourses = await fetchUserAddedCourses(query);
       
-      // Combine results
       const combinedResults = [
         ...userAddedCourses, 
         ...apiResults.map(course => ({
@@ -509,7 +499,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
       console.error("Search error:", error);
       setSearchError(error.message || "Failed to fetch courses. Please try again.");
       
-      // Try to at least get user-added courses if the API fails
       try {
         const userAddedCourses = await fetchUserAddedCourses(query);
         if (userAddedCourses.length > 0) {
@@ -606,7 +595,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
         console.log("Loading course from API:", course);
         
         try {
-          // Convert courseId to a proper format
           const courseIdRaw = course.apiCourseId || course.id;
           const courseId = typeof courseIdRaw === 'string' ? courseIdRaw : courseIdRaw.toString();
           
@@ -654,11 +642,8 @@ Try selecting a different course or adding this course manually.`);
             holes: defaultHoles
           };
           
-          // Ensure course.id is a number
-          const courseId = typeof course.id === 'string' ? parseInt(course.id, 10) : course.id;
-          
           simplifiedCourseDetail = {
-            id: courseId,
+            id: course.id,
             name: course.name,
             clubName: course.clubName,
             city: course.city,
@@ -714,32 +699,69 @@ Try selecting a different course or adding this course manually.`);
     setManualCourseOpen(false);
     
     try {
-      // Fetch the newly created course
-      const courseData = await fetchCourseById(courseId);
-      
-      if (courseData) {
-        const { clubName, courseName: name } = parseCourseName(courseData.name);
+      const { data, error } = await supabase
+        .from('courses')
+        .insert([
+          {
+            name: formatCourseName(courseData.clubName, courseData.name),
+            city: courseData.city,
+            state: courseData.state,
+            country: courseData.country
+          }
+        ])
+        .select()
+        .single();
         
+      if (error) {
+        console.error("Error adding manual course:", error);
+        throw new Error(error.message);
+      }
+      
+      if (data) {
         const newCourse: SimplifiedGolfCourse = {
-          id: courseData.id,
-          name,
-          clubName,
-          city: courseData.city || '',
-          state: courseData.state || '',
-          country: 'United States',
-          isUserAdded: isUserAddedCourse(courseData.name)
+          id: data.id,
+          name: data.name,
+          clubName: parseCourseName(data.name).clubName,
+          city: data.city,
+          state: data.state,
+          country: data.country,
+          isUserAdded: true
         };
         
-        // Immediately select the new course
+        try {
+          localStorage.setItem(
+            `course_details_${data.id}`, 
+            JSON.stringify({
+              id: data.id,
+              name: data.name,
+              clubName: parseCourseName(data.name).clubName,
+              city: data.city,
+              state: data.state,
+              country: data.country,
+              tees: [],
+              holes: []
+            })
+          );
+        } catch (e) {
+          console.error("Error saving to localStorage:", e);
+        }
+        
         await handleCourseSelect(newCourse);
+        
+        toast({
+          title: "Success",
+          description: "Course added successfully!",
+        });
       }
-    } catch (error) {
-      console.error("Error fetching newly created course:", error);
+    } catch (error: any) {
+      console.error("Error adding manual course:", error);
       toast({
         title: "Error",
-        description: "Course was created but could not be loaded automatically. Please search for it.",
+        description: error.message || "Failed to add course. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -896,4 +918,46 @@ Try selecting a different course or adding this course manually.`);
       console.log("No filtered holes, creating defaults");
       if (selection === 'front9') {
         filteredHoles = Array(9).fill(null).map((_, idx) => ({
-          number: idx +
+          number: idx + 1,
+          par: 4,
+          yards: 400,
+          handicap: idx + 1
+        }));
+      } else if (selection === 'back9') {
+        filteredHoles = Array(9).fill(null).map((_, idx) => ({
+          number: idx + 10,
+          par: 4,
+          yards: 400,
+          handicap: idx + 10
+        }));
+      } else {
+        filteredHoles = Array(18).fill(null).map((_, idx) => ({
+          number: idx + 1,
+          par: 4,
+          yards: 400,
+          handicap: idx + 1
+        }));
+      }
+    }
+    
+    const newScores = filteredHoles.map(hole => ({
+      hole: hole.number,
+      par: hole.par,
+      yards: hole.yards,
+      handicap: hole.handicap
+    }));
+    
+    console.log("Setting scores:", newScores);
+    setScores(newScores);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        {/* JSX for the component */}
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export { AddRoundModal };
