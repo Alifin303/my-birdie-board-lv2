@@ -12,10 +12,14 @@ const About = () => {
     <div 
       className="min-h-screen bg-cover bg-center bg-fixed bg-no-repeat relative"
       style={{
-        backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2)), url('https://images.unsplash.com/photo-1592919505738-5d517b0da38e?auto=format&fit=crop&q=80&w=2000')`,
+        backgroundImage: `url('https://images.unsplash.com/photo-1592919505738-5d517b0da38e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80')`,
+        backgroundColor: "#2C4A3B", // Fallback color if image fails to load
       }}
     >
-      <div className="absolute top-4 right-4">
+      {/* Dark overlay div */}
+      <div className="absolute inset-0 bg-black opacity-30 z-0"></div>
+      
+      <div className="absolute top-4 right-4 z-10">
         <Button 
           variant="ghost" 
           className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all"
@@ -25,7 +29,7 @@ const About = () => {
         </Button>
         <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
       </div>
-      <div className="container max-w-4xl mx-auto px-4 py-16">
+      <div className="container max-w-4xl mx-auto px-4 py-16 relative z-[1]">
         <Link to="/" className="text-white/80 hover:text-white mb-8 inline-block">
           ← Back to home
         </Link>
