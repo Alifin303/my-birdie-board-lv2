@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User, LogOut, PlusCircle } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -32,11 +32,6 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
     }
   };
 
-  const handleAddRound = () => {
-    console.log("Add Round button clicked");
-    onAddRound();
-  };
-
   const renderProfileContent = () => {
     if (!profileData) return null;
     return (
@@ -57,11 +52,9 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
           <h1 className="text-3xl font-bold">Welcome, {profileData?.first_name || 'Golfer'}!</h1>
         </div>
         <Button 
-          onClick={handleAddRound}
-          className="flex items-center gap-2"
-          size="lg"
+          onClick={onAddRound}
+          className="relative"
         >
-          <PlusCircle className="h-5 w-5" />
           Add a New Round
         </Button>
       </div>

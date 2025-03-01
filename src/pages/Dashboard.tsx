@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase, parseCourseName } from "@/integrations/supabase/client";
 import { AddRoundModal } from "@/components/AddRoundModal";
 import { DebugPanel } from "@/components/DebugPanel";
-import { RoundScorecard } from "@/components/dashboard/RoundScorecard";
-import { DashboardContent } from "@/components/dashboard/DashboardContent";
-import { DeleteRoundDialog } from "@/components/dashboard/DeleteRoundDialog";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { MainStats, HandicapCircle } from "@/components/dashboard/StatsDisplay";
+import { CourseStatsTable, CourseRoundHistory } from "@/components/dashboard/CourseStats";
+import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
 
 interface Round {
   id: number;
@@ -29,117 +29,85 @@ interface Round {
 }
 
 export default function Dashboard() {
-  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
   
-  const [selectedRound, setSelectedRound] = useState<Round | null>(null);
-  const [isScorecardOpen, setIsScorecardOpen] = useState(false);
-  
-  const [roundToDelete, setRoundToDelete] = useState<number | null>(null);
-  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
-  
-  const [showDebugPanel, setShowDebugPanel] = useState(false);
+  // Debug flag for development
+  const [showDebugPanel, setShowDebugPanel] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error("Please log in to view your dashboard");
-        navigate("/");
-      }
-    };
-    
-    checkAuth();
-  }, [navigate]);
+    console.log("Modal state changed:", isModalOpen);
+  }, [isModalOpen]);
 
-  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
+  const { data: profile } = useQuery({
     queryKey: ['profile'],
     queryFn: async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          throw new Error('No session found');
-        }
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session found');
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
         
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .maybeSingle();
-          
-        if (error) throw error;
-        
-        return data || { 
-          id: session.user.id,
-          username: session.user.email?.split('@')[0] || 'golfer',
-          first_name: '',
-          last_name: '',
-          handicap: 0
-        };
-      } catch (error) {
-        console.error("Error fetching profile:", error);
-        return null;
-      }
-    },
-    retry: 2
+      if (error) throw error;
+      return data;
+    }
   });
 
-  const { data: userRounds, isLoading: roundsLoading, error: roundsError, refetch: refetchRounds } = useQuery({
+  const { data: userRounds, isLoading: roundsLoading } = useQuery({
     queryKey: ['userRounds'],
     queryFn: async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) throw new Error('No session found');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session found');
+      
+      console.log("Fetching user rounds...");
+      const { data, error } = await supabase
+        .from('rounds')
+        .select(`
+          *,
+          courses:course_id(id, name, city, state)
+        `)
+        .eq('user_id', session.user.id)
+        .order('date', { ascending: false });
         
-        console.log("Fetching user rounds...");
-        const { data, error } = await supabase
-          .from('rounds')
-          .select(`
-            *,
-            courses:course_id(id, name, city, state)
-          `)
-          .eq('user_id', session.user.id)
-          .order('date', { ascending: false });
-          
-        if (error) {
-          console.error("Error fetching user rounds:", error);
-          throw error;
+      if (error) {
+        console.error("Error fetching user rounds:", error);
+        throw error;
+      }
+      
+      console.log("Fetched rounds data from Supabase:", data);
+      
+      // Process rounds to include parsed course names
+      const processedRounds = data?.map(round => {
+        let parsedNames = { clubName: "Unknown Club", courseName: "Unknown Course" };
+        
+        // Try to parse the course name if available
+        if (round.courses && round.courses.name) {
+          parsedNames = parseCourseName(round.courses.name);
         }
         
-        console.log("Fetched rounds data from Supabase:", data);
-        
-        const processedRounds = data?.map(round => {
-          let parsedNames = { clubName: "Unknown Club", courseName: "Unknown Course" };
-          
-          if (round.courses && round.courses.name) {
-            parsedNames = parseCourseName(round.courses.name);
-          }
-          
-          return {
-            ...round,
-            courses: round.courses ? {
-              ...round.courses,
-              clubName: parsedNames.clubName,
-              courseName: parsedNames.courseName
-            } : undefined
-          };
-        }) || [];
-        
-        console.log("Processed rounds with parsed course names:", processedRounds);
-        
-        return processedRounds as Round[];
-      } catch (error) {
-        console.error("Error in userRounds query:", error);
-        return [];
-      }
-    },
-    retry: 2,
-    retryDelay: 1000
+        return {
+          ...round,
+          courses: round.courses ? {
+            ...round.courses,
+            clubName: parsedNames.clubName,
+            courseName: parsedNames.courseName
+          } : undefined
+        };
+      }) || [];
+      
+      console.log("Processed rounds with parsed course names:", processedRounds);
+      
+      return processedRounds as Round[];
+    }
   });
 
   const handleOpenModal = () => {
-    console.log("Opening Add Round modal...");
+    console.log("Opening modal...");
     setIsModalOpen(true);
   };
 
@@ -147,84 +115,72 @@ export default function Dashboard() {
     setScoreType(type);
   };
 
-  const handleViewScorecard = (round: Round) => {
-    console.log("Opening scorecard for round:", round);
-    setSelectedRound(round);
-    setIsScorecardOpen(true);
-  };
-
-  const handleConfirmDelete = (roundId: number) => {
-    setRoundToDelete(roundId);
-    setIsConfirmDeleteOpen(true);
-  };
-
-  const handleRefetchRounds = async (): Promise<void> => {
-    await refetchRounds();
-    return;
-  };
-
-  if (profileError || roundsError) {
+  // Main dashboard content
+  const renderDashboard = () => {
     return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md mb-6">
-          <h3 className="text-lg font-medium">Error Loading Dashboard</h3>
-          <p className="mt-2">There was a problem loading your dashboard data. Please try refreshing the page.</p>
-          <p className="mt-1 text-sm">{profileError?.message || roundsError?.message}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="mt-4 bg-red-100 hover:bg-red-200 text-red-800 px-4 py-2 rounded-md transition-colors"
-          >
-            Refresh Page
-          </button>
+      <div className="space-y-8">
+        <DashboardHeader 
+          profileData={profile} 
+          onAddRound={handleOpenModal} 
+        />
+        
+        {/* Only show the overall stats if not viewing a specific course */}
+        {!selectedCourseId && (
+          <>
+            {/* Main Stats Display */}
+            <MainStats 
+              userRounds={userRounds}
+              roundsLoading={roundsLoading}
+              scoreType={scoreType}
+              calculateStats={calculateStats}
+            />
+            
+            {/* Handicap Circle */}
+            <HandicapCircle 
+              userRounds={userRounds}
+              roundsLoading={roundsLoading}
+              scoreType={scoreType}
+              onScoreTypeChange={handleScoreTypeChange}
+              calculateStats={calculateStats}
+            />
+          </>
+        )}
+        
+        {/* Course Stats or Round History */}
+        <div className="space-y-4">
+          {selectedCourseId 
+            ? <CourseRoundHistory 
+                userRounds={userRounds} 
+                selectedCourseId={selectedCourseId}
+                onBackClick={() => setSelectedCourseId(null)}
+              /> 
+            : (
+              <>
+                <h2 className="text-2xl font-semibold">Your Courses</h2>
+                <CourseStatsTable 
+                  userRounds={userRounds}
+                  scoreType={scoreType}
+                  calculateCourseStats={calculateCourseStats}
+                  onCourseClick={(courseId) => setSelectedCourseId(courseId)}
+                />
+              </>
+            )
+          }
         </div>
       </div>
     );
-  }
-
-  if (profileLoading && !profile) {
-    return (
-      <div className="container mx-auto py-8 px-4 flex justify-center items-center min-h-[50vh]">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-          <p className="mt-4 text-muted-foreground">Loading your dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+  };
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <DashboardContent
-        userRounds={userRounds || []}
-        roundsLoading={roundsLoading}
-        profile={profile}
-        scoreType={scoreType}
-        onScoreTypeChange={handleScoreTypeChange}
-        onAddRound={handleOpenModal}
-        onViewScorecard={handleViewScorecard}
-        onDeleteRound={handleConfirmDelete}
-      />
+      {renderDashboard()}
 
       <AddRoundModal 
         open={isModalOpen} 
         onOpenChange={setIsModalOpen}
       />
       
-      {selectedRound && (
-        <RoundScorecard
-          round={selectedRound}
-          isOpen={isScorecardOpen}
-          onOpenChange={setIsScorecardOpen}
-        />
-      )}
-      
-      <DeleteRoundDialog
-        roundId={roundToDelete}
-        isOpen={isConfirmDeleteOpen}
-        onOpenChange={setIsConfirmDeleteOpen}
-        onSuccess={handleRefetchRounds}
-      />
-      
+      {/* Debug Panel for development */}
       {showDebugPanel && <DebugPanel />}
     </div>
   );

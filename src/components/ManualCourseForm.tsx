@@ -1,324 +1,565 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, ReactNode } from "react";
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Loader2 } from "lucide-react";
+import { 
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { Card } from "./ui/card";
-import { Separator } from "./ui/separator";
-import { Plus, Trash } from "lucide-react";
+import { formatCourseName } from "@/integrations/supabase/client";
 
-const formSchema = z.object({
-  courseName: z.string().min(3, { message: "Course name must be at least 3 characters" }),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  country: z.string().optional(),
-});
+// Import our newly created components
+import { CourseInformation } from "./course-form/CourseInformation";
+import { TeeSelection } from "./course-form/TeeSelection";
+import { TeeConfiguration } from "./course-form/TeeConfiguration";
+import { HoleInputs } from "./course-form/HoleInputs";
+import { TeeSummary } from "./course-form/TeeSummary";
+import { createDefaultTee, calculateRatings } from "./course-form/course-utils";
+import { 
+  ManualCourseFormProps, 
+  ManualCourseData,
+  TeeData,
+  HoleData,
+  teeOptions
+} from "./course-form/types";
 
-interface TeeInfo {
-  id: string;
-  color: string;
-  par: string;
-  yards: string;
-  slope: string;
-  rating: string;
-}
-
-interface ManualCourseFormProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onCourseCreated?: (courseId: number, courseName: string) => void;
-  initialCourseName?: string;
-}
-
-export function ManualCourseForm({ open, onOpenChange, onCourseCreated, initialCourseName = "" }: ManualCourseFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [tees, setTees] = useState<TeeInfo[]>([
-    { id: "1", color: "", par: "", yards: "", slope: "", rating: "" }
-  ]);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      courseName: initialCourseName,
-      city: "",
-      state: "",
-      country: "",
-    },
+export function ManualCourseForm({ 
+  open, 
+  onOpenChange, 
+  onCourseCreated,
+  existingCourse 
+}: ManualCourseFormProps) {
+  const [formData, setFormData] = useState<ManualCourseData>(() => {
+    // Initialize with existing course data if provided, otherwise with defaults
+    if (existingCourse) {
+      return {
+        name: existingCourse.name.replace(' [User added course]', ''),
+        city: existingCourse.city || '',
+        state: existingCourse.state || '',
+        tees: existingCourse.tees || [createDefaultTee()]
+      };
+    }
+    
+    return {
+      name: '',
+      city: '',
+      state: '',
+      tees: [createDefaultTee()]
+    };
   });
+  
+  const [currentTeeIndex, setCurrentTeeIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentTab, setCurrentTab] = useState('front9');
+  const [isEditMode, setIsEditMode] = useState(!!existingCourse);
+  const manualCourseFormRef = useRef(null);
 
-  // Update form value when initialCourseName changes
+  const { toast } = useToast();
+
+  // Set initial state when form opens or when existingCourse changes
   useEffect(() => {
-    if (initialCourseName) {
-      console.log("Setting initial course name:", initialCourseName);
-      form.setValue("courseName", initialCourseName);
+    if (open) {
+      console.log("ManualCourseForm opened, existingCourse:", existingCourse);
+      if (existingCourse) {
+        console.log("Loading existing course data:", existingCourse);
+        setIsEditMode(true);
+        
+        // Get the tees from localStorage if they exist
+        const courseDetailsKey = `course_details_${existingCourse.id}`;
+        const storedDetails = localStorage.getItem(courseDetailsKey);
+        
+        if (storedDetails) {
+          try {
+            const parsedDetails = JSON.parse(storedDetails);
+            console.log("Found stored course details:", parsedDetails);
+            
+            // Use the stored tees or fallback to a default tee
+            const tees = parsedDetails.tees || [createDefaultTee()];
+            
+            setFormData({
+              name: existingCourse.name.replace(' [User added course]', ''),
+              city: existingCourse.city || '',
+              state: existingCourse.state || '',
+              tees: tees
+            });
+            
+            // Set the current tee to the first tee
+            if (tees.length > 0) {
+              setCurrentTeeIndex(0);
+            }
+          } catch (error) {
+            console.error("Error parsing stored course details:", error);
+            
+            // Fallback to default data with the course name/city/state
+            setFormData({
+              name: existingCourse.name.replace(' [User added course]', ''),
+              city: existingCourse.city || '',
+              state: existingCourse.state || '',
+              tees: [createDefaultTee()]
+            });
+          }
+        } else {
+          console.log("No stored details found for course:", existingCourse.id);
+          
+          // Fallback to default data with the course name/city/state
+          setFormData({
+            name: existingCourse.name.replace(' [User added course]', ''),
+            city: existingCourse.city || '',
+            state: existingCourse.state || '',
+            tees: [createDefaultTee()]
+          });
+        }
+      } else {
+        // New course - use defaults
+        setIsEditMode(false);
+        setFormData({
+          name: '',
+          city: '',
+          state: '',
+          tees: [createDefaultTee()]
+        });
+        setCurrentTeeIndex(0);
+      }
+      
+      setCurrentTab('front9');
     }
-  }, [initialCourseName, form]);
-
-  const addTee = () => {
-    setTees([...tees, { 
-      id: `tee-${Date.now()}`, 
-      color: "", 
-      par: "", 
-      yards: "", 
-      slope: "", 
-      rating: "" 
-    }]);
+  }, [open, existingCourse]);
+  
+  // Handle form field changes
+  const handleInputChange = (field: keyof ManualCourseData, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
-
-  const removeTee = (id: string) => {
-    if (tees.length > 1) {
-      setTees(tees.filter(tee => tee.id !== id));
+  
+  // Handle tee name selection
+  const handleTeeChange = (teeName: string) => {
+    const selectedTee = teeOptions.find(t => t.name === teeName);
+    
+    if (!selectedTee) return;
+    
+    setFormData(prev => {
+      const updatedTees = [...prev.tees];
+      updatedTees[currentTeeIndex] = {
+        ...updatedTees[currentTeeIndex],
+        name: selectedTee.name,
+        color: selectedTee.color,
+        gender: selectedTee.gender as 'male' | 'female'
+      };
+      return {
+        ...prev,
+        tees: updatedTees
+      };
+    });
+  };
+  
+  // Handle hole data changes
+  const handleHoleChange = (
+    holeIndex: number,
+    field: keyof HoleData,
+    value: string
+  ) => {
+    let numValue: number;
+    
+    // Handle empty input
+    if (value === '') {
+      if (field === 'par') {
+        numValue = 4; // Default par value
+      } else if (field === 'yards') {
+        numValue = 0; // Allow zero yards
+      } else if (field === 'handicap') {
+        numValue = holeIndex + 1; // Default handicap is hole number
+      } else {
+        return; // Ignore other empty fields
+      }
     } else {
-      toast.error("You must have at least one tee");
+      numValue = parseInt(value);
+      if (isNaN(numValue)) return;
+    }
+    
+    setFormData(prev => {
+      const updatedTees = [...prev.tees];
+      const updatedHoles = [...updatedTees[currentTeeIndex].holes];
+      
+      // Get the actual hole we're updating - for Back 9, we need to add 9 to the index
+      // since holeIndex is relative to the active tab (0-8 for both Front and Back 9)
+      const actualHoleIndex = currentTab === 'back9' ? holeIndex + 9 : holeIndex;
+      
+      updatedHoles[actualHoleIndex] = {
+        ...updatedHoles[actualHoleIndex],
+        [field]: numValue
+      };
+      
+      updatedTees[currentTeeIndex] = {
+        ...updatedTees[currentTeeIndex],
+        holes: updatedHoles
+      };
+      
+      return {
+        ...prev,
+        tees: updatedTees
+      };
+    });
+  };
+  
+  // Add a new tee
+  const handleAddTee = () => {
+    setFormData(prev => ({
+      ...prev,
+      tees: [...prev.tees, createDefaultTee()]
+    }));
+    
+    // Switch to the new tee
+    setCurrentTeeIndex(formData.tees.length);
+  };
+  
+  // Remove a tee
+  const handleRemoveTee = (teeIndex: number) => {
+    if (formData.tees.length <= 1) {
+      toast({
+        title: "Cannot Remove Tee",
+        description: "A course must have at least one tee.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setFormData(prev => {
+      const updatedTees = prev.tees.filter((_, idx) => idx !== teeIndex);
+      return {
+        ...prev,
+        tees: updatedTees
+      };
+    });
+    
+    // Update current tee index if needed
+    if (currentTeeIndex >= teeIndex && currentTeeIndex > 0) {
+      setCurrentTeeIndex(currentTeeIndex - 1);
     }
   };
-
-  const updateTee = (id: string, field: keyof TeeInfo, value: string) => {
-    setTees(tees.map(tee => 
-      tee.id === id ? { ...tee, [field]: value } : tee
-    ));
+  
+  // Validate the form before submission
+  const validateForm = () => {
+    if (!formData.name.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a course name.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    if (!formData.city.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a city.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    // Validate each tee
+    for (let teeIndex = 0; teeIndex < formData.tees.length; teeIndex++) {
+      const tee = formData.tees[teeIndex];
+      
+      // Validate each hole's par (must be between 2 and 6)
+      for (let holeIndex = 0; holeIndex < tee.holes.length; holeIndex++) {
+        const hole = tee.holes[holeIndex];
+        
+        if (hole.par < 2 || hole.par > 6) {
+          toast({
+            title: "Validation Error",
+            description: `Hole ${hole.number} par should be between 2 and 6.`,
+            variant: "destructive",
+          });
+          return false;
+        }
+      }
+    }
+    
+    return true;
   };
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setIsSubmitting(true);
-    console.log("Submitting course form with values:", values);
-    console.log("Tee information:", tees);
-
+  
+  // Handle form submission
+  const handleSubmit = async (e?: React.FormEvent) => {
+    // Prevent default if event is provided (for form submissions)
+    if (e) {
+      e.preventDefault();
+    }
+    
+    if (!validateForm()) return;
+    
+    setIsLoading(true);
     try {
-      // Prepare tee information for database storage
-      const teesData = tees.map(tee => ({
-        color: tee.color,
-        par: tee.par ? parseInt(tee.par) : null,
-        yards: tee.yards ? parseInt(tee.yards) : null,
-        slope: tee.slope ? parseInt(tee.slope) : null,
-        rating: tee.rating ? parseFloat(tee.rating) : null
-      }));
-
-      // Insert the course into the database
-      const { data, error } = await supabase
-        .from("courses")
-        .insert({
-          name: values.courseName,
-          city: values.city || null,
-          state: values.state || null,
-          tee_data: teesData.length > 0 ? teesData : null
+      console.log("Saving course with data:", formData);
+      
+      // Add "[User added course]" to the course name
+      const userAddedName = formData.name + " [User added course]";
+      
+      // Format course name for database
+      const formattedName = formatCourseName(userAddedName, userAddedName);
+      
+      // Prepare course data for insertion
+      const courseData = {
+        name: formattedName,
+        city: formData.city,
+        state: formData.state,
+        api_course_id: null
+      };
+      
+      let courseId: number;
+      
+      if (existingCourse?.id) {
+        // Update existing course
+        const { data: updatedCourse, error: updateError } = await supabase
+          .from('courses')
+          .update(courseData)
+          .eq('id', existingCourse.id)
+          .select('id')
+          .single();
+          
+        if (updateError) {
+          throw updateError;
+        }
+        
+        courseId = updatedCourse.id;
+        console.log("Updated existing course:", courseId);
+      } else {
+        // Insert new course
+        const { data: newCourse, error: insertError } = await supabase
+          .from('courses')
+          .insert(courseData)
+          .select('id')
+          .single();
+          
+        if (insertError) {
+          throw insertError;
+        }
+        
+        courseId = newCourse.id;
+        console.log("Inserted new course:", courseId);
+      }
+      
+      // Save tees and holes data to a custom table or as metadata
+      // For now, we'll store this in localStorage for simplicity
+      // In a full implementation, you would create additional tables for tees/holes
+      const courseDetailsKey = `course_details_${courseId}`;
+      const courseDetails = {
+        id: courseId,
+        name: formData.name,
+        tees: formData.tees.map(tee => {
+          const { rating, slope, par, yards } = calculateRatings(tee);
+          return {
+            ...tee,
+            rating,
+            slope,
+            par,
+            yards
+          };
         })
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Error adding course:", error);
-        throw error;
-      }
-
-      console.log("Course added successfully:", data);
-      // Show success message
-      toast.success("Course added successfully!");
-
-      // Call the callback function with the new course ID if provided
-      if (onCourseCreated) {
-        onCourseCreated(data.id, data.name);
-      }
-
-      // Reset form and close
-      form.reset();
-      setTees([{ id: "1", color: "", par: "", yards: "", slope: "", rating: "" }]);
+      };
+      
+      localStorage.setItem(courseDetailsKey, JSON.stringify(courseDetails));
+      console.log("Saved course details to localStorage:", courseDetailsKey, courseDetails);
+      
+      toast({
+        title: existingCourse ? "Course Updated" : "Course Created",
+        description: existingCourse ? 
+          "The course has been successfully updated." : 
+          "The course has been successfully created.",
+      });
+      
+      // Call the callback with course id and name
+      onCourseCreated(courseId, formattedName);
+      
+      // Close the form
       onOpenChange(false);
     } catch (error: any) {
-      console.error("Error adding course:", error);
-      toast.error(error.message || "Error adding course");
+      console.error("Error saving course:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save course. Please try again.",
+        variant: "destructive",
+      });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-lg font-medium">Course Information</h3>
-            <p className="text-sm text-muted-foreground">
-              Enter the basic information about the golf course
-            </p>
-          </div>
+  // Prevent form submission on Enter key
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      return false;
+    }
+    return true;
+  };
+
+  // Add a method to set the existing course from the ref
+  // This is used when editing a course from the AddRoundModal
+  React.useImperativeHandle(manualCourseFormRef, () => ({
+    setExistingCourse: (course: any) => {
+      console.log("Setting existing course via ref:", course);
+      if (course) {
+        setIsEditMode(true);
+        
+        // Get the tees from localStorage if they exist
+        const courseDetailsKey = `course_details_${course.id}`;
+        const storedDetails = localStorage.getItem(courseDetailsKey);
+        
+        if (storedDetails) {
+          try {
+            const parsedDetails = JSON.parse(storedDetails);
+            console.log("Found stored course details:", parsedDetails);
+            
+            // Use the stored tees or fallback to a default tee
+            const tees = parsedDetails.tees || [createDefaultTee()];
+            
+            setFormData({
+              name: course.name.replace(' [User added course]', ''),
+              city: course.city || '',
+              state: course.state || '',
+              tees: tees
+            });
+            
+            // Set the current tee to the first tee
+            if (tees.length > 0) {
+              setCurrentTeeIndex(0);
+            }
+          } catch (error) {
+            console.error("Error parsing stored course details:", error);
+            
+            // Fallback to default data with the course name/city/state
+            setFormData({
+              name: course.name.replace(' [User added course]', ''),
+              city: course.city || '',
+              state: course.state || '',
+              tees: [createDefaultTee()]
+            });
+          }
+        } else {
+          console.log("No stored details found for course:", course.id);
           
-          <FormField
-            control={form.control}
-            name="courseName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Course Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter course name" {...field} />
-                </FormControl>
-                <FormDescription>
-                  Enter the full name of the golf course.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+          // Fallback to default data with the course name/city/state
+          setFormData({
+            name: course.name.replace(' [User added course]', ''),
+            city: course.city || '',
+            state: course.state || '',
+            tees: [createDefaultTee()]
+          });
+        }
+      }
+    }
+  }));
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent 
+        className="sm:max-w-5xl max-h-[90vh] overflow-y-auto"
+        onKeyDown={handleKeyDown}
+      >
+        <DialogHeader>
+          <DialogTitle>{existingCourse ? "Edit Course" : "Add a New Course"}</DialogTitle>
+          <DialogDescription>
+            {existingCourse ? 
+              "Update course details or add more tee boxes." : 
+              "Enter course details to add it to our database."
+            }
+          </DialogDescription>
+        </DialogHeader>
+        
+        <form 
+          className="space-y-6" 
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit(e);
+          }}
+        >
+          {/* Course Information */}
+          <CourseInformation 
+            formData={formData}
+            handleInputChange={handleInputChange}
+            isEditMode={isEditMode}
           />
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <FormField
-              control={form.control}
-              name="city"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>City</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter city" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="state"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>State</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter state" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="country"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Country</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter country" {...field} value={field.value || "USA"} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-        
-        <Separator />
-        
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-lg font-medium">Tees Information</h3>
-            <p className="text-sm text-muted-foreground">
-              Enter details about the tees available at this course
-            </p>
-          </div>
+          {/* Tee Selection */}
+          <TeeSelection 
+            tees={formData.tees}
+            currentTeeIndex={currentTeeIndex}
+            setCurrentTeeIndex={setCurrentTeeIndex}
+            handleAddTee={handleAddTee}
+            handleRemoveTee={handleRemoveTee}
+          />
           
-          {tees.map((tee, index) => (
-            <Card key={tee.id} className="p-4">
-              <div className="flex justify-between items-center mb-4">
-                <h4 className="font-medium">Tee Set {index + 1}</h4>
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={() => removeTee(tee.id)}
-                  disabled={tees.length <= 1}
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
-              </div>
+          {/* Current Tee Details */}
+          {formData.tees.length > 0 && (
+            <div className="space-y-4 border-t pt-4">
+              <TeeConfiguration 
+                currentTee={formData.tees[currentTeeIndex]} 
+                handleTeeChange={handleTeeChange}
+              />
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <FormLabel htmlFor={`tee-color-${tee.id}`}>Tee Color</FormLabel>
-                  <Input 
-                    id={`tee-color-${tee.id}`}
-                    placeholder="Blue, White, Red, etc."
-                    value={tee.color}
-                    onChange={(e) => updateTee(tee.id, 'color', e.target.value)}
+              <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
+                <TabsList className="grid grid-cols-2">
+                  <TabsTrigger value="front9" type="button">Front Nine</TabsTrigger>
+                  <TabsTrigger value="back9" type="button">Back Nine</TabsTrigger>
+                </TabsList>
+                <TabsContent value="front9">
+                  <HoleInputs 
+                    holes={formData.tees[currentTeeIndex].holes.slice(0, 9)}
+                    handleHoleChange={(holeIndex, field, value) => 
+                      handleHoleChange(holeIndex, field, value)
+                    }
                   />
-                </div>
-                
-                <div className="space-y-2">
-                  <FormLabel htmlFor={`tee-par-${tee.id}`}>Par</FormLabel>
-                  <Input 
-                    id={`tee-par-${tee.id}`}
-                    placeholder="72"
-                    type="number"
-                    value={tee.par}
-                    onChange={(e) => updateTee(tee.id, 'par', e.target.value)}
+                </TabsContent>
+                <TabsContent value="back9">
+                  <HoleInputs 
+                    holes={formData.tees[currentTeeIndex].holes.slice(9, 18)}
+                    handleHoleChange={(holeIndex, field, value) => 
+                      handleHoleChange(holeIndex, field, value)
+                    }
                   />
-                </div>
-                
-                <div className="space-y-2">
-                  <FormLabel htmlFor={`tee-yards-${tee.id}`}>Total Yards</FormLabel>
-                  <Input 
-                    id={`tee-yards-${tee.id}`}
-                    placeholder="6500"
-                    type="number"
-                    value={tee.yards}
-                    onChange={(e) => updateTee(tee.id, 'yards', e.target.value)}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <FormLabel htmlFor={`tee-slope-${tee.id}`}>Slope Rating</FormLabel>
-                  <Input 
-                    id={`tee-slope-${tee.id}`}
-                    placeholder="130"
-                    type="number"
-                    value={tee.slope}
-                    onChange={(e) => updateTee(tee.id, 'slope', e.target.value)}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <FormLabel htmlFor={`tee-rating-${tee.id}`}>Course Rating</FormLabel>
-                  <Input 
-                    id={`tee-rating-${tee.id}`}
-                    placeholder="72.1"
-                    type="number"
-                    step="0.1"
-                    value={tee.rating}
-                    onChange={(e) => updateTee(tee.id, 'rating', e.target.value)}
-                  />
-                </div>
-              </div>
-            </Card>
-          ))}
-          
-          <Button
-            type="button"
-            variant="outline"
-            onClick={addTee}
-            className="w-full"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Another Tee Set
-          </Button>
-        </div>
+                </TabsContent>
+              </Tabs>
+              
+              <TeeSummary currentTee={formData.tees[currentTeeIndex]} />
+            </div>
+          )}
         
-        <div className="flex justify-end space-x-2">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => onOpenChange(false)}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Submitting..." : "Save Course"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => onOpenChange(false)} type="button">
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => handleSubmit()}
+              disabled={isLoading}
+              type="submit"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {existingCourse ? "Updating..." : "Creating..."}
+                </>
+              ) : (
+                existingCourse ? "Update Course" : "Create Course"
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
