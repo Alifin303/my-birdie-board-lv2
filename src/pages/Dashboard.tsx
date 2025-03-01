@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase, parseCourseName } from "@/integrations/supabase/client";
@@ -5,7 +6,7 @@ import { AddRoundModal } from "@/components/AddRoundModal";
 import { DebugPanel } from "@/components/DebugPanel";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MainStats, HandicapCircle } from "@/components/dashboard/StatsDisplay";
-import { CourseStatsTable, CourseRoundHistory } from "@/components/dashboard/CourseStats";
+import { CourseStatsTable, CourseRoundHistory } from "@/components/dashboard/course-stats";
 import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
 import { RoundScorecard } from "@/components/dashboard/RoundScorecard";
 import { toast } from "@/hooks/use-toast";
