@@ -28,14 +28,14 @@ export const MainContent = () => {
       {/* Features Section */}
       <div className="w-full max-w-5xl mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left justify-center">
-          <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-auto">
-            <CardContent className="p-4 flex flex-col">
+          <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
+            <CardContent className="p-4 flex flex-col h-full">
               <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
                 <Upload className="h-5 w-5 text-white" />
               </div>
               <h3 className="text-base font-bold text-white mb-1">Upload & Store Your Scorecards</h3>
               <p className="text-white/80 mb-2 text-sm">Keep a history of your rounds and track stats effortlessly.</p>
-              <div className="mt-auto">
+              <div className="mt-auto pt-2">
                 <Link to="/about">
                   <Button variant="link" className="text-white p-0 hover:text-white/80">
                     Learn more <ArrowRight className="ml-2 h-4 w-4" />
@@ -45,14 +45,14 @@ export const MainContent = () => {
             </CardContent>
           </Card>
           
-          <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-auto">
-            <CardContent className="p-4 flex flex-col">
+          <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
+            <CardContent className="p-4 flex flex-col h-full">
               <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
                 <BarChart2 className="h-5 w-5 text-white" />
               </div>
               <h3 className="text-base font-bold text-white mb-1">Visual Progress Tracking</h3>
               <p className="text-white/80 mb-2 text-sm">Charts and graphs give you insights into your strengths and areas to improve.</p>
-              <div className="mt-auto">
+              <div className="mt-auto pt-2">
                 <Link to="/about">
                   <Button variant="link" className="text-white p-0 hover:text-white/80">
                     Learn more <ArrowRight className="ml-2 h-4 w-4" />
@@ -62,14 +62,14 @@ export const MainContent = () => {
             </CardContent>
           </Card>
           
-          <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-auto">
-            <CardContent className="p-4 flex flex-col">
+          <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
+            <CardContent className="p-4 flex flex-col h-full">
               <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
                 <Award className="h-5 w-5 text-white" />
               </div>
               <h3 className="text-base font-bold text-white mb-1">Handicap Generator</h3>
               <p className="text-white/80 mb-2 text-sm">Get an accurate handicap calculation based on your rounds.</p>
-              <div className="mt-auto">
+              <div className="mt-auto pt-2">
                 <Link to="/about">
                   <Button variant="link" className="text-white p-0 hover:text-white/80">
                     Learn more <ArrowRight className="ml-2 h-4 w-4" />
@@ -79,14 +79,14 @@ export const MainContent = () => {
             </CardContent>
           </Card>
           
-          <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-auto">
-            <CardContent className="p-4 flex flex-col">
+          <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
+            <CardContent className="p-4 flex flex-col h-full">
               <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
                 <Trophy className="h-5 w-5 text-white" />
               </div>
               <h3 className="text-base font-bold text-white mb-1">Course Leaderboards</h3>
               <p className="text-white/80 mb-2 text-sm">Compete with friends and other golfers at your favorite courses.</p>
-              <div className="mt-auto">
+              <div className="mt-auto pt-2">
                 <Link to="/about">
                   <Button variant="link" className="text-white p-0 hover:text-white/80">
                     Learn more <ArrowRight className="ml-2 h-4 w-4" />
