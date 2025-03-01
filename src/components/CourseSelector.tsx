@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card } from './ui/card';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { searchCourses, GolfCourse } from '@/services/golfCourseApi';
 
@@ -18,18 +18,23 @@ interface CourseSelectorProps {
   selectedCourse: Course | null;
   onCourseChange: (course: Course | null) => void;
   onAddMissingCourse?: () => void;
+  onSearchUpdate?: (searchTerm: string, hasResults: boolean) => void;
+  initialSearchTerm?: string;
 }
 
 export const CourseSelector: React.FC<CourseSelectorProps> = ({ 
   selectedCourse, 
   onCourseChange,
-  onAddMissingCourse 
+  onAddMissingCourse,
+  onSearchUpdate,
+  initialSearchTerm = ''
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [searchResults, setSearchResults] = useState<Course[]>([]);
   const [apiResults, setApiResults] = useState<GolfCourse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showAddMissingCourse, setShowAddMissingCourse] = useState(false);
+  const [hasPerformedSearch, setHasPerformedSearch] = useState(false);
 
   useEffect(() => {
     if (searchTerm.length >= 3) {
@@ -38,12 +43,16 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
       setSearchResults([]);
       setApiResults([]);
       setShowAddMissingCourse(false);
+      if (onSearchUpdate) {
+        onSearchUpdate(searchTerm, true); // No search performed yet
+      }
     }
   }, [searchTerm]);
 
   const searchCoursesHandler = async () => {
     setIsLoading(true);
     setShowAddMissingCourse(false);
+    setHasPerformedSearch(true);
     
     try {
       // First, search our Supabase database
@@ -76,16 +85,27 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
       setApiResults(filteredApiResults);
       
       // Show "Add Missing Course" button if no matches found
+      const hasResults = (dbCourses?.length > 0 || filteredApiResults.length > 0);
       setShowAddMissingCourse(
-        (dbCourses?.length === 0 && filteredApiResults.length === 0) && 
-        searchTerm.length >= 3
+        !hasResults && searchTerm.length >= 3
       );
+
+      // Update parent component about search results
+      if (onSearchUpdate) {
+        onSearchUpdate(searchTerm, hasResults);
+      }
     } catch (err) {
       console.error('Error searching courses:', err);
       setSearchResults([]);
       setApiResults([]);
+      
       // Still show "Add Missing Course" if API fails
       setShowAddMissingCourse(searchTerm.length >= 3);
+      
+      // Update parent component about search results
+      if (onSearchUpdate) {
+        onSearchUpdate(searchTerm, false);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -97,6 +117,7 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
     setSearchResults([]);
     setApiResults([]);
     setShowAddMissingCourse(false);
+    setHasPerformedSearch(false);
   };
 
   const handleSelectApiCourse = async (apiCourse: GolfCourse) => {
@@ -126,6 +147,7 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
       setSearchResults([]);
       setApiResults([]);
       setShowAddMissingCourse(false);
+      setHasPerformedSearch(false);
     } catch (err) {
       console.error('Error adding course from API:', err);
     }
@@ -168,18 +190,30 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
         setSearchResults([]);
         setApiResults([]);
         setShowAddMissingCourse(false);
+        setHasPerformedSearch(false);
       });
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    if (e.target.value.length < 3) {
+      setHasPerformedSearch(false);
+    }
   };
 
   return (
     <div className="space-y-2">
       <Card className="p-4 mb-1 bg-white/80 border shadow">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-accent/60 w-4 h-4" />
+          {isLoading ? (
+            <Loader2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-accent/60 w-4 h-4 animate-spin" />
+          ) : (
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-accent/60 w-4 h-4" />
+          )}
           <Input
             type="text"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
             placeholder="Search for a golf course..."
             className="pl-10 border-accent/20 focus:border-accent/40"
           />
@@ -279,8 +313,9 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
         </div>
       )}
 
-      {/* Always show the "Add Missing Course" button when searching */}
-      {!showAddMissingCourse && searchTerm.length >= 3 && !isLoading && (
+      {/* Always show the "Add Missing Course" button when searching with no results */}
+      {!showAddMissingCourse && hasPerformedSearch && searchTerm.length >= 3 && 
+       searchResults.length === 0 && apiResults.length === 0 && !isLoading && (
         <div className="mt-2">
           <Button 
             variant="outline" 

@@ -8,12 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { CourseSelector } from "./CourseSelector";
 import { toast } from "@/hooks/use-toast";
-import { ManualCourseForm } from "./ManualCourseForm"; // Import the form for adding missing courses
+import { ManualCourseForm } from "./ManualCourseForm";
 
 interface AddRoundModalProps {
   open: boolean;
@@ -26,12 +26,14 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   const [date, setDate] = useState<Date>(new Date());
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<any | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [grossScore, setGrossScore] = useState<string>("");
   const [toPar, setToPar] = useState<string>("");
   const [tee, setTee] = useState<string>("");
   const [holeScores, setHoleScores] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [noResultsFound, setNoResultsFound] = useState(false);
 
   // Reset form when modal closes
   useEffect(() => {
@@ -44,15 +46,18 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setStep('course-search');
     setDate(new Date());
     setSelectedCourse(null);
+    setSearchTerm("");
     setGrossScore("");
     setToPar("");
     setTee("");
     setHoleScores("");
     setError(null);
+    setNoResultsFound(false);
   };
 
   const handleCourseSelect = (course: any) => {
     setSelectedCourse(course);
+    setNoResultsFound(false);
     setStep('round-details');
   };
 
@@ -73,6 +78,17 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     
     setSelectedCourse(newCourse);
     setStep('round-details');
+    
+    // Show success message
+    toast({
+      title: "Course Added",
+      description: `"${courseName}" has been added successfully`,
+    });
+  };
+
+  const handleSearchUpdate = (term: string, hasResults: boolean) => {
+    setSearchTerm(term);
+    setNoResultsFound(!hasResults && term.length >= 3);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -192,8 +208,28 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
           selectedCourse={selectedCourse} 
           onCourseChange={handleCourseSelect}
           onAddMissingCourse={handleAddMissingCourse}
+          onSearchUpdate={handleSearchUpdate}
         />
       </div>
+      
+      {/* No Results Message */}
+      {noResultsFound && (
+        <div className="p-4 bg-muted rounded-md mt-2">
+          <div className="flex items-start space-x-2">
+            <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5" />
+            <div>
+              <p className="font-medium">Course not found. Please check the name or add the course manually.</p>
+              <Button 
+                onClick={handleAddMissingCourse}
+                variant="outline" 
+                className="mt-3 w-full"
+              >
+                Can't find your course? Add it now: {searchTerm}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       
       {error && (
         <div className="text-destructive text-sm p-2 bg-destructive/10 rounded-md">
@@ -347,6 +383,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
           }
         }}
         onCourseCreated={handleCourseCreated}
+        initialCourseName={searchTerm}
       />
     </div>
   );
