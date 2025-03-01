@@ -265,7 +265,7 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
         </div>
       )}
 
-      {/* Add Missing Course button */}
+      {/* Add Missing Course button - Make sure it's always visible even when no results found */}
       {showAddMissingCourse && (
         <div className="mt-2">
           <Button 
@@ -279,15 +279,23 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
         </div>
       )}
 
-      {isLoading && (
-        <div className="p-2 text-center text-sm text-muted-foreground">
-          Searching courses...
+      {/* Always show the "Add Missing Course" button when searching */}
+      {!showAddMissingCourse && searchTerm.length >= 3 && !isLoading && (
+        <div className="mt-2">
+          <Button 
+            variant="outline" 
+            className="w-full flex items-center justify-center gap-2"
+            onClick={onAddMissingCourse || handleAddMissingCourse}
+          >
+            <Plus className="h-4 w-4" />
+            Can't find your course? Add it now
+          </Button>
         </div>
       )}
 
-      {searchTerm.length >= 3 && searchResults.length === 0 && apiResults.length === 0 && !isLoading && !showAddMissingCourse && (
+      {isLoading && (
         <div className="p-2 text-center text-sm text-muted-foreground">
-          No courses found. Try a different search.
+          Searching courses...
         </div>
       )}
 
