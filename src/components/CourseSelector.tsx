@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from './ui/card';
 import { Input } from './ui/input';
@@ -16,15 +17,17 @@ interface Course {
 interface CourseSelectorProps {
   selectedCourse: Course | null;
   onCourseChange: (course: Course | null) => void;
+  onAddMissingCourse?: () => void;
 }
 
 export const CourseSelector: React.FC<CourseSelectorProps> = ({ 
   selectedCourse, 
-  onCourseChange 
+  onCourseChange,
+  onAddMissingCourse 
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<Course[]>([]);
-  const [apiResults, setApiResults] = useState<any[]>([]);
+  const [apiResults, setApiResults] = useState<GolfCourse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showAddMissingCourse, setShowAddMissingCourse] = useState(false);
 
@@ -129,6 +132,12 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
   };
 
   const handleAddMissingCourse = () => {
+    if (onAddMissingCourse) {
+      onAddMissingCourse();
+      return;
+    }
+    
+    // Original fallback behavior if no handler is provided
     // Create a new course object with the search term as the name
     const newCourse = {
       id: -1, // Temporary ID that will be replaced on insert
@@ -265,7 +274,7 @@ export const CourseSelector: React.FC<CourseSelectorProps> = ({
             onClick={handleAddMissingCourse}
           >
             <Plus className="h-4 w-4" />
-            Add Missing Course: {searchTerm}
+            Can't find your course? Add it now: {searchTerm}
           </Button>
         </div>
       )}

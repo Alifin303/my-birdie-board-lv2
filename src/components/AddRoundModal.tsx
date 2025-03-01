@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { CourseSelector } from "./CourseSelector";
 import { toast } from "@/hooks/use-toast";
+import { ManualCourseForm } from "./ManualCourseForm"; // Import the form for adding missing courses
 
 interface AddRoundModalProps {
   open: boolean;
@@ -21,7 +22,7 @@ interface AddRoundModalProps {
 
 export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   const queryClient = useQueryClient();
-  const [step, setStep] = useState<'course-search' | 'round-details'>('course-search');
+  const [step, setStep] = useState<'course-search' | 'round-details' | 'add-course'>('course-search');
   const [date, setDate] = useState<Date>(new Date());
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<any | null>(null);
@@ -57,6 +58,15 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
 
   const handleBackToSearch = () => {
     setStep('course-search');
+  };
+
+  const handleAddMissingCourse = () => {
+    setStep('add-course');
+  };
+
+  const handleCourseAdded = (newCourse: any) => {
+    setSelectedCourse(newCourse);
+    setStep('round-details');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -174,7 +184,8 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
         <Label htmlFor="course">Search for a course</Label>
         <CourseSelector 
           selectedCourse={selectedCourse} 
-          onCourseChange={handleCourseSelect} 
+          onCourseChange={handleCourseSelect}
+          onAddMissingCourse={handleAddMissingCourse}
         />
       </div>
       
@@ -319,6 +330,16 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     </form>
   );
 
+  // Add missing course step
+  const renderAddCourse = () => (
+    <div className="space-y-4 py-4">
+      <ManualCourseForm 
+        onCourseAdded={handleCourseAdded} 
+        onCancel={handleBackToSearch}
+      />
+    </div>
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px]">
@@ -327,12 +348,16 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
           <DialogDescription>
             {step === 'course-search' 
               ? "Search for the course you played at."
+              : step === 'add-course'
+              ? "Add a new course"
               : "Enter the details of your golf round."
             }
           </DialogDescription>
         </DialogHeader>
 
-        {step === 'course-search' ? renderCourseSearch() : renderRoundDetails()}
+        {step === 'course-search' && renderCourseSearch()}
+        {step === 'round-details' && renderRoundDetails()}
+        {step === 'add-course' && renderAddCourse()}
       </DialogContent>
     </Dialog>
   );
