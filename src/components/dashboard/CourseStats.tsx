@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ArrowUpDown, BarChart } from "lucide-react";
-import { ScoreProgressChart } from "./ScoreProgressChart";
+import ScoreProgressChart from "./ScoreProgressChart";
 
 interface Round {
   id: number;
