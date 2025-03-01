@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase, parseCourseName } from "@/integrations/supabase/client";
@@ -37,15 +36,12 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
   
-  // State for scorecard modal
   const [selectedRound, setSelectedRound] = useState<Round | null>(null);
   const [isScorecardOpen, setIsScorecardOpen] = useState(false);
   
-  // State for delete confirmation
   const [roundToDelete, setRoundToDelete] = useState<number | null>(null);
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   
-  // Debug flag for development
   const [showDebugPanel, setShowDebugPanel] = useState(false);
 
   const { data: profile } = useQuery({
@@ -88,11 +84,9 @@ export default function Dashboard() {
       
       console.log("Fetched rounds data from Supabase:", data);
       
-      // Process rounds to include parsed course names
       const processedRounds = data?.map(round => {
         let parsedNames = { clubName: "Unknown Club", courseName: "Unknown Course" };
         
-        // Try to parse the course name if available
         if (round.courses && round.courses.name) {
           parsedNames = parseCourseName(round.courses.name);
         }
@@ -122,20 +116,17 @@ export default function Dashboard() {
     setScoreType(type);
   };
 
-  // Function to handle opening the scorecard
   const handleViewScorecard = (round: Round) => {
     console.log("Opening scorecard for round:", round);
     setSelectedRound(round);
     setIsScorecardOpen(true);
   };
 
-  // Function to handle round deletion confirmation
   const handleConfirmDelete = (roundId: number) => {
     setRoundToDelete(roundId);
     setIsConfirmDeleteOpen(true);
   };
 
-  // Function to handle round deletion
   const handleDeleteRound = async () => {
     if (!roundToDelete) return;
     
@@ -155,7 +146,6 @@ export default function Dashboard() {
         return;
       }
 
-      // Refetch rounds data
       await refetchRounds();
       toast({
         title: "Success",
@@ -174,7 +164,6 @@ export default function Dashboard() {
     }
   };
 
-  // Main dashboard content
   const renderDashboard = () => {
     return (
       <div className="space-y-8">
@@ -183,10 +172,8 @@ export default function Dashboard() {
           onAddRound={handleOpenModal} 
         />
         
-        {/* Only show the overall stats if not viewing a specific course */}
         {!selectedCourseId && (
           <>
-            {/* Main Stats Display */}
             <MainStats 
               userRounds={userRounds}
               roundsLoading={roundsLoading}
@@ -194,7 +181,6 @@ export default function Dashboard() {
               calculateStats={calculateStats}
             />
             
-            {/* Handicap Circle */}
             <HandicapCircle 
               userRounds={userRounds}
               roundsLoading={roundsLoading}
@@ -205,7 +191,6 @@ export default function Dashboard() {
           </>
         )}
         
-        {/* Course Stats or Round History */}
         <div className="space-y-4">
           {selectedCourseId 
             ? <CourseRoundHistory 
@@ -241,7 +226,6 @@ export default function Dashboard() {
         onOpenChange={setIsModalOpen}
       />
       
-      {/* Scorecard Modal */}
       {selectedRound && (
         <RoundScorecard
           round={selectedRound}
@@ -250,7 +234,6 @@ export default function Dashboard() {
         />
       )}
       
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={isConfirmDeleteOpen} onOpenChange={setIsConfirmDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -268,7 +251,6 @@ export default function Dashboard() {
         </AlertDialogContent>
       </AlertDialog>
       
-      {/* Debug Panel for development */}
       {showDebugPanel && <DebugPanel />}
     </div>
   );
