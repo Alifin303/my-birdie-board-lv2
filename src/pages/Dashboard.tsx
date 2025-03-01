@@ -8,6 +8,8 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MainStats, HandicapCircle } from "@/components/dashboard/StatsDisplay";
 import { CourseStatsTable, CourseRoundHistory } from "@/components/dashboard/CourseStats";
 import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
+import { RoundScorecard } from "@/components/dashboard/RoundScorecard";
+import { toast } from "@/hooks/use-toast";
 
 interface Round {
   id: number;
@@ -34,6 +36,10 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
   
+  // Added state for scorecard modal
+  const [selectedRound, setSelectedRound] = useState<Round | null>(null);
+  const [isScorecardOpen, setIsScorecardOpen] = useState(false);
+  
   // Debug flag for development
   const [showDebugPanel, setShowDebugPanel] = useState(true);
 
@@ -58,7 +64,7 @@ export default function Dashboard() {
     }
   });
 
-  const { data: userRounds, isLoading: roundsLoading } = useQuery({
+  const { data: userRounds, isLoading: roundsLoading, refetch: refetchRounds } = useQuery({
     queryKey: ['userRounds'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -115,6 +121,47 @@ export default function Dashboard() {
     setScoreType(type);
   };
 
+  // New function to handle opening the scorecard
+  const handleViewScorecard = (round: Round) => {
+    console.log("Opening scorecard for round:", round);
+    setSelectedRound(round);
+    setIsScorecardOpen(true);
+  };
+
+  // New function to handle round deletion
+  const handleDeleteRound = async (roundId: number) => {
+    try {
+      const { error } = await supabase
+        .from('rounds')
+        .delete()
+        .eq('id', roundId);
+
+      if (error) {
+        console.error("Error deleting round:", error);
+        toast({
+          title: "Error",
+          description: "Failed to delete round. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Refetch rounds data
+      await refetchRounds();
+      toast({
+        title: "Success",
+        description: "Round deleted successfully",
+      });
+    } catch (err) {
+      console.error("Error in delete operation:", err);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Main dashboard content
   const renderDashboard = () => {
     return (
@@ -153,6 +200,8 @@ export default function Dashboard() {
                 userRounds={userRounds} 
                 selectedCourseId={selectedCourseId}
                 onBackClick={() => setSelectedCourseId(null)}
+                onViewScorecard={handleViewScorecard}
+                onDeleteRound={handleDeleteRound}
               /> 
             : (
               <>
@@ -179,6 +228,15 @@ export default function Dashboard() {
         open={isModalOpen} 
         onOpenChange={setIsModalOpen}
       />
+      
+      {/* Scorecard Modal */}
+      {selectedRound && (
+        <RoundScorecard
+          round={selectedRound}
+          isOpen={isScorecardOpen}
+          onOpenChange={setIsScorecardOpen}
+        />
+      )}
       
       {/* Debug Panel for development */}
       {showDebugPanel && <DebugPanel />}

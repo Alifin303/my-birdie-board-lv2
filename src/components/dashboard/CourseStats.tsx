@@ -1,8 +1,11 @@
 
-import { ChevronUp, ChevronDown, Trash, Eye } from "lucide-react";
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useMemo, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ChevronLeft, Info, Eye, Trash2 } from "lucide-react";
+import { format } from "date-fns";
+import ScoreProgressChart from './ScoreProgressChart';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -14,420 +17,290 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
-import ScoreProgressChart from "./ScoreProgressChart";
-import { RoundScorecard } from "./RoundScorecard";
 
-interface Round {
-  id: number;
-  date: string;
-  tee_name: string;
-  gross_score: number;
-  net_score?: number;
-  to_par_gross: number;
-  to_par_net?: number;
-  hole_scores?: any;
-  courses?: {
-    id: number;
-    name: string;
-    city?: string;
-    state?: string;
-    clubName?: string;
-    courseName?: string;
-  };
-}
-
-interface CourseStats {
-  courseId: number;
-  courseName: string;
-  clubName: string;
-  city?: string;
-  state?: string;
-  roundsPlayed: number;
-  bestGrossScore: number;
-  bestNetScore: number | null;
-  bestToPar: number;
-  bestToParNet: number | null;
-}
-
-interface CourseStatsTableProps {
-  userRounds: Round[] | undefined;
+// Component to display stats for all courses
+export const CourseStatsTable = ({ 
+  userRounds, 
+  scoreType,
+  calculateCourseStats,
+  onCourseClick 
+}: { 
+  userRounds: any[];
   scoreType: 'gross' | 'net';
-  calculateCourseStats: (rounds: Round[]) => CourseStats[];
+  calculateCourseStats: (rounds: any[], courseId: number, scoreType: 'gross' | 'net') => any;
   onCourseClick: (courseId: number) => void;
-}
-
-export const CourseStatsTable = ({ userRounds, scoreType, calculateCourseStats, onCourseClick }: CourseStatsTableProps) => {
-  const [sortField, setSortField] = useState<keyof CourseStats>('courseName');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+}) => {
+  // Get unique courses from rounds
+  const courses = useMemo(() => {
+    if (!userRounds || userRounds.length === 0) return [];
+    
+    const courseMap = new Map();
+    
+    userRounds.forEach(round => {
+      if (round.courses && !courseMap.has(round.courses.id)) {
+        courseMap.set(round.courses.id, round.courses);
+      }
+    });
+    
+    return Array.from(courseMap.values());
+  }, [userRounds]);
 
   if (!userRounds || userRounds.length === 0) {
     return (
-      <div className="text-center p-6 bg-muted rounded-lg">
-        <p className="text-lg">You haven't added any rounds yet.</p>
-        <p className="text-muted-foreground">Click "Add a New Round" to get started!</p>
-      </div>
+      <Card className="mt-4">
+        <CardContent className="pt-6">
+          <div className="text-center p-6">
+            <p className="text-muted-foreground">No rounds recorded yet. Add your first round to see course stats.</p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
-  const courseStats = calculateCourseStats(userRounds);
-  
-  // Sort course stats
-  const sortedCourseStats = [...courseStats].sort((a, b) => {
-    const aValue = a[sortField];
-    const bValue = b[sortField];
-    
-    if (aValue === null) return 1;
-    if (bValue === null) return -1;
-    
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
-      return sortDirection === 'asc' 
-        ? aValue.localeCompare(bValue)
-        : bValue.localeCompare(aValue);
-    }
-    
-    // @ts-ignore - we know these are numbers at this point
-    return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
-  });
-
-  const handleSort = (field: keyof CourseStats) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
-
-  // Helper function to render sort indicator
-  const renderSortIndicator = (field: keyof CourseStats) => {
-    if (sortField !== field) {
-      return <span className="text-muted-foreground opacity-50 ml-1">↕️</span>;
-    }
-    return sortDirection === 'asc' 
-      ? <ChevronUp className="inline-block h-4 w-4 ml-1" /> 
-      : <ChevronDown className="inline-block h-4 w-4 ml-1" />;
-  };
-
   return (
-    <div className="overflow-x-auto rounded-lg border bg-background">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b">
-            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
-              <button
-                onClick={() => handleSort('courseName')}
-                className="flex items-center cursor-pointer hover:text-primary transition-colors"
-              >
-                <span>Course</span>
-                {renderSortIndicator('courseName')}
-              </button>
-            </th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
-              <button
-                onClick={() => handleSort('roundsPlayed')}
-                className="flex items-center cursor-pointer hover:text-primary transition-colors"
-              >
-                <span>Rounds Played</span>
-                {renderSortIndicator('roundsPlayed')}
-              </button>
-            </th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
-              <button
-                onClick={() => handleSort(scoreType === 'gross' ? 'bestGrossScore' : 'bestNetScore')}
-                className="flex items-center cursor-pointer hover:text-primary transition-colors"
-              >
-                <span>Best Score</span>
-                {renderSortIndicator(scoreType === 'gross' ? 'bestGrossScore' : 'bestNetScore')}
-              </button>
-            </th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
-              <button
-                onClick={() => handleSort(scoreType === 'gross' ? 'bestToPar' : 'bestToParNet')}
-                className="flex items-center cursor-pointer hover:text-primary transition-colors"
-              >
-                <span>Best to Par</span>
-                {renderSortIndicator(scoreType === 'gross' ? 'bestToPar' : 'bestToParNet')}
-              </button>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {sortedCourseStats.map((courseStat) => (
-            <tr key={courseStat.courseId} className="border-b last:border-0">
-              <td className="px-4 py-3 text-sm font-medium">
-                <button 
-                  className="hover:underline text-primary"
-                  onClick={() => onCourseClick(courseStat.courseId)}
-                >
-                  {courseStat.clubName !== courseStat.courseName 
-                    ? `${courseStat.clubName} - ${courseStat.courseName}`
-                    : courseStat.courseName}
-                </button>
-                <p className="text-xs text-muted-foreground">
-                  {courseStat.city}{courseStat.state ? `, ${courseStat.state}` : ''}
-                </p>
-              </td>
-              <td className="px-4 py-3 text-sm">
-                {courseStat.roundsPlayed}
-              </td>
-              <td className="px-4 py-3 text-sm">
-                {scoreType === 'gross' 
-                  ? courseStat.bestGrossScore 
-                  : courseStat.bestNetScore !== null ? courseStat.bestNetScore : '-'}
-              </td>
-              <td className="px-4 py-3 text-sm">
-                {scoreType === 'gross' 
-                  ? (courseStat.bestToPar > 0 ? '+' : '') + courseStat.bestToPar
-                  : courseStat.bestToParNet !== null 
-                    ? (courseStat.bestToParNet > 0 ? '+' : '') + courseStat.bestToParNet
-                    : '-'}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {courses.map(course => {
+        const courseStats = calculateCourseStats(userRounds, course.id, scoreType);
+        return (
+          <Card 
+            key={course.id} 
+            className="cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => onCourseClick(course.id)}
+          >
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-semibold">{course.clubName}</CardTitle>
+              <div className="text-sm text-muted-foreground">{course.courseName}</div>
+              {course.city && (
+                <div className="text-xs text-muted-foreground mt-1">
+                  {course.city}{course.state ? `, ${course.state}` : ''}
+                </div>
+              )}
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div>
+                  <div className="text-xs text-muted-foreground">Rounds</div>
+                  <div className="text-xl font-semibold">{courseStats.roundsPlayed}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Best Score</div>
+                  <div className="text-xl font-semibold">{courseStats.bestScore || '-'}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Best to Par</div>
+                  <div className="text-xl font-semibold">
+                    {courseStats.bestToPar !== null 
+                      ? (courseStats.bestToPar > 0 ? '+' : '') + courseStats.bestToPar 
+                      : '-'
+                    }
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 };
 
-export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }: { 
-  userRounds: Round[] | undefined; 
-  selectedCourseId: number | null;
+// Component to display rounds history for a specific course
+export const CourseRoundHistory = ({ 
+  userRounds, 
+  selectedCourseId,
+  onBackClick,
+  onViewScorecard,
+  onDeleteRound
+}: { 
+  userRounds: any[];
+  selectedCourseId: number;
   onBackClick: () => void;
+  onViewScorecard: (round: any) => void;
+  onDeleteRound: (roundId: number) => void;
 }) => {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
-  const [deletingRoundId, setDeletingRoundId] = useState<number | null>(null);
-  const [viewingRound, setViewingRound] = useState<Round | null>(null);
-  const [scorecardOpen, setScorecardOpen] = useState(false);
+  const [roundToDelete, setRoundToDelete] = useState<number | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   
-  if (!userRounds || !selectedCourseId) return null;
-  
-  const courseRounds = userRounds.filter(
-    round => round.courses && round.courses.id === selectedCourseId
-  );
-  
-  if (courseRounds.length === 0) return null;
-  
-  // Get course name, properly formatted
-  let courseName = "Course";
-  let clubName = "Unknown Club";
-  
-  if (courseRounds[0].courses) {
-    courseName = courseRounds[0].courses.courseName || "Course";
-    clubName = courseRounds[0].courses.clubName || "Unknown Club";
-  }
-  
-  const displayName = clubName !== courseName 
-    ? `${clubName} - ${courseName}`
-    : courseName;
-  
-  // Calculate course-specific stats
-  const calculateCourseSpecificStats = () => {
-    if (courseRounds.length === 0) return null;
-    
-    const roundsPlayed = courseRounds.length;
-    const bestGrossScore = Math.min(...courseRounds.map(r => r.gross_score));
-    const bestToPar = Math.min(...courseRounds.map(r => r.to_par_gross));
-    
-    // Net scores may not be available for all rounds
-    const roundsWithNetScore = courseRounds.filter(r => r.net_score !== undefined);
-    const bestNetScore = roundsWithNetScore.length > 0 ? 
-      Math.min(...roundsWithNetScore.map(r => r.net_score!)) : null;
-    
-    const roundsWithToParNet = courseRounds.filter(r => r.to_par_net !== undefined);
-    const bestToParNet = roundsWithToParNet.length > 0 ? 
-      Math.min(...roundsWithToParNet.map(r => r.to_par_net!)) : null;
-      
-    return { roundsPlayed, bestGrossScore, bestNetScore, bestToPar, bestToParNet };
+  // Filter rounds for the selected course
+  const courseRounds = useMemo(() => {
+    return userRounds?.filter(round => 
+      round.courses && round.courses.id === selectedCourseId
+    ) || [];
+  }, [userRounds, selectedCourseId]);
+
+  // Get course details
+  const courseDetails = useMemo(() => {
+    return courseRounds.length > 0 ? courseRounds[0].courses : null;
+  }, [courseRounds]);
+
+  const handleDeleteClick = (roundId: number, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the parent onClick
+    setRoundToDelete(roundId);
+    setDeleteDialogOpen(true);
   };
-  
-  const stats = calculateCourseSpecificStats();
-  
-  const handleDeleteRound = async () => {
-    if (!deletingRoundId) return;
-    
-    try {
-      const { error } = await supabase
-        .from('rounds')
-        .delete()
-        .eq('id', deletingRoundId);
-        
-      if (error) throw error;
-      
-      toast({
-        title: "Round deleted",
-        description: "The round has been permanently removed.",
-      });
-      
-      // Invalidate query cache to refresh data
-      queryClient.invalidateQueries({ queryKey: ['userRounds'] });
-      
-    } catch (error) {
-      console.error("Error deleting round:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete round. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setDeletingRoundId(null);
+
+  const confirmDelete = () => {
+    if (roundToDelete) {
+      onDeleteRound(roundToDelete);
+      setRoundToDelete(null);
+      setDeleteDialogOpen(false);
     }
   };
-  
-  const handleViewScorecard = (round: Round) => {
-    setViewingRound(round);
-    setScorecardOpen(true);
-  };
-  
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold flex items-center">
-          <button 
-            className="mr-2 p-1 hover:bg-muted rounded"
-            onClick={onBackClick}
-          >
-            <ChevronUp className="h-5 w-5" />
-          </button>
-          {displayName}
-        </h2>
+      <div className="flex items-center">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onBackClick}
+          className="mr-2"
+        >
+          <ChevronLeft className="h-4 w-4 mr-1" />
+          Back
+        </Button>
+        <h2 className="text-2xl font-semibold">{courseDetails?.clubName}</h2>
       </div>
-      
-      {/* Course-specific stats */}
-      {stats && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <div className="bg-background border rounded-lg p-4 text-center">
-            <p className="text-sm text-muted-foreground">Rounds Played</p>
-            <p className="text-3xl font-bold">{stats.roundsPlayed}</p>
-          </div>
-          <div className="bg-background border rounded-lg p-4 text-center">
-            <p className="text-sm text-muted-foreground">Best Score</p>
-            <p className="text-3xl font-bold">
-              {scoreType === 'gross' 
-                ? stats.bestGrossScore 
-                : stats.bestNetScore !== null ? stats.bestNetScore : '-'}
+
+      {courseDetails && (
+        <div className="mb-6">
+          <h3 className="text-lg font-medium">{courseDetails.courseName}</h3>
+          {courseDetails.city && (
+            <p className="text-sm text-muted-foreground">
+              {courseDetails.city}{courseDetails.state ? `, ${courseDetails.state}` : ''}
             </p>
-          </div>
-          <div className="bg-background border rounded-lg p-4 text-center">
-            <p className="text-sm text-muted-foreground">Best to Par</p>
-            <p className="text-3xl font-bold">
-              {scoreType === 'gross' 
-                ? (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar
-                : stats.bestToParNet !== null 
-                  ? (stats.bestToParNet > 0 ? '+' : '') + stats.bestToParNet
-                  : '-'}
-            </p>
-          </div>
+          )}
         </div>
       )}
-      
-      {/* Score progress chart */}
-      <ScoreProgressChart 
-        rounds={courseRounds}
-        scoreType={scoreType}
-      />
-      
-      {/* Round history listing */}
-      <div className="space-y-4 mt-6">
-        <h3 className="text-lg font-medium">Round History</h3>
-        <div className="flex justify-end space-x-2 mb-2">
-          <Button 
-            variant={scoreType === 'gross' ? 'default' : 'outline'} 
-            size="sm"
-            onClick={() => setScoreType('gross')}
-            className="text-xs"
-          >
-            Gross Score
-          </Button>
-          <Button 
-            variant={scoreType === 'net' ? 'default' : 'outline'} 
-            size="sm"
-            onClick={() => setScoreType('net')}
-            className="text-xs"
-          >
-            Net Score
-          </Button>
-        </div>
-        
-        {courseRounds.map((round) => (
-          <div key={round.id} className="bg-background border rounded-md p-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-medium">{new Date(round.date).toLocaleDateString()}</p>
-                <p className="text-sm text-muted-foreground">{round.tee_name} Tees</p>
+
+      {/* Course Stats */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Course Statistics</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div>
+              <div className="text-xs text-muted-foreground">Rounds Played</div>
+              <div className="text-xl font-semibold">{courseRounds.length}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Best Score</div>
+              <div className="text-xl font-semibold">
+                {courseRounds.length > 0 
+                  ? Math.min(...courseRounds.map(r => r.gross_score))
+                  : '-'
+                }
               </div>
-              <div className="text-right">
-                <p>
-                  Gross: {round.gross_score} 
-                  <span className="text-muted-foreground ml-1">
-                    ({round.to_par_gross > 0 ? '+' : ''}{round.to_par_gross})
-                  </span>
-                </p>
-                {round.net_score !== undefined && (
-                  <p>
-                    Net: {round.net_score}
-                    <span className="text-muted-foreground ml-1">
-                      ({round.to_par_net !== undefined ? (round.to_par_net > 0 ? '+' : '') + round.to_par_net : ''})
-                    </span>
-                  </p>
-                )}
-              </div>
-              <div className="flex space-x-2 ml-4">
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={() => handleViewScorecard(round)}
-                  title="View scorecard"
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-                
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => setDeletingRoundId(round.id)}
-                      className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                      title="Delete round"
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Are you sure you want to delete this round?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete the round
-                        data and remove it from all statistics.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel onClick={() => setDeletingRoundId(null)}>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDeleteRound} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Best to Par</div>
+              <div className="text-xl font-semibold">
+                {courseRounds.length > 0 
+                  ? (() => {
+                    const bestToPar = Math.min(...courseRounds.map(r => r.to_par_gross));
+                    return (bestToPar > 0 ? '+' : '') + bestToPar;
+                  })()
+                  : '-'
+                }
               </div>
             </div>
           </div>
-        ))}
+          
+          {/* Progress Chart */}
+          {courseRounds.length > 0 && (
+            <ScoreProgressChart 
+              rounds={courseRounds} 
+              scoreType="gross" 
+            />
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Rounds History */}
+      <div>
+        <h3 className="text-lg font-semibold mb-3">Round History</h3>
+        {courseRounds.length === 0 ? (
+          <div className="bg-muted/30 p-6 rounded-lg text-center">
+            <p className="text-muted-foreground">No rounds recorded for this course yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {courseRounds.map(round => (
+              <Card 
+                key={round.id} 
+                className="hover:shadow-sm transition-shadow"
+              >
+                <CardContent className="p-4 flex justify-between items-center">
+                  <div>
+                    <div className="font-medium">
+                      {format(new Date(round.date), 'MMMM d, yyyy')}
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      {round.tee_name && (
+                        <Badge variant="outline" className="text-xs">
+                          {round.tee_name} tees
+                        </Badge>
+                      )}
+                      <div className="text-sm">
+                        <span className="text-muted-foreground mr-1">Score:</span>
+                        <span className="font-medium">{round.gross_score}</span>
+                        <span className="text-muted-foreground mx-1">|</span>
+                        <span className="text-muted-foreground mr-1">To Par:</span>
+                        <span className="font-medium">
+                          {round.to_par_gross > 0 ? '+' : ''}{round.to_par_gross}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => onViewScorecard(round)}
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      View Scorecard
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="text-destructive hover:bg-destructive/10"
+                      onClick={(e) => handleDeleteClick(round.id, e)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Delete Round</span>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
-      
-      {/* Scorecard dialog */}
-      {viewingRound && (
-        <RoundScorecard 
-          round={viewingRound}
-          isOpen={scorecardOpen}
-          onOpenChange={setScorecardOpen}
-        />
-      )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Round</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this round? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setRoundToDelete(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
