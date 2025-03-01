@@ -12,12 +12,12 @@ const About = () => {
     <div 
       className="min-h-screen bg-cover bg-center bg-fixed bg-no-repeat relative"
       style={{
-        backgroundImage: `url('https://images.unsplash.com/photo-1592919505738-5d517b0da38e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80')`,
+        backgroundImage: `url('https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?ixlib=rb-4.0.3&auto=format&fit=crop&q=80')`,
         backgroundColor: "#2C4A3B", // Fallback color if image fails to load
       }}
     >
       {/* Dark overlay div */}
-      <div className="absolute inset-0 bg-black opacity-30 z-0"></div>
+      <div className="absolute inset-0 bg-black opacity-20 z-0"></div>
       
       <div className="absolute top-4 right-4 z-10">
         <Button 
