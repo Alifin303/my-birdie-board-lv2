@@ -1,4 +1,3 @@
-
 // Type definitions
 export interface GolfCourse {
   id: number | string;
@@ -14,6 +13,13 @@ export interface GolfCourse {
     longitude?: number;
     address?: string;
   };
+  // Add these properties for user-added courses
+  isUserAdded?: boolean;
+  name?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  tee_data?: any;
 }
 
 export interface TeeBox {
