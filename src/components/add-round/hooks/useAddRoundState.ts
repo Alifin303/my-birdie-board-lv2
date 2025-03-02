@@ -1,30 +1,29 @@
-
-import { useState } from 'react';
+import { useState } from "react";
 import { 
-  Score, 
-  HoleSelection, 
   SimplifiedGolfCourse, 
   SimplifiedCourseDetail,
-  CourseDetail 
+  Score,
+  HoleSelection,
+  CourseDetail
 } from "../types";
 
-export function useAddRoundState() {
+export const useAddRoundState = () => {
   const [currentStep, setCurrentStep] = useState<'search' | 'scorecard'>('search');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<SimplifiedGolfCourse[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<SimplifiedCourseDetail | null>(null);
   const [selectedTeeId, setSelectedTeeId] = useState<string | null>(null);
   const [scores, setScores] = useState<Score[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [dataLoadingError, setDataLoadingError] = useState<string | null>(null);
   const [roundDate, setRoundDate] = useState<Date | undefined>(new Date());
-  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState<boolean>(false);
   const [holeSelection, setHoleSelection] = useState<HoleSelection>('all');
   const [activeScoreTab, setActiveScoreTab] = useState<"front9" | "back9">("front9");
   const [originalCourseDetail, setOriginalCourseDetail] = useState<CourseDetail | null>(null);
-  const [noResults, setNoResults] = useState(false);
-  const [manualCourseOpen, setManualCourseOpen] = useState(false);
+  const [noResults, setNoResults] = useState<boolean>(false);
+  const [manualCourseOpen, setManualCourseOpen] = useState<boolean>(false);
 
   return {
     currentStep,
@@ -60,4 +59,4 @@ export function useAddRoundState() {
     manualCourseOpen,
     setManualCourseOpen
   };
-}
+};

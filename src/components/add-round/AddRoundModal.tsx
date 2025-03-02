@@ -54,6 +54,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setManualCourseOpen
   } = useAddRoundState();
   
+  // Fix: Get the correct toast object with its methods
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const manualCourseFormRef = useRef<any>(null);
