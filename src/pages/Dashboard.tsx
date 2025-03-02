@@ -126,6 +126,13 @@ export default function Dashboard() {
     setIsModalOpen(true);
   };
 
+  const handleCloseModal = () => {
+    console.log("Closing modal...");
+    setIsModalOpen(false);
+    // Refresh rounds data when modal closes
+    queryClient.invalidateQueries({ queryKey: ['userRounds'] });
+  };
+
   const handleScoreTypeChange = (type: 'gross' | 'net') => {
     setScoreType(type);
   };
@@ -208,14 +215,7 @@ export default function Dashboard() {
 
       <AddRoundModal 
         open={isModalOpen} 
-        onOpenChange={(open) => {
-          console.log("Modal open state changing to:", open);
-          setIsModalOpen(open);
-          if (!open) {
-            // Refresh rounds data when modal closes
-            queryClient.invalidateQueries({ queryKey: ['userRounds'] });
-          }
-        }}
+        onClose={handleCloseModal}
       />
       
       {showDebugPanel && <DebugPanel />}

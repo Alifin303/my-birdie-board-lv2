@@ -69,7 +69,7 @@ export interface ScoreSummary {
 
 export interface AddRoundModalProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onClose: () => void;
 }
 
 // Add the CourseDetail interface export

@@ -77,6 +77,7 @@ export const AddRoundModal: React.FC<AddRoundModalProps> = ({
   
   const toast = useToast();
   const queryClient = useQueryClient();
+  const manualCourseFormRef = useRef<any>(null);
   
   // Score summary calculation
   const scoreSummary = calculateScoreSummary(scores);
@@ -173,24 +174,27 @@ export const AddRoundModal: React.FC<AddRoundModalProps> = ({
         <DialogContent className="max-w-4xl h-[90vh] flex flex-col max-h-[90vh]">
           {manualCourseOpen && (
             <ManualCourseForm 
-              isOpen={manualCourseOpen}
-              onClose={() => setManualCourseOpen(false)}
+              open={manualCourseOpen}
+              onOpenChange={setManualCourseOpen}
               onCourseCreated={handleCourseCreated}
+              ref={manualCourseFormRef}
             />
           )}
           
           {currentStep === 'search' ? (
             <SearchStep 
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
               handleSearch={handleSearch}
               handleCourseSelect={handleCourseSelect}
               handleOpenManualCourseForm={handleOpenManualCourseForm}
-              handleCloseModal={handleDialogClose}
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              isLoading={isLoading}
+              manualCourseFormRef={manualCourseFormRef}
               searchResults={searchResults}
+              isLoading={isLoading}
               searchError={searchError}
               noResults={noResults}
+              setManualCourseOpen={setManualCourseOpen}
+              handleCloseModal={handleDialogClose}
             />
           ) : (
             <ScorecardStep 

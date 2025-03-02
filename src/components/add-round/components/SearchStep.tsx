@@ -23,6 +23,7 @@ interface SearchStepProps {
   searchError: string | null;
   noResults: boolean;
   setManualCourseOpen: (open: boolean) => void;
+  handleCloseModal: () => void;
 }
 
 export const SearchStep: React.FC<SearchStepProps> = ({
@@ -36,7 +37,8 @@ export const SearchStep: React.FC<SearchStepProps> = ({
   isLoading,
   searchError,
   noResults,
-  setManualCourseOpen
+  setManualCourseOpen,
+  handleCloseModal
 }) => {
   return (
     <>
