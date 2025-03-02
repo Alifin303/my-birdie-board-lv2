@@ -84,7 +84,7 @@ export interface AddRoundModalProps {
 export interface Course extends SimplifiedCourseDetail {}
 export interface Tee extends SimplifiedTee {}
 
-// Add the AddRoundStepProps interface
+// Update the AddRoundStepProps interface to include all required props
 export interface AddRoundStepProps {
   selectedCourse: Course | null;
   selectedTeeId: string | null;
@@ -97,6 +97,16 @@ export interface AddRoundStepProps {
   setSelectedTee: (tee: Tee | null) => void;
   handleHoleScoreChange: (index: number, value: string) => void;
   handleSaveRound: () => Promise<boolean>;
+  handleTeeChange: (teeId: string) => void;
+  handleDateSelect?: (date: Date | undefined) => void;
+  handleBackToSearch?: () => void;
+  handleCloseModal?: () => void;
+  scoreSummary?: ScoreSummary;
+  holeSelection?: HoleSelection;
+  calendarOpen?: boolean;
+  setCalendarOpen?: (open: boolean) => void;
+  dataLoadingError?: string | null;
+  today?: Date;
 }
 
 // Add CourseDetail interface 

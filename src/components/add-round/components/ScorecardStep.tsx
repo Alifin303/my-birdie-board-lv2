@@ -31,6 +31,7 @@ export const ScorecardStep = ({
   setSelectedTee,
   handleHoleScoreChange,
   handleSaveRound,
+  handleTeeChange,
 }: AddRoundStepProps) => {
   useEffect(() => {
     if (selectedCourse && (!selectedTeeId || !selectedTee)) {
@@ -95,22 +96,6 @@ export const ScorecardStep = ({
     teeName: selectedTee?.name,
     availableTees: selectedCourse.tees?.map(t => ({ id: t.id, name: t.name }))
   });
-
-  const handleTeeChange = (teeId: string) => {
-    console.log("Tee selection changed to ID:", teeId);
-    console.log("Available tees:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
-    
-    const newSelectedTee = selectedCourse.tees.find(tee => tee.id === teeId);
-    console.log("Found tee object:", newSelectedTee);
-    
-    if (newSelectedTee) {
-      console.log("Setting new tee:", newSelectedTee.name);
-      setSelectedTeeId(teeId);
-      setSelectedTee(newSelectedTee);
-    } else {
-      console.error("Could not find tee with ID:", teeId);
-    }
-  };
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat("en-US", {
