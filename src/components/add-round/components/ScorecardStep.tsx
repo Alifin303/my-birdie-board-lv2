@@ -74,15 +74,76 @@ export function ScorecardStep({
     return tee ? tee.name : null;
   };
   
-  const selectedTee = selectedCourse?.tees.find(t => t.id === selectedTeeId);
+  const selectedTee = selectedCourse?.tees?.find(t => t.id === selectedTeeId);
 
   useEffect(() => {
     console.log("ScorecardStep - selectedTeeId changed to:", selectedTeeId);
     console.log("Selected tee:", selectedTee);
-  }, [selectedTeeId, selectedTee]);
+    console.log("Available tees:", selectedCourse?.tees?.map(t => ({ id: t.id, name: t.name })));
+    
+    if (!selectedTee && selectedCourse && selectedCourse.tees && selectedCourse.tees.length > 0) {
+      console.warn("Selected tee not found but course has tees available");
+    }
+  }, [selectedTeeId, selectedTee, selectedCourse]);
 
+  // Error state display for debugging
   if (!selectedCourse) {
-    return <div>No course selected. Please go back and select a course.</div>;
+    console.error("ScorecardStep rendered with no selectedCourse");
+    return (
+      <div className="p-4 border border-destructive rounded-md text-destructive">
+        <h3 className="font-semibold mb-2">Error: No Course Selected</h3>
+        <p>Please go back and select a course.</p>
+        <Button 
+          variant="outline"
+          className="mt-4" 
+          onClick={handleBackToSearch}
+        >
+          Back to Search
+        </Button>
+      </div>
+    );
+  }
+
+  if (!selectedCourse.tees || selectedCourse.tees.length === 0) {
+    console.error("Selected course has no tees:", selectedCourse);
+    return (
+      <div className="p-4 border border-destructive rounded-md text-destructive">
+        <h3 className="font-semibold mb-2">Error: No Tees Available</h3>
+        <p>The selected course does not have any tee boxes defined.</p>
+        <Button 
+          variant="outline" 
+          className="mt-4"
+          onClick={handleBackToSearch}
+        >
+          Back to Search
+        </Button>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+        <p>Loading course data...</p>
+      </div>
+    );
+  }
+
+  if (dataLoadingError) {
+    return (
+      <div className="p-4 border border-destructive rounded-md text-destructive">
+        <h3 className="font-semibold mb-2">Error Loading Course Data</h3>
+        <p>{dataLoadingError}</p>
+        <Button 
+          variant="outline" 
+          className="mt-4"
+          onClick={handleBackToSearch}
+        >
+          Back to Search
+        </Button>
+      </div>
+    );
   }
 
   return (
@@ -283,8 +344,16 @@ export function ScorecardStep({
           ) : (
             <div className="h-40 flex items-center justify-center">
               <p className="text-muted-foreground">
-                {isLoading ? "Loading course data..." : 
-                  selectedTeeId ? "No scorecard data available" : "Select a tee to see the scorecard"}
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading course data...
+                  </span>
+                ) : !selectedTee ? (
+                  "Select a tee to see the scorecard"
+                ) : (
+                  "No scorecard data available"
+                )}
               </p>
             </div>
           )}
@@ -299,7 +368,7 @@ export function ScorecardStep({
           </Button>
           <Button 
             onClick={handleSaveRound} 
-            disabled={isSaving || !roundDate}
+            disabled={isSaving || !roundDate || !selectedTee || scores.length === 0}
           >
             {isSaving ? (
               <>

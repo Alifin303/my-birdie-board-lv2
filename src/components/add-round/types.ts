@@ -77,4 +77,5 @@ export interface AddRoundModalProps {
 }
 
 // Re-export CourseDetail from golfCourseApi to make it available to importers
-export { CourseDetail };
+// Using 'export type' to fix the isolatedModules error
+export type { CourseDetail };
