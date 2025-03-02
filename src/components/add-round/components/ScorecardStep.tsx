@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,6 +76,9 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
     if (lowerName.includes('silver')) return '#C0C0C0';
     return '#777';
   };
+
+  console.log("ScorecardStep - selectedTeeId:", selectedTeeId);
+  console.log("ScorecardStep - selectedTee:", selectedTee);
 
   return (
     <div>

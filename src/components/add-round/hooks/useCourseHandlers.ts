@@ -7,5 +7,6 @@ export { useCourseHandlers };
  * It preserves the old API for backward compatibility while using the new modularized implementation.
  */
 function useCourseHandlers(props: Parameters<typeof useRefactoredCourseHandlers>[0]) {
+  console.log("useCourseHandlers wrapper - selectedTeeId:", props.selectedTeeId);
   return useRefactoredCourseHandlers(props);
 }

@@ -57,6 +57,8 @@ export function createSaveRoundHandler({
       const selectedTee = selectedCourse.tees.find(tee => tee.id === selectedTeeId);
       if (!selectedTee) throw new Error('Selected tee not found');
       
+      console.log("Selected tee before saving:", selectedTee);
+      
       const totalStrokes = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
       const toParGross = totalStrokes - totalPar;
@@ -131,7 +133,7 @@ export function createSaveRoundHandler({
             user_id: session.user.id,
             course_id: dbCourseId,
             date: roundDate.toISOString(),
-            tee_name: selectedTee.name,
+            tee_name: selectedTee.name, // Use the correct tee name from selectedTee object
             tee_id: selectedTeeId,
             gross_score: totalStrokes,
             to_par_gross: toParGross,
