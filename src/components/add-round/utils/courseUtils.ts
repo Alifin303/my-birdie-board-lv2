@@ -1,3 +1,4 @@
+
 import { CourseDetail, TeeBox } from "@/services/golfCourseApi";
 import { SimplifiedCourseDetail, SimplifiedGolfCourse, SimplifiedHole, SimplifiedTee } from "../types";
 import { supabase, formatCourseName, parseCourseName, getCourseMetadataFromLocalStorage, isUserAddedCourse } from "@/integrations/supabase/client";
@@ -140,6 +141,7 @@ export const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): Sim
     }));
   }
   
+  // Fix: Ensure id is always a number
   const courseId = typeof courseDetail.id === 'string' ? parseInt(courseDetail.id, 10) : 
                    typeof courseDetail.id === 'number' ? courseDetail.id : 0;
 
@@ -208,6 +210,7 @@ export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDe
     const parsedDetails = JSON.parse(storedDetails);
     console.log("Parsed course details from localStorage:", parsedDetails);
     
+    // Ensure the course has at least one tee
     if (!parsedDetails.tees || parsedDetails.tees.length === 0) {
       console.log("No tees found in course details, creating default tee");
       
@@ -231,6 +234,7 @@ export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDe
       
       parsedDetails.holes = defaultHoles;
       
+      // Save updated details back to localStorage
       localStorage.setItem(`course_details_${courseId}`, JSON.stringify(parsedDetails));
       console.log("Updated course details saved to localStorage with default tee");
     }
@@ -287,41 +291,4 @@ export const enhanceCourseResults = (courses: SimplifiedGolfCourse[]): Simplifie
       isUserAdded: course.isUserAdded || isUserAddedCourse(course.name)
     };
   });
-};
-
-export const transformCourseDetails = (
-  courseId: number | string, 
-  courseDetail: any, 
-  simplifiedCourse: SimplifiedGolfCourse
-): SimplifiedCourseDetail => {
-  const id = typeof courseId === 'string' ? parseInt(courseId, 10) : courseId;
-  
-  const transformedCourse: SimplifiedCourseDetail = {
-    id: id,
-    name: simplifiedCourse.name || courseDetail.course_name || 'Unknown Course',
-    clubName: simplifiedCourse.clubName || courseDetail.club_name || 'Unknown Club',
-    city: simplifiedCourse.city || courseDetail?.location?.city || '',
-    state: simplifiedCourse.state || courseDetail?.location?.state || '',
-    country: simplifiedCourse.country || courseDetail?.location?.country || 'United States',
-    tees: [],
-    holes: [],
-    isUserAdded: simplifiedCourse.isUserAdded || false,
-    apiCourseId: courseId.toString(),
-  };
-  
-  transformedCourse.tees = extractTeesFromApiResponse(courseDetail);
-  
-  if (transformedCourse.tees.length > 0) {
-    const firstTeeId = transformedCourse.tees[0].id;
-    transformedCourse.holes = extractHolesForTee(courseDetail, firstTeeId);
-  } else {
-    transformedCourse.holes = Array(18).fill(null).map((_, idx) => ({
-      number: idx + 1,
-      par: 4,
-      yards: 400,
-      handicap: idx + 1
-    }));
-  }
-  
-  return transformedCourse;
 };

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -12,7 +11,7 @@ import {
 } from "./types";
 import { ManualCourseForm } from "@/components/ManualCourseForm";
 import { SearchStep } from "./components/SearchStep";
-import { ScorecardStep } from "./components/scorecard";
+import { ScorecardStep } from "./components/ScorecardStep";
 import { useAddRoundState } from "./hooks/useAddRoundState";
 import { useScoreHandlers } from "./hooks/useScoreHandlers";
 import { useCourseHandlers } from "./hooks/useCourseHandlers";
@@ -99,8 +98,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     isLoading,
     searchResults,
     toast,
-    queryClient,
-    onSaveComplete: () => handleCloseModal()
+    queryClient
   });
 
   const handleBackToSearch = () => {
@@ -120,10 +118,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
 
   const handleCloseModal = () => {
     onOpenChange(false);
-    resetFormState();
-  };
-  
-  const resetFormState = () => {
     setCurrentStep('search');
     setSearchQuery('');
     setSearchResults([]);
@@ -137,12 +131,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setActiveScoreTab("front9");
     setManualCourseOpen(false);
   };
-  
-  React.useEffect(() => {
-    if (!open) {
-      resetFormState();
-    }
-  }, [open]);
   
   const scoreSummary = calculateScoreSummary(scores);
 
@@ -192,17 +180,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
       <ManualCourseForm
         open={manualCourseOpen}
         onOpenChange={setManualCourseOpen}
-        onCourseCreated={(courseId, courseName) => {
-          // Create a simplified course object from the ID and name
-          const newCourse: SimplifiedCourseDetail = {
-            id: courseId,
-            name: courseName,
-            clubName: courseName,
-            tees: [],
-            holes: []
-          };
-          handleCourseCreated(newCourse);
-        }}
+        onCourseCreated={handleCourseCreated}
       />
     </>
   );
