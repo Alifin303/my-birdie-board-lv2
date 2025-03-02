@@ -1,8 +1,7 @@
-
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase, parseCourseName } from "@/integrations/supabase/client";
-import { AddRoundModal } from "@/components/AddRoundModal";
+import { AddRoundModal } from "@/components/add-round/AddRoundModal";
 import { DebugPanel } from "@/components/DebugPanel";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MainStats, HandicapCircle } from "@/components/dashboard/StatsDisplay";
@@ -34,7 +33,6 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
   
-  // Debug flag for development
   const [showDebugPanel, setShowDebugPanel] = useState(true);
 
   useEffect(() => {
@@ -81,11 +79,9 @@ export default function Dashboard() {
       
       console.log("Fetched rounds data from Supabase:", data);
       
-      // Process rounds to include parsed course names
       const processedRounds = data?.map(round => {
         let parsedNames = { clubName: "Unknown Club", courseName: "Unknown Course" };
         
-        // Try to parse the course name if available
         if (round.courses && round.courses.name) {
           parsedNames = parseCourseName(round.courses.name);
         }
@@ -115,7 +111,6 @@ export default function Dashboard() {
     setScoreType(type);
   };
 
-  // Main dashboard content
   const renderDashboard = () => {
     return (
       <div className="space-y-8">
@@ -124,10 +119,8 @@ export default function Dashboard() {
           onAddRound={handleOpenModal} 
         />
         
-        {/* Only show the overall stats if not viewing a specific course */}
         {!selectedCourseId && (
           <>
-            {/* Main Stats Display */}
             <MainStats 
               userRounds={userRounds}
               roundsLoading={roundsLoading}
@@ -135,7 +128,6 @@ export default function Dashboard() {
               calculateStats={calculateStats}
             />
             
-            {/* Handicap Circle */}
             <HandicapCircle 
               userRounds={userRounds}
               roundsLoading={roundsLoading}
@@ -146,7 +138,6 @@ export default function Dashboard() {
           </>
         )}
         
-        {/* Course Stats or Round History */}
         <div className="space-y-4">
           {selectedCourseId 
             ? <CourseRoundHistory 
@@ -180,7 +171,6 @@ export default function Dashboard() {
         onOpenChange={setIsModalOpen}
       />
       
-      {/* Debug Panel for development */}
       {showDebugPanel && <DebugPanel />}
     </div>
   );
