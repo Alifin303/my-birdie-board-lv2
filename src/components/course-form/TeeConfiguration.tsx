@@ -29,7 +29,18 @@ export function TeeConfiguration({
         onValueChange={handleTeeChange}
       >
         <SelectTrigger>
-          <SelectValue placeholder="Select tee color" />
+          <SelectValue placeholder="Select tee color">
+            <div className="flex items-center gap-2">
+              <div 
+                className="w-3 h-3 rounded-full" 
+                style={{ 
+                  backgroundColor: currentTee.color,
+                  border: currentTee.color === '#FFFFFF' ? '1px solid #ccc' : 'none' 
+                }} 
+              />
+              {currentTee.name} ({currentTee.gender === 'male' ? 'Men\'s' : 'Women\'s'})
+            </div>
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {teeOptions.map((tee) => (
@@ -37,7 +48,10 @@ export function TeeConfiguration({
               <div className="flex items-center gap-2">
                 <div 
                   className="w-3 h-3 rounded-full" 
-                  style={{ backgroundColor: tee.color, border: tee.color === '#FFFFFF' ? '1px solid #ccc' : 'none' }} 
+                  style={{ 
+                    backgroundColor: tee.color, 
+                    border: tee.color === '#FFFFFF' ? '1px solid #ccc' : 'none' 
+                  }} 
                 />
                 {tee.name} ({tee.gender === 'male' ? 'Men\'s' : 'Women\'s'})
               </div>

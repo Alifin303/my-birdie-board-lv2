@@ -60,6 +60,23 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
 }) => {
   if (!selectedCourse) return null;
 
+  // Get the currently selected tee information based on selectedTeeId
+  const selectedTee = selectedCourse.tees.find(tee => tee.id === selectedTeeId);
+  
+  // Helper function to determine tee color
+  const getTeeColor = (teeName: string) => {
+    const lowerName = teeName.toLowerCase();
+    if (lowerName.includes('black')) return '#000';
+    if (lowerName.includes('blue')) return '#005';
+    if (lowerName.includes('white')) return '#fff';
+    if (lowerName.includes('gold')) return '#FB0';
+    if (lowerName.includes('green')) return '#060';
+    if (lowerName.includes('yellow')) return '#FF0';
+    if (lowerName.includes('red')) return '#C00';
+    if (lowerName.includes('silver')) return '#C0C0C0';
+    return '#777';
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -133,15 +150,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
                     <div 
                       className="w-3 h-3 rounded-full mr-2"
                       style={{
-                        backgroundColor: tee.gender === 'male' ? 
-                          (tee.name.toLowerCase().includes('black') ? '#000' : 
-                          tee.name.toLowerCase().includes('blue') ? '#005' : 
-                          tee.name.toLowerCase().includes('white') ? '#fff' : 
-                          tee.name.toLowerCase().includes('gold') ? '#FB0' : 
-                          tee.name.toLowerCase().includes('green') ? '#060' : 
-                          tee.name.toLowerCase().includes('yellow') ? '#FF0' : '#777') :
-                          (tee.name.toLowerCase().includes('red') ? '#C00' : 
-                          tee.name.toLowerCase().includes('gold') ? '#FB0' : '#FAA'),
+                        backgroundColor: getTeeColor(tee.name),
                         border: tee.name.toLowerCase().includes('white') ? '1px solid #ccc' : 'none'
                       }}
                     ></div>
@@ -186,7 +195,19 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
       
       {/* Middle section: Front 9 holes */}
       <div className="mb-4">
-        <h3 className="text-sm font-medium mb-2">Front Nine</h3>
+        <h3 className="text-sm font-medium mb-2">
+          Front Nine 
+          {selectedTee && (
+            <span className="ml-2 text-xs px-2 py-0.5 rounded-full" style={{ 
+              backgroundColor: 'rgba(0,0,0,0.05)',
+              color: getTeeColor(selectedTee.name),
+              borderColor: getTeeColor(selectedTee.name),
+              borderWidth: '1px'
+            }}>
+              {selectedTee.name} Tees
+            </span>
+          )}
+        </h3>
         <div className="border rounded-md">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
@@ -238,7 +259,19 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
       
       {/* Below Middle: Back 9 holes */}
       <div className="mb-4">
-        <h3 className="text-sm font-medium mb-2">Back Nine</h3>
+        <h3 className="text-sm font-medium mb-2">
+          Back Nine
+          {selectedTee && (
+            <span className="ml-2 text-xs px-2 py-0.5 rounded-full" style={{ 
+              backgroundColor: 'rgba(0,0,0,0.05)',
+              color: getTeeColor(selectedTee.name),
+              borderColor: getTeeColor(selectedTee.name),
+              borderWidth: '1px'
+            }}>
+              {selectedTee.name} Tees
+            </span>
+          )}
+        </h3>
         <div className="border rounded-md">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
@@ -387,3 +420,4 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
     </div>
   );
 };
+
