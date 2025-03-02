@@ -77,7 +77,7 @@ export const AddRoundModal: React.FC<AddRoundModalProps> = ({
   
   const toast = useToast();
   const queryClient = useQueryClient();
-  const manualCourseFormRef = useRef<any>(null);
+  const manualCourseFormRef = useRef<{ setExistingCourse: (course: any) => void }>(null);
   
   // Score summary calculation
   const scoreSummary = calculateScoreSummary(scores);

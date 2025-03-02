@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef, ReactNode } from "react";
+import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle, ReactNode } from "react";
 import { 
   Dialog,
   DialogContent,
@@ -35,12 +35,16 @@ import {
   teeOptions
 } from "./course-form/types";
 
-export function ManualCourseForm({ 
+// Use forwardRef to properly handle refs
+export const ManualCourseForm = forwardRef<
+  { setExistingCourse: (course: any) => void },
+  ManualCourseFormProps
+>(({ 
   open, 
   onOpenChange, 
   onCourseCreated,
   existingCourse 
-}: ManualCourseFormProps) {
+}, ref) => {
   const [formData, setFormData] = useState<ManualCourseData>(() => {
     // Initialize with existing course data if provided, otherwise with defaults
     if (existingCourse) {
@@ -64,7 +68,6 @@ export function ManualCourseForm({
   const [isLoading, setIsLoading] = useState(false);
   const [currentTab, setCurrentTab] = useState('front9');
   const [isEditMode, setIsEditMode] = useState(!!existingCourse);
-  const manualCourseFormRef = useRef(null);
 
   const { toast } = useToast();
 
@@ -410,7 +413,7 @@ export function ManualCourseForm({
 
   // Add a method to set the existing course from the ref
   // This is used when editing a course from the AddRoundModal
-  React.useImperativeHandle(manualCourseFormRef, () => ({
+  useImperativeHandle(ref, () => ({
     setExistingCourse: (course: any) => {
       console.log("Setting existing course via ref:", course);
       if (course) {
@@ -562,4 +565,7 @@ export function ManualCourseForm({
       </DialogContent>
     </Dialog>
   );
-}
+});
+
+// Add display name for better debugging
+ManualCourseForm.displayName = "ManualCourseForm";
