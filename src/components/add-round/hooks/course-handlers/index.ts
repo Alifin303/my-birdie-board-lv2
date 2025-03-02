@@ -16,7 +16,16 @@ export function useCourseHandlers(props: UseCourseHandlersProps): CourseHandlers
     handleCourseCreated 
   } = createCourseSelectionHandlers(props);
   
-  const { handleSaveRound } = createSaveRoundHandler(props);
+  const { handleSaveRound } = createSaveRoundHandler({
+    selectedCourse: props.selectedCourse,
+    selectedTeeId: props.selectedTeeId,
+    roundDate: props.roundDate,
+    scores: props.scores,
+    setIsLoading: props.setIsLoading,
+    toast: props.toast,
+    queryClient: props.queryClient,
+    lastTeeChangeTimestamp: props.lastTeeChangeTimestamp
+  });
 
   return {
     handleSearch,

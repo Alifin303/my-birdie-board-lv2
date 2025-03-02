@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -51,7 +50,8 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     noResults,
     setNoResults,
     manualCourseOpen,
-    setManualCourseOpen
+    setManualCourseOpen,
+    lastTeeChangeTimestamp
   } = useAddRoundState();
   
   const toast = useToast();
@@ -92,7 +92,8 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     scores,
     setScores,
     setActiveScoreTab,
-    setHoleSelection
+    setHoleSelection,
+    selectedTeeId
   });
   
   const { 
@@ -122,7 +123,8 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     isLoading,
     searchResults,
     toast,
-    queryClient
+    queryClient,
+    lastTeeChangeTimestamp
   });
 
   const handleBackToSearch = () => {
@@ -145,7 +147,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     resetForm();
   };
   
-  // Modify handleSaveRound to close the modal after saving
   const handleSaveRoundAndClose = async () => {
     const success = await handleSaveRound();
     if (success) {
@@ -193,6 +194,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
               isLoading={isLoading}
               dataLoadingError={dataLoadingError}
               today={today}
+              lastTeeChangeTimestamp={lastTeeChangeTimestamp}
             />
           )}
         </DialogContent>
