@@ -9,8 +9,7 @@ export function createSaveRoundHandler({
   scores,
   setIsLoading,
   toast,
-  queryClient,
-  lastTeeChangeTimestamp
+  queryClient
 }: Pick<UseCourseHandlersProps, 
   'selectedCourse' | 
   'roundDate' | 
@@ -18,8 +17,7 @@ export function createSaveRoundHandler({
   'scores' | 
   'setIsLoading' | 
   'toast' | 
-  'queryClient' |
-  'lastTeeChangeTimestamp'
+  'queryClient'
 >) {
   
   const handleSaveRound = async (): Promise<boolean> => {
@@ -61,15 +59,13 @@ export function createSaveRoundHandler({
       if (!selectedTee) {
         console.error('BUG: Selected tee not found in course tees array', {
           selectedTeeId,
-          availableTees: selectedCourse.tees.map(t => ({ id: t.id, name: t.name })),
-          lastTeeChangeTime: new Date(lastTeeChangeTimestamp).toISOString()
+          availableTees: selectedCourse.tees.map(t => ({ id: t.id, name: t.name }))
         });
         throw new Error('Selected tee not found');
       }
       
       console.log("=================== SAVING ROUND WITH TEE ===================");
       console.log("Selected tee ID to save:", selectedTeeId);
-      console.log("Last tee change timestamp:", new Date(lastTeeChangeTimestamp).toISOString());
       console.log("Selected tee object to save:", selectedTee);
       console.log("Selected tee name to save:", selectedTee.name);
       console.log("Available tees in course at save time:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));

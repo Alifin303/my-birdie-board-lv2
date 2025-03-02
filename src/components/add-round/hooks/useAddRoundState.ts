@@ -25,14 +25,12 @@ export const useAddRoundState = () => {
   const [originalCourseDetail, setOriginalCourseDetail] = useState<CourseDetail | null>(null);
   const [noResults, setNoResults] = useState<boolean>(false);
   const [manualCourseOpen, setManualCourseOpen] = useState<boolean>(false);
-  const [lastTeeChangeTimestamp, setLastTeeChangeTimestamp] = useState<number>(0);
 
   // Reset selectedTeeId whenever selectedCourse changes
   useEffect(() => {
     if (selectedCourse && selectedCourse.tees && selectedCourse.tees.length > 0) {
       console.log("Selected course changed, setting default tee:", selectedCourse.tees[0].name);
       setSelectedTeeId(selectedCourse.tees[0].id);
-      setLastTeeChangeTimestamp(Date.now()); // Update timestamp for debugging
     } else {
       setSelectedTeeId(null);
     }
@@ -42,25 +40,13 @@ export const useAddRoundState = () => {
   useEffect(() => {
     if (selectedTeeId) {
       console.log("Selected tee ID state updated:", selectedTeeId);
-      console.log("Last tee change timestamp:", new Date(lastTeeChangeTimestamp).toISOString());
       
       if (selectedCourse && selectedCourse.tees) {
         const tee = selectedCourse.tees.find(t => t.id === selectedTeeId);
         console.log("Selected tee details:", tee ? { name: tee.name, id: tee.id } : "Not found");
-        
-        if (tee) {
-          console.log("SELECTED TEE STATE - Name:", tee.name, "ID:", tee.id);
-        }
       }
     }
-  }, [selectedTeeId, selectedCourse, lastTeeChangeTimestamp]);
-
-  // Add method to explicitly update tee with timestamp
-  const updateSelectedTeeId = (teeId: string | null) => {
-    console.log("Explicitly updating selectedTeeId to:", teeId);
-    setSelectedTeeId(teeId);
-    setLastTeeChangeTimestamp(Date.now());
-  };
+  }, [selectedTeeId, selectedCourse]);
 
   return {
     currentStep,
@@ -72,7 +58,7 @@ export const useAddRoundState = () => {
     selectedCourse,
     setSelectedCourse,
     selectedTeeId,
-    setSelectedTeeId: updateSelectedTeeId, // Use the new method instead
+    setSelectedTeeId,
     scores,
     setScores,
     isLoading,
@@ -94,7 +80,6 @@ export const useAddRoundState = () => {
     noResults,
     setNoResults,
     manualCourseOpen,
-    setManualCourseOpen,
-    lastTeeChangeTimestamp
+    setManualCourseOpen
   };
 };

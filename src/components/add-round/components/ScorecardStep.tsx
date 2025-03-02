@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +35,6 @@ interface ScorecardStepProps {
   isLoading: boolean;
   dataLoadingError: string | null;
   today: Date;
-  lastTeeChangeTimestamp?: number;
 }
 
 export const ScorecardStep: React.FC<ScorecardStepProps> = ({
@@ -57,8 +55,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   setCalendarOpen,
   isLoading,
   dataLoadingError,
-  today,
-  lastTeeChangeTimestamp
+  today
 }) => {
   if (!selectedCourse) return null;
 
@@ -69,7 +66,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   useEffect(() => {
     console.log("========== SCORECARD STEP TEE SELECTION ==========");
     console.log("selectedTeeId:", selectedTeeId);
-    console.log("Last tee change timestamp:", lastTeeChangeTimestamp ? new Date(lastTeeChangeTimestamp).toISOString() : "Not available");
     console.log("Available tees:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
     console.log("selectedTee object:", selectedTee);
     if (selectedTee) {
@@ -80,7 +76,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
       console.error("No tee found for ID:", selectedTeeId);
     }
     console.log("=================================================");
-  }, [selectedTeeId, selectedCourse.tees, selectedTee, lastTeeChangeTimestamp]);
+  }, [selectedTeeId, selectedCourse.tees, selectedTee]);
   
   // Helper function to determine tee color
   const getTeeColor = (teeName: string) => {
@@ -95,9 +91,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
     if (lowerName.includes('silver')) return '#C0C0C0';
     return '#777';
   };
-
-  // Force re-render when tee selection changes
-  const teeKey = `tee-${selectedTeeId}-${lastTeeChangeTimestamp || 0}`;
 
   return (
     <div>
@@ -162,7 +155,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         <div className="space-y-1">
           <label className="text-sm font-medium">Tee Played</label>
           <Select 
-            key={teeKey}
             value={selectedTeeId || undefined} 
             onValueChange={(value) => {
               console.log("Tee selection changed to:", value);
@@ -214,10 +206,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
             <Button 
               variant={holeSelection === 'all' ? "default" : "outline"}
               size="sm"
-              onClick={() => {
-                console.log("Switching to all 18 holes with current tee:", selectedTeeId);
-                handleHoleSelectionChange('all');
-              }}
+              onClick={() => handleHoleSelectionChange('all')}
               className="flex-1 h-9 px-2"
             >
               All 18
@@ -225,10 +214,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
             <Button 
               variant={holeSelection === 'front9' ? "default" : "outline"} 
               size="sm"
-              onClick={() => {
-                console.log("Switching to front 9 with current tee:", selectedTeeId);
-                handleHoleSelectionChange('front9');
-              }}
+              onClick={() => handleHoleSelectionChange('front9')}
               className="flex-1 h-9 px-2"
             >
               Front 9
@@ -236,10 +222,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
             <Button 
               variant={holeSelection === 'back9' ? "default" : "outline"} 
               size="sm"
-              onClick={() => {
-                console.log("Switching to back 9 with current tee:", selectedTeeId);
-                handleHoleSelectionChange('back9');
-              }}
+              onClick={() => handleHoleSelectionChange('back9')}
               className="flex-1 h-9 px-2"
             >
               Back 9
@@ -464,7 +447,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         <Button 
           onClick={() => {
             console.log("Save button clicked with selectedTeeId:", selectedTeeId);
-            console.log("Last tee change timestamp:", lastTeeChangeTimestamp ? new Date(lastTeeChangeTimestamp).toISOString() : "Not available");
             console.log("Selected tee at save time:", selectedTee);
             if (selectedTee) {
               console.log("Selected tee name at save time:", selectedTee.name);

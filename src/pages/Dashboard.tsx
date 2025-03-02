@@ -13,7 +13,6 @@ interface Round {
   id: number;
   date: string;
   tee_name: string;
-  tee_id?: string;
   gross_score: number;
   net_score?: number;
   to_par_gross: number;
@@ -81,7 +80,6 @@ export default function Dashboard() {
       
       console.log("Fetched rounds data from Supabase:", data);
       console.log("Tee names in rounds:", data?.map(round => round.tee_name));
-      console.log("Tee IDs in rounds:", data?.map(round => round.tee_id));
       
       const processedRounds = data?.map(round => {
         let parsedNames = { clubName: "Unknown Club", courseName: "Unknown Course" };
@@ -130,19 +128,6 @@ export default function Dashboard() {
     setScoreType(type);
   };
 
-  // Reset when switching courses to avoid stale data
-  useEffect(() => {
-    if (selectedCourseId) {
-      console.log("Changed to course ID:", selectedCourseId);
-      
-      // Invalidate the rounds query to ensure fresh data when returning to dashboard
-      return () => {
-        console.log("Leaving course view, invalidating rounds data");
-        queryClient.invalidateQueries({ queryKey: ['userRounds'] });
-      };
-    }
-  }, [selectedCourseId, queryClient]);
-
   const renderDashboard = () => {
     return (
       <div className="space-y-8">
@@ -175,12 +160,7 @@ export default function Dashboard() {
             ? <CourseRoundHistory 
                 userRounds={userRounds} 
                 selectedCourseId={selectedCourseId}
-                onBackClick={() => {
-                  console.log("Going back to dashboard from course view");
-                  setSelectedCourseId(null);
-                  // Ensure fresh data when returning to dashboard
-                  queryClient.invalidateQueries({ queryKey: ['userRounds'] });
-                }}
+                onBackClick={() => setSelectedCourseId(null)}
               /> 
             : (
               <>
@@ -189,10 +169,7 @@ export default function Dashboard() {
                   userRounds={userRounds}
                   scoreType={scoreType}
                   calculateCourseStats={calculateCourseStats}
-                  onCourseClick={(courseId) => {
-                    console.log("Selected course ID:", courseId);
-                    setSelectedCourseId(courseId);
-                  }}
+                  onCourseClick={(courseId) => setSelectedCourseId(courseId)}
                 />
               </>
             )
@@ -208,14 +185,7 @@ export default function Dashboard() {
 
       <AddRoundModal 
         open={isModalOpen} 
-        onOpenChange={(open) => {
-          console.log("Modal open state changing to:", open);
-          setIsModalOpen(open);
-          if (!open) {
-            // Refresh rounds data when modal closes
-            queryClient.invalidateQueries({ queryKey: ['userRounds'] });
-          }
-        }}
+        onOpenChange={setIsModalOpen}
       />
       
       {showDebugPanel && <DebugPanel />}

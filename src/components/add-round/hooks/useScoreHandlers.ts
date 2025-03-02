@@ -11,7 +11,6 @@ interface UseScoreHandlersProps {
   setScores: React.Dispatch<React.SetStateAction<Score[]>>;
   setActiveScoreTab: React.Dispatch<React.SetStateAction<"front9" | "back9">>;
   setHoleSelection: React.Dispatch<React.SetStateAction<HoleSelection>>;
-  selectedTeeId: string | null;
 }
 
 export function useScoreHandlers({
@@ -19,8 +18,7 @@ export function useScoreHandlers({
   scores,
   setScores,
   setActiveScoreTab,
-  setHoleSelection,
-  selectedTeeId
+  setHoleSelection
 }: UseScoreHandlersProps) {
   
   const getHolesForTee = (teeId: string) => {
@@ -65,8 +63,6 @@ export function useScoreHandlers({
     const selectedTee = selectedCourse.tees.find(t => t.id === teeId);
     console.log("Selected tee for scorecard update:", selectedTee);
     
-    // Even if we don't find the selected tee, we should still try to get hole data
-    // using the provided teeId as it might be correct
     const allHolesData = getHolesForTee(teeId);
     
     console.log("All holes data for selected tee:", allHolesData);
@@ -149,15 +145,11 @@ export function useScoreHandlers({
   };
 
   const handleHoleSelectionChange = (selection: HoleSelection) => {
-    if (!selectedCourse || !selectedTeeId) {
-      console.error("Cannot update hole selection: No course or tee selected");
-      return;
-    }
+    if (!selectedCourse || !selectedCourse.tees || selectedCourse.tees.length === 0) return;
     
-    console.log("HOLE SELECTION CHANGE - Using current selectedTeeId:", selectedTeeId);
-    
-    // Use the current selected tee ID instead of defaulting to the first tee
-    updateScorecardForTee(selectedTeeId, selection);
+    // Use the first tee if none is selected
+    const teeId = selectedCourse.tees[0]?.id || 'default-tee';
+    updateScorecardForTee(teeId, selection);
     setHoleSelection(selection);
   };
 
