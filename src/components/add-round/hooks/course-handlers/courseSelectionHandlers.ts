@@ -59,7 +59,7 @@ export function createCourseSelectionHandlers({
           cachedCourseDetail.state = course.state;
           cachedCourseDetail.isUserAdded = true;
           
-          // Make sure we have at least one tee
+          // Make sure we have at least one tee and all tees have proper hole data
           if (!cachedCourseDetail.tees || cachedCourseDetail.tees.length === 0) {
             console.log("No tees found in cached course details, creating default tee");
             
@@ -90,6 +90,53 @@ export function createCourseSelectionHandlers({
                 JSON.stringify(cachedCourseDetail)
               );
               console.log("Updated course details with default tee in localStorage");
+            } catch (e) {
+              console.error("Error saving to localStorage:", e);
+            }
+          } else {
+            // Ensure all tees have proper hole data
+            cachedCourseDetail.tees.forEach(tee => {
+              if (!tee.holes || tee.holes.length === 0) {
+                console.log(`Tee ${tee.name} has no hole data, creating defaults`);
+                tee.holes = Array(18).fill(null).map((_, idx) => ({
+                  number: idx + 1,
+                  par: 4,
+                  yards: 400,
+                  handicap: idx + 1
+                }));
+              } else if (tee.holes.length < 18) {
+                console.log(`Tee ${tee.name} has incomplete hole data (${tee.holes.length}/18), filling in missing holes`);
+                // Add missing holes
+                const existingHoleNumbers = tee.holes.map(h => h.number);
+                for (let i = 1; i <= 18; i++) {
+                  if (!existingHoleNumbers.includes(i)) {
+                    tee.holes.push({
+                      number: i,
+                      par: 4,
+                      yards: 400,
+                      handicap: i
+                    });
+                  }
+                }
+                // Sort holes by number
+                tee.holes.sort((a, b) => a.number - b.number);
+              }
+              
+              // Ensure all holes have par values
+              tee.holes.forEach(hole => {
+                if (!hole.par) hole.par = 4;
+                if (!hole.yards) hole.yards = 400;
+                if (!hole.handicap) hole.handicap = hole.number <= 9 ? hole.number : hole.number - 9;
+              });
+            });
+            
+            // Update localStorage with fixed data
+            try {
+              localStorage.setItem(
+                `course_details_${course.id}`, 
+                JSON.stringify(cachedCourseDetail)
+              );
+              console.log("Updated course details with fixed tee data in localStorage");
             } catch (e) {
               console.error("Error saving to localStorage:", e);
             }
@@ -173,6 +220,42 @@ export function createCourseSelectionHandlers({
           }
           
           simplifiedCourseDetail.apiCourseId = courseId.toString();
+          
+          // Ensure all tees have proper hole data
+          simplifiedCourseDetail.tees.forEach(tee => {
+            if (!tee.holes || tee.holes.length === 0) {
+              console.log(`API Tee ${tee.name} has no hole data, creating defaults`);
+              tee.holes = Array(18).fill(null).map((_, idx) => ({
+                number: idx + 1,
+                par: 4,
+                yards: 400,
+                handicap: idx + 1
+              }));
+            } else if (tee.holes.length < 18) {
+              console.log(`API Tee ${tee.name} has incomplete hole data (${tee.holes.length}/18), filling in missing holes`);
+              // Add missing holes
+              const existingHoleNumbers = tee.holes.map(h => h.number);
+              for (let i = 1; i <= 18; i++) {
+                if (!existingHoleNumbers.includes(i)) {
+                  tee.holes.push({
+                    number: i,
+                    par: 4,
+                    yards: 400,
+                    handicap: i
+                  });
+                }
+              }
+              // Sort holes by number
+              tee.holes.sort((a, b) => a.number - b.number);
+            }
+            
+            // Ensure all holes have par values
+            tee.holes.forEach(hole => {
+              if (!hole.par) hole.par = 4;
+              if (!hole.yards) hole.yards = 400;
+              if (!hole.handicap) hole.handicap = hole.number <= 9 ? hole.number : hole.number - 9;
+            });
+          });
           
           console.log("Final course detail after processing:", simplifiedCourseDetail);
           console.log("Course tees:", simplifiedCourseDetail.tees.map(t => ({ id: t.id, name: t.name })));

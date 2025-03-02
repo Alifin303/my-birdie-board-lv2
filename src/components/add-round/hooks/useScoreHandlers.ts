@@ -113,14 +113,20 @@ export function useScoreHandlers({
       }
     }
     
-    const newScores = filteredHoles.map(hole => ({
-      hole: hole.number,
-      par: hole.par,
-      strokes: 0,
-      putts: undefined,
-      yards: hole.yards,
-      handicap: hole.handicap
-    }));
+    // Create a new array of scores with data from the filtered holes
+    const newScores = filteredHoles.map(hole => {
+      // Find existing score for this hole if it exists
+      const existingScore = scores.find(s => s.hole === hole.number);
+      
+      return {
+        hole: hole.number,
+        par: hole.par || 4, // Ensure we have a valid par value
+        strokes: existingScore?.strokes || 0,
+        putts: existingScore?.putts,
+        yards: hole.yards || 400,
+        handicap: hole.handicap || (hole.number <= 9 ? hole.number : hole.number - 9)
+      };
+    });
     
     console.log("New scores array with proper par data:", newScores);
     setScores(newScores);

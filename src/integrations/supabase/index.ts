@@ -8,21 +8,17 @@ export {
   findCourseByApiId,
   findCourseByName,
   insertCourse,
-  getCourseMetadataFromLocalStorage
-} from './course/course-queries';
+  getCourseMetadataFromLocalStorage,
+  parseCourseName,
+  formatCourseName,
+  isUserAddedCourse
+} from './client';
 
 // Export course operation functions
 export {
   findOrCreateCourseByApiId,
   ensureCourseExists
-} from './course/course-operations';
-
-// Export course utility functions
-export {
-  parseCourseName,
-  formatCourseName,
-  isUserAddedCourse
-} from './utils/course-utils';
+} from './client';
 
 // Export handicap calculator
 export { calculateHandicapIndex } from './handicap/handicap-calculator';

@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,14 +81,18 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   
   // Helper function to determine tee color
   const getTeeColor = (teeName: string) => {
+    if (!teeName) return '#777';
+    
+    // Make case-insensitive matching
     const lowerName = teeName.toLowerCase();
+    
     if (lowerName.includes('black')) return '#000';
-    if (lowerName.includes('blue')) return '#005';
-    if (lowerName.includes('white')) return '#fff';
-    if (lowerName.includes('gold')) return '#FB0';
-    if (lowerName.includes('green')) return '#060';
-    if (lowerName.includes('yellow')) return '#FF0';
-    if (lowerName.includes('red')) return '#C00';
+    if (lowerName.includes('blue')) return '#005995';
+    if (lowerName.includes('white')) return '#FFFFFF';
+    if (lowerName.includes('gold')) return '#FFD700';
+    if (lowerName.includes('green')) return '#006400';
+    if (lowerName.includes('yellow')) return '#FFFF00';
+    if (lowerName.includes('red')) return '#DD0000';
     if (lowerName.includes('silver')) return '#C0C0C0';
     return '#777';
   };
@@ -162,7 +167,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
               handleTeeChange(value);
             }}
           >
-            <SelectTrigger className="h-9">
+            <SelectTrigger className="h-9 bg-white">
               <SelectValue placeholder="Select a tee box">
                 {selectedTee && (
                   <div className="flex items-center">
@@ -178,7 +183,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
                 )}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               {selectedCourse.tees.map((tee) => {
                 console.log(`Rendering tee option: ${tee.id} - ${tee.name} (selected: ${tee.id === selectedTeeId})`);
                 return (
