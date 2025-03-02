@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, KeyboardEvent } from "react";
 import { 
   DialogHeader,
   DialogTitle,
@@ -38,6 +38,14 @@ export const SearchStep: React.FC<SearchStepProps> = ({
   noResults,
   setManualCourseOpen
 }) => {
+  // Handle key press event for the search input
+  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchQuery.length >= 3 && !isLoading) {
+      e.preventDefault();
+      handleSearch(searchQuery);
+    }
+  };
+  
   return (
     <>
       <DialogHeader>
@@ -57,6 +65,7 @@ export const SearchStep: React.FC<SearchStepProps> = ({
               placeholder="Search for a course..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleKeyPress}
               className="pl-10"
             />
           </div>
