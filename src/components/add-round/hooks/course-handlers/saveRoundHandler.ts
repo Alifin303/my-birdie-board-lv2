@@ -57,7 +57,11 @@ export function createSaveRoundHandler({
       const selectedTee = selectedCourse.tees.find(tee => tee.id === selectedTeeId);
       if (!selectedTee) throw new Error('Selected tee not found');
       
-      console.log("Selected tee before saving:", selectedTee);
+      console.log("=================== SAVING ROUND ===================");
+      console.log("Selected tee ID:", selectedTeeId);
+      console.log("Selected tee object:", selectedTee);
+      console.log("Tee name to be saved:", selectedTee.name);
+      console.log("Available tees in course:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
       
       const totalStrokes = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
@@ -124,31 +128,36 @@ export function createSaveRoundHandler({
       }
       
       console.log("Using course_id for round insertion:", dbCourseId);
-      console.log("Selected tee for saving:", selectedTee);
+      console.log("Final selected tee for saving:", selectedTee);
       
+      // Prepare the data we're sending to Supabase
+      const roundData = {
+        user_id: session.user.id,
+        course_id: dbCourseId,
+        date: roundDate.toISOString(),
+        tee_name: selectedTee.name, // Using the name from the selectedTee object
+        tee_id: selectedTeeId,     // Using the ID that was selected
+        gross_score: totalStrokes,
+        to_par_gross: toParGross,
+        net_score: null,
+        to_par_net: null,
+        hole_scores: JSON.stringify(scores)
+      };
+      
+      console.log("Final round data being sent to Supabase:", roundData);
+        
       const { data, error } = await supabase
         .from('rounds')
-        .insert([
-          {
-            user_id: session.user.id,
-            course_id: dbCourseId,
-            date: roundDate.toISOString(),
-            tee_name: selectedTee.name, // Use the correct tee name from selectedTee object
-            tee_id: selectedTeeId,
-            gross_score: totalStrokes,
-            to_par_gross: toParGross,
-            net_score: null,
-            to_par_net: null,
-            hole_scores: JSON.stringify(scores)
-          }
-        ]);
+        .insert([roundData])
+        .select();
         
       if (error) {
         console.error("Error saving round:", error);
         throw error;
       }
       
-      console.log("Round saved successfully:", data);
+      console.log("Round saved successfully to Supabase:", data);
+      console.log("=================== END SAVING ROUND ===================");
       
       toast.toast({
         title: "Success",

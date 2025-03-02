@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, CalendarIcon, AlertCircle } from "lucide-react";
@@ -63,6 +62,20 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   // Get the currently selected tee information based on selectedTeeId
   const selectedTee = selectedCourse.tees.find(tee => tee.id === selectedTeeId);
   
+  // Log immediately when component renders or selectedTeeId changes
+  useEffect(() => {
+    console.log("========== SCORECARD STEP TEE SELECTION ==========");
+    console.log("selectedTeeId:", selectedTeeId);
+    console.log("Available tees:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
+    console.log("selectedTee object:", selectedTee);
+    if (selectedTee) {
+      console.log("Selected tee name:", selectedTee.name);
+    } else {
+      console.error("No tee found for ID:", selectedTeeId);
+    }
+    console.log("=================================================");
+  }, [selectedTeeId, selectedCourse.tees]);
+  
   // Helper function to determine tee color
   const getTeeColor = (teeName: string) => {
     const lowerName = teeName.toLowerCase();
@@ -76,9 +89,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
     if (lowerName.includes('silver')) return '#C0C0C0';
     return '#777';
   };
-
-  console.log("ScorecardStep - selectedTeeId:", selectedTeeId);
-  console.log("ScorecardStep - selectedTee:", selectedTee);
 
   return (
     <div>
@@ -142,7 +152,13 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         
         <div className="space-y-1">
           <label className="text-sm font-medium">Tee Played</label>
-          <Select value={selectedTeeId || undefined} onValueChange={handleTeeChange}>
+          <Select 
+            value={selectedTeeId || undefined} 
+            onValueChange={(value) => {
+              console.log("Tee selection changed to:", value);
+              handleTeeChange(value);
+            }}
+          >
             <SelectTrigger className="h-9">
               <SelectValue placeholder="Select a tee box">
                 {selectedTee && (
@@ -422,7 +438,15 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         <Button variant="outline" onClick={handleCloseModal} className="flex-1">
           Cancel
         </Button>
-        <Button onClick={handleSaveRound} disabled={isLoading} className="flex-1">
+        <Button 
+          onClick={() => {
+            console.log("Save button clicked with selectedTeeId:", selectedTeeId);
+            console.log("Selected tee at save time:", selectedTee);
+            handleSaveRound();
+          }} 
+          disabled={isLoading} 
+          className="flex-1"
+        >
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

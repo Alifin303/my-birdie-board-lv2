@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase, parseCourseName } from "@/integrations/supabase/client";
@@ -78,6 +79,7 @@ export default function Dashboard() {
       }
       
       console.log("Fetched rounds data from Supabase:", data);
+      console.log("Tee names in rounds:", data?.map(round => round.tee_name));
       
       const processedRounds = data?.map(round => {
         let parsedNames = { clubName: "Unknown Club", courseName: "Unknown Course" };

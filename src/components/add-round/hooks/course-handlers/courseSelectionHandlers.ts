@@ -1,4 +1,3 @@
-
 import { getCourseDetails, CourseDetail } from "@/services/golfCourseApi";
 import { loadUserAddedCourseDetails } from "../../utils/courseUtils";
 import { convertToSimplifiedCourseDetail } from "../../utils/courseUtils";
@@ -177,6 +176,7 @@ export function createCourseSelectionHandlers({
       
       if (simplifiedCourseDetail.tees && simplifiedCourseDetail.tees.length > 0) {
         const defaultTeeId = simplifiedCourseDetail.tees[0].id;
+        console.log("Available tees:", simplifiedCourseDetail.tees.map(t => ({ id: t.id, name: t.name })));
         console.log("Setting default tee ID:", defaultTeeId);
         setSelectedTeeId(defaultTeeId);
         
