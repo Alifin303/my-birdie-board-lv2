@@ -306,6 +306,60 @@ export function calculateHandicapIndex(
   };
 }
 
+// Add the addRound function to save round data to the database
+export async function addRound(roundData: {
+  courseId: number;
+  courseName: string;
+  clubName: string;
+  teeId: string;
+  teeName: string;
+  teeRating: number;
+  teeSlope: number;
+  datePlayed: Date;
+  scores: Array<{ hole: number; par: number; strokes?: number; putts?: number }>;
+}) {
+  // Calculate total score
+  const filledScores = roundData.scores.filter(score => 
+    score.strokes !== undefined && score.strokes > 0
+  );
+  
+  const totalStrokes = filledScores.reduce((sum, score) => sum + (score.strokes || 0), 0);
+  const totalPar = filledScores.reduce((sum, score) => sum + score.par, 0);
+  const toPar = totalStrokes - totalPar;
+  
+  try {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError) throw userError;
+    
+    if (!userData.user) {
+      throw new Error("User not authenticated");
+    }
+    
+    const { data, error } = await supabase
+      .from('rounds')
+      .insert([
+        {
+          user_id: userData.user.id,
+          course_id: roundData.courseId,
+          tee_id: roundData.teeId,
+          tee_name: roundData.teeName,
+          date: roundData.datePlayed.toISOString(),
+          gross_score: totalStrokes,
+          to_par_gross: toPar,
+          hole_scores: roundData.scores
+        }
+      ])
+      .select()
+      .single();
+      
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error adding round:", error);
+    throw error;
+  }
+}
+
 export type DatabaseError = {
   code: string;
   details: string;

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -123,7 +122,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     resetFormState();
   };
   
-  // Function to reset all form state to initial values
   const resetFormState = () => {
     setCurrentStep('search');
     setSearchQuery('');
@@ -139,7 +137,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setManualCourseOpen(false);
   };
   
-  // Reset form state when modal is closed
   React.useEffect(() => {
     if (!open) {
       resetFormState();
