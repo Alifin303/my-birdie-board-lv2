@@ -1,3 +1,4 @@
+
 export interface SimplifiedGolfCourse {
   id: number;
   name: string;

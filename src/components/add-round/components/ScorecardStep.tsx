@@ -16,7 +16,7 @@ import { CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ScoreCard } from "@/components/ScoreCard";
+import { ScoreCard, ScoreCardProps } from "@/components/ScoreCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SimplifiedCourseDetail, Score, HoleSelection } from "../types";
 
@@ -30,7 +30,7 @@ interface ScorecardStepProps {
   isSaving?: boolean;
   roundDate: Date | undefined;
   setRoundDate: (date: Date | undefined) => void;
-  handleDateSelect: (date: Date | undefined) => void;  // Add this prop
+  handleDateSelect: (date: Date | undefined) => void;
   calendarOpen: boolean;
   setCalendarOpen: (open: boolean) => void;
   holeSelection: HoleSelection;
@@ -54,7 +54,7 @@ export function ScorecardStep({
   isSaving,
   roundDate,
   setRoundDate,
-  handleDateSelect,  // Add this prop
+  handleDateSelect,
   calendarOpen,
   setCalendarOpen,
   holeSelection,
