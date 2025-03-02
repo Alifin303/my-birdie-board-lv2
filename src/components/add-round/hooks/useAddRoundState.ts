@@ -1,85 +1,98 @@
 
-import { useState, useEffect } from "react";
-import { 
-  SimplifiedGolfCourse, 
-  SimplifiedCourseDetail,
-  Score,
-  HoleSelection,
-  CourseDetail
-} from "../types";
+import { useState, useEffect } from 'react';
+import { useCourseHandlers } from './useCourseHandlers';
+import { useScoreHandlers } from './useScoreHandlers';
+import { Course, Tee, Step } from '../types';
 
 export const useAddRoundState = () => {
-  const [currentStep, setCurrentStep] = useState<'search' | 'scorecard'>('search');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [searchResults, setSearchResults] = useState<SimplifiedGolfCourse[]>([]);
-  const [selectedCourse, setSelectedCourse] = useState<SimplifiedCourseDetail | null>(null);
-  const [selectedTeeId, setSelectedTeeId] = useState<string | null>(null);
-  const [scores, setScores] = useState<Score[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [searchError, setSearchError] = useState<string | null>(null);
-  const [dataLoadingError, setDataLoadingError] = useState<string | null>(null);
+  const [step, setStep] = useState<Step>('search');
   const [roundDate, setRoundDate] = useState<Date | undefined>(new Date());
-  const [calendarOpen, setCalendarOpen] = useState<boolean>(false);
-  const [holeSelection, setHoleSelection] = useState<HoleSelection>('all');
-  const [activeScoreTab, setActiveScoreTab] = useState<"front9" | "back9">("front9");
-  const [originalCourseDetail, setOriginalCourseDetail] = useState<CourseDetail | null>(null);
-  const [noResults, setNoResults] = useState<boolean>(false);
-  const [manualCourseOpen, setManualCourseOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [noResults, setNoResults] = useState(false);
+  const [openManualForm, setOpenManualForm] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [selectedTeeId, setSelectedTeeId] = useState<string | null>(null);
+  const [selectedTee, setSelectedTee] = useState<Tee | null>(null);
 
-  // Reset selectedTeeId whenever selectedCourse changes
-  useEffect(() => {
-    if (selectedCourse && selectedCourse.tees && selectedCourse.tees.length > 0) {
-      console.log("Selected course changed, setting default tee:", selectedCourse.tees[0].name);
-      setSelectedTeeId(selectedCourse.tees[0].id);
-    } else {
-      setSelectedTeeId(null);
-    }
-  }, [selectedCourse]);
+  const { scores, setScores, initializeScores, handleHoleScoreChange } = useScoreHandlers();
 
-  // Log selection changes for debugging
+  // Create course handlers with all necessary dependencies
+  const courseHandlers = useCourseHandlers({
+    setIsLoading,
+    setSearchResults,
+    setSearchError,
+    setNoResults,
+    setSelectedCourse,
+    setSelectedTeeId,
+    setSelectedTee,
+    setScores,
+    setOpenManualForm,
+    selectedCourse,
+    selectedTeeId,
+    scores
+  });
+
+  // Initialize scores whenever the selected tee or course changes
   useEffect(() => {
-    if (selectedTeeId) {
-      console.log("Selected tee ID state updated:", selectedTeeId);
-      
-      if (selectedCourse && selectedCourse.tees) {
-        const tee = selectedCourse.tees.find(t => t.id === selectedTeeId);
-        console.log("Selected tee details:", tee ? { name: tee.name, id: tee.id } : "Not found");
-      }
+    if (selectedTee && selectedCourse) {
+      console.log("Selected tee changed, initializing scores:", selectedTee.name);
+      initializeScores(selectedTee, selectedCourse);
     }
-  }, [selectedTeeId, selectedCourse]);
+  }, [selectedTee, selectedCourse]);
+
+  // Log state changes for debugging
+  useEffect(() => {
+    console.log("Current state updated:", { 
+      selectedCourse: selectedCourse?.name,
+      selectedTeeId,
+      selectedTee: selectedTee?.name
+    });
+  }, [selectedCourse, selectedTeeId, selectedTee]);
+
+  const resetState = () => {
+    setStep('search');
+    setRoundDate(new Date());
+    setSearchValue('');
+    setSearchResults([]);
+    setSearchError(null);
+    setNoResults(false);
+    setOpenManualForm(false);
+    setSelectedCourse(null);
+    setSelectedTeeId(null);
+    setSelectedTee(null);
+    setScores([]);
+  };
 
   return {
-    currentStep,
-    setCurrentStep,
-    searchQuery,
-    setSearchQuery,
+    step,
+    setStep,
+    roundDate,
+    setRoundDate,
+    isLoading,
+    setIsLoading,
+    searchValue,
+    setSearchValue,
     searchResults,
     setSearchResults,
+    searchError,
+    setSearchError,
+    noResults,
+    setNoResults,
+    openManualForm,
+    setOpenManualForm,
     selectedCourse,
     setSelectedCourse,
     selectedTeeId,
     setSelectedTeeId,
+    selectedTee,
+    setSelectedTee,
     scores,
     setScores,
-    isLoading,
-    setIsLoading,
-    searchError,
-    setSearchError,
-    dataLoadingError,
-    setDataLoadingError,
-    roundDate,
-    setRoundDate,
-    calendarOpen,
-    setCalendarOpen,
-    holeSelection,
-    setHoleSelection,
-    activeScoreTab,
-    setActiveScoreTab,
-    originalCourseDetail,
-    setOriginalCourseDetail,
-    noResults,
-    setNoResults,
-    manualCourseOpen,
-    setManualCourseOpen
+    handleHoleScoreChange,
+    resetState,
+    ...courseHandlers
   };
 };
