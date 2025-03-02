@@ -324,14 +324,14 @@ export function useCourseHandlers({
     }
   };
 
-  const handleSaveRound = async (): Promise<void> => {
+  const handleSaveRound = async (): Promise<boolean> => {
     if (!selectedCourse) {
       toast.toast({
         title: "Error",
         description: "No course selected.",
         variant: "destructive",
       });
-      return;
+      return false;
     }
     
     if (!roundDate) {
@@ -340,7 +340,7 @@ export function useCourseHandlers({
         description: "Please select a date.",
         variant: "destructive",
       });
-      return;
+      return false;
     }
     
     if (!selectedTeeId) {
@@ -349,7 +349,7 @@ export function useCourseHandlers({
         description: "No tee selected.",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     setIsLoading(true);
@@ -457,6 +457,7 @@ export function useCourseHandlers({
       });
       
       queryClient.invalidateQueries({ queryKey: ['userRounds'] });
+      return true;
     } catch (error: any) {
       console.error("Error saving round:", error);
       toast.toast({
@@ -464,6 +465,7 @@ export function useCourseHandlers({
         description: error.message || "Failed to save round. Please try again.",
         variant: "destructive",
       });
+      return false;
     } finally {
       setIsLoading(false);
     }

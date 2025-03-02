@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+
+import React, { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -57,6 +58,29 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   const queryClient = useQueryClient();
   const manualCourseFormRef = useRef<any>(null);
   const today = new Date();
+  
+  // Reset form when modal opens or closes
+  useEffect(() => {
+    if (!open) {
+      // Reset state when modal is closed
+      resetForm();
+    }
+  }, [open]);
+  
+  const resetForm = () => {
+    setCurrentStep('search');
+    setSearchQuery('');
+    setSearchResults([]);
+    setSelectedCourse(null);
+    setSelectedTeeId(null);
+    setScores([]);
+    setSearchError(null);
+    setDataLoadingError(null);
+    setRoundDate(new Date());
+    setHoleSelection('all');
+    setActiveScoreTab("front9");
+    setManualCourseOpen(false);
+  };
   
   const { 
     handleScoreChange,
@@ -118,18 +142,15 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
 
   const handleCloseModal = () => {
     onOpenChange(false);
-    setCurrentStep('search');
-    setSearchQuery('');
-    setSearchResults([]);
-    setSelectedCourse(null);
-    setSelectedTeeId(null);
-    setScores([]);
-    setSearchError(null);
-    setDataLoadingError(null);
-    setRoundDate(new Date());
-    setHoleSelection('all');
-    setActiveScoreTab("front9");
-    setManualCourseOpen(false);
+    resetForm();
+  };
+  
+  // Modify handleSaveRound to close the modal after saving
+  const handleSaveRoundAndClose = async () => {
+    const success = await handleSaveRound();
+    if (success) {
+      handleCloseModal();
+    }
   };
   
   const scoreSummary = calculateScoreSummary(scores);
@@ -162,7 +183,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
               handleHoleSelectionChange={handleHoleSelectionChange}
               handleScoreChange={handleScoreChange}
               handleBackToSearch={handleBackToSearch}
-              handleSaveRound={handleSaveRound}
+              handleSaveRound={handleSaveRoundAndClose}
               handleCloseModal={handleCloseModal}
               scores={scores}
               scoreSummary={scoreSummary}
