@@ -27,9 +27,10 @@ interface ScorecardStepProps {
   handleScoreChange: (holeIndex: number, field: keyof Score, value: number) => void;
   handleTeeChange: (teeId: string) => void;
   handleSaveRound: () => void;
-  isSaving: boolean;
+  isSaving?: boolean;
   roundDate: Date | undefined;
   setRoundDate: (date: Date | undefined) => void;
+  handleDateSelect: (date: Date | undefined) => void;  // Add this prop
   calendarOpen: boolean;
   setCalendarOpen: (open: boolean) => void;
   holeSelection: HoleSelection;
@@ -37,6 +38,10 @@ interface ScorecardStepProps {
   activeScoreTab: "front9" | "back9";
   setActiveScoreTab: (tab: "front9" | "back9") => void;
   handleBackToSearch: () => void;
+  handleCloseModal?: () => void;
+  isLoading?: boolean;
+  dataLoadingError?: string | null;
+  today?: Date;
 }
 
 export function ScorecardStep({
@@ -49,13 +54,18 @@ export function ScorecardStep({
   isSaving,
   roundDate,
   setRoundDate,
+  handleDateSelect,  // Add this prop
   calendarOpen,
   setCalendarOpen,
   holeSelection,
   handleHoleSelectionChange,
   activeScoreTab,
   setActiveScoreTab,
-  handleBackToSearch
+  handleBackToSearch,
+  handleCloseModal,
+  isLoading,
+  dataLoadingError,
+  today
 }: ScorecardStepProps) {
   const getTeeNameById = (teeId: string | null) => {
     if (!teeId || !selectedCourse) return null;
@@ -121,7 +131,7 @@ export function ScorecardStep({
                     <Calendar
                       mode="single"
                       selected={roundDate}
-                      onSelect={setRoundDate}
+                      onSelect={handleDateSelect}
                       disabled={(date) =>
                         date > new Date() || date < new Date("1900-01-01")
                       }

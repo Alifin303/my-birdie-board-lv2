@@ -1,4 +1,3 @@
-
 export interface SimplifiedGolfCourse {
   id: number;
   name: string;
@@ -27,6 +26,7 @@ export interface SimplifiedTee {
   originalIndex: number;
   yards?: number;
   holes?: SimplifiedHole[];
+  color?: string;
 }
 
 export interface SimplifiedCourseDetail {
@@ -72,7 +72,6 @@ export interface AddRoundModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-// Add the CourseDetail interface export
 export interface CourseDetail {
   id: number | string;
   course_name?: string;

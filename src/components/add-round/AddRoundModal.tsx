@@ -81,18 +81,31 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setActiveScoreTab("front9");
     setManualCourseOpen(false);
   };
-  
+
   const { 
+    isSaving,
     handleScoreChange,
     handleHoleSelectionChange,
     updateScorecardForTee,
-    handleTeeChange
+    handleTeeChange,
+    handleBackToSearch,
+    handleSaveRound
   } = useScoreHandlers({
     selectedCourse,
+    selectedTeeId,
+    setSelectedTeeId,
     scores,
     setScores,
+    holeSelection,
+    setHoleSelection,
+    activeScoreTab,
     setActiveScoreTab,
-    setHoleSelection
+    setCurrentStep,
+    roundDate,
+    saveRound: async (data) => {
+      const success = await handleSaveRoundAndClose(data);
+      return success ? Promise.resolve() : Promise.reject("Save failed");
+    }
   });
   
   const { 
@@ -100,7 +113,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     handleCourseSelect,
     handleOpenManualCourseForm,
     handleCourseCreated,
-    handleSaveRound
+    handleSaveRound: handleSaveRoundFromCourseHandlers
   } = useCourseHandlers({
     searchQuery,
     setSearchQuery,
@@ -125,16 +138,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     queryClient
   });
 
-  const handleBackToSearch = () => {
-    setCurrentStep('search');
-    setSelectedCourse(null);
-    setSelectedTeeId(null);
-    setScores([]);
-    setSearchQuery('');
-    setHoleSelection('all');
-    setActiveScoreTab("front9");
-  };
-
   const handleDateSelect = (date: Date | undefined) => {
     setRoundDate(date);
     setCalendarOpen(false);
@@ -145,12 +148,13 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     resetForm();
   };
   
-  // Modify handleSaveRound to close the modal after saving
-  const handleSaveRoundAndClose = async () => {
-    const success = await handleSaveRound();
+  // Implement handleSaveRoundAndClose to use the course handlers version
+  const handleSaveRoundAndClose = async (data?: any) => {
+    const success = await handleSaveRoundFromCourseHandlers();
     if (success) {
       handleCloseModal();
     }
+    return success;
   };
   
   const scoreSummary = calculateScoreSummary(scores);
@@ -177,21 +181,24 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
             <ScorecardStep 
               selectedCourse={selectedCourse}
               selectedTeeId={selectedTeeId}
-              roundDate={roundDate}
+              scores={scores}
+              handleScoreChange={handleScoreChange}
               handleTeeChange={handleTeeChange}
               handleDateSelect={handleDateSelect}
-              handleHoleSelectionChange={handleHoleSelectionChange}
-              handleScoreChange={handleScoreChange}
-              handleBackToSearch={handleBackToSearch}
               handleSaveRound={handleSaveRoundAndClose}
-              handleCloseModal={handleCloseModal}
-              scores={scores}
-              scoreSummary={scoreSummary}
-              holeSelection={holeSelection}
+              handleBackToSearch={handleBackToSearch}
+              roundDate={roundDate}
+              setRoundDate={setRoundDate}
               calendarOpen={calendarOpen}
               setCalendarOpen={setCalendarOpen}
+              holeSelection={holeSelection}
+              handleHoleSelectionChange={handleHoleSelectionChange}
+              activeScoreTab={activeScoreTab}
+              setActiveScoreTab={setActiveScoreTab}
+              isSaving={isSaving}
               isLoading={isLoading}
               dataLoadingError={dataLoadingError}
+              handleCloseModal={handleCloseModal}
               today={today}
             />
           )}
