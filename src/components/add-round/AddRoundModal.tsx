@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -99,7 +100,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     searchResults,
     toast,
     queryClient,
-    onSaveComplete: () => handleCloseModal()  // Add callback to close modal on save
+    onSaveComplete: () => handleCloseModal()
   });
 
   const handleBackToSearch = () => {
@@ -191,7 +192,17 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
       <ManualCourseForm
         open={manualCourseOpen}
         onOpenChange={setManualCourseOpen}
-        onCourseCreated={handleCourseCreated}
+        onCourseCreated={(courseId, courseName) => {
+          // Create a simplified course object from the ID and name
+          const newCourse: SimplifiedCourseDetail = {
+            id: courseId,
+            name: courseName,
+            clubName: courseName,
+            tees: [],
+            holes: []
+          };
+          handleCourseCreated(newCourse);
+        }}
       />
     </>
   );
