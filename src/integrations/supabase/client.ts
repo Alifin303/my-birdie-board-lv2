@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize the Supabase client
@@ -36,6 +35,141 @@ export async function fetchCourseById(courseId: number): Promise<any> {
   }
   
   return data;
+}
+
+// Helper function to find a course by API ID
+export async function findCourseByApiId(apiCourseId: string): Promise<{ id: number } | null> {
+  const { data, error } = await supabase
+    .from('courses')
+    .select('id')
+    .eq('api_course_id', apiCourseId)
+    .maybeSingle();
+    
+  if (error) {
+    console.error("Error finding course by API ID:", error);
+    return null;
+  }
+  
+  return data;
+}
+
+// Helper function to find a course by name
+export async function findCourseByName(name: string): Promise<{ id: number } | null> {
+  const { data, error } = await supabase
+    .from('courses')
+    .select('id')
+    .eq('name', name)
+    .maybeSingle();
+    
+  if (error) {
+    console.error("Error finding course by name:", error);
+    return null;
+  }
+  
+  return data;
+}
+
+// Helper function to insert a course
+export async function insertCourse(course: {
+  name: string;
+  city?: string;
+  state?: string;
+  api_course_id?: string;
+}): Promise<{ id: number } | null> {
+  const { data, error } = await supabase
+    .from('courses')
+    .insert([course])
+    .select('id')
+    .single();
+    
+  if (error) {
+    console.error("Error inserting course:", error);
+    return null;
+  }
+  
+  return data;
+}
+
+// Helper function to find or create a course by API ID
+export async function findOrCreateCourseByApiId(
+  apiCourseId: string,
+  courseName: string,
+  clubName: string,
+  city?: string,
+  state?: string
+): Promise<number | null> {
+  try {
+    // First try to find by API ID
+    const existingCourse = await findCourseByApiId(apiCourseId);
+    if (existingCourse) {
+      console.log("Found existing course by API ID:", existingCourse);
+      return existingCourse.id;
+    }
+    
+    // If not found, create a new course
+    const fullName = formatCourseName(clubName, courseName);
+    const insertedCourse = await insertCourse({
+      name: fullName,
+      city,
+      state,
+      api_course_id: apiCourseId
+    });
+    
+    if (insertedCourse) {
+      console.log("Inserted new course:", insertedCourse);
+      return insertedCourse.id;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error("Error in findOrCreateCourseByApiId:", error);
+    return null;
+  }
+}
+
+// Helper function to ensure a course exists in the database
+export async function ensureCourseExists(
+  courseId: number,
+  apiCourseId?: string,
+  courseName?: string,
+  clubName?: string,
+  city?: string,
+  state?: string
+): Promise<number> {
+  try {
+    // First, check if the course with this ID exists
+    const { data, error } = await supabase
+      .from('courses')
+      .select('id')
+      .eq('id', courseId)
+      .maybeSingle();
+      
+    if (!error && data) {
+      console.log("Course exists with ID:", courseId);
+      return courseId;
+    }
+    
+    // If the course doesn't exist and we have an API ID, try to find or create by API ID
+    if (apiCourseId && courseName && clubName) {
+      const foundOrCreatedId = await findOrCreateCourseByApiId(
+        apiCourseId,
+        courseName,
+        clubName,
+        city,
+        state
+      );
+      
+      if (foundOrCreatedId) {
+        return foundOrCreatedId;
+      }
+    }
+    
+    // If all else fails, throw an error
+    throw new Error(`Course with ID ${courseId} not found and could not be created`);
+  } catch (error) {
+    console.error("Error ensuring course exists:", error);
+    throw error;
+  }
 }
 
 // Helper function to parse course name

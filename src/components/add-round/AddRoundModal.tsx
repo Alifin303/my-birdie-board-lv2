@@ -514,12 +514,82 @@ Try selecting a different course or adding this course manually.`);
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
       const toParGross = totalStrokes - totalPar;
       
+      // Ensure the course exists in the database
+      console.log("Ensuring course exists in database:", selectedCourse);
+      let dbCourseId = selectedCourse.id;
+      
+      // If this is an API course, check if it exists in the database
+      if (selectedCourse.apiCourseId) {
+        // Check if the course exists by API ID
+        const { data: existingCourseData, error: findError } = await supabase
+          .from('courses')
+          .select('id')
+          .eq('api_course_id', selectedCourse.apiCourseId)
+          .maybeSingle();
+          
+        if (findError) {
+          console.error("Error checking for existing course:", findError);
+        }
+        
+        if (existingCourseData && existingCourseData.id) {
+          console.log("Found existing course in database:", existingCourseData);
+          dbCourseId = existingCourseData.id;
+        } else {
+          // Course doesn't exist, insert it
+          console.log("Course not found in database, inserting:", selectedCourse);
+          
+          const { data: insertedCourse, error: insertError } = await supabase
+            .from('courses')
+            .insert([{
+              name: `${selectedCourse.clubName} - ${selectedCourse.name}`,
+              city: selectedCourse.city || '',
+              state: selectedCourse.state || '',
+              api_course_id: selectedCourse.apiCourseId
+            }])
+            .select('id')
+            .single();
+            
+          if (insertError) {
+            console.error("Error inserting course:", insertError);
+            throw new Error(`Failed to insert course: ${insertError.message}`);
+          }
+          
+          if (!insertedCourse) {
+            throw new Error("Failed to insert course, no course ID returned");
+          }
+          
+          console.log("Course inserted successfully:", insertedCourse);
+          dbCourseId = insertedCourse.id;
+        }
+      } else {
+        // For user-added courses, verify that the course_id exists
+        console.log("Verifying user-added course exists:", dbCourseId);
+        const { data: courseCheck, error: checkError } = await supabase
+          .from('courses')
+          .select('id')
+          .eq('id', dbCourseId)
+          .maybeSingle();
+          
+        if (checkError) {
+          console.error("Error checking course existence:", checkError);
+        }
+        
+        if (!courseCheck) {
+          throw new Error(`Course with ID ${dbCourseId} not found in database`);
+        }
+        
+        console.log("User-added course verified:", courseCheck);
+      }
+      
+      console.log("Using course_id for round insertion:", dbCourseId);
+      
+      // Save the round with the verified course_id
       const { data, error } = await supabase
         .from('rounds')
         .insert([
           {
             user_id: session.user.id,
-            course_id: selectedCourse.id,
+            course_id: dbCourseId,
             date: roundDate.toISOString(),
             tee_name: selectedTee.name,
             tee_id: selectedTeeId,
