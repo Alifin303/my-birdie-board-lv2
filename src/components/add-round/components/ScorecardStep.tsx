@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -141,7 +140,20 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
           <label className="text-sm font-medium">Tee Played</label>
           <Select value={selectedTeeId || undefined} onValueChange={handleTeeChange}>
             <SelectTrigger className="h-9">
-              <SelectValue placeholder="Select a tee box" />
+              <SelectValue placeholder="Select a tee box">
+                {selectedTee && (
+                  <div className="flex items-center">
+                    <div 
+                      className="w-3 h-3 rounded-full mr-2"
+                      style={{
+                        backgroundColor: getTeeColor(selectedTee.name),
+                        border: selectedTee.name.toLowerCase().includes('white') ? '1px solid #ccc' : 'none'
+                      }}
+                    ></div>
+                    {selectedTee.name}
+                  </div>
+                )}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {selectedCourse.tees.map((tee) => (
