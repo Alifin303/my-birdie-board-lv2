@@ -1,15 +1,14 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { HoleScore, Course, Tee } from '../types';
+import { HoleScore, SimplifiedCourseDetail, SimplifiedTee } from '../types';
 
 export const useScoreHandlers = () => {
   const [scores, setScores] = useState<HoleScore[]>([]);
   const { toast } = useToast();
 
   const initializeScores = (
-    selectedTee: Tee | null, 
-    selectedCourse: Course | null
+    selectedTee: SimplifiedTee | null, 
+    selectedCourse: SimplifiedCourseDetail | null
   ) => {
     if (!selectedCourse) {
       console.log("No course selected, cannot initialize scores");
@@ -79,7 +78,6 @@ export const useScoreHandlers = () => {
     }
   };
 
-  // Add the missing functions that other components expect
   const handleScoreChange = (holeIndex: number, value: string) => {
     handleHoleScoreChange(holeIndex, value);
   };

@@ -7,7 +7,8 @@ import {
   SimplifiedCourseDetail,
   HoleSelection,
   Score,
-  HoleScore
+  HoleScore,
+  Step
 } from "../../types";
 
 export interface UseCourseHandlersProps {
@@ -21,8 +22,9 @@ export interface UseCourseHandlersProps {
   setOriginalCourseDetail: React.Dispatch<React.SetStateAction<CourseDetail | null>>;
   setSelectedTeeId: React.Dispatch<React.SetStateAction<string | null>>;
   setHoleSelection: React.Dispatch<React.SetStateAction<HoleSelection>>;
-  setStep: React.Dispatch<React.SetStateAction<'search' | 'scorecard'>>;
+  setStep: React.Dispatch<React.SetStateAction<Step>>;
   setManualCourseOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setScores: React.Dispatch<React.SetStateAction<HoleScore[]>>;
   selectedCourse: SimplifiedCourseDetail | null;
   selectedTeeId: string | null;
   scores: HoleScore[];

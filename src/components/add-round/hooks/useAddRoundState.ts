@@ -1,8 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { useCourseHandlers } from './useCourseHandlers';
+import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCourseHandlers } from './course-handlers';
 import { useScoreHandlers } from './useScoreHandlers';
-import { SimplifiedCourseDetail, HoleScore, Step, Tee } from '../types';
+import { SimplifiedCourseDetail, HoleScore, Step, Tee, Course, SimplifiedGolfCourse } from '../types';
 import { CourseDetail } from '@/services/golfCourseApi';
 
 export const useAddRoundState = () => {
@@ -10,7 +12,7 @@ export const useAddRoundState = () => {
   const [roundDate, setRoundDate] = useState<Date | undefined>(new Date());
   const [isLoading, setIsLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<SimplifiedGolfCourse[]>([]);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [noResults, setNoResults] = useState(false);
   const [openManualForm, setOpenManualForm] = useState(false);
@@ -23,6 +25,9 @@ export const useAddRoundState = () => {
   const [activeScoreTab, setActiveScoreTab] = useState('front9');
   const [originalCourseDetail, setOriginalCourseDetail] = useState<CourseDetail | null>(null);
   const [manualCourseOpen, setManualCourseOpen] = useState(false);
+  
+  const toast = useToast();
+  const queryClient = useQueryClient();
 
   const { 
     scores, 
@@ -42,6 +47,7 @@ export const useAddRoundState = () => {
     setSearchResults,
     setSelectedCourse,
     setSelectedTeeId,
+    setScores,
     setIsLoading,
     setSearchError,
     setNoResults,
@@ -54,7 +60,9 @@ export const useAddRoundState = () => {
     scores,
     roundDate,
     isLoading,
-    searchResults
+    searchResults,
+    toast,
+    queryClient
   });
 
   // Initialize scores whenever the selected tee or course changes

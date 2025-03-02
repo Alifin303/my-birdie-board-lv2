@@ -17,7 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { AddRoundStepProps } from "../types";
+import { AddRoundStepProps, Step } from "../types";
 
 export const ScorecardStep = ({
   selectedCourse,
@@ -219,7 +219,7 @@ export const ScorecardStep = ({
         <Button
           type="button"
           variant="secondary"
-          onClick={() => setStep("date")}
+          onClick={() => setStep("search")}
         >
           Back
         </Button>

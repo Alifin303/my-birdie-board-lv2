@@ -1,7 +1,6 @@
 
 import { 
-  getCourseDetails, 
-  getCourseHoles
+  getCourseDetails
 } from "@/services/golfCourseApi";
 import { getCourseMetadataFromLocalStorage } from "@/integrations/supabase/client";
 import { UseCourseHandlersProps } from "./types";
@@ -136,9 +135,9 @@ export function createCourseSelectionHandlers({
             const flattenedDetails = flattenCourseDetailsFromAPI(courseDetail, clubName, courseName);
             console.log("Flattened course details:", flattenedDetails);
             
-            // Fetch hole data
-            const holesData = await getCourseHoles(apiCourseId);
-            console.log("API returned holes data:", holesData);
+            // Instead of fetchCourseHoles, we'll create holes from the course details
+            const holesData = generateHolesFromCourseDetail(courseDetail);
+            console.log("Generated holes data:", holesData);
             
             // Combine the data
             simplifiedCourseDetail = {
@@ -162,7 +161,7 @@ export function createCourseSelectionHandlers({
           } catch (error: any) {
             console.error("Error fetching course details from API:", error);
             if (toast) {
-              toast({
+              toast.toast({
                 title: "API Error",
                 description: error.message || "Could not fetch course details. Check the console for more information.",
                 variant: "destructive",
@@ -176,7 +175,7 @@ export function createCourseSelectionHandlers({
         } else {
           console.error("Invalid course selection: Not user-added and no API ID provided");
           if (toast) {
-            toast({
+            toast.toast({
               title: "Error",
               description: "Invalid course selection. Please try again.",
               variant: "destructive",
@@ -190,7 +189,7 @@ export function createCourseSelectionHandlers({
       if (!simplifiedCourseDetail) {
         console.error("Failed to load course details");
         if (toast) {
-          toast({
+          toast.toast({
             title: "Error",
             description: "Failed to load course details. Please try again.",
             variant: "destructive",
@@ -205,7 +204,7 @@ export function createCourseSelectionHandlers({
       if (!simplifiedCourseDetail.tees || simplifiedCourseDetail.tees.length === 0) {
         console.error("No tees found for course:", simplifiedCourseDetail);
         if (toast) {
-          toast({
+          toast.toast({
             title: "Error",
             description: "No tee information found for this course. Please try another course.",
             variant: "destructive",
@@ -250,7 +249,7 @@ export function createCourseSelectionHandlers({
     } catch (error: any) {
       console.error("Error in handleCourseSelect:", error);
       if (toast) {
-        toast({
+        toast.toast({
           title: "Error",
           description: error.message || "An error occurred while selecting the course",
           variant: "destructive",
@@ -370,6 +369,38 @@ export function createCourseSelectionHandlers({
       holes: defaultHoles,
       isUserAdded: false
     };
+  };
+
+  // Helper function to generate holes from course details
+  const generateHolesFromCourseDetail = (courseDetail: any) => {
+    // Look for holes in the first tee we can find
+    const maleTees = courseDetail.tees?.male || [];
+    const femaleTees = courseDetail.tees?.female || [];
+    
+    let holesData: any[] = [];
+    
+    // Try to find holes in any of the tees
+    const firstTeeWithHoles = 
+      [...maleTees, ...femaleTees].find(tee => tee.holes && tee.holes.length > 0);
+    
+    if (firstTeeWithHoles && firstTeeWithHoles.holes) {
+      holesData = firstTeeWithHoles.holes.map((hole: any) => ({
+        number: hole.number || 0,
+        par: hole.par || 4,
+        handicap: hole.handicap || 0,
+        yards: hole.yardage || 0
+      }));
+    } else {
+      // Create default holes if none exist
+      holesData = Array.from({ length: 18 }, (_, i) => ({
+        number: i + 1,
+        par: 4, // Default par
+        handicap: i + 1,
+        yards: 400 // Default yardage
+      }));
+    }
+    
+    return { holes: holesData };
   };
 
   return {
