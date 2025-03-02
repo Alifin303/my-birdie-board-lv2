@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { 
   Select,
   SelectContent,
@@ -18,6 +18,11 @@ export function TeeConfiguration({
   currentTee, 
   handleTeeChange 
 }: TeeConfigurationProps) {
+  // Log when currentTee changes for debugging
+  useEffect(() => {
+    console.log("TeeConfiguration re-rendering with tee:", currentTee.name, currentTee.color);
+  }, [currentTee]);
+
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium">
@@ -27,9 +32,10 @@ export function TeeConfiguration({
       <Select
         value={currentTee.name}
         onValueChange={handleTeeChange}
+        defaultValue={currentTee.name}
       >
-        <SelectTrigger>
-          <SelectValue>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select a tee box">
             <div className="flex items-center gap-2">
               <div 
                 className="w-3 h-3 rounded-full" 

@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash } from "lucide-react";
 import { TeeData } from "./types";
@@ -19,6 +19,12 @@ export function TeeSelection({
   handleAddTee, 
   handleRemoveTee 
 }: TeeSelectionProps) {
+  // Log whenever the current tee index changes
+  useEffect(() => {
+    console.log("TeeSelection component - currentTeeIndex changed to:", currentTeeIndex);
+    console.log("Current tee data:", tees[currentTeeIndex]);
+  }, [currentTeeIndex, tees]);
+
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-center">
@@ -41,7 +47,10 @@ export function TeeSelection({
             <Button
               variant={currentTeeIndex === index ? "default" : "outline"}
               size="sm"
-              onClick={() => setCurrentTeeIndex(index)}
+              onClick={() => {
+                console.log("Selecting tee:", tee.name, "at index:", index);
+                setCurrentTeeIndex(index);
+              }}
               className="flex items-center gap-1"
               style={{ 
                 borderColor: tee.color,

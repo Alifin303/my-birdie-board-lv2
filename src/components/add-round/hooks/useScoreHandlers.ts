@@ -139,9 +139,10 @@ export function useScoreHandlers({
       console.error("No tee found with ID:", teeId);
     }
     
-    // Always update the scorecard regardless of finding the tee
-    // This ensures that even if there's an issue, we display something
-    updateScorecardForTee(teeId, 'all');
+    // Force the UI update by setting a small timeout
+    setTimeout(() => {
+      updateScorecardForTee(teeId, 'all');
+    }, 10);
   };
 
   const handleHoleSelectionChange = (selection: HoleSelection) => {

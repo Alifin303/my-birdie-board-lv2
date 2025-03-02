@@ -30,7 +30,13 @@ export const useAddRoundState = () => {
   useEffect(() => {
     if (selectedCourse && selectedCourse.tees && selectedCourse.tees.length > 0) {
       console.log("Selected course changed, setting default tee:", selectedCourse.tees[0].name);
-      setSelectedTeeId(selectedCourse.tees[0].id);
+      const defaultTeeId = selectedCourse.tees[0].id;
+      setSelectedTeeId(defaultTeeId);
+      
+      // Ensure UI is updated with the correct tee
+      setTimeout(() => {
+        console.log("Delayed tee ID check - setting tee ID:", defaultTeeId);
+      }, 100);
     } else {
       setSelectedTeeId(null);
     }

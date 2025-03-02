@@ -161,6 +161,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
               console.log("Selected tee before change:", selectedTee?.name);
               handleTeeChange(value);
             }}
+            defaultValue={selectedTeeId || undefined}
           >
             <SelectTrigger className="h-9">
               <SelectValue placeholder="Select a tee box">
