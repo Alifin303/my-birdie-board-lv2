@@ -12,7 +12,7 @@ import {
 } from "./types";
 import { ManualCourseForm } from "@/components/ManualCourseForm";
 import { SearchStep } from "./components/SearchStep";
-import { ScorecardStep } from "./components/ScorecardStep";
+import { ScorecardStep } from "./components/scorecard";
 import { useAddRoundState } from "./hooks/useAddRoundState";
 import { useScoreHandlers } from "./hooks/useScoreHandlers";
 import { useCourseHandlers } from "./hooks/useCourseHandlers";

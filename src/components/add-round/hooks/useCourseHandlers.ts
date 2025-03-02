@@ -1,39 +1,43 @@
-import { QueryClient } from "@tanstack/react-query";
-import { 
-  SimplifiedGolfCourse, 
-  SimplifiedCourseDetail, 
-  Score, 
-  HoleSelection,
-  CourseDetail
-} from "../types";
 
-// We need to update the interface to include the onSaveComplete callback
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { searchCourses, getCourseDetails } from '@/services/golfCourseApi';
+import { addRound } from '@/integrations/supabase/client';
+import { transformCourseDetails } from '../utils/courseUtils';
+import { 
+  HoleSelection, 
+  SimplifiedGolfCourse, 
+  SimplifiedCourseDetail,
+  CourseDetail
+} from '../types';
+import { useToast } from '@/hooks/use-toast';
+
 interface UseCourseHandlersProps {
   searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  setSearchResults: (results: SimplifiedGolfCourse[]) => void;
-  setSelectedCourse: (course: SimplifiedCourseDetail | null) => void;
-  setIsLoading: (loading: boolean) => void;
-  setSearchError: (error: string | null) => void;
-  setNoResults: (noResults: boolean) => void;
-  setOriginalCourseDetail: (detail: CourseDetail | null) => void;
-  setSelectedTeeId: (teeId: string | null) => void;
-  updateScorecardForTee: (course: SimplifiedCourseDetail, teeId: string) => void;
-  setHoleSelection: (selection: HoleSelection) => void;
-  setCurrentStep: (step: 'search' | 'scorecard') => void;
-  setManualCourseOpen: (open: boolean) => void;
+  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+  setSearchResults: React.Dispatch<React.SetStateAction<SimplifiedGolfCourse[]>>;
+  setSelectedCourse: React.Dispatch<React.SetStateAction<SimplifiedCourseDetail | null>>;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setSearchError: React.Dispatch<React.SetStateAction<string | null>>;
+  setNoResults: React.Dispatch<React.SetStateAction<boolean>>;
+  setOriginalCourseDetail: React.Dispatch<React.SetStateAction<CourseDetail | null>>;
+  setSelectedTeeId: React.Dispatch<React.SetStateAction<string | null>>;
+  updateScorecardForTee: (teeId: string, selection?: HoleSelection) => void;
+  setHoleSelection: React.Dispatch<React.SetStateAction<HoleSelection>>;
+  setCurrentStep: React.Dispatch<React.SetStateAction<'search' | 'scorecard'>>;
+  setManualCourseOpen: React.Dispatch<React.SetStateAction<boolean>>;
   selectedCourse: SimplifiedCourseDetail | null;
   selectedTeeId: string | null;
-  scores: Score[];
+  scores: { hole: number; par: number; strokes?: number; putts?: number }[];
   roundDate: Date | undefined;
   isLoading: boolean;
   searchResults: SimplifiedGolfCourse[];
-  toast: any;
-  queryClient: QueryClient;
-  onSaveComplete?: () => void; // Add callback for when save is complete
+  toast: ReturnType<typeof useToast>;
+  queryClient: any;
+  onSaveComplete?: () => void;
 }
 
-export const useCourseHandlers = ({
+export function useCourseHandlers({
   searchQuery,
   setSearchQuery,
   setSearchResults,
@@ -56,194 +60,157 @@ export const useCourseHandlers = ({
   toast,
   queryClient,
   onSaveComplete
-}: UseCourseHandlersProps) => {
+}: UseCourseHandlersProps) {
   
-  const handleSearch = async (query: string): Promise<void> => {
-    if (!query || query.length < 3) {
-      setSearchError("Please enter at least 3 characters to search");
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
       return;
     }
-
+    
     setIsLoading(true);
     setSearchError(null);
     setNoResults(false);
-
+    
     try {
-      const response = await fetch(`/api/courses/search?q=${encodeURIComponent(query)}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to search courses');
-      }
-      
-      const data = await response.json();
-      
-      if (data.length === 0) {
-        setNoResults(true);
-      }
-      
-      setSearchResults(data);
+      const results = await searchCourses(searchQuery);
+      setSearchResults(results);
+      setNoResults(results.length === 0);
     } catch (error) {
-      console.error('Error searching courses:', error);
-      setSearchError('An error occurred while searching. Please try again.');
+      console.error("Error searching courses:", error);
+      setSearchError("Failed to search courses. Please try again.");
+      setSearchResults([]);
     } finally {
       setIsLoading(false);
     }
   };
-
-  const handleCourseSelect = async (course: SimplifiedGolfCourse): Promise<void> => {
+  
+  const handleCourseSelect = async (course: SimplifiedGolfCourse) => {
     setIsLoading(true);
+    setSelectedCourse(null);
     
     try {
-      const response = await fetch(`/api/courses/${course.id}`);
+      const courseDetails = await getCourseDetails(course.id);
+      setOriginalCourseDetail(courseDetails);
       
-      if (!response.ok) {
-        throw new Error('Failed to load course details');
-      }
+      const formattedCourse = transformCourseDetails(course.id, courseDetails, course);
+      setSelectedCourse(formattedCourse);
       
-      const courseDetail = await response.json();
-      setOriginalCourseDetail(courseDetail);
-      
-      // Create a simplified version of the course detail
-      const simplifiedCourseDetail: SimplifiedCourseDetail = {
-        id: courseDetail.id,
-        name: courseDetail.name,
-        clubName: courseDetail.clubName || courseDetail.name,
-        city: courseDetail.city,
-        state: courseDetail.state,
-        isUserAdded: courseDetail.isUserAdded,
-        tees: courseDetail.tees.map((tee: any) => ({
-          id: tee.id,
-          name: tee.name,
-          gender: tee.gender,
-          par: tee.par,
-          holes: tee.holes
-        }))
-      };
-      
-      setSelectedCourse(simplifiedCourseDetail);
-      
-      // Select the first tee by default
-      if (simplifiedCourseDetail.tees.length > 0) {
-        const defaultTeeId = simplifiedCourseDetail.tees[0].id;
-        setSelectedTeeId(defaultTeeId);
-        updateScorecardForTee(simplifiedCourseDetail, defaultTeeId);
+      const firstTeeId = formattedCourse.tees[0]?.id;
+      if (firstTeeId) {
+        setSelectedTeeId(firstTeeId);
+        updateScorecardForTee(firstTeeId);
       }
       
       setHoleSelection('all');
       setCurrentStep('scorecard');
     } catch (error) {
-      console.error('Error loading course details:', error);
+      console.error("Error fetching course details:", error);
       toast.toast({
         title: "Error",
         description: "Failed to load course details. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
     }
   };
-
+  
   const handleOpenManualCourseForm = () => {
     setManualCourseOpen(true);
   };
-
-  const handleCourseCreated = (newCourse: SimplifiedGolfCourse) => {
-    // Add the new course to search results
-    const updatedResults = [newCourse, ...searchResults];
-    setSearchResults(updatedResults);
+  
+  const handleCourseCreated = (newCourse: SimplifiedCourseDetail) => {
+    setSelectedCourse(newCourse);
     
-    // Select the new course
-    handleCourseSelect(newCourse);
+    const firstTeeId = newCourse.tees[0]?.id;
+    if (firstTeeId) {
+      setSelectedTeeId(firstTeeId);
+      updateScorecardForTee(firstTeeId);
+    }
+    
+    setHoleSelection('all');
+    setCurrentStep('scorecard');
+    setManualCourseOpen(false);
   };
   
-  const handleSaveRound = async (): Promise<void> => {
-    if (isLoading || !selectedCourse || !selectedTeeId || !roundDate) {
-      toast.toast({
-        title: "Missing Information",
-        description: "Please fill out all required fields.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Check if there are scores to save
-    const hasScores = scores.some((s) => s.strokes !== null && s.strokes > 0);
-    if (!hasScores) {
-      toast.toast({
-        title: "Missing Scores",
-        description: "Please enter at least one hole score.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      // Convert scores to the format expected by the API
-      const roundScores = scores
-        .filter((s) => s.strokes !== null && s.strokes > 0)
-        .map((s) => ({
-          hole: s.hole,
-          strokes: s.strokes,
-          putts: s.putts || null,
-        }));
-
-      // Prepare the round data
-      const roundData = {
-        courseId: selectedCourse.id,
-        date: roundDate.toISOString().split('T')[0],
-        teeId: selectedTeeId,
-        scores: roundScores,
-      };
-
-      // Save the round to the database
-      const response = await fetch('/api/rounds', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(roundData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save round');
-      }
-
-      // Show success message
-      toast.toast({
-        title: "Round Saved",
-        description: "Your round has been successfully saved.",
-      });
-
-      // Invalidate rounds query to refresh data
+  const addRoundMutation = useMutation({
+    mutationFn: addRound,
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rounds'] });
-      
-      // Call the onSaveComplete callback if provided
+      toast.toast({
+        title: "Success",
+        description: "Round added successfully!",
+        variant: "default"
+      });
       if (onSaveComplete) {
         onSaveComplete();
       }
-      
-      return;
-    } catch (error) {
-      console.error('Error saving round:', error);
+    },
+    onError: (error: any) => {
+      console.error("Error saving round:", error);
       toast.toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to save round",
-        variant: "destructive",
+        description: "Failed to save round. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+  
+  const handleSaveRound = async (): Promise<void> => {
+    if (!selectedCourse || !selectedTeeId || !roundDate) {
+      toast.toast({
+        title: "Missing Information",
+        description: "Please ensure all fields are filled in correctly.",
+        variant: "destructive"
       });
       return;
-    } finally {
-      setIsLoading(false);
+    }
+    
+    const filledScores = scores.filter(score => 
+      score.strokes !== undefined && score.strokes > 0
+    );
+    
+    if (filledScores.length === 0) {
+      toast.toast({
+        title: "No Scores",
+        description: "Please enter at least one score.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const selectedTee = selectedCourse.tees.find(tee => tee.id === selectedTeeId);
+    if (!selectedTee) {
+      toast.toast({
+        title: "Invalid Tee",
+        description: "The selected tee is invalid. Please select another tee.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      await addRoundMutation.mutateAsync({
+        courseId: selectedCourse.id,
+        courseName: selectedCourse.name,
+        clubName: selectedCourse.clubName,
+        teeId: selectedTeeId,
+        teeName: selectedTee.name,
+        teeRating: selectedTee.rating,
+        teeSlope: selectedTee.slope,
+        datePlayed: roundDate,
+        scores: filledScores
+      });
+    } catch (error) {
+      console.error("Error in handleSaveRound:", error);
     }
   };
-
+  
   return {
     handleSearch,
     handleCourseSelect,
     handleOpenManualCourseForm,
     handleCourseCreated,
-    handleSaveRound,
+    handleSaveRound
   };
-};
+}
