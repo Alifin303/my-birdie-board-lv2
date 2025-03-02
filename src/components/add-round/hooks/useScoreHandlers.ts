@@ -29,11 +29,18 @@ export function useScoreHandlers({
       return [];
     }
     
+    if (!selectedCourse.tees || selectedCourse.tees.length === 0) {
+      console.error("No tees found for course:", selectedCourse.name);
+      console.log("Returning course default holes");
+      return selectedCourse.holes || [];
+    }
+    
     const selectedTee = selectedCourse.tees.find(t => t.id === teeId);
     if (!selectedTee) {
       console.error(`Tee with ID ${teeId} not found in course tees`);
       console.log("Available tees:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
-      return selectedCourse.holes;
+      console.log("Returning course default holes");
+      return selectedCourse.holes || [];
     }
     
     console.log("Found selected tee:", selectedTee.name);
@@ -44,7 +51,7 @@ export function useScoreHandlers({
     }
     
     console.log("Tee doesn't have specific hole data, using course's default holes");
-    return selectedCourse.holes;
+    return selectedCourse.holes || [];
   };
 
   const updateScorecardForTee = (teeId: string, selection: HoleSelection = 'all') => {
@@ -124,7 +131,10 @@ export function useScoreHandlers({
   };
 
   const handleTeeChange = (teeId: string) => {
-    if (!selectedCourse) return;
+    if (!selectedCourse) {
+      console.error("Cannot handle tee change: No course selected");
+      return;
+    }
     
     console.log("CRITICAL TEE CHANGE: Selected tee ID:", teeId);
     console.log("Available tees at tee change:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
@@ -145,10 +155,14 @@ export function useScoreHandlers({
   };
 
   const handleHoleSelectionChange = (selection: HoleSelection) => {
-    if (!selectedCourse || !selectedCourse.tees || selectedCourse.tees.length === 0) return;
+    if (!selectedCourse || !selectedCourse.tees || selectedCourse.tees.length === 0) {
+      console.error("Cannot handle hole selection change: No course or tees selected");
+      return;
+    }
     
     // Use the first tee if none is selected
     const teeId = selectedCourse.tees[0]?.id || 'default-tee';
+    console.log("Handling hole selection change with tee ID:", teeId);
     updateScorecardForTee(teeId, selection);
     setHoleSelection(selection);
   };
