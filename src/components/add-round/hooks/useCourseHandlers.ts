@@ -1,4 +1,3 @@
-
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase, fetchCourseById } from "@/integrations/supabase/client";
@@ -73,14 +72,11 @@ export function useCourseHandlers({
     setNoResults(false);
     
     try {
-      // Fetch API courses
       const apiResponse = await searchCourses(query);
       const apiResults = Array.isArray(apiResponse.results) ? apiResponse.results : [];
       
-      // Fetch user-added courses
       const userAddedCourses = await fetchUserAddedCourses(query);
       
-      // Combine results
       const combinedResults = [
         ...userAddedCourses, 
         ...apiResults.map(course => ({
@@ -103,7 +99,6 @@ export function useCourseHandlers({
       console.error("Search error:", error);
       setSearchError(error.message || "Failed to fetch courses. Please try again.");
       
-      // Try to at least get user-added courses if the API fails
       try {
         const userAddedCourses = await fetchUserAddedCourses(query);
         if (userAddedCourses.length > 0) {
@@ -117,7 +112,7 @@ export function useCourseHandlers({
         setNoResults(true);
       }
       
-      toast({
+      toast.toast({
         title: "API Error",
         description: error.message || "Failed to fetch courses from API. Showing local courses only.",
         variant: "destructive",
@@ -199,7 +194,6 @@ export function useCourseHandlers({
         console.log("Loading course from API:", course);
         
         try {
-          // Convert courseId to a proper format
           const courseIdRaw = course.apiCourseId || course.id;
           const courseId = typeof courseIdRaw === 'string' ? courseIdRaw : courseIdRaw.toString();
           
@@ -244,11 +238,8 @@ export function useCourseHandlers({
             holes: defaultHoles
           };
           
-          // Ensure course.id is a number
-          const courseId = typeof course.id === 'string' ? parseInt(course.id, 10) : course.id;
-          
           simplifiedCourseDetail = {
-            id: courseId,
+            id: course.id,
             name: course.name,
             clubName: course.clubName,
             city: course.city,
@@ -288,7 +279,7 @@ export function useCourseHandlers({
     } catch (error: any) {
       console.error("Course detail error:", error);
       setSearchError(error.message || "Failed to load course details. Please try again.");
-      toast({
+      toast.toast({
         title: "Error",
         description: error.message || "Failed to load course details. Please try again.",
         variant: "destructive",
@@ -306,7 +297,6 @@ export function useCourseHandlers({
     setManualCourseOpen(false);
     
     try {
-      // Fetch the newly created course
       const courseData = await fetchCourseById(courseId);
       
       if (courseData) {
@@ -322,12 +312,11 @@ export function useCourseHandlers({
           isUserAdded: true
         };
         
-        // Immediately select the new course
         await handleCourseSelect(newCourse);
       }
     } catch (error) {
       console.error("Error fetching newly created course:", error);
-      toast({
+      toast.toast({
         title: "Error",
         description: "Course was created but could not be loaded automatically. Please search for it.",
         variant: "destructive",
@@ -335,9 +324,9 @@ export function useCourseHandlers({
     }
   };
 
-  const handleSaveRound = async () => {
+  const handleSaveRound = async (): Promise<void> => {
     if (!selectedCourse) {
-      toast({
+      toast.toast({
         title: "Error",
         description: "No course selected.",
         variant: "destructive",
@@ -346,7 +335,7 @@ export function useCourseHandlers({
     }
     
     if (!roundDate) {
-      toast({
+      toast.toast({
         title: "Error",
         description: "Please select a date.",
         variant: "destructive",
@@ -355,7 +344,7 @@ export function useCourseHandlers({
     }
     
     if (!selectedTeeId) {
-      toast({
+      toast.toast({
         title: "Error",
         description: "No tee selected.",
         variant: "destructive",
@@ -376,13 +365,10 @@ export function useCourseHandlers({
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
       const toParGross = totalStrokes - totalPar;
       
-      // Ensure the course exists in the database
       console.log("Ensuring course exists in database:", selectedCourse);
       let dbCourseId = selectedCourse.id;
       
-      // If this is an API course, check if it exists in the database
       if (selectedCourse.apiCourseId) {
-        // Check if the course exists by API ID
         const { data: existingCourseData, error: findError } = await supabase
           .from('courses')
           .select('id')
@@ -397,9 +383,6 @@ export function useCourseHandlers({
           console.log("Found existing course in database:", existingCourseData);
           dbCourseId = existingCourseData.id;
         } else {
-          // Course doesn't exist, insert it
-          console.log("Course not found in database, inserting:", selectedCourse);
-          
           const { data: insertedCourse, error: insertError } = await supabase
             .from('courses')
             .insert([{
@@ -424,7 +407,6 @@ export function useCourseHandlers({
           dbCourseId = insertedCourse.id;
         }
       } else {
-        // For user-added courses, verify that the course_id exists
         console.log("Verifying user-added course exists:", dbCourseId);
         const { data: courseCheck, error: checkError } = await supabase
           .from('courses')
@@ -445,7 +427,6 @@ export function useCourseHandlers({
       
       console.log("Using course_id for round insertion:", dbCourseId);
       
-      // Save the round with the verified course_id
       const { data, error } = await supabase
         .from('rounds')
         .insert([
@@ -470,22 +451,19 @@ export function useCourseHandlers({
       
       console.log("Round saved successfully:", data);
       
-      toast({
+      toast.toast({
         title: "Success",
         description: "Round saved successfully!",
       });
       
-      // Fix: Using correct format for invalidateQueries
       queryClient.invalidateQueries({ queryKey: ['userRounds'] });
-      return true;
     } catch (error: any) {
       console.error("Error saving round:", error);
-      toast({
+      toast.toast({
         title: "Error",
         description: error.message || "Failed to save round. Please try again.",
         variant: "destructive",
       });
-      return false;
     } finally {
       setIsLoading(false);
     }

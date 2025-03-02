@@ -71,3 +71,43 @@ export interface AddRoundModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+// Add the CourseDetail interface export
+export interface CourseDetail {
+  id: number | string;
+  course_name?: string;
+  club_name?: string;
+  location?: {
+    city?: string;
+    state?: string;
+    country?: string;
+  };
+  tees?: {
+    male?: Array<{
+      tee_name?: string;
+      course_rating?: number;
+      slope_rating?: number;
+      par_total?: number;
+      total_yards?: number;
+      holes?: Array<{
+        number?: number;
+        par?: number;
+        yardage?: number;
+        handicap?: number;
+      }>;
+    }>;
+    female?: Array<{
+      tee_name?: string;
+      course_rating?: number;
+      slope_rating?: number;
+      par_total?: number;
+      total_yards?: number;
+      holes?: Array<{
+        number?: number;
+        par?: number;
+        yardage?: number;
+        handicap?: number;
+      }>;
+    }>;
+  };
+}
