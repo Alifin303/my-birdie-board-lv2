@@ -1,6 +1,7 @@
+
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { searchCourses, getCourseDetails } from '@/services/golfCourseApi';
+import { searchCourses, getCourseDetails, GolfCourse } from '@/services/golfCourseApi';
 import { 
   HoleSelection, 
   SimplifiedGolfCourse, 
@@ -70,9 +71,22 @@ export function useCourseHandlers({
     
     try {
       const searchResponse = await searchCourses(searchQuery);
-      const courseResults = searchResponse.results || [];
-      setSearchResults(courseResults);
-      setNoResults(courseResults.length === 0);
+      const apiResults = searchResponse.results || [];
+      
+      // Map GolfCourse objects to SimplifiedGolfCourse objects
+      const simplifiedResults: SimplifiedGolfCourse[] = apiResults.map((course: GolfCourse) => ({
+        id: typeof course.id === 'string' ? parseInt(course.id, 10) : course.id as number,
+        name: course.course_name || course.name || '',
+        clubName: course.club_name || course.name || '',
+        city: course.location?.city || course.city || '',
+        state: course.location?.state || course.state || '',
+        country: course.location?.country || course.country || '',
+        isUserAdded: course.isUserAdded || false,
+        apiCourseId: typeof course.id === 'string' ? course.id : String(course.id)
+      }));
+      
+      setSearchResults(simplifiedResults);
+      setNoResults(simplifiedResults.length === 0);
     } catch (error) {
       console.error("Error searching courses:", error);
       setSearchError("Failed to search courses. Please try again.");
