@@ -22,7 +22,7 @@ export function createSaveRoundHandler({
   
   const handleSaveRound = async (): Promise<boolean> => {
     if (!selectedCourse) {
-      toast?.toast({
+      toast.toast({
         title: "Error",
         description: "No course selected.",
         variant: "destructive",
@@ -31,7 +31,7 @@ export function createSaveRoundHandler({
     }
     
     if (!roundDate) {
-      toast?.toast({
+      toast.toast({
         title: "Error",
         description: "Please select a date.",
         variant: "destructive",
@@ -40,7 +40,7 @@ export function createSaveRoundHandler({
     }
     
     if (!selectedTeeId) {
-      toast?.toast({
+      toast.toast({
         title: "Error",
         description: "No tee selected.",
         variant: "destructive",
@@ -175,16 +175,16 @@ export function createSaveRoundHandler({
       console.log("Saved round tee_id:", data[0].tee_id);
       console.log("=================== END SAVING ROUND ===================");
       
-      toast?.toast({
+      toast.toast({
         title: "Success",
         description: "Round saved successfully!",
       });
       
-      queryClient?.invalidateQueries({ queryKey: ['userRounds'] });
+      queryClient.invalidateQueries({ queryKey: ['userRounds'] });
       return true;
     } catch (error: any) {
       console.error("Error saving round:", error);
-      toast?.toast({
+      toast.toast({
         title: "Error",
         description: error.message || "Failed to save round. Please try again.",
         variant: "destructive",

@@ -2,13 +2,6 @@
 // Export everything from client core
 export { supabase, getSiteUrl, logSupabaseOperation, type DatabaseError } from './core/client';
 
-// Export course utils
-export { 
-  parseCourseName, 
-  formatCourseName, 
-  isUserAddedCourse 
-} from './utils/course-utils';
-
 // Export course query functions
 export {
   fetchCourseById,
@@ -23,6 +16,13 @@ export {
   findOrCreateCourseByApiId,
   ensureCourseExists
 } from './course/course-operations';
+
+// Export course utility functions
+export {
+  parseCourseName,
+  formatCourseName,
+  isUserAddedCourse
+} from './utils/course-utils';
 
 // Export handicap calculator
 export { calculateHandicapIndex } from './handicap/handicap-calculator';

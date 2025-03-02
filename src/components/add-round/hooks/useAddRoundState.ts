@@ -1,136 +1,74 @@
 
-import { useState, useEffect } from 'react';
-import { useToast } from "@/hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
-import { useCourseHandlers } from './course-handlers';
-import { useScoreHandlers } from './useScoreHandlers';
-import { SimplifiedCourseDetail, HoleScore, Step, Tee, Course, SimplifiedGolfCourse } from '../types';
-import { CourseDetail } from '@/services/golfCourseApi';
+import { useState, useEffect } from "react";
+import { 
+  SimplifiedGolfCourse, 
+  SimplifiedCourseDetail,
+  Score,
+  HoleSelection,
+  CourseDetail
+} from "../types";
 
 export const useAddRoundState = () => {
-  const [step, setStep] = useState<Step>('search');
-  const [roundDate, setRoundDate] = useState<Date | undefined>(new Date());
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
+  const [currentStep, setCurrentStep] = useState<'search' | 'scorecard'>('search');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<SimplifiedGolfCourse[]>([]);
-  const [searchError, setSearchError] = useState<string | null>(null);
-  const [noResults, setNoResults] = useState(false);
-  const [openManualForm, setOpenManualForm] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<SimplifiedCourseDetail | null>(null);
   const [selectedTeeId, setSelectedTeeId] = useState<string | null>(null);
-  const [selectedTee, setSelectedTee] = useState<Tee | null>(null);
+  const [scores, setScores] = useState<Score[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [dataLoadingError, setDataLoadingError] = useState<string | null>(null);
-  const [calendarOpen, setCalendarOpen] = useState(false);
-  const [holeSelection, setHoleSelection] = useState<'all' | 'front9' | 'back9'>('all');
-  const [activeScoreTab, setActiveScoreTab] = useState('front9');
+  const [roundDate, setRoundDate] = useState<Date | undefined>(new Date());
+  const [calendarOpen, setCalendarOpen] = useState<boolean>(false);
+  const [holeSelection, setHoleSelection] = useState<HoleSelection>('all');
+  const [activeScoreTab, setActiveScoreTab] = useState<"front9" | "back9">("front9");
   const [originalCourseDetail, setOriginalCourseDetail] = useState<CourseDetail | null>(null);
-  const [manualCourseOpen, setManualCourseOpen] = useState(false);
-  
-  const toast = useToast();
-  const queryClient = useQueryClient();
+  const [noResults, setNoResults] = useState<boolean>(false);
+  const [manualCourseOpen, setManualCourseOpen] = useState<boolean>(false);
 
-  const { 
-    scores, 
-    setScores, 
-    initializeScores, 
-    handleHoleScoreChange,
-    handleScoreChange,
-    handleHoleSelectionChange,
-    updateScorecardForTee,
-    handleTeeChange
-  } = useScoreHandlers();
-
-  // Create course handlers with all necessary dependencies
-  const courseHandlers = useCourseHandlers({
-    searchValue,
-    setSearchValue,
-    setSearchResults,
-    setSelectedCourse,
-    setSelectedTeeId,
-    setScores,
-    setIsLoading,
-    setSearchError,
-    setNoResults,
-    setOriginalCourseDetail,
-    setHoleSelection,
-    setStep,
-    setManualCourseOpen,
-    selectedCourse,
-    selectedTeeId,
-    scores,
-    roundDate,
-    isLoading,
-    searchResults,
-    toast,
-    queryClient
-  });
-
-  // Initialize scores whenever the selected tee or course changes
+  // Reset selectedTeeId whenever selectedCourse changes
   useEffect(() => {
-    if (selectedTee && selectedCourse) {
-      console.log("Selected tee changed, initializing scores:", selectedTee.name);
-      initializeScores(selectedTee, selectedCourse);
+    if (selectedCourse && selectedCourse.tees && selectedCourse.tees.length > 0) {
+      console.log("Selected course changed, setting default tee:", selectedCourse.tees[0].name);
+      setSelectedTeeId(selectedCourse.tees[0].id);
+    } else {
+      setSelectedTeeId(null);
     }
-  }, [selectedTee, selectedCourse]);
+  }, [selectedCourse]);
 
-  // Log state changes for debugging
+  // Log selection changes for debugging
   useEffect(() => {
-    console.log("Current state updated:", { 
-      selectedCourse: selectedCourse?.name,
-      selectedTeeId,
-      selectedTee: selectedTee?.name
-    });
-  }, [selectedCourse, selectedTeeId, selectedTee]);
-
-  const resetState = () => {
-    setStep('search');
-    setRoundDate(new Date());
-    setSearchValue('');
-    setSearchResults([]);
-    setSearchError(null);
-    setNoResults(false);
-    setOpenManualForm(false);
-    setSelectedCourse(null);
-    setSelectedTeeId(null);
-    setSelectedTee(null);
-    setScores([]);
-    setDataLoadingError(null);
-    setCalendarOpen(false);
-    setHoleSelection('all');
-    setActiveScoreTab('front9');
-    setOriginalCourseDetail(null);
-    setManualCourseOpen(false);
-  };
+    if (selectedTeeId) {
+      console.log("Selected tee ID state updated:", selectedTeeId);
+      
+      if (selectedCourse && selectedCourse.tees) {
+        const tee = selectedCourse.tees.find(t => t.id === selectedTeeId);
+        console.log("Selected tee details:", tee ? { name: tee.name, id: tee.id } : "Not found");
+      }
+    }
+  }, [selectedTeeId, selectedCourse]);
 
   return {
-    step,
-    setStep,
-    roundDate,
-    setRoundDate,
-    isLoading,
-    setIsLoading,
-    searchValue,
-    setSearchValue,
+    currentStep,
+    setCurrentStep,
+    searchQuery,
+    setSearchQuery,
     searchResults,
     setSearchResults,
-    searchError,
-    setSearchError,
-    noResults,
-    setNoResults,
-    openManualForm,
-    setOpenManualForm,
     selectedCourse,
     setSelectedCourse,
     selectedTeeId,
     setSelectedTeeId,
-    selectedTee,
-    setSelectedTee,
     scores,
     setScores,
-    handleHoleScoreChange,
-    resetState,
+    isLoading,
+    setIsLoading,
+    searchError,
+    setSearchError,
     dataLoadingError,
     setDataLoadingError,
+    roundDate,
+    setRoundDate,
     calendarOpen,
     setCalendarOpen,
     holeSelection,
@@ -139,12 +77,9 @@ export const useAddRoundState = () => {
     setActiveScoreTab,
     originalCourseDetail,
     setOriginalCourseDetail,
+    noResults,
+    setNoResults,
     manualCourseOpen,
-    setManualCourseOpen,
-    handleScoreChange,
-    handleHoleSelectionChange,
-    updateScorecardForTee,
-    handleTeeChange,
-    ...courseHandlers
+    setManualCourseOpen
   };
 };
