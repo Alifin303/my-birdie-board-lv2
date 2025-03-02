@@ -70,6 +70,8 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
     console.log("selectedTee object:", selectedTee);
     if (selectedTee) {
       console.log("Selected tee name:", selectedTee.name);
+      console.log("Rendering dropdown with selected tee:", selectedTeeId);
+      console.log("Dropdown should now show:", selectedTeeId, selectedTee.name);
     } else {
       console.error("No tee found for ID:", selectedTeeId);
     }
@@ -156,6 +158,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
             value={selectedTeeId || undefined} 
             onValueChange={(value) => {
               console.log("Tee selection changed to:", value);
+              console.log("Selected tee before change:", selectedTee?.name);
               handleTeeChange(value);
             }}
           >
@@ -176,20 +179,23 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {selectedCourse.tees.map((tee) => (
-                <SelectItem key={tee.id} value={tee.id}>
-                  <div className="flex items-center">
-                    <div 
-                      className="w-3 h-3 rounded-full mr-2"
-                      style={{
-                        backgroundColor: getTeeColor(tee.name),
-                        border: tee.name.toLowerCase().includes('white') ? '1px solid #ccc' : 'none'
-                      }}
-                    ></div>
-                    {tee.name}
-                  </div>
-                </SelectItem>
-              ))}
+              {selectedCourse.tees.map((tee) => {
+                console.log(`Rendering tee option: ${tee.id} - ${tee.name} (selected: ${tee.id === selectedTeeId})`);
+                return (
+                  <SelectItem key={tee.id} value={tee.id}>
+                    <div className="flex items-center">
+                      <div 
+                        className="w-3 h-3 rounded-full mr-2"
+                        style={{
+                          backgroundColor: getTeeColor(tee.name),
+                          border: tee.name.toLowerCase().includes('white') ? '1px solid #ccc' : 'none'
+                        }}
+                      ></div>
+                      {tee.name}
+                    </div>
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
@@ -444,6 +450,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
             console.log("Selected tee at save time:", selectedTee);
             if (selectedTee) {
               console.log("Selected tee name at save time:", selectedTee.name);
+              console.log("Saving round with tee:", selectedTeeId, selectedTee.name);
             } else {
               console.error("No selected tee found at save time for ID:", selectedTeeId);
             }

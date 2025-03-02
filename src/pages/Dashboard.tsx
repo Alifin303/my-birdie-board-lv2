@@ -88,6 +88,13 @@ export default function Dashboard() {
           parsedNames = parseCourseName(round.courses.name);
         }
         
+        // Log the round tee information for debugging
+        console.log("Fetched round data:", { 
+          roundId: round.id,
+          savedTeeId: round.tee_id, 
+          savedTeeName: round.tee_name 
+        });
+        
         return {
           ...round,
           courses: round.courses ? {

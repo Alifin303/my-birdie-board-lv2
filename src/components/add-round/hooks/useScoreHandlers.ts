@@ -31,9 +31,12 @@ export function useScoreHandlers({
     
     const selectedTee = selectedCourse.tees.find(t => t.id === teeId);
     if (!selectedTee) {
-      console.error(`Tee with ID ${teeId} not found`);
+      console.error(`Tee with ID ${teeId} not found in course tees`);
+      console.log("Available tees:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
       return selectedCourse.holes;
     }
+    
+    console.log("Found selected tee:", selectedTee.name);
     
     if (selectedTee.holes && selectedTee.holes.length > 0) {
       console.log("Using hole data specific to the selected tee:", selectedTee.holes);
@@ -51,6 +54,14 @@ export function useScoreHandlers({
       console.error("Cannot update scorecard: No course selected");
       return;
     }
+    
+    // Log available tees for debugging
+    console.log("Available tees when updating scorecard:", 
+      selectedCourse.tees.map(t => ({ id: t.id, name: t.name }))
+    );
+    
+    const selectedTee = selectedCourse.tees.find(t => t.id === teeId);
+    console.log("Selected tee for scorecard update:", selectedTee);
     
     const allHolesData = getHolesForTee(teeId);
     
@@ -115,7 +126,7 @@ export function useScoreHandlers({
   const handleTeeChange = (teeId: string) => {
     if (!selectedCourse) return;
     
-    console.log("CRITICAL FIX: Selected tee ID:", teeId);
+    console.log("CRITICAL TEE CHANGE: Selected tee ID:", teeId);
     console.log("Available tees at tee change:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
     
     const selectedTee = selectedCourse.tees.find(t => t.id === teeId);

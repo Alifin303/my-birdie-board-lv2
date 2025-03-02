@@ -69,6 +69,11 @@ export function createSaveRoundHandler({
       console.log("Selected tee object to save:", selectedTee);
       console.log("Selected tee name to save:", selectedTee.name);
       console.log("Available tees in course at save time:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
+      console.log("Saving round with:", { 
+        courseId: selectedCourse.id, 
+        selectedTeeId, 
+        selectedTeeName: selectedTee.name 
+      });
       
       const totalStrokes = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
@@ -138,7 +143,6 @@ export function createSaveRoundHandler({
       console.log("Final selected tee for saving:", selectedTee);
       
       // Prepare the data we're sending to Supabase
-      // CRITICAL FIX: Ensure we're using the selectedTee.name, not a default/hardcoded value
       const roundData = {
         user_id: session.user.id,
         course_id: dbCourseId,
