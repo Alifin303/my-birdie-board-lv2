@@ -6,8 +6,7 @@ import {
   Score, 
   SimplifiedGolfCourse, 
   SimplifiedCourseDetail,
-  HoleSelection,
-  SimplifiedTee
+  HoleSelection
 } from "../../types";
 
 export interface UseCourseHandlersProps {
@@ -32,21 +31,6 @@ export interface UseCourseHandlersProps {
   searchResults: SimplifiedGolfCourse[];
   toast: ReturnType<typeof useToast>;
   queryClient: ReturnType<typeof useQueryClient>;
-}
-
-export interface UseScoreHandlersProps {
-  selectedCourse: SimplifiedCourseDetail | null;
-  selectedTeeId: string | null;
-  setSelectedTeeId: React.Dispatch<React.SetStateAction<string | null>>;
-  scores: Score[];
-  setScores: React.Dispatch<React.SetStateAction<Score[]>>;
-  holeSelection: HoleSelection;
-  setHoleSelection: React.Dispatch<React.SetStateAction<HoleSelection>>;
-  activeScoreTab: "front9" | "back9";
-  setActiveScoreTab: React.Dispatch<React.SetStateAction<"front9" | "back9">>;
-  setCurrentStep: React.Dispatch<React.SetStateAction<'search' | 'scorecard'>>;
-  roundDate: Date | undefined;
-  saveRound: (data: any) => Promise<void>; 
 }
 
 export interface CourseHandlers {

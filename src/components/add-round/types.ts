@@ -1,8 +1,4 @@
 
-import { CourseDetail } from "@/services/golfCourseApi";
-
-export type HoleSelection = "all" | "front9" | "back9";
-
 export interface SimplifiedGolfCourse {
   id: number;
   name: string;
@@ -10,41 +6,40 @@ export interface SimplifiedGolfCourse {
   city?: string;
   state?: string;
   country?: string;
-  apiCourseId?: string | number;
   isUserAdded?: boolean;
+  apiCourseId?: string;
 }
 
 export interface SimplifiedHole {
   number: number;
   par: number;
-  yards: number;
-  handicap: number;
+  yards?: number;
+  handicap?: number;
 }
 
 export interface SimplifiedTee {
   id: string;
   name: string;
-  gender: 'male' | 'female';
   rating: number;
   slope: number;
   par: number;
-  originalIndex?: number;
-  yards: number;
+  gender: 'male' | 'female';
+  originalIndex: number;
+  yards?: number;
   holes?: SimplifiedHole[];
-  color?: string;
 }
 
 export interface SimplifiedCourseDetail {
   id: number;
   name: string;
   clubName: string;
-  city: string;
-  state: string;
-  country: string;
+  city?: string;
+  state?: string;
+  country?: string;
   tees: SimplifiedTee[];
-  holes?: SimplifiedHole[];
-  apiCourseId?: string;
+  holes: SimplifiedHole[];
   isUserAdded?: boolean;
+  apiCourseId?: string;
 }
 
 export interface Score {
@@ -52,10 +47,11 @@ export interface Score {
   par: number;
   strokes?: number;
   putts?: number;
-  fairwayHit?: boolean;
-  greenInRegulation?: boolean;
-  penaltyStrokes?: number;
+  yards?: number;
+  handicap?: number;
 }
+
+export type HoleSelection = 'all' | 'front9' | 'back9';
 
 export interface ScoreSummary {
   totalStrokes: number;
@@ -76,6 +72,42 @@ export interface AddRoundModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-// Re-export CourseDetail from golfCourseApi to make it available to importers
-// Using 'export type' to fix the isolatedModules error
-export type { CourseDetail };
+// Add the CourseDetail interface export
+export interface CourseDetail {
+  id: number | string;
+  course_name?: string;
+  club_name?: string;
+  location?: {
+    city?: string;
+    state?: string;
+    country?: string;
+  };
+  tees?: {
+    male?: Array<{
+      tee_name?: string;
+      course_rating?: number;
+      slope_rating?: number;
+      par_total?: number;
+      total_yards?: number;
+      holes?: Array<{
+        number?: number;
+        par?: number;
+        yardage?: number;
+        handicap?: number;
+      }>;
+    }>;
+    female?: Array<{
+      tee_name?: string;
+      course_rating?: number;
+      slope_rating?: number;
+      par_total?: number;
+      total_yards?: number;
+      holes?: Array<{
+        number?: number;
+        par?: number;
+        yardage?: number;
+        handicap?: number;
+      }>;
+    }>;
+  };
+}

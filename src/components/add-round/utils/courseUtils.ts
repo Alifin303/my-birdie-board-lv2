@@ -165,57 +165,32 @@ export const extractTeesFromApiResponse = (courseDetail: CourseDetail): Simplifi
   const tees: SimplifiedTee[] = [];
   
   if (courseDetail.tees) {
-    // Map of tee colors by name
-    const teeColors: Record<string, string> = {
-      'white': '#FFFFFF',
-      'blue': '#0000FF',
-      'red': '#FF0000',
-      'gold': '#FFD700',
-      'black': '#000000',
-      'green': '#008000',
-      'yellow': '#FFFF00',
-      'silver': '#C0C0C0',
-      'copper': '#B87333',
-      'orange': '#FFA500',
-      'purple': '#800080'
-    };
-    
     if (courseDetail.tees.male && courseDetail.tees.male.length > 0) {
       courseDetail.tees.male.forEach((tee, index) => {
-        const teeName = tee.tee_name || 'Unknown Tee';
-        // Try to get the color based on the tee name
-        const color = teeColors[teeName.toLowerCase()] || '#CCCCCC';
-        
         tees.push({
           id: `m-${index}`,
-          name: teeName,
+          name: tee.tee_name || 'Unknown Tee',
           rating: tee.course_rating ?? 72,
           slope: tee.slope_rating ?? 113,
           par: tee.par_total ?? 72,
           gender: 'male',
           originalIndex: index,
-          yards: tee.total_yards,
-          color: color
+          yards: tee.total_yards
         });
       });
     }
     
     if (courseDetail.tees.female && courseDetail.tees.female.length > 0) {
       courseDetail.tees.female.forEach((tee, index) => {
-        const teeName = tee.tee_name || 'Unknown Tee';
-        // Try to get the color based on the tee name
-        const color = teeColors[teeName.toLowerCase()] || '#CCCCCC';
-        
         tees.push({
           id: `f-${index}`,
-          name: teeName,
+          name: tee.tee_name || 'Unknown Tee',
           rating: tee.course_rating ?? 72,
           slope: tee.slope_rating ?? 113,
           par: tee.par_total ?? 72,
           gender: 'female',
           originalIndex: index,
-          yards: tee.total_yards,
-          color: color
+          yards: tee.total_yards
         });
       });
     }
@@ -246,70 +221,22 @@ export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDe
         handicap: idx + 1
       }));
       
-      // Add default tees with colors
-      parsedDetails.tees = [
-        {
-          id: `tee-${Date.now()}-white`,
-          name: 'White',
-          rating: 72,
-          slope: 113,
-          par: 72,
-          gender: 'male',
-          originalIndex: 0,
-          holes: defaultHoles,
-          color: '#FFFFFF'
-        },
-        {
-          id: `tee-${Date.now()}-blue`,
-          name: 'Blue',
-          rating: 74,
-          slope: 125,
-          par: 72,
-          gender: 'male',
-          originalIndex: 1,
-          holes: defaultHoles,
-          color: '#0000FF'
-        },
-        {
-          id: `tee-${Date.now()}-red`,
-          name: 'Red',
-          rating: 69,
-          slope: 113,
-          par: 72,
-          gender: 'female',
-          originalIndex: 2,
-          holes: defaultHoles,
-          color: '#FF0000'
-        }
-      ];
+      parsedDetails.tees = [{
+        id: `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        name: 'White',
+        rating: 72,
+        slope: 113,
+        par: 72,
+        gender: 'male',
+        originalIndex: 0,
+        holes: defaultHoles
+      }];
       
       parsedDetails.holes = defaultHoles;
       
       // Save updated details back to localStorage
       localStorage.setItem(`course_details_${courseId}`, JSON.stringify(parsedDetails));
-      console.log("Updated course details saved to localStorage with default tees");
-    } else {
-      // Make sure all tees have a color
-      parsedDetails.tees = parsedDetails.tees.map((tee: any) => {
-        if (!tee.color) {
-          // Map common tee names to colors
-          const colorMap: Record<string, string> = {
-            'White': '#FFFFFF',
-            'Blue': '#0000FF',
-            'Red': '#FF0000',
-            'Gold': '#FFD700',
-            'Black': '#000000',
-            'Green': '#008000',
-            'Yellow': '#FFFF00',
-            'Silver': '#C0C0C0'
-          };
-          tee.color = colorMap[tee.name] || '#CCCCCC';
-        }
-        return tee;
-      });
-      
-      // Save updated details back to localStorage if we added colors
-      localStorage.setItem(`course_details_${courseId}`, JSON.stringify(parsedDetails));
+      console.log("Updated course details saved to localStorage with default tee");
     }
     
     return parsedDetails as SimplifiedCourseDetail;
