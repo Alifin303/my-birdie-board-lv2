@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -54,8 +53,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setManualCourseOpen
   } = useAddRoundState();
   
-  // Fix: Get the correct toast object with its methods
-  const { toast } = useToast();
+  const toast = useToast();
   const queryClient = useQueryClient();
   const manualCourseFormRef = useRef<any>(null);
   const today = new Date();
@@ -134,7 +132,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setManualCourseOpen(false);
   };
   
-  // Calculate summary stats for scoring
   const scoreSummary = calculateScoreSummary(scores);
 
   return (
@@ -180,7 +177,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
         </DialogContent>
       </Dialog>
       
-      {/* Manual Course Form */}
       <ManualCourseForm
         open={manualCourseOpen}
         onOpenChange={setManualCourseOpen}
