@@ -420,4 +420,3 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
     </div>
   );
 };
-

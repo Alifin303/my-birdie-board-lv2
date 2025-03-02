@@ -122,6 +122,7 @@ export function createSaveRoundHandler({
       }
       
       console.log("Using course_id for round insertion:", dbCourseId);
+      console.log("Selected tee for saving:", selectedTee);
       
       const { data, error } = await supabase
         .from('rounds')
