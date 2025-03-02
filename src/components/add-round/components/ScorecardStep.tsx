@@ -32,6 +32,7 @@ export const ScorecardStep = ({
   handleHoleScoreChange,
   handleSaveRound,
   handleTeeChange,
+  handleScoreChange, // Added this prop to match what's being passed in AddRoundModal
 }: AddRoundStepProps) => {
   useEffect(() => {
     if (selectedCourse && (!selectedTeeId || !selectedTee)) {
@@ -91,10 +92,10 @@ export const ScorecardStep = ({
   }
 
   console.log("Rendering ScorecardStep with:", { 
-    course: selectedCourse.name, 
+    course: selectedCourse?.name, 
     teeId: selectedTeeId,
     teeName: selectedTee?.name,
-    availableTees: selectedCourse.tees?.map(t => ({ id: t.id, name: t.name }))
+    availableTees: selectedCourse?.tees?.map(t => ({ id: t.id, name: t.name }))
   });
 
   const formatDate = (date: Date) => {

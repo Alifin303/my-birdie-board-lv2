@@ -1,3 +1,4 @@
+
 export interface SimplifiedGolfCourse {
   id: number;
   name: string;
@@ -98,6 +99,7 @@ export interface AddRoundStepProps {
   handleSaveRound: () => Promise<boolean>;
   handleTeeChange: (teeId: string) => void;
   handleHoleSelectionChange?: (selection: HoleSelection) => void;
+  handleScoreChange?: (holeIndex: number, value: string) => void;
   handleDateSelect?: (date: Date | undefined) => void;
   handleBackToSearch?: () => void;
   handleCloseModal?: () => void;
