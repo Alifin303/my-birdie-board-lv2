@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+
+import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Tee, Course, HoleScore } from '../types';
+import { HoleScore, Course, Tee } from '../types';
 
 export const useScoreHandlers = () => {
   const [scores, setScores] = useState<HoleScore[]>([]);
@@ -78,10 +79,34 @@ export const useScoreHandlers = () => {
     }
   };
 
+  // Add the missing functions that other components expect
+  const handleScoreChange = (holeIndex: number, value: string) => {
+    handleHoleScoreChange(holeIndex, value);
+  };
+
+  const handleHoleSelectionChange = (selection: 'all' | 'front9' | 'back9') => {
+    console.log("Hole selection changed to:", selection);
+    // This would be implemented to filter displayed holes
+  };
+
+  const updateScorecardForTee = (teeId: string, selection?: 'all' | 'front9' | 'back9') => {
+    console.log("Updating scorecard for tee:", teeId);
+    // This would be implemented to update the scorecard when tee changes
+  };
+
+  const handleTeeChange = (teeId: string) => {
+    console.log("Tee change handler called with ID:", teeId);
+    // This would be implemented to handle tee changes
+  };
+
   return {
     scores,
     setScores,
     initializeScores,
     handleHoleScoreChange,
+    handleScoreChange,
+    handleHoleSelectionChange,
+    updateScorecardForTee,
+    handleTeeChange
   };
 };

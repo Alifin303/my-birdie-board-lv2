@@ -1,22 +1,13 @@
-
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { 
-  Score, 
-  HoleSelection, 
-  SimplifiedGolfCourse, 
-  SimplifiedCourseDetail, 
-  AddRoundModalProps 
-} from "./types";
 import { ManualCourseForm } from "@/components/ManualCourseForm";
 import { SearchStep } from "./components/SearchStep";
 import { ScorecardStep } from "./components/ScorecardStep";
 import { useAddRoundState } from "./hooks/useAddRoundState";
-import { useScoreHandlers } from "./hooks/useScoreHandlers";
-import { useCourseHandlers } from "./hooks/useCourseHandlers";
 import { calculateScoreSummary } from "./utils/scoreUtils";
+import { AddRoundModalProps } from "./types";
 
 export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   const {
@@ -59,10 +50,8 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   const manualCourseFormRef = useRef<any>(null);
   const today = new Date();
   
-  // Reset form when modal opens or closes
   useEffect(() => {
     if (!open) {
-      // Reset state when modal is closed
       resetForm();
     }
   }, [open]);
@@ -145,7 +134,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     resetForm();
   };
   
-  // Modify handleSaveRound to close the modal after saving
   const handleSaveRoundAndClose = async () => {
     const success = await handleSaveRound();
     if (success) {

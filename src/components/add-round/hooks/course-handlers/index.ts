@@ -10,11 +10,21 @@ export function useCourseHandlers(props: UseCourseHandlersProps): CourseHandlers
   
   const { handleSearch } = createSearchHandlers(props);
   
+  const courseSelectionProps = {
+    setIsLoading: props.setIsLoading,
+    setSelectedCourse: props.setSelectedCourse,
+    setSelectedTeeId: props.setSelectedTeeId,
+    setScores: props.setScores,
+    setManualCourseOpen: props.setManualCourseOpen,
+    setSearchResults: props.setSearchResults,
+    toast: props.toast
+  };
+  
   const { 
     handleCourseSelect, 
     handleOpenManualCourseForm,
     handleCourseCreated 
-  } = createCourseSelectionHandlers(props);
+  } = createCourseSelectionHandlers(courseSelectionProps);
   
   const { handleSaveRound } = createSaveRoundHandler(props);
 

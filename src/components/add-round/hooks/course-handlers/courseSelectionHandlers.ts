@@ -1,40 +1,41 @@
 
 import { 
-  fetchCourseDetails, 
-  flattenCourseDetails, 
-  fetchCourseHoles
+  getCourseDetails, 
+  getCourseHoles
 } from "@/services/golfCourseApi";
 import { getCourseMetadataFromLocalStorage } from "@/integrations/supabase/client";
 import { UseCourseHandlersProps } from "./types";
+import { SimplifiedGolfCourse } from "../../types";
 
 export function createCourseSelectionHandlers({
   setIsLoading,
   setSelectedCourse,
   setSelectedTeeId,
-  setSelectedTee,
   setScores,
-  setOpenManualForm,
+  setManualCourseOpen,
   setSearchResults,
   toast
 }: Pick<UseCourseHandlersProps, 
   'setIsLoading' | 
   'setSelectedCourse' | 
-  'setSelectedTeeId' | 
-  'setSelectedTee' |
+  'setSelectedTeeId' |
   'setScores' | 
-  'setOpenManualForm' |
+  'setManualCourseOpen' |
   'setSearchResults' |
   'toast'
 >) {
   
-  const handleCourseSelect = async (courseId: number, courseName: string, clubName: string, isUserAdded: boolean = false, apiCourseId?: string) => {
+  const handleCourseSelect = async (course: SimplifiedGolfCourse) => {
+    const { id: courseId, name: courseName, clubName } = course;
+    const isUserAdded = course.isUserAdded || false;
+    const apiCourseId = course.apiCourseId;
+    
     console.log("handleCourseSelect called with:", { courseId, courseName, clubName, isUserAdded, apiCourseId });
     
     try {
       setIsLoading(true);
       setSelectedCourse(null);
       setSelectedTeeId(null);
-      setSelectedTee(null);
       setScores([]);
       
       let simplifiedCourseDetail;
@@ -128,15 +129,15 @@ export function createCourseSelectionHandlers({
           // For API-sourced courses, fetch from API
           console.log("Fetching course details from API for course ID:", apiCourseId);
           try {
-            const courseDetail = await fetchCourseDetails(apiCourseId);
+            const courseDetail = await getCourseDetails(apiCourseId);
             console.log("API returned course details:", courseDetail);
             
             // Flatten the API response into a simpler object
-            const flattenedDetails = flattenCourseDetails(courseDetail, clubName, courseName);
+            const flattenedDetails = flattenCourseDetailsFromAPI(courseDetail, clubName, courseName);
             console.log("Flattened course details:", flattenedDetails);
             
             // Fetch hole data
-            const holesData = await fetchCourseHoles(apiCourseId);
+            const holesData = await getCourseHoles(apiCourseId);
             console.log("API returned holes data:", holesData);
             
             // Combine the data
@@ -160,11 +161,13 @@ export function createCourseSelectionHandlers({
             }
           } catch (error: any) {
             console.error("Error fetching course details from API:", error);
-            toast.toast({
-              title: "API Error",
-              description: error.message || "Could not fetch course details. Check the console for more information.",
-              variant: "destructive",
-            });
+            if (toast) {
+              toast({
+                title: "API Error",
+                description: error.message || "Could not fetch course details. Check the console for more information.",
+                variant: "destructive",
+              });
+            }
             
             // Create fallback data if API fails
             const fallbackData = createFallbackCourseData(courseId, courseName, clubName);
@@ -172,11 +175,13 @@ export function createCourseSelectionHandlers({
           }
         } else {
           console.error("Invalid course selection: Not user-added and no API ID provided");
-          toast.toast({
-            title: "Error",
-            description: "Invalid course selection. Please try again.",
-            variant: "destructive",
-          });
+          if (toast) {
+            toast({
+              title: "Error",
+              description: "Invalid course selection. Please try again.",
+              variant: "destructive",
+            });
+          }
           setIsLoading(false);
           return;
         }
@@ -184,11 +189,13 @@ export function createCourseSelectionHandlers({
       
       if (!simplifiedCourseDetail) {
         console.error("Failed to load course details");
-        toast.toast({
-          title: "Error",
-          description: "Failed to load course details. Please try again.",
-          variant: "destructive",
-        });
+        if (toast) {
+          toast({
+            title: "Error",
+            description: "Failed to load course details. Please try again.",
+            variant: "destructive",
+          });
+        }
         setIsLoading(false);
         return;
       }
@@ -197,18 +204,19 @@ export function createCourseSelectionHandlers({
       
       if (!simplifiedCourseDetail.tees || simplifiedCourseDetail.tees.length === 0) {
         console.error("No tees found for course:", simplifiedCourseDetail);
-        toast.toast({
-          title: "Error",
-          description: "No tee information found for this course. Please try another course.",
-          variant: "destructive",
-        });
+        if (toast) {
+          toast({
+            title: "Error",
+            description: "No tee information found for this course. Please try another course.",
+            variant: "destructive",
+          });
+        }
         setIsLoading(false);
         return;
       }
       
       // Select the first tee by default
       const defaultTeeId = simplifiedCourseDetail.tees[0].id;
-      const defaultTee = simplifiedCourseDetail.tees[0];
       
       // Ensure consistent structure in the tees data
       const formattedTees = simplifiedCourseDetail.tees.map(tee => ({
@@ -227,34 +235,34 @@ export function createCourseSelectionHandlers({
       };
       
       console.log("Default tee ID:", defaultTeeId);
-      console.log("Default tee:", defaultTee);
       console.log("Setting selected course and tee with corrected structure:", updatedCourseDetail);
       
       setSelectedCourse(updatedCourseDetail);
       
       // Use setTimeout to ensure component has processed the course update first
       setTimeout(() => {
-        console.log("Setting initial tee ID and tee object");
+        console.log("Setting initial tee ID");
         setSelectedTeeId(defaultTeeId);
-        setSelectedTee(defaultTee);
         console.log("Selected course after update:", updatedCourseDetail);
         console.log("Selected tee ID after update:", defaultTeeId);
         console.log("Selected tee name:", updatedCourseDetail.tees[0]?.name);
       }, 200); // Increased delay to ensure state updates are processed
     } catch (error: any) {
       console.error("Error in handleCourseSelect:", error);
-      toast.toast({
-        title: "Error",
-        description: error.message || "An error occurred while selecting the course",
-        variant: "destructive",
-      });
+      if (toast) {
+        toast({
+          title: "Error",
+          description: error.message || "An error occurred while selecting the course",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
   };
   
   const handleOpenManualCourseForm = () => {
-    setOpenManualForm(true);
+    setManualCourseOpen(true);
     setSearchResults([]);
   };
   
@@ -280,12 +288,54 @@ export function createCourseSelectionHandlers({
     if (courseData.tees && courseData.tees.length > 0) {
       const defaultTee = courseData.tees[0];
       setSelectedTeeId(defaultTee.id);
-      setSelectedTee(defaultTee);
       
       console.log("Setting tee from created course:", defaultTee);
     } else {
       console.error("No tees found in created course");
     }
+  };
+  
+  // Helper functions for course handling
+  
+  const flattenCourseDetailsFromAPI = (courseDetail: any, clubName: string, courseName: string) => {
+    // A utility function to convert API course details to our simplified format
+    const maleTees = courseDetail.tees?.male || [];
+    const femaleTees = courseDetail.tees?.female || [];
+    
+    const flattenedTees = [
+      ...maleTees.map((tee: any, index: number) => ({
+        id: `tee-male-${index}-${Date.now()}`,
+        name: tee.tee_name || `Men's Tee ${index + 1}`,
+        rating: tee.course_rating || 72,
+        slope: tee.slope_rating || 113,
+        par: tee.par_total || 72,
+        gender: 'male' as const,
+        originalIndex: index,
+        yards: tee.total_yards,
+        holes: tee.holes || []
+      })),
+      ...femaleTees.map((tee: any, index: number) => ({
+        id: `tee-female-${index}-${Date.now()}`,
+        name: tee.tee_name || `Women's Tee ${index + 1}`,
+        rating: tee.course_rating || 72,
+        slope: tee.slope_rating || 113,
+        par: tee.par_total || 72,
+        gender: 'female' as const,
+        originalIndex: index,
+        yards: tee.total_yards,
+        holes: tee.holes || []
+      }))
+    ];
+    
+    return {
+      name: courseName,
+      clubName: clubName,
+      city: courseDetail.location?.city || "",
+      state: courseDetail.location?.state || "",
+      country: courseDetail.location?.country || "",
+      tees: flattenedTees,
+      holes: []
+    };
   };
   
   // Helper function to create fallback course data

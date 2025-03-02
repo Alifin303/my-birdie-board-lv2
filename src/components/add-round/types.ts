@@ -51,6 +51,14 @@ export interface Score {
   handicap?: number;
 }
 
+export interface HoleScore {
+  hole: number;
+  par: number;
+  strokes: number | null;
+  putts?: number;
+}
+
+export type Step = 'search' | 'scorecard';
 export type HoleSelection = 'all' | 'front9' | 'back9';
 
 export interface ScoreSummary {
@@ -72,7 +80,26 @@ export interface AddRoundModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-// Add the CourseDetail interface export
+// Define the Course and Tee interfaces that were missing
+export interface Course extends SimplifiedCourseDetail {}
+export interface Tee extends SimplifiedTee {}
+
+// Add the AddRoundStepProps interface
+export interface AddRoundStepProps {
+  selectedCourse: Course | null;
+  selectedTeeId: string | null;
+  selectedTee: Tee | null;
+  scores: HoleScore[];
+  roundDate: Date | undefined;
+  isLoading: boolean;
+  setStep: (step: Step) => void;
+  setSelectedTeeId: (id: string | null) => void;
+  setSelectedTee: (tee: Tee | null) => void;
+  handleHoleScoreChange: (index: number, value: string) => void;
+  handleSaveRound: () => Promise<boolean>;
+}
+
+// Add CourseDetail interface 
 export interface CourseDetail {
   id: number | string;
   course_name?: string;
