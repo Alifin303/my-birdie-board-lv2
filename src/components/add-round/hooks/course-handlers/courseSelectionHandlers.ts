@@ -35,6 +35,7 @@ export function createCourseSelectionHandlers({
 >) {
   
   const handleCourseSelect = async (course: SimplifiedGolfCourse) => {
+    console.log("handleCourseSelect called with course:", course);
     setIsLoading(true);
     setSearchError(null);
     
@@ -173,7 +174,7 @@ export function createCourseSelectionHandlers({
         console.log("Available tees:", simplifiedCourseDetail.tees.map(t => ({ id: t.id, name: t.name })));
         console.log("Setting default tee ID:", defaultTeeId);
         
-        // CRITICAL FIX: Ensure the selectedTeeId is set before updating the scorecard
+        // Set the selected tee ID
         setSelectedTeeId(defaultTeeId);
         
         console.log("Default tee set to:", {
@@ -181,17 +182,22 @@ export function createCourseSelectionHandlers({
           name: simplifiedCourseDetail.tees[0]?.name
         });
         
-        // Use a timeout to ensure state has updated
-        setTimeout(() => {
-          console.log("Updating scorecard with tee ID:", defaultTeeId);
-          updateScorecardForTee(defaultTeeId, 'all');
-          setHoleSelection('all');
-        }, 50); // Increased timeout for more reliable updates
+        // Update scorecard with the selected tee
+        console.log("Updating scorecard with tee ID:", defaultTeeId);
+        updateScorecardForTee(defaultTeeId, 'all');
+        setHoleSelection('all');
+        
+        // Ensure we're on the scorecard step
+        console.log("Setting current step to 'scorecard'");
+        setCurrentStep('scorecard');
       } else {
         console.error("No tees found for course:", simplifiedCourseDetail);
+        toast.toast({
+          title: "Warning",
+          description: "No tee boxes found for this course. Please try another course.",
+          variant: "destructive",
+        });
       }
-      
-      setCurrentStep('scorecard');
     } catch (error: any) {
       console.error("Course detail error:", error);
       setSearchError(error.message || "Failed to load course details. Please try again.");

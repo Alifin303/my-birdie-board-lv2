@@ -28,16 +28,24 @@ export const useAddRoundState = () => {
 
   // Reset selectedTeeId whenever selectedCourse changes
   useEffect(() => {
+    console.log("selectedCourse changed:", selectedCourse?.name);
+    
     if (selectedCourse && selectedCourse.tees && selectedCourse.tees.length > 0) {
       console.log("Selected course changed, setting default tee:", selectedCourse.tees[0].name);
+      console.log("Available tees:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
+      
       const defaultTeeId = selectedCourse.tees[0].id;
+      console.log("Setting default tee ID:", defaultTeeId);
       setSelectedTeeId(defaultTeeId);
       
       // Ensure UI is updated with the correct tee
       setTimeout(() => {
-        console.log("Delayed tee ID check - setting tee ID:", defaultTeeId);
+        console.log("Delayed tee ID check - selected tee ID is now:", defaultTeeId);
       }, 100);
     } else {
+      if (selectedCourse) {
+        console.warn("Selected course has no tees:", selectedCourse);
+      }
       setSelectedTeeId(null);
     }
   }, [selectedCourse]);
@@ -51,8 +59,20 @@ export const useAddRoundState = () => {
         const tee = selectedCourse.tees.find(t => t.id === selectedTeeId);
         console.log("Selected tee details:", tee ? { name: tee.name, id: tee.id } : "Not found");
       }
+    } else {
+      console.log("Selected tee ID is null");
     }
   }, [selectedTeeId, selectedCourse]);
+
+  // Log current step changes
+  useEffect(() => {
+    console.log("Current step changed to:", currentStep);
+  }, [currentStep]);
+
+  // Log scores changes
+  useEffect(() => {
+    console.log("Scores updated, count:", scores.length);
+  }, [scores]);
 
   return {
     currentStep,

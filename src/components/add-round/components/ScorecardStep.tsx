@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -15,7 +16,7 @@ import { CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ScoreCard } from "@/components/ScoreCard";
+import { ScoreCard, ScoreCardProps } from "@/components/ScoreCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SimplifiedCourseDetail, Score, HoleSelection } from "../types";
 
@@ -282,7 +283,8 @@ export function ScorecardStep({
           ) : (
             <div className="h-40 flex items-center justify-center">
               <p className="text-muted-foreground">
-                Select a tee to see the scorecard
+                {isLoading ? "Loading course data..." : 
+                  selectedTeeId ? "No scorecard data available" : "Select a tee to see the scorecard"}
               </p>
             </div>
           )}
