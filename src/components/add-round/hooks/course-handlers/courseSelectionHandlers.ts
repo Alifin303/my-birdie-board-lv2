@@ -1,3 +1,4 @@
+
 import { getCourseDetails, CourseDetail } from "@/services/golfCourseApi";
 import { loadUserAddedCourseDetails } from "../../utils/courseUtils";
 import { convertToSimplifiedCourseDetail } from "../../utils/courseUtils";
@@ -113,7 +114,8 @@ export function createCourseSelectionHandlers({
         
         try {
           const courseIdRaw = course.apiCourseId || course.id;
-          const courseId = typeof courseIdRaw === 'string' ? courseIdRaw : String(courseIdRaw);
+          // Explicitly convert courseId to string to fix TypeScript error
+          const courseId = String(courseIdRaw);
           
           console.log("Fetching API course details for ID:", courseId);
           
