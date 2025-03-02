@@ -1,4 +1,3 @@
-
 import { getCourseDetails, CourseDetail } from "@/services/golfCourseApi";
 import { loadUserAddedCourseDetails } from "../../utils/courseUtils";
 import { convertToSimplifiedCourseDetail } from "../../utils/courseUtils";
@@ -114,7 +113,7 @@ export function createCourseSelectionHandlers({
         
         try {
           const courseIdRaw = course.apiCourseId || course.id;
-          const courseId = typeof courseIdRaw === 'string' ? courseIdRaw : courseIdRaw.toString();
+          const courseId = typeof courseIdRaw === 'string' ? courseIdRaw : String(courseIdRaw);
           
           console.log("Fetching API course details for ID:", courseId);
           
@@ -134,7 +133,7 @@ export function createCourseSelectionHandlers({
             simplifiedCourseDetail.clubName = course.clubName;
           }
           
-          simplifiedCourseDetail.apiCourseId = courseId.toString();
+          simplifiedCourseDetail.apiCourseId = courseId;
           
           console.log("Final course detail after processing:", simplifiedCourseDetail);
           console.log("Course tees:", simplifiedCourseDetail.tees.map(t => ({ id: t.id, name: t.name })));
@@ -152,7 +151,7 @@ export function createCourseSelectionHandlers({
             country: 'United States',
             tees: defaultTees,
             holes: defaultHoles,
-            apiCourseId: course.apiCourseId || course.id.toString()
+            apiCourseId: course.apiCourseId ? String(course.apiCourseId) : String(course.id)
           };
           
           throw error;
@@ -211,7 +210,6 @@ export function createCourseSelectionHandlers({
     }
   };
 
-  // Helper functions for creating default data
   const createDefaultHoles = () => {
     return Array(18).fill(null).map((_, idx) => ({
       number: idx + 1,

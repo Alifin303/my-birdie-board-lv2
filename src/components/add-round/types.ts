@@ -31,7 +31,7 @@ export interface SimplifiedTee {
   originalIndex?: number;
   yards: number;
   holes?: SimplifiedHole[];
-  color?: string; // Make sure color is defined here
+  color?: string;
 }
 
 export interface SimplifiedCourseDetail {
@@ -57,7 +57,24 @@ export interface Score {
   penaltyStrokes?: number;
 }
 
+export interface ScoreSummary {
+  totalStrokes: number;
+  totalPar: number;
+  totalPutts: number;
+  toPar: number;
+  puttsRecorded: boolean;
+  front9Strokes: number;
+  front9Par: number;
+  front9ToPar: number;
+  back9Strokes: number;
+  back9Par: number;
+  back9ToPar: number;
+}
+
 export interface AddRoundModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+// Re-export CourseDetail from golfCourseApi to make it available to importers
+export { CourseDetail };

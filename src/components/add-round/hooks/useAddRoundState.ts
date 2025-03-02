@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   SimplifiedGolfCourse, 
@@ -26,7 +25,6 @@ export const useAddRoundState = () => {
   const [noResults, setNoResults] = useState<boolean>(false);
   const [manualCourseOpen, setManualCourseOpen] = useState<boolean>(false);
 
-  // Reset selectedTeeId whenever selectedCourse changes
   useEffect(() => {
     console.log("selectedCourse changed:", selectedCourse?.name);
     
@@ -38,7 +36,6 @@ export const useAddRoundState = () => {
       console.log("Setting default tee ID:", defaultTeeId);
       setSelectedTeeId(defaultTeeId);
       
-      // Ensure UI is updated with the correct tee
       setTimeout(() => {
         console.log("Delayed tee ID check - selected tee ID is now:", defaultTeeId);
       }, 100);
@@ -50,7 +47,6 @@ export const useAddRoundState = () => {
     }
   }, [selectedCourse]);
 
-  // Log selection changes for debugging
   useEffect(() => {
     if (selectedTeeId) {
       console.log("Selected tee ID state updated:", selectedTeeId);
@@ -64,12 +60,10 @@ export const useAddRoundState = () => {
     }
   }, [selectedTeeId, selectedCourse]);
 
-  // Log current step changes
   useEffect(() => {
     console.log("Current step changed to:", currentStep);
   }, [currentStep]);
 
-  // Log scores changes
   useEffect(() => {
     console.log("Scores updated, count:", scores.length);
   }, [scores]);
