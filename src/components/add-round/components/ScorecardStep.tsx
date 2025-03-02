@@ -1,4 +1,7 @@
 
+// We need to update the ScorecardStep to fix the calendar behavior
+// We'll update just the calendar popover part
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -114,6 +117,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
                 onSelect={handleDateSelect}
                 disabled={(date) => date > today}
                 initialFocus
+                defaultMonth={roundDate || today} // Set defaultMonth to use the current selected date
                 className="z-50"
               />
             </PopoverContent>

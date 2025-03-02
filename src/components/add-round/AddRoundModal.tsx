@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -98,7 +99,8 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     isLoading,
     searchResults,
     toast,
-    queryClient
+    queryClient,
+    onSaveComplete: () => handleCloseModal()  // Add callback to close modal on save
   });
 
   const handleBackToSearch = () => {
@@ -118,6 +120,11 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
 
   const handleCloseModal = () => {
     onOpenChange(false);
+    resetFormState();
+  };
+  
+  // Function to reset all form state to initial values
+  const resetFormState = () => {
     setCurrentStep('search');
     setSearchQuery('');
     setSearchResults([]);
@@ -131,6 +138,13 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setActiveScoreTab("front9");
     setManualCourseOpen(false);
   };
+  
+  // Reset form state when modal is closed
+  React.useEffect(() => {
+    if (!open) {
+      resetFormState();
+    }
+  }, [open]);
   
   const scoreSummary = calculateScoreSummary(scores);
 
