@@ -115,21 +115,25 @@ export function useScoreHandlers({
   const handleTeeChange = (teeId: string) => {
     if (!selectedCourse) return;
     
-    console.log("Selected tee ID:", teeId);
+    console.log("CRITICAL FIX: Selected tee ID:", teeId);
+    console.log("Available tees at tee change:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
     
     const selectedTee = selectedCourse.tees.find(t => t.id === teeId);
-    if (selectedTee && selectedTee.holes) {
-      console.log("Using specific hole data from selected tee:", selectedTee.name);
+    console.log("Selected tee after change:", selectedTee);
+    
+    if (selectedTee) {
+      console.log("Using tee data from selected tee:", selectedTee.name);
       updateScorecardForTee(teeId, 'all');
     } else {
-      console.log("No specific hole data found for selected tee, using course defaults");
+      console.error("No tee found with ID:", teeId);
       updateScorecardForTee(teeId, 'all');
     }
   };
 
   const handleHoleSelectionChange = (selection: HoleSelection) => {
-    if (!selectedCourse) return;
+    if (!selectedCourse || !selectedCourse.tees || selectedCourse.tees.length === 0) return;
     
+    // Use the first tee if none is selected
     const teeId = selectedCourse.tees[0]?.id || 'default-tee';
     updateScorecardForTee(teeId, selection);
     setHoleSelection(selection);

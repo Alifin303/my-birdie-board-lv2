@@ -54,14 +54,21 @@ export function createSaveRoundHandler({
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session found');
       
+      // Get the selected tee information
       const selectedTee = selectedCourse.tees.find(tee => tee.id === selectedTeeId);
-      if (!selectedTee) throw new Error('Selected tee not found');
+      if (!selectedTee) {
+        console.error('BUG: Selected tee not found in course tees array', {
+          selectedTeeId,
+          availableTees: selectedCourse.tees.map(t => ({ id: t.id, name: t.name }))
+        });
+        throw new Error('Selected tee not found');
+      }
       
-      console.log("=================== SAVING ROUND ===================");
-      console.log("Selected tee ID:", selectedTeeId);
-      console.log("Selected tee object:", selectedTee);
-      console.log("Tee name to be saved:", selectedTee.name);
-      console.log("Available tees in course:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
+      console.log("=================== SAVING ROUND WITH TEE ===================");
+      console.log("Selected tee ID to save:", selectedTeeId);
+      console.log("Selected tee object to save:", selectedTee);
+      console.log("Selected tee name to save:", selectedTee.name);
+      console.log("Available tees in course at save time:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
       
       const totalStrokes = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
@@ -131,12 +138,13 @@ export function createSaveRoundHandler({
       console.log("Final selected tee for saving:", selectedTee);
       
       // Prepare the data we're sending to Supabase
+      // CRITICAL FIX: Ensure we're using the selectedTee.name, not a default/hardcoded value
       const roundData = {
         user_id: session.user.id,
         course_id: dbCourseId,
         date: roundDate.toISOString(),
-        tee_name: selectedTee.name, // Using the name from the selectedTee object
-        tee_id: selectedTeeId,     // Using the ID that was selected
+        tee_name: selectedTee.name, // Using name from the selectedTee object
+        tee_id: selectedTeeId,     // Using the teeId that was selected
         gross_score: totalStrokes,
         to_par_gross: toParGross,
         net_score: null,
@@ -145,6 +153,8 @@ export function createSaveRoundHandler({
       };
       
       console.log("Final round data being sent to Supabase:", roundData);
+      console.log("CRITICAL CHECK - tee_name in roundData:", roundData.tee_name);
+      console.log("CRITICAL CHECK - tee_id in roundData:", roundData.tee_id);
         
       const { data, error } = await supabase
         .from('rounds')
@@ -157,6 +167,8 @@ export function createSaveRoundHandler({
       }
       
       console.log("Round saved successfully to Supabase:", data);
+      console.log("Saved round tee_name:", data[0].tee_name);
+      console.log("Saved round tee_id:", data[0].tee_id);
       console.log("=================== END SAVING ROUND ===================");
       
       toast.toast({

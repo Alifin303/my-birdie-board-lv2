@@ -62,7 +62,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   // Get the currently selected tee information based on selectedTeeId
   const selectedTee = selectedCourse.tees.find(tee => tee.id === selectedTeeId);
   
-  // Log immediately when component renders or selectedTeeId changes
+  // Debug logging for tee selection issues
   useEffect(() => {
     console.log("========== SCORECARD STEP TEE SELECTION ==========");
     console.log("selectedTeeId:", selectedTeeId);
@@ -74,7 +74,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
       console.error("No tee found for ID:", selectedTeeId);
     }
     console.log("=================================================");
-  }, [selectedTeeId, selectedCourse.tees]);
+  }, [selectedTeeId, selectedCourse.tees, selectedTee]);
   
   // Helper function to determine tee color
   const getTeeColor = (teeName: string) => {
@@ -442,6 +442,11 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
           onClick={() => {
             console.log("Save button clicked with selectedTeeId:", selectedTeeId);
             console.log("Selected tee at save time:", selectedTee);
+            if (selectedTee) {
+              console.log("Selected tee name at save time:", selectedTee.name);
+            } else {
+              console.error("No selected tee found at save time for ID:", selectedTeeId);
+            }
             handleSaveRound();
           }} 
           disabled={isLoading} 

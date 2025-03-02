@@ -1,3 +1,4 @@
+
 import { getCourseDetails, CourseDetail } from "@/services/golfCourseApi";
 import { loadUserAddedCourseDetails } from "../../utils/courseUtils";
 import { convertToSimplifiedCourseDetail } from "../../utils/courseUtils";
@@ -129,6 +130,7 @@ export function createCourseSelectionHandlers({
           simplifiedCourseDetail.apiCourseId = courseId.toString();
           
           console.log("Final course detail after processing:", simplifiedCourseDetail);
+          console.log("Course tees:", simplifiedCourseDetail.tees.map(t => ({ id: t.id, name: t.name })));
         } catch (error) {
           console.error("Error fetching course details from API:", error);
           const defaultHoles = Array(18).fill(null).map((_, idx) => ({
@@ -178,13 +180,23 @@ export function createCourseSelectionHandlers({
         const defaultTeeId = simplifiedCourseDetail.tees[0].id;
         console.log("Available tees:", simplifiedCourseDetail.tees.map(t => ({ id: t.id, name: t.name })));
         console.log("Setting default tee ID:", defaultTeeId);
+        
+        // CRITICAL FIX: Ensure the selectedTeeId is set before updating the scorecard
         setSelectedTeeId(defaultTeeId);
         
+        console.log("Default tee set to:", {
+          id: defaultTeeId,
+          name: simplifiedCourseDetail.tees[0]?.name
+        });
+        
+        // Use a timeout to ensure state has updated
         setTimeout(() => {
           console.log("Updating scorecard with tee ID:", defaultTeeId);
           updateScorecardForTee(defaultTeeId, 'all');
           setHoleSelection('all');
         }, 0);
+      } else {
+        console.error("No tees found for course:", simplifiedCourseDetail);
       }
       
       setCurrentStep('scorecard');

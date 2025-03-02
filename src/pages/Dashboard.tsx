@@ -99,6 +99,14 @@ export default function Dashboard() {
       }) || [];
       
       console.log("Processed rounds with parsed course names:", processedRounds);
+      // Log specific round info to debug tee name issues
+      if (processedRounds.length > 0) {
+        console.log("LATEST ROUND TEE INFO:", {
+          id: processedRounds[0].id,
+          tee_name: processedRounds[0].tee_name,
+          tee_id: processedRounds[0].tee_id
+        });
+      }
       
       return processedRounds as Round[];
     }
