@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -29,9 +29,11 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Initialize editable state when round data changes or dialog opens
-  useState(() => {
+  // Reset state when round changes or dialog opens/closes
+  useEffect(() => {
     if (round && isOpen) {
+      console.log("Loading round data for scorecard:", round.id, "tee:", round.tee_name);
+      
       // Parse hole scores from JSON
       let parsedScores = [];
       try {
@@ -45,8 +47,23 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       
       setScores(parsedScores);
       setRoundDate(round.date ? new Date(round.date) : undefined);
+      setIsEditing(false); // Reset edit mode when opening a new round
+      
+      console.log("Loaded scorecard data:", {
+        roundId: round.id,
+        tee: round.tee_name,
+        date: roundDate ? format(roundDate, 'PP') : 'unknown',
+        scoresCount: parsedScores.length
+      });
     }
-  });
+    
+    // Clear state when dialog closes
+    if (!isOpen) {
+      setScores([]);
+      setRoundDate(undefined);
+      setIsEditing(false);
+    }
+  }, [round, isOpen]);
 
   if (!round) return null;
 
@@ -346,7 +363,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
                   ) : (
                     <>
                       <p className="text-sm text-muted-foreground mt-1">Date: {formattedDate}</p>
-                      <p className="text-sm text-muted-foreground">Tees: {round.tee_name}</p>
+                      <p className="text-sm text-muted-foreground">Tees: {round.tee_name || 'Standard'}</p>
                     </>
                   )}
                 </div>

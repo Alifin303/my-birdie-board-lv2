@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown, Trash, Eye, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,15 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
   const [scorecardOpen, setScorecardOpen] = useState(false);
   const [sortField, setSortField] = useState<'date' | 'gross_score' | 'to_par_gross'>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  
+  // Reset state when course changes
+  useEffect(() => {
+    if (selectedCourseId) {
+      console.log("Course ID changed, resetting round history state");
+      setViewingRound(null);
+      setScorecardOpen(false);
+    }
+  }, [selectedCourseId]);
   
   if (!userRounds || !selectedCourseId) return null;
   
@@ -111,8 +120,20 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
   };
   
   const handleViewScorecard = (round: Round) => {
-    setViewingRound(round);
-    setScorecardOpen(true);
+    console.log("Viewing scorecard for round:", round.id, "tee:", round.tee_name);
+    
+    // Close the current scorecard if open and reset state
+    if (scorecardOpen) {
+      setScorecardOpen(false);
+      // Small delay to ensure component unmounts before setting new round
+      setTimeout(() => {
+        setViewingRound(round);
+        setScorecardOpen(true);
+      }, 50);
+    } else {
+      setViewingRound(round);
+      setScorecardOpen(true);
+    }
   };
 
   const handleSort = (field: 'date' | 'gross_score' | 'to_par_gross') => {
@@ -336,7 +357,13 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
         <RoundScorecard 
           round={viewingRound}
           isOpen={scorecardOpen}
-          onOpenChange={setScorecardOpen}
+          onOpenChange={(open) => {
+            setScorecardOpen(open);
+            if (!open) {
+              // Reset viewingRound when closing the dialog
+              setTimeout(() => setViewingRound(null), 100);
+            }
+          }}
         />
       )}
     </div>

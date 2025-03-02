@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { 
   SimplifiedGolfCourse, 
   SimplifiedCourseDetail,
@@ -24,6 +25,28 @@ export const useAddRoundState = () => {
   const [originalCourseDetail, setOriginalCourseDetail] = useState<CourseDetail | null>(null);
   const [noResults, setNoResults] = useState<boolean>(false);
   const [manualCourseOpen, setManualCourseOpen] = useState<boolean>(false);
+
+  // Reset selectedTeeId whenever selectedCourse changes
+  useEffect(() => {
+    if (selectedCourse && selectedCourse.tees && selectedCourse.tees.length > 0) {
+      console.log("Selected course changed, setting default tee:", selectedCourse.tees[0].name);
+      setSelectedTeeId(selectedCourse.tees[0].id);
+    } else {
+      setSelectedTeeId(null);
+    }
+  }, [selectedCourse]);
+
+  // Log selection changes for debugging
+  useEffect(() => {
+    if (selectedTeeId) {
+      console.log("Selected tee ID state updated:", selectedTeeId);
+      
+      if (selectedCourse && selectedCourse.tees) {
+        const tee = selectedCourse.tees.find(t => t.id === selectedTeeId);
+        console.log("Selected tee details:", tee ? { name: tee.name, id: tee.id } : "Not found");
+      }
+    }
+  }, [selectedTeeId, selectedCourse]);
 
   return {
     currentStep,

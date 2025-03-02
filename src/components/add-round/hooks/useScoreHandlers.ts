@@ -134,11 +134,14 @@ export function useScoreHandlers({
     
     if (selectedTee) {
       console.log("Using tee data from selected tee:", selectedTee.name);
-      updateScorecardForTee(teeId, 'all');
+      console.log("TEE SELECTION UI UPDATE - Using tee name:", selectedTee.name, "with ID:", selectedTee.id);
     } else {
       console.error("No tee found with ID:", teeId);
-      updateScorecardForTee(teeId, 'all');
     }
+    
+    // Always update the scorecard regardless of finding the tee
+    // This ensures that even if there's an issue, we display something
+    updateScorecardForTee(teeId, 'all');
   };
 
   const handleHoleSelectionChange = (selection: HoleSelection) => {
