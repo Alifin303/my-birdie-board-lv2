@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -16,7 +15,7 @@ import { CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ScoreCard, ScoreCardProps } from "@/components/ScoreCard";
+import { ScoreCard } from "@/components/ScoreCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SimplifiedCourseDetail, Score, HoleSelection } from "../types";
 
@@ -76,7 +75,6 @@ export function ScorecardStep({
   
   const selectedTee = selectedCourse?.tees.find(t => t.id === selectedTeeId);
 
-  // Debug log when selectedTeeId changes
   useEffect(() => {
     console.log("ScorecardStep - selectedTeeId changed to:", selectedTeeId);
     console.log("Selected tee:", selectedTee);
@@ -101,7 +99,6 @@ export function ScorecardStep({
 
       <div className="space-y-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {/* Date selector */}
           <FormField
             control={{} as any}
             name="date"
@@ -143,7 +140,6 @@ export function ScorecardStep({
             )}
           />
 
-          {/* Tee selector */}
           <FormField
             control={{} as any}
             name="tee"
@@ -196,7 +192,6 @@ export function ScorecardStep({
           />
         </div>
 
-        {/* Hole selection */}
         <FormField
           control={{} as any}
           name="holeSelection"
@@ -241,7 +236,6 @@ export function ScorecardStep({
           )}
         />
 
-        {/* Scorecard */}
         <Card className="p-4">
           {selectedTee && scores.length > 0 ? (
             <>
@@ -260,6 +254,7 @@ export function ScorecardStep({
                       holes={scores.slice(0, 9)}
                       onChange={handleScoreChange}
                       startIndex={0}
+                      courseName={undefined}
                     />
                   </TabsContent>
                   <TabsContent value="back9" className="mt-4">
@@ -267,6 +262,7 @@ export function ScorecardStep({
                       holes={scores.slice(9, 18)}
                       onChange={handleScoreChange}
                       startIndex={9}
+                      courseName={undefined}
                     />
                   </TabsContent>
                 </Tabs>
@@ -279,6 +275,7 @@ export function ScorecardStep({
                   }
                   onChange={handleScoreChange}
                   startIndex={holeSelection === "front9" ? 0 : 9}
+                  courseName={undefined}
                 />
               )}
             </>
@@ -317,7 +314,6 @@ export function ScorecardStep({
   );
 }
 
-// Helper function to get color for tee names that don't have a color defined
 function getTeeColor(teeName: string): string {
   const colorMap: Record<string, string> = {
     'White': '#FFFFFF',
@@ -333,7 +329,6 @@ function getTeeColor(teeName: string): string {
     'Purple': '#800080'
   };
   
-  // Case-insensitive lookup
   const teeNameLower = teeName.toLowerCase();
   for (const [name, color] of Object.entries(colorMap)) {
     if (name.toLowerCase() === teeNameLower) {
@@ -341,6 +336,5 @@ function getTeeColor(teeName: string): string {
     }
   }
   
-  // Default color if not found
   return '#CCCCCC';
 }
