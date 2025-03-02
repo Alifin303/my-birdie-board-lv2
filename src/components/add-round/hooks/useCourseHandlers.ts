@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { searchCourses, getCourseDetails } from '@/services/golfCourseApi';
@@ -70,10 +69,10 @@ export function useCourseHandlers({
     setNoResults(false);
     
     try {
-      const results = await searchCourses(searchQuery);
-      // Fix: Ensure we're setting the results directly as an array of SimplifiedGolfCourse objects
-      setSearchResults(results);
-      setNoResults(results.length === 0);
+      const searchResponse = await searchCourses(searchQuery);
+      const courseResults = searchResponse.results || [];
+      setSearchResults(courseResults);
+      setNoResults(courseResults.length === 0);
     } catch (error) {
       console.error("Error searching courses:", error);
       setSearchError("Failed to search courses. Please try again.");
@@ -91,7 +90,6 @@ export function useCourseHandlers({
       const courseDetails = await getCourseDetails(course.id);
       setOriginalCourseDetail(courseDetails);
       
-      // Transform the course details to the expected format
       const formattedCourse = transformCourseDetails(course.id, courseDetails, course);
       setSelectedCourse(formattedCourse);
       
@@ -145,10 +143,8 @@ export function useCourseHandlers({
       datePlayed: Date;
       scores: { hole: number; par: number; strokes?: number; putts?: number }[];
     }) => {
-      // This is a placeholder for the addRound function that would be imported
       console.log("Adding round:", roundData);
       
-      // Simulate API call success
       return Promise.resolve({ success: true });
     },
     onSuccess: () => {
@@ -231,30 +227,23 @@ export function useCourseHandlers({
   };
 }
 
-// Helper function to transform the course details from the API format to our app format
 function transformCourseDetails(
   courseId: number,
   apiDetails: CourseDetail,
   basicCourseInfo: SimplifiedGolfCourse
 ): SimplifiedCourseDetail {
-  // Generate a simplified course structure from API details
   const tees: SimplifiedCourseDetail['tees'] = [];
   const holes: SimplifiedCourseDetail['holes'] = [];
   
-  // Extract and convert tees and holes from API format
-  // For now, just create a basic structure
-  
-  // Add a default hole structure if none is available
   if (holes.length === 0) {
     for (let i = 1; i <= 18; i++) {
       holes.push({
         number: i,
-        par: 4, // Default par
+        par: 4,
       });
     }
   }
   
-  // Add a default tee if none is available
   if (tees.length === 0) {
     tees.push({
       id: "default-tee",
@@ -281,4 +270,3 @@ function transformCourseDetails(
     apiCourseId: basicCourseInfo.apiCourseId
   };
 }
-
