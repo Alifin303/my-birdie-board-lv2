@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { UseCourseHandlersProps } from "./types";
 
@@ -17,8 +18,9 @@ export function createSaveRoundHandler({
   'scores' | 
   'setIsLoading' | 
   'toast' | 
-  'queryClient'
-> & { lastTeeChangeTimestamp?: number }) {
+  'queryClient' |
+  'lastTeeChangeTimestamp'
+>) {
   
   const handleSaveRound = async (): Promise<boolean> => {
     if (!selectedCourse) {
@@ -60,14 +62,14 @@ export function createSaveRoundHandler({
         console.error('BUG: Selected tee not found in course tees array', {
           selectedTeeId,
           availableTees: selectedCourse.tees.map(t => ({ id: t.id, name: t.name })),
-          lastTeeChangeTime: lastTeeChangeTimestamp ? new Date(lastTeeChangeTimestamp).toISOString() : "Not available"
+          lastTeeChangeTime: new Date(lastTeeChangeTimestamp).toISOString()
         });
         throw new Error('Selected tee not found');
       }
       
       console.log("=================== SAVING ROUND WITH TEE ===================");
       console.log("Selected tee ID to save:", selectedTeeId);
-      console.log("Last tee change timestamp:", lastTeeChangeTimestamp ? new Date(lastTeeChangeTimestamp).toISOString() : "Not available");
+      console.log("Last tee change timestamp:", new Date(lastTeeChangeTimestamp).toISOString());
       console.log("Selected tee object to save:", selectedTee);
       console.log("Selected tee name to save:", selectedTee.name);
       console.log("Available tees in course at save time:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
@@ -144,12 +146,13 @@ export function createSaveRoundHandler({
       console.log("Using course_id for round insertion:", dbCourseId);
       console.log("Final selected tee for saving:", selectedTee);
       
+      // Prepare the data we're sending to Supabase
       const roundData = {
         user_id: session.user.id,
         course_id: dbCourseId,
         date: roundDate.toISOString(),
-        tee_name: selectedTee.name,
-        tee_id: selectedTeeId,
+        tee_name: selectedTee.name, // Using name from the selectedTee object
+        tee_id: selectedTeeId,     // Using the teeId that was selected
         gross_score: totalStrokes,
         to_par_gross: toParGross,
         net_score: null,

@@ -31,7 +31,6 @@ export interface UseCourseHandlersProps {
   searchResults: SimplifiedGolfCourse[];
   toast: ReturnType<typeof useToast>;
   queryClient: ReturnType<typeof useQueryClient>;
-  lastTeeChangeTimestamp?: number; // Add this property to fix the error
 }
 
 export interface CourseHandlers {
