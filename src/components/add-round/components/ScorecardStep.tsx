@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,10 +61,8 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
 }) => {
   if (!selectedCourse) return null;
 
-  // Get the currently selected tee information based on selectedTeeId
   const selectedTee = selectedCourse.tees.find(tee => tee.id === selectedTeeId);
   
-  // Debug logging for tee selection issues
   useEffect(() => {
     console.log("========== SCORECARD STEP TEE SELECTION ==========");
     console.log("selectedTeeId:", selectedTeeId);
@@ -82,7 +79,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
     console.log("=================================================");
   }, [selectedTeeId, selectedCourse.tees, selectedTee, lastTeeChangeTimestamp]);
   
-  // Helper function to determine tee color
   const getTeeColor = (teeName: string) => {
     const lowerName = teeName.toLowerCase();
     if (lowerName.includes('black')) return '#000';
@@ -96,7 +92,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
     return '#777';
   };
 
-  // Force re-render when tee selection changes
   const teeKey = `tee-${selectedTeeId}-${lastTeeChangeTimestamp || 0}`;
 
   return (
@@ -131,7 +126,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </Alert>
       )}
       
-      {/* Top row: Controls in a horizontal layout */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div className="space-y-1">
           <label className="text-sm font-medium">Date Played</label>
@@ -248,7 +242,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </div>
       </div>
       
-      {/* Middle section: Front 9 holes */}
       <div className="mb-4">
         <h3 className="text-sm font-medium mb-2">
           Front Nine 
@@ -312,7 +305,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </div>
       </div>
       
-      {/* Below Middle: Back 9 holes */}
       <div className="mb-4">
         <h3 className="text-sm font-medium mb-2">
           Back Nine
@@ -379,7 +371,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </div>
       </div>
       
-      {/* Bottom section: Round stats and summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 items-start">
         <Card className="p-3">
           <h3 className="text-sm font-medium mb-2">Round Summary</h3>
@@ -456,7 +447,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </Card>
       </div>
       
-      {/* Button row */}
       <div className="flex justify-between space-x-4 mt-6">
         <Button variant="outline" onClick={handleCloseModal} className="flex-1">
           Cancel

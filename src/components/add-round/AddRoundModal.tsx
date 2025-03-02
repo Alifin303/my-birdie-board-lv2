@@ -1,23 +1,44 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { 
-  Score, 
-  HoleSelection, 
-  SimplifiedGolfCourse, 
-  SimplifiedCourseDetail, 
-  AddRoundModalProps 
-} from "./types";
-import { ManualCourseForm } from "@/components/ManualCourseForm";
 import { SearchStep } from "./components/SearchStep";
 import { ScorecardStep } from "./components/ScorecardStep";
+import { ManualCourseForm } from "../ManualCourseForm";
 import { useAddRoundState } from "./hooks/useAddRoundState";
 import { useScoreHandlers } from "./hooks/useScoreHandlers";
 import { useCourseHandlers } from "./hooks/useCourseHandlers";
 import { calculateScoreSummary } from "./utils/scoreUtils";
 
-export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
+interface AddRoundModalProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+export const AddRoundModal: React.FC<AddRoundModalProps> = ({ 
+  open, 
+  onClose 
+}) => {
+  // Today's date, used to limit the date picker
+  const today = new Date();
+  
+  const [addRoundDialogOpen, setAddRoundDialogOpen] = useState(open);
+  
+  // Ref to store if the dialog just closed, used to prevent state updates after unmount
+  const justClosedRef = useRef(false);
+  
+  useEffect(() => {
+    // If the open prop changes, update the local state
+    setAddRoundDialogOpen(open);
+    
+    // Reset the justClosed ref when dialog is opened
+    if (open) {
+      justClosedRef.current = false;
+    }
+  }, [open]);
+  
+  // Get state from our custom hook
   const {
     currentStep,
     setCurrentStep,
@@ -56,32 +77,11 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   
   const toast = useToast();
   const queryClient = useQueryClient();
-  const manualCourseFormRef = useRef<any>(null);
-  const today = new Date();
   
-  // Reset form when modal opens or closes
-  useEffect(() => {
-    if (!open) {
-      // Reset state when modal is closed
-      resetForm();
-    }
-  }, [open]);
+  // Score summary calculation
+  const scoreSummary = calculateScoreSummary(scores);
   
-  const resetForm = () => {
-    setCurrentStep('search');
-    setSearchQuery('');
-    setSearchResults([]);
-    setSelectedCourse(null);
-    setSelectedTeeId(null);
-    setScores([]);
-    setSearchError(null);
-    setDataLoadingError(null);
-    setRoundDate(new Date());
-    setHoleSelection('all');
-    setActiveScoreTab("front9");
-    setManualCourseOpen(false);
-  };
-  
+  // Score-related handlers
   const { 
     handleScoreChange,
     handleHoleSelectionChange,
@@ -97,7 +97,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   });
   
   const { 
-    handleSearch, 
+    handleSearch,
     handleCourseSelect,
     handleOpenManualCourseForm,
     handleCourseCreated,
@@ -132,47 +132,65 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setSelectedCourse(null);
     setSelectedTeeId(null);
     setScores([]);
-    setSearchQuery('');
-    setHoleSelection('all');
-    setActiveScoreTab("front9");
   };
-
+  
   const handleDateSelect = (date: Date | undefined) => {
     setRoundDate(date);
     setCalendarOpen(false);
   };
-
-  const handleCloseModal = () => {
-    onOpenChange(false);
+  
+  const resetForm = () => {
+    setSearchQuery('');
+    setSearchResults([]);
+    setSelectedCourse(null);
+    setSelectedTeeId(null);
+    setScores([]);
+    setCurrentStep('search');
+    setHoleSelection('all');
+    setActiveScoreTab('front9');
+    setRoundDate(new Date());
+  };
+  
+  const handleDialogClose = () => {
+    justClosedRef.current = true;
+    setAddRoundDialogOpen(false);
     resetForm();
+    onClose();
   };
   
   const handleSaveRoundAndClose = async () => {
     const success = await handleSaveRound();
     if (success) {
-      handleCloseModal();
+      handleDialogClose();
     }
   };
   
-  const scoreSummary = calculateScoreSummary(scores);
-
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[1000px] p-6 max-h-[90vh] overflow-y-auto">
+      <Dialog open={addRoundDialogOpen} onOpenChange={(open) => {
+        if (!open) handleDialogClose();
+      }}>
+        <DialogContent className="max-w-4xl h-[90vh] flex flex-col max-h-[90vh]">
+          {manualCourseOpen && (
+            <ManualCourseForm 
+              isOpen={manualCourseOpen}
+              onClose={() => setManualCourseOpen(false)}
+              onCourseCreated={handleCourseCreated}
+            />
+          )}
+          
           {currentStep === 'search' ? (
             <SearchStep 
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
               handleSearch={handleSearch}
               handleCourseSelect={handleCourseSelect}
               handleOpenManualCourseForm={handleOpenManualCourseForm}
-              manualCourseFormRef={manualCourseFormRef}
-              searchResults={searchResults}
+              handleCloseModal={handleDialogClose}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
               isLoading={isLoading}
+              searchResults={searchResults}
               searchError={searchError}
               noResults={noResults}
-              setManualCourseOpen={setManualCourseOpen}
             />
           ) : (
             <ScorecardStep 
@@ -185,7 +203,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
               handleScoreChange={handleScoreChange}
               handleBackToSearch={handleBackToSearch}
               handleSaveRound={handleSaveRoundAndClose}
-              handleCloseModal={handleCloseModal}
+              handleCloseModal={handleDialogClose}
               scores={scores}
               scoreSummary={scoreSummary}
               holeSelection={holeSelection}
@@ -199,12 +217,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
           )}
         </DialogContent>
       </Dialog>
-      
-      <ManualCourseForm
-        open={manualCourseOpen}
-        onOpenChange={setManualCourseOpen}
-        onCourseCreated={handleCourseCreated}
-      />
     </>
   );
-}
+};

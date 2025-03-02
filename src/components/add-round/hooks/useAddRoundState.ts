@@ -25,7 +25,7 @@ export const useAddRoundState = () => {
   const [originalCourseDetail, setOriginalCourseDetail] = useState<CourseDetail | null>(null);
   const [noResults, setNoResults] = useState<boolean>(false);
   const [manualCourseOpen, setManualCourseOpen] = useState<boolean>(false);
-  const [lastTeeChangeTimestamp, setLastTeeChangeTimestamp] = useState<number>(0);
+  const [lastTeeChangeTimestamp, setLastTeeChangeTimestamp] = useState<number>(Date.now());
 
   // Reset selectedTeeId whenever selectedCourse changes
   useEffect(() => {
