@@ -160,16 +160,39 @@ export function createCourseSelectionHandlers({
           const teeId = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
           console.log("Generated new tee ID:", teeId);
           
-          const defaultTee = {
-            id: teeId,
-            name: 'White',
-            rating: 72,
-            slope: 113,
-            par: 72,
-            gender: 'male' as const,
-            originalIndex: 0,
-            holes: defaultHoles
-          };
+          // Create multiple tee options for user-added courses as a better default
+          const defaultTees = [
+            {
+              id: `tee-white-${Date.now()}`,
+              name: 'White',
+              rating: 72,
+              slope: 113,
+              par: 72,
+              gender: 'male' as const,
+              originalIndex: 0,
+              holes: defaultHoles.map(hole => ({...hole}))
+            },
+            {
+              id: `tee-blue-${Date.now()}`,
+              name: 'Blue',
+              rating: 74,
+              slope: 115,
+              par: 72,
+              gender: 'male' as const,
+              originalIndex: 1,
+              holes: defaultHoles.map(hole => ({...hole}))
+            },
+            {
+              id: `tee-red-${Date.now()}`,
+              name: 'Red',
+              rating: 70,
+              slope: 110,
+              par: 72, 
+              gender: 'female' as const,
+              originalIndex: 2,
+              holes: defaultHoles.map(hole => ({...hole}))
+            }
+          ];
           
           simplifiedCourseDetail = {
             id: course.id,
@@ -177,7 +200,7 @@ export function createCourseSelectionHandlers({
             clubName: course.clubName,
             city: course.city,
             state: course.state,
-            tees: [defaultTee],
+            tees: defaultTees,
             holes: defaultHoles,
             isUserAdded: true
           };
@@ -187,7 +210,7 @@ export function createCourseSelectionHandlers({
               `course_details_${course.id}`, 
               JSON.stringify(simplifiedCourseDetail)
             );
-            console.log("Saved default course details to localStorage");
+            console.log("Saved default course details to localStorage with multiple tees");
           } catch (e) {
             console.error("Error saving to localStorage:", e);
           }
@@ -328,7 +351,7 @@ export function createCourseSelectionHandlers({
           console.log("Selected course after update:", simplifiedCourseDetail);
           console.log("Selected tee ID after update:", defaultTeeId);
           console.log("Selected tee name:", simplifiedCourseDetail.tees[0]?.name);
-        }, 50);
+        }, 100); // Increase delay to 100ms to ensure state updates are processed
       } else {
         console.error("No tees found for course:", simplifiedCourseDetail);
         

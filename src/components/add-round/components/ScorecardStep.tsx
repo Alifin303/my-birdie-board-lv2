@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,8 +70,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
     console.log("selectedTee object:", selectedTee);
     if (selectedTee) {
       console.log("Selected tee name:", selectedTee.name);
-      console.log("Rendering dropdown with selected tee:", selectedTeeId);
-      console.log("Dropdown should now show:", selectedTeeId, selectedTee.name);
     } else {
       console.error("No tee found for ID:", selectedTeeId);
     }
@@ -160,7 +157,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         <div className="space-y-1">
           <label className="text-sm font-medium">Tee Played</label>
           <Select 
-            value={selectedTeeId || undefined} 
+            value={selectedTeeId || ""} 
             onValueChange={(value) => {
               console.log("Tee selection changed to:", value);
               console.log("Selected tee before change:", selectedTee?.name);
