@@ -24,8 +24,10 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
   // Initialize editable state when round data changes or dialog opens
   useEffect(() => {
     if (round && isOpen) {
-      console.log("Loading round data in RoundScorecard:", round);
-      console.log("Round tee_name:", round.tee_name, "tee_id:", round.tee_id);
+      // Add debugging logs to help diagnose the issue
+      console.log("Opening scorecard for round:", round.id);
+      console.log("Round tee_name value:", round.tee_name);
+      console.log("Round tee_id value:", round.tee_id);
       
       let parsedScores: HoleScore[] = [];
       try {
@@ -79,6 +81,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
       const toPar = totalStrokes - totalPar;
       
+      // Make sure we persist the original tee name and id when saving
       console.log("Updating round with tee name:", round.tee_name);
       console.log("Updating round with tee ID:", round.tee_id);
       
@@ -89,8 +92,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
           gross_score: totalStrokes,
           to_par_gross: toPar,
           hole_scores: JSON.stringify(scores),
-          tee_name: round.tee_name,
-          tee_id: round.tee_id
+          tee_name: round.tee_name,  // Preserve the original tee name
+          tee_id: round.tee_id       // Preserve the original tee id
         })
         .eq('id', round.id);
         
