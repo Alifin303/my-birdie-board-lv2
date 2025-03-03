@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,12 +23,9 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
   // Initialize editable state when round data changes or dialog opens
   useEffect(() => {
     if (round && isOpen) {
-      // Add detailed debugging logs
-      console.log("================ ROUND SCORECARD OPENING ================");
       console.log("Opening scorecard for round:", round.id);
-      console.log("Round full data:", round);
-      console.log("Round tee_name value:", round.tee_name);
-      console.log("Round tee_id value:", round.tee_id);
+      console.log("Round tee name:", round.tee_name);
+      console.log("Round tee name type:", typeof round.tee_name);
       
       let parsedScores: HoleScore[] = [];
       try {
@@ -83,10 +79,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
       const toPar = totalStrokes - totalPar;
       
-      console.log("================ SAVING ROUND CHANGES ================");
-      console.log("Saving round:", round.id);
-      console.log("Using tee_name:", round.tee_name);
-      console.log("Using tee_id:", round.tee_id);
+      console.log("Saving round with original tee_name:", round.tee_name);
       
       const { error } = await supabase
         .from('rounds')

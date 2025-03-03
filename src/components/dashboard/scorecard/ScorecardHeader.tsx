@@ -22,12 +22,9 @@ export const ScorecardHeader = ({
     ? format(roundDate, 'MMMM d, yyyy')
     : format(new Date(round.date), 'MMMM d, yyyy');
     
-  // Directly use the exact tee_name from the round data
-  const teeName = round.tee_name || "Standard";
+  // Directly use the tee_name without any modification or default value
+  console.log("ScorecardHeader - Rendering with exact tee_name:", round.tee_name);
   
-  console.log("ScorecardHeader - Displaying round with tee_name:", teeName);
-  console.log("ScorecardHeader - Round full data:", round);
-
   return (
     <div className="flex justify-between items-center mb-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
@@ -69,7 +66,7 @@ export const ScorecardHeader = ({
           ) : (
             <>
               <p className="text-sm text-muted-foreground mt-1">Date: {formattedDate}</p>
-              <p className="text-sm text-muted-foreground">Tees: {teeName}</p>
+              <p className="text-sm text-muted-foreground">Tees: {round.tee_name || "Standard"}</p>
             </>
           )}
         </div>

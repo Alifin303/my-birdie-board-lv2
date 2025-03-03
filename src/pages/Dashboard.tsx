@@ -81,11 +81,10 @@ export default function Dashboard() {
       }
       
       console.log("============= ROUNDS FETCHED FROM SUPABASE =============");
-      console.log("Raw rounds data:", data);
-      console.log("Tee names in rounds:", data?.map(round => ({
-        id: round.id,
+      console.log("Raw rounds data with tee_name field:", data?.map(round => ({ 
+        id: round.id, 
         tee_name: round.tee_name,
-        tee_id: round.tee_id
+        date: round.date
       })));
       
       const processedRounds = data?.map(round => {
@@ -95,11 +94,13 @@ export default function Dashboard() {
           parsedNames = parseCourseName(round.courses.name);
         }
         
-        // Ensure we have the tee_name field
-        console.log(`Processing round ${round.id} with tee_name: "${round.tee_name}"`);
+        // Ensure we preserve the exact tee_name as it is in the database
+        const teeName = round.tee_name || "Standard";
+        console.log(`Processing round ${round.id} with tee_name: "${teeName}"`);
         
         return {
           ...round,
+          tee_name: teeName, // Preserve the exact tee name
           courses: round.courses ? {
             ...round.courses,
             clubName: parsedNames.clubName,
@@ -108,19 +109,11 @@ export default function Dashboard() {
         };
       }) || [];
       
-      console.log("Processed rounds with tee names:", processedRounds.map(r => ({
+      console.log("FULLY PROCESSED ROUNDS with tee names:", processedRounds.map(r => ({
         id: r.id,
-        tee_name: r.tee_name
+        tee_name: r.tee_name,
+        date: new Date(r.date).toLocaleDateString()
       })));
-      
-      // Log specific round info for each round
-      processedRounds.forEach(round => {
-        console.log(`ROUND ${round.id} TEE INFO:`, {
-          tee_name: round.tee_name,
-          tee_id: round.tee_id,
-          date: new Date(round.date).toLocaleDateString()
-        });
-      });
       
       // Update user IDs for courses without them
       if (processedRounds.length > 0) {

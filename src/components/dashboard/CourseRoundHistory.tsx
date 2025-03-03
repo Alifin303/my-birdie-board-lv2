@@ -51,13 +51,16 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
     round => round.courses && round.courses.id === selectedCourseId
   );
   
-  // Debug log all rounds and their tee names
-  console.log("Course rounds with tee information:", courseRounds.map(round => ({
-    id: round.id,
-    tee_name: round.tee_name,
-    tee_id: round.tee_id,
-    date: round.date
-  })));
+  // Enhanced logging for round tee information
+  console.log("DEBUGGING TEE DISPLAY: All course rounds with tee information:", 
+    courseRounds.map(round => ({
+      id: round.id,
+      tee_name: round.tee_name,
+      rawTeeName: typeof round.tee_name === 'string' ? round.tee_name : 'undefined',
+      tee_id: round.tee_id,
+      date: new Date(round.date).toLocaleDateString()
+    }))
+  );
   
   if (courseRounds.length === 0) return null;
   
@@ -129,8 +132,8 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
   
   const handleViewScorecard = (round: Round) => {
     console.log("Viewing scorecard for round:", round.id);
-    console.log("Round tee_name:", round.tee_name);
-    console.log("Round tee_id:", round.tee_id);
+    console.log("Round tee_name exact value:", round.tee_name);
+    console.log("Round tee_name type:", typeof round.tee_name);
     
     // Close the current scorecard if open and reset state
     if (scorecardOpen) {
@@ -177,6 +180,12 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
       return sortDirection === 'asc' ? a.to_par_gross - b.to_par_gross : b.to_par_gross - a.to_par_gross;
     }
   });
+
+  // Function to display tee name correctly
+  const formatTeeName = (teeName: string | null | undefined): string => {
+    if (!teeName) return 'Standard Tees';
+    return `${teeName} Tees`;
+  };
   
   return (
     <div className="space-y-4">
@@ -300,7 +309,7 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
                       {new Date(round.date).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3 text-sm">
-                      {round.tee_name ? `${round.tee_name} Tees` : 'Standard Tees'}
+                      {formatTeeName(round.tee_name)}
                     </td>
                     <td className="px-4 py-3 text-sm">
                       {scoreType === 'gross' 
