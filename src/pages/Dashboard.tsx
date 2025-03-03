@@ -81,14 +81,11 @@ export default function Dashboard() {
       }
       
       console.log("============= ROUNDS FETCHED FROM SUPABASE =============");
-      console.log("Raw rounds data:", data);
-      
-      // Log each round's tee_name for debugging
-      if (data) {
-        data.forEach((round, index) => {
-          console.log(`Round ${round.id} tee_name:`, round.tee_name);
-        });
-      }
+      console.log("Raw rounds data with tee_name field:", data?.map(round => ({ 
+        id: round.id, 
+        tee_name: round.tee_name,
+        date: round.date
+      })));
       
       const processedRounds = data?.map(round => {
         let parsedNames = { clubName: "Unknown Club", courseName: "Unknown Course" };
@@ -97,9 +94,13 @@ export default function Dashboard() {
           parsedNames = parseCourseName(round.courses.name);
         }
         
-        // Preserve the tee_name exactly as it comes from the database
+        // Ensure we preserve the exact tee_name as it is in the database
+        const teeName = round.tee_name || "Standard";
+        console.log(`Processing round ${round.id} with tee_name: "${teeName}"`);
+        
         return {
           ...round,
+          tee_name: teeName, // Preserve the exact tee name
           courses: round.courses ? {
             ...round.courses,
             clubName: parsedNames.clubName,
@@ -108,7 +109,7 @@ export default function Dashboard() {
         };
       }) || [];
       
-      console.log("PROCESSED ROUNDS with tee names:", processedRounds.map(r => ({
+      console.log("FULLY PROCESSED ROUNDS with tee names:", processedRounds.map(r => ({
         id: r.id,
         tee_name: r.tee_name,
         date: new Date(r.date).toLocaleDateString()
