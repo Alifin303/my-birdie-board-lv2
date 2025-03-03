@@ -146,14 +146,21 @@ export function convertToSimplifiedCourseDetail(courseDetail: CourseDetail): Sim
     (courseDetail.id || 0); // Default to 0 if undefined
 
   // Fix: Ensure holes is always an array of SimplifiedHole objects
-  const courseHoles: SimplifiedHole[] = courseDetail.holes ? 
-    courseDetail.holes.map(hole => ({
-      number: hole.number || 0, // Ensure number is not optional
-      par: hole.par || 4,
-      yards: hole.yardage || 0,
-      handicap: hole.handicap || 0
-    })) : 
-    defaultHoles;
+  let courseHoles: SimplifiedHole[] = defaultHoles;
+  
+  if (courseDetail.holes) {
+    // Ensure we're dealing with an array before calling map
+    if (Array.isArray(courseDetail.holes)) {
+      courseHoles = courseDetail.holes.map(hole => ({
+        number: hole.number || 0, // Ensure number is not optional
+        par: hole.par || 4,
+        yards: hole.yardage || 0,
+        handicap: hole.handicap || 0
+      }));
+    } else {
+      console.warn("courseDetail.holes is not an array, using default holes");
+    }
+  }
 
   const simplified: SimplifiedCourseDetail = {
     id: courseId,
