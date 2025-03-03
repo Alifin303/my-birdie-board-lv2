@@ -227,25 +227,8 @@ export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDe
     const parsedDetails = JSON.parse(storedDetails);
     console.log("Parsed course details from localStorage:", parsedDetails);
     
-    if (!parsedDetails.tees && parsedDetails.holes) {
-      console.log("Migrating from older format without tees array");
-      
-      const defaultTee = {
-        id: `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        name: 'White',
-        rating: 72,
-        slope: 113,
-        par: 72,
-        gender: 'male',
-        originalIndex: 0,
-        holes: [...parsedDetails.holes]
-      };
-      
-      parsedDetails.tees = [defaultTee];
-    }
-    
-    if (!parsedDetails.tees || parsedDetails.tees.length === 0) {
-      console.log("No tees found in course details, creating default tee");
+    if (!parsedDetails.tees || !Array.isArray(parsedDetails.tees) || parsedDetails.tees.length === 0) {
+      console.log("No tees array found or empty tees array in course details, creating default tee");
       
       const defaultHoles = Array(18).fill(null).map((_, idx) => ({
         number: idx + 1,
@@ -254,8 +237,10 @@ export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDe
         handicap: idx + 1
       }));
       
+      const defaultTeeId = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      
       parsedDetails.tees = [{
-        id: `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        id: defaultTeeId,
         name: 'White',
         rating: 72,
         slope: 113,
