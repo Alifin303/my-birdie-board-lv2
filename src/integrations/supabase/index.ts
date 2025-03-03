@@ -1,8 +1,8 @@
 
-// Export everything from client core
-export { supabase, getSiteUrl, logSupabaseOperation, type DatabaseError } from './core/client';
+// This is a barrel file that re-exports everything from the modularized structure
 
-// Export course query functions
+export { supabase, getSiteUrl, logSupabaseOperation } from './core/client';
+
 export {
   fetchCourseById,
   findCourseByApiId,
@@ -12,18 +12,10 @@ export {
   updateCourseWithUserId
 } from './course/course-queries';
 
-// Export course operation functions
-export {
-  findOrCreateCourseByApiId,
-  ensureCourseExists
-} from './course/course-operations';
+export { findOrCreateCourseByApiId, ensureCourseExists } from './course/course-operations';
 
-// Export course utility functions
-export {
-  parseCourseName,
-  formatCourseName,
-  isUserAddedCourse
-} from './utils/course-utils';
+export { parseCourseName, formatCourseName, isUserAddedCourse } from './utils/course-utils';
 
-// Export handicap calculator
 export { calculateHandicapIndex } from './handicap/handicap-calculator';
+
+export type { DatabaseError } from './types';

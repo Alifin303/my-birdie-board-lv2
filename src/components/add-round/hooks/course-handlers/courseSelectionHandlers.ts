@@ -1,3 +1,4 @@
+
 import { getCourseDetails, CourseDetail } from "@/services/golfCourseApi";
 import { loadUserAddedCourseDetails } from "../../utils/courseUtils";
 import { convertToSimplifiedCourseDetail } from "../../utils/courseUtils";
@@ -52,6 +53,7 @@ export function createCourseSelectionHandlers({
         
         if (cachedCourseDetail) {
           console.log("User-added course details loaded from cache:", cachedCourseDetail);
+          console.log("Cached tees:", cachedCourseDetail.tees?.map(t => ({ id: t.id, name: t.name })));
           
           cachedCourseDetail.id = course.id;
           cachedCourseDetail.name = course.name;

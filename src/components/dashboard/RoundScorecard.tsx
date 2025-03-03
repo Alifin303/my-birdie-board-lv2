@@ -12,6 +12,7 @@ import { CalendarIcon, Edit, Save, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface RoundScorecardProps {
   round: any;
@@ -25,6 +26,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
   const [roundDate, setRoundDate] = useState<Date | undefined>(undefined);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedTee, setSelectedTee] = useState<string | undefined>(undefined);
+  const [availableTees, setAvailableTees] = useState<Array<{id: string, name: string}>>([]);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -32,7 +35,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
   // Reset state when round changes or dialog opens/closes
   useEffect(() => {
     if (round && isOpen) {
-      console.log("Loading round data for scorecard:", round.id, "tee:", round.tee_name);
+      console.log("Loading round data for scorecard:", round.id, "tee:", round.tee_name, "tee_id:", round.tee_id);
       
       // Parse hole scores from JSON
       let parsedScores = [];
@@ -49,9 +52,35 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       setRoundDate(round.date ? new Date(round.date) : undefined);
       setIsEditing(false); // Reset edit mode when opening a new round
       
+      // Set the selected tee based on the round data
+      setSelectedTee(round.tee_name);
+      
+      // Get available tees for this course from localStorage
+      try {
+        const courseDetailsKey = `course_details_${round.course_id}`;
+        const storedDetails = localStorage.getItem(courseDetailsKey);
+        
+        if (storedDetails) {
+          const courseDetails = JSON.parse(storedDetails);
+          
+          if (courseDetails.tees && courseDetails.tees.length > 0) {
+            setAvailableTees(courseDetails.tees.map((tee: any) => ({
+              id: tee.id,
+              name: tee.name
+            })));
+            console.log("Loaded available tees from localStorage:", courseDetails.tees);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading tees from localStorage:", error);
+        // If we can't get tees from localStorage, just use the current tee
+        setAvailableTees([{ id: round.tee_id || 'default', name: round.tee_name || 'Default' }]);
+      }
+      
       console.log("Loaded scorecard data:", {
         roundId: round.id,
         tee: round.tee_name,
+        teeId: round.tee_id,
         date: roundDate ? format(roundDate, 'PP') : 'unknown',
         scoresCount: parsedScores.length
       });
@@ -62,6 +91,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       setScores([]);
       setRoundDate(undefined);
       setIsEditing(false);
+      setSelectedTee(undefined);
+      setAvailableTees([]);
     }
   }, [round, isOpen]);
 
@@ -75,6 +106,11 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
   const handleDateSelect = (date: Date | undefined) => {
     setRoundDate(date);
     setCalendarOpen(false);
+  };
+
+  const handleTeeChange = (teeName: string) => {
+    setSelectedTee(teeName);
+    console.log("Selected tee changed to:", teeName);
   };
 
   const handleScoreChange = (index: number, value: string) => {
@@ -108,6 +144,17 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
       const toPar = totalStrokes - totalPar;
       
+      // Get the tee ID that matches the selected tee name
+      let teeId = round.tee_id;
+      if (selectedTee !== round.tee_name) {
+        const selectedTeeObj = availableTees.find(tee => tee.name === selectedTee);
+        if (selectedTeeObj) {
+          teeId = selectedTeeObj.id;
+        }
+      }
+      
+      console.log("Saving round with tee:", selectedTee, "tee_id:", teeId);
+      
       // Update the round in the database
       const { error } = await supabase
         .from('rounds')
@@ -115,6 +162,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
           date: roundDate?.toISOString() || round.date,
           gross_score: totalStrokes,
           to_par_gross: toPar,
+          tee_name: selectedTee,
+          tee_id: teeId,
           hole_scores: JSON.stringify(scores)
         })
         .eq('id', round.id);
@@ -337,7 +386,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
                 <div>
                   <h3 className="font-semibold">Round Details</h3>
                   {isEditing ? (
-                    <div className="mt-1">
+                    <div className="space-y-2 mt-1">
                       <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                         <PopoverTrigger asChild>
                           <Button
@@ -359,11 +408,29 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
                           />
                         </PopoverContent>
                       </Popover>
+                      
+                      {availableTees.length > 0 && (
+                        <div className="mt-2">
+                          <label className="text-sm text-muted-foreground mb-1 block">Tees:</label>
+                          <Select value={selectedTee} onValueChange={handleTeeChange}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select tee" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {availableTees.map((tee) => (
+                                <SelectItem key={tee.id} value={tee.name}>
+                                  {tee.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <>
                       <p className="text-sm text-muted-foreground mt-1">Date: {formattedDate}</p>
-                      <p className="text-sm text-muted-foreground">Tees: {round.tee_name || 'Standard'}</p>
+                      <p className="text-sm text-muted-foreground">Tees: {selectedTee || round.tee_name || 'Standard'}</p>
                     </>
                   )}
                 </div>
