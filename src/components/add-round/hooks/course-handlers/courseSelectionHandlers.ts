@@ -5,7 +5,6 @@ import { convertToSimplifiedCourseDetail } from "../../utils/courseUtils";
 import { SimplifiedGolfCourse, SimplifiedCourseDetail } from "../../types";
 import { UseCourseHandlersProps } from "./types";
 import { fetchCourseById } from "@/integrations/supabase/course/course-queries";
-import { getCourseMetadataFromLocalStorage } from "@/integrations/supabase/course/course-queries";
 
 export function createCourseSelectionHandlers({
   setIsLoading,

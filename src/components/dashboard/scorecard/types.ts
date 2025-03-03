@@ -34,3 +34,7 @@ export interface ScoreTableProps {
   title: string;
   startIndex?: number;
 }
+
+export interface ScoreTableSummaryProps {
+  scores: HoleScore[];
+}

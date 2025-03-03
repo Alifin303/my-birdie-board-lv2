@@ -31,12 +31,12 @@ export function useCourseHandlers(props: UseCourseHandlersProps): CourseHandlers
 
   const handleCourseCreated = async (courseData: any): Promise<void> => {
     if (typeof courseData === 'object' && courseData !== null) {
+      // Extract courseId from the courseData object
       const courseId = courseData.id || courseData;
-      const courseName = courseData.name || '';
-      return await courseCreatedHandler(courseId, courseName);
+      return await courseCreatedHandler(courseId);
     } else {
       // For backward compatibility, assume courseData is the courseId
-      return await courseCreatedHandler(courseData, '');
+      return await courseCreatedHandler(courseData);
     }
   };
 
