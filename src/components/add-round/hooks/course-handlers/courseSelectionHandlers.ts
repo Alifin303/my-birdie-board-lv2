@@ -80,7 +80,7 @@ export function createCourseSelectionHandlers({
         setOriginalCourseDetail(apiCourseDetail);
         
         // Convert API course details to our simplified format
-        courseDetail = convertToSimplifiedCourseDetail(course, apiCourseDetail);
+        courseDetail = convertToSimplifiedCourseDetail(apiCourseDetail);
       }
       
       if (!courseDetail || !courseDetail.tees || courseDetail.tees.length === 0) {

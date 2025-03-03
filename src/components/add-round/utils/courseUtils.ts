@@ -1,7 +1,7 @@
 import { CourseDetail, TeeBox } from "@/services/golfCourseApi";
 import { SimplifiedCourseDetail, SimplifiedGolfCourse, SimplifiedHole, SimplifiedTee } from "../types";
-import { supabase, formatCourseName, parseCourseName, isUserAddedCourse } from "@/integrations/supabase/client";
-import { getCourseMetadataFromLocalStorage } from "@/integrations/supabase/course/course-queries";
+import { supabase, formatCourseName, parseCourseName, isUserAddedCourse } from "@/integrations/supabase";
+import { getCourseMetadataFromLocalStorage } from "@/integrations/supabase";
 
 export const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): SimplifiedHole[] => {
   console.log("Extracting holes for tee:", teeId, "from course detail:", courseDetail);

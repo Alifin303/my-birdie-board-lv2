@@ -44,7 +44,7 @@ export interface UseCourseHandlersProps {
   manualCourseOpen: boolean;
   setManualCourseOpen: Dispatch<SetStateAction<boolean>>;
   courseAndTeeReady: boolean;
-  updateScorecardForTee: (teeId: string, selection: HoleSelection) => void;
+  updateScorecardForTee: (course: SimplifiedCourseDetail, teeId: string, selection?: HoleSelection) => void;
   courseLoadFailure: boolean;
   setCourseLoadFailure: Dispatch<SetStateAction<boolean>>;
   toast: ToastApi;
