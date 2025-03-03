@@ -80,8 +80,7 @@ export default function Dashboard() {
         throw error;
       }
       
-      console.log("DATABASE RAW ROUNDS:");
-      console.log(JSON.stringify(data?.map(round => ({ 
+      console.log("IMPORTANT - RAW ROUNDS FROM DATABASE:", JSON.stringify(data?.slice(0, 3).map(round => ({ 
         id: round.id, 
         tee_name: round.tee_name,
         tee_name_type: typeof round.tee_name,
@@ -95,31 +94,26 @@ export default function Dashboard() {
           parsedNames = parseCourseName(round.courses.name);
         }
         
-        // EXTREMELY IMPORTANT - Preserve the exact tee_name as it is in the database
-        console.log(`Processing round ${round.id} with raw tee_name: "${round.tee_name}" (${typeof round.tee_name})`);
-        
-        // Make a direct copy of the round object without any manipulation
-        const processedRound = {
+        // CRITICAL - Preserve the exact tee_name as it is in the database
+        // DO NOT MODIFY THE TEE_NAME IN ANY WAY
+        return {
           ...round,
-          tee_name: round.tee_name, // Do not modify this value at all
           courses: round.courses ? {
             ...round.courses,
             clubName: parsedNames.clubName,
             courseName: parsedNames.courseName
           } : undefined
         };
-        
-        console.log(`Processed round ${round.id} tee_name: "${processedRound.tee_name}"`);
-        return processedRound;
       }) || [];
       
-      console.log("PROCESSED ROUNDS (FINAL):");
-      console.log(JSON.stringify(processedRounds.map(r => ({
-        id: r.id,
-        tee_name: r.tee_name,
-        tee_name_type: typeof r.tee_name,
-        tee_id: r.tee_id
-      })), null, 2));
+      console.log("PROCESSED ROUNDS - First few with tee info:", 
+        processedRounds.slice(0, 3).map(r => ({
+          id: r.id,
+          tee_name: r.tee_name,
+          tee_name_type: typeof r.tee_name,
+          tee_id: r.tee_id
+        }))
+      );
       
       // Update user IDs for courses without them
       if (processedRounds.length > 0) {

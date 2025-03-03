@@ -49,8 +49,7 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
     round => round.courses && round.courses.id === selectedCourseId
   );
   
-  // Log all tee information for debugging
-  console.log("All rounds for this course with detailed tee info:", 
+  console.log("All rounds for this course with tee info:", 
     courseRounds.map(round => ({
       id: round.id,
       tee_name: round.tee_name,
@@ -125,8 +124,12 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
   };
   
   const handleViewScorecard = (round: Round) => {
-    console.log("DETAILED ROUND INFO FOR VIEWING:", JSON.stringify(round, null, 2));
-    console.log(`Round ${round.id} tee name: "${round.tee_name}"`);
+    console.log("IMPORTANT - VIEWING ROUND SCORECARD:", {
+      id: round.id,
+      teeName: round.tee_name,
+      teeNameType: typeof round.tee_name,
+      teeId: round.tee_id
+    });
     
     if (scorecardOpen) {
       setScorecardOpen(false);
@@ -158,8 +161,9 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
       : <ChevronDown className="inline-block h-4 w-4 ml-1" />;
   };
 
-  // Simplify this function to directly display the tee name without modification
   const formatTeeName = (teeName: string | null | undefined): string => {
+    console.log(`Formatting tee name: "${teeName}" (${typeof teeName})`);
+    
     if (!teeName || teeName === '') {
       return 'Standard Tees';
     }
@@ -288,7 +292,7 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
             </thead>
             <tbody>
               {sortedRounds.map((round) => {
-                console.log(`Table row for round ${round.id}, tee name: "${round.tee_name}"`);
+                console.log(`Rendering row for round ${round.id}, tee name: "${round.tee_name}"`);
                 
                 return (
                   <tr key={round.id} className="border-b last:border-0">

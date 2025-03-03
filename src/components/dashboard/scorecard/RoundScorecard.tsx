@@ -24,9 +24,12 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
     if (round && isOpen) {
       console.log("============ ROUND SCORECARD OPENED ============");
       console.log("Round ID:", round.id);
-      console.log("Tee name:", round.tee_name);
-      console.log("Tee name type:", typeof round.tee_name);
-      console.log("Full round data:", JSON.stringify(round, null, 2));
+      console.log("CRITICAL - TEE DATA BEING PASSED TO SCORECARD:", {
+        teeName: round.tee_name,
+        teeNameType: typeof round.tee_name,
+        teeId: round.tee_id,
+        round: round
+      });
       
       let parsedScores: HoleScore[] = [];
       try {
@@ -80,9 +83,10 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
       const toPar = totalStrokes - totalPar;
       
-      console.log("Saving round with exact values:");
-      console.log("- tee_name:", round.tee_name);
-      console.log("- tee_id:", round.tee_id);
+      console.log("Saving round with tee data:", {
+        teeName: round.tee_name,
+        teeId: round.tee_id
+      });
       
       const { error } = await supabase
         .from('rounds')
