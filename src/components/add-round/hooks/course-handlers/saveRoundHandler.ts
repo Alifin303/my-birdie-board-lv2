@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { UseCourseHandlersProps } from "./types";
 import { QueryClient } from "@tanstack/react-query";
@@ -144,7 +145,7 @@ export function createSaveRoundHandler({
         course_id: dbCourseId,
         date: roundDate.toISOString(),
         tee_name: selectedTee.name,
-        tee_id: selectedTeeId,
+        tee_id: selectedTeeId,  // Explicitly save the tee ID
         gross_score: totalStrokes,
         to_par_gross: toParGross,
         net_score: null,
@@ -152,31 +153,50 @@ export function createSaveRoundHandler({
         hole_scores: JSON.stringify(scores)
       };
       
-      console.log("Final round data being sent to Supabase:", roundData);
-      console.log("CRITICAL CHECK - tee_name in roundData:", roundData.tee_name);
-      console.log("CRITICAL CHECK - tee_id in roundData:", roundData.tee_id);
-        
-      const { data, error } = await supabase
+      console.log("Saving round data:", roundData);
+      
+      // Insert the round into the database
+      const { data: round, error: roundError } = await supabase
         .from('rounds')
         .insert([roundData])
-        .select();
+        .select('id')
+        .single();
         
-      if (error) {
-        console.error("Error saving round:", error);
-        throw error;
+      if (roundError) {
+        console.error("Error inserting round:", roundError);
+        throw new Error(`Failed to save round: ${roundError.message}`);
       }
       
-      console.log("Round saved successfully to Supabase:", data);
-      console.log("Saved round tee_name:", data[0].tee_name);
-      console.log("Saved round tee_id:", data[0].tee_id);
-      console.log("=================== END SAVING ROUND ===================");
+      if (!round) {
+        throw new Error("Failed to save round, no round ID returned");
+      }
+      
+      console.log("Round saved successfully:", round);
+      
+      // Invalidate queries to refresh data in UI
+      queryClient.invalidateQueries({ queryKey: ['userRounds'] });
+      
+      // Update local storage for user-added courses if needed
+      if (selectedCourse.isUserAdded) {
+        try {
+          const courseDetailsKey = `course_details_${selectedCourse.id}`;
+          const storedDetails = localStorage.getItem(courseDetailsKey);
+          
+          if (storedDetails) {
+            const courseDetails = JSON.parse(storedDetails);
+            localStorage.setItem(courseDetailsKey, JSON.stringify(courseDetails));
+            console.log("Updated user-added course details in localStorage");
+          }
+        } catch (e) {
+          console.error("Error updating localStorage for user-added course:", e);
+        }
+      }
       
       toast.toast({
         title: "Success",
         description: "Round saved successfully!",
       });
       
-      queryClient.invalidateQueries({ queryKey: ['userRounds'] });
       return true;
     } catch (error: any) {
       console.error("Error saving round:", error);

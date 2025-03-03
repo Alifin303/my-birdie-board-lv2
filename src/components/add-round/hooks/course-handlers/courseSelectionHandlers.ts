@@ -68,6 +68,9 @@ export function createCourseSelectionHandlers({
             state: course.state || cachedCourseDetail.state,
             isUserAdded: true
           };
+          
+          // Debug tee data
+          console.log("Final tee data for user-added course:", simplifiedCourseDetail.tees);
         } else if (storedMetadata && storedMetadata.tees && storedMetadata.tees.length > 0) {
           console.log("Using metadata from localStorage:", storedMetadata);
           
@@ -81,6 +84,9 @@ export function createCourseSelectionHandlers({
             holes: storedMetadata.holes || storedMetadata.tees[0].holes,
             isUserAdded: true
           };
+          
+          // Debug tee data
+          console.log("Final tee data from metadata for user-added course:", simplifiedCourseDetail.tees);
         } else {
           console.log("No cached details found for user-added course, creating defaults");
           

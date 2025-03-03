@@ -1,3 +1,4 @@
+
 import { CourseDetail, TeeBox } from "@/services/golfCourseApi";
 import { SimplifiedCourseDetail, SimplifiedGolfCourse, SimplifiedHole, SimplifiedTee } from "../types";
 import { supabase, formatCourseName, parseCourseName, getCourseMetadataFromLocalStorage, isUserAddedCourse } from "@/integrations/supabase/client";
@@ -218,6 +219,8 @@ export const extractTeesFromApiResponse = (courseDetail: CourseDetail): Simplifi
 
 export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDetail | null => {
   try {
+    console.log("Loading user-added course details for ID:", courseId);
+    
     // First try the direct storage key
     const courseDetailsKey = `course_details_${courseId}`;
     const storedDetails = localStorage.getItem(courseDetailsKey);
@@ -255,6 +258,9 @@ export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDe
       console.log("No valid course details found for course ID:", courseId);
       return null;
     }
+    
+    // Debug the tees structure
+    console.log("Tees structure in localStorage:", parsedDetails.tees);
     
     // Ensure the tees array exists and is valid
     if (!parsedDetails.tees || !Array.isArray(parsedDetails.tees) || parsedDetails.tees.length === 0) {
@@ -336,7 +342,7 @@ export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDe
       
       // Ensure the course has holes array at the top level
       if (!parsedDetails.holes || !Array.isArray(parsedDetails.holes) || parsedDetails.holes.length === 0) {
-        if (parsedDetails.tees[0].holes && parsedDetails.tees[0].holes.length > 0) {
+        if (parsedDetails.tees[0]?.holes && parsedDetails.tees[0].holes.length > 0) {
           console.log("Setting course-level holes from first tee");
           parsedDetails.holes = parsedDetails.tees[0].holes;
         }
