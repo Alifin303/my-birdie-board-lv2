@@ -1,7 +1,6 @@
 
 import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
-import { QueryClient } from "@tanstack/react-query";
 import { ensureCourseExists, findOrCreateCourseByApiId } from "@/integrations/supabase";
 
 export function createSaveRoundHandler({
@@ -79,15 +78,29 @@ export function createSaveRoundHandler({
       console.log("Ensuring course exists in database:", selectedCourse);
       let dbCourseId: number;
       
+      // Fix for the Bentley Golf Club issue - normalize the course name
+      const normalizedCourseName = selectedCourse.name.replace(/\s+/g, ' ').trim();
+      const normalizedClubName = selectedCourse.clubName.replace(/\s+/g, ' ').trim();
+      
+      // Check if it's specifically Bentley Golf Club to apply special handling
+      const isBentleyGolfClub = normalizedCourseName.toLowerCase().includes('bentley') || 
+                               normalizedClubName.toLowerCase().includes('bentley');
+      
+      console.log(`Course name: "${normalizedCourseName}", Club name: "${normalizedClubName}"`);
+      console.log(`Is Bentley Golf Club: ${isBentleyGolfClub}`);
+      
       if (selectedCourse.apiCourseId) {
-        // FIX 3: For API courses, use findOrCreateCourseByApiId to avoid duplicates
+        // For API courses, use findOrCreateCourseByApiId to avoid duplicates
         console.log("Ensuring API course exists:", selectedCourse.apiCourseId);
+        
+        // Pass additional normalization flag for Bentley Golf Club
         const courseId = await findOrCreateCourseByApiId(
           selectedCourse.apiCourseId,
-          selectedCourse.name,
-          selectedCourse.clubName,
+          normalizedCourseName, // Use normalized name
+          normalizedClubName,   // Use normalized club name
           selectedCourse.city,
-          selectedCourse.state
+          selectedCourse.state,
+          isBentleyGolfClub     // Pass the flag for special handling
         );
         
         if (!courseId) {
@@ -100,14 +113,15 @@ export function createSaveRoundHandler({
         // For user-added courses, ensure the course exists
         console.log("Ensuring user-added course exists:", selectedCourse.id);
         
-        // FIX 3: Use ensureCourseExists to avoid duplicates
+        // Use ensureCourseExists to avoid duplicates, with special handling for Bentley
         dbCourseId = await ensureCourseExists(
           selectedCourse.id,
           undefined,
-          selectedCourse.name,
-          selectedCourse.clubName,
+          normalizedCourseName, // Use normalized name
+          normalizedClubName,   // Use normalized club name
           selectedCourse.city,
-          selectedCourse.state
+          selectedCourse.state,
+          isBentleyGolfClub     // Pass the flag for special handling
         );
         
         console.log("Using course_id for user-added course:", dbCourseId);
@@ -115,7 +129,7 @@ export function createSaveRoundHandler({
       
       console.log("Final selected tee for saving:", selectedTee);
       
-      // FIX 2: Ensure we save the actual tee information correctly
+      // Ensure we save the actual tee information correctly
       // First, get both tee ID and tee name to ensure they are properly linked
       const teeName = selectedTee.name;
       const teeId = selectedTeeId;
@@ -126,7 +140,7 @@ export function createSaveRoundHandler({
         course_id: dbCourseId,
         date: roundDate.toISOString(),
         tee_name: teeName, // Explicitly use the name from the selected tee
-        tee_id: teeId,  // Explicitly save the tee ID
+        tee_id: teeId,     // Explicitly save the tee ID
         gross_score: totalStrokes,
         to_par_gross: toParGross,
         net_score: null,

@@ -1,4 +1,3 @@
-
 import { getCourseDetails, CourseDetail } from "@/services/golfCourseApi";
 import { loadUserAddedCourseDetails } from "../../utils/courseUtils";
 import { convertToSimplifiedCourseDetail } from "../../utils/courseUtils";
@@ -57,9 +56,9 @@ export function createCourseSelectionHandlers({
         
         if (cachedCourseDetail && cachedCourseDetail.tees && cachedCourseDetail.tees.length > 0) {
           console.log("User-added course details loaded from cache:", cachedCourseDetail);
-          console.log("Cached tees:", cachedCourseDetail.tees?.map(t => ({ id: t.id, name: t.name })));
+          console.log("Cached tees:", cachedCourseDetail.tees?.map(t => ({ id: t.id, name: t.name, par: t.par })));
           
-          // FIX 1: Ensure the par values are proper numbers for each tee
+          // Ensure the par values are proper numbers for each tee
           const teesWithValidPar = cachedCourseDetail.tees.map(tee => {
             if (!tee.par || tee.par <= 0) {
               console.log(`Fixing invalid par value for tee ${tee.name}`);
@@ -70,6 +69,7 @@ export function createCourseSelectionHandlers({
                 // Default to 72 if no holes data
                 tee.par = 72;
               }
+              console.log(`Fixed par value for tee ${tee.name}: ${tee.par}`);
             }
             return tee;
           });
@@ -86,11 +86,17 @@ export function createCourseSelectionHandlers({
           };
           
           // Debug tee data
-          console.log("Final tee data for user-added course:", simplifiedCourseDetail.tees);
+          console.log("Final tee data for user-added course:", simplifiedCourseDetail.tees.map(t => ({
+            id: t.id,
+            name: t.name,
+            par: t.par,
+            slope: t.slope,
+            rating: t.rating
+          })));
         } else if (storedMetadata && storedMetadata.tees && storedMetadata.tees.length > 0) {
           console.log("Using metadata from localStorage:", storedMetadata);
           
-          // FIX 1: Ensure the tees in the metadata have proper par values
+          // Ensure the tees in the metadata have proper par values
           const teesWithValidPar = storedMetadata.tees.map(tee => {
             if (!tee.par || tee.par <= 0) {
               console.log(`Fixing invalid par value for tee ${tee.name}`);
@@ -101,11 +107,13 @@ export function createCourseSelectionHandlers({
                 // Default to 72 if no holes data
                 tee.par = 72;
               }
+              console.log(`Fixed par value for tee ${tee.name}: ${tee.par}`);
             }
             
             // Ensure tee ID is a string and exists
             if (!tee.id) {
               tee.id = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+              console.log(`Created new ID for tee ${tee.name}: ${tee.id}`);
             }
             
             return tee;
@@ -123,7 +131,13 @@ export function createCourseSelectionHandlers({
           };
           
           // Debug tee data
-          console.log("Final tee data from metadata for user-added course:", simplifiedCourseDetail.tees);
+          console.log("Final tee data from metadata for user-added course:", simplifiedCourseDetail.tees.map(t => ({
+            id: t.id,
+            name: t.name,
+            par: t.par,
+            slope: t.slope,
+            rating: t.rating
+          })));
         } else {
           console.log("No cached details found for user-added course, creating defaults");
           
@@ -159,6 +173,8 @@ export function createCourseSelectionHandlers({
             holes: defaultHoles,
             isUserAdded: true
           };
+          
+          console.log("Created default tee for user-added course:", defaultTee);
           
           // Save the default course details to localStorage
           try {
@@ -200,8 +216,56 @@ export function createCourseSelectionHandlers({
           
           simplifiedCourseDetail.apiCourseId = courseId.toString();
           
-          console.log("Final course detail after processing:", simplifiedCourseDetail);
-          console.log("Course tees:", simplifiedCourseDetail.tees.map(t => ({ id: t.id, name: t.name, par: t.par, rating: t.rating, slope: t.slope })));
+          // Fix for tees in API courses - make sure they're properly populated
+          if (!simplifiedCourseDetail.tees || simplifiedCourseDetail.tees.length === 0) {
+            console.error("No tees found for API course, creating default tee");
+            
+            const defaultHoles = Array(18).fill(null).map((_, idx) => ({
+              number: idx + 1,
+              par: 4,
+              yards: 400,
+              handicap: idx + 1
+            }));
+            
+            const defaultTee = {
+              id: `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+              name: 'White',
+              rating: 72,
+              slope: 113,
+              par: 72,
+              gender: 'male' as const,
+              originalIndex: 0,
+              holes: defaultHoles
+            };
+            
+            simplifiedCourseDetail.tees = [defaultTee];
+            simplifiedCourseDetail.holes = defaultHoles;
+          } else {
+            // Validate all tees have valid par values
+            simplifiedCourseDetail.tees = simplifiedCourseDetail.tees.map(tee => {
+              if (!tee.par || tee.par <= 0) {
+                console.log(`Fixing invalid par value for API course tee ${tee.name}`);
+                // Calculate par from holes if available
+                if (tee.holes && tee.holes.length > 0) {
+                  tee.par = tee.holes.reduce((sum, hole) => sum + (hole.par || 4), 0);
+                } else {
+                  // Default to 72 if no holes data
+                  tee.par = 72;
+                }
+                console.log(`Fixed par value for API course tee ${tee.name}: ${tee.par}`);
+              }
+              return tee;
+            });
+          }
+          
+          console.log("Final API course detail after processing:", simplifiedCourseDetail);
+          console.log("API Course tees:", simplifiedCourseDetail.tees.map(t => ({ 
+            id: t.id, 
+            name: t.name, 
+            par: t.par, 
+            rating: t.rating, 
+            slope: t.slope 
+          })));
         } catch (error) {
           console.error("Error fetching course details from API:", error);
           const defaultHoles = Array(18).fill(null).map((_, idx) => ({

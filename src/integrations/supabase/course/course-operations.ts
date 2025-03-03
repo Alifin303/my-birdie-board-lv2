@@ -9,7 +9,8 @@ export async function findOrCreateCourseByApiId(
   courseName: string,
   clubName: string,
   city?: string,
-  state?: string
+  state?: string,
+  isBentleyGolfClub?: boolean // Added flag for special handling of Bentley Golf Club
 ): Promise<number | null> {
   try {
     console.log(`Finding or creating course by API ID: ${apiCourseId}`);
@@ -29,6 +30,40 @@ export async function findOrCreateCourseByApiId(
     const fullName = formatCourseName(clubName, courseName);
     console.log(`Checking for course by name: ${fullName}`);
     
+    // Special handling for Bentley Golf Club
+    if (isBentleyGolfClub) {
+      console.log("Using special handling for Bentley Golf Club");
+      
+      // Try to find any course that includes 'Bentley' in the name
+      const { data: bentleyCourses } = await supabase
+        .from('courses')
+        .select('id')
+        .ilike('name', '%Bentley%');
+        
+      if (bentleyCourses && bentleyCourses.length > 0) {
+        console.log("Found existing Bentley Golf Club courses:", bentleyCourses);
+        
+        // Update course with current user_id if needed
+        await updateCourseWithUserId(bentleyCourses[0].id);
+        
+        // Update API ID if needed
+        if (apiCourseId) {
+          try {
+            await supabase
+              .from('courses')
+              .update({ api_course_id: apiCourseId })
+              .eq('id', bentleyCourses[0].id);
+            console.log(`Updated course ${bentleyCourses[0].id} with API ID ${apiCourseId}`);
+          } catch (error) {
+            console.error("Error updating course API ID:", error);
+          }
+        }
+        
+        return bentleyCourses[0].id;
+      }
+    }
+    
+    // Regular lookup by exact name match
     const existingByName = await findCourseByName(fullName);
     if (existingByName) {
       console.log("Found existing course by name:", existingByName);
@@ -93,7 +128,8 @@ export async function ensureCourseExists(
   courseName?: string,
   clubName?: string,
   city?: string,
-  state?: string
+  state?: string,
+  isBentleyGolfClub?: boolean // Added flag for special handling of Bentley Golf Club
 ): Promise<number> {
   try {
     console.log(`Ensuring course exists with ID: ${courseId}`);
@@ -129,6 +165,26 @@ export async function ensureCourseExists(
       return courseId;
     }
     
+    // Special handling for Bentley Golf Club
+    if (isBentleyGolfClub) {
+      console.log("Using special handling for Bentley Golf Club");
+      
+      // Try to find any course that includes 'Bentley' in the name
+      const { data: bentleyCourses } = await supabase
+        .from('courses')
+        .select('id')
+        .ilike('name', '%Bentley%');
+        
+      if (bentleyCourses && bentleyCourses.length > 0) {
+        console.log("Found existing Bentley Golf Club course:", bentleyCourses[0]);
+        
+        // Update course with current user_id if needed
+        await updateCourseWithUserId(bentleyCourses[0].id);
+        
+        return bentleyCourses[0].id;
+      }
+    }
+    
     // If the course doesn't exist by ID but we have a name, try to find by name
     if (courseName && clubName) {
       const fullName = formatCourseName(clubName, courseName);
@@ -153,7 +209,8 @@ export async function ensureCourseExists(
         courseName,
         clubName,
         city,
-        state
+        state,
+        isBentleyGolfClub
       );
       
       if (foundOrCreatedId) {

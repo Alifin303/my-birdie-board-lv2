@@ -1,4 +1,3 @@
-
 import { CourseDetail, TeeBox } from "@/services/golfCourseApi";
 import { SimplifiedCourseDetail, SimplifiedGolfCourse, SimplifiedHole, SimplifiedTee } from "../types";
 import { supabase, formatCourseName, parseCourseName, getCourseMetadataFromLocalStorage, isUserAddedCourse } from "@/integrations/supabase";
@@ -55,7 +54,7 @@ export const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): S
     console.log("Looking for hole data in any tee");
     
     const genderTees = gender === 'm' ? courseDetail.tees.male : courseDetail.tees.female;
-    if (genderTees) {
+    if (genderTees && Array.isArray(genderTees)) {
       for (const tee of genderTees) {
         if (tee.holes && tee.holes.length > 0) {
           console.log(`Found hole data in ${gender === 'm' ? 'male' : 'female'} tee:`, tee.tee_name);
@@ -73,7 +72,7 @@ export const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): S
     }
     
     const otherGenderTees = gender === 'm' ? courseDetail.tees.female : courseDetail.tees.male;
-    if (otherGenderTees) {
+    if (otherGenderTees && Array.isArray(otherGenderTees)) {
       for (const tee of otherGenderTees) {
         if (tee.holes && tee.holes.length > 0) {
           console.log(`Found hole data in ${gender === 'm' ? 'female' : 'male'} tee:`, tee.tee_name);
