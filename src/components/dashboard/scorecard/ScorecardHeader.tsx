@@ -23,6 +23,7 @@ export const ScorecardHeader = ({
     : format(new Date(round.date), 'MMMM d, yyyy');
     
   // Use the tee_name from the round data directly
+  // Important: Use explicitly round.tee_name to ensure we show the exact saved value
   const teeName = round.tee_name || "Standard";
   
   console.log("Displaying round with tee_name:", teeName, "tee_id:", round.tee_id);
