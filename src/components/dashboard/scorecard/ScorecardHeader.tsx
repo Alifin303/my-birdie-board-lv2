@@ -21,15 +21,9 @@ export const ScorecardHeader = ({
   const formattedDate = roundDate 
     ? format(roundDate, 'MMMM d, yyyy')
     : format(new Date(round.date), 'MMMM d, yyyy');
-  
-  // Ensure we display the correct tee name from the round data
+    
+  // FIX 2: Use the actual tee name from the round data
   const teeName = round.tee_name || "Standard";
-  
-  console.log("ScorecardHeader - round data:", {
-    id: round.id,
-    tee_name: round.tee_name,
-    tee_id: round.tee_id
-  });
 
   return (
     <div className="flex justify-between items-center mb-4">

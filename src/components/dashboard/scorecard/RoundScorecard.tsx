@@ -24,10 +24,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
   useEffect(() => {
     if (round && isOpen) {
       console.log("Loading round data in RoundScorecard:", round);
-      console.log("Round tee data:", {
-        tee_name: round.tee_name,
-        tee_id: round.tee_id
-      });
+      console.log("Round tee_name:", round.tee_name, "tee_id:", round.tee_id);
       
       let parsedScores: HoleScore[] = [];
       try {
@@ -81,25 +78,19 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
       const toPar = totalStrokes - totalPar;
       
-      // Make sure we preserve the original tee_name and tee_id
-      const updateData = {
-        date: roundDate?.toISOString() || round.date,
-        gross_score: totalStrokes,
-        to_par_gross: toPar,
-        hole_scores: JSON.stringify(scores),
-        // Explicitly include tee data to preserve it
-        tee_name: round.tee_name,
-        tee_id: round.tee_id
-      };
-      
-      console.log("Updating round with tee data:", {
-        tee_name: updateData.tee_name,
-        tee_id: updateData.tee_id
-      });
+      console.log("Updating round with tee name:", round.tee_name);
+      console.log("Updating round with tee ID:", round.tee_id);
       
       const { error } = await supabase
         .from('rounds')
-        .update(updateData)
+        .update({
+          date: roundDate?.toISOString() || round.date,
+          gross_score: totalStrokes,
+          to_par_gross: toPar,
+          hole_scores: JSON.stringify(scores),
+          tee_name: round.tee_name,
+          tee_id: round.tee_id
+        })
         .eq('id', round.id);
         
       if (error) {
@@ -173,7 +164,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
             {isEditing ? (
               "Edit your round details"
             ) : (
-              <>Details for your round at {round.courses?.clubName || round.courses?.name} - {round.courses?.name} ({round.tee_name || "Standard"})</>
+              <>Details for your round at {round.courses?.clubName} - {round.courses?.courseName} ({round.tee_name || "Standard"})</>
             )}
           </DialogDescription>
         </DialogHeader>
