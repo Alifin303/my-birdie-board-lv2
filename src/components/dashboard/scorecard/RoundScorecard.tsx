@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,7 +25,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
   useEffect(() => {
     if (round && isOpen) {
       console.log("Opening scorecard for round:", round.id);
-      console.log("Round tee name:", round.tee_name);
+      console.log("Round tee name in RoundScorecard:", round.tee_name);
       console.log("Round tee name type:", typeof round.tee_name);
       
       let parsedScores: HoleScore[] = [];
@@ -79,7 +80,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
       const toPar = totalStrokes - totalPar;
       
-      console.log("Saving round with original tee_name:", round.tee_name);
+      console.log("Saving round with tee_name:", round.tee_name);
       
       const { error } = await supabase
         .from('rounds')
@@ -88,7 +89,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
           gross_score: totalStrokes,
           to_par_gross: toPar,
           hole_scores: JSON.stringify(scores),
-          // Always preserve the original tee information
+          // Explicitly preserve the exact tee name from the round
           tee_name: round.tee_name,
           tee_id: round.tee_id
         })

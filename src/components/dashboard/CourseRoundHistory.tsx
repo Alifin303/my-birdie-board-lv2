@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown, Trash, Eye, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,7 +35,6 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
   const [sortField, setSortField] = useState<'date' | 'gross_score' | 'to_par_gross'>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   
-  // Reset state when course changes
   useEffect(() => {
     if (selectedCourseId) {
       console.log("Course ID changed, resetting round history state");
@@ -51,7 +49,6 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
     round => round.courses && round.courses.id === selectedCourseId
   );
   
-  // Enhanced logging for round tee information
   console.log("DEBUGGING TEE DISPLAY: All course rounds with tee information:", 
     courseRounds.map(round => ({
       id: round.id,
@@ -64,7 +61,6 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
   
   if (courseRounds.length === 0) return null;
   
-  // Get course name, properly formatted
   let courseName = "Course";
   let clubName = "Unknown Club";
   
@@ -77,7 +73,6 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
     ? `${clubName} - ${courseName}`
     : courseName;
   
-  // Calculate course-specific stats
   const calculateCourseSpecificStats = () => {
     if (courseRounds.length === 0) return null;
     
@@ -85,7 +80,6 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
     const bestGrossScore = Math.min(...courseRounds.map(r => r.gross_score));
     const bestToPar = Math.min(...courseRounds.map(r => r.to_par_gross));
     
-    // Net scores may not be available for all rounds
     const roundsWithNetScore = courseRounds.filter(r => r.net_score !== undefined);
     const bestNetScore = roundsWithNetScore.length > 0 ? 
       Math.min(...roundsWithNetScore.map(r => r.net_score!)) : null;
@@ -115,7 +109,6 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
         description: "The round has been permanently removed.",
       });
       
-      // Invalidate query cache to refresh data
       queryClient.invalidateQueries({ queryKey: ['userRounds'] });
       
     } catch (error) {
@@ -135,10 +128,8 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
     console.log("Round tee_name exact value:", round.tee_name);
     console.log("Round tee_name type:", typeof round.tee_name);
     
-    // Close the current scorecard if open and reset state
     if (scorecardOpen) {
       setScorecardOpen(false);
-      // Small delay to ensure component unmounts before setting new round
       setTimeout(() => {
         setViewingRound(round);
         setScorecardOpen(true);
@@ -158,7 +149,6 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
     }
   };
 
-  // Helper function to render sort indicator
   const renderSortIndicator = (field: 'date' | 'gross_score' | 'to_par_gross') => {
     if (sortField !== field) {
       return <span className="text-muted-foreground opacity-50 ml-1">↕️</span>;
@@ -168,7 +158,18 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
       : <ChevronDown className="inline-block h-4 w-4 ml-1" />;
   };
 
-  // Sort the rounds based on current sort settings
+  const formatTeeName = (teeName: string | null | undefined): string => {
+    if (teeName === null || teeName === undefined || teeName === '') {
+      return 'Standard Tees';
+    }
+    
+    if (teeName.toLowerCase().includes('tees')) {
+      return teeName;
+    }
+    
+    return `${teeName} Tees`;
+  };
+  
   const sortedRounds = [...courseRounds].sort((a, b) => {
     if (sortField === 'date') {
       const dateA = new Date(a.date).getTime();
@@ -181,12 +182,6 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
     }
   });
 
-  // Function to display tee name correctly
-  const formatTeeName = (teeName: string | null | undefined): string => {
-    if (!teeName) return 'Standard Tees';
-    return `${teeName} Tees`;
-  };
-  
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -203,7 +198,6 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
         </h2>
       </div>
       
-      {/* Course-specific stats */}
       {stats && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <div className="bg-background border rounded-lg p-4 text-center">
@@ -231,13 +225,11 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
         </div>
       )}
       
-      {/* Score progress chart */}
       <ScoreProgressChart 
         rounds={courseRounds}
         scoreType={scoreType}
       />
       
-      {/* Round history table */}
       <div className="space-y-4 mt-6">
         <h3 className="text-lg font-medium">Round History</h3>
         <div className="flex justify-end space-x-2 mb-2">
@@ -259,7 +251,6 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
           </Button>
         </div>
         
-        {/* Table view for rounds */}
         <div className="overflow-x-auto rounded-lg border bg-background">
           <table className="w-full">
             <thead>
@@ -301,7 +292,7 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
             </thead>
             <tbody>
               {sortedRounds.map((round) => {
-                console.log(`Rendering round ${round.id} with tee_name: "${round.tee_name}"`);
+                console.log(`CourseRoundHistory - Round ${round.id} tee_name:`, round.tee_name);
                 
                 return (
                   <tr key={round.id} className="border-b last:border-0">
@@ -375,7 +366,6 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
         </div>
       </div>
       
-      {/* Scorecard dialog */}
       {viewingRound && (
         <RoundScorecard 
           round={viewingRound}
@@ -383,7 +373,6 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
           onOpenChange={(open) => {
             setScorecardOpen(open);
             if (!open) {
-              // Reset viewingRound when closing the dialog
               setTimeout(() => setViewingRound(null), 100);
             }
           }}

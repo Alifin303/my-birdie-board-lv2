@@ -22,8 +22,18 @@ export const ScorecardHeader = ({
     ? format(roundDate, 'MMMM d, yyyy')
     : format(new Date(round.date), 'MMMM d, yyyy');
     
-  // Directly use the tee_name without any modification or default value
-  console.log("ScorecardHeader - Rendering with exact tee_name:", round.tee_name);
+  // Log the exact tee_name from the round to help with debugging
+  console.log("ScorecardHeader - Round tee_name:", round.tee_name);
+  console.log("ScorecardHeader - Round tee_name type:", typeof round.tee_name);
+  
+  // Function to safely display tee name
+  const displayTeeName = () => {
+    // Use the exact tee_name from the database without modifying it
+    if (round.tee_name === null || round.tee_name === undefined) {
+      return "Standard";
+    }
+    return round.tee_name;
+  };
   
   return (
     <div className="flex justify-between items-center mb-4">
@@ -66,7 +76,7 @@ export const ScorecardHeader = ({
           ) : (
             <>
               <p className="text-sm text-muted-foreground mt-1">Date: {formattedDate}</p>
-              <p className="text-sm text-muted-foreground">Tees: {round.tee_name || "Standard"}</p>
+              <p className="text-sm text-muted-foreground">Tees: {displayTeeName()}</p>
             </>
           )}
         </div>
