@@ -27,8 +27,8 @@ export async function findOrCreateCourseByApiId(
     }
     
     // Try to find by normalized name
-    const formattedName = `${normalizedClubName} - ${normalizedCourseName}`;
-    const existingCourseIdByName = await findCourseByName(formattedName);
+    const combinedName = `${normalizedClubName} - ${normalizedCourseName}`;
+    const existingCourseIdByName = await findCourseByName(combinedName);
     if (existingCourseIdByName) {
       console.log(`Found existing course by name: ${existingCourseIdByName}`);
       
@@ -57,14 +57,13 @@ export async function findOrCreateCourseByApiId(
     
     // No existing course found, create a new one
     console.log(`Creating new course: ${normalizedClubName} - ${normalizedCourseName}`);
-    const formattedName = `${normalizedClubName} - ${normalizedCourseName}`;
     
     // Get the current user ID for better course tracking
     const { data: { session } } = await supabase.auth.getSession();
     const userId = session?.user?.id;
     
     const newCourseId = await insertCourse({
-      name: formattedName,
+      name: combinedName,
       api_course_id: apiCourseId,
       city: city || '',
       state: state || '',
@@ -121,8 +120,8 @@ export async function ensureCourseExists(
     
     // If course name and club name are provided, try to find by formatted name
     if (normalizedCourseName && normalizedClubName) {
-      const formattedName = `${normalizedClubName} - ${normalizedCourseName}`;
-      const existingNameCourseId = await findCourseByName(formattedName);
+      const formattedCourseName = `${normalizedClubName} - ${normalizedCourseName}`;
+      const existingNameCourseId = await findCourseByName(formattedCourseName);
       if (existingNameCourseId) {
         console.log(`Found existing course by name: ${existingNameCourseId}`);
         return existingNameCourseId;
@@ -142,23 +141,23 @@ export async function ensureCourseExists(
     const userId = session?.user?.id;
     
     // Format the course name according to our standard format
-    let formattedName: string;
+    let courseName: string;
     if (normalizedClubName && normalizedCourseName) {
-      formattedName = `${normalizedClubName} - ${normalizedCourseName}`;
+      courseName = `${normalizedClubName} - ${normalizedCourseName}`;
     } else {
       // Try to parse from the course ID (for user-added courses)
       const existingCourseData = await getCourseMetadataFromLocalStorage(numericCourseId);
       if (existingCourseData && existingCourseData.name) {
         // For user-added courses with [User added course] suffix
-        formattedName = existingCourseData.name;
+        courseName = existingCourseData.name;
       } else {
         // Fallback to a generic name with the course ID
-        formattedName = `Course ID ${numericCourseId}`;
+        courseName = `Course ID ${numericCourseId}`;
       }
     }
     
     const courseData = {
-      name: formattedName,
+      name: courseName,
       api_course_id: apiCourseId || null,
       city: city || '',
       state: state || '',
