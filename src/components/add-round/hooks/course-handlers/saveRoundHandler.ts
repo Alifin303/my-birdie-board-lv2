@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
 import { ensureCourseExists, findOrCreateCourseByApiId } from "@/integrations/supabase";
@@ -62,11 +63,7 @@ export function createSaveRoundHandler({
       const normalizedCourseName = selectedCourse.name.replace(/\s+/g, ' ').trim();
       const normalizedClubName = selectedCourse.clubName.replace(/\s+/g, ' ').trim();
       
-      const isBentleyGolfClub = normalizedCourseName.toLowerCase().includes('bentley') || 
-                               normalizedClubName.toLowerCase().includes('bentley');
-      
       console.log(`Course name: "${normalizedCourseName}", Club name: "${normalizedClubName}"`);
-      console.log(`Is Bentley Golf Club: ${isBentleyGolfClub}`);
       
       if (selectedCourse.apiCourseId) {
         console.log("Ensuring API course exists:", selectedCourse.apiCourseId);
@@ -77,7 +74,7 @@ export function createSaveRoundHandler({
           normalizedClubName,
           selectedCourse.city,
           selectedCourse.state,
-          isBentleyGolfClub
+          false // No special handling
         );
         
         if (!courseId) {
@@ -96,7 +93,7 @@ export function createSaveRoundHandler({
           normalizedClubName,
           selectedCourse.city,
           selectedCourse.state,
-          isBentleyGolfClub
+          false // No special handling
         );
         
         console.log("Using course_id for user-added course:", dbCourseId);

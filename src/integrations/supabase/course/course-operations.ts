@@ -10,7 +10,7 @@ export async function findOrCreateCourseByApiId(
   clubName: string,
   city?: string,
   state?: string,
-  isSpecialHandling: boolean = false // Flag for Bentley or other special cases
+  isSpecialHandling: boolean = false // Flag kept for compatibility but not used
 ): Promise<number | null> {
   try {
     console.log('findOrCreateCourseByApiId', { apiCourseId, courseName, clubName, city, state });
@@ -19,66 +19,40 @@ export async function findOrCreateCourseByApiId(
     const normalizedCourseName = courseName.replace(/\s+/g, ' ').trim();
     const normalizedClubName = clubName.replace(/\s+/g, ' ').trim();
     
-    // Special handling for Bentley Golf Club
-    if (isSpecialHandling || 
-        normalizedCourseName.toLowerCase().includes('bentley') || 
-        normalizedClubName.toLowerCase().includes('bentley')) {
-      console.log("Special handling for Bentley Golf Club (or similar)");
+    // Standard course lookup by API ID
+    const existingCourse = await findCourseByApiId(apiCourseId);
+    if (existingCourse) {
+      console.log(`Found existing course by API ID: ${existingCourse}`);
+      return existingCourse;
+    }
+    
+    // Try to find by normalized name
+    const formattedName = `${normalizedClubName} - ${normalizedCourseName}`;
+    const existingCourseIdByName = await findCourseByName(formattedName);
+    if (existingCourseIdByName) {
+      console.log(`Found existing course by name: ${existingCourseIdByName}`);
       
-      // Try to find by API course ID first
-      const existingCourseId = await findCourseByApiId(apiCourseId);
-      if (existingCourseId) {
-        console.log(`Found existing course by API ID: ${existingCourseId}`);
-        return existingCourseId;
-      }
-      
-      // Then try to find by normalized name
-      const formattedName = `${normalizedClubName} - ${normalizedCourseName}`;
-      const existingCourseIdByName = await findCourseByName(formattedName);
-      if (existingCourseIdByName) {
-        console.log(`Found existing course by name: ${existingCourseIdByName}`);
-        
-        // Update the API course ID if it's not set - need to query for course details first
-        const { data: courseData, error: courseError } = await supabase
-          .from('courses')
-          .select('api_course_id')
-          .eq('id', existingCourseIdByName)
-          .single();
-          
-        if (!courseError && courseData && !courseData.api_course_id) {
-          const { error } = await supabase
-            .from('courses')
-            .update({ api_course_id: apiCourseId })
-            .eq('id', existingCourseIdByName);
-            
-          if (error) {
-            console.error('Error updating API course ID:', error);
-          } else {
-            console.log(`Updated API course ID for course ${existingCourseIdByName}`);
-          }
-        }
-        
-        return existingCourseIdByName;
-      }
-      
-      // If no exact match was found, try a broader search for Bentley
-      const { data: bentleyCourses, error: bentleyError } = await supabase
+      // Update the API course ID if it's not set - need to query for course details first
+      const { data: courseData, error: courseError } = await supabase
         .from('courses')
-        .select('*')
-        .or(`name.ilike.%Bentley%,api_course_id.eq.${apiCourseId}`);
+        .select('api_course_id')
+        .eq('id', existingCourseIdByName)
+        .single();
         
-      if (!bentleyError && bentleyCourses && bentleyCourses.length > 0) {
-        // Use the first matching Bentley course
-        console.log(`Found Bentley course from similar search: ${bentleyCourses[0].id}, ${bentleyCourses[0].name}`);
-        return bentleyCourses[0].id;
+      if (!courseError && courseData && !courseData.api_course_id) {
+        const { error } = await supabase
+          .from('courses')
+          .update({ api_course_id: apiCourseId })
+          .eq('id', existingCourseIdByName);
+          
+        if (error) {
+          console.error('Error updating API course ID:', error);
+        } else {
+          console.log(`Updated API course ID for course ${existingCourseIdByName}`);
+        }
       }
-    } else {
-      // Standard course lookup by API ID
-      const existingCourse = await findCourseByApiId(apiCourseId);
-      if (existingCourse) {
-        console.log(`Found existing course by API ID: ${existingCourse}`);
-        return existingCourse;
-      }
+      
+      return existingCourseIdByName;
     }
     
     // No existing course found, create a new one
@@ -112,7 +86,7 @@ export async function ensureCourseExists(
   clubName?: string,
   city?: string,
   state?: string,
-  isSpecialHandling: boolean = false // Flag for Bentley or other special cases
+  isSpecialHandling: boolean = false // Flag kept for compatibility but not used
 ): Promise<number> {
   try {
     console.log('ensureCourseExists', { courseId, apiCourseId, courseName, clubName, city, state });
@@ -123,44 +97,6 @@ export async function ensureCourseExists(
     
     // Convert string ID to number if needed
     const numericCourseId = typeof courseId === 'string' ? parseInt(courseId, 10) : courseId;
-    
-    // Special handling for Bentley Golf Club
-    if (isSpecialHandling || 
-        normalizedCourseName.toLowerCase().includes('bentley') || 
-        normalizedClubName.toLowerCase().includes('bentley')) {
-      console.log("Special handling for Bentley Golf Club (or similar)");
-      
-      // Try to find by API course ID first if provided
-      if (apiCourseId) {
-        const existingCourseId = await findCourseByApiId(apiCourseId);
-        if (existingCourseId) {
-          console.log(`Found existing Bentley course by API ID: ${existingCourseId}`);
-          return existingCourseId;
-        }
-      }
-      
-      // Try to find by normalized name if provided
-      if (normalizedCourseName && normalizedClubName) {
-        const formattedName = `${normalizedClubName} - ${normalizedCourseName}`;
-        const existingCourseId = await findCourseByName(formattedName);
-        if (existingCourseId) {
-          console.log(`Found existing Bentley course by name: ${existingCourseId}`);
-          return existingCourseId;
-        }
-      }
-      
-      // If no exact match was found, try a broader search for Bentley
-      const { data: bentleyCourses, error: bentleyError } = await supabase
-        .from('courses')
-        .select('*')
-        .or(`name.ilike.%Bentley%${apiCourseId ? `,api_course_id.eq.${apiCourseId}` : ''}`);
-        
-      if (!bentleyError && bentleyCourses && bentleyCourses.length > 0) {
-        // Use the first matching Bentley course
-        console.log(`Found Bentley course from similar search: ${bentleyCourses[0].id}`);
-        return bentleyCourses[0].id;
-      }
-    }
     
     // Check if the course exists by ID
     const { data: existingCourse, error: fetchError } = await supabase
