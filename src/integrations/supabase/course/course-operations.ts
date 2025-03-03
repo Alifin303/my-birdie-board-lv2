@@ -1,5 +1,6 @@
 
-import { supabase, findCourseByApiId, findCourseByName, insertCourse, logSupabaseOperation } from '../index';
+import { supabase, getCourseMetadataFromLocalStorage } from '../index';
+import { findCourseByApiId, findCourseByName, insertCourse, logSupabaseOperation } from '../course/course-queries';
 import { parseCourseName } from '../utils/course-utils';
 
 // This function finds or creates a course by the API course ID
@@ -27,7 +28,7 @@ export async function findOrCreateCourseByApiId(
       // Try to find by API course ID first
       const existingCourseByApiId = await findCourseByApiId(apiCourseId);
       if (existingCourseByApiId) {
-        console.log(`Found existing course by API ID: ${existingCourseByApiId.id}, ${existingCourseByApiId.name}`);
+        console.log(`Found existing course by API ID: ${existingCourseByApiId.id}`);
         return existingCourseByApiId.id;
       }
       
@@ -35,7 +36,7 @@ export async function findOrCreateCourseByApiId(
       const formattedName = `${normalizedClubName} - ${normalizedCourseName}`;
       const existingCourseByName = await findCourseByName(formattedName);
       if (existingCourseByName) {
-        console.log(`Found existing course by name: ${existingCourseByName.id}, ${existingCourseByName.name}`);
+        console.log(`Found existing course by name: ${existingCourseByName.id}`);
         
         // Update the API course ID if it's not set
         if (!existingCourseByName.api_course_id) {
@@ -69,7 +70,7 @@ export async function findOrCreateCourseByApiId(
       // Standard course lookup by API ID
       const existingCourse = await findCourseByApiId(apiCourseId);
       if (existingCourse) {
-        console.log(`Found existing course by API ID: ${existingCourse.id}, ${existingCourse.name}`);
+        console.log(`Found existing course by API ID: ${existingCourse.id}`);
         return existingCourse.id;
       }
     }
@@ -171,7 +172,7 @@ export async function ensureCourseExists(
     if (apiCourseId) {
       const existingApiCourse = await findCourseByApiId(apiCourseId);
       if (existingApiCourse) {
-        console.log(`Found existing course by API ID: ${existingApiCourse.id}, ${existingApiCourse.name}`);
+        console.log(`Found existing course by API ID: ${existingApiCourse.id}`);
         return existingApiCourse.id;
       }
     }
@@ -181,7 +182,7 @@ export async function ensureCourseExists(
       const formattedName = `${normalizedClubName} - ${normalizedCourseName}`;
       const existingNameCourse = await findCourseByName(formattedName);
       if (existingNameCourse) {
-        console.log(`Found existing course by name: ${existingNameCourse.id}, ${existingNameCourse.name}`);
+        console.log(`Found existing course by name: ${existingNameCourse.id}`);
         return existingNameCourse.id;
       }
     }
@@ -214,16 +215,35 @@ export async function ensureCourseExists(
       }
     }
     
-    const newCourseId = await insertCourse({
-      id: numericCourseId,
+    const courseData = {
       name: formattedName,
       api_course_id: apiCourseId || null,
       city: city || '',
       state: state || '',
       user_id: userId || null
-    });
+    };
     
-    return newCourseId;
+    // If we have a numeric course ID that's not from database sequence, use it explicitly
+    if (numericCourseId && !isNaN(numericCourseId) && numericCourseId > 0) {
+      const { data, error } = await supabase
+        .from('courses')
+        .upsert({ ...courseData, id: numericCourseId })
+        .select('id')
+        .single();
+        
+      if (error) {
+        console.error('Error upserting course with ID:', error);
+        // Fall back to regular insert
+        const newCourseId = await insertCourse(courseData);
+        return newCourseId;
+      }
+      
+      return data.id;
+    } else {
+      // Regular insert without specified ID
+      const newCourseId = await insertCourse(courseData);
+      return newCourseId;
+    }
   } catch (error) {
     console.error('Error in ensureCourseExists:', error);
     // Fall back to the provided course ID
