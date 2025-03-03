@@ -36,14 +36,15 @@ export const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): S
     }
   }
 
+  console.log("Extracted tee data:", teeData);
   console.log("Extracted holes data for tee:", teeId, holesData);
   
   if (holesData && holesData.length > 0) {
     const mappedHoles = holesData.map((hole, idx) => ({
       number: hole.number || idx + 1,
       par: hole.par || 4,
-      yards: hole.yardage,
-      handicap: hole.handicap
+      yards: hole.yardage || 400,
+      handicap: hole.handicap || idx + 1
     }));
     
     console.log("Mapped holes for selected tee:", mappedHoles);
@@ -61,8 +62,8 @@ export const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): S
           const mappedHoles = tee.holes.map((hole, idx) => ({
             number: hole.number || idx + 1,
             par: hole.par || 4,
-            yards: hole.yardage,
-            handicap: hole.handicap
+            yards: hole.yardage || 400,
+            handicap: hole.handicap || idx + 1
           }));
           
           console.log(`Mapped holes from alternative ${gender === 'm' ? 'male' : 'female'} tee:`, mappedHoles);
@@ -79,8 +80,8 @@ export const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): S
           const mappedHoles = tee.holes.map((hole, idx) => ({
             number: hole.number || idx + 1,
             par: hole.par || 4,
-            yards: hole.yardage,
-            handicap: hole.handicap
+            yards: hole.yardage || 400,
+            handicap: hole.handicap || idx + 1
           }));
           
           console.log(`Mapped holes from alternative ${gender === 'm' ? 'female' : 'male'} tee:`, mappedHoles);
@@ -112,6 +113,7 @@ export const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): Sim
   console.log("Club name:", clubName);
   
   const tees = extractTeesFromApiResponse(courseDetail);
+  console.log("Extracted tees:", tees.map(t => ({ id: t.id, name: t.name, par: t.par })));
   
   const simplifiedTees = tees.map(tee => {
     const teeHoles = extractHolesForTee(courseDetail, tee.id);
@@ -158,21 +160,30 @@ export const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): Sim
   };
   
   console.log("Simplified course detail:", simplified);
+  console.log("Simplified tees:", simplified.tees.map(t => ({ id: t.id, name: t.name, par: t.par })));
   return simplified;
 };
 
 export const extractTeesFromApiResponse = (courseDetail: CourseDetail): SimplifiedTee[] => {
   const tees: SimplifiedTee[] = [];
+  console.log("Extracting tees from API response:", courseDetail);
   
   if (courseDetail.tees) {
     if (courseDetail.tees.male && courseDetail.tees.male.length > 0) {
       courseDetail.tees.male.forEach((tee, index) => {
+        console.log(`Male tee ${index}:`, tee);
+        // Calculate total par if not available
+        let teePar = tee.par_total;
+        if (!teePar && tee.holes && tee.holes.length > 0) {
+          teePar = tee.holes.reduce((sum, hole) => sum + (hole.par || 4), 0);
+        }
+        
         tees.push({
           id: `m-${index}`,
           name: tee.tee_name || 'Unknown Tee',
           rating: tee.course_rating ?? 72,
           slope: tee.slope_rating ?? 113,
-          par: tee.par_total ?? 72,
+          par: teePar ?? 72,
           gender: 'male',
           originalIndex: index,
           yards: tee.total_yards
@@ -182,12 +193,19 @@ export const extractTeesFromApiResponse = (courseDetail: CourseDetail): Simplifi
     
     if (courseDetail.tees.female && courseDetail.tees.female.length > 0) {
       courseDetail.tees.female.forEach((tee, index) => {
+        console.log(`Female tee ${index}:`, tee);
+        // Calculate total par if not available
+        let teePar = tee.par_total;
+        if (!teePar && tee.holes && tee.holes.length > 0) {
+          teePar = tee.holes.reduce((sum, hole) => sum + (hole.par || 4), 0);
+        }
+        
         tees.push({
           id: `f-${index}`,
           name: tee.tee_name || 'Unknown Tee',
           rating: tee.course_rating ?? 72,
           slope: tee.slope_rating ?? 113,
-          par: tee.par_total ?? 72,
+          par: teePar ?? 72,
           gender: 'female',
           originalIndex: index,
           yards: tee.total_yards
@@ -196,6 +214,7 @@ export const extractTeesFromApiResponse = (courseDetail: CourseDetail): Simplifi
     }
   }
   
+  console.log("Extracted tees:", tees.map(t => ({ id: t.id, name: t.name, par: t.par })));
   return tees;
 };
 

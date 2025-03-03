@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, CalendarIcon, AlertCircle } from "lucide-react";
@@ -14,7 +15,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
-import { HoleSelection, Score, SimplifiedCourseDetail, ScoreSummary } from "../types";
+import { HoleSelection, Score, SimplifiedCourseDetail, ScoreSummary, SimplifiedTee } from "../types";
 
 interface ScorecardStepProps {
   selectedCourse: SimplifiedCourseDetail | null;
@@ -57,26 +58,52 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   dataLoadingError,
   today
 }) => {
+  // Local state to manage the current selected tee ID
+  // This ensures changes are immediately reflected in the UI
+  const [localSelectedTeeId, setLocalSelectedTeeId] = useState<string | null>(selectedTeeId);
+  
+  // Update the local state when the prop changes
+  useEffect(() => {
+    if (selectedTeeId !== localSelectedTeeId) {
+      console.log("Updating local tee ID from prop:", selectedTeeId);
+      setLocalSelectedTeeId(selectedTeeId);
+    }
+  }, [selectedTeeId]);
+
   if (!selectedCourse) return null;
 
-  // Get the currently selected tee information based on selectedTeeId
-  const selectedTee = selectedCourse.tees.find(tee => tee.id === selectedTeeId);
+  // Get the currently selected tee information based on localSelectedTeeId
+  const selectedTee = selectedCourse.tees.find(tee => tee.id === localSelectedTeeId);
   
   // Debug logging for tee selection issues
-  useEffect(() => {
-    console.log("========== SCORECARD STEP TEE SELECTION ==========");
-    console.log("selectedTeeId:", selectedTeeId);
-    console.log("Available tees:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
-    console.log("selectedTee object:", selectedTee);
-    if (selectedTee) {
-      console.log("Selected tee name:", selectedTee.name);
-      console.log("Rendering dropdown with selected tee:", selectedTeeId);
-      console.log("Dropdown should now show:", selectedTeeId, selectedTee.name);
-    } else {
-      console.error("No tee found for ID:", selectedTeeId);
-    }
-    console.log("=================================================");
-  }, [selectedTeeId, selectedCourse.tees, selectedTee]);
+  console.log("========== SCORECARD STEP TEE SELECTION ==========");
+  console.log("selectedTeeId (prop):", selectedTeeId);
+  console.log("localSelectedTeeId (state):", localSelectedTeeId);
+  console.log("Available tees:", selectedCourse.tees.map(t => ({ 
+    id: t.id, 
+    name: t.name,
+    par: t.par,
+    rating: t.rating,
+    slope: t.slope
+  })));
+  console.log("selectedTee object:", selectedTee);
+  if (selectedTee) {
+    console.log("Selected tee name:", selectedTee.name);
+    console.log("Selected tee par:", selectedTee.par);
+    console.log("Selected tee rating/slope:", selectedTee.rating, "/", selectedTee.slope);
+  } else {
+    console.error("No tee found for ID:", localSelectedTeeId);
+  }
+  console.log("=================================================");
+  
+  // Handler for tee changes that updates both the local state and parent state
+  const handleTeeChangeWithLocalState = (teeId: string) => {
+    console.log("Local tee change handler called with ID:", teeId);
+    // Update local state immediately for UI
+    setLocalSelectedTeeId(teeId);
+    // Call parent handler to update actual state and scorecard
+    handleTeeChange(teeId);
+  };
   
   // Helper function to determine tee color
   const getTeeColor = (teeName: string) => {
@@ -155,11 +182,10 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         <div className="space-y-1">
           <label className="text-sm font-medium">Tee Played</label>
           <Select 
-            value={selectedTeeId || undefined} 
+            value={localSelectedTeeId || undefined} 
             onValueChange={(value) => {
               console.log("Tee selection changed to:", value);
-              console.log("Selected tee before change:", selectedTee?.name);
-              handleTeeChange(value);
+              handleTeeChangeWithLocalState(value);
             }}
           >
             <SelectTrigger className="h-9">
@@ -179,8 +205,8 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {selectedCourse.tees.map((tee) => {
-                console.log(`Rendering tee option: ${tee.id} - ${tee.name} (selected: ${tee.id === selectedTeeId})`);
+              {selectedCourse.tees.map((tee: SimplifiedTee) => {
+                console.log(`Rendering tee option: ${tee.id} - ${tee.name} (selected: ${tee.id === localSelectedTeeId})`);
                 return (
                   <SelectItem key={tee.id} value={tee.id}>
                     <div className="flex items-center">
@@ -198,6 +224,13 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
               })}
             </SelectContent>
           </Select>
+          
+          {/* Display tee details for clarity */}
+          {selectedTee && (
+            <div className="text-xs text-muted-foreground mt-1">
+              Rating: {selectedTee.rating} | Slope: {selectedTee.slope} | Par: {selectedTee.par}
+            </div>
+          )}
         </div>
         
         <div className="space-y-1">

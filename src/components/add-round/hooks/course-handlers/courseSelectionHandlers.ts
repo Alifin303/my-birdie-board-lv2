@@ -175,7 +175,7 @@ export function createCourseSelectionHandlers({
           simplifiedCourseDetail.apiCourseId = courseId.toString();
           
           console.log("Final course detail after processing:", simplifiedCourseDetail);
-          console.log("Course tees:", simplifiedCourseDetail.tees.map(t => ({ id: t.id, name: t.name })));
+          console.log("Course tees:", simplifiedCourseDetail.tees.map(t => ({ id: t.id, name: t.name, par: t.par, rating: t.rating, slope: t.slope })));
         } catch (error) {
           console.error("Error fetching course details from API:", error);
           const defaultHoles = Array(18).fill(null).map((_, idx) => ({
@@ -213,8 +213,20 @@ export function createCourseSelectionHandlers({
       }
       
       console.log("Setting selected course:", simplifiedCourseDetail);
+      console.log("Course tees before setting state:", 
+        simplifiedCourseDetail.tees.map(t => ({
+          id: t.id, 
+          name: t.name, 
+          par: t.par, 
+          rating: t.rating, 
+          slope: t.slope
+        }))
+      );
+      
+      // Set the selected course in state
       setSelectedCourse(simplifiedCourseDetail);
       
+      // Clear search results and update search query display
       setSearchResults([]);
       const displayName = course.clubName !== course.name 
         ? `${course.clubName} - ${course.name}`
@@ -222,9 +234,18 @@ export function createCourseSelectionHandlers({
       console.log("Setting search query to:", displayName);
       setSearchQuery(displayName);
       
+      // Handle tee selection and scorecard setup
       if (simplifiedCourseDetail.tees && simplifiedCourseDetail.tees.length > 0) {
         const defaultTeeId = simplifiedCourseDetail.tees[0].id;
-        console.log("Available tees:", simplifiedCourseDetail.tees.map(t => ({ id: t.id, name: t.name })));
+        console.log("Available tees:", 
+          simplifiedCourseDetail.tees.map(t => ({ 
+            id: t.id, 
+            name: t.name,
+            par: t.par,
+            rating: t.rating,
+            slope: t.slope
+          }))
+        );
         console.log("Setting default tee ID:", defaultTeeId);
         
         // Set the selected tee ID first
@@ -232,7 +253,10 @@ export function createCourseSelectionHandlers({
         
         console.log("Default tee set to:", {
           id: defaultTeeId,
-          name: simplifiedCourseDetail.tees[0]?.name
+          name: simplifiedCourseDetail.tees[0]?.name,
+          par: simplifiedCourseDetail.tees[0]?.par,
+          rating: simplifiedCourseDetail.tees[0]?.rating,
+          slope: simplifiedCourseDetail.tees[0]?.slope
         });
         
         // Wait for state update before updating scorecard
@@ -245,7 +269,7 @@ export function createCourseSelectionHandlers({
           console.log("Selected course after update:", simplifiedCourseDetail);
           console.log("Selected tee ID after update:", defaultTeeId);
           console.log("Selected tee name:", simplifiedCourseDetail.tees[0]?.name);
-        }, 50);
+        }, 100); // Increased timeout to ensure state is updated
       } else {
         console.error("No tees found for course:", simplifiedCourseDetail);
         
@@ -297,7 +321,7 @@ export function createCourseSelectionHandlers({
         setTimeout(() => {
           updateScorecardForTee(defaultTeeId, 'all');
           setHoleSelection('all');
-        }, 50);
+        }, 100); // Increased timeout to ensure state is updated
       }
       
       setCurrentStep('scorecard');

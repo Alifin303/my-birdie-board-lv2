@@ -43,7 +43,7 @@ export function useScoreHandlers({
       return selectedCourse.holes || [];
     }
     
-    console.log("Found selected tee:", selectedTee.name);
+    console.log("Found selected tee:", selectedTee.name, "with par:", selectedTee.par);
     
     if (selectedTee.holes && selectedTee.holes.length > 0) {
       console.log("Using hole data specific to the selected tee:", selectedTee.holes);
@@ -64,11 +64,22 @@ export function useScoreHandlers({
     
     // Log available tees for debugging
     console.log("Available tees when updating scorecard:", 
-      selectedCourse.tees.map(t => ({ id: t.id, name: t.name }))
+      selectedCourse.tees.map(t => ({ 
+        id: t.id, 
+        name: t.name, 
+        par: t.par,
+        rating: t.rating,
+        slope: t.slope
+      }))
     );
     
     const selectedTee = selectedCourse.tees.find(t => t.id === teeId);
     console.log("Selected tee for scorecard update:", selectedTee);
+    
+    if (!selectedTee) {
+      console.error(`Cannot update scorecard: Tee with ID ${teeId} not found`);
+      return;
+    }
     
     const allHolesData = getHolesForTee(teeId);
     
@@ -137,20 +148,28 @@ export function useScoreHandlers({
     }
     
     console.log("CRITICAL TEE CHANGE: Selected tee ID:", teeId);
-    console.log("Available tees at tee change:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
+    console.log("Available tees at tee change:", 
+      selectedCourse.tees.map(t => ({ 
+        id: t.id, 
+        name: t.name, 
+        par: t.par,
+        rating: t.rating,
+        slope: t.slope
+      }))
+    );
     
     const selectedTee = selectedCourse.tees.find(t => t.id === teeId);
     console.log("Selected tee after change:", selectedTee);
     
     if (selectedTee) {
-      console.log("Using tee data from selected tee:", selectedTee.name);
+      console.log("Using tee data from selected tee:", selectedTee.name, "with par:", selectedTee.par);
       console.log("TEE SELECTION UI UPDATE - Using tee name:", selectedTee.name, "with ID:", selectedTee.id);
     } else {
       console.error("No tee found with ID:", teeId);
+      return; // Return early to prevent updating with invalid tee
     }
     
-    // Always update the scorecard regardless of finding the tee
-    // This ensures that even if there's an issue, we display something
+    // Update the scorecard with the new tee
     updateScorecardForTee(teeId, 'all');
   };
 
@@ -160,8 +179,13 @@ export function useScoreHandlers({
       return;
     }
     
-    // Use the first tee if none is selected
-    const teeId = selectedCourse.tees[0]?.id || 'default-tee';
+    // Find current selected tee
+    const teeId = selectedCourse.tees[0]?.id;
+    if (!teeId) {
+      console.error("No valid tee ID found");
+      return;
+    }
+    
     console.log("Handling hole selection change with tee ID:", teeId);
     updateScorecardForTee(teeId, selection);
     setHoleSelection(selection);
