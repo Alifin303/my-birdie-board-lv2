@@ -5,6 +5,10 @@ export interface TeeData {
   name: string;
   color: string;
   gender: 'male' | 'female';
+  rating?: number;
+  slope?: number;
+  par?: number;
+  yards?: number;
   holes: HoleData[];
 }
 

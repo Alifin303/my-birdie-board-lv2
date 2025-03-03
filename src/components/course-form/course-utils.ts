@@ -8,6 +8,9 @@ export function createDefaultTee(): TeeData {
     name: 'White',
     color: '#FFFFFF',
     gender: 'male',
+    rating: 72.0,
+    slope: 113,
+    par: 72,
     holes: Array(18).fill(null).map((_, idx) => ({
       number: idx + 1,
       par: 4,
@@ -21,7 +24,7 @@ export function createDefaultTee(): TeeData {
 export const calculateRatings = (tee: TeeData) => {
   // Add a safety check to prevent errors when holes is undefined or has undefined elements
   if (!tee || !tee.holes || tee.holes.some(hole => !hole)) {
-    return { rating: 0, slope: 113, par: 0, yards: 0 };
+    return { rating: 72.0, slope: 113, par: 72, yards: 0 };
   }
   
   // This is a simplified algorithm - in reality, course ratings are much more complex

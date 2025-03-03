@@ -2,6 +2,7 @@ import { CourseDetail, TeeBox } from "@/services/golfCourseApi";
 import { SimplifiedCourseDetail, SimplifiedGolfCourse, SimplifiedHole, SimplifiedTee } from "../types";
 import { supabase, formatCourseName, parseCourseName, getCourseMetadataFromLocalStorage, isUserAddedCourse } from "@/integrations/supabase";
 import { getCourseTeesByIdFromDatabase } from "@/integrations/supabase/course/course-db-operations";
+import { TeeData } from "@/components/course-form/types";
 
 export const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): SimplifiedHole[] => {
   console.log("Extracting holes for tee:", teeId, "from course detail:", courseDetail);
@@ -230,26 +231,21 @@ export const loadUserAddedCourseDetails = async (courseId: number): Promise<Simp
       
       const { clubName, courseName } = parseCourseName(courseData.name);
       
-      // Ensure each tee has hole data and calculate par
-      const validatedTees = tees.map(tee => {
-        // Ensure each tee has par data
-        if (!tee.par || tee.par <= 0) {
-          if (tee.holes && tee.holes.length > 0) {
-            tee.par = tee.holes.reduce((sum, hole) => sum + (hole.par || 4), 0);
-          } else {
-            tee.par = 72; // Default par
-          }
-        }
-        
-        // Ensure each tee has valid rating and slope
-        tee.rating = tee.rating || 72.0;
-        tee.slope = tee.slope || 113;
-        
-        return tee;
-      });
+      // Convert TeeData to SimplifiedTee
+      const simplifiedTees: SimplifiedTee[] = tees.map((tee, index) => ({
+        id: tee.id,
+        name: tee.name,
+        rating: tee.rating || 72.0,
+        slope: tee.slope || 113,
+        par: tee.par || 72,
+        gender: tee.gender,
+        originalIndex: index,
+        yards: tee.yards,
+        holes: tee.holes
+      }));
       
       // Get holes from the first tee
-      const holes = validatedTees[0]?.holes || [];
+      const holes = tees[0]?.holes || [];
       
       // Create the course detail
       const courseDetail: SimplifiedCourseDetail = {
@@ -258,7 +254,7 @@ export const loadUserAddedCourseDetails = async (courseId: number): Promise<Simp
         clubName: clubName,
         city: courseData.city || '',
         state: courseData.state || '',
-        tees: validatedTees,
+        tees: simplifiedTees,
         holes: holes,
         isUserAdded: true
       };
