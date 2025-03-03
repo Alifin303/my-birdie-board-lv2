@@ -59,7 +59,7 @@ export function createCourseSelectionHandlers({
           console.log("User-added course details loaded from cache:", cachedCourseDetail);
           console.log("Cached tees:", cachedCourseDetail.tees?.map(t => ({ id: t.id, name: t.name })));
           
-          // FIX 1: Ensure the par values are proper numbers for each tee
+          // Ensure the par values are proper numbers for each tee
           const teesWithValidPar = cachedCourseDetail.tees.map(tee => {
             if (!tee.par || tee.par <= 0) {
               console.log(`Fixing invalid par value for tee ${tee.name}`);
@@ -71,6 +71,23 @@ export function createCourseSelectionHandlers({
                 tee.par = 72;
               }
             }
+            
+            // Ensure tee ID is properly set
+            if (!tee.id || tee.id.trim() === '') {
+              tee.id = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+              console.log(`Generated new ID for tee ${tee.name}: ${tee.id}`);
+            }
+            
+            // Ensure hole data is complete
+            if (tee.holes && tee.holes.length > 0) {
+              tee.holes = tee.holes.map(hole => ({
+                ...hole,
+                par: hole.par || 4,
+                yards: hole.yards || 400,
+                handicap: hole.handicap || (hole.number || 1)
+              }));
+            }
+            
             return tee;
           });
           
@@ -87,10 +104,21 @@ export function createCourseSelectionHandlers({
           
           // Debug tee data
           console.log("Final tee data for user-added course:", simplifiedCourseDetail.tees);
+          
+          // Save the fixed data back to localStorage
+          try {
+            localStorage.setItem(
+              `course_details_${course.id}`, 
+              JSON.stringify(simplifiedCourseDetail)
+            );
+            console.log("Updated course details with fixed tee data saved to localStorage");
+          } catch (e) {
+            console.error("Error saving fixed tee data to localStorage:", e);
+          }
         } else if (storedMetadata && storedMetadata.tees && storedMetadata.tees.length > 0) {
           console.log("Using metadata from localStorage:", storedMetadata);
           
-          // FIX 1: Ensure the tees in the metadata have proper par values
+          // Ensure the tees in the metadata have proper par values and IDs
           const teesWithValidPar = storedMetadata.tees.map(tee => {
             if (!tee.par || tee.par <= 0) {
               console.log(`Fixing invalid par value for tee ${tee.name}`);
@@ -102,6 +130,23 @@ export function createCourseSelectionHandlers({
                 tee.par = 72;
               }
             }
+            
+            // Ensure tee ID is properly set
+            if (!tee.id || tee.id.trim() === '') {
+              tee.id = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+              console.log(`Generated new ID for tee ${tee.name}: ${tee.id}`);
+            }
+            
+            // Ensure hole data is complete
+            if (tee.holes && tee.holes.length > 0) {
+              tee.holes = tee.holes.map(hole => ({
+                ...hole,
+                par: hole.par || 4,
+                yards: hole.yards || 400,
+                handicap: hole.handicap || (hole.number || 1)
+              }));
+            }
+            
             return tee;
           });
           
@@ -118,6 +163,17 @@ export function createCourseSelectionHandlers({
           
           // Debug tee data
           console.log("Final tee data from metadata for user-added course:", simplifiedCourseDetail.tees);
+          
+          // Save the fixed data back to localStorage
+          try {
+            localStorage.setItem(
+              `course_details_${course.id}`, 
+              JSON.stringify(simplifiedCourseDetail)
+            );
+            console.log("Updated course details with fixed tee data saved to localStorage");
+          } catch (e) {
+            console.error("Error saving fixed tee data to localStorage:", e);
+          }
         } else {
           console.log("No cached details found for user-added course, creating defaults");
           

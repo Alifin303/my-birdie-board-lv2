@@ -30,3 +30,45 @@ export function formatCourseName(clubName: string, courseName: string): string {
 export function isUserAddedCourse(courseName: string): boolean {
   return courseName.includes('[User added course]');
 }
+
+// Helper function to ensure tee data is valid
+export function validateTeeData(tee: any): any {
+  if (!tee) return null;
+  
+  // Ensure it has a valid ID
+  if (!tee.id || typeof tee.id !== 'string' || tee.id.trim() === '') {
+    tee.id = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    console.log(`Generated new ID for tee ${tee.name || 'unnamed'}: ${tee.id}`);
+  }
+  
+  // Ensure it has a name
+  if (!tee.name || typeof tee.name !== 'string' || tee.name.trim() === '') {
+    tee.name = 'Standard';
+  }
+  
+  // Ensure it has valid rating and slope
+  tee.rating = tee.rating && !isNaN(tee.rating) ? tee.rating : 72;
+  tee.slope = tee.slope && !isNaN(tee.slope) ? tee.slope : 113;
+  
+  // Ensure it has valid par
+  if (!tee.par || isNaN(tee.par) || tee.par <= 0) {
+    // Calculate par from holes if available
+    if (tee.holes && Array.isArray(tee.holes) && tee.holes.length > 0) {
+      tee.par = tee.holes.reduce((sum: number, hole: any) => sum + (hole.par || 4), 0);
+    } else {
+      tee.par = 72; // Default par
+    }
+  }
+  
+  // Ensure holes have valid data if present
+  if (tee.holes && Array.isArray(tee.holes)) {
+    tee.holes = tee.holes.map((hole: any, idx: number) => ({
+      number: hole.number || (idx + 1),
+      par: hole.par || 4,
+      yards: hole.yards || 400,
+      handicap: hole.handicap || (idx + 1)
+    }));
+  }
+  
+  return tee;
+}
