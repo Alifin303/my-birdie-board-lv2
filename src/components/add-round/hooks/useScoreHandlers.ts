@@ -1,3 +1,4 @@
+
 import { 
   Score, 
   HoleSelection, 
@@ -128,21 +129,21 @@ export function useScoreHandlers({
     return defaultHoles;
   };
 
-  const updateScorecardForTee = (course: SimplifiedCourseDetail, teeId: string, selection: HoleSelection = 'all') => {
+  const updateScorecardForTee = (teeId: string, selection: HoleSelection = 'all') => {
     console.log("🚀 Updating scorecard for tee", teeId, "with selection", selection);
-    console.log("🔍 Course present:", !!course);
+    console.log("🔍 Course present:", !!selectedCourse);
     console.log("🔍 Course and tee ready:", courseAndTeeReady);
     
-    if (!course) {
+    if (!selectedCourse) {
       console.error("❌ Cannot update scorecard: No course selected");
       return;
     }
     
-    console.log("✅ Using course for scorecard update:", course.name, course.id);
+    console.log("✅ Using course for scorecard update:", selectedCourse.name, selectedCourse.id);
     
     // Log available tees for debugging
     console.log("ℹ️ Available tees when updating scorecard:", 
-      course.tees.map(t => ({ 
+      selectedCourse.tees.map(t => ({ 
         id: t.id, 
         name: t.name, 
         par: t.par,
@@ -151,7 +152,7 @@ export function useScoreHandlers({
       }))
     );
     
-    const selectedTee = course.tees.find(t => t.id === teeId);
+    const selectedTee = selectedCourse.tees.find(t => t.id === teeId);
     console.log("🔍 Selected tee for scorecard update:", selectedTee);
     
     if (!selectedTee) {
@@ -266,7 +267,7 @@ export function useScoreHandlers({
     }
     
     // Update the scorecard with the new tee
-    updateScorecardForTee(selectedCourse, teeId, 'all');
+    updateScorecardForTee(teeId, 'all');
   };
 
   const handleHoleSelectionChange = (selection: HoleSelection) => {
@@ -287,7 +288,7 @@ export function useScoreHandlers({
     }
     
     console.log("✅ Handling hole selection change with tee ID:", teeId);
-    updateScorecardForTee(selectedCourse, teeId, selection);
+    updateScorecardForTee(teeId, selection);
     setHoleSelection(selection);
   };
 
