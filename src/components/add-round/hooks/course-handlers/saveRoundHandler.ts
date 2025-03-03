@@ -100,58 +100,99 @@ export function createSaveRoundHandler({
         isUserAdded: selectedCourse.isUserAdded
       });
       
-      // We need to ensure the course exists in the database before saving the round
-      let courseId;
+      // First, check if the course exists in the database 
+      // and create it if it doesn't exist or get the correct ID
+      let courseDbId;
       try {
-        // First, try to fetch the course directly (most efficient)
-        const { data, error } = await supabase
-          .from('courses')
-          .select('id')
-          .eq('id', selectedCourse.id)
-          .maybeSingle();
+        // First try to find by ID if it's a numeric ID (existing course)
+        if (!isNaN(Number(selectedCourse.id)) && Number(selectedCourse.id) > 0) {
+          // Check if course exists with this ID
+          const { data: existingCourse } = await supabase
+            .from('courses')
+            .select('id, name')
+            .eq('id', selectedCourse.id)
+            .maybeSingle();
+            
+          if (existingCourse) {
+            courseDbId = existingCourse.id;
+            console.log("Using existing course with ID:", courseDbId);
+          }
+        }
+        
+        // If we didn't find by ID, try by API course ID
+        if (!courseDbId && selectedCourse.apiCourseId) {
+          const { data: apiIdCourse } = await supabase
+            .from('courses')
+            .select('id')
+            .eq('api_course_id', selectedCourse.apiCourseId)
+            .maybeSingle();
+            
+          if (apiIdCourse) {
+            courseDbId = apiIdCourse.id;
+            console.log("Found existing course by API ID:", courseDbId);
+          }
+        }
+        
+        // If we still don't have a course, create a new one
+        if (!courseDbId) {
+          console.log("Creating new course:", selectedCourse.name);
           
-        if (data && data.id) {
-          // Course exists, use its ID
-          courseId = data.id;
-          console.log("Course verified to exist with ID:", courseId);
-        } else {
-          // Course doesn't exist, need to create it
-          console.log("Course not found in database, will create it:", selectedCourse.id);
+          const { data: newCourse, error: insertError } = await supabase
+            .from('courses')
+            .insert({
+              name: selectedCourse.name || selectedCourse.clubName || 'Unknown Course',
+              city: selectedCourse.city,
+              state: selectedCourse.state,
+              api_course_id: selectedCourse.apiCourseId,
+              user_id: session.user.id
+            })
+            .select('id')
+            .single();
+            
+          if (insertError) {
+            console.error("Error creating course:", insertError);
+            throw new Error("Failed to create course: " + insertError.message);
+          }
           
-          // For user-added courses, we need to create a new entry
-          // IMPORTANT: We don't try to use the original ID since that might conflict
-          const newCourseId = await ensureCourseExists(
-            0, // Using 0 forces creation of a new course with auto-generated ID
-            selectedCourse.apiCourseId,
-            selectedCourse.name,
-            selectedCourse.clubName,
-            selectedCourse.city,
-            selectedCourse.state
-          );
-          
-          courseId = newCourseId;
-          console.log("Created new course with ID:", courseId);
+          if (newCourse) {
+            courseDbId = newCourse.id;
+            console.log("Created new course with ID:", courseDbId);
+            
+            // Save course details to localStorage for future use
+            try {
+              const courseDetails = {
+                ...selectedCourse,
+                id: courseDbId
+              };
+              localStorage.setItem(`course_details_${courseDbId}`, JSON.stringify(courseDetails));
+              console.log("Saved course details to localStorage for ID:", courseDbId);
+            } catch (e) {
+              console.warn("Could not save course details to localStorage:", e);
+            }
+          } else {
+            throw new Error("Failed to create course - no ID returned");
+          }
         }
       } catch (courseError) {
         console.error("Error ensuring course exists:", courseError);
-        throw new Error("Unable to save round - course data could not be verified.");
+        throw new Error("Unable to save round - course data could not be verified");
       }
       
-      if (!courseId) {
-        throw new Error("Could not verify or create course in database.");
+      if (!courseDbId) {
+        throw new Error("Could not verify or create course in database");
       }
       
-      // Insert round into database
+      // Insert round into database with the verified course ID and tee information
       const { data: roundData, error } = await supabase
         .from('rounds')
         .insert({
           user_id: session.user.id,
-          course_id: courseId, // Use the verified course ID
+          course_id: courseDbId,  // Use the verified course ID
           date: roundDate.toISOString(),
           gross_score: totalStrokes,
           to_par_gross: toPar,
-          tee_id: selectedTeeId, 
-          tee_name: selectedTee.name,
+          tee_id: selectedTeeId,  // Save the tee ID
+          tee_name: selectedTee.name,  // Save the tee name
           hole_scores: JSON.stringify(scores)
         })
         .select()

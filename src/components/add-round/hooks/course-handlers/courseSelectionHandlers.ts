@@ -5,6 +5,7 @@ import { convertToSimplifiedCourseDetail } from "../../utils/courseUtils";
 import { SimplifiedGolfCourse, SimplifiedCourseDetail } from "../../types";
 import { UseCourseHandlersProps } from "./types";
 import { fetchCourseById, getCourseMetadataFromLocalStorage } from "@/integrations/supabase";
+import { validateAndRepairTeeData, getDefaultTeeId } from "../../utils/teeUtils";
 
 export function createCourseSelectionHandlers({
   setIsLoading,
@@ -55,42 +56,11 @@ export function createCourseSelectionHandlers({
         console.log("User-added course metadata from localStorage:", storedMetadata);
         console.log("User-added course details from cache:", cachedCourseDetail);
         
-        if (cachedCourseDetail && cachedCourseDetail.tees && cachedCourseDetail.tees.length > 0) {
-          console.log("User-added course details loaded from cache:", cachedCourseDetail);
-          console.log("Cached tees:", cachedCourseDetail.tees?.map(t => ({ id: t.id, name: t.name })));
+        // Try to load from cachedCourseDetail first, then fall back to storedMetadata
+        if (cachedCourseDetail && cachedCourseDetail.tees) {
+          console.log("Using cached course details for user-added course");
           
-          // Ensure the par values are proper numbers for each tee
-          const teesWithValidPar = cachedCourseDetail.tees.map(tee => {
-            if (!tee.par || tee.par <= 0) {
-              console.log(`Fixing invalid par value for tee ${tee.name}`);
-              // Calculate par from holes if available
-              if (tee.holes && tee.holes.length > 0) {
-                tee.par = tee.holes.reduce((sum, hole) => sum + (hole.par || 4), 0);
-              } else {
-                // Default to 72 if no holes data
-                tee.par = 72;
-              }
-            }
-            
-            // Ensure tee ID is properly set
-            if (!tee.id || tee.id.trim() === '') {
-              tee.id = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-              console.log(`Generated new ID for tee ${tee.name}: ${tee.id}`);
-            }
-            
-            // Ensure hole data is complete
-            if (tee.holes && tee.holes.length > 0) {
-              tee.holes = tee.holes.map(hole => ({
-                ...hole,
-                par: hole.par || 4,
-                yards: hole.yards || 400,
-                handicap: hole.handicap || (hole.number || 1)
-              }));
-            }
-            
-            return tee;
-          });
-          
+          // Ensure course ID and name are set correctly
           simplifiedCourseDetail = {
             ...cachedCourseDetail,
             id: course.id,
@@ -98,57 +68,11 @@ export function createCourseSelectionHandlers({
             clubName: course.clubName,
             city: course.city || cachedCourseDetail.city,
             state: course.state || cachedCourseDetail.state,
-            isUserAdded: true,
-            tees: teesWithValidPar // Use the fixed tees
+            isUserAdded: true
           };
-          
-          // Debug tee data
-          console.log("Final tee data for user-added course:", simplifiedCourseDetail.tees);
-          
-          // Save the fixed data back to localStorage
-          try {
-            localStorage.setItem(
-              `course_details_${course.id}`, 
-              JSON.stringify(simplifiedCourseDetail)
-            );
-            console.log("Updated course details with fixed tee data saved to localStorage");
-          } catch (e) {
-            console.error("Error saving fixed tee data to localStorage:", e);
-          }
-        } else if (storedMetadata && storedMetadata.tees && storedMetadata.tees.length > 0) {
-          console.log("Using metadata from localStorage:", storedMetadata);
-          
-          // Ensure the tees in the metadata have proper par values and IDs
-          const teesWithValidPar = storedMetadata.tees.map(tee => {
-            if (!tee.par || tee.par <= 0) {
-              console.log(`Fixing invalid par value for tee ${tee.name}`);
-              // Calculate par from holes if available
-              if (tee.holes && tee.holes.length > 0) {
-                tee.par = tee.holes.reduce((sum, hole) => sum + (hole.par || 4), 0);
-              } else {
-                // Default to 72 if no holes data
-                tee.par = 72;
-              }
-            }
-            
-            // Ensure tee ID is properly set
-            if (!tee.id || tee.id.trim() === '') {
-              tee.id = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-              console.log(`Generated new ID for tee ${tee.name}: ${tee.id}`);
-            }
-            
-            // Ensure hole data is complete
-            if (tee.holes && tee.holes.length > 0) {
-              tee.holes = tee.holes.map(hole => ({
-                ...hole,
-                par: hole.par || 4,
-                yards: hole.yards || 400,
-                handicap: hole.handicap || (hole.number || 1)
-              }));
-            }
-            
-            return tee;
-          });
+        } 
+        else if (storedMetadata && storedMetadata.tees) {
+          console.log("Using stored metadata for user-added course");
           
           simplifiedCourseDetail = {
             id: course.id,
@@ -156,26 +80,14 @@ export function createCourseSelectionHandlers({
             clubName: course.clubName,
             city: course.city || storedMetadata.city,
             state: course.state || storedMetadata.state,
-            tees: teesWithValidPar, // Use the fixed tees
-            holes: storedMetadata.holes || teesWithValidPar[0].holes,
+            tees: storedMetadata.tees,
+            holes: storedMetadata.holes,
             isUserAdded: true
           };
-          
-          // Debug tee data
-          console.log("Final tee data from metadata for user-added course:", simplifiedCourseDetail.tees);
-          
-          // Save the fixed data back to localStorage
-          try {
-            localStorage.setItem(
-              `course_details_${course.id}`, 
-              JSON.stringify(simplifiedCourseDetail)
-            );
-            console.log("Updated course details with fixed tee data saved to localStorage");
-          } catch (e) {
-            console.error("Error saving fixed tee data to localStorage:", e);
-          }
-        } else {
-          console.log("No cached details found for user-added course, creating defaults");
+        } 
+        else {
+          // If no valid data found, create a basic structure
+          console.log("No valid data found for user-added course, creating basic structure");
           
           // Create a default tee if none exists
           const defaultHoles = Array(18).fill(null).map((_, idx) => ({
@@ -186,18 +98,6 @@ export function createCourseSelectionHandlers({
           }));
           
           const defaultTeeId = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-          console.log("Generated new tee ID:", defaultTeeId);
-          
-          const defaultTee = {
-            id: defaultTeeId,
-            name: 'White',
-            rating: 72,
-            slope: 113,
-            par: 72, // Ensure par is set correctly for the default tee
-            gender: 'male' as const,
-            originalIndex: 0,
-            holes: defaultHoles
-          };
           
           simplifiedCourseDetail = {
             id: course.id,
@@ -205,22 +105,24 @@ export function createCourseSelectionHandlers({
             clubName: course.clubName,
             city: course.city,
             state: course.state,
-            tees: [defaultTee],
+            tees: [{
+              id: defaultTeeId,
+              name: 'White',
+              rating: 72,
+              slope: 113,
+              par: 72,
+              gender: 'male' as const,
+              originalIndex: 0,
+              holes: defaultHoles
+            }],
             holes: defaultHoles,
             isUserAdded: true
           };
-          
-          // Save the default course details to localStorage
-          try {
-            localStorage.setItem(
-              `course_details_${course.id}`, 
-              JSON.stringify(simplifiedCourseDetail)
-            );
-            console.log("Saved default course details to localStorage");
-          } catch (e) {
-            console.error("Error saving to localStorage:", e);
-          }
         }
+        
+        // Validate and repair the tee data to ensure it's complete
+        simplifiedCourseDetail = validateAndRepairTeeData(simplifiedCourseDetail);
+        
       } 
       else {
         console.log("Loading course from API:", course);
@@ -249,11 +151,14 @@ export function createCourseSelectionHandlers({
           }
           
           simplifiedCourseDetail.apiCourseId = courseId.toString();
+          simplifiedCourseDetail.isUserAdded = false;
           
           console.log("Final course detail after processing:", simplifiedCourseDetail);
           console.log("Course tees:", simplifiedCourseDetail.tees.map(t => ({ id: t.id, name: t.name, par: t.par, rating: t.rating, slope: t.slope })));
         } catch (error) {
           console.error("Error fetching course details from API:", error);
+          
+          // Create default course data if API fails
           const defaultHoles = Array(18).fill(null).map((_, idx) => ({
             number: idx + 1,
             par: 4,
@@ -281,7 +186,8 @@ export function createCourseSelectionHandlers({
             tees: [defaultTee],
             holes: defaultHoles,
             apiCourseId: typeof course.apiCourseId === 'string' ? course.apiCourseId : 
-                        (course.id !== undefined ? course.id.toString() : "")
+                        (course.id !== undefined ? course.id.toString() : ""),
+            isUserAdded: false // Mark as from API but with defaults
           };
           
           throw error;
@@ -312,7 +218,9 @@ export function createCourseSelectionHandlers({
       
       // Handle tee selection and scorecard setup
       if (simplifiedCourseDetail.tees && simplifiedCourseDetail.tees.length > 0) {
-        const defaultTeeId = simplifiedCourseDetail.tees[0].id;
+        // Get a reasonable default tee or first available
+        const defaultTeeId = getDefaultTeeId(simplifiedCourseDetail);
+        
         console.log("Available tees:", 
           simplifiedCourseDetail.tees.map(t => ({ 
             id: t.id, 
@@ -324,62 +232,28 @@ export function createCourseSelectionHandlers({
         );
         console.log("Setting default tee ID:", defaultTeeId);
         
-        // Set the selected tee ID first
-        setSelectedTeeId(defaultTeeId);
-        
-        console.log("Default tee set to:", {
-          id: defaultTeeId,
-          name: simplifiedCourseDetail.tees[0]?.name,
-          par: simplifiedCourseDetail.tees[0]?.par,
-          rating: simplifiedCourseDetail.tees[0]?.rating,
-          slope: simplifiedCourseDetail.tees[0]?.slope
-        });
+        if (defaultTeeId) {
+          // Set the selected tee ID first
+          setSelectedTeeId(defaultTeeId);
+          
+          const selectedTee = simplifiedCourseDetail.tees.find(tee => tee.id === defaultTeeId);
+          
+          console.log("Default tee set to:", {
+            id: defaultTeeId,
+            name: selectedTee?.name,
+            par: selectedTee?.par,
+            rating: selectedTee?.rating,
+            slope: selectedTee?.slope
+          });
+          
+          // Update scorecard based on tee selection
+          updateScorecardForTee(simplifiedCourseDetail, defaultTeeId);
+        } else {
+          throw new Error("Could not find a valid tee for this course");
+        }
       } else {
         console.error("No tees found for course:", simplifiedCourseDetail);
-        
-        // Create a default tee if none exists
-        const defaultHoles = Array(18).fill(null).map((_, idx) => ({
-          number: idx + 1,
-          par: 4,
-          yards: 400,
-          handicap: idx + 1
-        }));
-        
-        const defaultTeeId = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-        const defaultTee = {
-          id: defaultTeeId,
-          name: 'White',
-          rating: 72,
-          slope: 113,
-          par: 72,
-          gender: 'male' as const,
-          originalIndex: 0,
-          holes: defaultHoles
-        };
-        
-        // Update the course detail with the default tee
-        simplifiedCourseDetail.tees = [defaultTee];
-        simplifiedCourseDetail.holes = defaultHoles;
-        
-        // Update state with the modified course detail
-        setSelectedCourse(simplifiedCourseDetail);
-        setSelectedTeeId(defaultTeeId);
-        
-        console.log("Created default tee:", defaultTee);
-        console.log("Updated course with default tee:", simplifiedCourseDetail);
-        
-        // Update localStorage if it's a user-added course
-        if (simplifiedCourseDetail.isUserAdded) {
-          try {
-            localStorage.setItem(
-              `course_details_${course.id}`, 
-              JSON.stringify(simplifiedCourseDetail)
-            );
-            console.log("Updated course details with default tee in localStorage");
-          } catch (e) {
-            console.error("Error saving to localStorage:", e);
-          }
-        }
+        throw new Error("No tee boxes found for this course");
       }
       
       setCurrentStep('scorecard');
@@ -408,12 +282,10 @@ export function createCourseSelectionHandlers({
       const courseData = await fetchCourseById(courseId);
       
       if (courseData) {
-        const { clubName, courseName: name } = courseData;
-        
         const newCourse: SimplifiedGolfCourse = {
           id: courseId,
-          name,
-          clubName,
+          name: courseData.name,
+          clubName: courseData.name,
           city: courseData.city || '',
           state: courseData.state || '',
           country: 'United States',

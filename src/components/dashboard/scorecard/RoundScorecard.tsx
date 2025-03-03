@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -174,7 +173,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
             {isEditing ? (
               "Edit your round details"
             ) : (
-              <>Details for your round at {round.courses?.clubName} - {round.courses?.courseName} ({round.tee_name || "Standard"})</>
+              <>Details for your round at {round.courses?.clubName || round.courses?.name} - {round.courses?.name} ({round.tee_name || "Standard"})</>
             )}
           </DialogDescription>
         </DialogHeader>
