@@ -22,13 +22,14 @@ export const ScorecardHeader = ({
     ? format(roundDate, 'MMMM d, yyyy')
     : format(new Date(round.date), 'MMMM d, yyyy');
     
-  // Enhanced logging to verify the exact tee name being received
-  console.log("ScorecardHeader - CRITICAL TEE INFO:", {
+  // Even more detailed logging to pinpoint the exact issue
+  console.log("SCORECARDHEADER FINAL TEE DATA:", {
     roundId: round.id,
     teeName: round.tee_name,
     teeNameType: typeof round.tee_name,
     teeId: round.tee_id,
-    rawTeeNameValue: JSON.stringify(round.tee_name)
+    rawTeeNameValue: JSON.stringify(round.tee_name),
+    roundObject: JSON.stringify(round)
   });
 
   return (
@@ -72,7 +73,6 @@ export const ScorecardHeader = ({
           ) : (
             <>
               <p className="text-sm text-muted-foreground mt-1">Date: {formattedDate}</p>
-              {/* CRITICAL FIX: Directly use the raw tee_name value without any modification or conditional logic */}
               <p className="text-sm text-muted-foreground">Tees: {round.tee_name || "Standard"}</p>
             </>
           )}

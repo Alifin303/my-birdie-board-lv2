@@ -49,10 +49,11 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
     round => round.courses && round.courses.id === selectedCourseId
   );
   
-  console.log("All rounds for this course with tee info:", 
+  console.log("All rounds for this course with raw tee info:", 
     courseRounds.map(round => ({
       id: round.id,
       tee_name: round.tee_name,
+      tee_name_raw: String(round.tee_name),
       tee_name_type: typeof round.tee_name,
       tee_id: round.tee_id,
       date: new Date(round.date).toLocaleDateString()
@@ -124,9 +125,10 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
   };
   
   const handleViewScorecard = (round: Round) => {
-    console.log("IMPORTANT - VIEWING ROUND SCORECARD:", {
+    console.log("VIEWING ROUND SCORECARD - EXACT TEE DATA:", {
       id: round.id,
       teeName: round.tee_name,
+      teeNameRaw: String(round.tee_name),
       teeNameType: typeof round.tee_name,
       teeId: round.tee_id
     });
@@ -162,12 +164,13 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
   };
 
   const formatTeeName = (teeName: string | null | undefined): string => {
-    console.log(`CRITICAL - Formatting tee name in CourseRoundHistory: "${teeName}" (${typeof teeName})`);
+    console.log(`COURSE HISTORY TEE NAME: "${teeName}" (${typeof teeName})`);
     
-    if (!teeName || teeName === '') {
+    if (teeName === null || teeName === undefined || teeName === '') {
       return 'Standard Tees';
     }
-    return teeName;
+    
+    return String(teeName);
   };
   
   const sortedRounds = [...courseRounds].sort((a, b) => {

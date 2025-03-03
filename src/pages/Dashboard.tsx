@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase, parseCourseName, updateCourseWithUserId } from "@/integrations/supabase/client";
@@ -80,12 +81,12 @@ export default function Dashboard() {
         throw error;
       }
       
-      console.log("IMPORTANT - RAW ROUNDS FROM DATABASE:", JSON.stringify(data?.slice(0, 3).map(round => ({ 
+      console.log("FETCH COMPLETE - DATABASE ROUND DATA:", data?.slice(0, 3).map(round => ({ 
         id: round.id, 
         tee_name: round.tee_name,
         tee_name_type: typeof round.tee_name,
         tee_id: round.tee_id
-      })), null, 2));
+      })));
       
       const processedRounds = data?.map(round => {
         let parsedNames = { clubName: "Unknown Club", courseName: "Unknown Course" };
@@ -94,8 +95,8 @@ export default function Dashboard() {
           parsedNames = parseCourseName(round.courses.name);
         }
         
-        // CRITICAL - Preserve the exact tee_name as it is in the database
-        // DO NOT MODIFY THE TEE_NAME IN ANY WAY
+        // CRITICAL: Directly assign the tee_name without any modifications
+        // This ensures the raw database value is preserved
         return {
           ...round,
           courses: round.courses ? {
@@ -106,7 +107,8 @@ export default function Dashboard() {
         };
       }) || [];
       
-      console.log("PROCESSED ROUNDS - First few with tee info:", 
+      // Log exactly what's being returned to the UI
+      console.log("DASHBOARD PROCESSED ROUNDS - WITH TEE INFO:", 
         processedRounds.slice(0, 3).map(r => ({
           id: r.id,
           tee_name: r.tee_name,
