@@ -162,7 +162,7 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
   };
 
   const formatTeeName = (teeName: string | null | undefined): string => {
-    console.log(`Formatting tee name: "${teeName}" (${typeof teeName})`);
+    console.log(`CRITICAL - Formatting tee name in CourseRoundHistory: "${teeName}" (${typeof teeName})`);
     
     if (!teeName || teeName === '') {
       return 'Standard Tees';

@@ -24,11 +24,11 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
     if (round && isOpen) {
       console.log("============ ROUND SCORECARD OPENED ============");
       console.log("Round ID:", round.id);
-      console.log("CRITICAL - TEE DATA BEING PASSED TO SCORECARD:", {
+      console.log("ULTIMATE TEE NAME DEBUG:", {
         teeName: round.tee_name,
         teeNameType: typeof round.tee_name,
-        teeId: round.tee_id,
-        round: round
+        teeNameStringified: JSON.stringify(round.tee_name),
+        teeId: round.tee_id
       });
       
       let parsedScores: HoleScore[] = [];
