@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScorecardHeader } from "./scorecard/ScorecardHeader";
 
 interface RoundScorecardProps {
   round: any;
@@ -52,7 +52,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       setRoundDate(round.date ? new Date(round.date) : undefined);
       setIsEditing(false); // Reset edit mode when opening a new round
       
-      // Set the selected tee based on the round data
+      // Always use the exact tee_name from the round data
       setSelectedTee(round.tee_name || '');
       console.log("Setting selected tee to round's tee_name:", round.tee_name);
       
@@ -374,100 +374,17 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
 
         <Card>
           <CardContent className="pt-6">
-            <div className="flex justify-between items-center mb-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
-                <div>
-                  <h3 className="font-semibold">Course Information</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {round.courses?.clubName} - {round.courses?.courseName}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {round.courses?.city}{round.courses?.state ? `, ${round.courses?.state}` : ''}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="font-semibold">Round Details</h3>
-                  {isEditing ? (
-                    <div className="space-y-2 mt-1">
-                      <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full justify-start text-left font-normal"
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {roundDate ? format(roundDate, "PPP") : "Select date"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={roundDate}
-                            onSelect={handleDateSelect}
-                            disabled={(date) => date > new Date()}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      
-                      {availableTees.length > 0 && (
-                        <div className="mt-2">
-                          <label className="text-sm text-muted-foreground mb-1 block">Tees:</label>
-                          <Select value={selectedTee} onValueChange={handleTeeChange}>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select tee" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {availableTees.map((tee) => (
-                                <SelectItem key={tee.id} value={tee.name}>
-                                  {tee.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <>
-                      <p className="text-sm text-muted-foreground mt-1">Date: {formattedDate}</p>
-                      <p className="text-sm text-muted-foreground">Tees: {selectedTee || round.tee_name || 'Standard'}</p>
-                    </>
-                  )}
-                </div>
-              </div>
-              
-              {/* Edit/Save buttons */}
-              {isEditing ? (
-                <div className="flex space-x-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setIsEditing(false)}
-                  >
-                    <X className="h-4 w-4 mr-1" />
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleSaveChanges}
-                    disabled={isSaving}
-                  >
-                    <Save className="h-4 w-4 mr-1" />
-                    {isSaving ? "Saving..." : "Save"}
-                  </Button>
-                </div>
-              ) : (
-                <Button
-                  size="sm"
-                  onClick={() => setIsEditing(true)}
-                >
-                  <Edit className="h-4 w-4 mr-1" />
-                  Edit
-                </Button>
-              )}
-            </div>
+            <ScorecardHeader
+              round={round}
+              isEditing={isEditing}
+              setIsEditing={setIsEditing}
+              roundDate={roundDate}
+              calendarOpen={calendarOpen}
+              setCalendarOpen={setCalendarOpen}
+              handleDateSelect={handleDateSelect}
+              isSaving={isSaving}
+              handleSaveChanges={handleSaveChanges}
+            />
 
             <Separator className="my-4" />
             

@@ -281,72 +281,77 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
               </tr>
             </thead>
             <tbody>
-              {sortedRounds.map((round) => (
-                <tr key={round.id} className="border-b last:border-0">
-                  <td className="px-4 py-3 text-sm font-medium">
-                    {new Date(round.date).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    {round.tee_name || 'Standard'} Tees
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    {scoreType === 'gross' 
-                      ? round.gross_score 
-                      : round.net_score || '-'}
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    {scoreType === 'gross' 
-                      ? (round.to_par_gross > 0 ? '+' : '') + round.to_par_gross
-                      : round.to_par_net !== undefined 
-                        ? (round.to_par_net > 0 ? '+' : '') + round.to_par_net
-                        : '-'}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-right">
-                    <div className="flex justify-end space-x-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => handleViewScorecard(round)}
-                        title="View scorecard"
-                        className="h-8 px-2"
-                      >
-                        <Eye className="h-4 w-4 mr-1" />
-                        View
-                      </Button>
-                      
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => setDeletingRoundId(round.id)}
-                            className="h-8 px-2 text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                            title="Delete round"
-                          >
-                            <Trash className="h-4 w-4 mr-1" />
-                            Delete
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure you want to delete this round?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete the round
-                              data and remove it from all statistics.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel onClick={() => setDeletingRoundId(null)}>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleDeleteRound} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {sortedRounds.map((round) => {
+                // Ensure we're using the correct tee name from the round data
+                const teeName = round.tee_name || 'Standard';
+                
+                return (
+                  <tr key={round.id} className="border-b last:border-0">
+                    <td className="px-4 py-3 text-sm font-medium">
+                      {new Date(round.date).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      {teeName} Tees
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      {scoreType === 'gross' 
+                        ? round.gross_score 
+                        : round.net_score || '-'}
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      {scoreType === 'gross' 
+                        ? (round.to_par_gross > 0 ? '+' : '') + round.to_par_gross
+                        : round.to_par_net !== undefined 
+                          ? (round.to_par_net > 0 ? '+' : '') + round.to_par_net
+                          : '-'}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-right">
+                      <div className="flex justify-end space-x-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleViewScorecard(round)}
+                          title="View scorecard"
+                          className="h-8 px-2"
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
+                        
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => setDeletingRoundId(round.id)}
+                              className="h-8 px-2 text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                              title="Delete round"
+                            >
+                              <Trash className="h-4 w-4 mr-1" />
                               Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure you want to delete this round?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the round
+                                data and remove it from all statistics.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel onClick={() => setDeletingRoundId(null)}>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={handleDeleteRound} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
