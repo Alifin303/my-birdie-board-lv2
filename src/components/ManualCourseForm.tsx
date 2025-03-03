@@ -18,6 +18,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCourseName } from "@/integrations/supabase/client";
+import { saveCourseTeesToDatabase, deleteCourseTees } from "@/integrations/supabase/course/course-db-operations";
 
 import { CourseInformation } from "./course-form/CourseInformation";
 import { TeeSelection } from "./course-form/TeeSelection";
@@ -72,28 +73,106 @@ export function ManualCourseForm({
         console.log("Loading existing course data:", existingCourse);
         setIsEditMode(true);
         
-        const courseDetailsKey = `course_details_${existingCourse.id}`;
-        const storedDetails = localStorage.getItem(courseDetailsKey);
-        
-        if (storedDetails) {
+        const loadTeeData = async () => {
           try {
-            const parsedDetails = JSON.parse(storedDetails);
-            console.log("Found stored course details:", parsedDetails);
-            
-            const tees = parsedDetails.tees || [createDefaultTee()];
-            
-            setFormData({
-              name: existingCourse.name.replace(' [User added course]', ''),
-              city: existingCourse.city || '',
-              state: existingCourse.state || '',
-              tees: tees
-            });
-            
-            if (tees.length > 0) {
-              setCurrentTeeIndex(0);
+            const { data: courseTees, error } = await supabase
+              .from('course_tees')
+              .select('*')
+              .eq('course_id', existingCourse.id);
+              
+            if (error) {
+              console.error("Error fetching tees from database:", error);
+              loadFromLocalStorage();
+              return;
             }
+            
+            if (courseTees && courseTees.length > 0) {
+              const teesWithHoles: TeeData[] = [];
+              
+              for (const tee of courseTees) {
+                const { data: holes, error: holesError } = await supabase
+                  .from('course_holes')
+                  .select('*')
+                  .eq('tee_id', tee.id)
+                  .order('hole_number', { ascending: true });
+                  
+                if (holesError) {
+                  console.error("Error fetching holes for tee:", tee.id, holesError);
+                  continue;
+                }
+                
+                const formattedHoles: HoleData[] = [];
+                for (let i = 1; i <= 18; i++) {
+                  const hole = holes?.find(h => h.hole_number === i);
+                  formattedHoles.push({
+                    number: i,
+                    par: hole?.par || 4,
+                    yards: hole?.yards || 350,
+                    handicap: hole?.handicap || i
+                  });
+                }
+                
+                teesWithHoles.push({
+                  id: tee.tee_id,
+                  name: tee.name,
+                  color: tee.color || '#FFFFFF',
+                  gender: tee.gender as 'male' | 'female' || 'male',
+                  holes: formattedHoles
+                });
+              }
+              
+              if (teesWithHoles.length > 0) {
+                setFormData({
+                  name: existingCourse.name.replace(' [User added course]', ''),
+                  city: existingCourse.city || '',
+                  state: existingCourse.state || '',
+                  tees: teesWithHoles
+                });
+                setCurrentTeeIndex(0);
+                return;
+              }
+            }
+            
+            loadFromLocalStorage();
           } catch (error) {
-            console.error("Error parsing stored course details:", error);
+            console.error("Error loading course tees from database:", error);
+            loadFromLocalStorage();
+          }
+        };
+        
+        const loadFromLocalStorage = () => {
+          const courseDetailsKey = `course_details_${existingCourse.id}`;
+          const storedDetails = localStorage.getItem(courseDetailsKey);
+          
+          if (storedDetails) {
+            try {
+              const parsedDetails = JSON.parse(storedDetails);
+              console.log("Found stored course details:", parsedDetails);
+              
+              const tees = parsedDetails.tees || [createDefaultTee()];
+              
+              setFormData({
+                name: existingCourse.name.replace(' [User added course]', ''),
+                city: existingCourse.city || '',
+                state: existingCourse.state || '',
+                tees: tees
+              });
+              
+              if (tees.length > 0) {
+                setCurrentTeeIndex(0);
+              }
+            } catch (error) {
+              console.error("Error parsing stored course details:", error);
+              
+              setFormData({
+                name: existingCourse.name.replace(' [User added course]', ''),
+                city: existingCourse.city || '',
+                state: existingCourse.state || '',
+                tees: [createDefaultTee()]
+              });
+            }
+          } else {
+            console.log("No stored details found for course:", existingCourse.id);
             
             setFormData({
               name: existingCourse.name.replace(' [User added course]', ''),
@@ -102,16 +181,9 @@ export function ManualCourseForm({
               tees: [createDefaultTee()]
             });
           }
-        } else {
-          console.log("No stored details found for course:", existingCourse.id);
-          
-          setFormData({
-            name: existingCourse.name.replace(' [User added course]', ''),
-            city: existingCourse.city || '',
-            state: existingCourse.state || '',
-            tees: [createDefaultTee()]
-          });
-        }
+        };
+        
+        loadTeeData();
       } else {
         setIsEditMode(false);
         setFormData({
@@ -307,6 +379,8 @@ export function ManualCourseForm({
         
         courseId = updatedCourse.id;
         console.log("Updated existing course:", courseId);
+        
+        await deleteCourseTees(courseId);
       } else {
         const { data: newCourse, error: insertError } = await supabase
           .from('courses')
@@ -322,6 +396,23 @@ export function ManualCourseForm({
         console.log("Inserted new course:", courseId);
       }
       
+      const preparedTees = formData.tees.map(tee => {
+        const { rating, slope, par, yards } = calculateRatings(tee);
+        return {
+          ...tee,
+          rating,
+          slope,
+          par,
+          yards
+        };
+      });
+      
+      const saveResult = await saveCourseTeesToDatabase(courseId, preparedTees);
+      
+      if (!saveResult) {
+        console.warn("Failed to save tees to database, falling back to localStorage");
+      }
+      
       const courseDetailsKey = `course_details_${courseId}`;
       const courseDetails = {
         id: courseId,
@@ -330,17 +421,8 @@ export function ManualCourseForm({
         city: formData.city,
         state: formData.state,
         isUserAdded: true,
-        tees: formData.tees.map(tee => {
-          const { rating, slope, par, yards } = calculateRatings(tee);
-          return {
-            ...tee,
-            rating,
-            slope,
-            par,
-            yards
-          };
-        }),
-        holes: formData.tees[0]?.holes || []
+        tees: preparedTees,
+        holes: preparedTees[0]?.holes || []
       };
       
       localStorage.setItem(courseDetailsKey, JSON.stringify(courseDetails));
@@ -353,17 +435,8 @@ export function ManualCourseForm({
         clubName: formData.name,
         city: formData.city,
         state: formData.state,
-        tees: formData.tees.map(tee => {
-          const { rating, slope, par, yards } = calculateRatings(tee);
-          return {
-            ...tee,
-            rating,
-            slope,
-            par,
-            yards
-          };
-        }),
-        holes: formData.tees[0]?.holes || []
+        tees: preparedTees,
+        holes: preparedTees[0]?.holes || []
       };
       
       localStorage.setItem(metadataKey, JSON.stringify(courseMetadata));

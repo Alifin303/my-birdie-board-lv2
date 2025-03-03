@@ -1,6 +1,7 @@
 import { CourseDetail, TeeBox } from "@/services/golfCourseApi";
 import { SimplifiedCourseDetail, SimplifiedGolfCourse, SimplifiedHole, SimplifiedTee } from "../types";
 import { supabase, formatCourseName, parseCourseName, getCourseMetadataFromLocalStorage, isUserAddedCourse } from "@/integrations/supabase";
+import { getCourseTeesByIdFromDatabase } from "@/integrations/supabase/course/course-db-operations";
 
 export const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): SimplifiedHole[] => {
   console.log("Extracting holes for tee:", teeId, "from course detail:", courseDetail);
@@ -119,7 +120,6 @@ export const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): Sim
     return { ...tee, holes: teeHoles };
   });
   
-  // Fix for holes being properly initialized
   let holes: SimplifiedHole[] = [];
   if (simplifiedTees.length > 0 && simplifiedTees[0].holes && simplifiedTees[0].holes.length > 0) {
     holes = simplifiedTees[0].holes;
@@ -133,7 +133,6 @@ export const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): Sim
     }));
   }
   
-  // Ensure courseId is a number
   const courseId = typeof courseDetail.id === 'string' ? parseInt(courseDetail.id, 10) : 
                    typeof courseDetail.id === 'number' ? courseDetail.id : 0;
 
@@ -208,11 +207,66 @@ export const extractTeesFromApiResponse = (courseDetail: CourseDetail): Simplifi
   return tees;
 };
 
-export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDetail | null => {
+export const loadUserAddedCourseDetails = async (courseId: number): Promise<SimplifiedCourseDetail | null> => {
   try {
     console.log("Loading user-added course details for ID:", courseId);
     
-    // First try the direct storage key
+    // First try to load from database
+    const tees = await getCourseTeesByIdFromDatabase(courseId);
+    if (tees && tees.length > 0) {
+      console.log("Successfully loaded tees from database:", tees.length);
+      
+      // Get course basic info
+      const { data: courseData, error: courseError } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('id', courseId)
+        .single();
+        
+      if (courseError) {
+        console.error("Error fetching course from database:", courseError);
+        return null;
+      }
+      
+      const { clubName, courseName } = parseCourseName(courseData.name);
+      
+      // Ensure each tee has hole data and calculate par
+      const validatedTees = tees.map(tee => {
+        // Ensure each tee has par data
+        if (!tee.par || tee.par <= 0) {
+          if (tee.holes && tee.holes.length > 0) {
+            tee.par = tee.holes.reduce((sum, hole) => sum + (hole.par || 4), 0);
+          } else {
+            tee.par = 72; // Default par
+          }
+        }
+        
+        // Ensure each tee has valid rating and slope
+        tee.rating = tee.rating || 72.0;
+        tee.slope = tee.slope || 113;
+        
+        return tee;
+      });
+      
+      // Get holes from the first tee
+      const holes = validatedTees[0]?.holes || [];
+      
+      // Create the course detail
+      const courseDetail: SimplifiedCourseDetail = {
+        id: courseId,
+        name: courseName,
+        clubName: clubName,
+        city: courseData.city || '',
+        state: courseData.state || '',
+        tees: validatedTees,
+        holes: holes,
+        isUserAdded: true
+      };
+      
+      return courseDetail;
+    }
+    
+    // Fall back to localStorage for backward compatibility
     const courseDetailsKey = `course_details_${courseId}`;
     const storedDetails = localStorage.getItem(courseDetailsKey);
     

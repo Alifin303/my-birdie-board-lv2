@@ -9,6 +9,100 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      course_holes: {
+        Row: {
+          created_at: string
+          handicap: number | null
+          hole_number: number
+          id: string
+          par: number
+          tee_id: string
+          updated_at: string
+          yards: number | null
+        }
+        Insert: {
+          created_at?: string
+          handicap?: number | null
+          hole_number: number
+          id?: string
+          par: number
+          tee_id: string
+          updated_at?: string
+          yards?: number | null
+        }
+        Update: {
+          created_at?: string
+          handicap?: number | null
+          hole_number?: number
+          id?: string
+          par?: number
+          tee_id?: string
+          updated_at?: string
+          yards?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_holes_tee_id_fkey"
+            columns: ["tee_id"]
+            isOneToOne: false
+            referencedRelation: "course_tees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_tees: {
+        Row: {
+          color: string | null
+          course_id: number
+          created_at: string
+          gender: string | null
+          id: string
+          name: string
+          par: number | null
+          rating: number | null
+          slope: number | null
+          tee_id: string
+          updated_at: string
+          yards: number | null
+        }
+        Insert: {
+          color?: string | null
+          course_id: number
+          created_at?: string
+          gender?: string | null
+          id?: string
+          name: string
+          par?: number | null
+          rating?: number | null
+          slope?: number | null
+          tee_id: string
+          updated_at?: string
+          yards?: number | null
+        }
+        Update: {
+          color?: string | null
+          course_id?: number
+          created_at?: string
+          gender?: string | null
+          id?: string
+          name?: string
+          par?: number | null
+          rating?: number | null
+          slope?: number | null
+          tee_id?: string
+          updated_at?: string
+          yards?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_tees_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           api_course_id: string | null

@@ -2,6 +2,7 @@
 import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
 import { ensureCourseExists, findOrCreateCourseByApiId } from "@/integrations/supabase";
+import { getCourseTeesByIdFromDatabase } from "@/integrations/supabase/course/course-db-operations";
 
 export function createSaveRoundHandler({
   selectedCourse,
@@ -172,33 +173,6 @@ export function createSaveRoundHandler({
       
       // Invalidate queries to refresh data in UI
       queryClient.invalidateQueries({ queryKey: ['userRounds'] });
-      
-      // Update local storage for user-added courses if needed
-      if (selectedCourse.isUserAdded) {
-        try {
-          const courseDetailsKey = `course_details_${selectedCourse.id}`;
-          const storedDetails = localStorage.getItem(courseDetailsKey);
-          
-          if (storedDetails) {
-            const courseDetails = JSON.parse(storedDetails);
-            // Ensure the tee information is correct in localStorage
-            if (courseDetails.tees && Array.isArray(courseDetails.tees)) {
-              // Make sure the selected tee is included with correct information
-              const teeIndex = courseDetails.tees.findIndex((t: any) => t.id === selectedTeeId);
-              if (teeIndex >= 0) {
-                // Update the existing tee if needed
-                if (!courseDetails.tees[teeIndex].par) {
-                  courseDetails.tees[teeIndex].par = selectedTee.par;
-                }
-              }
-            }
-            localStorage.setItem(courseDetailsKey, JSON.stringify(courseDetails));
-            console.log("Updated user-added course details in localStorage");
-          }
-        } catch (e) {
-          console.error("Error updating localStorage for user-added course:", e);
-        }
-      }
       
       toast.toast({
         title: "Success",
