@@ -8,5 +8,9 @@ export { useCourseHandlers };
  */
 function useCourseHandlers(props: Parameters<typeof useRefactoredCourseHandlers>[0]) {
   console.log("useCourseHandlers wrapper - selectedTeeId:", props.selectedTeeId);
-  return useRefactoredCourseHandlers(props);
+  // Make sure the selectedTeeId is passed correctly to the refactored handler
+  return useRefactoredCourseHandlers({
+    ...props,
+    selectedTeeId: props.selectedTeeId
+  });
 }

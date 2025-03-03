@@ -21,13 +21,14 @@ export const ScorecardHeader = ({
   const formattedDate = roundDate 
     ? format(roundDate, 'MMMM d, yyyy')
     : format(new Date(round.date), 'MMMM d, yyyy');
-    
-  // Use the actual tee name directly from the round data
+  
+  // Ensure we display the correct tee name from the round data
   const teeName = round.tee_name || "Standard";
   
-  console.log("ScorecardHeader rendering with tee:", {
-    name: round.tee_name,
-    id: round.tee_id
+  console.log("ScorecardHeader - round data:", {
+    id: round.id,
+    tee_name: round.tee_name,
+    tee_id: round.tee_id
   });
 
   return (

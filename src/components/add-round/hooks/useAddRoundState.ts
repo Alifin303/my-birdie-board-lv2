@@ -60,6 +60,7 @@ export const useAddRoundState = () => {
   // New effect to track when both course and tee are fully ready
   useEffect(() => {
     if (selectedCourse && selectedTeeId) {
+      // Make sure we can find the selected tee in the course
       const tee = selectedCourse.tees.find(t => t.id === selectedTeeId);
       if (tee) {
         console.log("🔄 Both course and tee are set - marking state as ready");
@@ -68,6 +69,7 @@ export const useAddRoundState = () => {
         setCourseAndTeeReady(true);
       } else {
         console.error("Selected tee ID doesn't match any tee in the course:", selectedTeeId);
+        console.log("Available tees:", selectedCourse.tees.map(t => ({id: t.id, name: t.name})));
         setCourseAndTeeReady(false);
       }
     } else {

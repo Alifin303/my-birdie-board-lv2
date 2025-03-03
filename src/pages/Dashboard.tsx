@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase, parseCourseName, updateCourseWithUserId } from "@/integrations/supabase/client";
@@ -82,7 +81,6 @@ export default function Dashboard() {
       }
       
       console.log("Fetched rounds data from Supabase:", data);
-      console.log("Tee names in rounds:", data?.map(round => round.tee_name));
       
       const processedRounds = data?.map(round => {
         let parsedNames = { clubName: "Unknown Club", courseName: "Unknown Course" };
@@ -91,7 +89,6 @@ export default function Dashboard() {
           parsedNames = parseCourseName(round.courses.name);
         }
         
-        // Log the round tee information for debugging
         console.log("Fetched round data:", { 
           roundId: round.id,
           savedTeeId: round.tee_id, 
@@ -108,17 +105,6 @@ export default function Dashboard() {
         };
       }) || [];
       
-      console.log("Processed rounds with parsed course names:", processedRounds);
-      // Log specific round info to debug tee name issues
-      if (processedRounds.length > 0) {
-        console.log("LATEST ROUND TEE INFO:", {
-          id: processedRounds[0].id,
-          tee_name: processedRounds[0].tee_name,
-          tee_id: processedRounds[0].tee_id
-        });
-      }
-      
-      // Update user IDs for courses without them
       if (processedRounds.length > 0) {
         processedRounds.forEach(round => {
           if (round.courses && round.courses.id) {
@@ -147,7 +133,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!isModalOpen) {
-      // Invalidate query cache when modal is closed to refresh data
       queryClient.invalidateQueries({ queryKey: ['userRounds'] });
     }
   }, [isModalOpen, queryClient]);

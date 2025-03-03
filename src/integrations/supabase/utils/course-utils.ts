@@ -28,41 +28,55 @@ export function formatCourseName(clubName: string, courseName: string): string {
 
 // Helper function to check if a course is user-added
 export function isUserAddedCourse(courseName: string): boolean {
-  return courseName.includes('[User added course]');
+  return courseName && courseName.includes('[User added course]');
 }
 
 // Helper function to ensure tee data is valid
 export function validateTeeData(tee: any): any {
   if (!tee) return null;
   
+  // Create a deep copy to avoid modifying the original object
+  const validatedTee = JSON.parse(JSON.stringify(tee));
+  
   // Ensure it has a valid ID
-  if (!tee.id || typeof tee.id !== 'string' || tee.id.trim() === '') {
-    tee.id = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-    console.log(`Generated new ID for tee ${tee.name || 'unnamed'}: ${tee.id}`);
+  if (!validatedTee.id || typeof validatedTee.id !== 'string' || validatedTee.id.trim() === '') {
+    validatedTee.id = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    console.log(`Generated new ID for tee ${validatedTee.name || 'unnamed'}: ${validatedTee.id}`);
   }
   
   // Ensure it has a name
-  if (!tee.name || typeof tee.name !== 'string' || tee.name.trim() === '') {
-    tee.name = 'Standard';
+  if (!validatedTee.name || typeof validatedTee.name !== 'string' || validatedTee.name.trim() === '') {
+    validatedTee.name = 'Standard';
   }
   
   // Ensure it has valid rating and slope
-  tee.rating = tee.rating && !isNaN(tee.rating) ? tee.rating : 72;
-  tee.slope = tee.slope && !isNaN(tee.slope) ? tee.slope : 113;
+  validatedTee.rating = validatedTee.rating && !isNaN(validatedTee.rating) ? Number(validatedTee.rating) : 72;
+  validatedTee.slope = validatedTee.slope && !isNaN(validatedTee.slope) ? Number(validatedTee.slope) : 113;
+  
+  // Ensure holes array exists
+  if (!validatedTee.holes || !Array.isArray(validatedTee.holes)) {
+    validatedTee.holes = Array(18).fill(0).map((_, idx) => ({
+      number: idx + 1,
+      par: 4,
+      yards: 400,
+      handicap: idx + 1
+    }));
+  }
   
   // Ensure it has valid par
-  if (!tee.par || isNaN(tee.par) || tee.par <= 0) {
+  if (!validatedTee.par || isNaN(validatedTee.par) || validatedTee.par <= 0) {
     // Calculate par from holes if available
-    if (tee.holes && Array.isArray(tee.holes) && tee.holes.length > 0) {
-      tee.par = tee.holes.reduce((sum: number, hole: any) => sum + (hole.par || 4), 0);
+    if (validatedTee.holes && Array.isArray(validatedTee.holes) && validatedTee.holes.length > 0) {
+      validatedTee.par = validatedTee.holes.reduce((sum: number, hole: any) => sum + (hole.par || 4), 0);
+      console.log(`Calculated par for tee ${validatedTee.name}: ${validatedTee.par}`);
     } else {
-      tee.par = 72; // Default par
+      validatedTee.par = 72; // Default par
     }
   }
   
-  // Ensure holes have valid data if present
-  if (tee.holes && Array.isArray(tee.holes)) {
-    tee.holes = tee.holes.map((hole: any, idx: number) => ({
+  // Ensure holes have valid data
+  if (validatedTee.holes && Array.isArray(validatedTee.holes)) {
+    validatedTee.holes = validatedTee.holes.map((hole: any, idx: number) => ({
       number: hole.number || (idx + 1),
       par: hole.par || 4,
       yards: hole.yards || 400,
@@ -70,5 +84,5 @@ export function validateTeeData(tee: any): any {
     }));
   }
   
-  return tee;
+  return validatedTee;
 }
