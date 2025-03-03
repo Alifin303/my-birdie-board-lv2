@@ -140,13 +140,28 @@ export function convertToSimplifiedCourseDetail(courseDetail: CourseDetail): Sim
     handicap: idx + 1
   }));
 
+  // Fix: Ensure courseDetail.id is properly converted to a number
+  const courseId = typeof courseDetail.id === 'string' ? 
+    parseInt(courseDetail.id, 10) : 
+    (courseDetail.id || 0); // Default to 0 if undefined
+
+  // Fix: Ensure holes is always an array of SimplifiedHole objects
+  const courseHoles: SimplifiedHole[] = courseDetail.holes ? 
+    courseDetail.holes.map(hole => ({
+      number: hole.number || 0, // Ensure number is not optional
+      par: hole.par || 4,
+      yards: hole.yardage || 0,
+      handicap: hole.handicap || 0
+    })) : 
+    defaultHoles;
+
   const simplified: SimplifiedCourseDetail = {
-    id: typeof courseDetail.id === 'string' ? parseInt(courseDetail.id, 10) : courseDetail.id,
+    id: courseId,
     name: courseDetail.course_name || 'Unknown Course',
     clubName: courseDetail.club_name || 'Unknown Club',
     city: courseDetail.location?.city,
     state: courseDetail.location?.state,
-    holes: courseDetail.holes || defaultHoles,
+    holes: courseHoles,
     tees: tees,
     isUserAdded: false
   };

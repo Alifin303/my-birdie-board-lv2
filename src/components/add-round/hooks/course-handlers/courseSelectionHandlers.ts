@@ -48,18 +48,15 @@ export function createCourseSelectionHandlers({
       if (course.isUserAdded) {
         console.log("Loading user-added course from database:", course);
         
-        // Load metadata from localStorage using both utilities for maximum compatibility
         const storedMetadata = getCourseMetadataFromLocalStorage(course.id);
         const cachedCourseDetail = loadUserAddedCourseDetails(course.id);
         
         console.log("User-added course metadata from localStorage:", storedMetadata);
         console.log("User-added course details from cache:", cachedCourseDetail);
         
-        // Try to load from cachedCourseDetail first, then fall back to storedMetadata
         if (cachedCourseDetail && cachedCourseDetail.tees) {
           console.log("Using cached course details for user-added course");
           
-          // Ensure course ID and name are set correctly
           simplifiedCourseDetail = {
             ...cachedCourseDetail,
             id: course.id,
@@ -85,10 +82,8 @@ export function createCourseSelectionHandlers({
           };
         } 
         else {
-          // If no valid data found, create a basic structure
           console.log("No valid data found for user-added course, creating basic structure");
           
-          // Create a default tee if none exists
           const defaultHoles = Array(18).fill(null).map((_, idx) => ({
             number: idx + 1,
             par: 4,
@@ -119,16 +114,13 @@ export function createCourseSelectionHandlers({
           };
         }
         
-        // Validate and repair the tee data to ensure it's complete
         simplifiedCourseDetail = validateAndRepairTeeData(simplifiedCourseDetail);
-        
       } 
       else {
         console.log("Loading course from API:", course);
         
         try {
           const courseIdRaw = course.apiCourseId || course.id;
-          // Ensure courseId is a string
           const courseId = typeof courseIdRaw === 'string' ? courseIdRaw : courseIdRaw.toString();
           
           console.log("Fetching API course details for ID:", courseId);
@@ -157,7 +149,6 @@ export function createCourseSelectionHandlers({
         } catch (error) {
           console.error("Error fetching course details from API:", error);
           
-          // Create default course data if API fails
           const defaultHoles = Array(18).fill(null).map((_, idx) => ({
             number: idx + 1,
             par: 4,
@@ -186,7 +177,7 @@ export function createCourseSelectionHandlers({
             holes: defaultHoles,
             apiCourseId: typeof course.apiCourseId === 'string' ? course.apiCourseId : 
                         (course.id !== undefined ? course.id.toString() : ""),
-            isUserAdded: false // Mark as from API but with defaults
+            isUserAdded: false
           };
           
           throw error;
@@ -204,10 +195,8 @@ export function createCourseSelectionHandlers({
         }))
       );
       
-      // Set the selected course in state
       setSelectedCourse(simplifiedCourseDetail);
       
-      // Clear search results and update search query display
       setSearchResults([]);
       const displayName = course.clubName !== course.name 
         ? `${course.clubName} - ${course.name}`
@@ -215,9 +204,7 @@ export function createCourseSelectionHandlers({
       console.log("Setting search query to:", displayName);
       setSearchQuery(displayName);
       
-      // Handle tee selection and scorecard setup
       if (simplifiedCourseDetail.tees && simplifiedCourseDetail.tees.length > 0) {
-        // Get a reasonable default tee or first available
         const defaultTeeId = getDefaultTeeId(simplifiedCourseDetail);
         
         console.log("Available tees:", 
@@ -232,7 +219,6 @@ export function createCourseSelectionHandlers({
         console.log("Setting default tee ID:", defaultTeeId);
         
         if (defaultTeeId) {
-          // Set the selected tee ID first
           setSelectedTeeId(defaultTeeId);
           
           const selectedTee = simplifiedCourseDetail.tees.find(tee => tee.id === defaultTeeId);
@@ -245,8 +231,7 @@ export function createCourseSelectionHandlers({
             slope: selectedTee?.slope
           });
           
-        // Update scorecard based on tee selection
-        updateScorecardForTee(simplifiedCourseDetail, defaultTeeId);
+          updateScorecardForTee(defaultTeeId);
         } else {
           throw new Error("Could not find a valid tee for this course");
         }
