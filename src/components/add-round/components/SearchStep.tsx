@@ -14,7 +14,7 @@ import { SimplifiedGolfCourse } from "../types";
 interface SearchStepProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  handleSearch: (query: string) => Promise<void>;
+  handleSearch: () => Promise<void>;
   handleCourseSelect: (course: SimplifiedGolfCourse) => Promise<void>;
   handleOpenManualCourseForm: () => void;
   manualCourseFormRef: React.RefObject<any>;
@@ -42,7 +42,7 @@ export const SearchStep: React.FC<SearchStepProps> = ({
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.length >= 3 && !isLoading) {
       e.preventDefault();
-      handleSearch(searchQuery);
+      handleSearch();
     }
   };
   
@@ -76,7 +76,7 @@ export const SearchStep: React.FC<SearchStepProps> = ({
         
         <div className="flex justify-center">
           <Button
-            onClick={() => handleSearch(searchQuery)}
+            onClick={() => handleSearch()}
             disabled={isLoading || searchQuery.length < 3}
             className="w-full md:w-auto"
           >
