@@ -129,18 +129,19 @@ export function createSaveRoundHandler({
       
       console.log("Final selected tee for saving:", selectedTee);
       
-      // Ensure we save the actual tee information correctly
-      // First, get both tee ID and tee name to ensure they are properly linked
+      // Explicitly capture both tee ID and tee name for storage
       const teeName = selectedTee.name;
       const teeId = selectedTeeId;
+      
+      console.log(`Saving round with tee_name: "${teeName}" and tee_id: "${teeId}"`);
       
       // Prepare the data we're sending to Supabase
       const roundData = {
         user_id: session.user.id,
         course_id: dbCourseId,
         date: roundDate.toISOString(),
-        tee_name: teeName, // Explicitly use the name from the selected tee
-        tee_id: teeId,     // Explicitly save the tee ID
+        tee_name: teeName, // Save the exact tee name
+        tee_id: teeId,     // Save the exact tee ID
         gross_score: totalStrokes,
         to_par_gross: toParGross,
         net_score: null,
@@ -154,7 +155,7 @@ export function createSaveRoundHandler({
       const { data: round, error: roundError } = await supabase
         .from('rounds')
         .insert([roundData])
-        .select('id')
+        .select('id, tee_name, tee_id')
         .single();
         
       if (roundError) {
@@ -167,6 +168,7 @@ export function createSaveRoundHandler({
       }
       
       console.log("Round saved successfully:", round);
+      console.log(`Saved tee_name: "${round.tee_name}" and tee_id: "${round.tee_id}"`);
       
       // Invalidate queries to refresh data in UI
       queryClient.invalidateQueries({ queryKey: ['userRounds'] });
