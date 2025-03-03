@@ -57,11 +57,8 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   dataLoadingError,
   today
 }) => {
-  // Local state to manage the current selected tee ID
-  // This ensures changes are immediately reflected in the UI
   const [localSelectedTeeId, setLocalSelectedTeeId] = useState<string | null>(selectedTeeId);
   
-  // Update the local state when the prop changes
   useEffect(() => {
     if (selectedTeeId !== localSelectedTeeId) {
       console.log("Updating local tee ID from prop:", selectedTeeId);
@@ -69,7 +66,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
     }
   }, [selectedTeeId]);
 
-  // Debug logging for course and tee selection
   useEffect(() => {
     if (selectedCourse) {
       console.log("Scorecard Step - Selected Course:", {
@@ -93,10 +89,8 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
 
   if (!selectedCourse) return null;
 
-  // Get the currently selected tee information based on localSelectedTeeId
   const selectedTee = selectedCourse.tees.find(tee => tee.id === localSelectedTeeId);
   
-  // Debug logging for tee selection issues
   console.log("========== SCORECARD STEP TEE SELECTION ==========");
   console.log("selectedTeeId (prop):", selectedTeeId);
   console.log("localSelectedTeeId (state):", localSelectedTeeId);
@@ -114,7 +108,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
     console.log("Selected tee rating/slope:", selectedTee.rating, "/", selectedTee.slope);
   } else {
     console.error("No tee found for ID:", localSelectedTeeId);
-    // Try to recover by selecting the first available tee
     if (selectedCourse.tees && selectedCourse.tees.length > 0) {
       console.log("Recovering by selecting first available tee:", selectedCourse.tees[0].id);
       setLocalSelectedTeeId(selectedCourse.tees[0].id);
@@ -122,16 +115,12 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   }
   console.log("=================================================");
   
-  // Handler for tee changes that updates both the local state and parent state
   const handleTeeChangeWithLocalState = (teeId: string) => {
     console.log("Local tee change handler called with ID:", teeId);
-    // Update local state immediately for UI
     setLocalSelectedTeeId(teeId);
-    // Call parent handler to update actual state and scorecard
     handleTeeChange(teeId);
   };
-  
-  // Helper function to determine tee color
+
   const getTeeColor = (teeName: string) => {
     const lowerName = teeName.toLowerCase();
     if (lowerName.includes('black')) return '#000';
@@ -177,7 +166,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </Alert>
       )}
       
-      {/* Top row: Controls in a horizontal layout */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div className="space-y-1">
           <label className="text-sm font-medium">Date Played</label>
@@ -251,7 +239,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
             </SelectContent>
           </Select>
           
-          {/* Display tee details for clarity */}
           {selectedTee && (
             <div className="text-xs text-muted-foreground mt-1">
               Rating: {selectedTee.rating} | Slope: {selectedTee.slope} | Par: {selectedTee.par}
@@ -290,7 +277,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </div>
       </div>
       
-      {/* Middle section: Front 9 holes */}
       <div className="mb-4">
         <h3 className="text-sm font-medium mb-2">
           Front Nine 
@@ -354,7 +340,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </div>
       </div>
       
-      {/* Below Middle: Back 9 holes */}
       <div className="mb-4">
         <h3 className="text-sm font-medium mb-2">
           Back Nine
@@ -421,7 +406,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </div>
       </div>
       
-      {/* Bottom section: Round stats and summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 items-start">
         <Card className="p-3">
           <h3 className="text-sm font-medium mb-2">Round Summary</h3>
@@ -498,7 +482,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </Card>
       </div>
       
-      {/* Button row */}
       <div className="flex justify-between space-x-4 mt-6">
         <Button variant="outline" onClick={handleCloseModal} className="flex-1">
           Cancel

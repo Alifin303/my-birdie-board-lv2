@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
 import { ensureCourseExists, findOrCreateCourseByApiId } from "@/integrations/supabase";
@@ -65,6 +66,7 @@ export function createSaveRoundHandler({
         throw new Error('Selected tee not found');
       }
       
+      // CRITICAL DEBUGGING: Log the exact tee information being used
       console.log("SAVING ROUND - CRITICAL TEE INFO:");
       console.log("Selected tee ID:", selectedTeeId);
       console.log("Selected tee object:", selectedTee);
@@ -127,9 +129,11 @@ export function createSaveRoundHandler({
         console.log("Using course_id for user-added course:", dbCourseId);
       }
       
+      // CRITICAL FIX: Make sure we're using the selected tee, not another one
       console.log("Final selected tee for saving:", selectedTee);
       
-      // Explicitly capture the exact tee name as a string value
+      // CRITICAL FIX: Explicitly capture the exact tee name as a string value
+      // Make sure we're using the exact name from the tee that was selected
       const teeName = String(selectedTee.name);
       const teeId = selectedTeeId;
       
