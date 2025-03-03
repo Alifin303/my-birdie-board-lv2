@@ -203,7 +203,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         <div className="space-y-1">
           <label className="text-sm font-medium">Tee Played</label>
           <Select 
-            value={localSelectedTeeId || undefined} 
+            value={localSelectedTeeId || undefined}
             onValueChange={(value) => {
               console.log("Tee selection changed to:", value);
               handleTeeChangeWithLocalState(value);
@@ -498,12 +498,12 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
             if (localSelectedTeeId !== selectedTeeId) {
               console.log("CRITICAL: Fixing tee ID mismatch before save");
               console.log(`Local tee ID: ${localSelectedTeeId}, Parent tee ID: ${selectedTeeId}`);
-              handleTeeChange(localSelectedTeeId);
+              handleTeeChange(localSelectedTeeId || "");
             }
             
             const actualSelectedTee = selectedCourse.tees.find(tee => tee.id === localSelectedTeeId);
             
-            console.log("Save button clicked with corrected teeId:", localSelectedTeeId);
+            console.log("Save button clicked with teeId:", localSelectedTeeId);
             console.log("Selected tee at save time:", actualSelectedTee);
             if (actualSelectedTee) {
               console.log("Selected tee name at save time:", actualSelectedTee.name);

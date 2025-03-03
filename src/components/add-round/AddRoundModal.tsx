@@ -61,10 +61,18 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   const manualCourseFormRef = useRef<any>(null);
   const today = new Date();
   
-  // Reset form when modal opens or closes
+  useEffect(() => {
+    if (selectedTeeId) {
+      console.log("AddRoundModal - Current selectedTeeId:", selectedTeeId);
+      if (selectedCourse) {
+        const selectedTee = selectedCourse.tees.find(tee => tee.id === selectedTeeId);
+        console.log("Selected tee:", selectedTee ? { id: selectedTee.id, name: selectedTee.name } : "Not found");
+      }
+    }
+  }, [selectedTeeId, selectedCourse]);
+  
   useEffect(() => {
     if (!open) {
-      // Reset state when modal is closed
       resetForm();
     }
   }, [open]);
@@ -96,6 +104,14 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setActiveScoreTab,
     setHoleSelection
   });
+  
+  const handleTeeChangeWithLogging = (teeId: string) => {
+    console.log(`AddRoundModal - handleTeeChange called with: ${teeId}`);
+    console.log("Before change - selectedTeeId:", selectedTeeId);
+    handleTeeChange(teeId);
+    console.log("After handler call - selectedTeeId:", selectedTeeId);
+    setSelectedTeeId(teeId);
+  };
   
   const { 
     handleSearch, 
@@ -165,6 +181,12 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   };
   
   const handleSaveRoundAndClose = async () => {
+    console.log("Save and close - current teeId:", selectedTeeId);
+    if (selectedCourse && selectedTeeId) {
+      const tee = selectedCourse.tees.find(t => t.id === selectedTeeId);
+      console.log("Saving with tee:", tee ? { id: tee.id, name: tee.name } : "No tee found");
+    }
+    
     const success = await handleSaveRound();
     if (success) {
       handleCloseModal();
@@ -196,7 +218,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
               selectedCourse={selectedCourse}
               selectedTeeId={selectedTeeId}
               roundDate={roundDate}
-              handleTeeChange={handleTeeChange}
+              handleTeeChange={handleTeeChangeWithLogging}
               handleDateSelect={handleDateSelect}
               handleHoleSelectionChange={handleHoleSelectionChange}
               handleScoreChange={handleScoreChange}

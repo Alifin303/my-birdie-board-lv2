@@ -38,6 +38,10 @@ export function createSaveRoundHandler({
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session found');
       
+      // Find the selected tee using the current selectedTeeId from props
+      console.log("Looking for tee with ID:", selectedTeeId);
+      console.log("Available tees:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
+      
       const selectedTee = selectedCourse.tees.find(tee => tee.id === selectedTeeId);
       if (!selectedTee) {
         console.error('CRITICAL ERROR: Selected tee not found in course tees array', {
@@ -99,8 +103,10 @@ export function createSaveRoundHandler({
         console.log("Using course_id for user-added course:", dbCourseId);
       }
       
+      // Ensure we're using the correct tee
       console.log("Final selected tee for saving:", selectedTee);
       
+      // Store the tee name and ID in constants to make debugging easier
       const teeName = String(selectedTee.name);
       const teeId = selectedTeeId;
       
