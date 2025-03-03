@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 import type {
@@ -166,6 +167,12 @@ function toast({ ...props }: Toast) {
     dismiss,
     update,
   }
+}
+
+// Define the ToastApi type for external use
+export interface ToastApi {
+  toast: typeof toast;
+  dismiss: (toastId?: string) => void;
 }
 
 function useToast() {

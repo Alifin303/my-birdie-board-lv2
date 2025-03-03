@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { UseCourseHandlersProps } from "./types";
+import { QueryClient } from "@tanstack/react-query";
 
 export function createSaveRoundHandler({
   selectedCourse,
@@ -103,7 +104,8 @@ export function createSaveRoundHandler({
               name: `${selectedCourse.clubName} - ${selectedCourse.name}`,
               city: selectedCourse.city || '',
               state: selectedCourse.state || '',
-              api_course_id: selectedCourse.apiCourseId
+              api_course_id: selectedCourse.apiCourseId,
+              user_id: session.user.id
             }])
             .select('id')
             .single();

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -51,7 +50,10 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     noResults,
     setNoResults,
     manualCourseOpen,
-    setManualCourseOpen
+    setManualCourseOpen,
+    courseAndTeeReady,
+    courseLoadFailure,
+    setCourseLoadFailure
   } = useAddRoundState();
   
   const toast = useToast();
@@ -102,25 +104,42 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     handleCourseCreated,
     handleSaveRound
   } = useCourseHandlers({
+    currentStep,
+    setCurrentStep,
     searchQuery,
     setSearchQuery,
-    setSearchResults,
-    setSelectedCourse,
-    setIsLoading,
-    setSearchError,
-    setNoResults,
-    setOriginalCourseDetail,
-    setSelectedTeeId,
-    updateScorecardForTee,
-    setHoleSelection,
-    setCurrentStep,
-    setManualCourseOpen,
-    selectedCourse,
-    selectedTeeId,
-    scores,
-    roundDate,
-    isLoading,
     searchResults,
+    setSearchResults,
+    selectedCourse,
+    setSelectedCourse,
+    selectedTeeId,
+    setSelectedTeeId,
+    scores,
+    setScores,
+    isLoading, 
+    setIsLoading,
+    searchError,
+    setSearchError,
+    dataLoadingError,
+    setDataLoadingError,
+    roundDate,
+    setRoundDate,
+    calendarOpen,
+    setCalendarOpen,
+    holeSelection,
+    setHoleSelection,
+    activeScoreTab,
+    setActiveScoreTab,
+    originalCourseDetail,
+    setOriginalCourseDetail,
+    noResults,
+    setNoResults,
+    manualCourseOpen,
+    setManualCourseOpen,
+    courseAndTeeReady,
+    updateScorecardForTee,
+    courseLoadFailure,
+    setCourseLoadFailure,
     toast,
     queryClient
   });
@@ -145,7 +164,6 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     resetForm();
   };
   
-  // Modify handleSaveRound to close the modal after saving
   const handleSaveRoundAndClose = async () => {
     const success = await handleSaveRound();
     if (success) {

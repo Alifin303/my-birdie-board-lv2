@@ -8,6 +8,7 @@ import {
   CourseDetail
 } from "../../types";
 import { ToastApi } from "@/hooks/use-toast";
+import { QueryClient } from "@tanstack/react-query";
 
 export interface UseCourseHandlersProps {
   currentStep: 'search' | 'scorecard';
@@ -47,4 +48,13 @@ export interface UseCourseHandlersProps {
   courseLoadFailure: boolean;
   setCourseLoadFailure: Dispatch<SetStateAction<boolean>>;
   toast: ToastApi;
+  queryClient: QueryClient;
+}
+
+export interface CourseHandlers {
+  handleSearch: () => Promise<void>;
+  handleCourseSelect: (course: SimplifiedGolfCourse) => Promise<void>;
+  handleOpenManualCourseForm: () => void;
+  handleCourseCreated: (courseData: any) => Promise<void>;
+  handleSaveRound: () => Promise<boolean>;
 }

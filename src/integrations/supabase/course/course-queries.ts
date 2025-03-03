@@ -1,3 +1,4 @@
+
 import { supabase, logSupabaseOperation } from '../core/client';
 
 // Helper function to fetch a course by ID
@@ -61,6 +62,7 @@ export async function insertCourse(course: {
   city?: string;
   state?: string;
   api_course_id?: string;
+  user_id?: string | null;
 }): Promise<{ id: number } | null> {
   logSupabaseOperation('insertCourse', { course });
   
