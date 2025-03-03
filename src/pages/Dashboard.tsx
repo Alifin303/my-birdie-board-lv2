@@ -80,13 +80,13 @@ export default function Dashboard() {
         throw error;
       }
       
-      console.log("============= ROUNDS FETCHED FROM SUPABASE =============");
-      console.log("Raw rounds data with tee_name field:", data?.map(round => ({ 
+      console.log("DATABASE RAW ROUNDS:");
+      console.log(JSON.stringify(data?.map(round => ({ 
         id: round.id, 
         tee_name: round.tee_name,
-        tee_id: round.tee_id,
-        date: round.date
-      })));
+        tee_name_type: typeof round.tee_name,
+        tee_id: round.tee_id
+      })), null, 2));
       
       const processedRounds = data?.map(round => {
         let parsedNames = { clubName: "Unknown Club", courseName: "Unknown Course" };
@@ -95,27 +95,31 @@ export default function Dashboard() {
           parsedNames = parseCourseName(round.courses.name);
         }
         
-        // Log tee_name during processing to diagnose issues
-        console.log(`Processing round ${round.id} with tee_name: "${round.tee_name}"`);
+        // EXTREMELY IMPORTANT - Preserve the exact tee_name as it is in the database
+        console.log(`Processing round ${round.id} with raw tee_name: "${round.tee_name}" (${typeof round.tee_name})`);
         
-        return {
+        // Make a direct copy of the round object without any manipulation
+        const processedRound = {
           ...round,
-          // Keep tee_name exactly as it is in the database
-          tee_name: round.tee_name,
+          tee_name: round.tee_name, // Do not modify this value at all
           courses: round.courses ? {
             ...round.courses,
             clubName: parsedNames.clubName,
             courseName: parsedNames.courseName
           } : undefined
         };
+        
+        console.log(`Processed round ${round.id} tee_name: "${processedRound.tee_name}"`);
+        return processedRound;
       }) || [];
       
-      console.log("FULLY PROCESSED ROUNDS with tee names:", processedRounds.map(r => ({
+      console.log("PROCESSED ROUNDS (FINAL):");
+      console.log(JSON.stringify(processedRounds.map(r => ({
         id: r.id,
-        tee_name: r.tee_name, 
-        tee_id: r.tee_id,
-        date: new Date(r.date).toLocaleDateString()
-      })));
+        tee_name: r.tee_name,
+        tee_name_type: typeof r.tee_name,
+        tee_id: r.tee_id
+      })), null, 2));
       
       // Update user IDs for courses without them
       if (processedRounds.length > 0) {

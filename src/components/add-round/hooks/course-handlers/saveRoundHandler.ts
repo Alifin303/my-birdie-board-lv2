@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
 import { ensureCourseExists, findOrCreateCourseByApiId } from "@/integrations/supabase";
@@ -66,11 +65,11 @@ export function createSaveRoundHandler({
         throw new Error('Selected tee not found');
       }
       
-      console.log("=================== SAVING ROUND WITH TEE ===================");
-      console.log("Selected tee ID to save:", selectedTeeId);
-      console.log("Selected tee object to save:", selectedTee);
-      console.log("Selected tee name to save:", selectedTee.name);
-      console.log("Available tees in course at save time:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
+      console.log("SAVING ROUND - CRITICAL TEE INFO:");
+      console.log("Selected tee ID:", selectedTeeId);
+      console.log("Selected tee object:", selectedTee);
+      console.log("Selected tee name:", selectedTee.name);
+      console.log("Tee name type:", typeof selectedTee.name);
       
       const totalStrokes = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
@@ -130,19 +129,21 @@ export function createSaveRoundHandler({
       
       console.log("Final selected tee for saving:", selectedTee);
       
-      // Explicitly capture both tee ID and tee name for storage
-      const teeName = selectedTee.name;
+      // Explicitly capture the exact tee name as a string value
+      const teeName = String(selectedTee.name);
       const teeId = selectedTeeId;
       
-      console.log(`Saving round with tee_name: "${teeName}" and tee_id: "${teeId}"`);
+      console.log(`FINAL TEE VALUES FOR SAVING:`);
+      console.log(`- tee_name: "${teeName}" (${typeof teeName})`);
+      console.log(`- tee_id: "${teeId}" (${typeof teeId})`);
       
       // Prepare the data we're sending to Supabase
       const roundData = {
         user_id: session.user.id,
         course_id: dbCourseId,
         date: roundDate.toISOString(),
-        tee_name: teeName, // Save the exact tee name
-        tee_id: teeId,     // Save the exact tee ID
+        tee_name: teeName,
+        tee_id: teeId,
         gross_score: totalStrokes,
         to_par_gross: toParGross,
         net_score: null,

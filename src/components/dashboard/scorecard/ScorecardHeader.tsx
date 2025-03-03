@@ -22,20 +22,11 @@ export const ScorecardHeader = ({
     ? format(roundDate, 'MMMM d, yyyy')
     : format(new Date(round.date), 'MMMM d, yyyy');
     
-  // Log the exact tee_name from the round to help with debugging
-  console.log("ScorecardHeader - Round tee_name:", round.tee_name);
-  console.log("ScorecardHeader - Round tee_name type:", typeof round.tee_name);
-  console.log("ScorecardHeader - Full round object:", JSON.stringify(round));
-  
-  // Function to safely display tee name
-  const displayTeeName = () => {
-    // Directly use the tee_name property without any manipulation
-    if (!round.tee_name || round.tee_name === '') {
-      return "Standard";
-    }
-    return round.tee_name;
-  };
-  
+  // More extensive logging to help diagnose the issue
+  console.log("ScorecardHeader - Complete round data:", round);
+  console.log("ScorecardHeader - Tee name:", round.tee_name);
+  console.log("ScorecardHeader - Tee ID:", round.tee_id);
+
   return (
     <div className="flex justify-between items-center mb-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
@@ -77,7 +68,7 @@ export const ScorecardHeader = ({
           ) : (
             <>
               <p className="text-sm text-muted-foreground mt-1">Date: {formattedDate}</p>
-              <p className="text-sm text-muted-foreground">Tees: {displayTeeName()}</p>
+              <p className="text-sm text-muted-foreground">Tees: {round.tee_name || "Standard"}</p>
             </>
           )}
         </div>

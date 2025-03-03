@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,13 +20,13 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Initialize editable state when round data changes or dialog opens
   useEffect(() => {
     if (round && isOpen) {
-      console.log("Opening scorecard for round:", round.id);
-      console.log("Round data in RoundScorecard:", JSON.stringify(round));
-      console.log("Round tee name in RoundScorecard:", round.tee_name);
-      console.log("Round tee name type:", typeof round.tee_name);
+      console.log("============ ROUND SCORECARD OPENED ============");
+      console.log("Round ID:", round.id);
+      console.log("Tee name:", round.tee_name);
+      console.log("Tee name type:", typeof round.tee_name);
+      console.log("Full round data:", JSON.stringify(round, null, 2));
       
       let parsedScores: HoleScore[] = [];
       try {
@@ -81,15 +80,9 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
       const toPar = totalStrokes - totalPar;
       
-      console.log("Saving round with tee_name:", round.tee_name);
-      console.log("Update data:", {
-        date: roundDate?.toISOString() || round.date,
-        gross_score: totalStrokes,
-        to_par_gross: toPar,
-        hole_scores: JSON.stringify(scores),
-        tee_name: round.tee_name,
-        tee_id: round.tee_id
-      });
+      console.log("Saving round with exact values:");
+      console.log("- tee_name:", round.tee_name);
+      console.log("- tee_id:", round.tee_id);
       
       const { error } = await supabase
         .from('rounds')
@@ -98,7 +91,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
           gross_score: totalStrokes,
           to_par_gross: toPar,
           hole_scores: JSON.stringify(scores),
-          // Preserve the exact tee name and ID without modification
           tee_name: round.tee_name,
           tee_id: round.tee_id
         })

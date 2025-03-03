@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown, Trash, Eye, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,11 +49,12 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
     round => round.courses && round.courses.id === selectedCourseId
   );
   
-  console.log("DEBUGGING TEE DISPLAY: All course rounds with tee information:", 
+  // Log all tee information for debugging
+  console.log("All rounds for this course with detailed tee info:", 
     courseRounds.map(round => ({
       id: round.id,
       tee_name: round.tee_name,
-      rawTeeName: round.tee_name,
+      tee_name_type: typeof round.tee_name,
       tee_id: round.tee_id,
       date: new Date(round.date).toLocaleDateString()
     }))
@@ -125,10 +125,8 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
   };
   
   const handleViewScorecard = (round: Round) => {
-    console.log("Viewing scorecard for round:", round.id);
-    console.log("Round tee_name (raw):", round.tee_name);
-    console.log("Round tee_name type:", typeof round.tee_name);
-    console.log("Round full object:", JSON.stringify(round));
+    console.log("DETAILED ROUND INFO FOR VIEWING:", JSON.stringify(round, null, 2));
+    console.log(`Round ${round.id} tee name: "${round.tee_name}"`);
     
     if (scorecardOpen) {
       setScorecardOpen(false);
@@ -160,17 +158,12 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
       : <ChevronDown className="inline-block h-4 w-4 ml-1" />;
   };
 
+  // Simplify this function to directly display the tee name without modification
   const formatTeeName = (teeName: string | null | undefined): string => {
     if (!teeName || teeName === '') {
       return 'Standard Tees';
     }
-    
-    // No conditional manipulation, just display the actual tee name
-    if (teeName.toLowerCase().includes('tees')) {
-      return teeName;
-    }
-    
-    return `${teeName} Tees`;
+    return teeName;
   };
   
   const sortedRounds = [...courseRounds].sort((a, b) => {
@@ -295,7 +288,7 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
             </thead>
             <tbody>
               {sortedRounds.map((round) => {
-                console.log(`CourseRoundHistory - Round ${round.id} tee_name:`, round.tee_name);
+                console.log(`Table row for round ${round.id}, tee name: "${round.tee_name}"`);
                 
                 return (
                   <tr key={round.id} className="border-b last:border-0">
