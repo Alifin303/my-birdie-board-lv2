@@ -1,5 +1,5 @@
 
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
 import { QueryClient } from "@tanstack/react-query";
 
@@ -139,12 +139,16 @@ export function createSaveRoundHandler({
       console.log("Using course_id for round insertion:", dbCourseId);
       console.log("Final selected tee for saving:", selectedTee);
       
+      // FIX 2: Ensure we save the actual tee information correctly
+      // First, get both tee ID and tee name to ensure they are properly linked
+      const teeName = selectedTee.name;
+      
       // Prepare the data we're sending to Supabase
       const roundData = {
         user_id: session.user.id,
         course_id: dbCourseId,
         date: roundDate.toISOString(),
-        tee_name: selectedTee.name,
+        tee_name: teeName, // Explicitly use the name from the selected tee
         tee_id: selectedTeeId,  // Explicitly save the tee ID
         gross_score: totalStrokes,
         to_par_gross: toParGross,
@@ -184,6 +188,17 @@ export function createSaveRoundHandler({
           
           if (storedDetails) {
             const courseDetails = JSON.parse(storedDetails);
+            // Ensure the tee information is correct in localStorage
+            if (courseDetails.tees && Array.isArray(courseDetails.tees)) {
+              // Make sure the selected tee is included with correct information
+              const teeIndex = courseDetails.tees.findIndex((t: any) => t.id === selectedTeeId);
+              if (teeIndex >= 0) {
+                // Update the existing tee if needed
+                if (!courseDetails.tees[teeIndex].par) {
+                  courseDetails.tees[teeIndex].par = selectedTee.par;
+                }
+              }
+            }
             localStorage.setItem(courseDetailsKey, JSON.stringify(courseDetails));
             console.log("Updated user-added course details in localStorage");
           }

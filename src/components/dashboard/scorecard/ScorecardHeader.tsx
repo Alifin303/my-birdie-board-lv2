@@ -1,7 +1,8 @@
 
-import { Button } from "@/components/ui/button";
-import { CalendarIcon, Edit, Save, X } from "lucide-react";
+import React from 'react';
 import { format } from "date-fns";
+import { Edit, Save, X, CalendarIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { ScorecardHeaderProps } from "./types";
@@ -17,10 +18,12 @@ export const ScorecardHeader = ({
   isSaving,
   handleSaveChanges
 }: ScorecardHeaderProps) => {
-  // Format date for display
   const formattedDate = roundDate 
     ? format(roundDate, 'MMMM d, yyyy')
     : format(new Date(round.date), 'MMMM d, yyyy');
+    
+  // FIX 2: Use the actual tee name from the round data
+  const teeName = round.tee_name || "Standard";
 
   return (
     <div className="flex justify-between items-center mb-4">
@@ -37,7 +40,7 @@ export const ScorecardHeader = ({
         <div>
           <h3 className="font-semibold">Round Details</h3>
           {isEditing ? (
-            <div className="mt-1">
+            <div className="space-y-2 mt-1">
               <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -63,7 +66,7 @@ export const ScorecardHeader = ({
           ) : (
             <>
               <p className="text-sm text-muted-foreground mt-1">Date: {formattedDate}</p>
-              <p className="text-sm text-muted-foreground">Tees: {round.tee_name}</p>
+              <p className="text-sm text-muted-foreground">Tees: {teeName}</p>
             </>
           )}
         </div>

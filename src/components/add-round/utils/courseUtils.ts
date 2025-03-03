@@ -1,7 +1,6 @@
-
 import { CourseDetail, TeeBox } from "@/services/golfCourseApi";
 import { SimplifiedCourseDetail, SimplifiedGolfCourse, SimplifiedHole, SimplifiedTee } from "../types";
-import { supabase, formatCourseName, parseCourseName, getCourseMetadataFromLocalStorage, isUserAddedCourse } from "@/integrations/supabase/client";
+import { supabase, formatCourseName, parseCourseName, getCourseMetadataFromLocalStorage, isUserAddedCourse } from "@/integrations/supabase";
 
 export const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): SimplifiedHole[] => {
   console.log("Extracting holes for tee:", teeId, "from course detail:", courseDetail);
@@ -231,14 +230,38 @@ export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDe
       const metadata = getCourseMetadataFromLocalStorage(courseId);
       if (metadata && metadata.tees && metadata.tees.length > 0) {
         console.log("Found course metadata using alternate method:", metadata);
+        
+        // FIX 1: Validate and fix tee data in metadata
+        const validatedTees = metadata.tees.map(tee => {
+          // Ensure tee has a valid ID
+          if (!tee.id) {
+            tee.id = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+          }
+          
+          // Ensure each tee has par data
+          if (!tee.par || tee.par <= 0) {
+            if (tee.holes && tee.holes.length > 0) {
+              tee.par = tee.holes.reduce((sum, hole) => sum + (hole.par || 4), 0);
+            } else {
+              tee.par = 72; // Default par
+            }
+          }
+          
+          // Ensure each tee has valid rating and slope
+          tee.rating = tee.rating || 72.0;
+          tee.slope = tee.slope || 113;
+          
+          return tee;
+        });
+        
         return {
           id: courseId,
           name: metadata.name || "Unknown Course",
           clubName: metadata.clubName || "Unknown Club",
           city: metadata.city || '',
           state: metadata.state || '',
-          tees: metadata.tees,
-          holes: metadata.holes || metadata.tees[0].holes,
+          tees: validatedTees,
+          holes: metadata.holes || validatedTees[0].holes,
           isUserAdded: true
         };
       }
@@ -297,8 +320,14 @@ export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDe
         par: t.par 
       })));
       
-      // Validate each tee has proper holes data
+      // FIX 1: Validate each tee has proper holes data and par information
       parsedDetails.tees = parsedDetails.tees.map((tee: any) => {
+        // Ensure each tee has a valid ID
+        if (!tee.id) {
+          tee.id = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+          console.log(`Generated new ID for tee ${tee.name}: ${tee.id}`);
+        }
+        
         if (!tee.holes || !Array.isArray(tee.holes) || tee.holes.length === 0) {
           console.log(`Tee ${tee.name} has no valid holes, creating defaults`);
           tee.holes = Array(18).fill(null).map((_, idx) => ({

@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { RoundScorecardProps, HoleScore } from "./types";
@@ -27,7 +26,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       console.log("Loading round data in RoundScorecard:", round);
       console.log("Round tee_name:", round.tee_name, "tee_id:", round.tee_id);
       
-      // Parse hole scores from JSON
       let parsedScores: HoleScore[] = [];
       try {
         parsedScores = typeof round.hole_scores === 'string' 
@@ -76,12 +74,13 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
     setIsSaving(true);
     
     try {
-      // Calculate new totals
       const totalStrokes = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
       const toPar = totalStrokes - totalPar;
       
-      // Update the round in the database
+      console.log("Updating round with tee name:", round.tee_name);
+      console.log("Updating round with tee ID:", round.tee_id);
+      
       const { error } = await supabase
         .from('rounds')
         .update({
@@ -103,10 +102,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
         description: "Round updated successfully!",
       });
       
-      // Invalidate the rounds query to refresh the data
       queryClient.invalidateQueries({ queryKey: ['userRounds'] });
       
-      // Exit edit mode
       setIsEditing(false);
     } catch (error: any) {
       console.error("Error updating round:", error);
@@ -120,7 +117,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
     }
   };
 
-  // Handle display of hole scores
   const renderHoleScores = () => {
     if (!scores || scores.length === 0) {
       return (
@@ -130,13 +126,11 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       );
     }
 
-    // Split holes into front 9 and back 9
     const front9 = scores.filter(score => score.hole <= 9);
     const back9 = scores.filter(score => score.hole > 9);
 
     return (
       <div className="mt-4 space-y-6">
-        {/* Front 9 */}
         {front9.length > 0 && (
           <ScoreTable 
             scores={front9} 
@@ -146,7 +140,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
           />
         )}
 
-        {/* Back 9 */}
         {back9.length > 0 && (
           <ScoreTable 
             scores={back9} 
@@ -157,7 +150,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
           />
         )}
 
-        {/* Total */}
         <ScoreTableSummary scores={scores} />
       </div>
     );
@@ -172,7 +164,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
             {isEditing ? (
               "Edit your round details"
             ) : (
-              <>Details for your round at {round.courses?.clubName} - {round.courses?.courseName} ({round.tee_name})</>
+              <>Details for your round at {round.courses?.clubName} - {round.courses?.courseName} ({round.tee_name || "Standard"})</>
             )}
           </DialogDescription>
         </DialogHeader>

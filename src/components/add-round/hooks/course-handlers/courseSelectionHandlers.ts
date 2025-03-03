@@ -4,7 +4,7 @@ import { loadUserAddedCourseDetails } from "../../utils/courseUtils";
 import { convertToSimplifiedCourseDetail } from "../../utils/courseUtils";
 import { SimplifiedGolfCourse, SimplifiedCourseDetail } from "../../types";
 import { UseCourseHandlersProps } from "./types";
-import { fetchCourseById, getCourseMetadataFromLocalStorage } from "@/integrations/supabase/client";
+import { fetchCourseById, getCourseMetadataFromLocalStorage } from "@/integrations/supabase";
 
 export function createCourseSelectionHandlers({
   setIsLoading,
@@ -59,6 +59,21 @@ export function createCourseSelectionHandlers({
           console.log("User-added course details loaded from cache:", cachedCourseDetail);
           console.log("Cached tees:", cachedCourseDetail.tees?.map(t => ({ id: t.id, name: t.name })));
           
+          // FIX 1: Ensure the par values are proper numbers for each tee
+          const teesWithValidPar = cachedCourseDetail.tees.map(tee => {
+            if (!tee.par || tee.par <= 0) {
+              console.log(`Fixing invalid par value for tee ${tee.name}`);
+              // Calculate par from holes if available
+              if (tee.holes && tee.holes.length > 0) {
+                tee.par = tee.holes.reduce((sum, hole) => sum + (hole.par || 4), 0);
+              } else {
+                // Default to 72 if no holes data
+                tee.par = 72;
+              }
+            }
+            return tee;
+          });
+          
           simplifiedCourseDetail = {
             ...cachedCourseDetail,
             id: course.id,
@@ -66,7 +81,8 @@ export function createCourseSelectionHandlers({
             clubName: course.clubName,
             city: course.city || cachedCourseDetail.city,
             state: course.state || cachedCourseDetail.state,
-            isUserAdded: true
+            isUserAdded: true,
+            tees: teesWithValidPar // Use the fixed tees
           };
           
           // Debug tee data
@@ -74,14 +90,29 @@ export function createCourseSelectionHandlers({
         } else if (storedMetadata && storedMetadata.tees && storedMetadata.tees.length > 0) {
           console.log("Using metadata from localStorage:", storedMetadata);
           
+          // FIX 1: Ensure the tees in the metadata have proper par values
+          const teesWithValidPar = storedMetadata.tees.map(tee => {
+            if (!tee.par || tee.par <= 0) {
+              console.log(`Fixing invalid par value for tee ${tee.name}`);
+              // Calculate par from holes if available
+              if (tee.holes && tee.holes.length > 0) {
+                tee.par = tee.holes.reduce((sum, hole) => sum + (hole.par || 4), 0);
+              } else {
+                // Default to 72 if no holes data
+                tee.par = 72;
+              }
+            }
+            return tee;
+          });
+          
           simplifiedCourseDetail = {
             id: course.id,
             name: course.name,
             clubName: course.clubName,
             city: course.city || storedMetadata.city,
             state: course.state || storedMetadata.state,
-            tees: storedMetadata.tees,
-            holes: storedMetadata.holes || storedMetadata.tees[0].holes,
+            tees: teesWithValidPar, // Use the fixed tees
+            holes: storedMetadata.holes || teesWithValidPar[0].holes,
             isUserAdded: true
           };
           
@@ -106,7 +137,7 @@ export function createCourseSelectionHandlers({
             name: 'White',
             rating: 72,
             slope: 113,
-            par: 72,
+            par: 72, // Ensure par is set correctly for the default tee
             gender: 'male' as const,
             originalIndex: 0,
             holes: defaultHoles
