@@ -22,10 +22,11 @@ export const ScorecardHeader = ({
     ? format(roundDate, 'MMMM d, yyyy')
     : format(new Date(round.date), 'MMMM d, yyyy');
     
-  // IMPORTANT: Always use the exact tee_name saved in the round data
+  // Directly use the exact tee_name from the round data
   const teeName = round.tee_name || "Standard";
   
-  console.log("Displaying round with tee_name:", teeName, "tee_id:", round.tee_id);
+  console.log("ScorecardHeader - Displaying round with tee_name:", teeName);
+  console.log("ScorecardHeader - Round full data:", round);
 
   return (
     <div className="flex justify-between items-center mb-4">

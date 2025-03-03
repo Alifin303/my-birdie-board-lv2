@@ -51,6 +51,14 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
     round => round.courses && round.courses.id === selectedCourseId
   );
   
+  // Debug log all rounds and their tee names
+  console.log("Course rounds with tee information:", courseRounds.map(round => ({
+    id: round.id,
+    tee_name: round.tee_name,
+    tee_id: round.tee_id,
+    date: round.date
+  })));
+  
   if (courseRounds.length === 0) return null;
   
   // Get course name, properly formatted
@@ -120,7 +128,9 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
   };
   
   const handleViewScorecard = (round: Round) => {
-    console.log("Viewing scorecard for round:", round.id, "tee:", round.tee_name);
+    console.log("Viewing scorecard for round:", round.id);
+    console.log("Round tee_name:", round.tee_name);
+    console.log("Round tee_id:", round.tee_id);
     
     // Close the current scorecard if open and reset state
     if (scorecardOpen) {
@@ -282,8 +292,7 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
             </thead>
             <tbody>
               {sortedRounds.map((round) => {
-                // Ensure we're using the correct tee name from the round data
-                const teeName = round.tee_name || 'Standard';
+                console.log(`Rendering round ${round.id} with tee_name: "${round.tee_name}"`);
                 
                 return (
                   <tr key={round.id} className="border-b last:border-0">
@@ -291,7 +300,7 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
                       {new Date(round.date).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3 text-sm">
-                      {teeName} Tees
+                      {round.tee_name ? `${round.tee_name} Tees` : 'Standard Tees'}
                     </td>
                     <td className="px-4 py-3 text-sm">
                       {scoreType === 'gross' 

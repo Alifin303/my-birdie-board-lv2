@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase, parseCourseName, updateCourseWithUserId } from "@/integrations/supabase/client";
@@ -81,8 +80,13 @@ export default function Dashboard() {
         throw error;
       }
       
-      console.log("Fetched rounds data from Supabase:", data);
-      console.log("Tee names in rounds:", data?.map(round => round.tee_name));
+      console.log("============= ROUNDS FETCHED FROM SUPABASE =============");
+      console.log("Raw rounds data:", data);
+      console.log("Tee names in rounds:", data?.map(round => ({
+        id: round.id,
+        tee_name: round.tee_name,
+        tee_id: round.tee_id
+      })));
       
       const processedRounds = data?.map(round => {
         let parsedNames = { clubName: "Unknown Club", courseName: "Unknown Course" };
@@ -91,12 +95,8 @@ export default function Dashboard() {
           parsedNames = parseCourseName(round.courses.name);
         }
         
-        // Log the round tee information for debugging
-        console.log("Fetched round data:", { 
-          roundId: round.id,
-          savedTeeId: round.tee_id, 
-          savedTeeName: round.tee_name 
-        });
+        // Ensure we have the tee_name field
+        console.log(`Processing round ${round.id} with tee_name: "${round.tee_name}"`);
         
         return {
           ...round,
@@ -108,15 +108,19 @@ export default function Dashboard() {
         };
       }) || [];
       
-      console.log("Processed rounds with parsed course names:", processedRounds);
-      // Log specific round info to debug tee name issues
-      if (processedRounds.length > 0) {
-        console.log("LATEST ROUND TEE INFO:", {
-          id: processedRounds[0].id,
-          tee_name: processedRounds[0].tee_name,
-          tee_id: processedRounds[0].tee_id
+      console.log("Processed rounds with tee names:", processedRounds.map(r => ({
+        id: r.id,
+        tee_name: r.tee_name
+      })));
+      
+      // Log specific round info for each round
+      processedRounds.forEach(round => {
+        console.log(`ROUND ${round.id} TEE INFO:`, {
+          tee_name: round.tee_name,
+          tee_id: round.tee_id,
+          date: new Date(round.date).toLocaleDateString()
         });
-      }
+      });
       
       // Update user IDs for courses without them
       if (processedRounds.length > 0) {
