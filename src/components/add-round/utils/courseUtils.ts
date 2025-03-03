@@ -1,3 +1,4 @@
+
 import { CourseDetail, TeeBox } from "@/services/golfCourseApi";
 import { SimplifiedCourseDetail, SimplifiedGolfCourse, SimplifiedHole, SimplifiedTee } from "../types";
 import { supabase, formatCourseName, parseCourseName, getCourseMetadataFromLocalStorage, isUserAddedCourse } from "@/integrations/supabase";
@@ -119,21 +120,12 @@ export const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): Sim
     return { ...tee, holes: teeHoles };
   });
   
+  // Fix for holes being properly initialized
   let holes: SimplifiedHole[] = [];
-  if (simplifiedTees.length > 0) {
-    const firstTee = simplifiedTees[0];
-    holes = firstTee.holes || [];
-    
-    if (!holes || holes.length === 0) {
-      holes = Array(18).fill(null).map((_, idx) => ({
-        number: idx + 1,
-        par: 4,
-        yards: 400,
-        handicap: idx + 1
-      }));
-    }
+  if (simplifiedTees.length > 0 && simplifiedTees[0].holes && simplifiedTees[0].holes.length > 0) {
+    holes = simplifiedTees[0].holes;
   } else {
-    console.log("No tees available, creating default holes");
+    console.log("No tee holes found, creating default holes");
     holes = Array(18).fill(null).map((_, idx) => ({
       number: idx + 1,
       par: 4,
@@ -142,6 +134,7 @@ export const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): Sim
     }));
   }
   
+  // Ensure courseId is a number
   const courseId = typeof courseDetail.id === 'string' ? parseInt(courseDetail.id, 10) : 
                    typeof courseDetail.id === 'number' ? courseDetail.id : 0;
 
@@ -254,16 +247,42 @@ export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDe
           return tee;
         });
         
-        return {
+        // Ensure we have holes data - default to the first tee's holes or create new ones
+        let holes: SimplifiedHole[] = [];
+        if (metadata.holes && Array.isArray(metadata.holes) && metadata.holes.length > 0) {
+          holes = metadata.holes;
+        } else if (validatedTees[0].holes && Array.isArray(validatedTees[0].holes) && validatedTees[0].holes.length > 0) {
+          holes = validatedTees[0].holes;
+        } else {
+          holes = Array(18).fill(null).map((_, idx) => ({
+            number: idx + 1,
+            par: 4,
+            yards: 400,
+            handicap: idx + 1
+          }));
+        }
+        
+        // Create the course detail with fixed data
+        const courseDetail: SimplifiedCourseDetail = {
           id: courseId,
           name: metadata.name || "Unknown Course",
           clubName: metadata.clubName || "Unknown Club",
           city: metadata.city || '',
           state: metadata.state || '',
           tees: validatedTees,
-          holes: metadata.holes || validatedTees[0].holes,
+          holes: holes,
           isUserAdded: true
         };
+        
+        // Save the fixed course details to localStorage
+        try {
+          localStorage.setItem(courseDetailsKey, JSON.stringify(courseDetail));
+          console.log("Saved fixed course details to localStorage");
+        } catch (e) {
+          console.error("Error saving to localStorage:", e);
+        }
+        
+        return courseDetail;
       }
       return null;
     }
@@ -374,6 +393,14 @@ export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDe
         if (parsedDetails.tees[0]?.holes && parsedDetails.tees[0].holes.length > 0) {
           console.log("Setting course-level holes from first tee");
           parsedDetails.holes = parsedDetails.tees[0].holes;
+        } else {
+          console.log("Creating default course-level holes");
+          parsedDetails.holes = Array(18).fill(null).map((_, idx) => ({
+            number: idx + 1,
+            par: 4,
+            yards: 400,
+            handicap: idx + 1
+          }));
         }
       }
       

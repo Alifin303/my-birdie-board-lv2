@@ -102,6 +102,12 @@ export function createCourseSelectionHandlers({
                 tee.par = 72;
               }
             }
+            
+            // Ensure tee ID is a string and exists
+            if (!tee.id) {
+              tee.id = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+            }
+            
             return tee;
           });
           
@@ -112,7 +118,7 @@ export function createCourseSelectionHandlers({
             city: course.city || storedMetadata.city,
             state: course.state || storedMetadata.state,
             tees: teesWithValidPar, // Use the fixed tees
-            holes: storedMetadata.holes || teesWithValidPar[0].holes,
+            holes: storedMetadata.holes || teesWithValidPar[0].holes || [],
             isUserAdded: true
           };
           
@@ -271,6 +277,9 @@ export function createCourseSelectionHandlers({
         // Set the selected tee ID first
         setSelectedTeeId(defaultTeeId);
         
+        // Update scorecard with the default tee
+        updateScorecardForTee(defaultTeeId, 'all');
+        
         console.log("Default tee set to:", {
           id: defaultTeeId,
           name: simplifiedCourseDetail.tees[0]?.name,
@@ -308,6 +317,9 @@ export function createCourseSelectionHandlers({
         // Update state with the modified course detail
         setSelectedCourse(simplifiedCourseDetail);
         setSelectedTeeId(defaultTeeId);
+        
+        // Update scorecard with the default tee
+        updateScorecardForTee(defaultTeeId, 'all');
         
         console.log("Created default tee:", defaultTee);
         console.log("Updated course with default tee:", simplifiedCourseDetail);

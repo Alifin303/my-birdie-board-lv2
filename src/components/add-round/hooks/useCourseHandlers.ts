@@ -8,5 +8,12 @@ export { useCourseHandlers };
  */
 function useCourseHandlers(props: Parameters<typeof useRefactoredCourseHandlers>[0]) {
   console.log("useCourseHandlers wrapper - selectedTeeId:", props.selectedTeeId);
+  console.log("useCourseHandlers wrapper - courseAndTeeReady:", props.courseAndTeeReady);
+  
+  if (props.selectedCourse && props.selectedTeeId) {
+    const tee = props.selectedCourse.tees.find(t => t.id === props.selectedTeeId);
+    console.log("Selected tee in wrapper:", tee ? { id: tee.id, name: tee.name, par: tee.par } : "Tee not found");
+  }
+  
   return useRefactoredCourseHandlers(props);
 }

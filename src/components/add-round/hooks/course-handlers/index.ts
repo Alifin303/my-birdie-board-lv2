@@ -6,7 +6,11 @@ import { createSaveRoundHandler } from "./saveRoundHandler";
 
 export function useCourseHandlers(props: UseCourseHandlersProps): CourseHandlers {
   console.log("useCourseHandlers - selectedTeeId:", props.selectedTeeId);
-  console.log("useCourseHandlers - selectedCourse:", props.selectedCourse);
+  
+  if (props.selectedCourse && props.selectedTeeId) {
+    const tee = props.selectedCourse.tees.find(t => t.id === props.selectedTeeId);
+    console.log("Selected tee in useCourseHandlers:", tee ? { id: tee.id, name: tee.name, par: tee.par } : "Tee not found");
+  }
   
   const { handleSearch: searchHandler } = createSearchHandlers({
     setIsLoading: props.setIsLoading,

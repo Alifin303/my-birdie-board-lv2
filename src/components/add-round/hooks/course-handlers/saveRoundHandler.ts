@@ -2,6 +2,7 @@
 import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
 import { QueryClient } from "@tanstack/react-query";
+import { ensureCourseExists, findOrCreateCourseByApiId } from "@/integrations/supabase";
 
 export function createSaveRoundHandler({
   selectedCourse,
@@ -76,72 +77,48 @@ export function createSaveRoundHandler({
       const toParGross = totalStrokes - totalPar;
       
       console.log("Ensuring course exists in database:", selectedCourse);
-      let dbCourseId = selectedCourse.id;
+      let dbCourseId: number;
       
       if (selectedCourse.apiCourseId) {
-        const { data: existingCourseData, error: findError } = await supabase
-          .from('courses')
-          .select('id')
-          .eq('api_course_id', selectedCourse.apiCourseId)
-          .maybeSingle();
-          
-        if (findError) {
-          console.error("Error checking for existing course:", findError);
+        // FIX 3: For API courses, use findOrCreateCourseByApiId to avoid duplicates
+        console.log("Ensuring API course exists:", selectedCourse.apiCourseId);
+        const courseId = await findOrCreateCourseByApiId(
+          selectedCourse.apiCourseId,
+          selectedCourse.name,
+          selectedCourse.clubName,
+          selectedCourse.city,
+          selectedCourse.state
+        );
+        
+        if (!courseId) {
+          throw new Error("Failed to find or create course in database");
         }
         
-        if (existingCourseData && existingCourseData.id) {
-          console.log("Found existing course in database:", existingCourseData);
-          dbCourseId = existingCourseData.id;
-        } else {
-          const { data: insertedCourse, error: insertError } = await supabase
-            .from('courses')
-            .insert([{
-              name: `${selectedCourse.clubName} - ${selectedCourse.name}`,
-              city: selectedCourse.city || '',
-              state: selectedCourse.state || '',
-              api_course_id: selectedCourse.apiCourseId,
-              user_id: session.user.id
-            }])
-            .select('id')
-            .single();
-            
-          if (insertError) {
-            console.error("Error inserting course:", insertError);
-            throw new Error(`Failed to insert course: ${insertError.message}`);
-          }
-          
-          if (!insertedCourse) {
-            throw new Error("Failed to insert course, no course ID returned");
-          }
-          
-          console.log("Course inserted successfully:", insertedCourse);
-          dbCourseId = insertedCourse.id;
-        }
+        dbCourseId = courseId;
+        console.log("Using course_id for API course:", dbCourseId);
       } else {
-        console.log("Verifying user-added course exists:", dbCourseId);
-        const { data: courseCheck, error: checkError } = await supabase
-          .from('courses')
-          .select('id')
-          .eq('id', dbCourseId)
-          .maybeSingle();
-          
-        if (checkError) {
-          console.error("Error checking course existence:", checkError);
-        }
+        // For user-added courses, ensure the course exists
+        console.log("Ensuring user-added course exists:", selectedCourse.id);
         
-        if (!courseCheck) {
-          throw new Error(`Course with ID ${dbCourseId} not found in database`);
-        }
+        // FIX 3: Use ensureCourseExists to avoid duplicates
+        dbCourseId = await ensureCourseExists(
+          selectedCourse.id,
+          undefined,
+          selectedCourse.name,
+          selectedCourse.clubName,
+          selectedCourse.city,
+          selectedCourse.state
+        );
         
-        console.log("User-added course verified:", courseCheck);
+        console.log("Using course_id for user-added course:", dbCourseId);
       }
       
-      console.log("Using course_id for round insertion:", dbCourseId);
       console.log("Final selected tee for saving:", selectedTee);
       
       // FIX 2: Ensure we save the actual tee information correctly
       // First, get both tee ID and tee name to ensure they are properly linked
       const teeName = selectedTee.name;
+      const teeId = selectedTeeId;
       
       // Prepare the data we're sending to Supabase
       const roundData = {
@@ -149,7 +126,7 @@ export function createSaveRoundHandler({
         course_id: dbCourseId,
         date: roundDate.toISOString(),
         tee_name: teeName, // Explicitly use the name from the selected tee
-        tee_id: selectedTeeId,  // Explicitly save the tee ID
+        tee_id: teeId,  // Explicitly save the tee ID
         gross_score: totalStrokes,
         to_par_gross: toParGross,
         net_score: null,
