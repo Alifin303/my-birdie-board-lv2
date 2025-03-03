@@ -141,23 +141,23 @@ export async function ensureCourseExists(
     const userId = session?.user?.id;
     
     // Format the course name according to our standard format
-    let courseName: string;
+    let fullCourseName: string;
     if (normalizedClubName && normalizedCourseName) {
-      courseName = `${normalizedClubName} - ${normalizedCourseName}`;
+      fullCourseName = `${normalizedClubName} - ${normalizedCourseName}`;
     } else {
       // Try to parse from the course ID (for user-added courses)
       const existingCourseData = await getCourseMetadataFromLocalStorage(numericCourseId);
       if (existingCourseData && existingCourseData.name) {
         // For user-added courses with [User added course] suffix
-        courseName = existingCourseData.name;
+        fullCourseName = existingCourseData.name;
       } else {
         // Fallback to a generic name with the course ID
-        courseName = `Course ID ${numericCourseId}`;
+        fullCourseName = `Course ID ${numericCourseId}`;
       }
     }
     
     const courseData = {
-      name: courseName,
+      name: fullCourseName,
       api_course_id: apiCourseId || null,
       city: city || '',
       state: state || '',
