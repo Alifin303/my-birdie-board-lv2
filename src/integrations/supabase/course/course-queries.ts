@@ -88,40 +88,139 @@ export function getCourseMetadataFromLocalStorage(courseId: number | string): an
     // Try different possible storage keys
     const courseDetailsKey = `course_details_${courseIdStr}`;
     const courseMetadataKey = `course_metadata_${courseIdStr}`;
+    const legacyKey = `course-${courseIdStr}`;
     
-    // Get stored details
-    const storedDetails = localStorage.getItem(courseDetailsKey) || localStorage.getItem(courseMetadataKey);
+    // Log all matching keys in localStorage for debugging
+    console.log("Checking localStorage keys for course ID:", courseIdStr);
+    const matchingKeys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.includes(courseIdStr) || key.includes('course'))) {
+        matchingKeys.push(key);
+      }
+    }
+    console.log("Matching localStorage keys:", matchingKeys);
+    
+    // Get stored details, trying all possible key formats
+    const storedDetails = localStorage.getItem(courseDetailsKey) || 
+                         localStorage.getItem(courseMetadataKey) ||
+                         localStorage.getItem(legacyKey);
     
     if (!storedDetails) {
       console.log(`No metadata found in localStorage for course ID: ${courseIdStr}`);
       return null;
     }
     
-    const parsedDetails = JSON.parse(storedDetails);
-    console.log("Loaded course metadata from localStorage:", parsedDetails);
+    let parsedDetails;
+    try {
+      parsedDetails = JSON.parse(storedDetails);
+      console.log("Successfully parsed course metadata from localStorage:", parsedDetails);
+    } catch (parseError) {
+      console.error("Error parsing course metadata JSON:", parseError);
+      return null;
+    }
+    
+    // Validate the parsed data has minimum required fields
+    if (!parsedDetails) {
+      console.error("Invalid course data: empty object after parsing");
+      return null;
+    }
+    
+    if (!parsedDetails.name) {
+      console.warn("Course data missing name property, may be incomplete:", parsedDetails);
+    }
     
     // Ensure each tee has proper hole configuration
-    if (parsedDetails.tees) {
+    if (parsedDetails.tees && Array.isArray(parsedDetails.tees)) {
+      console.log(`Processing ${parsedDetails.tees.length} tees for course`);
+      
       parsedDetails.tees = parsedDetails.tees.map(tee => {
-        // Calculate total par if it's not already set
-        if (!tee.par && tee.holes && tee.holes.length > 0) {
-          tee.par = tee.holes.reduce((sum, hole) => sum + (hole.par || 4), 0);
-          console.log(`Calculated par for tee ${tee.name}: ${tee.par}`);
-        } else if (!tee.par) {
-          tee.par = 72; // Default only if no holes are available
-          console.log(`Using default par (72) for tee ${tee.name} as no holes are available`);
+        if (!tee) {
+          console.error("Null or undefined tee found in course data");
+          return null;
         }
         
-        // Validate holes data
-        if (tee.holes && tee.holes.length > 0) {
+        console.log(`Processing tee: ${tee.name} (ID: ${tee.id})`);
+        
+        // Validate tee has holes data
+        if (!tee.holes || !Array.isArray(tee.holes) || tee.holes.length === 0) {
+          console.warn(`Tee ${tee.name} has no hole data. Using default holes.`);
+          // Create default holes if none exist
+          tee.holes = Array(18).fill(null).map((_, idx) => ({
+            number: idx + 1,
+            par: 4,
+            yards: 400,
+            handicap: idx + 1
+          }));
+        } else {
           console.log(`Tee ${tee.name} has ${tee.holes.length} holes with par data:`, 
             tee.holes.map(h => ({ number: h.number, par: h.par })));
-        } else {
-          console.log(`Tee ${tee.name} has no hole data`);
         }
         
+        // Calculate total par from hole data
+        const calculatedPar = tee.holes.reduce((sum, hole) => sum + (hole.par || 4), 0);
+        console.log(`Calculated par for tee ${tee.name}: ${calculatedPar}`);
+        
+        // Update tee with calculated par
+        tee.par = calculatedPar;
+        
+        // Ensure all required tee properties exist
+        tee.rating = tee.rating || 72.0;
+        tee.slope = tee.slope || 113;
+        tee.gender = tee.gender || 'male';
+        
         return tee;
-      });
+      }).filter(Boolean); // Remove any null tees
+    } else {
+      console.warn("No tees array found in course data:", parsedDetails);
+      
+      // Create default tee if none exists
+      const defaultHoles = Array(18).fill(null).map((_, idx) => ({
+        number: idx + 1,
+        par: 4,
+        yards: 400,
+        handicap: idx + 1
+      }));
+      
+      const defaultTeeId = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      
+      parsedDetails.tees = [{
+        id: defaultTeeId,
+        name: 'White',
+        rating: 72,
+        slope: 113,
+        par: 72,
+        gender: 'male' as const,
+        originalIndex: 0,
+        holes: defaultHoles
+      }];
+      
+      parsedDetails.holes = defaultHoles;
+      console.log("Created default tee for course:", parsedDetails.tees[0]);
+      
+      // Update localStorage with the fixed data
+      try {
+        localStorage.setItem(courseDetailsKey, JSON.stringify(parsedDetails));
+        console.log("Updated course details in localStorage with default tee");
+      } catch (e) {
+        console.error("Error saving fixed course data to localStorage:", e);
+      }
+    }
+    
+    // Ensure course has the holes array at the top level too
+    if (!parsedDetails.holes || !Array.isArray(parsedDetails.holes)) {
+      console.log("Setting course-level holes from first tee");
+      if (parsedDetails.tees && parsedDetails.tees.length > 0 && parsedDetails.tees[0].holes) {
+        parsedDetails.holes = parsedDetails.tees[0].holes;
+      } else {
+        console.warn("No tee holes found, creating default course holes");
+        parsedDetails.holes = Array(18).fill(null).map((_, idx) => ({
+          number: idx + 1,
+          par: 4,
+          yards: 400,
+          handicap: idx + 1
+        }));
+      }
     }
     
     return parsedDetails;

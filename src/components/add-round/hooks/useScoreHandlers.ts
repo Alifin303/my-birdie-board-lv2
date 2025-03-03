@@ -49,7 +49,11 @@ export function useScoreHandlers({
     if (selectedTee.holes && selectedTee.holes.length > 0) {
       console.log("Using hole data specific to the selected tee:", selectedTee.holes);
       
-      // Validate par values
+      // Log the hole data for debugging
+      console.log("Par values for tee-specific holes:", 
+        selectedTee.holes.map(h => ({ number: h.number, par: h.par || 4 })));
+      
+      // Validate par values and ensure each hole has a par value
       const validHoles = selectedTee.holes.map(hole => {
         if (!hole.par || hole.par < 2 || hole.par > 6) {
           console.log(`Fixing invalid par value (${hole.par}) for hole ${hole.number}`);
@@ -58,13 +62,28 @@ export function useScoreHandlers({
         return hole;
       });
       
-      console.log("Validated holes with par values:", validHoles.map(h => ({ number: h.number, par: h.par })));
+      // Calculate total par to validate
+      const totalPar = validHoles.reduce((sum, hole) => sum + (hole.par || 4), 0);
+      console.log(`Calculated total par for tee ${selectedTee.name}: ${totalPar}`);
+      
+      // Update the tee's par if needed
+      if (selectedTee.par !== totalPar) {
+        console.log(`Updating tee par from ${selectedTee.par} to ${totalPar} based on hole data`);
+        selectedTee.par = totalPar;
+      }
+      
       return validHoles;
     }
     
     console.log("Tee doesn't have specific hole data, using course's default holes");
     // Fallback to course holes if available
     if (selectedCourse.holes && selectedCourse.holes.length > 0) {
+      console.log("Using course-level holes:", selectedCourse.holes);
+      
+      // Log the hole data for debugging
+      console.log("Par values for course-level holes:", 
+        selectedCourse.holes.map(h => ({ number: h.number, par: h.par || 4 })));
+      
       // Check for potential par data issues
       const anyInvalidPar = selectedCourse.holes.some(h => !h.par || h.par < 2 || h.par > 6);
       if (anyInvalidPar) {
@@ -74,17 +93,35 @@ export function useScoreHandlers({
           par: hole.par && hole.par >= 2 && hole.par <= 6 ? hole.par : 4
         }));
       }
+      
+      // Calculate total par for the course holes
+      const totalCoursePar = selectedCourse.holes.reduce((sum, hole) => sum + (hole.par || 4), 0);
+      console.log(`Calculated total par from course holes: ${totalCoursePar}`);
+      
+      // Update the tee's par if needed
+      if (selectedTee.par !== totalCoursePar) {
+        console.log(`Updating tee par from ${selectedTee.par} to ${totalCoursePar} based on course hole data`);
+        selectedTee.par = totalCoursePar;
+      }
+      
       return selectedCourse.holes;
     }
     
     // Last resort: generate default holes
     console.warn("No hole data found for course or tee, generating default holes");
-    return Array(18).fill(null).map((_, idx) => ({
+    const defaultHoles = Array(18).fill(null).map((_, idx) => ({
       number: idx + 1,
       par: 4,
       yards: 400,
       handicap: idx + 1
     }));
+    
+    // Set default par for the tee based on generated holes
+    const defaultPar = defaultHoles.reduce((sum, hole) => sum + hole.par, 0);
+    console.log(`Setting default par ${defaultPar} for tee ${selectedTee.name}`);
+    selectedTee.par = defaultPar;
+    
+    return defaultHoles;
   };
 
   const updateScorecardForTee = (teeId: string, selection: HoleSelection = 'all') => {
@@ -125,6 +162,8 @@ export function useScoreHandlers({
     
     if (totalPar !== selectedTee.par) {
       console.warn(`Par mismatch: Calculated ${totalPar} from holes, but tee.par is ${selectedTee.par}. Using calculated value.`);
+      // Update the tee's par to match the calculated value
+      selectedTee.par = totalPar;
     }
     
     let filteredHoles = [];
