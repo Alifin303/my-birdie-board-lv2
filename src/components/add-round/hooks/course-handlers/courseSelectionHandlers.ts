@@ -55,6 +55,7 @@ export function createCourseSelectionHandlers({
           console.log("User-added course details loaded from cache:", cachedCourseDetail);
           console.log("Cached tees:", cachedCourseDetail.tees?.map(t => ({ id: t.id, name: t.name })));
           
+          // IMPORTANT FIX: Ensure we preserve the entire cached tee data
           cachedCourseDetail.id = course.id;
           cachedCourseDetail.name = course.name;
           cachedCourseDetail.clubName = course.clubName;

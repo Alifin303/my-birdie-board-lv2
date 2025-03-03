@@ -52,8 +52,9 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       setRoundDate(round.date ? new Date(round.date) : undefined);
       setIsEditing(false); // Reset edit mode when opening a new round
       
-      // Set the selected tee based on the round data
+      // FIX: Set the selected tee based on the round data
       setSelectedTee(round.tee_name);
+      console.log("Setting selected tee to round's tee_name:", round.tee_name);
       
       // Get available tees for this course from localStorage
       try {
