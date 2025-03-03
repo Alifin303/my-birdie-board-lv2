@@ -17,5 +17,6 @@ export {
   isUserAddedCourse,
   getCourseMetadataFromLocalStorage,
   calculateHandicapIndex,
+  updateCourseWithUserId,
   type DatabaseError
 } from './index';
