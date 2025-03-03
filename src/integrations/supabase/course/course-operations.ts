@@ -26,33 +26,39 @@ export async function findOrCreateCourseByApiId(
       console.log("Special handling for Bentley Golf Club (or similar)");
       
       // Try to find by API course ID first
-      const existingCourseByApiId = await findCourseByApiId(apiCourseId);
-      if (existingCourseByApiId) {
-        console.log(`Found existing course by API ID: ${existingCourseByApiId}`);
-        return existingCourseByApiId;
+      const existingCourseId = await findCourseByApiId(apiCourseId);
+      if (existingCourseId) {
+        console.log(`Found existing course by API ID: ${existingCourseId}`);
+        return existingCourseId;
       }
       
       // Then try to find by normalized name
       const formattedName = `${normalizedClubName} - ${normalizedCourseName}`;
-      const existingCourseByName = await findCourseByName(formattedName);
-      if (existingCourseByName) {
-        console.log(`Found existing course by name: ${existingCourseByName}`);
+      const existingCourseIdByName = await findCourseByName(formattedName);
+      if (existingCourseIdByName) {
+        console.log(`Found existing course by name: ${existingCourseIdByName}`);
         
-        // Update the API course ID if it's not set
-        if (!existingCourseByName.api_course_id) {
+        // Update the API course ID if it's not set - need to query for course details first
+        const { data: courseData, error: courseError } = await supabase
+          .from('courses')
+          .select('api_course_id')
+          .eq('id', existingCourseIdByName)
+          .single();
+          
+        if (!courseError && courseData && !courseData.api_course_id) {
           const { error } = await supabase
             .from('courses')
             .update({ api_course_id: apiCourseId })
-            .eq('id', existingCourseByName);
+            .eq('id', existingCourseIdByName);
             
           if (error) {
             console.error('Error updating API course ID:', error);
           } else {
-            console.log(`Updated API course ID for course ${existingCourseByName}`);
+            console.log(`Updated API course ID for course ${existingCourseIdByName}`);
           }
         }
         
-        return existingCourseByName;
+        return existingCourseIdByName;
       }
       
       // If no exact match was found, try a broader search for Bentley
@@ -126,20 +132,20 @@ export async function ensureCourseExists(
       
       // Try to find by API course ID first if provided
       if (apiCourseId) {
-        const existingCourseByApiId = await findCourseByApiId(apiCourseId);
-        if (existingCourseByApiId) {
-          console.log(`Found existing Bentley course by API ID: ${existingCourseByApiId}`);
-          return existingCourseByApiId;
+        const existingCourseId = await findCourseByApiId(apiCourseId);
+        if (existingCourseId) {
+          console.log(`Found existing Bentley course by API ID: ${existingCourseId}`);
+          return existingCourseId;
         }
       }
       
       // Try to find by normalized name if provided
       if (normalizedCourseName && normalizedClubName) {
         const formattedName = `${normalizedClubName} - ${normalizedCourseName}`;
-        const existingCourseByName = await findCourseByName(formattedName);
-        if (existingCourseByName) {
-          console.log(`Found existing Bentley course by name: ${existingCourseByName}`);
-          return existingCourseByName;
+        const existingCourseId = await findCourseByName(formattedName);
+        if (existingCourseId) {
+          console.log(`Found existing Bentley course by name: ${existingCourseId}`);
+          return existingCourseId;
         }
       }
       
@@ -170,20 +176,20 @@ export async function ensureCourseExists(
     
     // If API course ID is provided, try to find by that
     if (apiCourseId) {
-      const existingApiCourse = await findCourseByApiId(apiCourseId);
-      if (existingApiCourse) {
-        console.log(`Found existing course by API ID: ${existingApiCourse}`);
-        return existingApiCourse;
+      const existingApiCourseId = await findCourseByApiId(apiCourseId);
+      if (existingApiCourseId) {
+        console.log(`Found existing course by API ID: ${existingApiCourseId}`);
+        return existingApiCourseId;
       }
     }
     
     // If course name and club name are provided, try to find by formatted name
     if (normalizedCourseName && normalizedClubName) {
       const formattedName = `${normalizedClubName} - ${normalizedCourseName}`;
-      const existingNameCourse = await findCourseByName(formattedName);
-      if (existingNameCourse) {
-        console.log(`Found existing course by name: ${existingNameCourse}`);
-        return existingNameCourse;
+      const existingNameCourseId = await findCourseByName(formattedName);
+      if (existingNameCourseId) {
+        console.log(`Found existing course by name: ${existingNameCourseId}`);
+        return existingNameCourseId;
       }
     }
     
@@ -228,7 +234,7 @@ export async function ensureCourseExists(
       try {
         const { data, error } = await supabase
           .from('courses')
-          .upsert({ ...courseData, id: numericCourseId })
+          .upsert([{ ...courseData, id: numericCourseId }])
           .select('id')
           .single();
           
