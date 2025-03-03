@@ -18,4 +18,10 @@ export { parseCourseName, formatCourseName, isUserAddedCourse } from './utils/co
 
 export { calculateHandicapIndex } from './handicap/handicap-calculator';
 
-export type { DatabaseError } from './types';
+// Define DatabaseError type directly in this file since it's not in types.ts
+export type DatabaseError = {
+  code: string;
+  details?: string;
+  hint?: string;
+  message: string;
+};
