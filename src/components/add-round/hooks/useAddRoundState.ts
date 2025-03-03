@@ -45,6 +45,31 @@ export const useAddRoundState = () => {
     }
   }, [selectedCourse]);
 
+  // Enhanced logging for debugging course loading issues
+  useEffect(() => {
+    if (selectedCourse) {
+      console.log("Course loaded:", {
+        id: selectedCourse.id,
+        name: selectedCourse.name,
+        isUserAdded: selectedCourse.isUserAdded,
+        teesCount: selectedCourse.tees?.length || 0
+      });
+      
+      if (selectedCourse.tees && selectedCourse.tees.length > 0) {
+        console.log("Course tees:", selectedCourse.tees.map(t => ({
+          id: t.id,
+          name: t.name,
+          par: t.par,
+          rating: t.rating,
+          slope: t.slope,
+          holesCount: t.holes?.length || 0
+        })));
+      } else {
+        console.error("No tees found for course:", selectedCourse.id);
+      }
+    }
+  }, [selectedCourse]);
+
   // Log selection changes for debugging
   useEffect(() => {
     if (selectedTeeId) {

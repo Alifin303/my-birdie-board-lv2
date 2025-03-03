@@ -403,6 +403,9 @@ export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDe
         }
       }
       
+      // Make sure the course is marked as user-added
+      parsedDetails.isUserAdded = true;
+      
       // Save the updated details back to localStorage
       localStorage.setItem(`course_details_${courseId}`, JSON.stringify(parsedDetails));
       console.log("Updated course details with verified par data saved to localStorage");

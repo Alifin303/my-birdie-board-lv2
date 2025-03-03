@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,6 +69,28 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
     }
   }, [selectedTeeId]);
 
+  // Debug logging for course and tee selection
+  useEffect(() => {
+    if (selectedCourse) {
+      console.log("Scorecard Step - Selected Course:", {
+        id: selectedCourse.id,
+        name: selectedCourse.name,
+        isUserAdded: selectedCourse.isUserAdded,
+        teeCount: selectedCourse.tees?.length
+      });
+      
+      if (selectedCourse.tees) {
+        console.log("Available tees:", selectedCourse.tees.map(t => ({
+          id: t.id,
+          name: t.name,
+          par: t.par,
+          rating: t.rating,
+          slope: t.slope
+        })));
+      }
+    }
+  }, [selectedCourse]);
+
   if (!selectedCourse) return null;
 
   // Get the currently selected tee information based on localSelectedTeeId
@@ -93,6 +114,11 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
     console.log("Selected tee rating/slope:", selectedTee.rating, "/", selectedTee.slope);
   } else {
     console.error("No tee found for ID:", localSelectedTeeId);
+    // Try to recover by selecting the first available tee
+    if (selectedCourse.tees && selectedCourse.tees.length > 0) {
+      console.log("Recovering by selecting first available tee:", selectedCourse.tees[0].id);
+      setLocalSelectedTeeId(selectedCourse.tees[0].id);
+    }
   }
   console.log("=================================================");
   

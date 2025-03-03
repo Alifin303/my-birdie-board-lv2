@@ -4,7 +4,7 @@ import { loadUserAddedCourseDetails } from "../../utils/courseUtils";
 import { convertToSimplifiedCourseDetail } from "../../utils/courseUtils";
 import { SimplifiedGolfCourse, SimplifiedCourseDetail } from "../../types";
 import { UseCourseHandlersProps } from "./types";
-import { fetchCourseById, getCourseMetadataFromLocalStorage } from "@/integrations/supabase";
+import { fetchCourseById, getCourseMetadataFromLocalStorage, isUserAddedCourse } from "@/integrations/supabase";
 
 export function createCourseSelectionHandlers({
   setIsLoading,
@@ -45,7 +45,10 @@ export function createCourseSelectionHandlers({
       
       let simplifiedCourseDetail: SimplifiedCourseDetail;
       
-      if (course.isUserAdded) {
+      // Check if this is a user-added course either by flag or by name pattern
+      const isUserAdded = course.isUserAdded || (course.name && course.name.includes('[User added course]'));
+      
+      if (isUserAdded) {
         console.log("Loading user-added course from database:", course);
         
         // First, try to load detailed course data using loadUserAddedCourseDetails

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, ReactNode } from "react";
 import { 
   Dialog,
@@ -20,7 +19,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCourseName } from "@/integrations/supabase/client";
 
-// Import our newly created components
 import { CourseInformation } from "./course-form/CourseInformation";
 import { TeeSelection } from "./course-form/TeeSelection";
 import { TeeConfiguration } from "./course-form/TeeConfiguration";
@@ -42,7 +40,6 @@ export function ManualCourseForm({
   existingCourse 
 }: ManualCourseFormProps) {
   const [formData, setFormData] = useState<ManualCourseData>(() => {
-    // Initialize with existing course data if provided, otherwise with defaults
     if (existingCourse) {
       return {
         name: existingCourse.name.replace(' [User added course]', ''),
@@ -68,7 +65,6 @@ export function ManualCourseForm({
 
   const { toast } = useToast();
 
-  // Set initial state when form opens or when existingCourse changes
   useEffect(() => {
     if (open) {
       console.log("ManualCourseForm opened, existingCourse:", existingCourse);
@@ -76,7 +72,6 @@ export function ManualCourseForm({
         console.log("Loading existing course data:", existingCourse);
         setIsEditMode(true);
         
-        // Get the tees from localStorage if they exist
         const courseDetailsKey = `course_details_${existingCourse.id}`;
         const storedDetails = localStorage.getItem(courseDetailsKey);
         
@@ -85,7 +80,6 @@ export function ManualCourseForm({
             const parsedDetails = JSON.parse(storedDetails);
             console.log("Found stored course details:", parsedDetails);
             
-            // Use the stored tees or fallback to a default tee
             const tees = parsedDetails.tees || [createDefaultTee()];
             
             setFormData({
@@ -95,14 +89,12 @@ export function ManualCourseForm({
               tees: tees
             });
             
-            // Set the current tee to the first tee
             if (tees.length > 0) {
               setCurrentTeeIndex(0);
             }
           } catch (error) {
             console.error("Error parsing stored course details:", error);
             
-            // Fallback to default data with the course name/city/state
             setFormData({
               name: existingCourse.name.replace(' [User added course]', ''),
               city: existingCourse.city || '',
@@ -113,7 +105,6 @@ export function ManualCourseForm({
         } else {
           console.log("No stored details found for course:", existingCourse.id);
           
-          // Fallback to default data with the course name/city/state
           setFormData({
             name: existingCourse.name.replace(' [User added course]', ''),
             city: existingCourse.city || '',
@@ -122,7 +113,6 @@ export function ManualCourseForm({
           });
         }
       } else {
-        // New course - use defaults
         setIsEditMode(false);
         setFormData({
           name: '',
@@ -137,7 +127,6 @@ export function ManualCourseForm({
     }
   }, [open, existingCourse]);
   
-  // Handle form field changes
   const handleInputChange = (field: keyof ManualCourseData, value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -145,7 +134,6 @@ export function ManualCourseForm({
     }));
   };
   
-  // Handle tee name selection
   const handleTeeChange = (teeName: string) => {
     const selectedTee = teeOptions.find(t => t.name === teeName);
     
@@ -166,7 +154,6 @@ export function ManualCourseForm({
     });
   };
   
-  // Handle hole data changes
   const handleHoleChange = (
     holeIndex: number,
     field: keyof HoleData,
@@ -174,16 +161,15 @@ export function ManualCourseForm({
   ) => {
     let numValue: number;
     
-    // Handle empty input
     if (value === '') {
       if (field === 'par') {
-        numValue = 4; // Default par value
+        numValue = 4;
       } else if (field === 'yards') {
-        numValue = 0; // Allow zero yards
+        numValue = 0;
       } else if (field === 'handicap') {
-        numValue = holeIndex + 1; // Default handicap is hole number
+        numValue = holeIndex + 1;
       } else {
-        return; // Ignore other empty fields
+        return;
       }
     } else {
       numValue = parseInt(value);
@@ -194,8 +180,6 @@ export function ManualCourseForm({
       const updatedTees = [...prev.tees];
       const updatedHoles = [...updatedTees[currentTeeIndex].holes];
       
-      // Get the actual hole we're updating - for Back 9, we need to add 9 to the index
-      // since holeIndex is relative to the active tab (0-8 for both Front and Back 9)
       const actualHoleIndex = currentTab === 'back9' ? holeIndex + 9 : holeIndex;
       
       updatedHoles[actualHoleIndex] = {
@@ -215,18 +199,15 @@ export function ManualCourseForm({
     });
   };
   
-  // Add a new tee
   const handleAddTee = () => {
     setFormData(prev => ({
       ...prev,
       tees: [...prev.tees, createDefaultTee()]
     }));
     
-    // Switch to the new tee
     setCurrentTeeIndex(formData.tees.length);
   };
   
-  // Remove a tee
   const handleRemoveTee = (teeIndex: number) => {
     if (formData.tees.length <= 1) {
       toast({
@@ -245,13 +226,11 @@ export function ManualCourseForm({
       };
     });
     
-    // Update current tee index if needed
     if (currentTeeIndex >= teeIndex && currentTeeIndex > 0) {
       setCurrentTeeIndex(currentTeeIndex - 1);
     }
   };
   
-  // Validate the form before submission
   const validateForm = () => {
     if (!formData.name.trim()) {
       toast({
@@ -271,11 +250,9 @@ export function ManualCourseForm({
       return false;
     }
     
-    // Validate each tee
     for (let teeIndex = 0; teeIndex < formData.tees.length; teeIndex++) {
       const tee = formData.tees[teeIndex];
       
-      // Validate each hole's par (must be between 2 and 6)
       for (let holeIndex = 0; holeIndex < tee.holes.length; holeIndex++) {
         const hole = tee.holes[holeIndex];
         
@@ -293,9 +270,7 @@ export function ManualCourseForm({
     return true;
   };
   
-  // Handle form submission
   const handleSubmit = async (e?: React.FormEvent) => {
-    // Prevent default if event is provided (for form submissions)
     if (e) {
       e.preventDefault();
     }
@@ -306,13 +281,9 @@ export function ManualCourseForm({
     try {
       console.log("Saving course with data:", formData);
       
-      // Add "[User added course]" to the course name
       const userAddedName = formData.name + " [User added course]";
-      
-      // Format course name for database
       const formattedName = formatCourseName(userAddedName, userAddedName);
       
-      // Prepare course data for insertion
       const courseData = {
         name: formattedName,
         city: formData.city,
@@ -323,7 +294,6 @@ export function ManualCourseForm({
       let courseId: number;
       
       if (existingCourse?.id) {
-        // Update existing course
         const { data: updatedCourse, error: updateError } = await supabase
           .from('courses')
           .update(courseData)
@@ -338,7 +308,6 @@ export function ManualCourseForm({
         courseId = updatedCourse.id;
         console.log("Updated existing course:", courseId);
       } else {
-        // Insert new course
         const { data: newCourse, error: insertError } = await supabase
           .from('courses')
           .insert(courseData)
@@ -353,13 +322,14 @@ export function ManualCourseForm({
         console.log("Inserted new course:", courseId);
       }
       
-      // Save tees and holes data to a custom table or as metadata
-      // For now, we'll store this in localStorage for simplicity
-      // In a full implementation, you would create additional tables for tees/holes
       const courseDetailsKey = `course_details_${courseId}`;
       const courseDetails = {
         id: courseId,
         name: formData.name,
+        clubName: formData.name,
+        city: formData.city,
+        state: formData.state,
+        isUserAdded: true,
         tees: formData.tees.map(tee => {
           const { rating, slope, par, yards } = calculateRatings(tee);
           return {
@@ -369,11 +339,35 @@ export function ManualCourseForm({
             par,
             yards
           };
-        })
+        }),
+        holes: formData.tees[0]?.holes || []
       };
       
       localStorage.setItem(courseDetailsKey, JSON.stringify(courseDetails));
       console.log("Saved course details to localStorage:", courseDetailsKey, courseDetails);
+      
+      const metadataKey = `golf_course_${courseId}`;
+      const courseMetadata = {
+        id: courseId,
+        name: formData.name,
+        clubName: formData.name,
+        city: formData.city,
+        state: formData.state,
+        tees: formData.tees.map(tee => {
+          const { rating, slope, par, yards } = calculateRatings(tee);
+          return {
+            ...tee,
+            rating,
+            slope,
+            par,
+            yards
+          };
+        }),
+        holes: formData.tees[0]?.holes || []
+      };
+      
+      localStorage.setItem(metadataKey, JSON.stringify(courseMetadata));
+      console.log("Saved course metadata to localStorage:", metadataKey, courseMetadata);
       
       toast({
         title: existingCourse ? "Course Updated" : "Course Created",
@@ -382,10 +376,7 @@ export function ManualCourseForm({
           "The course has been successfully created.",
       });
       
-      // Call the callback with course id and name
       onCourseCreated(courseId, formattedName);
-      
-      // Close the form
       onOpenChange(false);
     } catch (error: any) {
       console.error("Error saving course:", error);
@@ -399,7 +390,6 @@ export function ManualCourseForm({
     }
   };
 
-  // Prevent form submission on Enter key
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -408,15 +398,12 @@ export function ManualCourseForm({
     return true;
   };
 
-  // Add a method to set the existing course from the ref
-  // This is used when editing a course from the AddRoundModal
   React.useImperativeHandle(manualCourseFormRef, () => ({
     setExistingCourse: (course: any) => {
       console.log("Setting existing course via ref:", course);
       if (course) {
         setIsEditMode(true);
         
-        // Get the tees from localStorage if they exist
         const courseDetailsKey = `course_details_${course.id}`;
         const storedDetails = localStorage.getItem(courseDetailsKey);
         
@@ -425,7 +412,6 @@ export function ManualCourseForm({
             const parsedDetails = JSON.parse(storedDetails);
             console.log("Found stored course details:", parsedDetails);
             
-            // Use the stored tees or fallback to a default tee
             const tees = parsedDetails.tees || [createDefaultTee()];
             
             setFormData({
@@ -435,14 +421,12 @@ export function ManualCourseForm({
               tees: tees
             });
             
-            // Set the current tee to the first tee
             if (tees.length > 0) {
               setCurrentTeeIndex(0);
             }
           } catch (error) {
             console.error("Error parsing stored course details:", error);
             
-            // Fallback to default data with the course name/city/state
             setFormData({
               name: course.name.replace(' [User added course]', ''),
               city: course.city || '',
@@ -453,7 +437,6 @@ export function ManualCourseForm({
         } else {
           console.log("No stored details found for course:", course.id);
           
-          // Fallback to default data with the course name/city/state
           setFormData({
             name: course.name.replace(' [User added course]', ''),
             city: course.city || '',
@@ -488,14 +471,12 @@ export function ManualCourseForm({
             handleSubmit(e);
           }}
         >
-          {/* Course Information */}
           <CourseInformation 
             formData={formData}
             handleInputChange={handleInputChange}
             isEditMode={isEditMode}
           />
           
-          {/* Tee Selection */}
           <TeeSelection 
             tees={formData.tees}
             currentTeeIndex={currentTeeIndex}
@@ -504,7 +485,6 @@ export function ManualCourseForm({
             handleRemoveTee={handleRemoveTee}
           />
           
-          {/* Current Tee Details */}
           {formData.tees.length > 0 && (
             <div className="space-y-4 border-t pt-4">
               <TeeConfiguration 
