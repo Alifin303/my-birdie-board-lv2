@@ -256,6 +256,52 @@ export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDe
       // Save updated details back to localStorage
       localStorage.setItem(`course_details_${courseId}`, JSON.stringify(parsedDetails));
       console.log("Updated course details saved to localStorage with default tee");
+    } else {
+      // Verify each tee has correct par data
+      parsedDetails.tees = parsedDetails.tees.map(tee => {
+        // Log the tee details for debugging
+        console.log(`Verifying tee ${tee.name} data:`, {
+          id: tee.id,
+          par: tee.par,
+          hasHoles: tee.holes && tee.holes.length > 0
+        });
+        
+        // Calculate par from holes if available
+        if (tee.holes && tee.holes.length > 0) {
+          // Verify each hole has a valid par
+          tee.holes = tee.holes.map(hole => {
+            if (!hole.par || hole.par < 2 || hole.par > 6) {
+              console.log(`Fixing invalid par value (${hole.par}) for hole ${hole.number} in tee ${tee.name}`);
+              return { ...hole, par: 4 }; // Use a reasonable default
+            }
+            return hole;
+          });
+          
+          // Calculate total par from holes
+          const calculatedPar = tee.holes.reduce((sum, hole) => sum + (hole.par || 4), 0);
+          
+          if (!tee.par || Math.abs(tee.par - calculatedPar) > 5) {
+            console.log(`Updating total par for tee ${tee.name} from ${tee.par} to ${calculatedPar}`);
+            tee.par = calculatedPar;
+          }
+          
+          console.log(`Tee ${tee.name} has total par ${tee.par} from ${tee.holes.length} holes`);
+        } else if (!tee.par) {
+          console.log(`Setting default par (72) for tee ${tee.name} as no holes are available`);
+          tee.par = 72; // Default only if no holes are available
+        }
+        
+        return tee;
+      });
+      
+      // Ensure we have course-level holes as well (using first tee's holes)
+      if (parsedDetails.tees[0].holes && parsedDetails.tees[0].holes.length > 0) {
+        parsedDetails.holes = parsedDetails.tees[0].holes;
+      }
+      
+      // Save corrected details back to localStorage
+      localStorage.setItem(`course_details_${courseId}`, JSON.stringify(parsedDetails));
+      console.log("Updated course details with verified par data saved to localStorage");
     }
     
     return parsedDetails as SimplifiedCourseDetail;

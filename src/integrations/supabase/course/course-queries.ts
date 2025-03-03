@@ -93,11 +93,37 @@ export function getCourseMetadataFromLocalStorage(courseId: number | string): an
     const storedDetails = localStorage.getItem(courseDetailsKey) || localStorage.getItem(courseMetadataKey);
     
     if (!storedDetails) {
+      console.log(`No metadata found in localStorage for course ID: ${courseIdStr}`);
       return null;
     }
     
     const parsedDetails = JSON.parse(storedDetails);
     console.log("Loaded course metadata from localStorage:", parsedDetails);
+    
+    // Ensure each tee has proper hole configuration
+    if (parsedDetails.tees) {
+      parsedDetails.tees = parsedDetails.tees.map(tee => {
+        // Calculate total par if it's not already set
+        if (!tee.par && tee.holes && tee.holes.length > 0) {
+          tee.par = tee.holes.reduce((sum, hole) => sum + (hole.par || 4), 0);
+          console.log(`Calculated par for tee ${tee.name}: ${tee.par}`);
+        } else if (!tee.par) {
+          tee.par = 72; // Default only if no holes are available
+          console.log(`Using default par (72) for tee ${tee.name} as no holes are available`);
+        }
+        
+        // Validate holes data
+        if (tee.holes && tee.holes.length > 0) {
+          console.log(`Tee ${tee.name} has ${tee.holes.length} holes with par data:`, 
+            tee.holes.map(h => ({ number: h.number, par: h.par })));
+        } else {
+          console.log(`Tee ${tee.name} has no hole data`);
+        }
+        
+        return tee;
+      });
+    }
+    
     return parsedDetails;
   } catch (error) {
     console.error("Error getting course metadata from localStorage:", error);
