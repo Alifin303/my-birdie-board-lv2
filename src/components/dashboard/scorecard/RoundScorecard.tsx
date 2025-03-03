@@ -22,17 +22,14 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
 
   useEffect(() => {
     if (round && isOpen) {
-      console.log("============ ROUND SCORECARD OPENED - FINAL DEBUG ============");
+      console.log("============ ROUND SCORECARD OPENED ============");
       console.log("Round ID:", round.id);
-      console.log("ROUND TEE DATA (raw object inspection):", {
-        tee_name: round.tee_name,
-        tee_name_TYPE: typeof round.tee_name,
-        tee_name_JSON: JSON.stringify(round.tee_name),
-        tee_id: round.tee_id,
-        round_keys: Object.keys(round)
+      console.log("ULTIMATE TEE NAME DEBUG:", {
+        teeName: round.tee_name,
+        teeNameType: typeof round.tee_name,
+        teeNameStringified: JSON.stringify(round.tee_name),
+        teeId: round.tee_id
       });
-      
-      console.log("COMPLETE ROUND DATA:", JSON.stringify(round, null, 2));
       
       let parsedScores: HoleScore[] = [];
       try {
@@ -86,9 +83,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
       const toPar = totalStrokes - totalPar;
       
-      console.log("Saving round with PRESERVED tee data:", {
+      console.log("Saving round with tee data:", {
         teeName: round.tee_name,
-        teeNameType: typeof round.tee_name,
         teeId: round.tee_id
       });
       
