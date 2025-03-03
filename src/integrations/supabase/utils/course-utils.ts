@@ -84,5 +84,83 @@ export function validateTeeData(tee: any): any {
     }));
   }
   
+  // Log the validated tee data for debugging
+  console.log(`Validated tee data for ${validatedTee.name}:`, {
+    id: validatedTee.id,
+    name: validatedTee.name,
+    par: validatedTee.par,
+    rating: validatedTee.rating,
+    slope: validatedTee.slope,
+    holesCount: validatedTee.holes?.length || 0
+  });
+  
   return validatedTee;
+}
+
+// New helper function to handle loading all course tees with better error handling
+export function loadAndValidateCourseTees(courseId: number | string): any[] {
+  try {
+    // Try to get the course details from localStorage
+    const courseDetailsKey = `course_details_${courseId}`;
+    const storedDetails = localStorage.getItem(courseDetailsKey);
+    
+    if (!storedDetails) {
+      console.log(`No course details found in localStorage for course ID: ${courseId}`);
+      return createDefaultTees();
+    }
+    
+    const courseDetails = JSON.parse(storedDetails);
+    
+    // Check if we have tees data
+    if (!courseDetails.tees || !Array.isArray(courseDetails.tees) || courseDetails.tees.length === 0) {
+      console.log(`No tees found in course details for course ID: ${courseId}, creating defaults`);
+      return createDefaultTees();
+    }
+    
+    // Validate each tee
+    const validatedTees = courseDetails.tees.map((tee: any) => validateTeeData(tee)).filter(Boolean);
+    
+    if (validatedTees.length === 0) {
+      console.log(`All tees were invalid for course ID: ${courseId}, creating defaults`);
+      return createDefaultTees();
+    }
+    
+    console.log(`Successfully loaded and validated ${validatedTees.length} tees for course ID: ${courseId}`);
+    
+    // Save the validated tees back to localStorage
+    courseDetails.tees = validatedTees;
+    localStorage.setItem(courseDetailsKey, JSON.stringify(courseDetails));
+    
+    return validatedTees;
+  } catch (error) {
+    console.error(`Error loading tees for course ID: ${courseId}`, error);
+    return createDefaultTees();
+  }
+}
+
+// Helper function to create default tees
+function createDefaultTees(): any[] {
+  const defaultHoles = Array(18).fill(null).map((_, idx) => ({
+    number: idx + 1,
+    par: 4,
+    yards: 400,
+    handicap: idx + 1
+  }));
+  
+  const defaultTeeId = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  
+  const defaultTee = {
+    id: defaultTeeId,
+    name: 'White',
+    rating: 72,
+    slope: 113,
+    par: 72,
+    gender: 'male',
+    originalIndex: 0,
+    holes: defaultHoles
+  };
+  
+  console.log('Created default tee:', defaultTee);
+  
+  return [defaultTee];
 }

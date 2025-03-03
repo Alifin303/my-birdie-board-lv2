@@ -432,7 +432,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
                   ) : (
                     <>
                       <p className="text-sm text-muted-foreground mt-1">Date: {formattedDate}</p>
-                      <p className="text-sm text-muted-foreground">Tees: {selectedTee || round.tee_name || 'Standard'}</p>
+                      <p className="text-sm text-muted-foreground">Tees: {round.tee_name || 'Standard'}</p>
                     </>
                   )}
                 </div>

@@ -1,6 +1,6 @@
 
 import { formatCourseName } from '../utils/course-utils';
-import { findCourseByApiId, insertCourse } from './course-queries';
+import { findCourseByApiId, insertCourse, fetchCourseById } from './course-queries';
 import { supabase } from '../core/client';
 
 // Helper function to find or create a course by API ID
@@ -63,55 +63,86 @@ export async function ensureCourseExists(
   state?: string
 ): Promise<number> {
   try {
+    console.log(`Ensuring course exists: ID=${courseId}, name=${courseName}, clubName=${clubName}`);
+    
     // First, check if the course with this ID exists
-    const { data, error } = await supabase
-      .from('courses')
-      .select('id, user_id')
-      .eq('id', courseId)
-      .maybeSingle();
+    try {
+      const { data, error } = await supabase
+        .from('courses')
+        .select('id, name, user_id')
+        .eq('id', courseId)
+        .maybeSingle();
       
-    if (!error && data) {
-      console.log("Course exists with ID:", courseId);
-      
-      // If the course exists but doesn't have a user_id, try to update it with the current user's ID
-      if (!data.user_id) {
-        try {
-          const { data: session } = await supabase.auth.getSession();
-          if (session && session.session && session.session.user) {
-            const userId = session.session.user.id;
-            await supabase
-              .from('courses')
-              .update({ user_id: userId })
-              .eq('id', courseId);
-            console.log(`Updated course ${courseId} with user_id ${userId}`);
+      if (!error && data) {
+        console.log("Course exists with ID:", courseId, "name:", data.name);
+        
+        // If the course exists but doesn't have a user_id, try to update it with the current user's ID
+        if (!data.user_id) {
+          try {
+            const { data: session } = await supabase.auth.getSession();
+            if (session && session.session && session.session.user) {
+              const userId = session.session.user.id;
+              await supabase
+                .from('courses')
+                .update({ user_id: userId })
+                .eq('id', courseId);
+              console.log(`Updated course ${courseId} with user_id ${userId}`);
+            }
+          } catch (updateError) {
+            console.error("Error updating course user_id:", updateError);
           }
-        } catch (updateError) {
-          console.error("Error updating course user_id:", updateError);
         }
+        
+        return courseId;
+      } else {
+        console.log("Course not found with ID:", courseId, "Error:", error?.message);
       }
-      
-      return courseId;
+    } catch (checkError) {
+      console.error("Error checking if course exists:", checkError);
     }
     
-    // If the course doesn't exist and we have an API ID, try to find or create by API ID
-    if (apiCourseId && courseName && clubName) {
-      const foundOrCreatedId = await findOrCreateCourseByApiId(
-        apiCourseId,
-        courseName,
-        clubName,
-        city,
-        state
-      );
-      
-      if (foundOrCreatedId) {
-        return foundOrCreatedId;
-      }
+    // If we get here, the course doesn't exist with the provided ID
+    // Try to create a new course
+    console.log("Course doesn't exist with ID:", courseId, "attempting to create it");
+    
+    if (!courseName) {
+      courseName = clubName ? `${clubName} Course` : "Unknown Course";
     }
     
-    // If all else fails, throw an error
-    throw new Error(`Course with ID ${courseId} not found and could not be created`);
+    if (!clubName) {
+      clubName = courseName;
+    }
+    
+    const fullName = formatCourseName(clubName, courseName);
+    console.log("Creating new course with name:", fullName);
+    
+    // Get the current user ID if available
+    let userId = null;
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      if (session && session.session && session.session.user) {
+        userId = session.session.user.id;
+      }
+    } catch (error) {
+      console.error("Error getting user session:", error);
+    }
+    
+    const insertedCourse = await insertCourse({
+      name: fullName,
+      city,
+      state,
+      api_course_id: apiCourseId,
+      user_id: userId
+    });
+    
+    if (insertedCourse) {
+      console.log("Created new course:", insertedCourse);
+      return insertedCourse.id;
+    }
+    
+    throw new Error(`Failed to create course "${fullName}"`);
   } catch (error) {
     console.error("Error ensuring course exists:", error);
-    throw error;
+    throw new Error(`Course with ID ${courseId} not found and could not be created: ${error}`);
   }
 }

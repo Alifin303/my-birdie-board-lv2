@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
+import { ensureCourseExists } from "@/integrations/supabase/course/course-operations";
 
 export function createSaveRoundHandler({
   toast,
@@ -92,23 +93,54 @@ export function createSaveRoundHandler({
         slope: selectedTee.slope
       });
       
+      console.log("Selected course data:", {
+        id: selectedCourse.id,
+        name: selectedCourse.name,
+        clubName: selectedCourse.clubName,
+        isUserAdded: selectedCourse.isUserAdded
+      });
+      
+      // Ensure the course exists in the database before saving the round
+      let courseId = selectedCourse.id;
+      
+      if (selectedCourse.isUserAdded) {
+        // For user-added courses, we need to ensure they exist in the database
+        try {
+          // Verify the course exists in the database (or create it if it doesn't)
+          courseId = await ensureCourseExists(
+            selectedCourse.id,
+            selectedCourse.apiCourseId,
+            selectedCourse.name,
+            selectedCourse.clubName,
+            selectedCourse.city,
+            selectedCourse.state
+          );
+          
+          console.log("Verified course exists in database with ID:", courseId);
+        } catch (courseError) {
+          console.error("Error ensuring course exists:", courseError);
+          throw new Error("Unable to save round - course data could not be verified.");
+        }
+      }
+      
       // Insert round into database
       const { data: roundData, error } = await supabase
         .from('rounds')
         .insert({
           user_id: session.user.id,
-          course_id: selectedCourse.id,
+          course_id: courseId, // Use the verified course ID
           date: roundDate.toISOString(),
           gross_score: totalStrokes,
           to_par_gross: toPar,
-          tee_id: selectedTeeId, // Explicitly save tee ID
-          tee_name: selectedTee.name, // Explicitly save tee name
+          tee_id: selectedTeeId, 
+          tee_name: selectedTee.name,
           hole_scores: JSON.stringify(scores)
         })
         .select()
         .single();
         
       if (error) {
+        console.error("Database error saving round:", error);
         throw error;
       }
       
