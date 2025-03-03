@@ -100,15 +100,28 @@ export function createSaveRoundHandler({
         isUserAdded: selectedCourse.isUserAdded
       });
       
-      // Ensure the course exists in the database before saving the round
-      let courseId = selectedCourse.id;
-      
-      if (selectedCourse.isUserAdded) {
-        // For user-added courses, we need to ensure they exist in the database
-        try {
-          // Verify the course exists in the database (or create it if it doesn't)
-          courseId = await ensureCourseExists(
-            selectedCourse.id,
+      // We need to ensure the course exists in the database before saving the round
+      let courseId;
+      try {
+        // First, try to fetch the course directly (most efficient)
+        const { data, error } = await supabase
+          .from('courses')
+          .select('id')
+          .eq('id', selectedCourse.id)
+          .maybeSingle();
+          
+        if (data && data.id) {
+          // Course exists, use its ID
+          courseId = data.id;
+          console.log("Course verified to exist with ID:", courseId);
+        } else {
+          // Course doesn't exist, need to create it
+          console.log("Course not found in database, will create it:", selectedCourse.id);
+          
+          // For user-added courses, we need to create a new entry
+          // IMPORTANT: We don't try to use the original ID since that might conflict
+          const newCourseId = await ensureCourseExists(
+            0, // Using 0 forces creation of a new course with auto-generated ID
             selectedCourse.apiCourseId,
             selectedCourse.name,
             selectedCourse.clubName,
@@ -116,11 +129,16 @@ export function createSaveRoundHandler({
             selectedCourse.state
           );
           
-          console.log("Verified course exists in database with ID:", courseId);
-        } catch (courseError) {
-          console.error("Error ensuring course exists:", courseError);
-          throw new Error("Unable to save round - course data could not be verified.");
+          courseId = newCourseId;
+          console.log("Created new course with ID:", courseId);
         }
+      } catch (courseError) {
+        console.error("Error ensuring course exists:", courseError);
+        throw new Error("Unable to save round - course data could not be verified.");
+      }
+      
+      if (!courseId) {
+        throw new Error("Could not verify or create course in database.");
       }
       
       // Insert round into database

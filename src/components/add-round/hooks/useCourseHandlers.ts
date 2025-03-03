@@ -22,8 +22,20 @@ function useCourseHandlers(props: Parameters<typeof useRefactoredCourseHandlers>
   }
   
   // Make sure the selectedTeeId is passed correctly to the refactored handler
-  return useRefactoredCourseHandlers({
+  const result = useRefactoredCourseHandlers({
     ...props,
     selectedTeeId: props.selectedTeeId
   });
+  
+  // Add additional logging when returning result
+  console.log("useCourseHandlers - selectedTeeId:", result.selectedTeeId);
+  console.log("useCourseHandlers - selectedCourse:", 
+    result.selectedCourse ? {
+      id: result.selectedCourse.id,
+      name: result.selectedCourse.name,
+      tees: result.selectedCourse.tees?.length || 0
+    } : null
+  );
+  
+  return result;
 }

@@ -127,6 +127,8 @@ export async function ensureCourseExists(
       console.error("Error getting user session:", error);
     }
     
+    // CRITICAL FIX: DO NOT TRY TO USE THE ORIGINAL COURSE ID FOR THE NEW COURSE
+    // Let the database assign a new ID instead
     const insertedCourse = await insertCourse({
       name: fullName,
       city,
