@@ -25,6 +25,7 @@ export const useAddRoundState = () => {
   const [originalCourseDetail, setOriginalCourseDetail] = useState<CourseDetail | null>(null);
   const [noResults, setNoResults] = useState<boolean>(false);
   const [manualCourseOpen, setManualCourseOpen] = useState<boolean>(false);
+  const [courseAndTeeReady, setCourseAndTeeReady] = useState<boolean>(false);
 
   // Reset selectedTeeId whenever selectedCourse changes
   useEffect(() => {
@@ -47,6 +48,18 @@ export const useAddRoundState = () => {
       }
     }
   }, [selectedTeeId, selectedCourse]);
+
+  // New effect to track when both course and tee are fully ready
+  useEffect(() => {
+    if (selectedCourse && selectedTeeId) {
+      console.log("🔄 Both course and tee are set - marking state as ready");
+      console.log("Ready course:", selectedCourse.name, selectedCourse.id);
+      console.log("Ready tee:", selectedTeeId);
+      setCourseAndTeeReady(true);
+    } else {
+      setCourseAndTeeReady(false);
+    }
+  }, [selectedCourse, selectedTeeId]);
 
   return {
     currentStep,
@@ -80,6 +93,7 @@ export const useAddRoundState = () => {
     noResults,
     setNoResults,
     manualCourseOpen,
-    setManualCourseOpen
+    setManualCourseOpen,
+    courseAndTeeReady
   };
 };
