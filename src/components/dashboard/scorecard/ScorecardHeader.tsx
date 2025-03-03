@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { ScorecardHeaderProps } from "./types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const ScorecardHeader = ({
   round,
@@ -15,7 +16,10 @@ export const ScorecardHeader = ({
   setCalendarOpen,
   handleDateSelect,
   isSaving,
-  handleSaveChanges
+  handleSaveChanges,
+  selectedTee,
+  availableTees,
+  handleTeeChange
 }: ScorecardHeaderProps) => {
   // Format date for display
   const formattedDate = roundDate 
@@ -37,7 +41,7 @@ export const ScorecardHeader = ({
         <div>
           <h3 className="font-semibold">Round Details</h3>
           {isEditing ? (
-            <div className="mt-1">
+            <div className="space-y-2 mt-1">
               <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -59,11 +63,29 @@ export const ScorecardHeader = ({
                   />
                 </PopoverContent>
               </Popover>
+              
+              {availableTees && availableTees.length > 0 && (
+                <div className="mt-2">
+                  <label className="text-sm text-muted-foreground mb-1 block">Tees:</label>
+                  <Select value={selectedTee} onValueChange={handleTeeChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select tee" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableTees.map((tee) => (
+                        <SelectItem key={tee.id} value={tee.name}>
+                          {tee.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
           ) : (
             <>
               <p className="text-sm text-muted-foreground mt-1">Date: {formattedDate}</p>
-              <p className="text-sm text-muted-foreground">Tees: {round.tee_name}</p>
+              <p className="text-sm text-muted-foreground">Tees: {round.tee_name || 'Standard'}</p>
             </>
           )}
         </div>

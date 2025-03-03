@@ -1,6 +1,7 @@
 import { CourseDetail, TeeBox } from "@/services/golfCourseApi";
 import { SimplifiedCourseDetail, SimplifiedGolfCourse, SimplifiedHole, SimplifiedTee } from "../types";
-import { supabase, formatCourseName, parseCourseName, getCourseMetadataFromLocalStorage, isUserAddedCourse } from "@/integrations/supabase/client";
+import { supabase, formatCourseName, parseCourseName, isUserAddedCourse } from "@/integrations/supabase/client";
+import { getCourseMetadataFromLocalStorage } from "@/integrations/supabase/course/course-queries";
 
 export const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): SimplifiedHole[] => {
   console.log("Extracting holes for tee:", teeId, "from course detail:", courseDetail);
@@ -216,63 +217,32 @@ export const extractTeesFromApiResponse = (courseDetail: CourseDetail): Simplifi
   return tees;
 };
 
-export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDetail | null => {
+export const loadUserAddedCourseDetails = async (courseId: number | string): Promise<SimplifiedCourseDetail | null> => {
   try {
-    console.log("Loading user-added course details for ID:", courseId);
+    console.log(`Loading user-added course details for ID: ${courseId}`);
     
-    // First try the direct storage key
-    const courseDetailsKey = `course_details_${courseId}`;
-    const storedDetails = localStorage.getItem(courseDetailsKey);
-    
-    if (!storedDetails) {
-      console.log("No course details found in localStorage for course ID:", courseId);
-      // Try the metadata function as fallback
-      const metadata = getCourseMetadataFromLocalStorage(courseId);
-      if (metadata && metadata.tees && metadata.tees.length > 0) {
-        console.log("Found course metadata using alternate method:", metadata);
-        return {
-          id: courseId,
-          name: metadata.name || "Unknown Course",
-          clubName: metadata.clubName || "Unknown Club",
-          city: metadata.city || '',
-          state: metadata.state || '',
-          tees: metadata.tees,
-          holes: metadata.holes || metadata.tees[0].holes,
-          isUserAdded: true
-        };
-      }
-      return null;
-    }
-    
-    let parsedDetails: any;
-    try {
-      parsedDetails = JSON.parse(storedDetails);
-      console.log("Parsed course details from localStorage:", parsedDetails);
-    } catch (error) {
-      console.error("Error parsing course details:", error);
-      return null;
-    }
+    // Get course metadata from localStorage
+    const parsedDetails = getCourseMetadataFromLocalStorage(courseId);
     
     if (!parsedDetails) {
-      console.log("No valid course details found for course ID:", courseId);
+      console.error(`No course details found in localStorage for course ID: ${courseId}`);
       return null;
     }
     
-    // Debug the tees structure
-    console.log("Tees structure in localStorage:", parsedDetails.tees);
+    console.log("Found course details in localStorage:", parsedDetails);
     
-    // Ensure the tees array exists and is valid
+    // Validate and ensure tees exist and are properly formatted
     if (!parsedDetails.tees || !Array.isArray(parsedDetails.tees) || parsedDetails.tees.length === 0) {
-      console.log("No tees array found or empty tees array in course details, creating default tee");
+      console.warn("Course has no tees or improperly formatted tees data. Creating default tee.");
       
+      // Create a default tee if none exists
+      const defaultTeeId = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
       const defaultHoles = Array(18).fill(null).map((_, idx) => ({
         number: idx + 1,
         par: 4,
         yards: 400,
         handicap: idx + 1
       }));
-      
-      const defaultTeeId = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
       
       parsedDetails.tees = [{
         id: defaultTeeId,
@@ -281,91 +251,144 @@ export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDe
         slope: 113,
         par: 72,
         gender: 'male',
-        originalIndex: 0,
         holes: defaultHoles
       }];
       
+      // Make sure holes exist at the root level too
       parsedDetails.holes = defaultHoles;
       
+      // Save the updated details
       localStorage.setItem(`course_details_${courseId}`, JSON.stringify(parsedDetails));
-      console.log("Updated course details saved to localStorage with default tee");
+      console.log("Created and saved default tee for course due to missing tees data");
     } else {
-      console.log("Found tees in localStorage:", parsedDetails.tees.map((t: any) => ({ 
-        id: t.id, 
-        name: t.name,
-        par: t.par 
-      })));
+      // Validate existing tees
+      let teesUpdated = false;
       
-      // Validate each tee has proper holes data
-      parsedDetails.tees = parsedDetails.tees.map((tee: any) => {
+      parsedDetails.tees = parsedDetails.tees.map(tee => {
+        // Skip any undefined tees
+        if (!tee) return null;
+        
+        console.log(`Validating tee: ${tee.name} (ID: ${tee.id || 'missing ID'})`);
+        
+        // Ensure each tee has the required properties
+        if (!tee.id) {
+          tee.id = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+          teesUpdated = true;
+          console.log(`Added missing ID to tee: ${tee.name}, new ID: ${tee.id}`);
+        }
+        
+        // Ensure each tee has a valid name
+        if (!tee.name) {
+          tee.name = 'Default';
+          teesUpdated = true;
+          console.log(`Added missing name to tee ID: ${tee.id}`);
+        }
+        
+        // Ensure each tee has rating and slope
+        tee.rating = tee.rating || 72.0;
+        tee.slope = tee.slope || 113;
+        
+        // Ensure holes exist for this tee
         if (!tee.holes || !Array.isArray(tee.holes) || tee.holes.length === 0) {
-          console.log(`Tee ${tee.name} has no valid holes, creating defaults`);
+          console.warn(`Tee ${tee.name} has no hole data. Creating default holes.`);
           tee.holes = Array(18).fill(null).map((_, idx) => ({
             number: idx + 1,
             par: 4,
             yards: 400,
             handicap: idx + 1
           }));
+          teesUpdated = true;
         }
         
-        if (tee.holes && tee.holes.length > 0) {
-          tee.holes = tee.holes.map((hole: any) => {
-            if (!hole.par || hole.par < 2 || hole.par > 6) {
-              console.log(`Fixing invalid par value (${hole.par}) for hole ${hole.number} in tee ${tee.name}`);
-              return { ...hole, par: 4 };
+        // Verify holes data is complete
+        if (tee.holes) {
+          tee.holes = tee.holes.map((hole, idx) => {
+            if (!hole) {
+              return {
+                number: idx + 1,
+                par: 4,
+                yards: 400,
+                handicap: idx + 1
+              };
             }
+            
+            // Ensure each hole has required properties
+            hole.number = hole.number || (idx + 1);
+            hole.par = hole.par || 4;
+            hole.yards = hole.yards || 400;
+            hole.handicap = hole.handicap || (idx + 1);
+            
             return hole;
           });
-          
-          // Calculate total par from holes
-          const calculatedPar = tee.holes.reduce((sum: number, hole: any) => sum + (hole.par || 4), 0);
-          
-          if (!tee.par || Math.abs(tee.par - calculatedPar) > 5) {
-            console.log(`Updating total par for tee ${tee.name} from ${tee.par} to ${calculatedPar}`);
-            tee.par = calculatedPar;
-          }
-          
-          console.log(`Tee ${tee.name} has total par ${tee.par} from ${tee.holes.length} holes`);
-        } else if (!tee.par) {
-          console.log(`Setting default par (72) for tee ${tee.name} as no holes are available`);
-          tee.par = 72;
         }
         
-        // Ensure all required tee properties exist
-        tee.rating = tee.rating || 72.0;
-        tee.slope = tee.slope || 113;
-        tee.gender = tee.gender || 'male';
+        // Calculate total par from hole data
+        const calculatedPar = tee.holes.reduce((sum, hole) => sum + (hole.par || 4), 0);
+        if (!tee.par || tee.par !== calculatedPar) {
+          console.log(`Updating par for tee ${tee.name} from ${tee.par} to calculated ${calculatedPar}`);
+          tee.par = calculatedPar;
+          teesUpdated = true;
+        }
         
         return tee;
-      });
+      }).filter(Boolean); // Remove any null tees
       
-      // Ensure the course has holes array at the top level
-      if (!parsedDetails.holes || !Array.isArray(parsedDetails.holes) || parsedDetails.holes.length === 0) {
-        if (parsedDetails.tees[0]?.holes && parsedDetails.tees[0].holes.length > 0) {
-          console.log("Setting course-level holes from first tee");
-          parsedDetails.holes = parsedDetails.tees[0].holes;
-        }
+      if (teesUpdated) {
+        // Save the updated details
+        localStorage.setItem(`course_details_${courseId}`, JSON.stringify(parsedDetails));
+        console.log("Updated course details with verified tee data saved to localStorage");
       }
-      
-      // Ensure id, name, and clubName properties exist
-      parsedDetails.id = parsedDetails.id || courseId;
-      parsedDetails.name = parsedDetails.name || "Unknown Course";
-      parsedDetails.clubName = parsedDetails.clubName || parsedDetails.name;
-      parsedDetails.isUserAdded = true;
-      
-      // Save the updated details back to localStorage
-      localStorage.setItem(`course_details_${courseId}`, JSON.stringify(parsedDetails));
-      console.log("Updated course details with verified par data saved to localStorage");
     }
     
+    // Ensure id, name, and clubName properties exist
+    parsedDetails.id = parsedDetails.id || courseId;
+    parsedDetails.name = parsedDetails.name || "Unknown Course";
+    parsedDetails.clubName = parsedDetails.clubName || parsedDetails.name;
+    parsedDetails.isUserAdded = true;
+    
+    // Ensure holes exist at the root level
+    if (!parsedDetails.holes || !Array.isArray(parsedDetails.holes) || parsedDetails.holes.length === 0) {
+      if (parsedDetails.tees && parsedDetails.tees.length > 0 && parsedDetails.tees[0].holes) {
+        parsedDetails.holes = parsedDetails.tees[0].holes;
+      } else {
+        parsedDetails.holes = Array(18).fill(null).map((_, idx) => ({
+          number: idx + 1,
+          par: 4,
+          yards: 400,
+          handicap: idx + 1
+        }));
+      }
+    }
+    
+    // Create the properly structured SimplifiedCourseDetail object
+    console.log("Returning verified course data with tees:", parsedDetails.tees.map(t => ({ id: t.id, name: t.name, par: t.par })));
+    
     return {
-      id: courseId,
-      name: parsedDetails.name || "Unknown Course",
-      clubName: parsedDetails.clubName || parsedDetails.name || "Unknown Club",
+      id: parsedDetails.id.toString(),
+      name: parsedDetails.name,
+      clubName: parsedDetails.clubName,
       city: parsedDetails.city || '',
       state: parsedDetails.state || '',
-      tees: parsedDetails.tees || [],
-      holes: parsedDetails.holes || (parsedDetails.tees?.[0]?.holes || []),
+      tees: parsedDetails.tees.map(tee => ({
+        id: tee.id,
+        name: tee.name,
+        par: tee.par,
+        rating: tee.rating,
+        slope: tee.slope,
+        gender: tee.gender || 'male',
+        holes: tee.holes.map(hole => ({
+          number: hole.number,
+          par: hole.par,
+          yards: hole.yards,
+          handicap: hole.handicap
+        }))
+      })),
+      holes: parsedDetails.holes.map(hole => ({
+        number: hole.number,
+        par: hole.par,
+        yards: hole.yards,
+        handicap: hole.handicap
+      })),
       isUserAdded: true
     };
   } catch (error) {

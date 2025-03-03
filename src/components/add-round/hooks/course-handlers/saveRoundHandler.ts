@@ -1,7 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { UseCourseHandlersProps } from "./types";
-import { QueryClient } from "@tanstack/react-query";
 
 export function createSaveRoundHandler({
   selectedCourse,
@@ -58,7 +57,7 @@ export function createSaveRoundHandler({
       // Get the selected tee information
       const selectedTee = selectedCourse.tees.find(tee => tee.id === selectedTeeId);
       if (!selectedTee) {
-        console.error('BUG: Selected tee not found in course tees array', {
+        console.error('Selected tee not found in course tees array', {
           selectedTeeId,
           availableTees: selectedCourse.tees.map(t => ({ id: t.id, name: t.name }))
         });
@@ -139,7 +138,21 @@ export function createSaveRoundHandler({
       console.log("Using course_id for round insertion:", dbCourseId);
       console.log("Final selected tee for saving:", selectedTee);
       
-      // Prepare the data we're sending to Supabase
+      // Store tee metadata in localStorage to ensure we have it for later retrieval
+      try {
+        const courseDetailsKey = `course_details_${dbCourseId}`;
+        const storedDetails = localStorage.getItem(courseDetailsKey);
+        
+        if (storedDetails) {
+          const courseDetails = JSON.parse(storedDetails);
+          localStorage.setItem(courseDetailsKey, JSON.stringify(courseDetails));
+          console.log("Updated user-added course details in localStorage");
+        }
+      } catch (e) {
+        console.error("Error updating localStorage for course:", e);
+      }
+      
+      // Prepare the data we're sending to Supabase - CRITICALLY important to save the tee_id correctly
       const roundData = {
         user_id: session.user.id,
         course_id: dbCourseId,
@@ -175,22 +188,6 @@ export function createSaveRoundHandler({
       
       // Invalidate queries to refresh data in UI
       queryClient.invalidateQueries({ queryKey: ['userRounds'] });
-      
-      // Update local storage for user-added courses if needed
-      if (selectedCourse.isUserAdded) {
-        try {
-          const courseDetailsKey = `course_details_${selectedCourse.id}`;
-          const storedDetails = localStorage.getItem(courseDetailsKey);
-          
-          if (storedDetails) {
-            const courseDetails = JSON.parse(storedDetails);
-            localStorage.setItem(courseDetailsKey, JSON.stringify(courseDetails));
-            console.log("Updated user-added course details in localStorage");
-          }
-        } catch (e) {
-          console.error("Error updating localStorage for user-added course:", e);
-        }
-      }
       
       toast.toast({
         title: "Success",

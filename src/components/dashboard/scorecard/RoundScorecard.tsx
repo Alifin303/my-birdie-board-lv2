@@ -10,6 +10,7 @@ import { RoundScorecardProps, HoleScore } from "./types";
 import { ScoreTable } from "./ScoreTable";
 import { ScoreTableSummary } from "./ScoreTableSummary";
 import { ScorecardHeader } from "./ScorecardHeader";
+import { getCourseMetadataFromLocalStorage } from "@/integrations/supabase/course/course-queries";
 
 export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardProps) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -17,6 +18,9 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
   const [roundDate, setRoundDate] = useState<Date | undefined>(undefined);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedTee, setSelectedTee] = useState<string>("");
+  const [selectedTeeId, setSelectedTeeId] = useState<string>("");
+  const [availableTees, setAvailableTees] = useState<Array<{id: string, name: string}>>([]);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -40,8 +44,51 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       
       setScores(parsedScores);
       setRoundDate(round.date ? new Date(round.date) : undefined);
+      
+      // Set the selected tee based on the round data
+      setSelectedTee(round.tee_name || "");
+      setSelectedTeeId(round.tee_id || "");
+      
+      // Load available tees for this course from localStorage
+      loadAvailableTees(round.course_id);
     }
   }, [round, isOpen]);
+
+  const loadAvailableTees = (courseId: number) => {
+    if (!courseId) return;
+    
+    console.log("Loading available tees for course:", courseId);
+    
+    try {
+      const courseMetadata = getCourseMetadataFromLocalStorage(courseId);
+      
+      if (courseMetadata && courseMetadata.tees && courseMetadata.tees.length > 0) {
+        const teesData = courseMetadata.tees.map((tee: any) => ({
+          id: tee.id,
+          name: tee.name
+        }));
+        
+        console.log("Loaded available tees from localStorage:", teesData);
+        setAvailableTees(teesData);
+        
+        // If we have tee_id from the round but no selected tee, find it in the tees data
+        if (round.tee_id && !selectedTee) {
+          const matchingTee = courseMetadata.tees.find((t: any) => t.id === round.tee_id);
+          if (matchingTee) {
+            console.log("Found matching tee for tee_id:", matchingTee);
+            setSelectedTee(matchingTee.name);
+          }
+        }
+      } else {
+        // Create a default tee if none found
+        console.log("No tees found in localStorage, using default");
+        setAvailableTees([{ id: round.tee_id || "default", name: round.tee_name || "Default" }]);
+      }
+    } catch (error) {
+      console.error("Error loading tees from localStorage:", error);
+      setAvailableTees([{ id: round.tee_id || "default", name: round.tee_name || "Default" }]);
+    }
+  };
 
   if (!round) return null;
 
@@ -63,6 +110,20 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
     }
   };
 
+  const handleTeeChange = (teeName: string) => {
+    console.log("Tee changed to:", teeName);
+    setSelectedTee(teeName);
+    
+    // Find the corresponding tee_id for the selected tee name
+    const selectedTeeObject = availableTees.find(tee => tee.name === teeName);
+    if (selectedTeeObject) {
+      console.log("Found tee_id for selected tee:", selectedTeeObject.id);
+      setSelectedTeeId(selectedTeeObject.id);
+    } else {
+      console.error("Could not find tee_id for tee name:", teeName);
+    }
+  };
+
   const handleSaveChanges = async () => {
     if (!round.id) {
       toast({
@@ -81,6 +142,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
       const toPar = totalStrokes - totalPar;
       
+      console.log("Saving round with tee:", selectedTee, "tee_id:", selectedTeeId);
+      
       // Update the round in the database
       const { error } = await supabase
         .from('rounds')
@@ -89,8 +152,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
           gross_score: totalStrokes,
           to_par_gross: toPar,
           hole_scores: JSON.stringify(scores),
-          tee_name: round.tee_name,
-          tee_id: round.tee_id
+          tee_name: selectedTee,
+          tee_id: selectedTeeId
         })
         .eq('id', round.id);
         
@@ -189,6 +252,9 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
               handleDateSelect={handleDateSelect}
               isSaving={isSaving}
               handleSaveChanges={handleSaveChanges}
+              selectedTee={selectedTee}
+              availableTees={availableTees}
+              handleTeeChange={handleTeeChange}
             />
 
             <Separator className="my-4" />
