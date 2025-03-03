@@ -170,15 +170,29 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
     return teeName;
   };
   
+  const formatScore = (score: number | undefined | null): string => {
+    if (score === undefined || score === null) return '-';
+    return score.toString();
+  };
+  
+  const formatToPar = (toPar: number | undefined | null): string => {
+    if (toPar === undefined || toPar === null) return '-';
+    return (toPar > 0 ? '+' : '') + toPar;
+  };
+  
   const sortedRounds = [...courseRounds].sort((a, b) => {
     if (sortField === 'date') {
       const dateA = new Date(a.date).getTime();
       const dateB = new Date(b.date).getTime();
       return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
     } else if (sortField === 'gross_score') {
-      return sortDirection === 'asc' ? a.gross_score - b.gross_score : b.gross_score - a.gross_score;
-    } else { // to_par_gross
-      return sortDirection === 'asc' ? a.to_par_gross - b.to_par_gross : b.to_par_gross - a.to_par_gross;
+      const scoreA = scoreType === 'gross' ? a.gross_score : (a.net_score ?? Number.MAX_SAFE_INTEGER);
+      const scoreB = scoreType === 'gross' ? b.gross_score : (b.net_score ?? Number.MAX_SAFE_INTEGER);
+      return sortDirection === 'asc' ? scoreA - scoreB : scoreB - scoreA;
+    } else {
+      const toParA = scoreType === 'gross' ? a.to_par_gross : (a.to_par_net ?? Number.MAX_SAFE_INTEGER);
+      const toParB = scoreType === 'gross' ? b.to_par_gross : (b.to_par_net ?? Number.MAX_SAFE_INTEGER);
+      return sortDirection === 'asc' ? toParA - toParB : toParB - toParA;
     }
   });
 
@@ -216,9 +230,9 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
             <p className="text-sm text-muted-foreground">Best to Par</p>
             <p className="text-3xl font-bold">
               {scoreType === 'gross' 
-                ? (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar
+                ? formatToPar(stats.bestToPar)
                 : stats.bestToParNet !== null 
-                  ? (stats.bestToParNet > 0 ? '+' : '') + stats.bestToParNet
+                  ? formatToPar(stats.bestToParNet)
                   : '-'}
             </p>
           </div>
@@ -304,15 +318,13 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
                     </td>
                     <td className="px-4 py-3 text-sm">
                       {scoreType === 'gross' 
-                        ? round.gross_score 
-                        : round.net_score || '-'}
+                        ? formatScore(round.gross_score)
+                        : formatScore(round.net_score)}
                     </td>
                     <td className="px-4 py-3 text-sm">
                       {scoreType === 'gross' 
-                        ? (round.to_par_gross > 0 ? '+' : '') + round.to_par_gross
-                        : round.to_par_net !== undefined 
-                          ? (round.to_par_net > 0 ? '+' : '') + round.to_par_net
-                          : '-'}
+                        ? formatToPar(round.to_par_gross)
+                        : formatToPar(round.to_par_net)}
                     </td>
                     <td className="px-4 py-3 text-sm text-right">
                       <div className="flex justify-end space-x-2">

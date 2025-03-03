@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
 import { ensureCourseExists, findOrCreateCourseByApiId } from "@/integrations/supabase";
 import { getCourseTeesByIdFromDatabase } from "@/integrations/supabase/course/course-db-operations";
+import { calculateHandicapIndex } from "@/integrations/supabase/handicap/handicap-calculator";
 
 export function createSaveRoundHandler({
   selectedCourse,
@@ -114,6 +115,28 @@ export function createSaveRoundHandler({
       console.log(`- tee_name: "${teeName}" (${typeof teeName})`);
       console.log(`- tee_id: "${teeId}" (${typeof teeId})`);
       
+      // Get the user's handicap
+      const { data: userData, error: userError } = await supabase
+        .from('profiles')
+        .select('handicap')
+        .eq('id', session.user.id)
+        .single();
+        
+      if (userError) {
+        console.error("Error fetching user handicap:", userError);
+        throw new Error(`Failed to get user handicap: ${userError.message}`);
+      }
+      
+      const userHandicap = userData?.handicap || 0;
+      console.log("User handicap:", userHandicap);
+      
+      // Calculate net score and to par net
+      const netScore = totalStrokes - Math.round(userHandicap);
+      const toParNet = netScore - totalPar;
+      
+      console.log("Calculated net score:", netScore);
+      console.log("Calculated to par net:", toParNet);
+      
       const roundData = {
         user_id: session.user.id,
         course_id: dbCourseId,
@@ -122,8 +145,8 @@ export function createSaveRoundHandler({
         tee_id: teeId,
         gross_score: totalStrokes,
         to_par_gross: toParGross,
-        net_score: null,
-        to_par_net: null,
+        net_score: netScore,
+        to_par_net: toParNet,
         hole_scores: JSON.stringify(scores)
       };
       

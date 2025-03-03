@@ -76,11 +76,13 @@ export const calculateStats = (rounds: Round[]): Stats => {
   const bestToPar = Math.min(...rounds.map(r => r.to_par_gross));
   
   // Net scores may not be available for all rounds
-  const roundsWithNetScore = rounds.filter(r => r.net_score !== undefined && r.to_par_net !== undefined);
+  const roundsWithNetScore = rounds.filter(r => r.net_score !== undefined && r.net_score !== null);
   const bestNetScore = roundsWithNetScore.length > 0 ? 
     Math.min(...roundsWithNetScore.map(r => r.net_score!)) : null;
-  const bestToParNet = roundsWithNetScore.length > 0 ? 
-    Math.min(...roundsWithNetScore.map(r => r.to_par_net!)) : null;
+    
+  const roundsWithToParNet = rounds.filter(r => r.to_par_net !== undefined && r.to_par_net !== null);
+  const bestToParNet = roundsWithToParNet.length > 0 ? 
+    Math.min(...roundsWithToParNet.map(r => r.to_par_net!)) : null;
   
   const averageScore = rounds.reduce((sum, r) => sum + r.gross_score, 0) / totalRounds;
   
@@ -156,11 +158,13 @@ export const calculateCourseStats = (rounds: Round[]): CourseStats[] => {
     const bestToPar = Math.min(...courseRounds.map(r => r.to_par_gross));
     
     // Net scores may not be available for all rounds
-    const roundsWithNetScore = courseRounds.filter(r => r.net_score !== undefined && r.to_par_net !== undefined);
+    const roundsWithNetScore = courseRounds.filter(r => r.net_score !== undefined && r.net_score !== null);
     const bestNetScore = roundsWithNetScore.length > 0 ? 
       Math.min(...roundsWithNetScore.map(r => r.net_score!)) : null;
-    const bestToParNet = roundsWithNetScore.length > 0 ? 
-      Math.min(...roundsWithNetScore.map(r => r.to_par_net!)) : null;
+      
+    const roundsWithToParNet = courseRounds.filter(r => r.to_par_net !== undefined && r.to_par_net !== null);
+    const bestToParNet = roundsWithToParNet.length > 0 ? 
+      Math.min(...roundsWithToParNet.map(r => r.to_par_net!)) : null;
 
     return {
       courseId,

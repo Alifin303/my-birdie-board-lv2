@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -157,7 +158,10 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
           />
         )}
 
-        <ScoreTableSummary scores={scores} />
+        <ScoreTableSummary 
+          scores={scores} 
+          userId={round.user_id}
+        />
       </div>
     );
   };
