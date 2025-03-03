@@ -1,6 +1,6 @@
 
-import { supabase, getCourseMetadataFromLocalStorage } from '../index';
-import { findCourseByApiId, findCourseByName, insertCourse, logSupabaseOperation } from '../course/course-queries';
+import { supabase } from '../core/client';
+import { findCourseByApiId, findCourseByName, insertCourse, getCourseMetadataFromLocalStorage } from '../course/course-queries';
 import { parseCourseName } from '../utils/course-utils';
 
 // This function finds or creates a course by the API course ID
@@ -13,7 +13,7 @@ export async function findOrCreateCourseByApiId(
   isSpecialHandling: boolean = false // Flag for Bentley or other special cases
 ): Promise<number | null> {
   try {
-    logSupabaseOperation('findOrCreateCourseByApiId', { apiCourseId, courseName, clubName, city, state });
+    console.log('findOrCreateCourseByApiId', { apiCourseId, courseName, clubName, city, state });
     
     // Normalize the course name and club name for consistent lookups
     const normalizedCourseName = courseName.replace(/\s+/g, ' ').trim();
@@ -28,31 +28,31 @@ export async function findOrCreateCourseByApiId(
       // Try to find by API course ID first
       const existingCourseByApiId = await findCourseByApiId(apiCourseId);
       if (existingCourseByApiId) {
-        console.log(`Found existing course by API ID: ${existingCourseByApiId.id}`);
-        return existingCourseByApiId.id;
+        console.log(`Found existing course by API ID: ${existingCourseByApiId}`);
+        return existingCourseByApiId;
       }
       
       // Then try to find by normalized name
       const formattedName = `${normalizedClubName} - ${normalizedCourseName}`;
       const existingCourseByName = await findCourseByName(formattedName);
       if (existingCourseByName) {
-        console.log(`Found existing course by name: ${existingCourseByName.id}`);
+        console.log(`Found existing course by name: ${existingCourseByName}`);
         
         // Update the API course ID if it's not set
         if (!existingCourseByName.api_course_id) {
           const { error } = await supabase
             .from('courses')
             .update({ api_course_id: apiCourseId })
-            .eq('id', existingCourseByName.id);
+            .eq('id', existingCourseByName);
             
           if (error) {
             console.error('Error updating API course ID:', error);
           } else {
-            console.log(`Updated API course ID for course ${existingCourseByName.id}`);
+            console.log(`Updated API course ID for course ${existingCourseByName}`);
           }
         }
         
-        return existingCourseByName.id;
+        return existingCourseByName;
       }
       
       // If no exact match was found, try a broader search for Bentley
@@ -70,8 +70,8 @@ export async function findOrCreateCourseByApiId(
       // Standard course lookup by API ID
       const existingCourse = await findCourseByApiId(apiCourseId);
       if (existingCourse) {
-        console.log(`Found existing course by API ID: ${existingCourse.id}`);
-        return existingCourse.id;
+        console.log(`Found existing course by API ID: ${existingCourse}`);
+        return existingCourse;
       }
     }
     
@@ -109,7 +109,7 @@ export async function ensureCourseExists(
   isSpecialHandling: boolean = false // Flag for Bentley or other special cases
 ): Promise<number> {
   try {
-    logSupabaseOperation('ensureCourseExists', { courseId, apiCourseId, courseName, clubName, city, state });
+    console.log('ensureCourseExists', { courseId, apiCourseId, courseName, clubName, city, state });
     
     // Normalize the course name and club name for consistent lookups
     const normalizedCourseName = courseName?.replace(/\s+/g, ' ').trim() || '';
@@ -128,8 +128,8 @@ export async function ensureCourseExists(
       if (apiCourseId) {
         const existingCourseByApiId = await findCourseByApiId(apiCourseId);
         if (existingCourseByApiId) {
-          console.log(`Found existing Bentley course by API ID: ${existingCourseByApiId.id}`);
-          return existingCourseByApiId.id;
+          console.log(`Found existing Bentley course by API ID: ${existingCourseByApiId}`);
+          return existingCourseByApiId;
         }
       }
       
@@ -138,8 +138,8 @@ export async function ensureCourseExists(
         const formattedName = `${normalizedClubName} - ${normalizedCourseName}`;
         const existingCourseByName = await findCourseByName(formattedName);
         if (existingCourseByName) {
-          console.log(`Found existing Bentley course by name: ${existingCourseByName.id}`);
-          return existingCourseByName.id;
+          console.log(`Found existing Bentley course by name: ${existingCourseByName}`);
+          return existingCourseByName;
         }
       }
       
@@ -172,8 +172,8 @@ export async function ensureCourseExists(
     if (apiCourseId) {
       const existingApiCourse = await findCourseByApiId(apiCourseId);
       if (existingApiCourse) {
-        console.log(`Found existing course by API ID: ${existingApiCourse.id}`);
-        return existingApiCourse.id;
+        console.log(`Found existing course by API ID: ${existingApiCourse}`);
+        return existingApiCourse;
       }
     }
     
@@ -182,8 +182,8 @@ export async function ensureCourseExists(
       const formattedName = `${normalizedClubName} - ${normalizedCourseName}`;
       const existingNameCourse = await findCourseByName(formattedName);
       if (existingNameCourse) {
-        console.log(`Found existing course by name: ${existingNameCourse.id}`);
-        return existingNameCourse.id;
+        console.log(`Found existing course by name: ${existingNameCourse}`);
+        return existingNameCourse;
       }
     }
     
@@ -225,20 +225,27 @@ export async function ensureCourseExists(
     
     // If we have a numeric course ID that's not from database sequence, use it explicitly
     if (numericCourseId && !isNaN(numericCourseId) && numericCourseId > 0) {
-      const { data, error } = await supabase
-        .from('courses')
-        .upsert({ ...courseData, id: numericCourseId })
-        .select('id')
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('courses')
+          .upsert({ ...courseData, id: numericCourseId })
+          .select('id')
+          .single();
+          
+        if (error) {
+          console.error('Error upserting course with ID:', error);
+          // Fall back to regular insert
+          const newCourseId = await insertCourse(courseData);
+          return newCourseId;
+        }
         
-      if (error) {
-        console.error('Error upserting course with ID:', error);
+        return data.id;
+      } catch (error) {
+        console.error('Error in upsert:', error);
         // Fall back to regular insert
         const newCourseId = await insertCourse(courseData);
         return newCourseId;
       }
-      
-      return data.id;
     } else {
       // Regular insert without specified ID
       const newCourseId = await insertCourse(courseData);
@@ -248,22 +255,5 @@ export async function ensureCourseExists(
     console.error('Error in ensureCourseExists:', error);
     // Fall back to the provided course ID
     return typeof courseId === 'string' ? parseInt(courseId, 10) : courseId;
-  }
-}
-
-// Helper function to get course metadata from localStorage
-async function getCourseMetadataFromLocalStorage(courseId: number): Promise<any> {
-  try {
-    const courseDetailsKey = `course_details_${courseId}`;
-    const storedDetails = localStorage.getItem(courseDetailsKey);
-    
-    if (storedDetails) {
-      return JSON.parse(storedDetails);
-    }
-    
-    return null;
-  } catch (error) {
-    console.error('Error getting course metadata from localStorage:', error);
-    return null;
   }
 }

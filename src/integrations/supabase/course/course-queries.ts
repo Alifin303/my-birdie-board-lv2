@@ -1,4 +1,6 @@
-import { supabase, logSupabaseOperation } from '../core/client';
+
+import { supabase } from '../core/client';
+import { logSupabaseOperation } from '../core/client';
 
 // Helper function to fetch a course by ID
 export async function fetchCourseById(courseId: number): Promise<any> {
@@ -20,12 +22,12 @@ export async function fetchCourseById(courseId: number): Promise<any> {
 }
 
 // Helper function to find a course by API ID
-export async function findCourseByApiId(apiCourseId: string): Promise<any> {
+export async function findCourseByApiId(apiCourseId: string): Promise<number | null> {
   logSupabaseOperation('findCourseByApiId', { apiCourseId });
   
   const { data, error } = await supabase
     .from('courses')
-    .select('*')
+    .select('id')
     .eq('api_course_id', apiCourseId)
     .maybeSingle();
     
@@ -34,16 +36,16 @@ export async function findCourseByApiId(apiCourseId: string): Promise<any> {
     return null;
   }
   
-  return data;
+  return data ? data.id : null;
 }
 
 // Helper function to find a course by name
-export async function findCourseByName(name: string): Promise<any> {
+export async function findCourseByName(name: string): Promise<number | null> {
   logSupabaseOperation('findCourseByName', { name });
   
   const { data, error } = await supabase
     .from('courses')
-    .select('*')
+    .select('id')
     .eq('name', name)
     .maybeSingle();
     
@@ -52,7 +54,7 @@ export async function findCourseByName(name: string): Promise<any> {
     return null;
   }
   
-  return data;
+  return data ? data.id : null;
 }
 
 // Helper function to insert a course
