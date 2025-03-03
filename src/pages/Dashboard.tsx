@@ -95,9 +95,10 @@ export default function Dashboard() {
         }
         
         // CRITICAL - Preserve the exact tee_name as it is in the database
-        // DO NOT MODIFY THE TEE_NAME IN ANY WAY
+        // Ensure we're not modifying the tee_name in any way
         return {
           ...round,
+          tee_name: round.tee_name, // Explicitly assign to ensure it's preserved
           courses: round.courses ? {
             ...round.courses,
             clubName: parsedNames.clubName,
