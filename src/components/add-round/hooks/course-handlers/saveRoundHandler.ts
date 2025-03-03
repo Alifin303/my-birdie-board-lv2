@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
 import { ensureCourseExists, findOrCreateCourseByApiId } from "@/integrations/supabase";
@@ -23,50 +22,30 @@ export function createSaveRoundHandler({
 >) {
   
   const handleSaveRound = async (): Promise<boolean> => {
-    if (!selectedCourse) {
+    if (!selectedCourse || !selectedTeeId) {
       toast.toast({
         title: "Error",
-        description: "No course selected.",
+        description: "Required course or tee information is missing.",
         variant: "destructive",
       });
       return false;
     }
     
-    if (!roundDate) {
-      toast.toast({
-        title: "Error",
-        description: "Please select a date.",
-        variant: "destructive",
-      });
-      return false;
-    }
-    
-    if (!selectedTeeId) {
-      toast.toast({
-        title: "Error",
-        description: "No tee selected.",
-        variant: "destructive",
-      });
-      return false;
-    }
-
     setIsLoading(true);
     
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session found');
       
-      // Get the selected tee information
       const selectedTee = selectedCourse.tees.find(tee => tee.id === selectedTeeId);
       if (!selectedTee) {
-        console.error('BUG: Selected tee not found in course tees array', {
+        console.error('CRITICAL ERROR: Selected tee not found in course tees array', {
           selectedTeeId,
           availableTees: selectedCourse.tees.map(t => ({ id: t.id, name: t.name }))
         });
-        throw new Error('Selected tee not found');
+        throw new Error('Selected tee not found - this is a critical error');
       }
       
-      // CRITICAL DEBUGGING: Log the exact tee information being used
       console.log("SAVING ROUND - CRITICAL TEE INFO:");
       console.log("Selected tee ID:", selectedTeeId);
       console.log("Selected tee object:", selectedTee);
@@ -80,11 +59,9 @@ export function createSaveRoundHandler({
       console.log("Ensuring course exists in database:", selectedCourse);
       let dbCourseId: number;
       
-      // Fix for the Bentley Golf Club issue - normalize the course name
       const normalizedCourseName = selectedCourse.name.replace(/\s+/g, ' ').trim();
       const normalizedClubName = selectedCourse.clubName.replace(/\s+/g, ' ').trim();
       
-      // Check if it's specifically Bentley Golf Club to apply special handling
       const isBentleyGolfClub = normalizedCourseName.toLowerCase().includes('bentley') || 
                                normalizedClubName.toLowerCase().includes('bentley');
       
@@ -92,17 +69,15 @@ export function createSaveRoundHandler({
       console.log(`Is Bentley Golf Club: ${isBentleyGolfClub}`);
       
       if (selectedCourse.apiCourseId) {
-        // For API courses, use findOrCreateCourseByApiId to avoid duplicates
         console.log("Ensuring API course exists:", selectedCourse.apiCourseId);
         
-        // Pass additional normalization flag for Bentley Golf Club
         const courseId = await findOrCreateCourseByApiId(
           selectedCourse.apiCourseId,
-          normalizedCourseName, // Use normalized name
-          normalizedClubName,   // Use normalized club name
+          normalizedCourseName,
+          normalizedClubName,
           selectedCourse.city,
           selectedCourse.state,
-          isBentleyGolfClub     // Pass the flag for special handling
+          isBentleyGolfClub
         );
         
         if (!courseId) {
@@ -112,29 +87,23 @@ export function createSaveRoundHandler({
         dbCourseId = courseId;
         console.log("Using course_id for API course:", dbCourseId);
       } else {
-        // For user-added courses, ensure the course exists
         console.log("Ensuring user-added course exists:", selectedCourse.id);
         
-        // Use ensureCourseExists to avoid duplicates, with special handling for Bentley
         dbCourseId = await ensureCourseExists(
           selectedCourse.id,
           undefined,
-          normalizedCourseName, // Use normalized name
-          normalizedClubName,   // Use normalized club name
+          normalizedCourseName,
+          normalizedClubName,
           selectedCourse.city,
           selectedCourse.state,
-          isBentleyGolfClub     // Pass the flag for special handling
+          isBentleyGolfClub
         );
         
         console.log("Using course_id for user-added course:", dbCourseId);
       }
       
-      // CRITICAL FIX: Make sure we're using the selected tee, not another one
       console.log("Final selected tee for saving:", selectedTee);
       
-      // =========== FIX: ENSURE WE USE THE CORRECT TEE NAME ===========
-      // Instead of just capturing the name, let's explicitly use the name from the selected tee
-      // This ensures we're using exactly what the user selected and not defaulting to anything else
       const teeName = String(selectedTee.name);
       const teeId = selectedTeeId;
       
@@ -142,12 +111,11 @@ export function createSaveRoundHandler({
       console.log(`- tee_name: "${teeName}" (${typeof teeName})`);
       console.log(`- tee_id: "${teeId}" (${typeof teeId})`);
       
-      // Prepare the data we're sending to Supabase
       const roundData = {
         user_id: session.user.id,
         course_id: dbCourseId,
         date: roundDate.toISOString(),
-        tee_name: teeName,  // This is the critical part - using the name directly from the selected tee
+        tee_name: teeName,
         tee_id: teeId,
         gross_score: totalStrokes,
         to_par_gross: toParGross,
@@ -158,7 +126,6 @@ export function createSaveRoundHandler({
       
       console.log("Saving round data:", roundData);
       
-      // Insert the round into the database
       const { data: round, error: roundError } = await supabase
         .from('rounds')
         .insert([roundData])
@@ -177,7 +144,6 @@ export function createSaveRoundHandler({
       console.log("Round saved successfully:", round);
       console.log(`Saved tee_name: "${round.tee_name}" and tee_id: "${round.tee_id}"`);
       
-      // Invalidate queries to refresh data in UI
       queryClient.invalidateQueries({ queryKey: ['userRounds'] });
       
       toast.toast({

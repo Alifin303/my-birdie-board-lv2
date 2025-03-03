@@ -58,13 +58,20 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   today
 }) => {
   const [localSelectedTeeId, setLocalSelectedTeeId] = useState<string | null>(selectedTeeId);
-  
+
   useEffect(() => {
     if (selectedTeeId !== localSelectedTeeId) {
       console.log("Updating local tee ID from prop:", selectedTeeId);
       setLocalSelectedTeeId(selectedTeeId);
     }
   }, [selectedTeeId]);
+
+  useEffect(() => {
+    if (localSelectedTeeId && localSelectedTeeId !== selectedTeeId) {
+      console.log("Updating parent tee ID from local state:", localSelectedTeeId);
+      handleTeeChange(localSelectedTeeId);
+    }
+  }, [localSelectedTeeId]);
 
   useEffect(() => {
     if (selectedCourse) {
@@ -488,14 +495,23 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </Button>
         <Button 
           onClick={() => {
-            console.log("Save button clicked with selectedTeeId:", selectedTeeId);
-            console.log("Selected tee at save time:", selectedTee);
-            if (selectedTee) {
-              console.log("Selected tee name at save time:", selectedTee.name);
-              console.log("Saving round with tee:", selectedTeeId, selectedTee.name);
-            } else {
-              console.error("No selected tee found at save time for ID:", selectedTeeId);
+            if (localSelectedTeeId !== selectedTeeId) {
+              console.log("CRITICAL: Fixing tee ID mismatch before save");
+              console.log(`Local tee ID: ${localSelectedTeeId}, Parent tee ID: ${selectedTeeId}`);
+              handleTeeChange(localSelectedTeeId);
             }
+            
+            const actualSelectedTee = selectedCourse.tees.find(tee => tee.id === localSelectedTeeId);
+            
+            console.log("Save button clicked with corrected teeId:", localSelectedTeeId);
+            console.log("Selected tee at save time:", actualSelectedTee);
+            if (actualSelectedTee) {
+              console.log("Selected tee name at save time:", actualSelectedTee.name);
+              console.log("Saving round with tee:", localSelectedTeeId, actualSelectedTee.name);
+            } else {
+              console.error("No selected tee found at save time for ID:", localSelectedTeeId);
+            }
+            
             handleSaveRound();
           }} 
           disabled={isLoading} 
