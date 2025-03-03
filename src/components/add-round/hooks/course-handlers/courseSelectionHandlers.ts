@@ -1,4 +1,3 @@
-
 import { getCourseDetails, CourseDetail } from "@/services/golfCourseApi";
 import { loadUserAddedCourseDetails } from "../../utils/courseUtils";
 import { convertToSimplifiedCourseDetail } from "../../utils/courseUtils";
@@ -246,8 +245,8 @@ export function createCourseSelectionHandlers({
             slope: selectedTee?.slope
           });
           
-          // Update scorecard based on tee selection
-          updateScorecardForTee(simplifiedCourseDetail, defaultTeeId);
+        // Update scorecard based on tee selection
+        updateScorecardForTee(simplifiedCourseDetail, defaultTeeId);
         } else {
           throw new Error("Could not find a valid tee for this course");
         }

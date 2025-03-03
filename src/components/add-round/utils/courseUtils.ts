@@ -1,6 +1,7 @@
+
 import { getCourseMetadataFromLocalStorage } from "@/integrations/supabase";
 import { CourseDetail } from "@/services/golfCourseApi";
-import { SimplifiedCourseDetail, SimplifiedTee } from "../types";
+import { SimplifiedCourseDetail, SimplifiedTee, SimplifiedGolfCourse, SimplifiedHole } from "../types";
 
 /**
  * Loads course details for a user-added course
@@ -86,6 +87,14 @@ export function convertToSimplifiedCourseDetail(courseDetail: CourseDetail): Sim
   // Process male tees
   if (courseDetail.tees?.male) {
     courseDetail.tees.male.forEach((tee, index) => {
+      // Convert API hole structure to our SimplifiedHole structure
+      const convertedHoles: SimplifiedHole[] = (tee.holes || []).map(hole => ({
+        number: hole.number || 0, // Ensure number is not optional
+        par: hole.par || 4,
+        yards: hole.yardage || 0,
+        handicap: hole.handicap || 0
+      }));
+
       tees.push({
         id: `male-${index}-${tee.tee_name?.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
         name: tee.tee_name || 'Unknown Tee',
@@ -94,7 +103,7 @@ export function convertToSimplifiedCourseDetail(courseDetail: CourseDetail): Sim
         slope: tee.slope_rating || 113,
         gender: 'male',
         originalIndex: index,
-        holes: tee.holes
+        holes: convertedHoles
       });
     });
   }
@@ -102,6 +111,14 @@ export function convertToSimplifiedCourseDetail(courseDetail: CourseDetail): Sim
   // Process female tees
   if (courseDetail.tees?.female) {
     courseDetail.tees.female.forEach((tee, index) => {
+      // Convert API hole structure to our SimplifiedHole structure
+      const convertedHoles: SimplifiedHole[] = (tee.holes || []).map(hole => ({
+        number: hole.number || 0, // Ensure number is not optional
+        par: hole.par || 4,
+        yards: hole.yardage || 0,
+        handicap: hole.handicap || 0
+      }));
+
       tees.push({
         id: `female-${index}-${tee.tee_name?.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
         name: tee.tee_name || 'Unknown Tee',
@@ -110,18 +127,26 @@ export function convertToSimplifiedCourseDetail(courseDetail: CourseDetail): Sim
         slope: tee.slope_rating || 113,
         gender: 'female',
         originalIndex: index,
-        holes: tee.holes
+        holes: convertedHoles
       });
     });
   }
 
+  // Create default holes array if none exists
+  const defaultHoles: SimplifiedHole[] = Array(18).fill(null).map((_, idx) => ({
+    number: idx + 1,
+    par: 4,
+    yards: 400,
+    handicap: idx + 1
+  }));
+
   const simplified: SimplifiedCourseDetail = {
-    id: courseDetail.id,
+    id: typeof courseDetail.id === 'string' ? parseInt(courseDetail.id, 10) : courseDetail.id,
     name: courseDetail.course_name || 'Unknown Course',
     clubName: courseDetail.club_name || 'Unknown Club',
     city: courseDetail.location?.city,
     state: courseDetail.location?.state,
-    holes: courseDetail.holes,
+    holes: courseDetail.holes || defaultHoles,
     tees: tees,
     isUserAdded: false
   };
@@ -145,4 +170,104 @@ export function formatCourseName(clubName: string, courseName: string): string {
   }
   
   return `${clubName} - ${courseName}`;
+}
+
+/**
+ * Fetches user-added courses from localStorage that match a search query
+ * 
+ * @param query The search query to match against course names
+ * @returns An array of simplified golf courses
+ */
+export function fetchUserAddedCourses(query: string): SimplifiedGolfCourse[] {
+  try {
+    const courses: SimplifiedGolfCourse[] = [];
+    
+    // Iterate through localStorage to find course details
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      
+      // Only process keys that match our course details pattern
+      if (key && key.startsWith('course_details_')) {
+        try {
+          const courseId = key.replace('course_details_', '');
+          const storedCourse = localStorage.getItem(key);
+          
+          if (storedCourse) {
+            const courseData = JSON.parse(storedCourse);
+            
+            // Check if the course name or club name matches the query
+            const courseName = courseData.name || '';
+            const clubName = courseData.clubName || courseName;
+            const cityState = `${courseData.city || ''} ${courseData.state || ''}`;
+            
+            const searchableText = `${courseName} ${clubName} ${cityState}`.toLowerCase();
+            
+            if (searchableText.includes(query.toLowerCase())) {
+              courses.push({
+                id: parseInt(courseId, 10) || 0,
+                name: courseName,
+                clubName: clubName,
+                city: courseData.city,
+                state: courseData.state,
+                isUserAdded: true
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error parsing course from localStorage:", error);
+        }
+      }
+    }
+    
+    console.log("User-added courses matching query:", courses);
+    return courses;
+  } catch (error) {
+    console.error("Error fetching user-added courses:", error);
+    return [];
+  }
+}
+
+/**
+ * Enhances course search results with additional metadata
+ * 
+ * @param courses The array of courses to enhance
+ * @returns The enhanced array of courses
+ */
+export function enhanceCourseResults(courses: SimplifiedGolfCourse[]): SimplifiedGolfCourse[] {
+  try {
+    return courses.map(course => {
+      // If it's already a user-added course, just return it as is
+      if (course.isUserAdded) {
+        return course;
+      }
+      
+      // Check if this course exists as a user-added course with the same api_course_id
+      // This would happen if a user has previously added this course from the API
+      const userAddedKey = `course_details_${course.id}`;
+      const userAddedData = localStorage.getItem(userAddedKey);
+      
+      if (userAddedData) {
+        try {
+          const courseData = JSON.parse(userAddedData);
+          
+          return {
+            ...course,
+            isUserAdded: true, // Mark as user-added since we have local data for it
+            id: course.id, // Keep the original ID
+            name: courseData.name || course.name,
+            clubName: courseData.clubName || course.clubName,
+            city: courseData.city || course.city,
+            state: courseData.state || course.state
+          };
+        } catch (error) {
+          console.error("Error parsing user-added course data:", error);
+        }
+      }
+      
+      return course;
+    });
+  } catch (error) {
+    console.error("Error enhancing course results:", error);
+    return courses;
+  }
 }
