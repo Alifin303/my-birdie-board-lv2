@@ -3,6 +3,7 @@ export interface Round {
   id: number;
   date: string;
   tee_name: string;
+  tee_id?: string;
   gross_score: number;
   net_score?: number;
   to_par_gross: number;
