@@ -88,7 +88,9 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
           date: roundDate?.toISOString() || round.date,
           gross_score: totalStrokes,
           to_par_gross: toPar,
-          hole_scores: JSON.stringify(scores)
+          hole_scores: JSON.stringify(scores),
+          tee_name: round.tee_name,
+          tee_id: round.tee_id
         })
         .eq('id', round.id);
         

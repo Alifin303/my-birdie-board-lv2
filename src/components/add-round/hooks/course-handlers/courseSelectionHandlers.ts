@@ -1,3 +1,4 @@
+
 import { getCourseDetails, CourseDetail } from "@/services/golfCourseApi";
 import { loadUserAddedCourseDetails } from "../../utils/courseUtils";
 import { convertToSimplifiedCourseDetail } from "../../utils/courseUtils";
@@ -47,10 +48,14 @@ export function createCourseSelectionHandlers({
       if (course.isUserAdded) {
         console.log("Loading user-added course from database:", course);
         
-        // First check localStorage for cached course details
+        // Load metadata from localStorage using both utilities for maximum compatibility
+        const storedMetadata = getCourseMetadataFromLocalStorage(course.id);
         const cachedCourseDetail = loadUserAddedCourseDetails(course.id);
         
-        if (cachedCourseDetail) {
+        console.log("User-added course metadata from localStorage:", storedMetadata);
+        console.log("User-added course details from cache:", cachedCourseDetail);
+        
+        if (cachedCourseDetail && cachedCourseDetail.tees && cachedCourseDetail.tees.length > 0) {
           console.log("User-added course details loaded from cache:", cachedCourseDetail);
           console.log("Cached tees:", cachedCourseDetail.tees?.map(t => ({ id: t.id, name: t.name })));
           
@@ -63,13 +68,23 @@ export function createCourseSelectionHandlers({
             state: course.state || cachedCourseDetail.state,
             isUserAdded: true
           };
+        } else if (storedMetadata && storedMetadata.tees && storedMetadata.tees.length > 0) {
+          console.log("Using metadata from localStorage:", storedMetadata);
+          
+          simplifiedCourseDetail = {
+            id: course.id,
+            name: course.name,
+            clubName: course.clubName,
+            city: course.city || storedMetadata.city,
+            state: course.state || storedMetadata.state,
+            tees: storedMetadata.tees,
+            holes: storedMetadata.holes || storedMetadata.tees[0].holes,
+            isUserAdded: true
+          };
         } else {
           console.log("No cached details found for user-added course, creating defaults");
           
-          // Try to get metadata from localStorage using the course-utils function
-          const metadata = getCourseMetadataFromLocalStorage(course.id);
-          console.log("Metadata from localStorage:", metadata);
-          
+          // Create a default tee if none exists
           const defaultHoles = Array(18).fill(null).map((_, idx) => ({
             number: idx + 1,
             par: 4,
@@ -77,11 +92,11 @@ export function createCourseSelectionHandlers({
             handicap: idx + 1
           }));
           
-          const teeId = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-          console.log("Generated new tee ID:", teeId);
+          const defaultTeeId = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+          console.log("Generated new tee ID:", defaultTeeId);
           
           const defaultTee = {
-            id: teeId,
+            id: defaultTeeId,
             name: 'White',
             rating: 72,
             slope: 113,
@@ -102,6 +117,7 @@ export function createCourseSelectionHandlers({
             isUserAdded: true
           };
           
+          // Save the default course details to localStorage
           try {
             localStorage.setItem(
               `course_details_${course.id}`, 

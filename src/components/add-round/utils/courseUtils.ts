@@ -218,15 +218,45 @@ export const extractTeesFromApiResponse = (courseDetail: CourseDetail): Simplifi
 
 export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDetail | null => {
   try {
-    const storedDetails = localStorage.getItem(`course_details_${courseId}`);
+    // First try the direct storage key
+    const courseDetailsKey = `course_details_${courseId}`;
+    const storedDetails = localStorage.getItem(courseDetailsKey);
+    
     if (!storedDetails) {
       console.log("No course details found in localStorage for course ID:", courseId);
+      // Try the metadata function as fallback
+      const metadata = getCourseMetadataFromLocalStorage(courseId);
+      if (metadata && metadata.tees && metadata.tees.length > 0) {
+        console.log("Found course metadata using alternate method:", metadata);
+        return {
+          id: courseId,
+          name: metadata.name || "Unknown Course",
+          clubName: metadata.clubName || "Unknown Club",
+          city: metadata.city || '',
+          state: metadata.state || '',
+          tees: metadata.tees,
+          holes: metadata.holes || metadata.tees[0].holes,
+          isUserAdded: true
+        };
+      }
       return null;
     }
     
-    const parsedDetails = JSON.parse(storedDetails);
-    console.log("Parsed course details from localStorage:", parsedDetails);
+    let parsedDetails: any;
+    try {
+      parsedDetails = JSON.parse(storedDetails);
+      console.log("Parsed course details from localStorage:", parsedDetails);
+    } catch (error) {
+      console.error("Error parsing course details:", error);
+      return null;
+    }
     
+    if (!parsedDetails) {
+      console.log("No valid course details found for course ID:", courseId);
+      return null;
+    }
+    
+    // Ensure the tees array exists and is valid
     if (!parsedDetails.tees || !Array.isArray(parsedDetails.tees) || parsedDetails.tees.length === 0) {
       console.log("No tees array found or empty tees array in course details, creating default tee");
       
@@ -261,6 +291,7 @@ export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDe
         par: t.par 
       })));
       
+      // Validate each tee has proper holes data
       parsedDetails.tees = parsedDetails.tees.map((tee: any) => {
         if (!tee.holes || !Array.isArray(tee.holes) || tee.holes.length === 0) {
           console.log(`Tee ${tee.name} has no valid holes, creating defaults`);
@@ -281,6 +312,7 @@ export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDe
             return hole;
           });
           
+          // Calculate total par from holes
           const calculatedPar = tee.holes.reduce((sum: number, hole: any) => sum + (hole.par || 4), 0);
           
           if (!tee.par || Math.abs(tee.par - calculatedPar) > 5) {
@@ -294,6 +326,7 @@ export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDe
           tee.par = 72;
         }
         
+        // Ensure all required tee properties exist
         tee.rating = tee.rating || 72.0;
         tee.slope = tee.slope || 113;
         tee.gender = tee.gender || 'male';
@@ -301,10 +334,15 @@ export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDe
         return tee;
       });
       
-      if (parsedDetails.tees[0].holes && parsedDetails.tees[0].holes.length > 0) {
-        parsedDetails.holes = parsedDetails.tees[0].holes;
+      // Ensure the course has holes array at the top level
+      if (!parsedDetails.holes || !Array.isArray(parsedDetails.holes) || parsedDetails.holes.length === 0) {
+        if (parsedDetails.tees[0].holes && parsedDetails.tees[0].holes.length > 0) {
+          console.log("Setting course-level holes from first tee");
+          parsedDetails.holes = parsedDetails.tees[0].holes;
+        }
       }
       
+      // Save the updated details back to localStorage
       localStorage.setItem(`course_details_${courseId}`, JSON.stringify(parsedDetails));
       console.log("Updated course details with verified par data saved to localStorage");
     }
