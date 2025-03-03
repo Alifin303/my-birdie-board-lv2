@@ -1,4 +1,3 @@
-
 import { getCourseDetails, CourseDetail } from "@/services/golfCourseApi";
 import { loadUserAddedCourseDetails } from "../../utils/courseUtils";
 import { convertToSimplifiedCourseDetail } from "../../utils/courseUtils";
@@ -55,52 +54,15 @@ export function createCourseSelectionHandlers({
           console.log("User-added course details loaded from cache:", cachedCourseDetail);
           console.log("Cached tees:", cachedCourseDetail.tees?.map(t => ({ id: t.id, name: t.name })));
           
-          // IMPORTANT FIX: Ensure we preserve the entire cached tee data
-          cachedCourseDetail.id = course.id;
-          cachedCourseDetail.name = course.name;
-          cachedCourseDetail.clubName = course.clubName;
-          cachedCourseDetail.city = course.city;
-          cachedCourseDetail.state = course.state;
-          cachedCourseDetail.isUserAdded = true;
-          
-          // Make sure we have at least one tee
-          if (!cachedCourseDetail.tees || cachedCourseDetail.tees.length === 0) {
-            console.log("No tees found in cached course details, creating default tee");
-            
-            const defaultHoles = Array(18).fill(null).map((_, idx) => ({
-              number: idx + 1,
-              par: 4,
-              yards: 400,
-              handicap: idx + 1
-            }));
-            
-            const teeId = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-            cachedCourseDetail.tees = [{
-              id: teeId,
-              name: 'White',
-              rating: 72,
-              slope: 113,
-              par: 72,
-              gender: 'male' as const,
-              originalIndex: 0,
-              holes: defaultHoles
-            }];
-            
-            cachedCourseDetail.holes = defaultHoles;
-            
-            // Update localStorage with fixed data
-            try {
-              localStorage.setItem(
-                `course_details_${course.id}`, 
-                JSON.stringify(cachedCourseDetail)
-              );
-              console.log("Updated course details with default tee in localStorage");
-            } catch (e) {
-              console.error("Error saving to localStorage:", e);
-            }
-          }
-          
-          simplifiedCourseDetail = cachedCourseDetail;
+          simplifiedCourseDetail = {
+            ...cachedCourseDetail,
+            id: course.id,
+            name: course.name,
+            clubName: course.clubName,
+            city: course.city || cachedCourseDetail.city,
+            state: course.state || cachedCourseDetail.state,
+            isUserAdded: true
+          };
         } else {
           console.log("No cached details found for user-added course, creating defaults");
           
@@ -219,7 +181,7 @@ export function createCourseSelectionHandlers({
       
       console.log("Setting selected course:", simplifiedCourseDetail);
       console.log("Course tees before setting state:", 
-        simplifiedCourseDetail.tees.map(t => ({
+        simplifiedCourseDetail.tees?.map(t => ({
           id: t.id, 
           name: t.name, 
           par: t.par, 
@@ -263,9 +225,6 @@ export function createCourseSelectionHandlers({
           rating: simplifiedCourseDetail.tees[0]?.rating,
           slope: simplifiedCourseDetail.tees[0]?.slope
         });
-        
-        // We will now let the useEffect in useAddRoundState handle the scorecard update
-        // once both course and tee are confirmed set
       } else {
         console.error("No tees found for course:", simplifiedCourseDetail);
         

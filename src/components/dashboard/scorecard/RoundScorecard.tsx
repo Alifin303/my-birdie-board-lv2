@@ -24,6 +24,9 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
   // Initialize editable state when round data changes or dialog opens
   useEffect(() => {
     if (round && isOpen) {
+      console.log("Loading round data in RoundScorecard:", round);
+      console.log("Round tee_name:", round.tee_name, "tee_id:", round.tee_id);
+      
       // Parse hole scores from JSON
       let parsedScores: HoleScore[] = [];
       try {
@@ -167,7 +170,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
             {isEditing ? (
               "Edit your round details"
             ) : (
-              <>Details for your round at {round.courses?.clubName} - {round.courses?.courseName}</>
+              <>Details for your round at {round.courses?.clubName} - {round.courses?.courseName} ({round.tee_name})</>
             )}
           </DialogDescription>
         </DialogHeader>

@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { UseCourseHandlersProps } from "./types";
 import { QueryClient } from "@tanstack/react-query";
@@ -70,11 +69,6 @@ export function createSaveRoundHandler({
       console.log("Selected tee object to save:", selectedTee);
       console.log("Selected tee name to save:", selectedTee.name);
       console.log("Available tees in course at save time:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
-      console.log("Saving round with:", { 
-        courseId: selectedCourse.id, 
-        selectedTeeId, 
-        selectedTeeName: selectedTee.name 
-      });
       
       const totalStrokes = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
@@ -149,8 +143,8 @@ export function createSaveRoundHandler({
         user_id: session.user.id,
         course_id: dbCourseId,
         date: roundDate.toISOString(),
-        tee_name: selectedTee.name, // Using name from the selectedTee object
-        tee_id: selectedTeeId,     // Using the teeId that was selected
+        tee_name: selectedTee.name,
+        tee_id: selectedTeeId,
         gross_score: totalStrokes,
         to_par_gross: toParGross,
         net_score: null,
