@@ -1,13 +1,13 @@
-
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase, parseCourseName } from "@/integrations/supabase/client";
+import { supabase, parseCourseName, updateCourseWithUserId } from "@/integrations/supabase/client";
 import { AddRoundModal } from "@/components/add-round/AddRoundModal";
 import { DebugPanel } from "@/components/DebugPanel";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MainStats, HandicapCircle } from "@/components/dashboard/StatsDisplay";
 import { CourseStatsTable, CourseRoundHistory } from "@/components/dashboard/CourseStats";
 import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
+import { useToast } from "@/hooks/use-toast";
 
 interface Round {
   id: number;
@@ -30,6 +30,7 @@ interface Round {
 
 export default function Dashboard() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
@@ -115,6 +116,20 @@ export default function Dashboard() {
         });
       }
       
+      // Update user IDs for courses without them
+      if (processedRounds.length > 0) {
+        processedRounds.forEach(round => {
+          if (round.courses && round.courses.id) {
+            updateCourseWithUserId(round.courses.id)
+              .then(updated => {
+                if (updated) {
+                  console.log(`Updated user_id for course ${round.courses?.id}`);
+                }
+              });
+          }
+        });
+      }
+      
       return processedRounds as Round[];
     }
   });
@@ -127,6 +142,13 @@ export default function Dashboard() {
   const handleScoreTypeChange = (type: 'gross' | 'net') => {
     setScoreType(type);
   };
+
+  useEffect(() => {
+    if (!isModalOpen) {
+      // Invalidate query cache when modal is closed to refresh data
+      queryClient.invalidateQueries({ queryKey: ['userRounds'] });
+    }
+  }, [isModalOpen, queryClient]);
 
   const renderDashboard = () => {
     return (

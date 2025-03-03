@@ -1,4 +1,3 @@
-
 import { supabase, logSupabaseOperation } from '../core/client';
 
 // Helper function to fetch a course by ID
@@ -227,5 +226,38 @@ export function getCourseMetadataFromLocalStorage(courseId: number | string): an
   } catch (error) {
     console.error("Error getting course metadata from localStorage:", error);
     return null;
+  }
+}
+
+// Helper function to update a course with the current user's ID
+export async function updateCourseWithUserId(courseId: number): Promise<boolean> {
+  logSupabaseOperation('updateCourseWithUserId', { courseId });
+  
+  try {
+    const { data: session } = await supabase.auth.getSession();
+    if (!session || !session.session || !session.session.user) {
+      console.log("No authenticated user found when trying to update course user_id");
+      return false;
+    }
+    
+    const userId = session.session.user.id;
+    console.log(`Updating course ${courseId} with user_id ${userId}`);
+    
+    const { data, error } = await supabase
+      .from('courses')
+      .update({ user_id: userId })
+      .eq('id', courseId)
+      .is('user_id', null); // Only update if user_id is null
+      
+    if (error) {
+      console.error("Error updating course with user_id:", error);
+      return false;
+    }
+    
+    console.log("Course user_id update result:", data);
+    return true;
+  } catch (error) {
+    console.error("Exception updating course with user_id:", error);
+    return false;
   }
 }

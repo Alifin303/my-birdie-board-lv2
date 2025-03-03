@@ -21,11 +21,24 @@ export async function findOrCreateCourseByApiId(
     
     // If not found, create a new course
     const fullName = formatCourseName(clubName, courseName);
+    
+    // Get the current user ID if available
+    let userId = null;
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      if (session && session.session && session.session.user) {
+        userId = session.session.user.id;
+      }
+    } catch (error) {
+      console.error("Error getting user session:", error);
+    }
+    
     const insertedCourse = await insertCourse({
       name: fullName,
       city,
       state,
-      api_course_id: apiCourseId
+      api_course_id: apiCourseId,
+      user_id: userId
     });
     
     if (insertedCourse) {
@@ -53,12 +66,30 @@ export async function ensureCourseExists(
     // First, check if the course with this ID exists
     const { data, error } = await supabase
       .from('courses')
-      .select('id')
+      .select('id, user_id')
       .eq('id', courseId)
       .maybeSingle();
       
     if (!error && data) {
       console.log("Course exists with ID:", courseId);
+      
+      // If the course exists but doesn't have a user_id, try to update it with the current user's ID
+      if (!data.user_id) {
+        try {
+          const { data: session } = await supabase.auth.getSession();
+          if (session && session.session && session.session.user) {
+            const userId = session.session.user.id;
+            await supabase
+              .from('courses')
+              .update({ user_id: userId })
+              .eq('id', courseId);
+            console.log(`Updated course ${courseId} with user_id ${userId}`);
+          }
+        } catch (updateError) {
+          console.error("Error updating course user_id:", updateError);
+        }
+      }
+      
       return courseId;
     }
     

@@ -18,6 +18,7 @@ export type Database = {
           name: string
           state: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           api_course_id?: string | null
@@ -27,6 +28,7 @@ export type Database = {
           name: string
           state?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           api_course_id?: string | null
@@ -36,6 +38,7 @@ export type Database = {
           name?: string
           state?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }

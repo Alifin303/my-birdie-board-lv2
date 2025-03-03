@@ -1,4 +1,3 @@
-
 import { getCourseDetails, CourseDetail } from "@/services/golfCourseApi";
 import { loadUserAddedCourseDetails } from "../../utils/courseUtils";
 import { convertToSimplifiedCourseDetail } from "../../utils/courseUtils";
@@ -18,6 +17,7 @@ export function createCourseSelectionHandlers({
   setCurrentStep,
   setOriginalCourseDetail,
   setManualCourseOpen,
+  setCourseLoadFailure,
   toast
 }: Pick<UseCourseHandlersProps, 
   'setIsLoading' | 
@@ -31,6 +31,7 @@ export function createCourseSelectionHandlers({
   'setCurrentStep' |
   'setOriginalCourseDetail' |
   'setManualCourseOpen' |
+  'setCourseLoadFailure' |
   'toast'
 >) {
   
@@ -70,8 +71,9 @@ export function createCourseSelectionHandlers({
               handicap: idx + 1
             }));
             
+            const teeId = `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
             cachedCourseDetail.tees = [{
-              id: `tee-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+              id: teeId,
               name: 'White',
               rating: 72,
               slope: 113,
@@ -259,17 +261,8 @@ export function createCourseSelectionHandlers({
           slope: simplifiedCourseDetail.tees[0]?.slope
         });
         
-        // Wait for state update before updating scorecard
-        setTimeout(() => {
-          console.log("Updating scorecard with tee ID:", defaultTeeId);
-          updateScorecardForTee(defaultTeeId, 'all');
-          setHoleSelection('all');
-          
-          // Double-check that the course and tee data is available
-          console.log("Selected course after update:", simplifiedCourseDetail);
-          console.log("Selected tee ID after update:", defaultTeeId);
-          console.log("Selected tee name:", simplifiedCourseDetail.tees[0]?.name);
-        }, 100); // Increased timeout to ensure state is updated
+        // We will now let the useEffect in useAddRoundState handle the scorecard update
+        // once both course and tee are confirmed set
       } else {
         console.error("No tees found for course:", simplifiedCourseDetail);
         
@@ -316,18 +309,13 @@ export function createCourseSelectionHandlers({
             console.error("Error saving to localStorage:", e);
           }
         }
-        
-        // Update scorecard with the default tee
-        setTimeout(() => {
-          updateScorecardForTee(defaultTeeId, 'all');
-          setHoleSelection('all');
-        }, 100); // Increased timeout to ensure state is updated
       }
       
       setCurrentStep('scorecard');
     } catch (error: any) {
       console.error("Course detail error:", error);
       setSearchError(error.message || "Failed to load course details. Please try again.");
+      setCourseLoadFailure(true);
       toast.toast({
         title: "Error",
         description: error.message || "Failed to load course details. Please try again.",

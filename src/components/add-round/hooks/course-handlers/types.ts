@@ -1,42 +1,50 @@
 
-import { useToast } from "@/hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
-import { CourseDetail } from "@/services/golfCourseApi";
+import { Dispatch, SetStateAction } from "react";
 import { 
-  Score, 
   SimplifiedGolfCourse, 
   SimplifiedCourseDetail,
-  HoleSelection
+  Score,
+  HoleSelection,
+  CourseDetail
 } from "../../types";
+import { ToastApi } from "@/hooks/use-toast";
 
 export interface UseCourseHandlersProps {
+  currentStep: 'search' | 'scorecard';
+  setCurrentStep: Dispatch<SetStateAction<'search' | 'scorecard'>>;
   searchQuery: string;
-  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
-  setSearchResults: React.Dispatch<React.SetStateAction<SimplifiedGolfCourse[]>>;
-  setSelectedCourse: React.Dispatch<React.SetStateAction<SimplifiedCourseDetail | null>>;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  setSearchError: React.Dispatch<React.SetStateAction<string | null>>;
-  setNoResults: React.Dispatch<React.SetStateAction<boolean>>;
-  setOriginalCourseDetail: React.Dispatch<React.SetStateAction<CourseDetail | null>>;
-  setSelectedTeeId: React.Dispatch<React.SetStateAction<string | null>>;
-  updateScorecardForTee: (teeId: string, selection?: HoleSelection) => void;
-  setHoleSelection: React.Dispatch<React.SetStateAction<HoleSelection>>;
-  setCurrentStep: React.Dispatch<React.SetStateAction<'search' | 'scorecard'>>;
-  setManualCourseOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  selectedCourse: SimplifiedCourseDetail | null;
-  selectedTeeId: string | null;
-  scores: Score[];
-  roundDate: Date | undefined;
-  isLoading: boolean;
+  setSearchQuery: Dispatch<SetStateAction<string>>;
   searchResults: SimplifiedGolfCourse[];
-  toast: ReturnType<typeof useToast>;
-  queryClient: ReturnType<typeof useQueryClient>;
-}
-
-export interface CourseHandlers {
-  handleSearch: (query: string) => Promise<void>;
-  handleCourseSelect: (course: SimplifiedGolfCourse) => Promise<void>;
-  handleOpenManualCourseForm: () => void;
-  handleCourseCreated: (courseId: number, courseName: string) => Promise<void>;
-  handleSaveRound: () => Promise<boolean>;
+  setSearchResults: Dispatch<SetStateAction<SimplifiedGolfCourse[]>>;
+  selectedCourse: SimplifiedCourseDetail | null;
+  setSelectedCourse: Dispatch<SetStateAction<SimplifiedCourseDetail | null>>;
+  selectedTeeId: string | null;
+  setSelectedTeeId: Dispatch<SetStateAction<string | null>>;
+  scores: Score[];
+  setScores: Dispatch<SetStateAction<Score[]>>;
+  isLoading: boolean;
+  setIsLoading: Dispatch<SetStateAction<boolean>>;
+  searchError: string | null;
+  setSearchError: Dispatch<SetStateAction<string | null>>;
+  dataLoadingError: string | null;
+  setDataLoadingError: Dispatch<SetStateAction<string | null>>;
+  roundDate: Date | undefined;
+  setRoundDate: Dispatch<SetStateAction<Date | undefined>>;
+  calendarOpen: boolean;
+  setCalendarOpen: Dispatch<SetStateAction<boolean>>;
+  holeSelection: HoleSelection;
+  setHoleSelection: Dispatch<SetStateAction<HoleSelection>>;
+  activeScoreTab: "front9" | "back9";
+  setActiveScoreTab: Dispatch<SetStateAction<"front9" | "back9">>;
+  originalCourseDetail: CourseDetail | null;
+  setOriginalCourseDetail: Dispatch<SetStateAction<CourseDetail | null>>;
+  noResults: boolean;
+  setNoResults: Dispatch<SetStateAction<boolean>>;
+  manualCourseOpen: boolean;
+  setManualCourseOpen: Dispatch<SetStateAction<boolean>>;
+  courseAndTeeReady: boolean;
+  updateScorecardForTee: (teeId: string, selection: HoleSelection) => void;
+  courseLoadFailure: boolean;
+  setCourseLoadFailure: Dispatch<SetStateAction<boolean>>;
+  toast: ToastApi;
 }

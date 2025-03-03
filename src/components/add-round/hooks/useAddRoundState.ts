@@ -26,14 +26,22 @@ export const useAddRoundState = () => {
   const [noResults, setNoResults] = useState<boolean>(false);
   const [manualCourseOpen, setManualCourseOpen] = useState<boolean>(false);
   const [courseAndTeeReady, setCourseAndTeeReady] = useState<boolean>(false);
+  const [courseLoadFailure, setCourseLoadFailure] = useState<boolean>(false);
 
   // Reset selectedTeeId whenever selectedCourse changes
   useEffect(() => {
     if (selectedCourse && selectedCourse.tees && selectedCourse.tees.length > 0) {
       console.log("Selected course changed, setting default tee:", selectedCourse.tees[0].name);
       setSelectedTeeId(selectedCourse.tees[0].id);
+      // Reset any course load failure
+      setCourseLoadFailure(false);
     } else {
       setSelectedTeeId(null);
+      // If course selection is completed but no tees are found, mark as failure
+      if (selectedCourse && (!selectedCourse.tees || selectedCourse.tees.length === 0)) {
+        console.error("Course selected but no tees available:", selectedCourse);
+        setCourseLoadFailure(true);
+      }
     }
   }, [selectedCourse]);
 
@@ -52,10 +60,16 @@ export const useAddRoundState = () => {
   // New effect to track when both course and tee are fully ready
   useEffect(() => {
     if (selectedCourse && selectedTeeId) {
-      console.log("🔄 Both course and tee are set - marking state as ready");
-      console.log("Ready course:", selectedCourse.name, selectedCourse.id);
-      console.log("Ready tee:", selectedTeeId);
-      setCourseAndTeeReady(true);
+      const tee = selectedCourse.tees.find(t => t.id === selectedTeeId);
+      if (tee) {
+        console.log("🔄 Both course and tee are set - marking state as ready");
+        console.log("Ready course:", selectedCourse.name, selectedCourse.id);
+        console.log("Ready tee:", tee.name, selectedTeeId);
+        setCourseAndTeeReady(true);
+      } else {
+        console.error("Selected tee ID doesn't match any tee in the course:", selectedTeeId);
+        setCourseAndTeeReady(false);
+      }
     } else {
       setCourseAndTeeReady(false);
     }
@@ -94,6 +108,8 @@ export const useAddRoundState = () => {
     setNoResults,
     manualCourseOpen,
     setManualCourseOpen,
-    courseAndTeeReady
+    courseAndTeeReady,
+    courseLoadFailure,
+    setCourseLoadFailure
   };
 };

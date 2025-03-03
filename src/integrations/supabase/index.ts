@@ -8,7 +8,8 @@ export {
   findCourseByApiId,
   findCourseByName,
   insertCourse,
-  getCourseMetadataFromLocalStorage
+  getCourseMetadataFromLocalStorage,
+  updateCourseWithUserId
 } from './course/course-queries';
 
 // Export course operation functions
