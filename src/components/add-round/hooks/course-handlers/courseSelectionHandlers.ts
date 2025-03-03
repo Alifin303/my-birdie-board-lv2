@@ -1,10 +1,9 @@
-
 import { getCourseDetails, CourseDetail } from "@/services/golfCourseApi";
 import { loadUserAddedCourseDetails } from "../../utils/courseUtils";
 import { convertToSimplifiedCourseDetail } from "../../utils/courseUtils";
 import { SimplifiedGolfCourse, SimplifiedCourseDetail } from "../../types";
 import { UseCourseHandlersProps } from "./types";
-import { fetchCourseById, getCourseMetadataFromLocalStorage } from "@/integrations/supabase/client";
+import { fetchCourseById, getCourseMetadataFromLocalStorage } from "@/integrations/supabase";
 
 export function createCourseSelectionHandlers({
   setIsLoading,

@@ -1,6 +1,6 @@
 
 import { formatCourseName } from '../utils/course-utils';
-import { findCourseByApiId, insertCourse } from './course-queries';
+import { findCourseByApiId, insertCourse, getCourseMetadataFromLocalStorage } from './course-queries';
 import { supabase } from '../core/client';
 
 // Helper function to find or create a course by API ID

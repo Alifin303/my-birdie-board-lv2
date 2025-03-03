@@ -1,4 +1,3 @@
-
 import { CourseDetail, TeeBox } from "@/services/golfCourseApi";
 import { SimplifiedCourseDetail, SimplifiedGolfCourse, SimplifiedHole, SimplifiedTee } from "../types";
 import { supabase, formatCourseName, parseCourseName, getCourseMetadataFromLocalStorage, isUserAddedCourse } from "@/integrations/supabase/client";
@@ -348,12 +347,27 @@ export const loadUserAddedCourseDetails = (courseId: number): SimplifiedCourseDe
         }
       }
       
+      // Ensure id, name, and clubName properties exist
+      parsedDetails.id = parsedDetails.id || courseId;
+      parsedDetails.name = parsedDetails.name || "Unknown Course";
+      parsedDetails.clubName = parsedDetails.clubName || parsedDetails.name;
+      parsedDetails.isUserAdded = true;
+      
       // Save the updated details back to localStorage
       localStorage.setItem(`course_details_${courseId}`, JSON.stringify(parsedDetails));
       console.log("Updated course details with verified par data saved to localStorage");
     }
     
-    return parsedDetails as SimplifiedCourseDetail;
+    return {
+      id: courseId,
+      name: parsedDetails.name || "Unknown Course",
+      clubName: parsedDetails.clubName || parsedDetails.name || "Unknown Club",
+      city: parsedDetails.city || '',
+      state: parsedDetails.state || '',
+      tees: parsedDetails.tees || [],
+      holes: parsedDetails.holes || (parsedDetails.tees?.[0]?.holes || []),
+      isUserAdded: true
+    };
   } catch (error) {
     console.error("Error loading course details from localStorage:", error);
     return null;
