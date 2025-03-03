@@ -8,15 +8,37 @@ export function useCourseHandlers(props: UseCourseHandlersProps): CourseHandlers
   console.log("useCourseHandlers - selectedTeeId:", props.selectedTeeId);
   console.log("useCourseHandlers - selectedCourse:", props.selectedCourse);
   
-  const { handleSearch } = createSearchHandlers(props);
+  const { handleSearch: searchHandler } = createSearchHandlers({
+    setIsLoading: props.setIsLoading,
+    setSearchError: props.setSearchError,
+    setNoResults: props.setNoResults,
+    setSearchResults: props.setSearchResults,
+    toast: props.toast
+  });
   
   const { 
     handleCourseSelect, 
     handleOpenManualCourseForm,
-    handleCourseCreated 
+    handleCourseCreated: courseCreatedHandler
   } = createCourseSelectionHandlers(props);
   
   const { handleSaveRound } = createSaveRoundHandler(props);
+
+  // Wrap handlers to match the expected interface types
+  const handleSearch = async (): Promise<void> => {
+    return await searchHandler(props.searchQuery);
+  };
+
+  const handleCourseCreated = async (courseData: any): Promise<void> => {
+    if (typeof courseData === 'object' && courseData !== null) {
+      const courseId = courseData.id || courseData;
+      const courseName = courseData.name || '';
+      return await courseCreatedHandler(courseId, courseName);
+    } else {
+      // For backward compatibility, assume courseData is the courseId
+      return await courseCreatedHandler(courseData, '');
+    }
+  };
 
   return {
     handleSearch,

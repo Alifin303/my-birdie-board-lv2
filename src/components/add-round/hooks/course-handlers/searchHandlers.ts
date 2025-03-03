@@ -12,6 +12,12 @@ export function createSearchHandlers({
 }: Pick<UseCourseHandlersProps, 'setIsLoading' | 'setSearchError' | 'setNoResults' | 'setSearchResults' | 'toast'>) {
   
   const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      setNoResults(false);
+      return;
+    }
+    
     setIsLoading(true);
     setSearchError(null);
     setNoResults(false);
