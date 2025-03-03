@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -79,7 +80,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
       const toPar = totalStrokes - totalPar;
       
-      console.log("Saving round with original tee_name:", round.tee_name);
+      console.log("Saving round with tee_name:", round.tee_name);
+      console.log("Saving round with tee_id:", round.tee_id);
       
       const { error } = await supabase
         .from('rounds')
@@ -165,7 +167,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
             {isEditing ? (
               "Edit your round details"
             ) : (
-              <>Details for your round at {round.courses?.clubName} - {round.courses?.courseName} ({round.tee_name || "Standard"})</>
+              <>Details for your round at {round.courses?.clubName} - {round.courses?.courseName} ({round.tee_name})</>
             )}
           </DialogDescription>
         </DialogHeader>
