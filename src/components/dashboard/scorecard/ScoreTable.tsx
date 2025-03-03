@@ -23,7 +23,7 @@ export const ScoreTable = ({
             <tr className="border-b bg-muted/50">
               <th className="px-2 py-2 text-left text-sm font-medium">Hole</th>
               {scores.map((score) => (
-                <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
+                <th key={`hole-${score.hole}`} className="px-1 py-2 text-center text-sm font-medium">{score.hole}</th>
               ))}
               <th className="px-2 py-2 text-center text-sm font-medium">Total</th>
             </tr>

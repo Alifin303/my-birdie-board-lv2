@@ -17,9 +17,9 @@ export function HoleInputs({
       <table className="w-full">
         <thead className="border-b">
           <tr>
-            <th className="text-sm font-medium text-muted-foreground px-2 py-2 text-left">Hole</th>
+            <th className="text-xs sm:text-sm font-medium text-muted-foreground px-1 sm:px-2 py-1 sm:py-2 text-left">Hole</th>
             {holes.map(hole => (
-              <th key={`header-${hole.number}`} className="text-sm font-medium text-muted-foreground px-2 py-2 text-center">
+              <th key={`header-${hole.number}`} className="text-xs sm:text-sm font-medium text-muted-foreground px-1 sm:px-2 py-1 sm:py-2 text-center">
                 {hole.number}
               </th>
             ))}
@@ -27,16 +27,16 @@ export function HoleInputs({
         </thead>
         <tbody>
           <tr className="border-b">
-            <td className="text-sm font-medium text-muted-foreground px-2 py-2">Par</td>
+            <td className="text-xs sm:text-sm font-medium text-muted-foreground px-1 sm:px-2 py-1 sm:py-2">Par</td>
             {holes.map((hole, idx) => (
-              <td key={`par-${hole.number}`} className="text-center px-2 py-2">
+              <td key={`par-${hole.number}`} className="text-center px-1 sm:px-2 py-1 sm:py-2">
                 <Input
                   type="number"
                   min="2"
                   max="6"
                   value={hole.par}
                   onChange={(e) => handleHoleChange(idx, 'par', e.target.value)}
-                  className="w-12 h-8 text-center"
+                  className="w-8 sm:w-12 h-7 sm:h-8 text-center text-xs sm:text-sm"
                   required
                   // Prevent form submission on enter
                   onKeyDown={(e) => {
@@ -51,16 +51,16 @@ export function HoleInputs({
             ))}
           </tr>
           <tr className="border-b">
-            <td className="text-sm font-medium text-muted-foreground px-2 py-2">Yards</td>
+            <td className="text-xs sm:text-sm font-medium text-muted-foreground px-1 sm:px-2 py-1 sm:py-2">Yards</td>
             {holes.map((hole, idx) => (
-              <td key={`yards-${hole.number}`} className="text-center px-2 py-2">
+              <td key={`yards-${hole.number}`} className="text-center px-1 sm:px-2 py-1 sm:py-2">
                 <Input
                   type="number"
                   min="0"
                   max="999"
                   value={hole.yards}
                   onChange={(e) => handleHoleChange(idx, 'yards', e.target.value)}
-                  className="w-12 h-8 text-center"
+                  className="w-8 sm:w-12 h-7 sm:h-8 text-center text-xs sm:text-sm"
                   required
                   // Prevent form submission on enter
                   onKeyDown={(e) => {
@@ -75,16 +75,16 @@ export function HoleInputs({
             ))}
           </tr>
           <tr>
-            <td className="text-sm font-medium text-muted-foreground px-2 py-2">Handicap</td>
+            <td className="text-xs sm:text-sm font-medium text-muted-foreground px-1 sm:px-2 py-1 sm:py-2">Handicap</td>
             {holes.map((hole, idx) => (
-              <td key={`handicap-${hole.number}`} className="text-center px-2 py-2">
+              <td key={`handicap-${hole.number}`} className="text-center px-1 sm:px-2 py-1 sm:py-2">
                 <Input
                   type="number"
                   min="1"
                   max="18"
                   value={hole.handicap}
                   onChange={(e) => handleHoleChange(idx, 'handicap', e.target.value)}
-                  className="w-12 h-8 text-center"
+                  className="w-8 sm:w-12 h-7 sm:h-8 text-center text-xs sm:text-sm"
                   required
                   // Prevent form submission on enter
                   onKeyDown={(e) => {

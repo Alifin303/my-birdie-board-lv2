@@ -152,7 +152,7 @@ export default function Dashboard() {
 
   const renderDashboard = () => {
     return (
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         <DashboardHeader 
           profileData={profile} 
           onAddRound={handleOpenModal} 
@@ -177,7 +177,7 @@ export default function Dashboard() {
           </>
         )}
         
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {selectedCourseId 
             ? <CourseRoundHistory 
                 userRounds={userRounds} 
@@ -186,7 +186,7 @@ export default function Dashboard() {
               /> 
             : (
               <>
-                <h2 className="text-2xl font-semibold">Your Courses</h2>
+                <h2 className="text-xl sm:text-2xl font-semibold">Your Courses</h2>
                 <CourseStatsTable 
                   userRounds={userRounds}
                   scoreType={scoreType}
@@ -202,7 +202,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-4 sm:py-8 px-2 sm:px-4">
       {renderDashboard()}
 
       <AddRoundModal 

@@ -24,23 +24,23 @@ const Index = () => {
           <div className="container mx-auto px-4 py-2">
             <nav className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="bg-white/10 backdrop-blur-sm p-2 rounded-lg">
+                <div className="bg-white/10 backdrop-blur-sm p-1 sm:p-2 rounded-lg">
                   <img 
                     src="https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/favicon.ico" 
                     alt="BirdieBoard" 
-                    className="w-6 h-6"
+                    className="w-5 h-5 sm:w-6 sm:h-6"
                   />
                 </div>
-                <h1 className="text-xl font-bold text-white tracking-tight">
+                <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">
                   BirdieBoard
                 </h1>
               </div>
               <Button 
                 onClick={() => setShowLoginDialog(true)}
                 variant="ghost" 
-                className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all text-sm py-1"
+                className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all text-xs sm:text-sm py-1"
               >
-                <User className="mr-1 h-4 w-4" />
+                <User className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
                 Log In
               </Button>
             </nav>

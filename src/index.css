@@ -138,3 +138,33 @@
     isolation: isolate;
   }
 }
+
+/* Mobile-specific styles */
+@media (max-width: 640px) {
+  .rdp-caption {
+    @apply text-sm !important;
+  }
+  
+  .rdp-head_cell {
+    @apply text-xs !important;
+  }
+  
+  .rdp-day {
+    @apply text-xs !important;
+    @apply w-7 h-7 !important;
+  }
+  
+  .rdp-button {
+    @apply p-0 !important;
+  }
+  
+  /* Ensure dialog content is properly sized for mobile */
+  [role="dialog"] {
+    @apply p-3 !important;
+  }
+  
+  /* Improve table readability on mobile */
+  table {
+    @apply text-sm !important;
+  }
+}

@@ -48,13 +48,13 @@ export const SearchStep: React.FC<SearchStepProps> = ({
   
   return (
     <>
-      <DialogHeader>
+      <DialogHeader className="space-y-2 sm:space-y-4">
         <DialogTitle>Add a New Round</DialogTitle>
         <DialogDescription>
           Search for a golf course or add a new one
         </DialogDescription>
       </DialogHeader>
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         <div>
           <div className="relative rounded-md bg-background shadow-sm">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -78,7 +78,7 @@ export const SearchStep: React.FC<SearchStepProps> = ({
           <Button
             onClick={() => handleSearch(searchQuery)}
             disabled={isLoading || searchQuery.length < 3}
-            className="w-full md:w-auto"
+            className="w-full"
           >
             {isLoading ? (
               <>
@@ -96,29 +96,29 @@ export const SearchStep: React.FC<SearchStepProps> = ({
             variant="outline" 
             size="sm" 
             onClick={handleOpenManualCourseForm}
-            className="w-full"
+            className="w-full text-xs sm:text-sm"
           >
-            <PlusCircle className="mr-2 h-4 w-4" />
+            <PlusCircle className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
             Can&apos;t find your course? Add it now
           </Button>
         </div>
         
         {searchError && (
           <div className="bg-destructive/10 border border-destructive/30 rounded-md p-3 text-center">
-            <p className="text-sm text-destructive">{searchError}</p>
+            <p className="text-xs sm:text-sm text-destructive">{searchError}</p>
           </div>
         )}
         
         {noResults && (
           <div className="bg-muted/50 rounded-md p-4 text-center">
-            <p className="text-sm text-muted-foreground">No courses found matching your search.</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">No courses found matching your search.</p>
             <Button
               variant="outline"
               size="sm"
               onClick={handleOpenManualCourseForm}
-              className="mt-2"
+              className="mt-2 text-xs sm:text-sm"
             >
-              <PlusCircle className="mr-2 h-4 w-4" />
+              <PlusCircle className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
               Add Your Course
             </Button>
           </div>
@@ -126,23 +126,23 @@ export const SearchStep: React.FC<SearchStepProps> = ({
         
         {searchResults.length > 0 && (
           <div>
-            <h3 className="text-lg font-medium mb-2">Search Results</h3>
+            <h3 className="text-base sm:text-lg font-medium mb-2">Search Results</h3>
             <div className="border rounded-md divide-y">
               {searchResults.map((course) => (
                 <div 
                   key={course.id.toString()}
-                  className="flex justify-between items-center px-4 py-3 hover:bg-muted cursor-pointer"
+                  className="flex justify-between items-center px-2 sm:px-4 py-2 sm:py-3 hover:bg-muted cursor-pointer"
                   onClick={() => handleCourseSelect(course)}
                 >
                   <div>
-                    <p className="font-medium">
+                    <p className="font-medium text-sm sm:text-base">
                       {course.clubName !== course.name 
                         ? `${course.clubName} - ${course.name}`
                         : course.name}
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs sm:text-sm text-muted-foreground">
                       {course.city}{course.state ? `, ${course.state}` : ''}
-                      {course.isUserAdded && <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">User Added</span>}
+                      {course.isUserAdded && <span className="ml-1 sm:ml-2 text-xs bg-primary/20 text-primary px-1 sm:px-2 py-0.5 rounded-full">User Added</span>}
                     </p>
                   </div>
                   
@@ -174,7 +174,7 @@ export const SearchStep: React.FC<SearchStepProps> = ({
                         }, 10);
                       }}
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
                   )}
                 </div>
