@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown, Trash, Eye, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,7 +54,7 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
     courseRounds.map(round => ({
       id: round.id,
       tee_name: round.tee_name,
-      rawTeeName: typeof round.tee_name === 'string' ? round.tee_name : 'undefined',
+      rawTeeName: round.tee_name,
       tee_id: round.tee_id,
       date: new Date(round.date).toLocaleDateString()
     }))
@@ -125,8 +126,9 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
   
   const handleViewScorecard = (round: Round) => {
     console.log("Viewing scorecard for round:", round.id);
-    console.log("Round tee_name exact value:", round.tee_name);
+    console.log("Round tee_name (raw):", round.tee_name);
     console.log("Round tee_name type:", typeof round.tee_name);
+    console.log("Round full object:", JSON.stringify(round));
     
     if (scorecardOpen) {
       setScorecardOpen(false);
@@ -159,10 +161,11 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
   };
 
   const formatTeeName = (teeName: string | null | undefined): string => {
-    if (teeName === null || teeName === undefined || teeName === '') {
+    if (!teeName || teeName === '') {
       return 'Standard Tees';
     }
     
+    // No conditional manipulation, just display the actual tee name
     if (teeName.toLowerCase().includes('tees')) {
       return teeName;
     }

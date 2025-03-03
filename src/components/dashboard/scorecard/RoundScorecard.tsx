@@ -25,6 +25,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
   useEffect(() => {
     if (round && isOpen) {
       console.log("Opening scorecard for round:", round.id);
+      console.log("Round data in RoundScorecard:", JSON.stringify(round));
       console.log("Round tee name in RoundScorecard:", round.tee_name);
       console.log("Round tee name type:", typeof round.tee_name);
       
@@ -81,6 +82,14 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       const toPar = totalStrokes - totalPar;
       
       console.log("Saving round with tee_name:", round.tee_name);
+      console.log("Update data:", {
+        date: roundDate?.toISOString() || round.date,
+        gross_score: totalStrokes,
+        to_par_gross: toPar,
+        hole_scores: JSON.stringify(scores),
+        tee_name: round.tee_name,
+        tee_id: round.tee_id
+      });
       
       const { error } = await supabase
         .from('rounds')
@@ -89,7 +98,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
           gross_score: totalStrokes,
           to_par_gross: toPar,
           hole_scores: JSON.stringify(scores),
-          // Explicitly preserve the exact tee name from the round
+          // Preserve the exact tee name and ID without modification
           tee_name: round.tee_name,
           tee_id: round.tee_id
         })

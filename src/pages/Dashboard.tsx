@@ -95,12 +95,13 @@ export default function Dashboard() {
           parsedNames = parseCourseName(round.courses.name);
         }
         
-        // Ensure we preserve the EXACT tee_name as it is in the database
+        // Log tee_name during processing to diagnose issues
         console.log(`Processing round ${round.id} with tee_name: "${round.tee_name}"`);
         
         return {
           ...round,
-          tee_name: round.tee_name, // Preserve the exact tee name without modification
+          // Keep tee_name exactly as it is in the database
+          tee_name: round.tee_name,
           courses: round.courses ? {
             ...round.courses,
             clubName: parsedNames.clubName,
@@ -111,7 +112,7 @@ export default function Dashboard() {
       
       console.log("FULLY PROCESSED ROUNDS with tee names:", processedRounds.map(r => ({
         id: r.id,
-        tee_name: r.tee_name,
+        tee_name: r.tee_name, 
         tee_id: r.tee_id,
         date: new Date(r.date).toLocaleDateString()
       })));

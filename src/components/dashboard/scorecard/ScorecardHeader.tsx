@@ -25,11 +25,12 @@ export const ScorecardHeader = ({
   // Log the exact tee_name from the round to help with debugging
   console.log("ScorecardHeader - Round tee_name:", round.tee_name);
   console.log("ScorecardHeader - Round tee_name type:", typeof round.tee_name);
+  console.log("ScorecardHeader - Full round object:", JSON.stringify(round));
   
   // Function to safely display tee name
   const displayTeeName = () => {
-    // Use the exact tee_name from the database without modifying it
-    if (round.tee_name === null || round.tee_name === undefined) {
+    // Directly use the tee_name property without any manipulation
+    if (!round.tee_name || round.tee_name === '') {
       return "Standard";
     }
     return round.tee_name;
