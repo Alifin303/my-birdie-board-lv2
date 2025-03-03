@@ -21,21 +21,15 @@ function useCourseHandlers(props: Parameters<typeof useRefactoredCourseHandlers>
     console.error("Course has no tees in wrapper:", props.selectedCourse.name);
   }
   
-  // Make sure the selectedTeeId is passed correctly to the refactored handler
-  const result = useRefactoredCourseHandlers({
+  // Call the refactored handlers with the proper props
+  const handlers = useRefactoredCourseHandlers({
     ...props,
     selectedTeeId: props.selectedTeeId
   });
   
-  // Add additional logging when returning result
-  console.log("useCourseHandlers - selectedTeeId:", result.selectedTeeId);
-  console.log("useCourseHandlers - selectedCourse:", 
-    result.selectedCourse ? {
-      id: result.selectedCourse.id,
-      name: result.selectedCourse.name,
-      tees: result.selectedCourse.tees?.length || 0
-    } : null
-  );
+  // Log the handlers' results without trying to access non-existent properties
+  console.log("useCourseHandlers - returning handlers object");
   
-  return result;
+  // Return only the handlers object that matches the CourseHandlers interface
+  return handlers;
 }
