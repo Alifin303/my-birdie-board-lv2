@@ -231,7 +231,7 @@ export function createCourseSelectionHandlers({
             slope: selectedTee?.slope
           });
           
-          updateScorecardForTee(defaultTeeId, holeSelection || 'all');
+          updateScorecardForTee(defaultTeeId, 'all');
         } else {
           throw new Error("Could not find a valid tee for this course");
         }
