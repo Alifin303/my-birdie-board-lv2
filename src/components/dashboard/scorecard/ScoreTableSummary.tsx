@@ -1,4 +1,5 @@
 
+import { calculateNetScore } from "@/integrations/supabase";
 import { ScoreTableSummaryProps } from "./types";
 
 export const ScoreTableSummary = ({ scores, handicapIndex = 0, showNet = false }: ScoreTableSummaryProps) => {
@@ -10,7 +11,7 @@ export const ScoreTableSummary = ({ scores, handicapIndex = 0, showNet = false }
   
   // Calculate net score by subtracting handicap
   // Make sure we don't go below zero
-  const netScore = Math.max(0, totalScore - handicapIndex);
+  const netScore = calculateNetScore(totalScore, handicapIndex);
   const netToPar = netScore - totalPar;
   
   console.log("[ScoreTableSummary] Rendering with:", {
