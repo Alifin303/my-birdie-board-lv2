@@ -190,7 +190,7 @@ export default function Dashboard() {
               /> 
             : (
               <>
-                <h2 className="text-xl sm:text-2xl font-semibold text-white">Your Courses</h2>
+                <h2 className="text-xl sm:text-2xl font-semibold">Your Courses</h2>
                 <CourseStatsTable 
                   userRounds={userRounds}
                   scoreType={scoreType}
@@ -207,29 +207,15 @@ export default function Dashboard() {
   };
 
   return (
-    <div 
-      className="min-h-screen"
-      style={{
-        backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
-        backgroundColor: "#2C4A3B", // Fallback color if image fails to load
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black opacity-20 z-0"></div>
-      
-      <div className="relative z-[1] container mx-auto py-4 sm:py-8 px-2 sm:px-4">
-        {renderDashboard()}
+    <div className="container mx-auto py-4 sm:py-8 px-2 sm:px-4">
+      {renderDashboard()}
 
-        <AddRoundModal 
-          open={isModalOpen} 
-          onOpenChange={setIsModalOpen}
-        />
-        
-        {showDebugPanel && <DebugPanel />}
-      </div>
+      <AddRoundModal 
+        open={isModalOpen} 
+        onOpenChange={setIsModalOpen}
+      />
+      
+      {showDebugPanel && <DebugPanel />}
     </div>
   );
 }
