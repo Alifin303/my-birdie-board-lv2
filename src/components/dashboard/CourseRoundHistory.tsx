@@ -242,7 +242,7 @@ export const CourseRoundHistory = ({
         handicapIndex={handicapIndex}
       />
       
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 bg-muted/30 rounded-lg border mt-4">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 bg-muted/30 rounded-lg border mt-8">
         <p className="text-sm sm:text-base">
           Want to see how your score compares to other golfers at this course?
         </p>
