@@ -1,4 +1,3 @@
-
 interface Round {
   id: number;
   date: string;
@@ -246,36 +245,29 @@ export const calculateCourseStats = (rounds: Round[]): CourseStats[] => {
     
     // CRITICAL FIX: Calculate net scores using the CURRENT handicap index
     // This ensures consistency with the main stats display
-    const roundsWithNetScore = courseRounds.map(r => {
+    const roundsWithCalculatedScores = courseRounds.map(r => {
       // Always use current handicap for calculations - round to nearest integer
       const netScore = Math.round(r.gross_score - currentHandicapIndex);
-      return {
-        ...r,
-        calculatedNetScore: netScore
-      };
-    });
-    
-    // Find the best net score using calculated values
-    const bestNetScore = roundsWithNetScore.length > 0 ? 
-      Math.min(...roundsWithNetScore.map(r => r.calculatedNetScore)) : null;
-    
-    // CRITICAL FIX: Calculate net to par using the CURRENT handicap index
-    const roundsWithToParNet = courseRounds.map(r => {
-      // Always use current handicap for calculations - round to nearest integer
+      // Calculate net to par using current handicap - round to nearest integer
       const toParNet = Math.round(r.to_par_gross - currentHandicapIndex);
       return {
         ...r,
+        calculatedNetScore: netScore,
         calculatedToParNet: toParNet
       };
     });
     
+    // Find the best net score using calculated values
+    const bestNetScore = roundsWithCalculatedScores.length > 0 ? 
+      Math.min(...roundsWithCalculatedScores.map(r => r.calculatedNetScore)) : null;
+    
     // Find the best net to par using calculated values
-    const bestToParNet = roundsWithToParNet.length > 0 ? 
-      Math.min(...roundsWithToParNet.map(r => r.calculatedToParNet)) : null;
+    const bestToParNet = roundsWithCalculatedScores.length > 0 ? 
+      Math.min(...roundsWithCalculatedScores.map(r => r.calculatedToParNet)) : null;
     
     // Log the rounds for this course with their net scores for debugging
     console.log(`Course stats for ${clubName} - ${courseName}:`, 
-      roundsWithNetScore.map(r => ({
+      roundsWithCalculatedScores.map(r => ({
         id: r.id,
         date: new Date(r.date).toLocaleDateString(),
         gross: r.gross_score,
