@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { CourseStats, Round } from "./types";
 
@@ -20,6 +20,81 @@ export const CourseStatsTable = ({
 }: CourseStatsTableProps) => {
   const [sortField, setSortField] = useState<keyof CourseStats>('courseName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortedStats, setSortedStats] = useState<CourseStats[]>([]);
+
+  useEffect(() => {
+    if (!userRounds || userRounds.length === 0) return;
+    
+    // Calculate and sort stats whenever userRounds, sortField, sortDirection, or scoreType changes
+    const courseStats = calculateCourseStats(userRounds);
+    
+    // Log courses with their scores for debugging
+    console.log("Courses with scores before sorting:", courseStats.map(course => ({
+      id: course.courseId,
+      name: course.courseName,
+      bestGross: course.bestGrossScore,
+      bestToPar: course.bestToPar,
+      netScore: handicapIndex > 0 ? Math.round(course.bestGrossScore - handicapIndex) : course.bestGrossScore,
+      netToPar: handicapIndex > 0 ? Math.round(course.bestToPar - handicapIndex) : course.bestToPar
+    })));
+    
+    // Sort course stats
+    const sorted = [...courseStats].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+      
+      // Handle special cases for net scores
+      if (sortField === 'bestGrossScore' && scoreType === 'net') {
+        // For net scores, we need to calculate them on the fly
+        aValue = handicapIndex > 0 
+          ? Math.round(a.bestGrossScore - handicapIndex)
+          : a.bestGrossScore;
+        bValue = handicapIndex > 0 
+          ? Math.round(b.bestGrossScore - handicapIndex)
+          : b.bestGrossScore;
+      } 
+      else if (sortField === 'bestToPar' && scoreType === 'net') {
+        // For net to par, calculate on the fly
+        aValue = handicapIndex > 0 
+          ? Math.round(a.bestToPar - handicapIndex)
+          : a.bestToPar;
+        bValue = handicapIndex > 0
+          ? Math.round(b.bestToPar - handicapIndex)
+          : b.bestToPar;
+      }
+      else {
+        // For all other fields, use them directly
+        aValue = a[sortField];
+        bValue = b[sortField];
+      }
+      
+      // Handle null values
+      if (aValue === null) return 1;
+      if (bValue === null) return -1;
+      
+      // Sort strings and numbers accordingly
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortDirection === 'asc' 
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+      
+      // For numerical values (including to par scores)
+      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+    });
+    
+    // Log the sorted results
+    console.log("Courses after sorting:", sorted.map(course => ({
+      name: course.courseName,
+      field: sortField,
+      direction: sortDirection,
+      value: sortField === 'bestToPar' && scoreType === 'net' 
+        ? Math.round(course.bestToPar - handicapIndex) 
+        : course[sortField]
+    })));
+    
+    setSortedStats(sorted);
+  }, [userRounds, sortField, sortDirection, scoreType, handicapIndex, calculateCourseStats]);
 
   if (!userRounds || userRounds.length === 0) {
     return (
@@ -29,72 +104,6 @@ export const CourseStatsTable = ({
       </div>
     );
   }
-
-  const courseStats = calculateCourseStats(userRounds);
-  
-  // Log course stats with net scores for debugging
-  console.log("Course stats before sorting:", courseStats.map(course => ({
-    courseName: course.courseName,
-    bestGrossScore: course.bestGrossScore,
-    bestNetScore: handicapIndex > 0 
-      ? Math.max(0, Math.round(course.bestGrossScore - handicapIndex))
-      : course.bestGrossScore,
-    bestToPar: course.bestToPar,
-    bestToParNet: handicapIndex > 0
-      ? course.bestToPar - handicapIndex
-      : course.bestToPar
-  })));
-  
-  // Sort course stats
-  const sortedCourseStats = [...courseStats].sort((a, b) => {
-    let aValue;
-    let bValue;
-    
-    // Determine which value to use based on sort field and score type
-    if (sortField === 'bestGrossScore' && scoreType === 'net') {
-      // For net scores, calculate them from gross scores
-      aValue = handicapIndex > 0 
-        ? Math.max(0, Math.round(a.bestGrossScore - handicapIndex)) 
-        : a.bestGrossScore;
-      bValue = handicapIndex > 0 
-        ? Math.max(0, Math.round(b.bestGrossScore - handicapIndex))
-        : b.bestGrossScore;
-    } else if (sortField === 'bestToPar' && scoreType === 'net') {
-      // For net to par, calculate it from gross to par
-      aValue = handicapIndex > 0 
-        ? a.bestToPar - handicapIndex
-        : a.bestToPar;
-      bValue = handicapIndex > 0
-        ? b.bestToPar - handicapIndex
-        : b.bestToPar;
-    } else {
-      // For all other fields, use the field directly
-      aValue = a[sortField];
-      bValue = b[sortField];
-    }
-    
-    if (aValue === null) return 1;
-    if (bValue === null) return -1;
-    
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
-      return sortDirection === 'asc' 
-        ? aValue.localeCompare(bValue)
-        : bValue.localeCompare(aValue);
-    }
-    
-    // For numerical values (including to par scores)
-    return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
-  });
-  
-  console.log("Course stats after sorting:", sortedCourseStats.map(course => ({
-    courseName: course.courseName,
-    bestToPar: course.bestToPar,
-    bestToParNet: handicapIndex > 0
-      ? course.bestToPar - handicapIndex
-      : course.bestToPar,
-    sortField,
-    sortDirection
-  })));
 
   const handleSort = (field: keyof CourseStats) => {
     if (sortField === field) {
@@ -140,34 +149,34 @@ export const CourseStatsTable = ({
             </th>
             <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
               <button
-                onClick={() => handleSort(scoreType === 'gross' ? 'bestGrossScore' : 'bestNetScore')}
+                onClick={() => handleSort('bestGrossScore')}
                 className="flex items-center cursor-pointer hover:text-primary transition-colors"
               >
                 <span>Best Score</span>
-                {renderSortIndicator(scoreType === 'gross' ? 'bestGrossScore' : 'bestNetScore')}
+                {renderSortIndicator('bestGrossScore')}
               </button>
             </th>
             <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
               <button
-                onClick={() => handleSort(scoreType === 'gross' ? 'bestToPar' : 'bestToParNet')}
+                onClick={() => handleSort('bestToPar')}
                 className="flex items-center cursor-pointer hover:text-primary transition-colors"
               >
                 <span>Best to Par</span>
-                {renderSortIndicator(scoreType === 'gross' ? 'bestToPar' : 'bestToParNet')}
+                {renderSortIndicator('bestToPar')}
               </button>
             </th>
           </tr>
         </thead>
         <tbody>
-          {sortedCourseStats.map((courseStat) => {
-            // Calculate net score from gross, accounting for handicap
+          {sortedStats.map((courseStat) => {
+            // Calculate net score from gross, accounting for handicap - rounding to nearest integer
             const netScore = handicapIndex > 0 
-              ? Math.max(0, Math.round(courseStat.bestGrossScore - handicapIndex))
+              ? Math.round(courseStat.bestGrossScore - handicapIndex)
               : courseStat.bestGrossScore;
             
-            // Calculate net to par from gross to par, accounting for handicap
+            // Calculate net to par from gross to par, accounting for handicap - rounding to nearest integer
             const netToPar = handicapIndex > 0
-              ? courseStat.bestToPar - handicapIndex
+              ? Math.round(courseStat.bestToPar - handicapIndex)
               : courseStat.bestToPar;
             
             return (

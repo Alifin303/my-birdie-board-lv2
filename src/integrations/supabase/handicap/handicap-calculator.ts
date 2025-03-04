@@ -56,11 +56,8 @@ export const calculateNetScore = (grossScore: number, handicap: number | string 
   // Calculate the raw net score
   const rawNetScore = grossScore - numericHandicap;
   
-  // Round to the nearest integer to ensure we return an integer value
-  const roundedNetScore = Math.round(rawNetScore);
-  
-  // Ensure we never return a negative score
-  return Math.max(0, roundedNetScore);
+  // Round to the nearest integer as per user requirement
+  return Math.max(0, Math.round(rawNetScore));
 };
 
 /**
@@ -101,7 +98,7 @@ export const updateUserHandicap = async (userId: string, rounds: number[]): Prom
       return 0;
     }
     
-    // Import supabase client
+    // Import supabase client directly
     const { supabase } = await import('@/integrations/supabase');
     
     // Calculate the new handicap index

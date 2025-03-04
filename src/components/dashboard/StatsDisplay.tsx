@@ -1,4 +1,3 @@
-
 import { CalendarDays, Trophy, Flag } from "lucide-react";
 import { Stats, Round } from "./types";
 import React, { useEffect } from "react";
@@ -33,7 +32,7 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
 
   const stats = calculateStats(userRounds);
   
-  console.log("[MainStats] Rendering with score type:", scoreType, {
+  console.log("[MainStats] Calculating scores with:", {
     roundsKey,
     roundsCount: userRounds.length,
     bestGrossScore: stats.bestGrossScore,
@@ -42,9 +41,10 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
   });
   
   // Calculate net scores based on handicap if not already available
+  // Always round to nearest integer as per user requirement
   const bestNetScore = stats.bestNetScore !== null 
     ? stats.bestNetScore 
-    : (stats.handicapIndex > 0 ? Math.max(0, Math.round(stats.bestGrossScore - stats.handicapIndex)) : stats.bestGrossScore);
+    : (stats.handicapIndex > 0 ? Math.round(stats.bestGrossScore - stats.handicapIndex) : stats.bestGrossScore);
     
   const bestNetToPar = stats.bestToParNet !== null
     ? stats.bestToParNet
@@ -53,7 +53,7 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
   // Find the round with the best net score for debugging
   if (scoreType === 'net' && userRounds.length > 0) {
     const roundsWithNetScores = userRounds.map(round => {
-      const netScore = round.net_score || Math.max(0, round.gross_score - stats.handicapIndex);
+      const netScore = round.net_score || Math.round(round.gross_score - stats.handicapIndex);
       const netToPar = round.to_par_net || Math.round(round.to_par_gross - stats.handicapIndex);
       return { 
         id: round.id, 
@@ -76,7 +76,7 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
     console.log("[MainStats] Round with best net to par:", sortedByToParNet[0]);
   }
   
-  console.log("[MainStats] Calculated scores:", {
+  console.log("[MainStats] Final calculated best scores:", {
     bestGrossScore: stats.bestGrossScore,
     calculatedBestNetScore: bestNetScore,
     difference: stats.bestGrossScore - bestNetScore,

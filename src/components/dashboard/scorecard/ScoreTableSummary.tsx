@@ -14,7 +14,7 @@ export const ScoreTableSummary = ({ scores, handicapIndex = 0, showNet = false }
     ? handicapIndex 
     : parseFloat(String(handicapIndex)) || 0;
     
-  // Calculate net score by subtracting handicap
+  // Calculate net score by subtracting handicap - ensuring this is rounded to nearest integer
   const netScore = calculateNetScore(totalScore, numericHandicap);
   const netToPar = calculateNetToPar(toPar, numericHandicap);
   

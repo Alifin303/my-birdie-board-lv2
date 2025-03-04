@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown, Trash, Eye, ArrowLeft, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -117,12 +116,46 @@ export const CourseRoundHistory = ({
     if (!deletingRoundId) return;
     
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      console.log(`Deleting round with ID ${deletingRoundId} from Supabase database`);
+      
       const { error } = await supabase
         .from('rounds')
         .delete()
         .eq('id', deletingRoundId);
         
-      if (error) throw error;
+      if (error) {
+        console.error("Database error when deleting round:", error);
+        throw error;
+      }
+      
+      if (session) {
+        console.log("Recalculating handicap after round deletion");
+        
+        const { data: userRounds, error: userRoundsError } = await supabase
+          .from('rounds')
+          .select('gross_score')
+          .eq('user_id', session.user.id)
+          .order('date', { ascending: false });
+          
+        if (userRoundsError) {
+          console.error("Error fetching user rounds for handicap update after deletion:", userRoundsError);
+        } else if (userRounds) {
+          const grossScores = userRounds.map(r => r.gross_score);
+          console.log("Updating handicap based on remaining rounds:", grossScores);
+          
+          const { updateUserHandicap } = await import('@/integrations/supabase');
+          
+          const newHandicap = await updateUserHandicap(session.user.id, grossScores);
+          console.log("Updated handicap after round deletion to:", newHandicap);
+          
+          toast({
+            title: "Handicap Updated",
+            description: `Your handicap index is now ${newHandicap}`,
+          });
+        }
+      }
       
       toast({
         title: "Round deleted",
@@ -131,11 +164,11 @@ export const CourseRoundHistory = ({
       
       queryClient.invalidateQueries({ queryKey: ['userRounds'] });
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting round:", error);
       toast({
         title: "Error",
-        description: "Failed to delete round. Please try again.",
+        description: error.message || "Failed to delete round. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -251,7 +284,6 @@ export const CourseRoundHistory = ({
         />
       </div>
       
-      {/* Add the new Potential Best Score component here */}
       <PotentialBestScore rounds={courseRounds} />
       
       <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 bg-muted/30 rounded-lg border mt-16">
