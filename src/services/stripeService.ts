@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface StripeCustomer {
@@ -39,10 +38,19 @@ export interface StripeEnvCheck {
 
 class StripeService {
   async checkEnvironment(): Promise<StripeEnvCheck> {
-    const { data, error } = await supabase.functions.invoke('check-stripe-env');
-    
-    if (error) throw error;
-    return data;
+    try {
+      const { data, error } = await supabase.functions.invoke('check-stripe-env');
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Failed to check Stripe environment:", error);
+      return {
+        success: false,
+        environmentVariables: {},
+        message: error.message || "Failed to check Stripe environment"
+      };
+    }
   }
 
   async createCustomer(email: string): Promise<StripeCustomer> {

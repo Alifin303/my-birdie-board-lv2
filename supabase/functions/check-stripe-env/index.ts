@@ -13,15 +13,6 @@ serve(async (req) => {
   }
   
   try {
-    // Check authorization - either require anon key or service role key
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      throw new Error('Missing authorization header');
-    }
-    
-    // Allow either service role or anon key authentication
-    // This ensures the function can be called from both the frontend and other edge functions
-    
     // Check required environment variables
     const requiredEnvVars = [
       'STRIPE_SECRET_KEY',
@@ -64,7 +55,7 @@ serve(async (req) => {
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 401
+        status: 500
       }
     );
   }

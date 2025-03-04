@@ -46,26 +46,36 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   
-  // Get subscription status from Supabase
-  const { data: subscriptionData, isLoading: subscriptionLoading } = useQuery({
+  const { data: subscriptionData, isLoading: subscriptionLoading, error: subscriptionError } = useQuery({
     queryKey: ['subscription'],
     queryFn: async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return { status: "none" };
         
-        // Get subscription data from Supabase
+        try {
+          const envCheck = await stripeService.checkEnvironment();
+          if (!envCheck.success) {
+            console.warn("Stripe environment not properly configured:", envCheck.message);
+            return { status: "config_error", message: envCheck.message };
+          }
+        } catch (envError) {
+          console.error("Error checking Stripe environment:", envError);
+        }
+        
         const { data, error } = await supabase
           .from('customer_subscriptions')
           .select('*')
           .eq('user_id', session.user.id)
           .maybeSingle();
           
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching subscription:", error);
+          throw error;
+        }
         
         if (!data) return { status: "none" };
         
-        // If there's a subscription, get more details from Stripe
         if (data.subscription_id) {
           try {
             const subscription = await stripeService.getSubscription(data.subscription_id);
@@ -85,7 +95,8 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
               data: {
                 id: data.subscription_id,
                 customerId: data.customer_id
-              }
+              },
+              error: stripeError.message
             };
           }
         }
@@ -96,12 +107,13 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
         };
       } catch (error) {
         console.error("Error fetching subscription:", error);
-        return { status: "error" };
+        return { status: "error", error: error.message };
       }
-    }
+    },
+    retry: 1,
+    retryDelay: 1000
   });
 
-  // Initialize the profile form
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
@@ -112,7 +124,6 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
     }
   });
 
-  // Initialize the password form
   const passwordForm = useForm<z.infer<typeof passwordFormSchema>>({
     resolver: zodResolver(passwordFormSchema),
     defaultValues: {
@@ -122,7 +133,6 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
     }
   });
 
-  // Load profile data into form when it changes
   React.useEffect(() => {
     if (profileData) {
       profileForm.reset({
@@ -132,7 +142,6 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
         email: profileData.email || ""
       });
 
-      // Fetch user email if not in profileData
       const getUserEmail = async () => {
         const { data } = await supabase.auth.getUser();
         if (data?.user?.email) {
@@ -161,7 +170,6 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
   const handleProfileUpdate = async (values: z.infer<typeof profileFormSchema>) => {
     setLoading(true);
     try {
-      // Update profile in database
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -173,7 +181,6 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
 
       if (profileError) throw profileError;
 
-      // Update email if changed
       const { data: userData } = await supabase.auth.getUser();
       if (userData?.user && userData.user.email !== values.email) {
         const { error: emailError } = await supabase.auth.updateUser({
@@ -204,7 +211,6 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
   const handlePasswordChange = async (values: z.infer<typeof passwordFormSchema>) => {
     setLoading(true);
     try {
-      // First verify current password
       const { data: { session }, error: signInError } = await supabase.auth.signInWithPassword({
         email: profileForm.getValues("email"),
         password: values.currentPassword
@@ -212,7 +218,6 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
 
       if (signInError) throw new Error("Current password is incorrect");
 
-      // Then update password
       const { error: updateError } = await supabase.auth.updateUser({
         password: values.newPassword
       });
@@ -250,7 +255,6 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
       
       switch (action) {
         case "subscribe": {
-          // Create a customer if needed
           let customerId = subscriptionData?.data?.customerId;
           
           if (!customerId) {
@@ -258,7 +262,6 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
             const customer = await stripeService.createCustomer(userData.user?.email || "");
             customerId = customer.id;
             
-            // Save customer ID to Supabase
             await supabase
               .from('customer_subscriptions')
               .upsert({
@@ -268,8 +271,7 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
               });
           }
           
-          // Create checkout session
-          const priceId = 'price_1OXYZABCDEFGHIJKLMNOPQRSTprice'; // Replace with your actual price ID
+          const priceId = 'price_1OXYZABCDEFGHIJKLMNOPQRSTprice';
           const checkoutSession = await stripeService.createCheckoutSession(
             customerId,
             priceId,
@@ -277,7 +279,6 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
             `${baseUrl}/dashboard?subscription=canceled`
           );
           
-          // Redirect to checkout
           window.location.href = checkoutSession.url;
           break;
         }
@@ -287,13 +288,11 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
             throw new Error("No customer found");
           }
           
-          // Create billing portal session
           const portalSession = await stripeService.createBillingPortalSession(
             subscriptionData.data.customerId,
             `${baseUrl}/dashboard`
           );
           
-          // Redirect to billing portal
           window.location.href = portalSession.url;
           break;
         }
@@ -303,16 +302,13 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
             throw new Error("No subscription found");
           }
           
-          // Cancel subscription at period end
           await stripeService.cancelSubscription(subscriptionData.data.id);
           
-          // Update subscription status
           toast({
             title: "Subscription Cancelled",
             description: "Your subscription will end at the current billing period.",
           });
           
-          // Refresh subscription data
           queryClient.invalidateQueries({ queryKey: ['subscription'] });
           break;
         }
@@ -322,7 +318,6 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
             throw new Error("No subscription found");
           }
           
-          // Reactivate cancelled subscription
           await stripeService.reactivateSubscription(subscriptionData.data.id);
           
           toast({
@@ -330,7 +325,6 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
             description: "Your subscription has been successfully reactivated.",
           });
           
-          // Refresh subscription data
           queryClient.invalidateQueries({ queryKey: ['subscription'] });
           break;
         }
@@ -429,6 +423,23 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
                 <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
                 <span>Loading subscription info...</span>
               </div>
+            ) : subscriptionData?.status === "config_error" ? (
+              <div className="text-sm text-amber-600 mb-3">
+                <p>Stripe configuration issue: {subscriptionData.message}</p>
+                <p className="mt-2">Please contact support to enable subscriptions.</p>
+              </div>
+            ) : subscriptionError || subscriptionData?.error ? (
+              <div className="text-sm text-destructive mb-3">
+                <p>Error loading subscription data: {subscriptionError?.message || subscriptionData?.error}</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="mt-2"
+                  onClick={() => queryClient.invalidateQueries({ queryKey: ['subscription'] })}
+                >
+                  Retry
+                </Button>
+              </div>
             ) : (
               <>
                 {subscriptionData?.status === "none" && (
@@ -496,6 +507,14 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
                 {subscriptionData?.status === "error" && (
                   <div className="text-sm text-destructive">
                     There was an error loading your subscription. Please try again later.
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="mt-2 w-full"
+                      onClick={() => queryClient.invalidateQueries({ queryKey: ['subscription'] })}
+                    >
+                      Retry
+                    </Button>
                   </div>
                 )}
               </>
@@ -511,7 +530,7 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
       </Form>
     );
   };
-  
+
   const renderPasswordContent = () => {
     return (
       <Form {...passwordForm}>
