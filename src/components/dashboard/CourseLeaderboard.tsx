@@ -155,8 +155,9 @@ export const CourseLeaderboard = ({
       
       // Process leaderboard data
       let processedData = data.map(round => {
-        // Fix for the username extraction - profiles is an object returned by Supabase
-        const username = round.profiles ? round.profiles.username || "Unknown" : "Unknown";
+        // Fix for the username extraction - correctly extract username from the profiles object
+        const username = round.profiles && typeof round.profiles === 'object' ? 
+          (round.profiles as any).username || "Unknown" : "Unknown";
         
         const score = scoreType === 'gross' 
           ? round.gross_score 
@@ -188,8 +189,8 @@ export const CourseLeaderboard = ({
           prev.score < current.score ? prev : current
         );
         
-        // Fix for the rank property access
-        setUserRank(bestUserEntry.rank || null);
+        // Fix for the rank property access with proper type checking
+        setUserRank(bestUserEntry.rank !== undefined ? bestUserEntry.rank : null);
         setUserBestScore(bestUserEntry);
       } else {
         setUserRank(null);
