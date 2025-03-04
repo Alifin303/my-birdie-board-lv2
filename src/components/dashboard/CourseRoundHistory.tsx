@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown, Trash, Eye, ArrowLeft, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -237,13 +236,15 @@ export const CourseRoundHistory = ({
         </div>
       )}
       
-      <ScoreProgressChart 
-        rounds={courseRounds}
-        scoreType={scoreType}
-        handicapIndex={handicapIndex}
-      />
+      <div className="pb-8">
+        <ScoreProgressChart 
+          rounds={courseRounds}
+          scoreType={scoreType}
+          handicapIndex={handicapIndex}
+        />
+      </div>
       
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 bg-muted/30 rounded-lg border mt-12">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 bg-muted/30 rounded-lg border mt-16">
         <p className="text-sm sm:text-base">
           Want to see how your score compares to other golfers at this course?
         </p>
