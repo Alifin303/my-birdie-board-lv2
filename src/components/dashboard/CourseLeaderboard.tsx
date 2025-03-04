@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Calendar, ChevronLeft, ChevronRight, Search } from "lucide-react";
@@ -17,8 +16,8 @@ interface LeaderboardEntry {
   username: string;
   score: number;
   isCurrentUser: boolean;
-  rank?: number;  // Added rank as an optional property
-  tee_name?: string; // Added tee name for filtering
+  rank?: number;
+  tee_name?: string;
 }
 
 interface CourseLeaderboardProps {
@@ -55,7 +54,6 @@ export const CourseLeaderboard = ({
   
   const itemsPerPage = 10;
   
-  // Fetch available tees for this course
   const fetchAvailableTees = async () => {
     try {
       const { data, error } = await supabase
@@ -67,7 +65,7 @@ export const CourseLeaderboard = ({
       if (error) throw error;
       
       if (data && data.length > 0) {
-        const tees = [...new Set(data.map(round => round.tee_name))];
+        const tees = [...new Set(data.map(round => round.tee_name).filter(Boolean))];
         setAvailableTees(tees);
       }
     } catch (error) {
@@ -75,7 +73,6 @@ export const CourseLeaderboard = ({
     }
   };
   
-  // Fetch available years with rounds for this course
   const fetchAvailableYears = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -93,7 +90,6 @@ export const CourseLeaderboard = ({
         const years = [...new Set(data.map(round => new Date(round.date).getFullYear().toString()))];
         setAvailableYears(years.sort((a, b) => parseInt(b) - parseInt(a)));
         
-        // Set the most recent year as default
         if (years.length > 0) {
           setSelectedYear(years[0]);
         }
@@ -103,7 +99,6 @@ export const CourseLeaderboard = ({
     }
   };
   
-  // Fetch leaderboard data
   const fetchLeaderboard = async () => {
     setIsLoading(true);
     
@@ -121,7 +116,6 @@ export const CourseLeaderboard = ({
       
       const currentUserId = session.user.id;
       
-      // Build date filter based on selected range
       let dateFilter = {};
       if (dateRange === 'monthly' && selectedMonth) {
         const startDate = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
@@ -141,7 +135,6 @@ export const CourseLeaderboard = ({
         };
       }
       
-      // Build the base query
       let query = supabase
         .from('rounds')
         .select(`
@@ -155,12 +148,10 @@ export const CourseLeaderboard = ({
         `)
         .eq('course_id', courseId);
         
-      // Apply tee filter if selected
       if (selectedTee) {
         query = query.eq('tee_name', selectedTee);
       }
-        
-      // Apply date filter if not all-time
+      
       if (dateRange !== 'all-time') {
         query = query.filter('date', 'gte', (dateFilter as any).gte)
                     .filter('date', 'lte', (dateFilter as any).lte);
@@ -185,9 +176,7 @@ export const CourseLeaderboard = ({
       
       console.log("Query result data:", data);
       
-      // Process leaderboard data
       let processedData = data.map(round => {
-        // Handle profiles data which could be an array or an object
         let username = "Unknown";
         
         if (round.profiles) {
@@ -212,24 +201,19 @@ export const CourseLeaderboard = ({
         };
       });
       
-      // Sort by score (ascending - lower is better in golf)
       processedData.sort((a, b) => a.score - b.score);
       
-      // Add rank to each entry
       processedData = processedData.map((entry, index) => ({
         ...entry,
         rank: index + 1
       }));
       
-      // Find user's best score and rank
       const userEntries = processedData.filter(entry => entry.isCurrentUser);
       if (userEntries.length > 0) {
-        // Get the user's best score (lowest score)
         const bestUserEntry = userEntries.reduce((prev, current) => 
           prev.score < current.score ? prev : current
-        ) as LeaderboardEntry;  // Explicitly cast to LeaderboardEntry to ensure it has the rank property
+        ) as LeaderboardEntry;
         
-        // Fix for the rank property access with proper type checking
         setUserRank(bestUserEntry.rank !== undefined ? bestUserEntry.rank : null);
         setUserBestScore(bestUserEntry);
       } else {
@@ -237,11 +221,9 @@ export const CourseLeaderboard = ({
         setUserBestScore(null);
       }
       
-      // Calculate pagination
       setTotalPages(Math.ceil(processedData.length / itemsPerPage));
       setCurrentPage(1);
       
-      // Set leaderboard data
       setLeaderboard(processedData);
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
@@ -255,26 +237,22 @@ export const CourseLeaderboard = ({
     }
   };
   
-  // Handle search button click
   const handleSearch = () => {
     fetchLeaderboard();
   };
   
-  // Handle pagination
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
   };
   
-  // Get current page items
   const getCurrentPageItems = () => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     return leaderboard.slice(startIndex, endIndex);
   };
   
-  // Handle dialog open
   const handleDialogOpen = (isOpen: boolean) => {
     if (isOpen) {
       fetchAvailableYears();
@@ -294,9 +272,7 @@ export const CourseLeaderboard = ({
         </DialogHeader>
         
         <div className="space-y-4 mt-4">
-          {/* Filters section */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Date Range Filter */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Date Range</label>
               <Select 
@@ -314,7 +290,6 @@ export const CourseLeaderboard = ({
               </Select>
             </div>
             
-            {/* Month Picker (when monthly is selected) */}
             {dateRange === 'monthly' && (
               <div className="space-y-2">
                 <label className="text-sm font-medium">Month</label>
@@ -343,7 +318,6 @@ export const CourseLeaderboard = ({
               </div>
             )}
             
-            {/* Year Picker (when yearly is selected) */}
             {dateRange === 'yearly' && (
               <div className="space-y-2">
                 <label className="text-sm font-medium">Year</label>
@@ -363,7 +337,6 @@ export const CourseLeaderboard = ({
               </div>
             )}
             
-            {/* Tee Selection Filter */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Tee</label>
               <Select 
@@ -382,7 +355,6 @@ export const CourseLeaderboard = ({
               </Select>
             </div>
             
-            {/* Score Type Filter */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Score Type</label>
               <Select 
@@ -399,7 +371,6 @@ export const CourseLeaderboard = ({
               </Select>
             </div>
             
-            {/* Search Button */}
             <div className="flex items-end sm:col-span-2">
               <Button 
                 onClick={handleSearch} 
@@ -412,7 +383,6 @@ export const CourseLeaderboard = ({
             </div>
           </div>
           
-          {/* User's best score highlight (if available) */}
           {userBestScore && (
             <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 mb-4">
               <h3 className="text-md font-semibold mb-2">Your Best Round</h3>
@@ -430,7 +400,6 @@ export const CourseLeaderboard = ({
             </div>
           )}
           
-          {/* Leaderboard table */}
           <div className="rounded-lg border overflow-hidden">
             <table className="w-full">
               <thead>
@@ -476,7 +445,6 @@ export const CourseLeaderboard = ({
             </table>
           </div>
           
-          {/* Pagination */}
           {leaderboard.length > 0 && (
             <div className="flex justify-between items-center mt-4">
               <Button
