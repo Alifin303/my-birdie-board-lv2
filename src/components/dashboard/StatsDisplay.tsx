@@ -1,6 +1,7 @@
 
 import { CalendarDays, Trophy, Flag } from "lucide-react";
 import { Stats, Round } from "./types";
+import React, { useEffect } from "react";
 
 interface StatsDisplayProps {
   userRounds: Round[] | undefined;
@@ -11,6 +12,15 @@ interface StatsDisplayProps {
 }
 
 export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats }: Omit<StatsDisplayProps, 'onScoreTypeChange'>) => {
+  // Add key prop to force re-render when userRounds changes
+  const roundsKey = userRounds ? `rounds-${userRounds.length}` : 'no-rounds';
+  
+  useEffect(() => {
+    console.log("[MainStats] Rounds data changed, recalculating stats", { 
+      roundsCount: userRounds?.length 
+    });
+  }, [userRounds]);
+  
   if (roundsLoading || !userRounds) {
     return (
       <div className="grid grid-cols-3 gap-6 mb-6">
@@ -24,6 +34,8 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
   const stats = calculateStats(userRounds);
   
   console.log("[MainStats] Rendering with score type:", scoreType, {
+    roundsKey,
+    roundsCount: userRounds.length,
     bestGrossScore: stats.bestGrossScore,
     bestNetScore: stats.bestNetScore,
     handicapIndex: stats.handicapIndex
@@ -47,7 +59,7 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
   });
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div key={roundsKey} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
       <div className="bg-background rounded-lg p-5 border">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
@@ -94,6 +106,15 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
 };
 
 export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTypeChange, calculateStats }: StatsDisplayProps) => {
+  // Add key prop to force re-render when userRounds changes
+  const roundsKey = userRounds ? `rounds-${userRounds.length}` : 'no-rounds';
+  
+  useEffect(() => {
+    console.log("[HandicapCircle] Rounds data changed, recalculating handicap", { 
+      roundsCount: userRounds?.length 
+    });
+  }, [userRounds]);
+  
   if (roundsLoading || !userRounds) {
     return (
       <div className="flex justify-center mb-8">
@@ -106,8 +127,16 @@ export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTy
   const stats = calculateStats(userRounds);
   const hasHandicap = stats.roundsNeededForHandicap === 0;
   
+  console.log("[HandicapCircle] Rendering with handicap:", {
+    roundsKey,
+    roundsCount: userRounds.length,
+    handicapIndex: stats.handicapIndex,
+    hasHandicap,
+    roundsNeededForHandicap: stats.roundsNeededForHandicap
+  });
+  
   return (
-    <div className="flex flex-col items-center justify-center mb-8">
+    <div key={roundsKey} className="flex flex-col items-center justify-center mb-8">
       <div className="relative mb-3">
         <div className="flex items-center gap-2">
           <button 
