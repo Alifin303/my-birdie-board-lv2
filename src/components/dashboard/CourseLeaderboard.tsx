@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Calendar, ChevronLeft, ChevronRight, Search } from "lucide-react";
@@ -204,6 +203,7 @@ export const CourseLeaderboard = ({
         return;
       }
       
+      // Ensure we have a handicap for every user
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('id, username, first_name, last_name, handicap')
@@ -216,22 +216,35 @@ export const CourseLeaderboard = ({
       
       console.log("Fetched profiles data:", profilesData);
       
-      if (!profilesData || profilesData.length === 0) {
-        console.error("No profiles found");
-        toast({
-          title: "Error",
-          description: "Could not retrieve player information.",
-          variant: "destructive"
-        });
-        setIsLoading(false);
-        return;
+      // If a user doesn't have a profile, we need to handle that case
+      // by ensuring each user ID has at least a default profile
+      const allProfiles = [...(profilesData || [])];
+      
+      // Check if we're missing any user profiles
+      const foundUserIds = new Set(allProfiles.map(profile => profile.id));
+      const missingUserIds = userIds.filter(id => !foundUserIds.has(id));
+      
+      // Log info about missing profiles
+      if (missingUserIds.length > 0) {
+        console.log(`Missing profiles for ${missingUserIds.length} users:`, missingUserIds);
+        
+        // Create default profiles for missing users
+        for (const userId of missingUserIds) {
+          allProfiles.push({
+            id: userId,
+            username: 'Unknown Player',
+            first_name: null,
+            last_name: null,
+            handicap: 0 // Default handicap
+          });
+        }
       }
       
       // Create maps for usernames and handicaps with better logging
       const userMap = new Map();
       const handicapMap = new Map();
       
-      profilesData.forEach(profile => {
+      allProfiles.forEach(profile => {
         let displayName = profile.username;
         
         if (!displayName && (profile.first_name || profile.last_name)) {
@@ -261,9 +274,7 @@ export const CourseLeaderboard = ({
         const username = userMap.get(round.user_id) || 'Unknown Player';
         const playerHandicap = handicapMap.get(round.user_id);
         
-        if (playerHandicap === undefined) {
-          console.warn(`No handicap found for user ${round.user_id}. Defaulting to 0.`);
-        }
+        console.log(`Round ID ${round.id} - User: ${username}, gross: ${round.gross_score}, handicap: ${playerHandicap}`);
         
         const grossScore = round.gross_score;
         const playerHandicapValue = playerHandicap !== undefined ? playerHandicap : 0;
@@ -277,8 +288,6 @@ export const CourseLeaderboard = ({
           netScore = calculateNetScore(grossScore, playerHandicapValue);
           console.log(`Calculated new net score for round ${round.id}: gross=${grossScore}, handicap=${playerHandicapValue}, net=${netScore}`);
         }
-        
-        console.log(`Round ID ${round.id} - User: ${username}, gross: ${grossScore}, net: ${netScore}, handicap: ${playerHandicapValue}`);
         
         return {
           id: round.id,
