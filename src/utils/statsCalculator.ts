@@ -75,12 +75,33 @@ export const calculateStats = (rounds: Round[]): Stats => {
   const bestGrossScore = Math.min(...rounds.map(r => r.gross_score));
   const bestToPar = Math.min(...rounds.map(r => r.to_par_gross));
   
-  // Net scores may not be available for all rounds
-  const roundsWithNetScore = rounds.filter(r => r.net_score !== undefined && r.to_par_net !== undefined);
+  // Properly handle net scores - use stored net_score if available, otherwise calculate
+  const roundsWithNetScore = rounds.map(r => {
+    const netScore = r.net_score !== undefined && r.net_score !== null
+      ? r.net_score
+      : null;
+    return {
+      ...r,
+      calculatedNetScore: netScore
+    };
+  }).filter(r => r.calculatedNetScore !== null);
+  
   const bestNetScore = roundsWithNetScore.length > 0 ? 
-    Math.min(...roundsWithNetScore.map(r => r.net_score!)) : null;
-  const bestToParNet = roundsWithNetScore.length > 0 ? 
-    Math.min(...roundsWithNetScore.map(r => r.to_par_net!)) : null;
+    Math.min(...roundsWithNetScore.map(r => r.calculatedNetScore!)) : null;
+  
+  // Similarly handle to_par_net values
+  const roundsWithToParNet = rounds.map(r => {
+    const toParNet = r.to_par_net !== undefined && r.to_par_net !== null
+      ? r.to_par_net
+      : null;
+    return {
+      ...r,
+      calculatedToParNet: toParNet
+    };
+  }).filter(r => r.calculatedToParNet !== null);
+  
+  const bestToParNet = roundsWithToParNet.length > 0 ? 
+    Math.min(...roundsWithToParNet.map(r => r.calculatedToParNet!)) : null;
   
   const averageScore = rounds.reduce((sum, r) => sum + r.gross_score, 0) / totalRounds;
   
@@ -155,12 +176,33 @@ export const calculateCourseStats = (rounds: Round[]): CourseStats[] => {
     const bestGrossScore = Math.min(...courseRounds.map(r => r.gross_score));
     const bestToPar = Math.min(...courseRounds.map(r => r.to_par_gross));
     
-    // Net scores may not be available for all rounds
-    const roundsWithNetScore = courseRounds.filter(r => r.net_score !== undefined && r.to_par_net !== undefined);
+    // Properly handle net scores
+    const roundsWithNetScore = courseRounds.map(r => {
+      const netScore = r.net_score !== undefined && r.net_score !== null
+        ? r.net_score
+        : null;
+      return {
+        ...r,
+        calculatedNetScore: netScore
+      };
+    }).filter(r => r.calculatedNetScore !== null);
+    
     const bestNetScore = roundsWithNetScore.length > 0 ? 
-      Math.min(...roundsWithNetScore.map(r => r.net_score!)) : null;
-    const bestToParNet = roundsWithNetScore.length > 0 ? 
-      Math.min(...roundsWithNetScore.map(r => r.to_par_net!)) : null;
+      Math.min(...roundsWithNetScore.map(r => r.calculatedNetScore!)) : null;
+    
+    // Similarly handle to_par_net values
+    const roundsWithToParNet = courseRounds.map(r => {
+      const toParNet = r.to_par_net !== undefined && r.to_par_net !== null
+        ? r.to_par_net
+        : null;
+      return {
+        ...r,
+        calculatedToParNet: toParNet
+      };
+    }).filter(r => r.calculatedToParNet !== null);
+    
+    const bestToParNet = roundsWithToParNet.length > 0 ? 
+      Math.min(...roundsWithToParNet.map(r => r.calculatedToParNet!)) : null;
 
     return {
       courseId,

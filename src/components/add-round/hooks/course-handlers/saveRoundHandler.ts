@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
 import { ensureCourseExists, findOrCreateCourseByApiId } from "@/integrations/supabase";
@@ -61,6 +60,23 @@ export function createSaveRoundHandler({
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
       const toParGross = totalStrokes - totalPar;
       
+      // Get the user's handicap to calculate net score
+      const { data: userData, error: userError } = await supabase
+        .from('profiles')
+        .select('handicap')
+        .eq('id', session.user.id)
+        .single();
+        
+      if (userError) {
+        console.error("Error fetching user handicap:", userError);
+      }
+      
+      const handicapIndex = userData?.handicap || 0;
+      
+      // Calculate net score and to par net
+      const netScore = Math.max(0, totalStrokes - handicapIndex);
+      const toParNet = Math.max(-totalPar, toParGross - handicapIndex);
+      
       console.log("Ensuring course exists in database:", selectedCourse);
       let dbCourseId: number;
       
@@ -122,8 +138,8 @@ export function createSaveRoundHandler({
         tee_id: teeId,
         gross_score: totalStrokes,
         to_par_gross: toParGross,
-        net_score: null,
-        to_par_net: null,
+        net_score: netScore,
+        to_par_net: toParNet,
         hole_scores: JSON.stringify(scores)
       };
       

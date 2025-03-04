@@ -88,13 +88,23 @@ export const CourseRoundHistory = ({
     const bestGrossScore = Math.min(...courseRounds.map(r => r.gross_score));
     const bestToPar = Math.min(...courseRounds.map(r => r.to_par_gross));
     
-    const roundsWithNetScore = courseRounds.filter(r => r.net_score !== undefined);
-    const bestNetScore = roundsWithNetScore.length > 0 ? 
-      Math.min(...roundsWithNetScore.map(r => r.net_score!)) : null;
+    const roundsWithNetScore = courseRounds.map(r => ({
+      ...r,
+      calculatedNetScore: r.net_score !== undefined && r.net_score !== null 
+        ? r.net_score 
+        : Math.max(0, r.gross_score - handicapIndex)
+    }));
     
-    const roundsWithToParNet = courseRounds.filter(r => r.to_par_net !== undefined);
-    const bestToParNet = roundsWithToParNet.length > 0 ? 
-      Math.min(...roundsWithToParNet.map(r => r.to_par_net!)) : null;
+    const bestNetScore = Math.min(...roundsWithNetScore.map(r => r.calculatedNetScore));
+    
+    const roundsWithToParNet = courseRounds.map(r => ({
+      ...r,
+      calculatedToParNet: r.to_par_net !== undefined && r.to_par_net !== null
+        ? r.to_par_net
+        : Math.max(-72, r.to_par_gross - handicapIndex)
+    }));
+    
+    const bestToParNet = Math.min(...roundsWithToParNet.map(r => r.calculatedToParNet));
       
     return { roundsPlayed, bestGrossScore, bestNetScore, bestToPar, bestToParNet };
   };
@@ -217,9 +227,7 @@ export const CourseRoundHistory = ({
             <p className="text-3xl font-bold">
               {scoreType === 'gross' 
                 ? stats.bestGrossScore 
-                : (handicapIndex > 0 
-                    ? Math.max(0, Math.round(stats.bestGrossScore - handicapIndex)) 
-                    : stats.bestGrossScore)}
+                : stats.bestNetScore}
             </p>
           </div>
           <div className="bg-background border rounded-lg p-4 text-center">
@@ -227,10 +235,7 @@ export const CourseRoundHistory = ({
             <p className="text-3xl font-bold">
               {scoreType === 'gross' 
                 ? (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar
-                : (handicapIndex > 0
-                    ? ((stats.bestToPar - handicapIndex > 0 ? '+' : '') + 
-                       (stats.bestToPar - handicapIndex))
-                    : (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar)}
+                : (stats.bestToParNet > 0 ? '+' : '') + stats.bestToParNet}
             </p>
           </div>
         </div>
@@ -319,7 +324,13 @@ export const CourseRoundHistory = ({
             </thead>
             <tbody>
               {sortedRounds.map((round) => {
-                console.log(`Rendering row for round ${round.id}, tee name: "${round.tee_name}"`);
+                const netScore = round.net_score !== undefined && round.net_score !== null
+                  ? round.net_score
+                  : Math.max(0, round.gross_score - handicapIndex);
+                
+                const netToPar = round.to_par_net !== undefined && round.to_par_net !== null
+                  ? round.to_par_net
+                  : Math.max(-72, round.to_par_gross - handicapIndex);
                 
                 return (
                   <tr key={round.id} className="border-b last:border-0">
@@ -332,17 +343,12 @@ export const CourseRoundHistory = ({
                     <td className="px-4 py-3 text-sm">
                       {scoreType === 'gross' 
                         ? round.gross_score 
-                        : handicapIndex > 0 
-                          ? Math.max(0, Math.round(round.gross_score - handicapIndex))
-                          : round.gross_score}
+                        : netScore}
                     </td>
                     <td className="px-4 py-3 text-sm">
                       {scoreType === 'gross' 
                         ? (round.to_par_gross > 0 ? '+' : '') + round.to_par_gross
-                        : handicapIndex > 0
-                          ? ((round.to_par_gross - handicapIndex > 0 ? '+' : '') + 
-                             (round.to_par_gross - handicapIndex))
-                          : (round.to_par_gross > 0 ? '+' : '') + round.to_par_gross}
+                        : (netToPar > 0 ? '+' : '') + netToPar}
                     </td>
                     <td className="px-4 py-3 text-sm text-right">
                       <div className="flex justify-end space-x-2">
