@@ -367,14 +367,14 @@ export const CourseLeaderboard = ({
             <div className="space-y-2">
               <label className="text-sm font-medium">Tee</label>
               <Select 
-                value={selectedTee || ""} 
-                onValueChange={(value) => setSelectedTee(value || null)}
+                value={selectedTee || "all"} 
+                onValueChange={(value) => setSelectedTee(value === "all" ? null : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All Tees" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Tees</SelectItem>
+                  <SelectItem value="all">All Tees</SelectItem>
                   {availableTees.map(tee => (
                     <SelectItem key={tee} value={tee}>{tee}</SelectItem>
                   ))}
