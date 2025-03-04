@@ -1,9 +1,8 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User, LogOut, CreditCard, Key } from "lucide-react";
+import { User, LogOut, CreditCard, Key, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +12,8 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { stripeService } from "@/services/stripeService";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface DashboardHeaderProps {
   profileData: any;
@@ -40,10 +41,65 @@ const passwordFormSchema = z.object({
 export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [subscriptionStatus, setSubscriptionStatus] = useState("none"); // can be "none", "active", "cancelled"
+  
+  // Get subscription status from Supabase
+  const { data: subscriptionData, isLoading: subscriptionLoading } = useQuery({
+    queryKey: ['subscription'],
+    queryFn: async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return { status: "none" };
+        
+        // Get subscription data from Supabase
+        const { data, error } = await supabase
+          .from('customer_subscriptions')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+          
+        if (error) throw error;
+        
+        if (!data) return { status: "none" };
+        
+        // If there's a subscription, get more details from Stripe
+        if (data.subscription_id) {
+          try {
+            const subscription = await stripeService.getSubscription(data.subscription_id);
+            return {
+              status: subscription.cancel_at_period_end ? "cancelled" : "active",
+              data: {
+                id: subscription.id,
+                customerId: data.customer_id,
+                endDate: new Date(subscription.current_period_end * 1000).toLocaleDateString(),
+                priceId: subscription.items.data[0]?.price.id
+              }
+            };
+          } catch (stripeError) {
+            console.error("Error fetching Stripe subscription:", stripeError);
+            return {
+              status: data.status || "error",
+              data: {
+                id: data.subscription_id,
+                customerId: data.customer_id
+              }
+            };
+          }
+        }
+        
+        return { 
+          status: data.status || "none",
+          data: { customerId: data.customer_id }
+        };
+      } catch (error) {
+        console.error("Error fetching subscription:", error);
+        return { status: "error" };
+      }
+    }
+  });
 
   // Initialize the profile form
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
@@ -182,12 +238,113 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
     }
   };
 
-  const handleSubscriptionAction = (action: string) => {
-    // This is a placeholder for future Stripe integration
-    toast({
-      title: "Subscription",
-      description: `${action} feature will be implemented with Stripe integration.`,
-    });
+  const handleSubscriptionAction = async (action: string) => {
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error("You must be logged in to manage subscriptions");
+      }
+      
+      const baseUrl = window.location.origin;
+      
+      switch (action) {
+        case "subscribe": {
+          // Create a customer if needed
+          let customerId = subscriptionData?.data?.customerId;
+          
+          if (!customerId) {
+            const { data: userData } = await supabase.auth.getUser();
+            const customer = await stripeService.createCustomer(userData.user?.email || "");
+            customerId = customer.id;
+            
+            // Save customer ID to Supabase
+            await supabase
+              .from('customer_subscriptions')
+              .upsert({
+                user_id: session.user.id,
+                customer_id: customerId,
+                status: "created"
+              });
+          }
+          
+          // Create checkout session
+          const priceId = 'price_1OXYZABCDEFGHIJKLMNOPQRSTprice'; // Replace with your actual price ID
+          const checkoutSession = await stripeService.createCheckoutSession(
+            customerId,
+            priceId,
+            `${baseUrl}/dashboard?subscription=success`,
+            `${baseUrl}/dashboard?subscription=canceled`
+          );
+          
+          // Redirect to checkout
+          window.location.href = checkoutSession.url;
+          break;
+        }
+        
+        case "manage": {
+          if (!subscriptionData?.data?.customerId) {
+            throw new Error("No customer found");
+          }
+          
+          // Create billing portal session
+          const portalSession = await stripeService.createBillingPortalSession(
+            subscriptionData.data.customerId,
+            `${baseUrl}/dashboard`
+          );
+          
+          // Redirect to billing portal
+          window.location.href = portalSession.url;
+          break;
+        }
+        
+        case "cancel": {
+          if (!subscriptionData?.data?.id) {
+            throw new Error("No subscription found");
+          }
+          
+          // Cancel subscription at period end
+          await stripeService.cancelSubscription(subscriptionData.data.id);
+          
+          // Update subscription status
+          toast({
+            title: "Subscription Cancelled",
+            description: "Your subscription will end at the current billing period.",
+          });
+          
+          // Refresh subscription data
+          queryClient.invalidateQueries({ queryKey: ['subscription'] });
+          break;
+        }
+        
+        case "reactivate": {
+          if (!subscriptionData?.data?.id) {
+            throw new Error("No subscription found");
+          }
+          
+          // Reactivate cancelled subscription
+          await stripeService.reactivateSubscription(subscriptionData.data.id);
+          
+          toast({
+            title: "Subscription Reactivated",
+            description: "Your subscription has been successfully reactivated.",
+          });
+          
+          // Refresh subscription data
+          queryClient.invalidateQueries({ queryKey: ['subscription'] });
+          break;
+        }
+      }
+    } catch (error: any) {
+      console.error('Error managing subscription:', error);
+      toast({
+        title: "Subscription Error",
+        description: error.message || "An error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderProfileContent = () => {
@@ -267,51 +424,81 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
           
           <div className="pt-4 border-t">
             <h4 className="font-medium mb-3">Subscription Management</h4>
-            {subscriptionStatus === "none" && (
-              <Button 
-                type="button" 
-                variant="default" 
-                className="flex items-center gap-2"
-                onClick={() => handleSubscriptionAction("Add Subscription")}
-              >
-                <CreditCard className="w-4 h-4" />
-                Add Subscription
-              </Button>
-            )}
-            
-            {subscriptionStatus === "active" && (
-              <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  className="flex items-center gap-2"
-                  onClick={() => handleSubscriptionAction("Update Payment Details")}
-                >
-                  <CreditCard className="w-4 h-4" />
-                  Update Payment Details
-                </Button>
-                
-                <Button 
-                  type="button" 
-                  variant="destructive" 
-                  className="flex items-center gap-2"
-                  onClick={() => handleSubscriptionAction("Cancel Subscription")}
-                >
-                  Cancel Subscription
-                </Button>
+            {subscriptionLoading ? (
+              <div className="flex items-center space-x-2">
+                <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
+                <span>Loading subscription info...</span>
               </div>
-            )}
-            
-            {subscriptionStatus === "cancelled" && (
-              <Button 
-                type="button" 
-                variant="default" 
-                className="flex items-center gap-2"
-                onClick={() => handleSubscriptionAction("Re-subscribe")}
-              >
-                <CreditCard className="w-4 h-4" />
-                Re-subscribe
-              </Button>
+            ) : (
+              <>
+                {subscriptionData?.status === "none" && (
+                  <Button 
+                    type="button" 
+                    variant="default" 
+                    className="flex items-center gap-2"
+                    onClick={() => handleSubscriptionAction("subscribe")}
+                    disabled={loading}
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    {loading ? "Processing..." : "Add Subscription"}
+                  </Button>
+                )}
+                
+                {subscriptionData?.status === "active" && (
+                  <div className="space-y-2">
+                    <div className="text-sm text-muted-foreground mb-3">
+                      Your subscription is active until {subscriptionData.data?.endDate}.
+                    </div>
+                    <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        className="flex items-center gap-2"
+                        onClick={() => handleSubscriptionAction("manage")}
+                        disabled={loading}
+                      >
+                        <CreditCard className="w-4 h-4" />
+                        <span>Manage Billing</span>
+                        <ExternalLink className="w-3 h-3 ml-1" />
+                      </Button>
+                      
+                      <Button 
+                        type="button" 
+                        variant="destructive" 
+                        className="flex items-center gap-2"
+                        onClick={() => handleSubscriptionAction("cancel")}
+                        disabled={loading}
+                      >
+                        {loading ? "Processing..." : "Cancel Subscription"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                
+                {subscriptionData?.status === "cancelled" && (
+                  <div className="space-y-2">
+                    <div className="text-sm text-muted-foreground mb-3">
+                      Your subscription will end on {subscriptionData.data?.endDate}.
+                    </div>
+                    <Button 
+                      type="button" 
+                      variant="default" 
+                      className="flex items-center gap-2"
+                      onClick={() => handleSubscriptionAction("reactivate")}
+                      disabled={loading}
+                    >
+                      <CreditCard className="w-4 h-4" />
+                      {loading ? "Processing..." : "Reactivate Subscription"}
+                    </Button>
+                  </div>
+                )}
+                
+                {subscriptionData?.status === "error" && (
+                  <div className="text-sm text-destructive">
+                    There was an error loading your subscription. Please try again later.
+                  </div>
+                )}
+              </>
             )}
           </div>
           
