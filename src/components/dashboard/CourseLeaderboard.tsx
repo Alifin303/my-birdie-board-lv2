@@ -117,7 +117,7 @@ export const CourseLeaderboard = ({
         };
       }
       
-      // Fetch leaderboard data - FIX: Modified the query to correctly join with profiles table
+      // Fixed query to correctly join with profiles table
       let query = supabase
         .from('rounds')
         .select(`
@@ -157,9 +157,19 @@ export const CourseLeaderboard = ({
       
       // Process leaderboard data
       let processedData = data.map(round => {
-        // Fix for the username extraction - correctly extract username from the profiles object
-        const username = round.profiles && typeof round.profiles === 'object' ? 
-          round.profiles.username || "Unknown" : "Unknown";
+        // Fix for array vs object issue with profiles
+        let username = "Unknown";
+        
+        // Handle profiles data which could be an array or an object
+        if (round.profiles) {
+          if (Array.isArray(round.profiles) && round.profiles.length > 0) {
+            // If it's an array, take the first item's username
+            username = round.profiles[0]?.username || "Unknown";
+          } else if (typeof round.profiles === 'object') {
+            // If it's an object, get the username property
+            username = (round.profiles as any).username || "Unknown";
+          }
+        }
         
         const score = scoreType === 'gross' 
           ? round.gross_score 
