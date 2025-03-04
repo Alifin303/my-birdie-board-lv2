@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { ChevronUp, ChevronDown, Trash, Eye, ArrowLeft } from "lucide-react";
+import { ChevronUp, ChevronDown, Trash, Eye, ArrowLeft, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { 
@@ -18,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import ScoreProgressChart from "./ScoreProgressChart";
 import { RoundScorecard } from "./scorecard/RoundScorecard";
+import { CourseLeaderboard } from "./CourseLeaderboard";
 import { Round } from "./types";
 
 interface CourseRoundHistoryProps {
@@ -39,6 +39,7 @@ export const CourseRoundHistory = ({
   const [deletingRoundId, setDeletingRoundId] = useState<number | null>(null);
   const [viewingRound, setViewingRound] = useState<Round | null>(null);
   const [scorecardOpen, setScorecardOpen] = useState(false);
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const [sortField, setSortField] = useState<'date' | 'gross_score' | 'to_par_gross'>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   
@@ -241,6 +242,19 @@ export const CourseRoundHistory = ({
         handicapIndex={handicapIndex}
       />
       
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 bg-muted/30 rounded-lg border mt-4">
+        <p className="text-sm sm:text-base">
+          Want to see how your score compares to other golfers at this course?
+        </p>
+        <Button 
+          onClick={() => setLeaderboardOpen(true)}
+          className="whitespace-nowrap"
+        >
+          <Trophy className="h-4 w-4 mr-2" />
+          View Course Leaderboards
+        </Button>
+      </div>
+      
       <div className="space-y-4 mt-6">
         <h3 className="text-lg font-medium">Round History</h3>
         <div className="flex justify-end space-x-2 mb-2">
@@ -393,6 +407,14 @@ export const CourseRoundHistory = ({
           handicapIndex={handicapIndex}
         />
       )}
+      
+      <CourseLeaderboard
+        courseId={selectedCourseId}
+        courseName={displayName}
+        open={leaderboardOpen}
+        onOpenChange={setLeaderboardOpen}
+        handicapIndex={handicapIndex}
+      />
     </div>
   );
 };
