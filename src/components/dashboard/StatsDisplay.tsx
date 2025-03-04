@@ -53,19 +53,25 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
     bestGrossScore: stats.bestGrossScore, 
     bestNetScore: stats.bestNetScore,
     bestToPar: stats.bestToPar,
-    bestToParNet: stats.bestToParNet
+    bestToParNet: stats.bestToParNet,
+    handicapIndex: stats.handicapIndex
   });
   
-  // Force component re-render on scoreType change
-  const displayedScore = scoreType === 'gross'
-    ? stats.bestGrossScore
-    : (stats.bestNetScore !== null && stats.bestNetScore !== undefined ? stats.bestNetScore : '-');
+  // Simple calculation for net scores when toggling
+  let displayedScore, displayedToPar;
   
-  const displayedToPar = scoreType === 'gross'
-    ? ((stats.bestToPar > 0 ? '+' : '') + stats.bestToPar)
-    : (stats.bestToParNet !== null && stats.bestToParNet !== undefined
-        ? (stats.bestToParNet > 0 ? '+' : '') + stats.bestToParNet
-        : '-');
+  if (scoreType === 'gross') {
+    displayedScore = stats.bestGrossScore;
+    displayedToPar = (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar;
+  } else {
+    // For net score: simply subtract handicap from gross score
+    const netScore = stats.handicapIndex > 0 ? Math.round(stats.bestGrossScore - stats.handicapIndex) : stats.bestGrossScore;
+    displayedScore = netScore;
+    
+    // For net to par: subtract handicap from gross to par
+    const netToPar = stats.handicapIndex > 0 ? stats.bestToPar - Math.round(stats.handicapIndex) : stats.bestToPar;
+    displayedToPar = (netToPar > 0 ? '+' : '') + netToPar;
+  }
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
