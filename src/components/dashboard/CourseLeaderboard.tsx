@@ -143,8 +143,7 @@ export const CourseLeaderboard = ({
           gross_score,
           net_score,
           user_id,
-          tee_name,
-          profiles(username)
+          tee_name
         `)
         .eq('course_id', courseId);
         
@@ -157,11 +156,11 @@ export const CourseLeaderboard = ({
                     .filter('date', 'lte', (dateFilter as any).lte);
       }
       
-      const { data, error } = await query;
+      const { data: roundsData, error: roundsError } = await query;
       
-      if (error) throw error;
+      if (roundsError) throw roundsError;
       
-      if (!data || data.length === 0) {
+      if (!roundsData || roundsData.length === 0) {
         setLeaderboard([]);
         setUserRank(null);
         setUserBestScore(null);
@@ -174,18 +173,23 @@ export const CourseLeaderboard = ({
         return;
       }
       
-      console.log("Query result data:", data);
-      
-      let processedData = data.map(round => {
-        let username = "Unknown";
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, username');
         
-        if (round.profiles) {
-          if (Array.isArray(round.profiles) && round.profiles.length > 0) {
-            username = round.profiles[0]?.username || "Unknown";
-          } else if (typeof round.profiles === 'object') {
-            username = (round.profiles as any).username || "Unknown";
-          }
-        }
+      if (profilesError) throw profilesError;
+      
+      const userMap = new Map();
+      if (profilesData) {
+        profilesData.forEach(profile => {
+          userMap.set(profile.id, profile.username || 'Unknown');
+        });
+      }
+      
+      console.log("Query result data:", roundsData);
+      
+      let processedData = roundsData.map(round => {
+        const username = userMap.get(round.user_id) || 'Unknown';
         
         const score = scoreType === 'gross' 
           ? round.gross_score 
