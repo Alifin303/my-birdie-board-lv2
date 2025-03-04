@@ -1,3 +1,4 @@
+
 import { CalendarDays, Trophy, Flag } from "lucide-react";
 import { Stats, Round } from "./types";
 
@@ -22,6 +23,21 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
 
   const stats = calculateStats(userRounds);
   
+  console.log("[MainStats] Rendering with score type:", scoreType, {
+    bestGrossScore: stats.bestGrossScore,
+    bestNetScore: stats.bestNetScore,
+    handicapIndex: stats.handicapIndex
+  });
+  
+  // Calculate net scores based on handicap
+  const bestNetScore = stats.bestNetScore !== null 
+    ? stats.bestNetScore 
+    : (stats.handicapIndex > 0 ? Math.max(0, stats.bestGrossScore - stats.handicapIndex) : stats.bestGrossScore);
+    
+  const bestNetToPar = stats.bestToParNet !== null
+    ? stats.bestToParNet
+    : (stats.handicapIndex > 0 ? Math.max(-72, stats.bestToPar - stats.handicapIndex) : stats.bestToPar);
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
       <div className="bg-background rounded-lg p-5 border">
@@ -41,11 +57,7 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
           <div className="space-y-1">
             <p className="text-sm font-medium text-muted-foreground">Best Score</p>
             <p className="text-3xl font-bold">
-              {scoreType === 'gross' 
-                ? stats.bestGrossScore 
-                : (stats.handicapIndex > 0 
-                    ? Math.max(0, Math.round(stats.bestGrossScore - stats.handicapIndex)) 
-                    : stats.bestGrossScore)}
+              {scoreType === 'gross' ? stats.bestGrossScore : bestNetScore}
             </p>
           </div>
           <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary/10">
@@ -61,10 +73,7 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
             <p className="text-3xl font-bold">
               {scoreType === 'gross' 
                 ? (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar 
-                : (stats.handicapIndex > 0
-                    ? ((stats.bestToPar - stats.handicapIndex > 0 ? '+' : '') + 
-                       (stats.bestToPar - stats.handicapIndex))
-                    : (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar)}
+                : (bestNetToPar > 0 ? '+' : '') + bestNetToPar}
             </p>
           </div>
           <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary/10">

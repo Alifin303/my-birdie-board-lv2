@@ -10,12 +10,13 @@ import { ScoreTable } from "./ScoreTable";
 import { ScoreTableSummary } from "./ScoreTableSummary";
 import { ScorecardHeader } from "./ScorecardHeader";
 
-export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardProps) => {
+export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 }: RoundScorecardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [scores, setScores] = useState<HoleScore[]>([]);
   const [roundDate, setRoundDate] = useState<Date | undefined>(undefined);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showNet, setShowNet] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -124,6 +125,11 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
     }
   };
 
+  const toggleNetScores = () => {
+    setShowNet(prev => !prev);
+    console.log(`[RoundScorecard] Toggling net scores: ${!showNet} with handicap: ${handicapIndex}`);
+  };
+
   const renderHoleScores = () => {
     if (!scores || scores.length === 0) {
       return (
@@ -157,7 +163,11 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
           />
         )}
 
-        <ScoreTableSummary scores={scores} />
+        <ScoreTableSummary 
+          scores={scores} 
+          handicapIndex={handicapIndex} 
+          showNet={showNet} 
+        />
       </div>
     );
   };
@@ -189,6 +199,17 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
               isSaving={isSaving}
               handleSaveChanges={handleSaveChanges}
             />
+
+            {handicapIndex > 0 && !isEditing && (
+              <div className="mt-4 mb-2 flex justify-end">
+                <button 
+                  onClick={toggleNetScores}
+                  className={`px-3 py-1 text-sm rounded-full ${showNet ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+                >
+                  {showNet ? 'Show Gross Score' : 'Show Net Score'}
+                </button>
+              </div>
+            )}
 
             <Separator className="my-4" />
             

@@ -9,8 +9,18 @@ export const ScoreTableSummary = ({ scores, handicapIndex = 0, showNet = false }
   const toPar = totalScore - totalPar;
   
   // Calculate net score by subtracting handicap
+  // Make sure we don't go below zero
   const netScore = Math.max(0, totalScore - handicapIndex);
   const netToPar = netScore - totalPar;
+  
+  console.log("[ScoreTableSummary] Rendering with:", {
+    totalScore,
+    netScore,
+    handicapIndex,
+    showNet,
+    toPar,
+    netToPar
+  });
   
   return (
     <div className="pt-2 border-t">
