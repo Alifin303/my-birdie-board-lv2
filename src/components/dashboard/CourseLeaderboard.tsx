@@ -176,11 +176,10 @@ export const CourseLeaderboard = ({
         return;
       }
       
-      // Get ALL profiles to ensure we have usernames for everyone
-      // We don't want to filter by user_id here - we need ALL profiles
+      // Get ALL profiles without ANY filter
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, username');
+        .select('*');
         
       if (profilesError) {
         console.error("Error fetching profiles:", profilesError);
@@ -200,6 +199,7 @@ export const CourseLeaderboard = ({
         return;
       }
       
+      // Create a map of user IDs to usernames for faster lookup
       const userMap = new Map();
       profilesData.forEach(profile => {
         userMap.set(profile.id, profile.username || 'Unknown');
