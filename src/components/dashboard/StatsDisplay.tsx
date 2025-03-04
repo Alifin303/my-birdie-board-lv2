@@ -56,6 +56,17 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
     bestToParNet: stats.bestToParNet
   });
   
+  // Force component re-render on scoreType change
+  const displayedScore = scoreType === 'gross'
+    ? stats.bestGrossScore
+    : (stats.bestNetScore !== null && stats.bestNetScore !== undefined ? stats.bestNetScore : '-');
+  
+  const displayedToPar = scoreType === 'gross'
+    ? ((stats.bestToPar > 0 ? '+' : '') + stats.bestToPar)
+    : (stats.bestToParNet !== null && stats.bestToParNet !== undefined
+        ? (stats.bestToParNet > 0 ? '+' : '') + stats.bestToParNet
+        : '-');
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
       <div className="bg-background rounded-lg p-5 border">
@@ -74,7 +85,7 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-sm font-medium text-muted-foreground">Best Score</p>
-            <p className="text-3xl font-bold">{scoreType === 'gross' ? stats.bestGrossScore : (stats.bestNetScore !== null ? stats.bestNetScore : '-')}</p>
+            <p className="text-3xl font-bold">{displayedScore}</p>
           </div>
           <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary/10">
             <Trophy className="h-6 w-6 text-primary" />
@@ -86,13 +97,7 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-sm font-medium text-muted-foreground">Best to Par</p>
-            <p className="text-3xl font-bold">
-              {scoreType === 'gross' 
-                ? (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar 
-                : stats.bestToParNet !== null 
-                  ? (stats.bestToParNet > 0 ? '+' : '') + stats.bestToParNet 
-                  : '-'}
-            </p>
+            <p className="text-3xl font-bold">{displayedToPar}</p>
           </div>
           <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary/10">
             <Flag className="h-6 w-6 text-primary" />
@@ -118,7 +123,11 @@ export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTy
   
   const handleScoreTypeChange = (type: 'gross' | 'net') => {
     console.log("HandicapCircle: changing score type to", type);
-    onScoreTypeChange(type);
+    
+    // Ensure we're not triggering unnecessary re-renders if type is the same
+    if (type !== scoreType) {
+      onScoreTypeChange(type);
+    }
   };
   
   return (

@@ -12,6 +12,14 @@ export function useCourseHandlers(props: UseCourseHandlersProps): CourseHandlers
     console.log("Selected tee in useCourseHandlers:", tee ? { id: tee.id, name: tee.name, par: tee.par } : "Tee not found");
   }
   
+  // Fix for missing teeId when course is available
+  if (props.selectedCourse && props.selectedCourse.tees && props.selectedCourse.tees.length > 0 && !props.selectedTeeId) {
+    console.log("Recovering missing teeId by selecting first tee:", props.selectedCourse.tees[0].id);
+    setTimeout(() => {
+      props.setSelectedTeeId(props.selectedCourse.tees[0].id);
+    }, 0);
+  }
+  
   const { handleSearch: searchHandler } = createSearchHandlers({
     setIsLoading: props.setIsLoading,
     setSearchError: props.setSearchError,
