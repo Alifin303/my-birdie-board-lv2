@@ -1,4 +1,3 @@
-
 import { CalendarDays, Trophy, Flag } from "lucide-react";
 import { Stats, Round } from "./types";
 import React, { useEffect } from "react";
@@ -12,7 +11,6 @@ interface StatsDisplayProps {
 }
 
 export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats }: Omit<StatsDisplayProps, 'onScoreTypeChange'>) => {
-  // Add key prop to force re-render when userRounds changes
   const roundsKey = userRounds ? `rounds-${userRounds.length}` : 'no-rounds';
   
   useEffect(() => {
@@ -43,9 +41,7 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
     handicapIndex: stats.handicapIndex
   });
   
-  // Find the round with the best net score and best net to par for debugging
   if (scoreType === 'net' && userRounds.length > 0) {
-    // Calculate net scores with CURRENT handicap to ensure consistency
     const calculatedRounds = userRounds.map(round => {
       const netScore = Math.round(round.gross_score - stats.handicapIndex);
       const netToPar = Math.round(round.to_par_gross - stats.handicapIndex);
@@ -61,9 +57,7 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
       };
     });
     
-    // Sort by net score to find the best one
     const sortedByNetScore = [...calculatedRounds].sort((a, b) => a.net - b.net);
-    // Sort by to par net to find the best one
     const sortedByToParNet = [...calculatedRounds].sort((a, b) => a.toParNet - b.toParNet);
     
     console.log("[MainStats] All rounds with net scores:", calculatedRounds.map(r => ({
@@ -131,7 +125,6 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
 };
 
 export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTypeChange, calculateStats }: StatsDisplayProps) => {
-  // Add key prop to force re-render when userRounds changes
   const roundsKey = userRounds ? `rounds-${userRounds.length}` : 'no-rounds';
   
   useEffect(() => {

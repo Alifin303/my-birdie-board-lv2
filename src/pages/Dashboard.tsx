@@ -43,7 +43,7 @@ export default function Dashboard() {
     console.log("Modal state changed:", isModalOpen);
   }, [isModalOpen]);
 
-  const { data: profile } = useQuery({
+  const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['profile'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -56,6 +56,7 @@ export default function Dashboard() {
         .single();
         
       if (error) throw error;
+      console.log("Retrieved user profile with handicap:", data?.handicap);
       return data;
     }
   });
@@ -152,7 +153,16 @@ export default function Dashboard() {
   }, [isModalOpen, queryClient]);
 
   const renderDashboard = () => {
+    // CRITICAL FIX: Calculate stats once and pass the pre-calculated handicap to all components
+    // This ensures consistency across the dashboard
     const stats = userRounds ? calculateStats(userRounds) : { handicapIndex: 0 };
+    
+    // DEBUG: Log the calculated handicap vs the profile handicap
+    console.log("Handicap comparison:", {
+      calculatedHandicap: stats.handicapIndex,
+      profileHandicap: profile?.handicap,
+      profileType: typeof profile?.handicap
+    });
     
     return (
       <div className="space-y-6 sm:space-y-8">
