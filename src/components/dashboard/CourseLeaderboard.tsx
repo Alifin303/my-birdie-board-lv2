@@ -232,14 +232,12 @@ export const CourseLeaderboard = ({
       console.log("Handicap map created:", Array.from(handicapMap.entries()));
       console.log("Query result data:", roundsData);
       
-      // Process the data and store both gross and net scores
       let processedData = roundsData.map(round => {
         const username = userMap.get(round.user_id) || 'Unknown Player';
         const playerHandicap = handicapMap.get(round.user_id) || 0;
         
         const grossScore = round.gross_score;
         
-        // Use stored net_score if available, otherwise calculate it
         const netScore = (round.net_score !== null && round.net_score !== undefined) 
           ? round.net_score 
           : Math.max(0, round.gross_score - playerHandicap);
@@ -252,8 +250,7 @@ export const CourseLeaderboard = ({
           username: username,
           gross_score: grossScore,
           net_score: netScore,
-          // Set initial score based on the current scoreType
-          score: scoreType === 'gross' ? grossScore : netScore,
+          score: 0,
           isCurrentUser: round.user_id === currentUserId,
           tee_name: round.tee_name,
           user_id: round.user_id,
@@ -263,10 +260,8 @@ export const CourseLeaderboard = ({
       
       console.log("Score type selected:", scoreType);
       
-      // Update displayedScoreType to match the scoreType when search is pressed
       setDisplayedScoreType(scoreType);
       
-      // Apply the score type to set the correct score property
       processedData = processedData.map(entry => ({
         ...entry,
         score: scoreType === 'gross' ? entry.gross_score! : entry.net_score!
@@ -282,16 +277,13 @@ export const CourseLeaderboard = ({
         }))
       );
       
-      // Sort the processed data by the score property
       processedData.sort((a, b) => a.score - b.score);
       
-      // Add rankings
       processedData = processedData.map((entry, index) => ({
         ...entry,
         rank: index + 1
       }));
       
-      // Store the original data 
       setOriginalLeaderboardData(processedData);
       
       const userEntries = processedData.filter(entry => entry.isCurrentUser);
