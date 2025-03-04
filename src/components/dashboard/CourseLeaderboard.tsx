@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Calendar, ChevronLeft, ChevronRight, Search } from "lucide-react";
@@ -194,10 +193,9 @@ export const CourseLeaderboard = ({
         return;
       }
       
-      // Get unique user IDs from rounds to fetch their profiles
       const userIds = [...new Set(roundsData.map(round => round.user_id))];
+      console.log("User IDs to fetch profiles for:", userIds);
       
-      // Fetch profile data for all users who have rounds at this course
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('id, username, first_name, last_name, handicap')
@@ -232,7 +230,6 @@ export const CourseLeaderboard = ({
         }
         
         userMap.set(profile.id, displayName || 'Unknown Player');
-        // Use the actual handicap value from the profile
         handicapMap.set(profile.id, profile.handicap || 0);
       });
       
@@ -242,11 +239,10 @@ export const CourseLeaderboard = ({
       
       let processedData = roundsData.map(round => {
         const username = userMap.get(round.user_id) || 'Unknown Player';
-        const playerHandicap = handicapMap.get(round.user_id) || 0;
+        const playerHandicap = parseFloat(handicapMap.get(round.user_id) || '0');
         
         const grossScore = round.gross_score;
         
-        // Calculate net score based on the player's actual handicap
         let netScore;
         if (round.net_score !== null && round.net_score !== undefined) {
           netScore = round.net_score;
@@ -272,10 +268,8 @@ export const CourseLeaderboard = ({
       
       console.log("Score type selected:", scoreType);
       
-      // Store the current display mode
       setDisplayedScoreType(scoreType);
       
-      // Apply score type to determine which score to display
       processedData = processedData.map(entry => ({
         ...entry,
         score: scoreType === 'gross' ? entry.gross_score! : entry.net_score!
@@ -292,10 +286,8 @@ export const CourseLeaderboard = ({
         }))
       );
       
-      // Sort based on score (ascending - lower is better in golf)
       processedData.sort((a, b) => a.score - b.score);
       
-      // Apply ranking
       processedData = processedData.map((entry, index) => ({
         ...entry,
         rank: index + 1
@@ -303,7 +295,6 @@ export const CourseLeaderboard = ({
       
       setOriginalLeaderboardData(processedData);
       
-      // Find user's best round
       const userEntries = processedData.filter(entry => entry.isCurrentUser);
       if (userEntries.length > 0) {
         const bestUserEntry = userEntries.reduce((prev, current) => 
@@ -316,9 +307,6 @@ export const CourseLeaderboard = ({
         setUserRank(null);
         setUserBestScore(null);
       }
-      
-      console.log("Final processed leaderboard data:", processedData);
-      console.log("Number of unique users:", new Set(processedData.map(entry => entry.user_id)).size);
       
       setTotalPages(Math.ceil(processedData.length / itemsPerPage));
       setCurrentPage(1);

@@ -79,5 +79,6 @@ export function calculateHandicapIndex(
 
 // Helper function to calculate net score from gross score and handicap
 export function calculateNetScore(grossScore: number, handicap: number): number {
+  console.log(`Calculating net score: gross=${grossScore}, handicap=${handicap}`);
   return Math.max(0, grossScore - handicap);
 }
