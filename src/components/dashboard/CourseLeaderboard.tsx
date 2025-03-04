@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Calendar, ChevronLeft, ChevronRight, Search } from "lucide-react";
@@ -112,6 +113,7 @@ export const CourseLeaderboard = ({
       }
       
       const currentUserId = session.user.id;
+      console.log("Current user ID:", currentUserId);
       
       let dateFilter = {};
       if (dateRange === 'monthly' && selectedMonth) {
@@ -132,6 +134,7 @@ export const CourseLeaderboard = ({
         };
       }
       
+      // Important change: Remove user_id filter to get all users' rounds
       let query = supabase
         .from('rounds')
         .select(`
@@ -157,6 +160,8 @@ export const CourseLeaderboard = ({
       
       if (roundsError) throw roundsError;
       
+      console.log("Fetched rounds data:", roundsData);
+      
       if (!roundsData || roundsData.length === 0) {
         setLeaderboard([]);
         setUserRank(null);
@@ -170,11 +175,14 @@ export const CourseLeaderboard = ({
         return;
       }
       
+      // Fetch all profiles to get usernames
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('id, username');
         
       if (profilesError) throw profilesError;
+      
+      console.log("Fetched profiles data:", profilesData);
       
       const userMap = new Map();
       if (profilesData) {
@@ -183,6 +191,7 @@ export const CourseLeaderboard = ({
         });
       }
       
+      console.log("User map created:", Array.from(userMap.entries()));
       console.log("Query result data:", roundsData);
       
       let processedData = roundsData.map(round => {
@@ -202,13 +211,16 @@ export const CourseLeaderboard = ({
         };
       });
       
+      // Sort by score (lowest first)
       processedData.sort((a, b) => a.score - b.score);
       
+      // Assign ranks
       processedData = processedData.map((entry, index) => ({
         ...entry,
         rank: index + 1
       }));
       
+      // Find best user entry for the current user
       const userEntries = processedData.filter(entry => entry.isCurrentUser);
       if (userEntries.length > 0) {
         const bestUserEntry = userEntries.reduce((prev, current) => 
