@@ -30,8 +30,9 @@ export const ScoreTableSummary = ({ scores, userId }: ScoreTableSummaryProps) =>
   const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
   const toPar = totalScore - totalPar;
   
-  // Calculate net score
-  const netScore = totalScore - Math.round(handicap);
+  // Calculate net score by applying the handicap
+  const handicapToApply = Math.round(handicap);
+  const netScore = totalScore - handicapToApply;
   const toParNet = netScore - totalPar;
   
   return (

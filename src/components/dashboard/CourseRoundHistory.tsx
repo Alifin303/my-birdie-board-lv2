@@ -55,7 +55,11 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
       tee_name: round.tee_name,
       tee_name_type: typeof round.tee_name,
       tee_id: round.tee_id,
-      date: new Date(round.date).toLocaleDateString()
+      date: new Date(round.date).toLocaleDateString(),
+      gross_score: round.gross_score,
+      net_score: round.net_score,
+      to_par_gross: round.to_par_gross,
+      to_par_net: round.to_par_net
     }))
   );
   
@@ -80,11 +84,11 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
     const bestGrossScore = Math.min(...courseRounds.map(r => r.gross_score));
     const bestToPar = Math.min(...courseRounds.map(r => r.to_par_gross));
     
-    const roundsWithNetScore = courseRounds.filter(r => r.net_score !== undefined);
+    const roundsWithNetScore = courseRounds.filter(r => r.net_score !== undefined && r.net_score !== null);
     const bestNetScore = roundsWithNetScore.length > 0 ? 
       Math.min(...roundsWithNetScore.map(r => r.net_score!)) : null;
     
-    const roundsWithToParNet = courseRounds.filter(r => r.to_par_net !== undefined);
+    const roundsWithToParNet = courseRounds.filter(r => r.to_par_net !== undefined && r.to_par_net !== null);
     const bestToParNet = roundsWithToParNet.length > 0 ? 
       Math.min(...roundsWithToParNet.map(r => r.to_par_net!)) : null;
       

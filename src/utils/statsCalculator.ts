@@ -75,7 +75,7 @@ export const calculateStats = (rounds: Round[]): Stats => {
   const bestGrossScore = Math.min(...rounds.map(r => r.gross_score));
   const bestToPar = Math.min(...rounds.map(r => r.to_par_gross));
   
-  // Net scores may not be available for all rounds
+  // Net scores may not be available for all rounds - handle properly
   const roundsWithNetScore = rounds.filter(r => r.net_score !== undefined && r.net_score !== null);
   const bestNetScore = roundsWithNetScore.length > 0 ? 
     Math.min(...roundsWithNetScore.map(r => r.net_score!)) : null;
@@ -157,7 +157,7 @@ export const calculateCourseStats = (rounds: Round[]): CourseStats[] => {
     const bestGrossScore = Math.min(...courseRounds.map(r => r.gross_score));
     const bestToPar = Math.min(...courseRounds.map(r => r.to_par_gross));
     
-    // Net scores may not be available for all rounds
+    // Properly handle net scores - ensure null values don't break calculations
     const roundsWithNetScore = courseRounds.filter(r => r.net_score !== undefined && r.net_score !== null);
     const bestNetScore = roundsWithNetScore.length > 0 ? 
       Math.min(...roundsWithNetScore.map(r => r.net_score!)) : null;
