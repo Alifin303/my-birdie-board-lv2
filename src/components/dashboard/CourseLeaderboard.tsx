@@ -19,6 +19,7 @@ interface LeaderboardEntry {
   isCurrentUser: boolean;
   rank?: number;
   tee_name?: string;
+  user_id?: string; // Added to help with debugging
 }
 
 interface CourseLeaderboardProps {
@@ -134,7 +135,7 @@ export const CourseLeaderboard = ({
         };
       }
       
-      // Important change: Remove user_id filter to get all users' rounds
+      // Get all rounds for the specified course
       let query = supabase
         .from('rounds')
         .select(`
@@ -175,21 +176,33 @@ export const CourseLeaderboard = ({
         return;
       }
       
-      // Fetch all profiles to get usernames
+      // Get ALL profiles to ensure we have usernames for everyone
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('id, username');
         
-      if (profilesError) throw profilesError;
+      if (profilesError) {
+        console.error("Error fetching profiles:", profilesError);
+        throw profilesError;
+      }
       
       console.log("Fetched profiles data:", profilesData);
       
-      const userMap = new Map();
-      if (profilesData) {
-        profilesData.forEach(profile => {
-          userMap.set(profile.id, profile.username || 'Unknown');
+      if (!profilesData || profilesData.length === 0) {
+        console.error("No profiles found");
+        toast({
+          title: "Error",
+          description: "Could not retrieve player information.",
+          variant: "destructive"
         });
+        setIsLoading(false);
+        return;
       }
+      
+      const userMap = new Map();
+      profilesData.forEach(profile => {
+        userMap.set(profile.id, profile.username || 'Unknown');
+      });
       
       console.log("User map created:", Array.from(userMap.entries()));
       console.log("Query result data:", roundsData);
@@ -207,7 +220,8 @@ export const CourseLeaderboard = ({
           username: username,
           score: score,
           isCurrentUser: round.user_id === currentUserId,
-          tee_name: round.tee_name
+          tee_name: round.tee_name,
+          user_id: round.user_id // Added for debugging
         };
       });
       
@@ -233,6 +247,9 @@ export const CourseLeaderboard = ({
         setUserRank(null);
         setUserBestScore(null);
       }
+      
+      console.log("Processed leaderboard data:", processedData);
+      console.log("Number of unique users:", new Set(processedData.map(entry => entry.user_id)).size);
       
       setTotalPages(Math.ceil(processedData.length / itemsPerPage));
       setCurrentPage(1);
