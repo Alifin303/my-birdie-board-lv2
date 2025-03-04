@@ -177,6 +177,7 @@ export const CourseLeaderboard = ({
       }
       
       // Get ALL profiles to ensure we have usernames for everyone
+      // We don't want to filter by user_id here - we need ALL profiles
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('id, username');
