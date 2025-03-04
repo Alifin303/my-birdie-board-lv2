@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Calendar, ChevronLeft, ChevronRight, Search } from "lucide-react";
@@ -135,7 +134,6 @@ export const CourseLeaderboard = ({
         };
       }
       
-      // Get all rounds for the specified course WITHOUT filtering by user_id
       let query = supabase
         .from('rounds')
         .select(`
@@ -176,7 +174,6 @@ export const CourseLeaderboard = ({
         return;
       }
       
-      // Get ALL profiles without ANY filter
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('*');
@@ -199,17 +196,16 @@ export const CourseLeaderboard = ({
         return;
       }
       
-      // Create a map of user IDs to usernames for faster lookup
       const userMap = new Map();
       profilesData.forEach(profile => {
-        userMap.set(profile.id, profile.username || 'Unknown');
+        userMap.set(profile.id, profile.username || 'Unknown Player');
       });
       
       console.log("User map created:", Array.from(userMap.entries()));
       console.log("Query result data:", roundsData);
       
       let processedData = roundsData.map(round => {
-        const username = userMap.get(round.user_id) || 'Unknown';
+        const username = userMap.get(round.user_id) || 'Unknown Player';
         
         const score = scoreType === 'gross' 
           ? round.gross_score 
@@ -226,16 +222,13 @@ export const CourseLeaderboard = ({
         };
       });
       
-      // Sort by score (lowest first)
       processedData.sort((a, b) => a.score - b.score);
       
-      // Assign ranks
       processedData = processedData.map((entry, index) => ({
         ...entry,
         rank: index + 1
       }));
       
-      // Find best user entry for the current user
       const userEntries = processedData.filter(entry => entry.isCurrentUser);
       if (userEntries.length > 0) {
         const bestUserEntry = userEntries.reduce((prev, current) => 
