@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
-import { ensureCourseExists, findOrCreateCourseByApiId } from "@/integrations/supabase";
+import { ensureCourseExists, findOrCreateCourseByApiId, updateUserHandicap } from "@/integrations/supabase";
 import { getCourseTeesByIdFromDatabase } from "@/integrations/supabase/course/course-db-operations";
 
 export function createSaveRoundHandler({
@@ -163,6 +163,31 @@ export function createSaveRoundHandler({
       
       console.log("Round saved successfully:", round);
       console.log(`Saved tee_name: "${round.tee_name}" and tee_id: "${round.tee_id}"`);
+      
+      // After successful round save, fetch all user rounds to update handicap
+      const { data: userRounds, error: userRoundsError } = await supabase
+        .from('rounds')
+        .select('gross_score')
+        .eq('user_id', session.user.id)
+        .order('date', { ascending: false });
+        
+      if (userRoundsError) {
+        console.error("Error fetching user rounds for handicap update:", userRoundsError);
+      } else if (userRounds && userRounds.length > 0) {
+        // Extract gross scores for handicap calculation
+        const grossScores = userRounds.map(r => r.gross_score);
+        console.log("Updating handicap based on rounds:", grossScores);
+        
+        // Update the user's handicap
+        const newHandicap = await updateUserHandicap(session.user.id, grossScores);
+        console.log("Updated handicap to:", newHandicap);
+        
+        // Show handicap update in toast
+        toast.toast({
+          title: "Handicap Updated",
+          description: `Your handicap index is now ${newHandicap}`,
+        });
+      }
       
       queryClient.invalidateQueries({ queryKey: ['userRounds'] });
       

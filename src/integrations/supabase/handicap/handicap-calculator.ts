@@ -1,20 +1,33 @@
 
 /**
  * Calculates a handicap index based on a set of scores
- * This is a simplified calculation and not the exact USGA method
+ * This follows a simplified version of the World Handicap System
  */
 export const calculateHandicapIndex = (scores: number[]): number => {
   if (!scores || scores.length === 0) return 0;
 
-  // Sort scores from best to worst
+  // Sort scores from best to worst (lowest to highest)
   const sortedScores = [...scores].sort((a, b) => a - b);
   
-  // Take the best score
-  const bestScore = sortedScores[0];
+  // Determine how many scores to use based on available rounds
+  // Following a simplified version of the World Handicap System
+  let scoresToUse = 0;
+  if (scores.length >= 20) scoresToUse = 8;       // Use best 8 of 20
+  else if (scores.length >= 15) scoresToUse = 6;  // Use best 6 of 15-19
+  else if (scores.length >= 10) scoresToUse = 4;  // Use best 4 of 10-14
+  else if (scores.length >= 5) scoresToUse = 3;   // Use best 3 of 5-9
+  else if (scores.length >= 3) scoresToUse = 1;   // Use best score if fewer than 5 rounds
+  else scoresToUse = 1;                           // Use best score if fewer than 3 rounds
   
-  // Apply a simple algorithm to calculate handicap index
-  // This is not the official USGA method
-  const handicapIndex = Math.max(0, (bestScore - 72) * 0.96);
+  // Take the best scores based on the number we determined
+  const bestScores = sortedScores.slice(0, scoresToUse);
+  
+  // Calculate the average of best scores
+  const averageScore = bestScores.reduce((sum, score) => sum + score, 0) / bestScores.length;
+  
+  // Apply a simplified handicap formula (0.96 multiplier as per WHS)
+  // In a real implementation, this would consider course rating and slope
+  const handicapIndex = Math.max(0, (averageScore - 72) * 0.96);
   
   // Round to 1 decimal place
   return Math.round(handicapIndex * 10) / 10;
@@ -41,4 +54,44 @@ export const calculateNetScore = (grossScore: number, handicap: number | string 
   
   // Ensure we never return a negative score
   return Math.max(0, grossScore - numericHandicap);
+};
+
+/**
+ * Updates a user's handicap in the database based on their recent rounds
+ * @param userId The user's ID
+ * @param rounds An array of round gross scores
+ * @returns The new handicap index
+ */
+export const updateUserHandicap = async (userId: string, rounds: number[]): Promise<number> => {
+  try {
+    if (!userId) {
+      console.error("Cannot update handicap: No user ID provided");
+      return 0;
+    }
+    
+    // Import supabase client
+    const { supabase } = await import('@/integrations/supabase');
+    
+    // Calculate the new handicap index
+    const newHandicap = calculateHandicapIndex(rounds);
+    console.log(`Updating handicap for user ${userId}: New handicap=${newHandicap} based on ${rounds.length} rounds`);
+    
+    // Update the user's profile with the new handicap
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ handicap: newHandicap })
+      .eq('id', userId)
+      .select('handicap');
+    
+    if (error) {
+      console.error("Error updating user handicap:", error);
+      throw error;
+    }
+    
+    console.log("Handicap updated successfully:", data);
+    return newHandicap;
+  } catch (error) {
+    console.error("Failed to update handicap:", error);
+    return 0;
+  }
 };

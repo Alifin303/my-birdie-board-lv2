@@ -1,8 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase";
+import { updateUserHandicap } from "@/integrations/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { RoundScorecardProps, HoleScore } from "./types";
@@ -103,6 +105,36 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         
       if (error) {
         throw error;
+      }
+      
+      // Get current user ID to update handicap
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        // Fetch all user rounds to recalculate handicap
+        const { data: userRounds, error: userRoundsError } = await supabase
+          .from('rounds')
+          .select('gross_score')
+          .eq('user_id', session.user.id)
+          .order('date', { ascending: false });
+          
+        if (userRoundsError) {
+          console.error("Error fetching user rounds for handicap update:", userRoundsError);
+        } else if (userRounds && userRounds.length > 0) {
+          // Extract gross scores for handicap calculation
+          const grossScores = userRounds.map(r => r.gross_score);
+          console.log("Updating handicap based on rounds:", grossScores);
+          
+          // Update the user's handicap
+          const newHandicap = await updateUserHandicap(session.user.id, grossScores);
+          console.log("Updated handicap to:", newHandicap);
+          
+          // Show handicap update in toast
+          toast({
+            title: "Handicap Updated",
+            description: `Your handicap index is now ${newHandicap}`,
+          });
+        }
       }
       
       toast({
