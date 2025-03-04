@@ -29,14 +29,22 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
     handicapIndex: stats.handicapIndex
   });
   
-  // Calculate net scores based on handicap
+  // Calculate net scores based on handicap if not already available
   const bestNetScore = stats.bestNetScore !== null 
     ? stats.bestNetScore 
     : (stats.handicapIndex > 0 ? Math.max(0, stats.bestGrossScore - stats.handicapIndex) : stats.bestGrossScore);
     
   const bestNetToPar = stats.bestToParNet !== null
     ? stats.bestToParNet
-    : (stats.handicapIndex > 0 ? Math.max(-72, stats.bestToPar - stats.handicapIndex) : stats.bestToPar);
+    : (stats.handicapIndex > 0 ? stats.bestToPar - stats.handicapIndex : stats.bestToPar);
+  
+  console.log("[MainStats] Calculated scores:", {
+    bestGrossScore: stats.bestGrossScore,
+    calculatedBestNetScore: bestNetScore,
+    difference: stats.bestGrossScore - bestNetScore,
+    bestToPar: stats.bestToPar,
+    bestNetToPar: bestNetToPar
+  });
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">

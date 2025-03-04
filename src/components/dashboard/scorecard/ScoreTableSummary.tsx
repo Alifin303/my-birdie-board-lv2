@@ -19,7 +19,8 @@ export const ScoreTableSummary = ({ scores, handicapIndex = 0, showNet = false }
     handicapIndex,
     showNet,
     toPar,
-    netToPar
+    netToPar,
+    difference: totalScore - netScore
   });
   
   return (

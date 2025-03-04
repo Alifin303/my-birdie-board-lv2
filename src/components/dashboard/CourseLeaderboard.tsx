@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Calendar, ChevronLeft, ChevronRight, Search } from "lucide-react";
@@ -243,7 +242,9 @@ export const CourseLeaderboard = ({
         const netScore = (round.net_score !== null && round.net_score !== undefined) 
           ? round.net_score 
           : Math.max(0, round.gross_score - playerHandicap);
-            
+        
+        console.log(`Round ID ${round.id} - gross: ${grossScore}, net: ${netScore}, handicap: ${playerHandicap}`);
+        
         return {
           id: round.id,
           date: round.date,
@@ -333,52 +334,6 @@ export const CourseLeaderboard = ({
   const handleDialogOpen = (isOpen: boolean) => {
     onOpenChange(isOpen);
   };
-  
-  // Handle scoreType changes
-  useEffect(() => {
-    if (originalLeaderboardData.length > 0) {
-      console.log("Score type changed to:", scoreType);
-
-      // Create a new array for the leaderboard with updated scores based on the scoreType
-      const updatedLeaderboard = originalLeaderboardData.map(entry => ({
-        ...entry,
-        score: scoreType === 'gross' ? entry.gross_score! : entry.net_score!
-      }));
-      
-      // Sort by the new score values
-      updatedLeaderboard.sort((a, b) => a.score - b.score);
-      
-      // Recalculate rankings
-      const rankedLeaderboard = updatedLeaderboard.map((entry, index) => ({
-        ...entry,
-        rank: index + 1
-      }));
-      
-      console.log("Updated leaderboard with new score type:", 
-        rankedLeaderboard.slice(0, 3).map(d => ({
-          id: d.id, 
-          gross: d.gross_score,
-          net: d.net_score,
-          displayed: d.score,
-          scoreType
-        }))
-      );
-      
-      // Update the user's best round and rank
-      const userEntries = rankedLeaderboard.filter(entry => entry.isCurrentUser);
-      if (userEntries.length > 0) {
-        const bestUserEntry = userEntries.reduce((prev, current) => 
-          prev.score < current.score ? prev : current
-        ) as LeaderboardEntry;
-        
-        setUserRank(bestUserEntry.rank !== undefined ? bestUserEntry.rank : null);
-        setUserBestScore(bestUserEntry);
-      }
-      
-      // Update the leaderboard
-      setLeaderboard(rankedLeaderboard);
-    }
-  }, [scoreType]);
   
   return (
     <Dialog open={open} onOpenChange={handleDialogOpen}>
@@ -508,7 +463,9 @@ export const CourseLeaderboard = ({
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-sm">Date: {format(new Date(userBestScore.date), 'MMM d, yyyy')}</p>
-                  <p className="text-sm">Score: {userBestScore.score}</p>
+                  <p className="text-sm">
+                    Score: {scoreType === 'gross' ? userBestScore.gross_score : userBestScore.net_score}
+                  </p>
                   {userBestScore.tee_name && <p className="text-sm">Tee: {userBestScore.tee_name}</p>}
                 </div>
                 <div className="text-right">
@@ -558,7 +515,9 @@ export const CourseLeaderboard = ({
                         {entry.isCurrentUser && <span className="ml-2 text-xs text-primary">(You)</span>}
                       </td>
                       {availableTees.length > 0 && <td className="p-3 text-sm">{entry.tee_name || 'N/A'}</td>}
-                      <td className="p-3 text-sm text-right">{entry.score}</td>
+                      <td className="p-3 text-sm text-right">
+                        {scoreType === 'gross' ? entry.gross_score : entry.net_score}
+                      </td>
                     </tr>
                   ))
                 )}
