@@ -187,7 +187,7 @@ export const CourseLeaderboard = ({
         // Get the user's best score (lowest score)
         const bestUserEntry = userEntries.reduce((prev, current) => 
           prev.score < current.score ? prev : current
-        );
+        ) as LeaderboardEntry;  // Explicitly cast to LeaderboardEntry to ensure it has the rank property
         
         // Fix for the rank property access with proper type checking
         setUserRank(bestUserEntry.rank !== undefined ? bestUserEntry.rank : null);
