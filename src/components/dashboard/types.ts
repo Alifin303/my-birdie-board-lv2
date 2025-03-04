@@ -42,3 +42,10 @@ export interface Stats {
   handicapIndex: number;
   roundsNeededForHandicap: number;
 }
+
+export interface HoleScore {
+  hole: number;
+  par: number;
+  strokes?: number;
+  putts?: number;
+}

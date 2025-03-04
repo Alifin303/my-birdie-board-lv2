@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown, Trash, Eye, ArrowLeft, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +19,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import ScoreProgressChart from "./ScoreProgressChart";
 import { RoundScorecard } from "./scorecard/RoundScorecard";
 import { CourseLeaderboard } from "./CourseLeaderboard";
+import { PotentialBestScore } from "./PotentialBestScore";
 import { Round } from "./types";
 
 interface CourseRoundHistoryProps {
@@ -248,6 +250,9 @@ export const CourseRoundHistory = ({
           handicapIndex={handicapIndex}
         />
       </div>
+      
+      {/* Add the new Potential Best Score component here */}
+      <PotentialBestScore rounds={courseRounds} />
       
       <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 bg-muted/30 rounded-lg border mt-16">
         <p className="text-sm sm:text-base">
