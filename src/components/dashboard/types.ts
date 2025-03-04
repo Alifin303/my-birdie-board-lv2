@@ -9,6 +9,7 @@ export interface Round {
   to_par_gross: number;
   to_par_net?: number;
   hole_scores?: any;
+  user_id?: string;
   courses?: {
     id: number;
     name: string;
