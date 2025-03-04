@@ -16,18 +16,5 @@ function useCourseHandlers(props: Parameters<typeof useRefactoredCourseHandlers>
     console.log("Selected tee in wrapper:", tee ? { id: tee.id, name: tee.name, par: tee.par } : "Tee not found");
   }
   
-  // Ensure we have a valid default for selectedTeeId if it's null but we have a course with tees
-  if (!props.selectedTeeId && props.selectedCourse && props.selectedCourse.tees && props.selectedCourse.tees.length > 0) {
-    console.log("Setting default selectedTeeId in wrapper from first available tee");
-    props.setSelectedTeeId(props.selectedCourse.tees[0].id);
-    
-    // Ensure courseAndTeeReady gets set properly once we have both course and tee
-    if (!props.courseAndTeeReady) {
-      setTimeout(() => {
-        props.setCourseAndTeeReady(true);
-      }, 0);
-    }
-  }
-  
   return useRefactoredCourseHandlers(props);
 }

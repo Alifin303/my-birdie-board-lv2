@@ -48,30 +48,6 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
   }
 
   const stats = calculateStats(userRounds);
-  console.log("Stats for MainStats:", { 
-    scoreType, 
-    bestGrossScore: stats.bestGrossScore, 
-    bestNetScore: stats.bestNetScore,
-    bestToPar: stats.bestToPar,
-    bestToParNet: stats.bestToParNet,
-    handicapIndex: stats.handicapIndex
-  });
-  
-  // Simple calculation for net scores when toggling
-  let displayedScore, displayedToPar;
-  
-  if (scoreType === 'gross') {
-    displayedScore = stats.bestGrossScore;
-    displayedToPar = (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar;
-  } else {
-    // For net score: simply subtract handicap from gross score
-    const netScore = stats.handicapIndex > 0 ? Math.round(stats.bestGrossScore - stats.handicapIndex) : stats.bestGrossScore;
-    displayedScore = netScore;
-    
-    // For net to par: subtract handicap from gross to par
-    const netToPar = stats.handicapIndex > 0 ? stats.bestToPar - Math.round(stats.handicapIndex) : stats.bestToPar;
-    displayedToPar = (netToPar > 0 ? '+' : '') + netToPar;
-  }
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -91,7 +67,7 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-sm font-medium text-muted-foreground">Best Score</p>
-            <p className="text-3xl font-bold">{displayedScore}</p>
+            <p className="text-3xl font-bold">{scoreType === 'gross' ? stats.bestGrossScore : (stats.bestNetScore || '-')}</p>
           </div>
           <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary/10">
             <Trophy className="h-6 w-6 text-primary" />
@@ -103,7 +79,13 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-sm font-medium text-muted-foreground">Best to Par</p>
-            <p className="text-3xl font-bold">{displayedToPar}</p>
+            <p className="text-3xl font-bold">
+              {scoreType === 'gross' 
+                ? (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar 
+                : stats.bestToParNet !== null 
+                  ? (stats.bestToParNet > 0 ? '+' : '') + stats.bestToParNet 
+                  : '-'}
+            </p>
           </div>
           <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary/10">
             <Flag className="h-6 w-6 text-primary" />
@@ -127,27 +109,18 @@ export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTy
   const stats = calculateStats(userRounds);
   const hasHandicap = stats.roundsNeededForHandicap === 0;
   
-  const handleScoreTypeChange = (type: 'gross' | 'net') => {
-    console.log("HandicapCircle: changing score type to", type);
-    
-    // Ensure we're not triggering unnecessary re-renders if type is the same
-    if (type !== scoreType) {
-      onScoreTypeChange(type);
-    }
-  };
-  
   return (
     <div className="flex flex-col items-center justify-center mb-8">
       <div className="relative mb-3">
         <div className="flex items-center gap-2">
           <button 
-            onClick={() => handleScoreTypeChange('gross')} 
+            onClick={() => onScoreTypeChange('gross')} 
             className={`px-3 py-1 rounded-full text-sm font-medium ${scoreType === 'gross' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
           >
             Gross
           </button>
           <button 
-            onClick={() => handleScoreTypeChange('net')} 
+            onClick={() => onScoreTypeChange('net')} 
             className={`px-3 py-1 rounded-full text-sm font-medium ${scoreType === 'net' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
           >
             Net

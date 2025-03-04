@@ -23,7 +23,6 @@ export interface ScoreTableProps {
 
 export interface ScoreTableSummaryProps {
   scores: HoleScore[];
-  userId?: string;
 }
 
 export interface ScorecardHeaderProps {

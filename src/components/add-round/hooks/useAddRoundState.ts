@@ -93,14 +93,7 @@ export const useAddRoundState = () => {
         setCourseAndTeeReady(true);
       } else {
         console.error("Selected tee ID doesn't match any tee in the course:", selectedTeeId);
-        
-        // Recovery logic - if tee doesn't exist but course has tees, select first available tee
-        if (selectedCourse.tees && selectedCourse.tees.length > 0) {
-          console.log("Recovering by selecting first available tee:", selectedCourse.tees[0].id);
-          setSelectedTeeId(selectedCourse.tees[0].id);
-        } else {
-          setCourseAndTeeReady(false);
-        }
+        setCourseAndTeeReady(false);
       }
     } else {
       setCourseAndTeeReady(false);

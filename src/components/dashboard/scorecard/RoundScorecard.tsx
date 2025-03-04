@@ -157,10 +157,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
           />
         )}
 
-        <ScoreTableSummary 
-          scores={scores} 
-          userId={round.user_id}
-        />
+        <ScoreTableSummary scores={scores} />
       </div>
     );
   };
