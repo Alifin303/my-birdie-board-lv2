@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { calculateStats } from "@/utils/statsCalculator";
-import { ScoreProgressChart } from "./ScoreProgressChart";
+import ScoreProgressChart from "./ScoreProgressChart";
 import { CourseLeaderboard, RoundScorecard } from "./CourseStats";
 import { Round } from "./types";
 import { PotentialBestScore } from "./PotentialBestScore";
@@ -23,6 +23,8 @@ export const CourseRoundHistory = ({
   handicapIndex
 }: CourseRoundHistoryProps) => {
   const [selectedRoundId, setSelectedRoundId] = useState<number | null>(null);
+  const [isRoundDialogOpen, setIsRoundDialogOpen] = useState(false);
+  const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   
   const courseRounds = useMemo(() => {
     if (!userRounds) return [];
@@ -37,10 +39,11 @@ export const CourseRoundHistory = ({
   }, [courseRounds]);
   
   const handleRoundClick = (roundId: number) => {
-    setSelectedRoundId(prev => prev === roundId ? null : roundId);
+    setSelectedRoundId(roundId);
+    setIsRoundDialogOpen(true);
   };
   
-  if (selectedRoundId) {
+  if (selectedRoundId && isRoundDialogOpen) {
     const round = courseRounds.find(r => r.id === selectedRoundId);
     if (!round) return null;
     
@@ -49,15 +52,17 @@ export const CourseRoundHistory = ({
         <Button 
           variant="ghost" 
           className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all"
-          onClick={() => setSelectedRoundId(null)}
+          onClick={() => setIsRoundDialogOpen(false)}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to rounds
         </Button>
         
         <RoundScorecard 
-          round={round} 
-          onClose={() => setSelectedRoundId(null)} 
+          round={round}
+          isOpen={isRoundDialogOpen}
+          onOpenChange={setIsRoundDialogOpen}
+          handicapIndex={handicapIndex}
         />
       </div>
     );
@@ -107,7 +112,7 @@ export const CourseRoundHistory = ({
       <div className="space-y-4">
         <h3 className="text-lg font-medium text-white">Score Progression Over Time</h3>
         <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-4">
-          <ScoreProgressChart rounds={courseRounds} />
+          <ScoreProgressChart rounds={courseRounds} scoreType="gross" />
         </div>
       </div>
       
@@ -115,7 +120,20 @@ export const CourseRoundHistory = ({
       
       <div className="space-y-4">
         <h3 className="text-lg font-medium text-white">Want to see how your score compares to other golfers at this course?</h3>
-        <CourseLeaderboard courseId={selectedCourseId} />
+        <Button
+          onClick={() => setIsLeaderboardOpen(true)}
+          className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all"
+        >
+          View Leaderboard
+        </Button>
+        
+        <CourseLeaderboard 
+          courseId={selectedCourseId} 
+          courseName={selectedCourse?.clubName + " - " + selectedCourse?.courseName || "This Course"}
+          open={isLeaderboardOpen}
+          onOpenChange={setIsLeaderboardOpen}
+          handicapIndex={handicapIndex}
+        />
       </div>
       
       <div className="space-y-4">
