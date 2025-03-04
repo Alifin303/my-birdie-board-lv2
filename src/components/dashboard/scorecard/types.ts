@@ -23,6 +23,8 @@ export interface ScoreTableProps {
 
 export interface ScoreTableSummaryProps {
   scores: HoleScore[];
+  handicapIndex?: number;
+  showNet?: boolean;
 }
 
 export interface ScorecardHeaderProps {

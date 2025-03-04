@@ -31,3 +31,14 @@ export interface CourseStats {
   bestToPar: number;
   bestToParNet: number | null;
 }
+
+export interface Stats {
+  totalRounds: number;
+  bestGrossScore: number;
+  bestNetScore: number | null;
+  bestToPar: number;
+  bestToParNet: number | null;
+  averageScore: number;
+  handicapIndex: number;
+  roundsNeededForHandicap: number;
+}

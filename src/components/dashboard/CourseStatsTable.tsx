@@ -8,9 +8,16 @@ interface CourseStatsTableProps {
   scoreType: 'gross' | 'net';
   calculateCourseStats: (rounds: Round[]) => CourseStats[];
   onCourseClick: (courseId: number) => void;
+  handicapIndex?: number;
 }
 
-export const CourseStatsTable = ({ userRounds, scoreType, calculateCourseStats, onCourseClick }: CourseStatsTableProps) => {
+export const CourseStatsTable = ({ 
+  userRounds, 
+  scoreType, 
+  calculateCourseStats, 
+  onCourseClick,
+  handicapIndex = 0
+}: CourseStatsTableProps) => {
   const [sortField, setSortField] = useState<keyof CourseStats>('courseName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -127,14 +134,17 @@ export const CourseStatsTable = ({ userRounds, scoreType, calculateCourseStats, 
               <td className="px-4 py-3 text-sm">
                 {scoreType === 'gross' 
                   ? courseStat.bestGrossScore 
-                  : courseStat.bestNetScore !== null ? courseStat.bestNetScore : '-'}
+                  : handicapIndex > 0 
+                    ? Math.max(0, Math.round(courseStat.bestGrossScore - handicapIndex))
+                    : courseStat.bestGrossScore}
               </td>
               <td className="px-4 py-3 text-sm">
                 {scoreType === 'gross' 
                   ? (courseStat.bestToPar > 0 ? '+' : '') + courseStat.bestToPar
-                  : courseStat.bestToParNet !== null 
-                    ? (courseStat.bestToParNet > 0 ? '+' : '') + courseStat.bestToParNet
-                    : '-'}
+                  : handicapIndex > 0
+                    ? ((courseStat.bestToPar - handicapIndex > 0 ? '+' : '') + 
+                      (courseStat.bestToPar - handicapIndex))
+                    : (courseStat.bestToPar > 0 ? '+' : '') + courseStat.bestToPar}
               </td>
             </tr>
           ))}

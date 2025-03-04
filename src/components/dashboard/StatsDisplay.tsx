@@ -1,32 +1,5 @@
-
 import { CalendarDays, Trophy, Flag } from "lucide-react";
-
-interface Round {
-  id: number;
-  date: string;
-  tee_name: string;
-  gross_score: number;
-  net_score?: number;
-  to_par_gross: number;
-  to_par_net?: number;
-  courses?: {
-    id: number;
-    name: string;
-    city?: string;
-    state?: string;
-  };
-}
-
-interface Stats {
-  totalRounds: number;
-  bestGrossScore: number;
-  bestNetScore: number | null;
-  bestToPar: number;
-  bestToParNet: number | null;
-  averageScore: number;
-  handicapIndex: number;
-  roundsNeededForHandicap: number;
-}
+import { Stats, Round } from "./types";
 
 interface StatsDisplayProps {
   userRounds: Round[] | undefined;
@@ -67,7 +40,13 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-sm font-medium text-muted-foreground">Best Score</p>
-            <p className="text-3xl font-bold">{scoreType === 'gross' ? stats.bestGrossScore : (stats.bestNetScore || '-')}</p>
+            <p className="text-3xl font-bold">
+              {scoreType === 'gross' 
+                ? stats.bestGrossScore 
+                : (stats.handicapIndex > 0 
+                    ? Math.max(0, Math.round(stats.bestGrossScore - stats.handicapIndex)) 
+                    : stats.bestGrossScore)}
+            </p>
           </div>
           <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary/10">
             <Trophy className="h-6 w-6 text-primary" />
@@ -82,9 +61,10 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
             <p className="text-3xl font-bold">
               {scoreType === 'gross' 
                 ? (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar 
-                : stats.bestToParNet !== null 
-                  ? (stats.bestToParNet > 0 ? '+' : '') + stats.bestToParNet 
-                  : '-'}
+                : (stats.handicapIndex > 0
+                    ? ((stats.bestToPar - stats.handicapIndex > 0 ? '+' : '') + 
+                       (stats.bestToPar - stats.handicapIndex))
+                    : (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar)}
             </p>
           </div>
           <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary/10">

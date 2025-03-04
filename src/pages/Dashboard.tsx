@@ -151,6 +151,8 @@ export default function Dashboard() {
   }, [isModalOpen, queryClient]);
 
   const renderDashboard = () => {
+    const stats = userRounds ? calculateStats(userRounds) : { handicapIndex: 0 };
+    
     return (
       <div className="space-y-6 sm:space-y-8">
         <DashboardHeader 
@@ -192,6 +194,7 @@ export default function Dashboard() {
                   scoreType={scoreType}
                   calculateCourseStats={calculateCourseStats}
                   onCourseClick={(courseId) => setSelectedCourseId(courseId)}
+                  handicapIndex={stats.handicapIndex}
                 />
               </>
             )
