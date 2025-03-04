@@ -80,7 +80,12 @@ export function calculateHandicapIndex(
 // Helper function to calculate net score from gross score and handicap
 export function calculateNetScore(grossScore: number, handicap: number): number {
   // Ensure handicap is a valid number
-  const numericHandicap = parseFloat(String(handicap)) || 0;
+  const numericHandicap = typeof handicap === 'number' 
+    ? handicap
+    : parseFloat(String(handicap)) || 0;
+    
   console.log(`Calculating net score: gross=${grossScore}, handicap=${numericHandicap} (original: ${handicap}, type: ${typeof handicap})`);
+  
+  // Calculate net score by subtracting handicap
   return Math.max(0, grossScore - numericHandicap);
 }
