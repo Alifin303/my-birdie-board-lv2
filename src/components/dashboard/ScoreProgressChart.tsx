@@ -15,9 +15,10 @@ interface Round {
 interface ScoreProgressChartProps {
   rounds: Round[];
   scoreType: 'gross' | 'net';
+  handicapIndex?: number;
 }
 
-const ScoreProgressChart = ({ rounds, scoreType }: ScoreProgressChartProps) => {
+const ScoreProgressChart = ({ rounds, scoreType, handicapIndex = 0 }: ScoreProgressChartProps) => {
   const [chartData, setChartData] = useState<any[]>([]);
 
   useEffect(() => {
@@ -29,14 +30,24 @@ const ScoreProgressChart = ({ rounds, scoreType }: ScoreProgressChartProps) => {
     );
 
     // Format data for the chart
-    const data = sortedRounds.map(round => ({
-      date: format(new Date(round.date), 'MMM d, yyyy'),
-      score: scoreType === 'gross' ? round.gross_score : round.net_score,
-      id: round.id
-    }));
+    const data = sortedRounds.map(round => {
+      // Calculate scores with handicap when in net mode
+      let score = scoreType === 'gross' ? round.gross_score : round.net_score;
+      
+      // If we're in net mode and there's no net_score but we have a handicap
+      if (scoreType === 'net' && handicapIndex > 0 && !round.net_score) {
+        score = Math.max(0, round.gross_score - handicapIndex);
+      }
+      
+      return {
+        date: format(new Date(round.date), 'MMM d, yyyy'),
+        score: score,
+        id: round.id
+      };
+    });
 
     setChartData(data);
-  }, [rounds, scoreType]);
+  }, [rounds, scoreType, handicapIndex]);
 
   if (rounds.length < 2) {
     return (
