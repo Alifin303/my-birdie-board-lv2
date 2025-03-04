@@ -16,7 +16,7 @@ interface LeaderboardEntry {
   username: string;
   score: number;
   isCurrentUser: boolean;
-  rank?: number;
+  rank?: number;  // Added rank as an optional property
 }
 
 interface CourseLeaderboardProps {
@@ -156,7 +156,8 @@ export const CourseLeaderboard = ({
       // Process leaderboard data
       let processedData = data.map(round => {
         // Fix: Extract username correctly from the profiles object
-        const username = round.profiles?.username || "Unknown";
+        // The profiles object is a single object, not an array
+        const username = round.profiles ? round.profiles.username || "Unknown" : "Unknown";
         
         const score = scoreType === 'gross' 
           ? round.gross_score 
