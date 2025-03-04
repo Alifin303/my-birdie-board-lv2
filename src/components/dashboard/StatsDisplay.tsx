@@ -67,7 +67,7 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-sm font-medium text-muted-foreground">Best Score</p>
-            <p className="text-3xl font-bold">{scoreType === 'gross' ? stats.bestGrossScore : (stats.bestNetScore || '-')}</p>
+            <p className="text-3xl font-bold">{scoreType === 'gross' ? stats.bestGrossScore : (stats.bestNetScore !== null ? stats.bestNetScore : '-')}</p>
           </div>
           <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary/10">
             <Trophy className="h-6 w-6 text-primary" />

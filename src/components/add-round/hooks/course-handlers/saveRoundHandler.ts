@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
 import { ensureCourseExists, findOrCreateCourseByApiId } from "@/integrations/supabase";
@@ -39,7 +38,6 @@ export function createSaveRoundHandler({
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session found');
       
-      // Find the selected tee using the current selectedTeeId from props
       console.log("Looking for tee with ID:", selectedTeeId);
       console.log("Available tees:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
       
@@ -104,10 +102,8 @@ export function createSaveRoundHandler({
         console.log("Using course_id for user-added course:", dbCourseId);
       }
       
-      // Ensure we're using the correct tee
       console.log("Final selected tee for saving:", selectedTee);
       
-      // Store the tee name and ID in constants to make debugging easier
       const teeName = String(selectedTee.name);
       const teeId = selectedTeeId;
       
@@ -115,7 +111,6 @@ export function createSaveRoundHandler({
       console.log(`- tee_name: "${teeName}" (${typeof teeName})`);
       console.log(`- tee_id: "${teeId}" (${typeof teeId})`);
       
-      // Get the user's handicap
       const { data: userData, error: userError } = await supabase
         .from('profiles')
         .select('handicap')
@@ -130,8 +125,8 @@ export function createSaveRoundHandler({
       const userHandicap = userData?.handicap || 0;
       console.log("User handicap:", userHandicap);
       
-      // Calculate net score and to par net
-      const netScore = totalStrokes - Math.round(userHandicap);
+      const handicapToApply = Math.round(userHandicap);
+      const netScore = totalStrokes - handicapToApply;
       const toParNet = netScore - totalPar;
       
       console.log("Calculated net score:", netScore);
