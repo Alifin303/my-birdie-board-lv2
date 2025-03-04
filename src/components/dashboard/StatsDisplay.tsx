@@ -44,11 +44,37 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
   // Calculate net scores based on handicap if not already available
   const bestNetScore = stats.bestNetScore !== null 
     ? stats.bestNetScore 
-    : (stats.handicapIndex > 0 ? Math.max(0, stats.bestGrossScore - stats.handicapIndex) : stats.bestGrossScore);
+    : (stats.handicapIndex > 0 ? Math.max(0, Math.round(stats.bestGrossScore - stats.handicapIndex)) : stats.bestGrossScore);
     
   const bestNetToPar = stats.bestToParNet !== null
     ? stats.bestToParNet
-    : (stats.handicapIndex > 0 ? stats.bestToPar - stats.handicapIndex : stats.bestToPar);
+    : (stats.handicapIndex > 0 ? Math.round(stats.bestToPar - stats.handicapIndex) : stats.bestToPar);
+  
+  // Find the round with the best net score for debugging
+  if (scoreType === 'net' && userRounds.length > 0) {
+    const roundsWithNetScores = userRounds.map(round => {
+      const netScore = round.net_score || Math.max(0, round.gross_score - stats.handicapIndex);
+      const netToPar = round.to_par_net || Math.round(round.to_par_gross - stats.handicapIndex);
+      return { 
+        id: round.id, 
+        date: round.date, 
+        gross: round.gross_score, 
+        net: netScore, 
+        toPar: round.to_par_gross,
+        toParNet: netToPar,
+        courseName: round.courses?.courseName
+      };
+    });
+    
+    // Sort by net score to find the best one
+    const sortedByNetScore = [...roundsWithNetScores].sort((a, b) => a.net - b.net);
+    // Sort by to par net to find the best one
+    const sortedByToParNet = [...roundsWithNetScores].sort((a, b) => a.toParNet - b.toParNet);
+    
+    console.log("[MainStats] Best rounds by net score:", sortedByNetScore.slice(0, 3));
+    console.log("[MainStats] Best rounds by net to par:", sortedByToParNet.slice(0, 3));
+    console.log("[MainStats] Round with best net to par:", sortedByToParNet[0]);
+  }
   
   console.log("[MainStats] Calculated scores:", {
     bestGrossScore: stats.bestGrossScore,

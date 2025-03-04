@@ -64,6 +64,31 @@ export const calculateNetScore = (grossScore: number, handicap: number | string 
 };
 
 /**
+ * Calculates a net "to par" score by subtracting the player's handicap from their gross "to par" score
+ * This is used to determine how a player performed relative to par, after applying their handicap
+ */
+export const calculateNetToPar = (toPar: number, handicap: number | string | null | undefined): number => {
+  // Handle various input types for handicap
+  let numericHandicap = 0;
+  
+  if (handicap === null || handicap === undefined) {
+    numericHandicap = 0;
+  } else if (typeof handicap === 'number') {
+    numericHandicap = handicap;
+  } else {
+    numericHandicap = parseFloat(String(handicap)) || 0;
+  }
+  
+  // Subtract handicap from to par value and round to nearest integer
+  const netToPar = Math.round(toPar - numericHandicap);
+  
+  console.log(`Calculating net to par: toPar=${toPar}, handicap=${numericHandicap}, netToPar=${netToPar}`);
+  
+  // Unlike net score, net to par can be negative (under par) so we don't apply a minimum value
+  return netToPar;
+};
+
+/**
  * Updates a user's handicap in the database based on their recent rounds
  * @param userId The user's ID
  * @param rounds An array of round gross scores

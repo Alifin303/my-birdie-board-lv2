@@ -19,6 +19,7 @@ export { parseCourseName, formatCourseName, isUserAddedCourse } from './utils/co
 export { 
   calculateHandicapIndex, 
   calculateNetScore,
+  calculateNetToPar,
   updateUserHandicap 
 } from './handicap/handicap-calculator';
 

@@ -32,10 +32,46 @@ export const CourseStatsTable = ({
 
   const courseStats = calculateCourseStats(userRounds);
   
+  // Log course stats with net scores for debugging
+  console.log("Course stats before sorting:", courseStats.map(course => ({
+    courseName: course.courseName,
+    bestGrossScore: course.bestGrossScore,
+    bestNetScore: handicapIndex > 0 
+      ? Math.max(0, Math.round(course.bestGrossScore - handicapIndex))
+      : course.bestGrossScore,
+    bestToPar: course.bestToPar,
+    bestToParNet: handicapIndex > 0
+      ? course.bestToPar - handicapIndex
+      : course.bestToPar
+  })));
+  
   // Sort course stats
   const sortedCourseStats = [...courseStats].sort((a, b) => {
-    const aValue = a[sortField];
-    const bValue = b[sortField];
+    let aValue;
+    let bValue;
+    
+    // Determine which value to use based on sort field and score type
+    if (sortField === 'bestGrossScore' && scoreType === 'net') {
+      // For net scores, calculate them from gross scores
+      aValue = handicapIndex > 0 
+        ? Math.max(0, Math.round(a.bestGrossScore - handicapIndex)) 
+        : a.bestGrossScore;
+      bValue = handicapIndex > 0 
+        ? Math.max(0, Math.round(b.bestGrossScore - handicapIndex))
+        : b.bestGrossScore;
+    } else if (sortField === 'bestToPar' && scoreType === 'net') {
+      // For net to par, calculate it from gross to par
+      aValue = handicapIndex > 0 
+        ? a.bestToPar - handicapIndex
+        : a.bestToPar;
+      bValue = handicapIndex > 0
+        ? b.bestToPar - handicapIndex
+        : b.bestToPar;
+    } else {
+      // For all other fields, use the field directly
+      aValue = a[sortField];
+      bValue = b[sortField];
+    }
     
     if (aValue === null) return 1;
     if (bValue === null) return -1;
@@ -46,9 +82,19 @@ export const CourseStatsTable = ({
         : bValue.localeCompare(aValue);
     }
     
-    // @ts-ignore - we know these are numbers at this point
+    // For numerical values (including to par scores)
     return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
   });
+  
+  console.log("Course stats after sorting:", sortedCourseStats.map(course => ({
+    courseName: course.courseName,
+    bestToPar: course.bestToPar,
+    bestToParNet: handicapIndex > 0
+      ? course.bestToPar - handicapIndex
+      : course.bestToPar,
+    sortField,
+    sortDirection
+  })));
 
   const handleSort = (field: keyof CourseStats) => {
     if (sortField === field) {
@@ -113,41 +159,48 @@ export const CourseStatsTable = ({
           </tr>
         </thead>
         <tbody>
-          {sortedCourseStats.map((courseStat) => (
-            <tr key={courseStat.courseId} className="border-b last:border-0">
-              <td className="px-4 py-3 text-sm font-medium">
-                <button 
-                  className="hover:underline text-primary"
-                  onClick={() => onCourseClick(courseStat.courseId)}
-                >
-                  {courseStat.clubName !== courseStat.courseName 
-                    ? `${courseStat.clubName} - ${courseStat.courseName}`
-                    : courseStat.courseName}
-                </button>
-                <p className="text-xs text-muted-foreground">
-                  {courseStat.city}{courseStat.state ? `, ${courseStat.state}` : ''}
-                </p>
-              </td>
-              <td className="px-4 py-3 text-sm">
-                {courseStat.roundsPlayed}
-              </td>
-              <td className="px-4 py-3 text-sm">
-                {scoreType === 'gross' 
-                  ? courseStat.bestGrossScore 
-                  : handicapIndex > 0 
-                    ? Math.max(0, Math.round(courseStat.bestGrossScore - handicapIndex))
-                    : courseStat.bestGrossScore}
-              </td>
-              <td className="px-4 py-3 text-sm">
-                {scoreType === 'gross' 
-                  ? (courseStat.bestToPar > 0 ? '+' : '') + courseStat.bestToPar
-                  : handicapIndex > 0
-                    ? ((courseStat.bestToPar - handicapIndex > 0 ? '+' : '') + 
-                      (courseStat.bestToPar - handicapIndex))
-                    : (courseStat.bestToPar > 0 ? '+' : '') + courseStat.bestToPar}
-              </td>
-            </tr>
-          ))}
+          {sortedCourseStats.map((courseStat) => {
+            // Calculate net score from gross, accounting for handicap
+            const netScore = handicapIndex > 0 
+              ? Math.max(0, Math.round(courseStat.bestGrossScore - handicapIndex))
+              : courseStat.bestGrossScore;
+            
+            // Calculate net to par from gross to par, accounting for handicap
+            const netToPar = handicapIndex > 0
+              ? courseStat.bestToPar - handicapIndex
+              : courseStat.bestToPar;
+            
+            return (
+              <tr key={courseStat.courseId} className="border-b last:border-0">
+                <td className="px-4 py-3 text-sm font-medium">
+                  <button 
+                    className="hover:underline text-primary"
+                    onClick={() => onCourseClick(courseStat.courseId)}
+                  >
+                    {courseStat.clubName !== courseStat.courseName 
+                      ? `${courseStat.clubName} - ${courseStat.courseName}`
+                      : courseStat.courseName}
+                  </button>
+                  <p className="text-xs text-muted-foreground">
+                    {courseStat.city}{courseStat.state ? `, ${courseStat.state}` : ''}
+                  </p>
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  {courseStat.roundsPlayed}
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  {scoreType === 'gross' 
+                    ? courseStat.bestGrossScore 
+                    : netScore}
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  {scoreType === 'gross' 
+                    ? (courseStat.bestToPar > 0 ? '+' : '') + courseStat.bestToPar
+                    : (netToPar > 0 ? '+' : '') + netToPar}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
