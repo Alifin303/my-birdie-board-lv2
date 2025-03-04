@@ -76,3 +76,8 @@ export function calculateHandicapIndex(
     isValidHandicap: roundsNeededForHandicap === 0
   };
 }
+
+// Helper function to calculate net score from gross score and handicap
+export function calculateNetScore(grossScore: number, handicap: number): number {
+  return Math.max(0, grossScore - handicap);
+}

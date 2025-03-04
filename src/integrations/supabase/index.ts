@@ -16,7 +16,7 @@ export { findOrCreateCourseByApiId, ensureCourseExists } from './course/course-o
 
 export { parseCourseName, formatCourseName, isUserAddedCourse } from './utils/course-utils';
 
-export { calculateHandicapIndex } from './handicap/handicap-calculator';
+export { calculateHandicapIndex, calculateNetScore } from './handicap/handicap-calculator';
 
 // Define DatabaseError type directly in this file since it's not in types.ts
 export type DatabaseError = {

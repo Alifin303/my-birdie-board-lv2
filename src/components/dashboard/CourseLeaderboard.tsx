@@ -238,9 +238,12 @@ export const CourseLeaderboard = ({
         
         const grossScore = round.gross_score;
         
-        const netScore = (round.net_score !== null && round.net_score !== undefined) 
-          ? round.net_score 
-          : Math.max(0, round.gross_score - playerHandicap);
+        let netScore;
+        if (round.net_score !== null && round.net_score !== undefined) {
+          netScore = round.net_score;
+        } else {
+          netScore = Math.max(0, grossScore - playerHandicap);
+        }
         
         console.log(`Round ID ${round.id} - gross: ${grossScore}, net: ${netScore}, handicap: ${playerHandicap}`);
         
