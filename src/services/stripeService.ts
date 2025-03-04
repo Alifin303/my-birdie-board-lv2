@@ -31,7 +31,20 @@ export interface BillingPortalSession {
   url: string;
 }
 
+export interface StripeEnvCheck {
+  success: boolean;
+  environmentVariables: Record<string, boolean>;
+  message: string;
+}
+
 class StripeService {
+  async checkEnvironment(): Promise<StripeEnvCheck> {
+    const { data, error } = await supabase.functions.invoke('check-stripe-env');
+    
+    if (error) throw error;
+    return data;
+  }
+
   async createCustomer(email: string): Promise<StripeCustomer> {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
