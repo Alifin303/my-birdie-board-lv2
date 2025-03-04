@@ -49,11 +49,11 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
     <>
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Welcome, {profileData?.first_name || 'Golfer'}!</h1>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight drop-shadow-md">Welcome, {profileData?.first_name || 'Golfer'}!</h1>
         </div>
         <Button 
           onClick={onAddRound}
-          className="relative"
+          className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all"
         >
           Add a New Round
         </Button>
@@ -62,25 +62,25 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
       <div className="absolute top-4 right-4 z-10">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="lg" className="rounded-full h-12 w-12 flex items-center justify-center border border-muted bg-background/80 backdrop-blur-sm">
+            <Button variant="ghost" size="lg" className="rounded-full h-12 w-12 flex items-center justify-center border border-muted bg-white/10 backdrop-blur-sm text-white">
               <User className="h-6 w-6" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="bg-white/10 backdrop-blur-md border-white/20 text-white">
             <Dialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen}>
               <DialogTrigger asChild>
                 <DropdownMenuItem onSelect={(e) => {
                   e.preventDefault();
                   setProfileDialogOpen(true);
-                }}>
+                }} className="hover:bg-white/20">
                   <User className="mr-2 h-4 w-4" />
                   <span>Profile Settings</span>
                 </DropdownMenuItem>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent className="sm:max-w-[425px] bg-white/10 backdrop-blur-md border-white/20 text-white">
                 <DialogHeader>
                   <DialogTitle>Profile Settings</DialogTitle>
-                  <DialogDescription>
+                  <DialogDescription className="text-white/80">
                     Update your profile information
                   </DialogDescription>
                 </DialogHeader>
@@ -88,7 +88,7 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
               </DialogContent>
             </Dialog>
             
-            <DropdownMenuItem onClick={handleLogout}>
+            <DropdownMenuItem onClick={handleLogout} className="hover:bg-white/20">
               <LogOut className="mr-2 h-4 w-4" />
               <span>Logout</span>
             </DropdownMenuItem>
