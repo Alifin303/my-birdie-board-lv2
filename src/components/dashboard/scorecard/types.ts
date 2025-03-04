@@ -11,6 +11,7 @@ export interface RoundScorecardProps {
   round: Round;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  handicapIndex?: number;
 }
 
 export interface ScoreTableProps {

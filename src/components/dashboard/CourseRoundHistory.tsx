@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown, Trash, Eye, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,9 +24,15 @@ interface CourseRoundHistoryProps {
   userRounds: Round[] | undefined; 
   selectedCourseId: number | null;
   onBackClick: () => void;
+  handicapIndex?: number;
 }
 
-export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }: CourseRoundHistoryProps) => {
+export const CourseRoundHistory = ({ 
+  userRounds, 
+  selectedCourseId, 
+  onBackClick,
+  handicapIndex = 0
+}: CourseRoundHistoryProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
@@ -209,7 +216,9 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
             <p className="text-3xl font-bold">
               {scoreType === 'gross' 
                 ? stats.bestGrossScore 
-                : stats.bestNetScore !== null ? stats.bestNetScore : '-'}
+                : (handicapIndex > 0 
+                    ? Math.max(0, Math.round(stats.bestGrossScore - handicapIndex)) 
+                    : stats.bestGrossScore)}
             </p>
           </div>
           <div className="bg-background border rounded-lg p-4 text-center">
@@ -217,9 +226,10 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
             <p className="text-3xl font-bold">
               {scoreType === 'gross' 
                 ? (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar
-                : stats.bestToParNet !== null 
-                  ? (stats.bestToParNet > 0 ? '+' : '') + stats.bestToParNet
-                  : '-'}
+                : (handicapIndex > 0
+                    ? ((stats.bestToPar - handicapIndex > 0 ? '+' : '') + 
+                       (stats.bestToPar - handicapIndex))
+                    : (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar)}
             </p>
           </div>
         </div>
@@ -228,6 +238,7 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
       <ScoreProgressChart 
         rounds={courseRounds}
         scoreType={scoreType}
+        handicapIndex={handicapIndex}
       />
       
       <div className="space-y-4 mt-6">
@@ -305,14 +316,17 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
                     <td className="px-4 py-3 text-sm">
                       {scoreType === 'gross' 
                         ? round.gross_score 
-                        : round.net_score || '-'}
+                        : handicapIndex > 0 
+                          ? Math.max(0, Math.round(round.gross_score - handicapIndex))
+                          : round.gross_score}
                     </td>
                     <td className="px-4 py-3 text-sm">
                       {scoreType === 'gross' 
                         ? (round.to_par_gross > 0 ? '+' : '') + round.to_par_gross
-                        : round.to_par_net !== undefined 
-                          ? (round.to_par_net > 0 ? '+' : '') + round.to_par_net
-                          : '-'}
+                        : handicapIndex > 0
+                          ? ((round.to_par_gross - handicapIndex > 0 ? '+' : '') + 
+                             (round.to_par_gross - handicapIndex))
+                          : (round.to_par_gross > 0 ? '+' : '') + round.to_par_gross}
                     </td>
                     <td className="px-4 py-3 text-sm text-right">
                       <div className="flex justify-end space-x-2">
@@ -376,6 +390,7 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
               setTimeout(() => setViewingRound(null), 100);
             }
           }}
+          handicapIndex={handicapIndex}
         />
       )}
     </div>

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase, parseCourseName, updateCourseWithUserId } from "@/integrations/supabase/client";
@@ -185,6 +186,7 @@ export default function Dashboard() {
                 userRounds={userRounds} 
                 selectedCourseId={selectedCourseId}
                 onBackClick={() => setSelectedCourseId(null)}
+                handicapIndex={stats.handicapIndex}
               /> 
             : (
               <>
