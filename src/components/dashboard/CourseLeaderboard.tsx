@@ -117,7 +117,7 @@ export const CourseLeaderboard = ({
         };
       }
       
-      // Fetch leaderboard data
+      // Fetch leaderboard data - FIX: Modified the query to correctly join with profiles table
       let query = supabase
         .from('rounds')
         .select(`
@@ -126,7 +126,7 @@ export const CourseLeaderboard = ({
           gross_score,
           net_score,
           user_id,
-          profiles:user_id(username)
+          profiles:profiles!user_id(username)
         `)
         .eq('course_id', courseId);
         
@@ -153,11 +153,13 @@ export const CourseLeaderboard = ({
         return;
       }
       
+      console.log("Profiles query data:", data);
+      
       // Process leaderboard data
       let processedData = data.map(round => {
         // Fix for the username extraction - correctly extract username from the profiles object
         const username = round.profiles && typeof round.profiles === 'object' ? 
-          (round.profiles as any).username || "Unknown" : "Unknown";
+          round.profiles.username || "Unknown" : "Unknown";
         
         const score = scoreType === 'gross' 
           ? round.gross_score 
