@@ -155,6 +155,9 @@ export const CourseLeaderboard = ({
       
       // Process leaderboard data
       let processedData = data.map(round => {
+        // Fix: Extract username correctly from the profiles object
+        const username = round.profiles?.username || "Unknown";
+        
         const score = scoreType === 'gross' 
           ? round.gross_score 
           : (round.net_score || (handicapIndex > 0 ? Math.max(0, round.gross_score - handicapIndex) : round.gross_score));
@@ -162,7 +165,7 @@ export const CourseLeaderboard = ({
         return {
           id: round.id,
           date: round.date,
-          username: round.profiles?.username || "Unknown",
+          username: username,
           score: score,
           isCurrentUser: round.user_id === currentUserId
         };
@@ -172,9 +175,10 @@ export const CourseLeaderboard = ({
       processedData.sort((a, b) => a.score - b.score);
       
       // Add rank to each entry
-      processedData.forEach((entry, index) => {
-        entry.rank = index + 1;
-      });
+      processedData = processedData.map((entry, index) => ({
+        ...entry,
+        rank: index + 1
+      }));
       
       // Find user's best score and rank
       const userEntries = processedData.filter(entry => entry.isCurrentUser);
