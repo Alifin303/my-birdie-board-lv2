@@ -48,6 +48,13 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
   }
 
   const stats = calculateStats(userRounds);
+  console.log("Stats for MainStats:", { 
+    scoreType, 
+    bestGrossScore: stats.bestGrossScore, 
+    bestNetScore: stats.bestNetScore,
+    bestToPar: stats.bestToPar,
+    bestToParNet: stats.bestToParNet
+  });
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -109,18 +116,23 @@ export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTy
   const stats = calculateStats(userRounds);
   const hasHandicap = stats.roundsNeededForHandicap === 0;
   
+  const handleScoreTypeChange = (type: 'gross' | 'net') => {
+    console.log("HandicapCircle: changing score type to", type);
+    onScoreTypeChange(type);
+  };
+  
   return (
     <div className="flex flex-col items-center justify-center mb-8">
       <div className="relative mb-3">
         <div className="flex items-center gap-2">
           <button 
-            onClick={() => onScoreTypeChange('gross')} 
+            onClick={() => handleScoreTypeChange('gross')} 
             className={`px-3 py-1 rounded-full text-sm font-medium ${scoreType === 'gross' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
           >
             Gross
           </button>
           <button 
-            onClick={() => onScoreTypeChange('net')} 
+            onClick={() => handleScoreTypeChange('net')} 
             className={`px-3 py-1 rounded-full text-sm font-medium ${scoreType === 'net' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
           >
             Net

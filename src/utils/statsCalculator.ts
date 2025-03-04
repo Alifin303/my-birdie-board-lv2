@@ -116,6 +116,16 @@ export const calculateStats = (rounds: Round[]): Stats => {
   const roundsNeededForHandicap = validRoundsCount >= ROUNDS_NEEDED_FOR_HANDICAP ? 
     0 : ROUNDS_NEEDED_FOR_HANDICAP - validRoundsCount;
 
+  console.log("Stats calculation:", {
+    totalRounds,
+    bestGrossScore,
+    bestNetScore,
+    bestToPar,
+    bestToParNet,
+    averageScore,
+    handicapIndex
+  });
+
   return {
     totalRounds,
     bestGrossScore,
@@ -165,6 +175,15 @@ export const calculateCourseStats = (rounds: Round[]): CourseStats[] => {
     const roundsWithToParNet = courseRounds.filter(r => r.to_par_net !== undefined && r.to_par_net !== null);
     const bestToParNet = roundsWithToParNet.length > 0 ? 
       Math.min(...roundsWithToParNet.map(r => r.to_par_net!)) : null;
+
+    console.log(`Course stats for ${courseName}:`, {
+      bestGrossScore,
+      bestNetScore,
+      bestToPar,
+      bestToParNet,
+      roundsWithNetScore: roundsWithNetScore.length,
+      roundsWithToParNet: roundsWithToParNet.length
+    });
 
     return {
       courseId,

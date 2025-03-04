@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase, parseCourseName, updateCourseWithUserId } from "@/integrations/supabase/client";
@@ -140,6 +141,7 @@ export default function Dashboard() {
   };
 
   const handleScoreTypeChange = (type: 'gross' | 'net') => {
+    console.log("Changing score type to:", type);
     setScoreType(type);
   };
 
@@ -183,6 +185,8 @@ export default function Dashboard() {
                 userRounds={userRounds} 
                 selectedCourseId={selectedCourseId}
                 onBackClick={() => setSelectedCourseId(null)}
+                scoreType={scoreType}
+                onScoreTypeChange={handleScoreTypeChange}
               /> 
             : (
               <>

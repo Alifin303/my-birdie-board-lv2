@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown, Trash, Eye, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,12 +24,13 @@ interface CourseRoundHistoryProps {
   userRounds: Round[] | undefined; 
   selectedCourseId: number | null;
   onBackClick: () => void;
+  scoreType: 'gross' | 'net';
+  onScoreTypeChange: (type: 'gross' | 'net') => void;
 }
 
-export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }: CourseRoundHistoryProps) => {
+export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick, scoreType, onScoreTypeChange }: CourseRoundHistoryProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
   const [deletingRoundId, setDeletingRoundId] = useState<number | null>(null);
   const [viewingRound, setViewingRound] = useState<Round | null>(null);
   const [scorecardOpen, setScorecardOpen] = useState(false);
@@ -190,10 +192,12 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
       const dateB = new Date(b.date).getTime();
       return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
     } else if (sortField === 'gross_score') {
+      // Use appropriate score type based on the scoreType state
       const scoreA = scoreType === 'gross' ? a.gross_score : (a.net_score ?? Number.MAX_SAFE_INTEGER);
       const scoreB = scoreType === 'gross' ? b.gross_score : (b.net_score ?? Number.MAX_SAFE_INTEGER);
       return sortDirection === 'asc' ? scoreA - scoreB : scoreB - scoreA;
     } else {
+      // Use appropriate to-par value based on the scoreType state
       const toParA = scoreType === 'gross' ? a.to_par_gross : (a.to_par_net ?? Number.MAX_SAFE_INTEGER);
       const toParB = scoreType === 'gross' ? b.to_par_gross : (b.to_par_net ?? Number.MAX_SAFE_INTEGER);
       return sortDirection === 'asc' ? toParA - toParB : toParB - toParA;
@@ -254,7 +258,7 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
           <Button 
             variant={scoreType === 'gross' ? 'default' : 'outline'} 
             size="sm"
-            onClick={() => setScoreType('gross')}
+            onClick={() => onScoreTypeChange('gross')}
             className="text-xs"
           >
             Gross Score
@@ -262,7 +266,7 @@ export const CourseRoundHistory = ({ userRounds, selectedCourseId, onBackClick }
           <Button 
             variant={scoreType === 'net' ? 'default' : 'outline'} 
             size="sm"
-            onClick={() => setScoreType('net')}
+            onClick={() => onScoreTypeChange('net')}
             className="text-xs"
           >
             Net Score
