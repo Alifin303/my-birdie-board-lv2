@@ -155,8 +155,6 @@ serve(async (req) => {
         
         break;
       }
-      
-      // Add more event handling as needed
     }
 
     return new Response(JSON.stringify({ received: true }), {
