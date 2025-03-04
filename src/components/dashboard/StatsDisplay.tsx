@@ -1,3 +1,4 @@
+
 import { CalendarDays, Trophy, Flag } from "lucide-react";
 import { Stats, Round } from "./types";
 import React, { useEffect } from "react";
@@ -44,9 +45,10 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
   
   // Find the round with the best net score and best net to par for debugging
   if (scoreType === 'net' && userRounds.length > 0) {
+    // Calculate net scores with CURRENT handicap to ensure consistency
     const calculatedRounds = userRounds.map(round => {
-      const netScore = round.net_score || Math.round(round.gross_score - stats.handicapIndex);
-      const netToPar = round.to_par_net || Math.round(round.to_par_gross - stats.handicapIndex);
+      const netScore = Math.round(round.gross_score - stats.handicapIndex);
+      const netToPar = Math.round(round.to_par_gross - stats.handicapIndex);
       return { 
         id: round.id, 
         date: round.date, 
@@ -54,7 +56,8 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
         net: netScore, 
         toPar: round.to_par_gross,
         toParNet: netToPar,
-        courseName: round.courses?.courseName
+        courseName: round.courses?.courseName,
+        clubName: round.courses?.clubName
       };
     });
     
@@ -62,6 +65,17 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
     const sortedByNetScore = [...calculatedRounds].sort((a, b) => a.net - b.net);
     // Sort by to par net to find the best one
     const sortedByToParNet = [...calculatedRounds].sort((a, b) => a.toParNet - b.toParNet);
+    
+    console.log("[MainStats] All rounds with net scores:", calculatedRounds.map(r => ({
+      id: r.id,
+      date: new Date(r.date).toLocaleDateString(),
+      course: r.courseName,
+      club: r.clubName,
+      gross: r.gross,
+      net: r.net,
+      toPar: r.toPar,
+      toParNet: r.toParNet
+    })));
     
     console.log("[MainStats] Best rounds by net score:", sortedByNetScore.slice(0, 3));
     console.log("[MainStats] Best rounds by net to par:", sortedByToParNet.slice(0, 3));

@@ -32,35 +32,30 @@ export const CourseStatsTable = ({
     console.log("Courses with scores before sorting:", courseStats.map(course => ({
       id: course.courseId,
       name: course.courseName,
+      club: course.clubName,
       bestGross: course.bestGrossScore,
       bestToPar: course.bestToPar,
-      netScore: handicapIndex > 0 ? Math.round(course.bestGrossScore - handicapIndex) : course.bestGrossScore,
-      netToPar: handicapIndex > 0 ? Math.round(course.bestToPar - handicapIndex) : course.bestToPar
+      bestNetScore: course.bestNetScore,
+      bestToParNet: course.bestToParNet,
+      handicapUsed: handicapIndex
     })));
     
-    // Sort course stats
+    // CRITICAL FIX: Use the pre-calculated bestNetScore and bestToParNet values
+    // which are already calculated using the current handicap index
     const sorted = [...courseStats].sort((a, b) => {
       let aValue: any;
       let bValue: any;
       
       // Handle special cases for net scores
       if (sortField === 'bestGrossScore' && scoreType === 'net') {
-        // For net scores, we need to calculate them on the fly
-        aValue = handicapIndex > 0 
-          ? Math.round(a.bestGrossScore - handicapIndex)
-          : a.bestGrossScore;
-        bValue = handicapIndex > 0 
-          ? Math.round(b.bestGrossScore - handicapIndex)
-          : b.bestGrossScore;
+        // For net scores, use the pre-calculated bestNetScore
+        aValue = a.bestNetScore !== null ? a.bestNetScore : Number.MAX_SAFE_INTEGER;
+        bValue = b.bestNetScore !== null ? b.bestNetScore : Number.MAX_SAFE_INTEGER;
       } 
       else if (sortField === 'bestToPar' && scoreType === 'net') {
-        // For net to par, calculate on the fly
-        aValue = handicapIndex > 0 
-          ? Math.round(a.bestToPar - handicapIndex)
-          : a.bestToPar;
-        bValue = handicapIndex > 0
-          ? Math.round(b.bestToPar - handicapIndex)
-          : b.bestToPar;
+        // For net to par, use the pre-calculated bestToParNet
+        aValue = a.bestToParNet !== null ? a.bestToParNet : Number.MAX_SAFE_INTEGER;
+        bValue = b.bestToParNet !== null ? b.bestToParNet : Number.MAX_SAFE_INTEGER;
       }
       else {
         // For all other fields, use them directly
@@ -86,11 +81,14 @@ export const CourseStatsTable = ({
     // Log the sorted results
     console.log("Courses after sorting:", sorted.map(course => ({
       name: course.courseName,
+      club: course.clubName,
       field: sortField,
       direction: sortDirection,
       value: sortField === 'bestToPar' && scoreType === 'net' 
-        ? Math.round(course.bestToPar - handicapIndex) 
-        : course[sortField]
+        ? course.bestToParNet 
+        : (sortField === 'bestGrossScore' && scoreType === 'net'
+            ? course.bestNetScore
+            : course[sortField])
     })));
     
     setSortedStats(sorted);
@@ -168,48 +166,38 @@ export const CourseStatsTable = ({
           </tr>
         </thead>
         <tbody>
-          {sortedStats.map((courseStat) => {
-            // Calculate net score from gross, accounting for handicap - rounding to nearest integer
-            const netScore = handicapIndex > 0 
-              ? Math.round(courseStat.bestGrossScore - handicapIndex)
-              : courseStat.bestGrossScore;
-            
-            // Calculate net to par from gross to par, accounting for handicap - rounding to nearest integer
-            const netToPar = handicapIndex > 0
-              ? Math.round(courseStat.bestToPar - handicapIndex)
-              : courseStat.bestToPar;
-            
-            return (
-              <tr key={courseStat.courseId} className="border-b last:border-0">
-                <td className="px-4 py-3 text-sm font-medium">
-                  <button 
-                    className="hover:underline text-primary"
-                    onClick={() => onCourseClick(courseStat.courseId)}
-                  >
-                    {courseStat.clubName !== courseStat.courseName 
-                      ? `${courseStat.clubName} - ${courseStat.courseName}`
-                      : courseStat.courseName}
-                  </button>
-                  <p className="text-xs text-muted-foreground">
-                    {courseStat.city}{courseStat.state ? `, ${courseStat.state}` : ''}
-                  </p>
-                </td>
-                <td className="px-4 py-3 text-sm">
-                  {courseStat.roundsPlayed}
-                </td>
-                <td className="px-4 py-3 text-sm">
-                  {scoreType === 'gross' 
-                    ? courseStat.bestGrossScore 
-                    : netScore}
-                </td>
-                <td className="px-4 py-3 text-sm">
-                  {scoreType === 'gross' 
-                    ? (courseStat.bestToPar > 0 ? '+' : '') + courseStat.bestToPar
-                    : (netToPar > 0 ? '+' : '') + netToPar}
-                </td>
-              </tr>
-            );
-          })}
+          {sortedStats.map((courseStat) => (
+            <tr key={courseStat.courseId} className="border-b last:border-0">
+              <td className="px-4 py-3 text-sm font-medium">
+                <button 
+                  className="hover:underline text-primary"
+                  onClick={() => onCourseClick(courseStat.courseId)}
+                >
+                  {courseStat.clubName !== courseStat.courseName 
+                    ? `${courseStat.clubName} - ${courseStat.courseName}`
+                    : courseStat.courseName}
+                </button>
+                <p className="text-xs text-muted-foreground">
+                  {courseStat.city}{courseStat.state ? `, ${courseStat.state}` : ''}
+                </p>
+              </td>
+              <td className="px-4 py-3 text-sm">
+                {courseStat.roundsPlayed}
+              </td>
+              <td className="px-4 py-3 text-sm">
+                {scoreType === 'gross' 
+                  ? courseStat.bestGrossScore 
+                  : courseStat.bestNetScore}
+              </td>
+              <td className="px-4 py-3 text-sm">
+                {scoreType === 'gross' 
+                  ? (courseStat.bestToPar > 0 ? '+' : '') + courseStat.bestToPar
+                  : courseStat.bestToParNet !== null 
+                    ? (courseStat.bestToParNet > 0 ? '+' : '') + courseStat.bestToParNet
+                    : ''}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

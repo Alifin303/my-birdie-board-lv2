@@ -81,6 +81,7 @@ export const calculateStats = (rounds: Round[]): Stats => {
       id: r.id,
       date: new Date(r.date).toLocaleDateString(),
       course: r.courses?.courseName,
+      club: r.courses?.clubName,
       gross: r.gross_score,
       net: r.net_score,
       toPar: r.to_par_gross,
@@ -88,23 +89,19 @@ export const calculateStats = (rounds: Round[]): Stats => {
     }))
   );
   
-  // FIXED: Use consistent calculation for net scores and net to par
-  // First get the handicap from stored data if available
+  // IMPORTANT: Calculate the handicap first so we can use it for net scores
   const handicapIndex = validRoundsForHandicap.length >= ROUNDS_NEEDED_FOR_HANDICAP ? 
     calculateHandicapIndex(validRoundsForHandicap.map(r => r.gross_score)) : 0;
 
-  // Calculate net scores for each round using the handicap
+  // CRITICAL FIX: Always calculate net scores based on CURRENT handicap
+  // This ensures consistency across the application
   const roundsWithCalculatedScores = rounds.map(r => {
-    // Use stored net_score if available, otherwise calculate
-    const netScore = r.net_score !== undefined && r.net_score !== null
-      ? r.net_score
-      : Math.round(r.gross_score - handicapIndex);
-      
-    // Use stored to_par_net if available, otherwise calculate
-    const toParNet = r.to_par_net !== undefined && r.to_par_net !== null
-      ? r.to_par_net
-      : Math.round(r.to_par_gross - handicapIndex);
-      
+    // Calculate net score using current handicap - round to nearest integer
+    const netScore = Math.round(r.gross_score - handicapIndex);
+    
+    // Calculate net to par using current handicap - round to nearest integer
+    const toParNet = Math.round(r.to_par_gross - handicapIndex);
+    
     return {
       ...r,
       calculatedNetScore: netScore,
@@ -122,7 +119,7 @@ export const calculateStats = (rounds: Round[]): Stats => {
     }))
   );
   
-  // Find the best scores
+  // Find the best scores using calculated values
   const bestNetScore = roundsWithCalculatedScores.length > 0 ? 
     Math.min(...roundsWithCalculatedScores.map(r => r.calculatedNetScore)) : null;
   
@@ -137,6 +134,7 @@ export const calculateStats = (rounds: Round[]): Stats => {
     id: bestNetRound.id,
     date: new Date(bestNetRound.date).toLocaleDateString(),
     course: bestNetRound.courses?.courseName,
+    club: bestNetRound.courses?.clubName,
     gross: bestNetRound.gross_score,
     net: bestNetRound.calculatedNetScore,
     toParNet: bestNetRound.calculatedToParNet,
@@ -147,6 +145,7 @@ export const calculateStats = (rounds: Round[]): Stats => {
     id: bestToParNetRound.id,
     date: new Date(bestToParNetRound.date).toLocaleDateString(),
     course: bestToParNetRound.courses?.courseName,
+    club: bestToParNetRound.courses?.clubName,
     gross: bestToParNetRound.gross_score,
     net: bestToParNetRound.calculatedNetScore,
     toParNet: bestToParNetRound.calculatedToParNet,
@@ -229,6 +228,10 @@ export const calculateCourseStats = (rounds: Round[]): CourseStats[] => {
     }
   });
 
+  // IMPORTANT: First calculate the current handicap index for consistent net score calculations
+  const currentHandicapIndex = calculateStats(rounds).handicapIndex;
+  console.log("Current handicap for course stats calculations:", currentHandicapIndex);
+
   // Calculate stats for each course
   return Array.from(courseMap.entries()).map(([courseId, courseRounds]) => {
     const firstRound = courseRounds[0]; // For course name and details
@@ -241,33 +244,46 @@ export const calculateCourseStats = (rounds: Round[]): CourseStats[] => {
     const bestGrossScore = Math.min(...courseRounds.map(r => r.gross_score));
     const bestToPar = Math.min(...courseRounds.map(r => r.to_par_gross));
     
-    // Properly handle net scores
+    // CRITICAL FIX: Calculate net scores using the CURRENT handicap index
+    // This ensures consistency with the main stats display
     const roundsWithNetScore = courseRounds.map(r => {
-      const netScore = r.net_score !== undefined && r.net_score !== null
-        ? r.net_score
-        : null;
+      // Always use current handicap for calculations - round to nearest integer
+      const netScore = Math.round(r.gross_score - currentHandicapIndex);
       return {
         ...r,
         calculatedNetScore: netScore
       };
-    }).filter(r => r.calculatedNetScore !== null);
+    });
     
+    // Find the best net score using calculated values
     const bestNetScore = roundsWithNetScore.length > 0 ? 
-      Math.min(...roundsWithNetScore.map(r => r.calculatedNetScore!)) : null;
+      Math.min(...roundsWithNetScore.map(r => r.calculatedNetScore)) : null;
     
-    // Similarly handle to_par_net values
+    // CRITICAL FIX: Calculate net to par using the CURRENT handicap index
     const roundsWithToParNet = courseRounds.map(r => {
-      const toParNet = r.to_par_net !== undefined && r.to_par_net !== null
-        ? r.to_par_net
-        : null;
+      // Always use current handicap for calculations - round to nearest integer
+      const toParNet = Math.round(r.to_par_gross - currentHandicapIndex);
       return {
         ...r,
         calculatedToParNet: toParNet
       };
-    }).filter(r => r.calculatedToParNet !== null);
+    });
     
+    // Find the best net to par using calculated values
     const bestToParNet = roundsWithToParNet.length > 0 ? 
-      Math.min(...roundsWithToParNet.map(r => r.calculatedToParNet!)) : null;
+      Math.min(...roundsWithToParNet.map(r => r.calculatedToParNet)) : null;
+    
+    // Log the rounds for this course with their net scores for debugging
+    console.log(`Course stats for ${clubName} - ${courseName}:`, 
+      roundsWithNetScore.map(r => ({
+        id: r.id,
+        date: new Date(r.date).toLocaleDateString(),
+        gross: r.gross_score,
+        net: r.calculatedNetScore,
+        toPar: r.to_par_gross,
+        toParNet: r.calculatedToParNet
+      }))
+    );
 
     return {
       courseId,

@@ -29,8 +29,8 @@ export const calculateHandicapIndex = (scores: number[]): number => {
   // In a real implementation, this would consider course rating and slope
   const handicapIndex = Math.max(0, (averageScore - 72) * 0.96);
   
-  // Round to 1 decimal place
-  return Math.round(handicapIndex * 10) / 10;
+  // CRITICAL FIX: Round to the nearest integer as per user requirement
+  return Math.round(handicapIndex);
 };
 
 /**
@@ -101,7 +101,7 @@ export const updateUserHandicap = async (userId: string, rounds: number[]): Prom
     // Import supabase client directly
     const { supabase } = await import('@/integrations/supabase');
     
-    // Calculate the new handicap index
+    // Calculate the new handicap index - ensure it's rounded to nearest integer
     const newHandicap = calculateHandicapIndex(rounds);
     console.log(`Updating handicap for user ${userId}: New handicap=${newHandicap} based on ${rounds.length} rounds`);
     
