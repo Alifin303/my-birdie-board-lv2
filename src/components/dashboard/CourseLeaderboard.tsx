@@ -230,7 +230,13 @@ export const CourseLeaderboard = ({
         }
         
         userMap.set(profile.id, displayName || 'Unknown Player');
-        handicapMap.set(profile.id, profile.handicap || 0);
+        
+        const handicapValue = typeof profile.handicap === 'number' 
+          ? profile.handicap 
+          : parseFloat(profile.handicap) || 0;
+          
+        handicapMap.set(profile.id, handicapValue);
+        console.log(`Setting handicap for user ${profile.id}: ${handicapValue} (original type: ${typeof profile.handicap})`);
       });
       
       console.log("User map created:", Array.from(userMap.entries()));
@@ -239,7 +245,7 @@ export const CourseLeaderboard = ({
       
       let processedData = roundsData.map(round => {
         const username = userMap.get(round.user_id) || 'Unknown Player';
-        const playerHandicap = parseFloat(handicapMap.get(round.user_id) || '0');
+        const playerHandicap = handicapMap.get(round.user_id) || 0;
         
         const grossScore = round.gross_score;
         

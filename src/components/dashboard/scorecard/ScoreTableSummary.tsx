@@ -9,15 +9,20 @@ export const ScoreTableSummary = ({ scores, handicapIndex = 0, showNet = false }
   const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
   const toPar = totalScore - totalPar;
   
+  // Ensure handicapIndex is a number
+  const numericHandicap = typeof handicapIndex === 'number' 
+    ? handicapIndex 
+    : parseFloat(String(handicapIndex)) || 0;
+    
   // Calculate net score by subtracting handicap
-  // Make sure we don't go below zero
-  const netScore = calculateNetScore(totalScore, handicapIndex);
+  const netScore = calculateNetScore(totalScore, numericHandicap);
   const netToPar = netScore - totalPar;
   
   console.log("[ScoreTableSummary] Rendering with:", {
     totalScore,
     netScore,
-    handicapIndex,
+    handicapIndex: numericHandicap,
+    originalHandicapType: typeof handicapIndex,
     showNet,
     toPar,
     netToPar,
@@ -29,8 +34,8 @@ export const ScoreTableSummary = ({ scores, handicapIndex = 0, showNet = false }
       <div className="flex justify-between">
         <span className="font-medium">Total Score:</span>
         <span>
-          {showNet && handicapIndex > 0 ? netScore : totalScore}
-          {showNet && handicapIndex > 0 ? ` (${totalScore} gross)` : ''}
+          {showNet && numericHandicap > 0 ? netScore : totalScore}
+          {showNet && numericHandicap > 0 ? ` (${totalScore} gross)` : ''}
         </span>
       </div>
       <div className="flex justify-between">
@@ -40,16 +45,16 @@ export const ScoreTableSummary = ({ scores, handicapIndex = 0, showNet = false }
       <div className="flex justify-between">
         <span className="font-medium">To Par:</span>
         <span>
-          {showNet && handicapIndex > 0 
+          {showNet && numericHandicap > 0 
             ? `${netToPar > 0 ? '+' : ''}${netToPar}`
             : `${toPar > 0 ? '+' : ''}${toPar}`}
-          {showNet && handicapIndex > 0 ? ` (${toPar > 0 ? '+' : ''}${toPar} gross)` : ''}
+          {showNet && numericHandicap > 0 ? ` (${toPar > 0 ? '+' : ''}${toPar} gross)` : ''}
         </span>
       </div>
-      {showNet && handicapIndex > 0 && (
+      {showNet && numericHandicap > 0 && (
         <div className="flex justify-between text-sm text-muted-foreground mt-1">
           <span>Handicap applied:</span>
-          <span>{handicapIndex}</span>
+          <span>{numericHandicap}</span>
         </div>
       )}
     </div>
