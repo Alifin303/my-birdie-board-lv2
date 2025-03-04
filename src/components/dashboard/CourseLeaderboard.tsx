@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Calendar, ChevronLeft, ChevronRight, Search } from "lucide-react";
@@ -198,7 +199,14 @@ export const CourseLeaderboard = ({
       
       const userMap = new Map();
       profilesData.forEach(profile => {
-        userMap.set(profile.id, profile.username || 'Unknown Player');
+        // Create a display name by prioritizing username, then combining first/last name, or using fallbacks
+        let displayName = profile.username;
+        
+        if (!displayName && (profile.first_name || profile.last_name)) {
+          displayName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+        }
+        
+        userMap.set(profile.id, displayName || 'Unknown Player');
       });
       
       console.log("User map created:", Array.from(userMap.entries()));
