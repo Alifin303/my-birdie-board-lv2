@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Calendar, ChevronLeft, ChevronRight, Search } from "lucide-react";
@@ -133,7 +132,6 @@ export const CourseLeaderboard = ({
         };
       }
       
-      // Query all rounds for the specified course without filtering by user_id
       let query = supabase
         .from('rounds')
         .select(`
@@ -172,14 +170,12 @@ export const CourseLeaderboard = ({
         return;
       }
       
-      // Fetch all user profiles to get the usernames
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('id, username');
         
       if (profilesError) throw profilesError;
       
-      // Create a map of user IDs to usernames
       const userMap = new Map();
       if (profilesData) {
         profilesData.forEach(profile => {
@@ -189,7 +185,6 @@ export const CourseLeaderboard = ({
       
       console.log("Query result data:", roundsData);
       
-      // Process the rounds data using the user map to get usernames
       let processedData = roundsData.map(round => {
         const username = userMap.get(round.user_id) || 'Unknown';
         
@@ -207,16 +202,13 @@ export const CourseLeaderboard = ({
         };
       });
       
-      // Sort the leaderboard by score (lowest first)
       processedData.sort((a, b) => a.score - b.score);
       
-      // Assign ranks to the sorted entries
       processedData = processedData.map((entry, index) => ({
         ...entry,
         rank: index + 1
       }));
       
-      // Find the current user's entries and determine their best score
       const userEntries = processedData.filter(entry => entry.isCurrentUser);
       if (userEntries.length > 0) {
         const bestUserEntry = userEntries.reduce((prev, current) => 
