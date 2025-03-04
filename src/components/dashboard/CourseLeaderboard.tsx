@@ -42,6 +42,7 @@ export const CourseLeaderboard = ({
   const { toast } = useToast();
   const [dateRange, setDateRange] = useState<'monthly' | 'yearly' | 'all-time'>('monthly');
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
+  const [displayedScoreType, setDisplayedScoreType] = useState<'gross' | 'net'>('gross');
   const [selectedMonth, setSelectedMonth] = useState<Date | undefined>(new Date());
   const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -261,6 +262,16 @@ export const CourseLeaderboard = ({
       });
       
       console.log("Score type selected:", scoreType);
+      
+      // Update displayedScoreType to match the scoreType when search is pressed
+      setDisplayedScoreType(scoreType);
+      
+      // Apply the score type to set the correct score property
+      processedData = processedData.map(entry => ({
+        ...entry,
+        score: scoreType === 'gross' ? entry.gross_score! : entry.net_score!
+      }));
+      
       console.log("Processed data with score type applied:", 
         processedData.slice(0, 3).map(d => ({
           id: d.id,
@@ -464,7 +475,7 @@ export const CourseLeaderboard = ({
                 <div>
                   <p className="text-sm">Date: {format(new Date(userBestScore.date), 'MMM d, yyyy')}</p>
                   <p className="text-sm">
-                    Score: {scoreType === 'gross' ? userBestScore.gross_score : userBestScore.net_score}
+                    Score: {displayedScoreType === 'gross' ? userBestScore.gross_score : userBestScore.net_score}
                   </p>
                   {userBestScore.tee_name && <p className="text-sm">Tee: {userBestScore.tee_name}</p>}
                 </div>
@@ -485,7 +496,7 @@ export const CourseLeaderboard = ({
                   <th className="text-left p-3 text-sm font-medium text-muted-foreground">Player</th>
                   {availableTees.length > 0 && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Tee</th>}
                   <th className="text-right p-3 text-sm font-medium text-muted-foreground">
-                    {scoreType === 'gross' ? 'Gross Score' : 'Net Score'}
+                    {displayedScoreType === 'gross' ? 'Gross Score' : 'Net Score'}
                   </th>
                 </tr>
               </thead>
@@ -516,7 +527,7 @@ export const CourseLeaderboard = ({
                       </td>
                       {availableTees.length > 0 && <td className="p-3 text-sm">{entry.tee_name || 'N/A'}</td>}
                       <td className="p-3 text-sm text-right">
-                        {scoreType === 'gross' ? entry.gross_score : entry.net_score}
+                        {displayedScoreType === 'gross' ? entry.gross_score : entry.net_score}
                       </td>
                     </tr>
                   ))
