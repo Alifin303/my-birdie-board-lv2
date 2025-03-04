@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
 import { ensureCourseExists, findOrCreateCourseByApiId, updateUserHandicap } from "@/integrations/supabase";
 import { getCourseTeesByIdFromDatabase } from "@/integrations/supabase/course/course-db-operations";
+import { calculateNetScore } from "@/integrations/supabase";
 
 export function createSaveRoundHandler({
   selectedCourse,
@@ -73,10 +74,18 @@ export function createSaveRoundHandler({
       }
       
       const handicapIndex = userData?.handicap || 0;
+      console.log("User handicap for net score calculation:", handicapIndex, typeof handicapIndex);
       
-      // Calculate net score and to par net
-      const netScore = Math.max(0, totalStrokes - handicapIndex);
+      // Calculate net score and to par net, ensuring we get integers
+      const netScore = calculateNetScore(totalStrokes, handicapIndex);
       const toParNet = netScore - totalPar;
+      
+      console.log("Calculated scores:", {
+        grossScore: totalStrokes,
+        netScore: netScore,
+        toParGross: toParGross,
+        toParNet: toParNet
+      });
       
       console.log("Ensuring course exists in database:", selectedCourse);
       let dbCourseId: number;

@@ -91,12 +91,26 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         teeId: round.tee_id
       });
       
+      // Calculate a proper net score based on current handicap
+      const netScore = Math.round(totalStrokes - handicapIndex);
+      const toParNet = netScore - totalPar;
+      
+      console.log("Calculated scores for update:", {
+        grossScore: totalStrokes,
+        netScore: netScore,
+        toPar: toPar,
+        toParNet: toParNet,
+        handicapUsed: handicapIndex
+      });
+      
       const { error } = await supabase
         .from('rounds')
         .update({
           date: roundDate?.toISOString() || round.date,
           gross_score: totalStrokes,
           to_par_gross: toPar,
+          net_score: netScore,
+          to_par_net: toParNet,
           hole_scores: JSON.stringify(scores),
           tee_name: round.tee_name,
           tee_id: round.tee_id

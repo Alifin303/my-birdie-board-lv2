@@ -35,6 +35,7 @@ export const calculateHandicapIndex = (scores: number[]): number => {
 
 /**
  * Calculates a net score by subtracting the player's handicap from their gross score
+ * Ensures the result is always an integer
  */
 export const calculateNetScore = (grossScore: number, handicap: number | string | null | undefined): number => {
   // Handle various input types for handicap
@@ -52,8 +53,14 @@ export const calculateNetScore = (grossScore: number, handicap: number | string 
   
   console.log(`Calculating net score: gross=${grossScore}, handicap=${numericHandicap} (original: ${handicap}, type: ${typeof handicap})`);
   
+  // Calculate the raw net score
+  const rawNetScore = grossScore - numericHandicap;
+  
+  // Round to the nearest integer to ensure we return an integer value
+  const roundedNetScore = Math.round(rawNetScore);
+  
   // Ensure we never return a negative score
-  return Math.max(0, grossScore - numericHandicap);
+  return Math.max(0, roundedNetScore);
 };
 
 /**
