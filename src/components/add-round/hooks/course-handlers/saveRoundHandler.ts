@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
 import { ensureCourseExists, findOrCreateCourseByApiId } from "@/integrations/supabase";
@@ -75,7 +76,7 @@ export function createSaveRoundHandler({
       
       // Calculate net score and to par net
       const netScore = Math.max(0, totalStrokes - handicapIndex);
-      const toParNet = Math.max(-totalPar, toParGross - handicapIndex);
+      const toParNet = netScore - totalPar;
       
       console.log("Ensuring course exists in database:", selectedCourse);
       let dbCourseId: number;

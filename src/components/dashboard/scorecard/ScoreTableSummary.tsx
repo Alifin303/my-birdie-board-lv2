@@ -10,7 +10,7 @@ export const ScoreTableSummary = ({ scores, handicapIndex = 0, showNet = false }
   
   // Calculate net score by subtracting handicap
   const netScore = Math.max(0, totalScore - handicapIndex);
-  const netToPar = Math.max(-totalPar, toPar - handicapIndex);
+  const netToPar = netScore - totalPar;
   
   return (
     <div className="pt-2 border-t">

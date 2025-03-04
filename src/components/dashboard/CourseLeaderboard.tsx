@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Calendar, ChevronLeft, ChevronRight, Search } from "lucide-react";
@@ -145,6 +146,7 @@ export const CourseLeaderboard = ({
         };
       }
       
+      // Modify the query to also fetch net_score and to_par_net
       let query = supabase
         .from('rounds')
         .select(`
@@ -152,6 +154,8 @@ export const CourseLeaderboard = ({
           date,
           gross_score,
           net_score,
+          to_par_gross,
+          to_par_net,
           user_id,
           tee_name
         `)
@@ -229,9 +233,12 @@ export const CourseLeaderboard = ({
         const username = userMap.get(round.user_id) || 'Unknown Player';
         const playerHandicap = handicapMap.get(round.user_id) || 0;
         
+        // Use the stored net_score if available, otherwise calculate it
         const score = scoreType === 'gross' 
           ? round.gross_score 
-          : (round.net_score || Math.max(0, round.gross_score - playerHandicap));
+          : (round.net_score !== null && round.net_score !== undefined) 
+              ? round.net_score 
+              : Math.max(0, round.gross_score - playerHandicap);
             
         return {
           id: round.id,
