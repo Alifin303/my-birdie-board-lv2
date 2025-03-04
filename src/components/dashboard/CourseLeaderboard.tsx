@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Calendar, ChevronLeft, ChevronRight, Search } from "lucide-react";
@@ -19,7 +18,7 @@ interface LeaderboardEntry {
   isCurrentUser: boolean;
   rank?: number;
   tee_name?: string;
-  user_id?: string; // Added to help with debugging
+  user_id?: string;
 }
 
 interface CourseLeaderboardProps {
@@ -56,6 +55,13 @@ export const CourseLeaderboard = ({
   
   const itemsPerPage = 10;
   
+  useEffect(() => {
+    if (open && courseId) {
+      fetchAvailableYears();
+      fetchAvailableTees();
+    }
+  }, [open, courseId]);
+  
   const fetchAvailableTees = async () => {
     try {
       const { data, error } = await supabase
@@ -69,6 +75,7 @@ export const CourseLeaderboard = ({
       if (data && data.length > 0) {
         const tees = [...new Set(data.map(round => round.tee_name).filter(Boolean))];
         setAvailableTees(tees);
+        console.log("Available tees:", tees);
       }
     } catch (error) {
       console.error("Error fetching available tees:", error);
@@ -87,10 +94,12 @@ export const CourseLeaderboard = ({
       
       if (data && data.length > 0) {
         const years = [...new Set(data.map(round => new Date(round.date).getFullYear().toString()))];
-        setAvailableYears(years.sort((a, b) => parseInt(b) - parseInt(a)));
+        const sortedYears = years.sort((a, b) => parseInt(b) - parseInt(a));
+        setAvailableYears(sortedYears);
+        console.log("Available years:", sortedYears);
         
-        if (years.length > 0) {
-          setSelectedYear(years[0]);
+        if (sortedYears.length > 0) {
+          setSelectedYear(sortedYears[0]);
         }
       }
     } catch (error) {
@@ -199,7 +208,6 @@ export const CourseLeaderboard = ({
       
       const userMap = new Map();
       profilesData.forEach(profile => {
-        // Create a display name by prioritizing username, then combining first/last name, or using fallbacks
         let displayName = profile.username;
         
         if (!displayName && (profile.first_name || profile.last_name)) {
@@ -226,7 +234,7 @@ export const CourseLeaderboard = ({
           score: score,
           isCurrentUser: round.user_id === currentUserId,
           tee_name: round.tee_name,
-          user_id: round.user_id // Added for debugging
+          user_id: round.user_id
         };
       });
       
@@ -286,10 +294,6 @@ export const CourseLeaderboard = ({
   };
   
   const handleDialogOpen = (isOpen: boolean) => {
-    if (isOpen) {
-      fetchAvailableYears();
-      fetchAvailableTees();
-    }
     onOpenChange(isOpen);
   };
   
