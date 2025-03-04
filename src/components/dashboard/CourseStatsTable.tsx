@@ -6,9 +6,9 @@ import { CourseStats, Round } from "./types";
 interface CourseStatsTableProps {
   userRounds: Round[] | undefined;
   scoreType: 'gross' | 'net';
-  calculateCourseStats: (rounds: Round[]) => CourseStats[];
+  calculateCourseStats: (rounds: Round[], handicapIndex?: number) => CourseStats[];
   onCourseClick: (courseId: number) => void;
-  handicapIndex?: number;
+  handicapIndex: number;
 }
 
 export const CourseStatsTable = ({ 
@@ -16,7 +16,7 @@ export const CourseStatsTable = ({
   scoreType, 
   calculateCourseStats, 
   onCourseClick,
-  handicapIndex = 0
+  handicapIndex
 }: CourseStatsTableProps) => {
   const [sortField, setSortField] = useState<keyof CourseStats>('courseName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -25,8 +25,8 @@ export const CourseStatsTable = ({
   useEffect(() => {
     if (!userRounds || userRounds.length === 0) return;
     
-    // Calculate and sort stats whenever userRounds, sortField, sortDirection, or scoreType changes
-    const courseStats = calculateCourseStats(userRounds);
+    // Pass the handicap index to ensure consistency with other components
+    const courseStats = calculateCourseStats(userRounds, handicapIndex);
     
     // Log courses with their scores for debugging
     console.log("Courses with scores before sorting:", courseStats.map(course => ({
@@ -40,25 +40,21 @@ export const CourseStatsTable = ({
       handicapUsed: handicapIndex
     })));
     
-    // CRITICAL FIX: Use the pre-calculated bestNetScore and bestToParNet values
-    // which are already calculated using the current handicap index
+    // Sort based on the field and using the appropriate scores
     const sorted = [...courseStats].sort((a, b) => {
       let aValue: any;
       let bValue: any;
       
-      // Handle special cases for net scores
+      // Use the correct field based on score type
       if (sortField === 'bestGrossScore' && scoreType === 'net') {
-        // For net scores, use the pre-calculated bestNetScore
         aValue = a.bestNetScore !== null ? a.bestNetScore : Number.MAX_SAFE_INTEGER;
         bValue = b.bestNetScore !== null ? b.bestNetScore : Number.MAX_SAFE_INTEGER;
       } 
       else if (sortField === 'bestToPar' && scoreType === 'net') {
-        // For net to par, use the pre-calculated bestToParNet
         aValue = a.bestToParNet !== null ? a.bestToParNet : Number.MAX_SAFE_INTEGER;
         bValue = b.bestToParNet !== null ? b.bestToParNet : Number.MAX_SAFE_INTEGER;
       }
       else {
-        // For all other fields, use them directly
         aValue = a[sortField];
         bValue = b[sortField];
       }

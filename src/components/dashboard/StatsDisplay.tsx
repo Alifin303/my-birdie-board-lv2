@@ -6,18 +6,21 @@ interface StatsDisplayProps {
   userRounds: Round[] | undefined;
   roundsLoading: boolean;
   scoreType: 'gross' | 'net';
-  onScoreTypeChange: (type: 'gross' | 'net') => void;
+  onScoreTypeChange?: (type: 'gross' | 'net') => void;
   calculateStats: (rounds: Round[]) => Stats;
+  handicapIndex: number;
+  profileHandicap?: number;
 }
 
-export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats }: Omit<StatsDisplayProps, 'onScoreTypeChange'>) => {
+export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats, handicapIndex }: Omit<StatsDisplayProps, 'onScoreTypeChange' | 'profileHandicap'>) => {
   const roundsKey = userRounds ? `rounds-${userRounds.length}` : 'no-rounds';
   
   useEffect(() => {
     console.log("[MainStats] Rounds data changed, recalculating stats", { 
-      roundsCount: userRounds?.length 
+      roundsCount: userRounds?.length, 
+      handicapIndex
     });
-  }, [userRounds]);
+  }, [userRounds, handicapIndex]);
   
   if (roundsLoading || !userRounds) {
     return (
@@ -38,13 +41,13 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
     bestNetScore: stats.bestNetScore,
     bestToPar: stats.bestToPar,
     bestToParNet: stats.bestToParNet,
-    handicapIndex: stats.handicapIndex
+    handicapIndex: handicapIndex
   });
   
   if (scoreType === 'net' && userRounds.length > 0) {
     const calculatedRounds = userRounds.map(round => {
-      const netScore = Math.round(round.gross_score - stats.handicapIndex);
-      const netToPar = Math.round(round.to_par_gross - stats.handicapIndex);
+      const netScore = Math.round(round.gross_score - handicapIndex);
+      const netToPar = Math.round(round.to_par_gross - handicapIndex);
       return { 
         id: round.id, 
         date: round.date, 
@@ -75,6 +78,9 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
     console.log("[MainStats] Best rounds by net to par:", sortedByToParNet.slice(0, 3));
     console.log("[MainStats] Round with best net score:", sortedByNetScore[0]);
     console.log("[MainStats] Round with best net to par:", sortedByToParNet[0]);
+
+    stats.bestNetScore = sortedByNetScore[0]?.net || null;
+    stats.bestToParNet = sortedByToParNet[0]?.toParNet || null;
   }
   
   return (
@@ -124,14 +130,16 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
   );
 };
 
-export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTypeChange, calculateStats }: StatsDisplayProps) => {
+export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTypeChange, calculateStats, handicapIndex, profileHandicap }: StatsDisplayProps) => {
   const roundsKey = userRounds ? `rounds-${userRounds.length}` : 'no-rounds';
   
   useEffect(() => {
-    console.log("[HandicapCircle] Rounds data changed, recalculating handicap", { 
-      roundsCount: userRounds?.length 
+    console.log("[HandicapCircle] Rounds data changed, handicap info:", { 
+      roundsCount: userRounds?.length,
+      profileHandicap,
+      calculatedHandicap: handicapIndex
     });
-  }, [userRounds]);
+  }, [userRounds, handicapIndex, profileHandicap]);
   
   if (roundsLoading || !userRounds) {
     return (
@@ -143,12 +151,15 @@ export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTy
   }
   
   const stats = calculateStats(userRounds);
+  const displayHandicap = profileHandicap !== undefined ? profileHandicap : stats.handicapIndex;
   const hasHandicap = stats.roundsNeededForHandicap === 0;
   
   console.log("[HandicapCircle] Rendering with handicap:", {
     roundsKey,
     roundsCount: userRounds.length,
-    handicapIndex: stats.handicapIndex,
+    calculatedHandicapIndex: stats.handicapIndex,
+    profileHandicap: profileHandicap,
+    displayHandicap: displayHandicap,
     hasHandicap,
     roundsNeededForHandicap: stats.roundsNeededForHandicap
   });
@@ -158,13 +169,13 @@ export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTy
       <div className="relative mb-3">
         <div className="flex items-center gap-2">
           <button 
-            onClick={() => onScoreTypeChange('gross')} 
+            onClick={() => onScoreTypeChange && onScoreTypeChange('gross')} 
             className={`px-3 py-1 rounded-full text-sm font-medium ${scoreType === 'gross' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
           >
             Gross
           </button>
           <button 
-            onClick={() => onScoreTypeChange('net')} 
+            onClick={() => onScoreTypeChange && onScoreTypeChange('net')} 
             className={`px-3 py-1 rounded-full text-sm font-medium ${scoreType === 'net' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
           >
             Net
@@ -177,7 +188,7 @@ export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTy
           {hasHandicap ? (
             <>
               <p className="text-sm font-medium text-muted-foreground">Handicap Index</p>
-              <p className="text-5xl font-bold my-2">{stats.handicapIndex}</p>
+              <p className="text-5xl font-bold my-2">{displayHandicap}</p>
               <p className="text-sm text-muted-foreground">Based on {stats.totalRounds} rounds</p>
             </>
           ) : (

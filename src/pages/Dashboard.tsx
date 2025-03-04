@@ -149,19 +149,25 @@ export default function Dashboard() {
     if (!isModalOpen) {
       // Invalidate query cache when modal is closed to refresh data
       queryClient.invalidateQueries({ queryKey: ['userRounds'] });
+      // Also invalidate profile to refresh the handicap
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
     }
   }, [isModalOpen, queryClient]);
 
   const renderDashboard = () => {
-    // CRITICAL FIX: Calculate stats once and pass the pre-calculated handicap to all components
-    // This ensures consistency across the dashboard
-    const stats = userRounds ? calculateStats(userRounds) : { handicapIndex: 0 };
+    if (profileLoading || !profile) {
+      return <div className="flex justify-center py-10"><div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div></div>;
+    }
     
-    // DEBUG: Log the calculated handicap vs the profile handicap
-    console.log("Handicap comparison:", {
-      calculatedHandicap: stats.handicapIndex,
-      profileHandicap: profile?.handicap,
-      profileType: typeof profile?.handicap
+    // CRITICAL FIX: Use the profile handicap directly from Supabase instead of calculating it
+    // This ensures consistency across the dashboard
+    const handicapFromProfile = typeof profile.handicap === 'number' ? profile.handicap : 
+                               (parseFloat(String(profile.handicap)) || 0);
+    
+    console.log("Using handicap directly from profile:", {
+      rawHandicap: profile.handicap,
+      parsedHandicap: handicapFromProfile,
+      profileType: typeof profile.handicap
     });
     
     return (
@@ -178,6 +184,7 @@ export default function Dashboard() {
               roundsLoading={roundsLoading}
               scoreType={scoreType}
               calculateStats={calculateStats}
+              handicapIndex={handicapFromProfile}
             />
             
             <HandicapCircle 
@@ -186,6 +193,8 @@ export default function Dashboard() {
               scoreType={scoreType}
               onScoreTypeChange={handleScoreTypeChange}
               calculateStats={calculateStats}
+              handicapIndex={handicapFromProfile}
+              profileHandicap={handicapFromProfile}
             />
           </>
         )}
@@ -196,7 +205,7 @@ export default function Dashboard() {
                 userRounds={userRounds} 
                 selectedCourseId={selectedCourseId}
                 onBackClick={() => setSelectedCourseId(null)}
-                handicapIndex={stats.handicapIndex}
+                handicapIndex={handicapFromProfile}
               /> 
             : (
               <>
@@ -206,7 +215,7 @@ export default function Dashboard() {
                   scoreType={scoreType}
                   calculateCourseStats={calculateCourseStats}
                   onCourseClick={(courseId) => setSelectedCourseId(courseId)}
-                  handicapIndex={stats.handicapIndex}
+                  handicapIndex={handicapFromProfile}
                 />
               </>
             )

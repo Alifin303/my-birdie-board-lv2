@@ -89,12 +89,16 @@ export const calculateStats = (rounds: Round[]): Stats => {
     }))
   );
   
-  // IMPORTANT: Calculate the handicap first so we can use it for net scores
+  // IMPORTANT: Calculate the handicap for display in the stats component
+  // This may differ from the profile handicap, which is what should be used for score calculations
   const handicapIndex = validRoundsForHandicap.length >= ROUNDS_NEEDED_FOR_HANDICAP ? 
     calculateHandicapIndex(validRoundsForHandicap.map(r => r.gross_score)) : 0;
 
-  // CRITICAL FIX: Always calculate net scores based on CURRENT handicap
-  // This ensures consistency across the application
+  // For stats, always calculate the handicap but let components decide which handicap to use
+  const averageScore = rounds.reduce((sum, r) => sum + r.gross_score, 0) / totalRounds;
+  
+  // We still need to calculate net scores for historical analysis
+  // (Though components should use passed handicap for UI)
   const roundsWithCalculatedScores = rounds.map(r => {
     // Calculate net score using current handicap - round to nearest integer
     const netScore = Math.round(r.gross_score - handicapIndex);
@@ -113,7 +117,7 @@ export const calculateStats = (rounds: Round[]): Stats => {
     roundsWithCalculatedScores.map(r => ({
       id: r.id,
       gross: r.gross_score,
-      net: r.calculatedNetScore,
+      netScore: r.calculatedNetScore,
       toPar: r.to_par_gross,
       toParNet: r.calculatedToParNet
     }))
@@ -152,8 +156,6 @@ export const calculateStats = (rounds: Round[]): Stats => {
     handicapUsed: handicapIndex
   } : "No rounds found");
   
-  const averageScore = rounds.reduce((sum, r) => sum + r.gross_score, 0) / totalRounds;
-  
   // Calculate handicap based on official handicap system
   // This follows a simplified version of the World Handicap System
   // Best 8 of last 20 rounds for established players
@@ -177,7 +179,7 @@ export const calculateStats = (rounds: Round[]): Stats => {
   const averageDifferential = bestDifferentials.length > 0 ? 
     bestDifferentials.reduce((sum, diff) => sum + diff, 0) / bestDifferentials.length : 0;
   
-  // Apply handicap formula (0.96 multiplier as per WHS)
+  // This is just for debugging - the actual handicap will come from the profile
   const calculatedHandicapIndex = scoresToUse > 0 ? 
     Math.max(0, Math.round(averageDifferential * 0.96 * 10) / 10) : 0;
   
@@ -212,7 +214,7 @@ const calculateHandicapIndex = (scores: number[]): number => {
 };
 
 // Group rounds by course and calculate course stats
-export const calculateCourseStats = (rounds: Round[]): CourseStats[] => {
+export const calculateCourseStats = (rounds: Round[], handicapIndex?: number): CourseStats[] => {
   if (!rounds || rounds.length === 0) return [];
 
   // Group rounds by course
@@ -228,8 +230,10 @@ export const calculateCourseStats = (rounds: Round[]): CourseStats[] => {
     }
   });
 
-  // IMPORTANT: First calculate the current handicap index for consistent net score calculations
-  const currentHandicapIndex = calculateStats(rounds).handicapIndex;
+  // Use handicap from parameter if provided, otherwise calculate
+  const currentHandicapIndex = handicapIndex !== undefined ? 
+    handicapIndex : calculateStats(rounds).handicapIndex;
+    
   console.log("Current handicap for course stats calculations:", currentHandicapIndex);
 
   // Calculate stats for each course
@@ -244,12 +248,12 @@ export const calculateCourseStats = (rounds: Round[]): CourseStats[] => {
     const bestGrossScore = Math.min(...courseRounds.map(r => r.gross_score));
     const bestToPar = Math.min(...courseRounds.map(r => r.to_par_gross));
     
-    // CRITICAL FIX: Calculate net scores using the CURRENT handicap index
-    // This ensures consistency with the main stats display
+    // CRITICAL FIX: Calculate net scores using the provided handicap index
+    // This ensures consistency across all components
     const roundsWithCalculatedScores = courseRounds.map(r => {
-      // Always use current handicap for calculations - round to nearest integer
+      // Always use provided handicap - round to nearest integer
       const netScore = Math.round(r.gross_score - currentHandicapIndex);
-      // Calculate net to par using current handicap - round to nearest integer
+      // Calculate net to par - round to nearest integer
       const toParNet = Math.round(r.to_par_gross - currentHandicapIndex);
       return {
         ...r,
@@ -274,7 +278,8 @@ export const calculateCourseStats = (rounds: Round[]): CourseStats[] => {
         gross: r.gross_score,
         net: r.calculatedNetScore,
         toPar: r.to_par_gross,
-        toParNet: r.calculatedToParNet
+        toParNet: r.calculatedToParNet,
+        handicapUsed: currentHandicapIndex
       }))
     );
 
