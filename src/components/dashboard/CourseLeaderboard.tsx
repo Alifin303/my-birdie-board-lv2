@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Calendar, ChevronLeft, ChevronRight, Search } from "lucide-react";
@@ -21,6 +20,8 @@ interface LeaderboardEntry {
   tee_name?: string;
   user_id?: string;
   player_handicap?: number;
+  gross_score?: number;
+  net_score?: number;
 }
 
 interface CourseLeaderboardProps {
@@ -146,7 +147,6 @@ export const CourseLeaderboard = ({
         };
       }
       
-      // Modify the query to also fetch net_score and to_par_net
       let query = supabase
         .from('rounds')
         .select(`
@@ -233,24 +233,41 @@ export const CourseLeaderboard = ({
         const username = userMap.get(round.user_id) || 'Unknown Player';
         const playerHandicap = handicapMap.get(round.user_id) || 0;
         
-        // Use the stored net_score if available, otherwise calculate it
-        const score = scoreType === 'gross' 
-          ? round.gross_score 
-          : (round.net_score !== null && round.net_score !== undefined) 
-              ? round.net_score 
-              : Math.max(0, round.gross_score - playerHandicap);
+        const grossScore = round.gross_score;
+        
+        const netScore = (round.net_score !== null && round.net_score !== undefined) 
+          ? round.net_score 
+          : Math.max(0, round.gross_score - playerHandicap);
             
         return {
           id: round.id,
           date: round.date,
           username: username,
-          score: score,
+          gross_score: grossScore,
+          net_score: netScore,
+          score: 0,
           isCurrentUser: round.user_id === currentUserId,
           tee_name: round.tee_name,
           user_id: round.user_id,
           player_handicap: playerHandicap
         };
       });
+      
+      processedData = processedData.map(entry => ({
+        ...entry,
+        score: scoreType === 'gross' ? entry.gross_score! : entry.net_score!
+      }));
+      
+      console.log("Score type selected:", scoreType);
+      console.log("Processed data with score type applied:", 
+        processedData.slice(0, 3).map(d => ({
+          id: d.id,
+          gross: d.gross_score,
+          net: d.net_score,
+          displayed: d.score,
+          scoreType
+        }))
+      );
       
       processedData.sort((a, b) => a.score - b.score);
       
@@ -272,7 +289,7 @@ export const CourseLeaderboard = ({
         setUserBestScore(null);
       }
       
-      console.log("Processed leaderboard data:", processedData);
+      console.log("Final processed leaderboard data:", processedData);
       console.log("Number of unique users:", new Set(processedData.map(entry => entry.user_id)).size);
       
       setTotalPages(Math.ceil(processedData.length / itemsPerPage));
@@ -310,6 +327,46 @@ export const CourseLeaderboard = ({
   const handleDialogOpen = (isOpen: boolean) => {
     onOpenChange(isOpen);
   };
+  
+  useEffect(() => {
+    if (leaderboard.length > 0) {
+      console.log("Score type changed to:", scoreType);
+      
+      const updatedLeaderboard = leaderboard.map(entry => ({
+        ...entry,
+        score: scoreType === 'gross' ? entry.gross_score! : entry.net_score!
+      }));
+      
+      updatedLeaderboard.sort((a, b) => a.score - b.score);
+      
+      const rankedLeaderboard = updatedLeaderboard.map((entry, index) => ({
+        ...entry,
+        rank: index + 1
+      }));
+      
+      console.log("Updated leaderboard with new score type:", 
+        rankedLeaderboard.slice(0, 3).map(d => ({
+          id: d.id, 
+          gross: d.gross_score,
+          net: d.net_score,
+          displayed: d.score,
+          scoreType
+        }))
+      );
+      
+      setLeaderboard(rankedLeaderboard);
+      
+      const userEntries = rankedLeaderboard.filter(entry => entry.isCurrentUser);
+      if (userEntries.length > 0) {
+        const bestUserEntry = userEntries.reduce((prev, current) => 
+          prev.score < current.score ? prev : current
+        ) as LeaderboardEntry;
+        
+        setUserRank(bestUserEntry.rank !== undefined ? bestUserEntry.rank : null);
+        setUserBestScore(bestUserEntry);
+      }
+    }
+  }, [scoreType]);
   
   return (
     <Dialog open={open} onOpenChange={handleDialogOpen}>
@@ -458,7 +515,9 @@ export const CourseLeaderboard = ({
                   <th className="text-left p-3 text-sm font-medium text-muted-foreground">Date</th>
                   <th className="text-left p-3 text-sm font-medium text-muted-foreground">Player</th>
                   {availableTees.length > 0 && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Tee</th>}
-                  <th className="text-right p-3 text-sm font-medium text-muted-foreground">Score</th>
+                  <th className="text-right p-3 text-sm font-medium text-muted-foreground">
+                    {scoreType === 'gross' ? 'Gross Score' : 'Net Score'}
+                  </th>
                 </tr>
               </thead>
               <tbody>
