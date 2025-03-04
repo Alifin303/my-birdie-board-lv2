@@ -196,75 +196,61 @@ export const CourseLeaderboard = ({
       const userIds = [...new Set(roundsData.map(round => round.user_id))];
       console.log("User IDs to fetch profiles for:", userIds);
       
-      // Fetch profiles data with improved error handling
-      if (userIds.length === 0) {
-        console.error("No user IDs found in rounds data");
-        setIsLoading(false);
-        return;
-      }
-      
-      // Ensure we have a handicap for every user
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, username, first_name, last_name, handicap')
-        .in('id', userIds);
+        .select('id, username, first_name, last_name, handicap');
         
       if (profilesError) {
         console.error("Error fetching profiles:", profilesError);
         throw profilesError;
       }
       
-      console.log("Fetched profiles data:", profilesData);
+      console.log("All profiles fetched:", profilesData);
       
-      // If a user doesn't have a profile, we need to handle that case
-      // by ensuring each user ID has at least a default profile
-      const allProfiles = [...(profilesData || [])];
-      
-      // Check if we're missing any user profiles
-      const foundUserIds = new Set(allProfiles.map(profile => profile.id));
-      const missingUserIds = userIds.filter(id => !foundUserIds.has(id));
-      
-      // Log info about missing profiles
-      if (missingUserIds.length > 0) {
-        console.log(`Missing profiles for ${missingUserIds.length} users:`, missingUserIds);
-        
-        // Create default profiles for missing users
-        for (const userId of missingUserIds) {
-          allProfiles.push({
-            id: userId,
-            username: 'Unknown Player',
-            first_name: null,
-            last_name: null,
-            handicap: 0 // Default handicap
-          });
-        }
+      const profileMap = new Map();
+      if (profilesData) {
+        profilesData.forEach(profile => {
+          profileMap.set(profile.id, profile);
+        });
       }
       
-      // Create maps for usernames and handicaps with better logging
+      const missingUserIds = userIds.filter(id => !profileMap.has(id));
+      if (missingUserIds.length > 0) {
+        console.error("Missing profiles for users:", missingUserIds);
+      }
+      
       const userMap = new Map();
       const handicapMap = new Map();
       
-      allProfiles.forEach(profile => {
-        let displayName = profile.username;
+      userIds.forEach(userId => {
+        const profile = profileMap.get(userId);
         
-        if (!displayName && (profile.first_name || profile.last_name)) {
-          displayName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
-        }
-        
-        userMap.set(profile.id, displayName || 'Unknown Player');
-        
-        // Parse handicap ensuring it's a number
-        let handicapValue;
-        if (profile.handicap === null || profile.handicap === undefined) {
-          handicapValue = 0;
-        } else if (typeof profile.handicap === 'number') {
-          handicapValue = profile.handicap;
+        if (profile) {
+          let displayName = profile.username;
+          
+          if (!displayName && (profile.first_name || profile.last_name)) {
+            displayName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+          }
+          
+          userMap.set(userId, displayName || 'Unknown Player');
+          
+          let handicapValue;
+          if (profile.handicap === null || profile.handicap === undefined) {
+            handicapValue = 0;
+            console.log(`User ${userId} has null/undefined handicap, defaulting to 0`);
+          } else if (typeof profile.handicap === 'number') {
+            handicapValue = profile.handicap;
+          } else {
+            handicapValue = parseFloat(String(profile.handicap)) || 0;
+          }
+          
+          handicapMap.set(userId, handicapValue);
+          console.log(`User ${userId} (${displayName}) has handicap: ${handicapValue} (original: ${profile.handicap}, type: ${typeof profile.handicap})`);
         } else {
-          handicapValue = parseFloat(String(profile.handicap)) || 0;
+          userMap.set(userId, 'Unknown Player');
+          handicapMap.set(userId, 0);
+          console.error(`No profile found for user ${userId}. Using default values.`);
         }
-        
-        handicapMap.set(profile.id, handicapValue);
-        console.log(`Setting handicap for user ${profile.id}: ${handicapValue} (original: ${profile.handicap}, type: ${typeof profile.handicap})`);
       });
       
       console.log("User map created:", Array.from(userMap.entries()));
@@ -279,7 +265,6 @@ export const CourseLeaderboard = ({
         const grossScore = round.gross_score;
         const playerHandicapValue = playerHandicap !== undefined ? playerHandicap : 0;
         
-        // Calculate net score with detailed logging
         let netScore;
         if (round.net_score !== null && round.net_score !== undefined) {
           netScore = round.net_score;
@@ -295,7 +280,7 @@ export const CourseLeaderboard = ({
           username: username,
           gross_score: grossScore,
           net_score: netScore,
-          score: 0, // Will be set based on scoreType
+          score: 0,
           isCurrentUser: round.user_id === currentUserId,
           tee_name: round.tee_name,
           user_id: round.user_id,
@@ -307,7 +292,6 @@ export const CourseLeaderboard = ({
       
       setDisplayedScoreType(scoreType);
       
-      // Set the score property based on the selected score type
       processedData = processedData.map(entry => ({
         ...entry,
         score: scoreType === 'gross' ? entry.gross_score! : entry.net_score!
@@ -325,10 +309,8 @@ export const CourseLeaderboard = ({
         }))
       );
       
-      // Sort by score (ascending)
       processedData.sort((a, b) => a.score - b.score);
       
-      // Add rank property
       processedData = processedData.map((entry, index) => ({
         ...entry,
         rank: index + 1
@@ -339,7 +321,6 @@ export const CourseLeaderboard = ({
       
       setOriginalLeaderboardData(processedData);
       
-      // Find user's best score
       const userEntries = processedData.filter(entry => entry.isCurrentUser);
       if (userEntries.length > 0) {
         const bestUserEntry = userEntries.reduce((prev, current) => 

@@ -1,106 +1,44 @@
 
-// Helper function to calculate handicap index based on World Handicap System
-export function calculateHandicapIndex(
-  rounds: Array<{ gross_score: number; to_par_gross: number; net_score?: number; to_par_net?: number }>, 
-  options: { 
-    skipIncompleteRounds?: boolean; 
-    skipPar3Courses?: boolean;
-    requiredRounds?: number;
-  } = {}
-): { 
-  handicapIndex: number; 
-  roundsNeededForHandicap: number;
-  isValidHandicap: boolean;
-} {
-  const { 
-    skipIncompleteRounds = true, 
-    skipPar3Courses = true,
-    requiredRounds = 5 
-  } = options;
-  
-  if (!rounds || rounds.length === 0) {
-    return { 
-      handicapIndex: 0, 
-      roundsNeededForHandicap: requiredRounds,
-      isValidHandicap: false
-    };
-  }
+/**
+ * Calculates a handicap index based on a set of scores
+ * This is a simplified calculation and not the exact USGA method
+ */
+export const calculateHandicapIndex = (scores: number[]): number => {
+  if (!scores || scores.length === 0) return 0;
 
-  // Filter out incomplete rounds and par-3 only courses if specified
-  const validRoundsForHandicap = rounds.filter(round => {
-    // Check if round is complete based on gross score
-    const isComplete = !skipIncompleteRounds || round.gross_score > 0;
-    
-    // For par-3 courses, we would need some kind of indicator in the data
-    // This is a placeholder logic - in a real app, you would need actual course data
-    const isPar3OnlyCourse = skipPar3Courses ? false : true; // Placeholder logic
-    
-    return isComplete && !isPar3OnlyCourse;
-  });
+  // Sort scores from best to worst
+  const sortedScores = [...scores].sort((a, b) => a - b);
+  
+  // Take the best score
+  const bestScore = sortedScores[0];
+  
+  // Apply a simple algorithm to calculate handicap index
+  // This is not the official USGA method
+  const handicapIndex = Math.max(0, (bestScore - 72) * 0.96);
+  
+  // Round to 1 decimal place
+  return Math.round(handicapIndex * 10) / 10;
+};
 
-  const validRoundsCount = validRoundsForHandicap.length;
-  
-  // Calculate differentials (using to_par_gross as a simplified proxy)
-  // In a real WHS implementation, you would use: (adjusted_gross_score - course_rating) * 113 / slope_rating
-  const differentials = validRoundsForHandicap.map(round => round.to_par_gross);
-  differentials.sort((a, b) => a - b); // Sort in ascending order
-  
-  // Determine how many differentials to use based on WHS rules
-  let scoresToUse = 0;
-  if (validRoundsCount >= 20) scoresToUse = 8;       // Use best 8 of 20
-  else if (validRoundsCount >= 15) scoresToUse = 6;  // Use best 6 of 15-19
-  else if (validRoundsCount >= 10) scoresToUse = 4;  // Use best 4 of 10-14
-  else if (validRoundsCount >= 5) scoresToUse = 3;   // Use best 3 of 5-9
-  else scoresToUse = 0;                              // Not enough rounds
-  
-  // Take the best differentials
-  const bestDifferentials = differentials.slice(0, scoresToUse);
-  
-  // Calculate average differential
-  const averageDifferential = bestDifferentials.length > 0 
-    ? bestDifferentials.reduce((sum, diff) => sum + diff, 0) / bestDifferentials.length 
-    : 0;
-  
-  // Apply the 0.96 multiplier per WHS
-  const handicapIndex = scoresToUse > 0 
-    ? Math.max(0, Math.round(averageDifferential * 0.96 * 10) / 10) 
-    : 0;
-  
-  const roundsNeededForHandicap = validRoundsCount >= requiredRounds 
-    ? 0 
-    : requiredRounds - validRoundsCount;
-  
-  return {
-    handicapIndex,
-    roundsNeededForHandicap,
-    isValidHandicap: roundsNeededForHandicap === 0
-  };
-}
-
-// Helper function to calculate net score from gross score and handicap
-export function calculateNetScore(grossScore: number, handicap: number | string | null | undefined): number {
-  // Enhanced handling of various handicap input types
+/**
+ * Calculates a net score by subtracting the player's handicap from their gross score
+ */
+export const calculateNetScore = (grossScore: number, handicap: number | string | null | undefined): number => {
+  // Handle various input types for handicap
   let numericHandicap = 0;
   
   if (handicap === null || handicap === undefined) {
-    console.log(`Received null or undefined handicap, defaulting to 0`);
+    console.log(`Handicap is ${handicap}, defaulting to 0`);
     numericHandicap = 0;
   } else if (typeof handicap === 'number') {
     numericHandicap = handicap;
-  } else if (typeof handicap === 'string') {
-    numericHandicap = parseFloat(handicap) || 0;
   } else {
-    console.warn(`Unexpected handicap type: ${typeof handicap}, value: ${String(handicap)}`);
-    try {
-      numericHandicap = parseFloat(String(handicap)) || 0;
-    } catch (e) {
-      console.error(`Failed to parse handicap: ${e}`);
-      numericHandicap = 0;
-    }
+    // Try to parse it as a number if it's a string
+    numericHandicap = parseFloat(String(handicap)) || 0;
   }
-    
+  
   console.log(`Calculating net score: gross=${grossScore}, handicap=${numericHandicap} (original: ${handicap}, type: ${typeof handicap})`);
   
-  // Calculate net score by subtracting handicap and ensure it's not negative
+  // Ensure we never return a negative score
   return Math.max(0, grossScore - numericHandicap);
-}
+};
