@@ -197,7 +197,13 @@ export const CourseLeaderboard = ({
       const userIds = [...new Set(roundsData.map(round => round.user_id))];
       console.log("User IDs to fetch profiles for:", userIds);
       
-      // Fetch user profiles to get handicaps and usernames
+      // Fetch profiles data with improved error handling
+      if (userIds.length === 0) {
+        console.error("No user IDs found in rounds data");
+        setIsLoading(false);
+        return;
+      }
+      
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('id, username, first_name, last_name, handicap')
@@ -221,6 +227,7 @@ export const CourseLeaderboard = ({
         return;
       }
       
+      // Create maps for usernames and handicaps with better logging
       const userMap = new Map();
       const handicapMap = new Map();
       
@@ -233,34 +240,45 @@ export const CourseLeaderboard = ({
         
         userMap.set(profile.id, displayName || 'Unknown Player');
         
-        // Parse handicap as a number 
-        const handicapValue = typeof profile.handicap === 'number' 
-          ? profile.handicap 
-          : parseFloat(String(profile.handicap)) || 0;
-          
+        // Parse handicap ensuring it's a number
+        let handicapValue;
+        if (profile.handicap === null || profile.handicap === undefined) {
+          handicapValue = 0;
+        } else if (typeof profile.handicap === 'number') {
+          handicapValue = profile.handicap;
+        } else {
+          handicapValue = parseFloat(String(profile.handicap)) || 0;
+        }
+        
         handicapMap.set(profile.id, handicapValue);
-        console.log(`Setting handicap for user ${profile.id}: ${handicapValue} (original type: ${typeof profile.handicap})`);
+        console.log(`Setting handicap for user ${profile.id}: ${handicapValue} (original: ${profile.handicap}, type: ${typeof profile.handicap})`);
       });
       
       console.log("User map created:", Array.from(userMap.entries()));
       console.log("Handicap map created:", Array.from(handicapMap.entries()));
-      console.log("Query result data:", roundsData);
       
       let processedData = roundsData.map(round => {
         const username = userMap.get(round.user_id) || 'Unknown Player';
-        const playerHandicap = handicapMap.get(round.user_id) || 0;
+        const playerHandicap = handicapMap.get(round.user_id);
+        
+        if (playerHandicap === undefined) {
+          console.warn(`No handicap found for user ${round.user_id}. Defaulting to 0.`);
+        }
         
         const grossScore = round.gross_score;
+        const playerHandicapValue = playerHandicap !== undefined ? playerHandicap : 0;
         
-        // Calculate net score using the player's handicap
+        // Calculate net score with detailed logging
         let netScore;
         if (round.net_score !== null && round.net_score !== undefined) {
           netScore = round.net_score;
+          console.log(`Using existing net score for round ${round.id}: ${netScore}`);
         } else {
-          netScore = calculateNetScore(grossScore, playerHandicap);
+          netScore = calculateNetScore(grossScore, playerHandicapValue);
+          console.log(`Calculated new net score for round ${round.id}: gross=${grossScore}, handicap=${playerHandicapValue}, net=${netScore}`);
         }
         
-        console.log(`Round ID ${round.id} - gross: ${grossScore}, net: ${netScore}, handicap: ${playerHandicap}`);
+        console.log(`Round ID ${round.id} - User: ${username}, gross: ${grossScore}, net: ${netScore}, handicap: ${playerHandicapValue}`);
         
         return {
           id: round.id,
@@ -272,7 +290,7 @@ export const CourseLeaderboard = ({
           isCurrentUser: round.user_id === currentUserId,
           tee_name: round.tee_name,
           user_id: round.user_id,
-          player_handicap: playerHandicap
+          player_handicap: playerHandicapValue
         };
       });
       
@@ -289,6 +307,7 @@ export const CourseLeaderboard = ({
       console.log("Processed data with score type applied:", 
         processedData.slice(0, 3).map(d => ({
           id: d.id,
+          username: d.username,
           gross: d.gross_score,
           net: d.net_score,
           displayed: d.score,

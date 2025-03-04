@@ -78,14 +78,29 @@ export function calculateHandicapIndex(
 }
 
 // Helper function to calculate net score from gross score and handicap
-export function calculateNetScore(grossScore: number, handicap: number): number {
-  // Ensure handicap is a valid number
-  const numericHandicap = typeof handicap === 'number' 
-    ? handicap
-    : parseFloat(String(handicap)) || 0;
+export function calculateNetScore(grossScore: number, handicap: number | string | null | undefined): number {
+  // Enhanced handling of various handicap input types
+  let numericHandicap = 0;
+  
+  if (handicap === null || handicap === undefined) {
+    console.log(`Received null or undefined handicap, defaulting to 0`);
+    numericHandicap = 0;
+  } else if (typeof handicap === 'number') {
+    numericHandicap = handicap;
+  } else if (typeof handicap === 'string') {
+    numericHandicap = parseFloat(handicap) || 0;
+  } else {
+    console.warn(`Unexpected handicap type: ${typeof handicap}, value: ${String(handicap)}`);
+    try {
+      numericHandicap = parseFloat(String(handicap)) || 0;
+    } catch (e) {
+      console.error(`Failed to parse handicap: ${e}`);
+      numericHandicap = 0;
+    }
+  }
     
   console.log(`Calculating net score: gross=${grossScore}, handicap=${numericHandicap} (original: ${handicap}, type: ${typeof handicap})`);
   
-  // Calculate net score by subtracting handicap
+  // Calculate net score by subtracting handicap and ensure it's not negative
   return Math.max(0, grossScore - numericHandicap);
 }
