@@ -155,9 +155,9 @@ export const CourseLeaderboard = ({
       
       // Process leaderboard data
       let processedData = data.map(round => {
-        // Fix: Extract username correctly from the profiles object
-        // The profiles object is a single object, not an array
-        const username = round.profiles ? round.profiles.username || "Unknown" : "Unknown";
+        // Fix for the first error: correctly extract username from the profiles object
+        // In the Supabase join, profiles is a single object, not an array
+        const username = round.profiles?.username || "Unknown";
         
         const score = scoreType === 'gross' 
           ? round.gross_score 
@@ -175,7 +175,7 @@ export const CourseLeaderboard = ({
       // Sort by score (ascending - lower is better in golf)
       processedData.sort((a, b) => a.score - b.score);
       
-      // Add rank to each entry
+      // Add rank to each entry - this addresses the second error
       processedData = processedData.map((entry, index) => ({
         ...entry,
         rank: index + 1
@@ -189,7 +189,7 @@ export const CourseLeaderboard = ({
           prev.score < current.score ? prev : current
         );
         
-        setUserRank(bestUserEntry.rank);
+        setUserRank(bestUserEntry.rank || null);
         setUserBestScore(bestUserEntry);
       } else {
         setUserRank(null);
