@@ -1,14 +1,15 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Calendar, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/core/client";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
 
 interface LeaderboardEntry {
   id: number;
@@ -17,6 +18,7 @@ interface LeaderboardEntry {
   score: number;
   isCurrentUser: boolean;
   rank?: number;  // Added rank as an optional property
+  tee_name?: string; // Added tee name for filtering
 }
 
 interface CourseLeaderboardProps {
@@ -48,8 +50,30 @@ export const CourseLeaderboard = ({
   const [availableYears, setAvailableYears] = useState<string[]>([]);
   const [userRank, setUserRank] = useState<number | null>(null);
   const [userBestScore, setUserBestScore] = useState<LeaderboardEntry | null>(null);
+  const [availableTees, setAvailableTees] = useState<string[]>([]);
+  const [selectedTee, setSelectedTee] = useState<string | null>(null);
   
   const itemsPerPage = 10;
+  
+  // Fetch available tees for this course
+  const fetchAvailableTees = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('rounds')
+        .select('tee_name')
+        .eq('course_id', courseId)
+        .not('tee_name', 'is', null);
+        
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        const tees = [...new Set(data.map(round => round.tee_name))];
+        setAvailableTees(tees);
+      }
+    } catch (error) {
+      console.error("Error fetching available tees:", error);
+    }
+  };
   
   // Fetch available years with rounds for this course
   const fetchAvailableYears = async () => {
@@ -117,7 +141,7 @@ export const CourseLeaderboard = ({
         };
       }
       
-      // Fixed query to correctly join with profiles table
+      // Build the base query
       let query = supabase
         .from('rounds')
         .select(`
@@ -126,9 +150,15 @@ export const CourseLeaderboard = ({
           gross_score,
           net_score,
           user_id,
-          profiles:profiles!user_id(username)
+          tee_name,
+          profiles(username)
         `)
         .eq('course_id', courseId);
+        
+      // Apply tee filter if selected
+      if (selectedTee) {
+        query = query.eq('tee_name', selectedTee);
+      }
         
       // Apply date filter if not all-time
       if (dateRange !== 'all-time') {
@@ -153,20 +183,17 @@ export const CourseLeaderboard = ({
         return;
       }
       
-      console.log("Profiles query data:", data);
+      console.log("Query result data:", data);
       
       // Process leaderboard data
       let processedData = data.map(round => {
-        // Fix for array vs object issue with profiles
+        // Handle profiles data which could be an array or an object
         let username = "Unknown";
         
-        // Handle profiles data which could be an array or an object
         if (round.profiles) {
           if (Array.isArray(round.profiles) && round.profiles.length > 0) {
-            // If it's an array, take the first item's username
             username = round.profiles[0]?.username || "Unknown";
           } else if (typeof round.profiles === 'object') {
-            // If it's an object, get the username property
             username = (round.profiles as any).username || "Unknown";
           }
         }
@@ -180,7 +207,8 @@ export const CourseLeaderboard = ({
           date: round.date,
           username: username,
           score: score,
-          isCurrentUser: round.user_id === currentUserId
+          isCurrentUser: round.user_id === currentUserId,
+          tee_name: round.tee_name
         };
       });
       
@@ -250,6 +278,7 @@ export const CourseLeaderboard = ({
   const handleDialogOpen = (isOpen: boolean) => {
     if (isOpen) {
       fetchAvailableYears();
+      fetchAvailableTees();
     }
     onOpenChange(isOpen);
   };
@@ -259,11 +288,14 @@ export const CourseLeaderboard = ({
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">{courseName} Leaderboards</DialogTitle>
+          <DialogDescription>
+            Compare your scores with other players on this course.
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4 mt-4">
           {/* Filters section */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Date Range Filter */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Date Range</label>
@@ -331,6 +363,25 @@ export const CourseLeaderboard = ({
               </div>
             )}
             
+            {/* Tee Selection Filter */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Tee</label>
+              <Select 
+                value={selectedTee || ""} 
+                onValueChange={(value) => setSelectedTee(value || null)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Tees" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All Tees</SelectItem>
+                  {availableTees.map(tee => (
+                    <SelectItem key={tee} value={tee}>{tee}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
             {/* Score Type Filter */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Score Type</label>
@@ -349,14 +400,14 @@ export const CourseLeaderboard = ({
             </div>
             
             {/* Search Button */}
-            <div className="flex items-end">
+            <div className="flex items-end sm:col-span-2">
               <Button 
                 onClick={handleSearch} 
                 className="w-full"
                 disabled={isLoading}
               >
                 <Search className="h-4 w-4 mr-2" />
-                Search
+                Search Leaderboard
               </Button>
             </div>
           </div>
@@ -369,6 +420,7 @@ export const CourseLeaderboard = ({
                 <div>
                   <p className="text-sm">Date: {format(new Date(userBestScore.date), 'MMM d, yyyy')}</p>
                   <p className="text-sm">Score: {userBestScore.score}</p>
+                  {userBestScore.tee_name && <p className="text-sm">Tee: {userBestScore.tee_name}</p>}
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">Rank</p>
@@ -386,19 +438,20 @@ export const CourseLeaderboard = ({
                   <th className="text-left p-3 text-sm font-medium text-muted-foreground">Rank</th>
                   <th className="text-left p-3 text-sm font-medium text-muted-foreground">Date</th>
                   <th className="text-left p-3 text-sm font-medium text-muted-foreground">Player</th>
+                  {availableTees.length > 0 && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Tee</th>}
                   <th className="text-right p-3 text-sm font-medium text-muted-foreground">Score</th>
                 </tr>
               </thead>
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan={4} className="text-center p-8">
+                    <td colSpan={availableTees.length > 0 ? 5 : 4} className="text-center p-8">
                       <p className="text-muted-foreground">Loading leaderboard data...</p>
                     </td>
                   </tr>
                 ) : leaderboard.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="text-center p-8">
+                    <td colSpan={availableTees.length > 0 ? 5 : 4} className="text-center p-8">
                       <p className="text-muted-foreground">No leaderboard data available. Try different filters or search again.</p>
                     </td>
                   </tr>
@@ -414,6 +467,7 @@ export const CourseLeaderboard = ({
                         {entry.username}
                         {entry.isCurrentUser && <span className="ml-2 text-xs text-primary">(You)</span>}
                       </td>
+                      {availableTees.length > 0 && <td className="p-3 text-sm">{entry.tee_name || 'N/A'}</td>}
                       <td className="p-3 text-sm text-right">{entry.score}</td>
                     </tr>
                   ))
