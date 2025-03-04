@@ -16,7 +16,10 @@ export const ScoreTableSummary = ({ scores, handicapIndex = 0, showNet = false }
     <div className="pt-2 border-t">
       <div className="flex justify-between">
         <span className="font-medium">Total Score:</span>
-        <span>{showNet && handicapIndex > 0 ? netScore : totalScore}{showNet && handicapIndex > 0 ? ` (${totalScore} gross)` : ''}</span>
+        <span>
+          {showNet && handicapIndex > 0 ? netScore : totalScore}
+          {showNet && handicapIndex > 0 ? ` (${totalScore} gross)` : ''}
+        </span>
       </div>
       <div className="flex justify-between">
         <span className="font-medium">Total Par:</span>

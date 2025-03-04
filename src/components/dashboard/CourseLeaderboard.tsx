@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Calendar, ChevronLeft, ChevronRight, Search } from "lucide-react";
@@ -55,6 +56,7 @@ export const CourseLeaderboard = ({
   const [userBestScore, setUserBestScore] = useState<LeaderboardEntry | null>(null);
   const [availableTees, setAvailableTees] = useState<string[]>([]);
   const [selectedTee, setSelectedTee] = useState<string | null>(null);
+  const [originalLeaderboardData, setOriginalLeaderboardData] = useState<LeaderboardEntry[]>([]);
   
   const itemsPerPage = 10;
   
@@ -178,6 +180,7 @@ export const CourseLeaderboard = ({
       
       if (!roundsData || roundsData.length === 0) {
         setLeaderboard([]);
+        setOriginalLeaderboardData([]);
         setUserRank(null);
         setUserBestScore(null);
         setTotalPages(1);
@@ -229,12 +232,14 @@ export const CourseLeaderboard = ({
       console.log("Handicap map created:", Array.from(handicapMap.entries()));
       console.log("Query result data:", roundsData);
       
+      // Process the data and store both gross and net scores
       let processedData = roundsData.map(round => {
         const username = userMap.get(round.user_id) || 'Unknown Player';
         const playerHandicap = handicapMap.get(round.user_id) || 0;
         
         const grossScore = round.gross_score;
         
+        // Use stored net_score if available, otherwise calculate it
         const netScore = (round.net_score !== null && round.net_score !== undefined) 
           ? round.net_score 
           : Math.max(0, round.gross_score - playerHandicap);
@@ -245,18 +250,14 @@ export const CourseLeaderboard = ({
           username: username,
           gross_score: grossScore,
           net_score: netScore,
-          score: 0,
+          // Set initial score based on the current scoreType
+          score: scoreType === 'gross' ? grossScore : netScore,
           isCurrentUser: round.user_id === currentUserId,
           tee_name: round.tee_name,
           user_id: round.user_id,
           player_handicap: playerHandicap
         };
       });
-      
-      processedData = processedData.map(entry => ({
-        ...entry,
-        score: scoreType === 'gross' ? entry.gross_score! : entry.net_score!
-      }));
       
       console.log("Score type selected:", scoreType);
       console.log("Processed data with score type applied:", 
@@ -269,12 +270,17 @@ export const CourseLeaderboard = ({
         }))
       );
       
+      // Sort the processed data by the score property
       processedData.sort((a, b) => a.score - b.score);
       
+      // Add rankings
       processedData = processedData.map((entry, index) => ({
         ...entry,
         rank: index + 1
       }));
+      
+      // Store the original data 
+      setOriginalLeaderboardData(processedData);
       
       const userEntries = processedData.filter(entry => entry.isCurrentUser);
       if (userEntries.length > 0) {
@@ -328,17 +334,21 @@ export const CourseLeaderboard = ({
     onOpenChange(isOpen);
   };
   
+  // Handle scoreType changes
   useEffect(() => {
-    if (leaderboard.length > 0) {
+    if (originalLeaderboardData.length > 0) {
       console.log("Score type changed to:", scoreType);
-      
-      const updatedLeaderboard = leaderboard.map(entry => ({
+
+      // Create a new array for the leaderboard with updated scores based on the scoreType
+      const updatedLeaderboard = originalLeaderboardData.map(entry => ({
         ...entry,
         score: scoreType === 'gross' ? entry.gross_score! : entry.net_score!
       }));
       
+      // Sort by the new score values
       updatedLeaderboard.sort((a, b) => a.score - b.score);
       
+      // Recalculate rankings
       const rankedLeaderboard = updatedLeaderboard.map((entry, index) => ({
         ...entry,
         rank: index + 1
@@ -354,8 +364,7 @@ export const CourseLeaderboard = ({
         }))
       );
       
-      setLeaderboard(rankedLeaderboard);
-      
+      // Update the user's best round and rank
       const userEntries = rankedLeaderboard.filter(entry => entry.isCurrentUser);
       if (userEntries.length > 0) {
         const bestUserEntry = userEntries.reduce((prev, current) => 
@@ -365,6 +374,9 @@ export const CourseLeaderboard = ({
         setUserRank(bestUserEntry.rank !== undefined ? bestUserEntry.rank : null);
         setUserBestScore(bestUserEntry);
       }
+      
+      // Update the leaderboard
+      setLeaderboard(rankedLeaderboard);
     }
   }, [scoreType]);
   
