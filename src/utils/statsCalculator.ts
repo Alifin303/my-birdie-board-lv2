@@ -88,41 +88,70 @@ export const calculateStats = (rounds: Round[]): Stats => {
     }))
   );
   
-  // Handle net scores - use stored net_score if available, otherwise calculate
-  // Make sure to properly round all calculations
-  const roundsWithNetScore = rounds.map(r => {
+  // FIXED: Use consistent calculation for net scores and net to par
+  // First get the handicap from stored data if available
+  const handicapIndex = validRoundsForHandicap.length >= ROUNDS_NEEDED_FOR_HANDICAP ? 
+    calculateHandicapIndex(validRoundsForHandicap.map(r => r.gross_score)) : 0;
+
+  // Calculate net scores for each round using the handicap
+  const roundsWithCalculatedScores = rounds.map(r => {
+    // Use stored net_score if available, otherwise calculate
     const netScore = r.net_score !== undefined && r.net_score !== null
       ? r.net_score
-      : null;
-    return {
-      ...r,
-      calculatedNetScore: netScore
-    };
-  }).filter(r => r.calculatedNetScore !== null);
-  
-  const bestNetScore = roundsWithNetScore.length > 0 ? 
-    Math.min(...roundsWithNetScore.map(r => r.calculatedNetScore!)) : null;
-  
-  // Similarly handle to_par_net values
-  const roundsWithToParNet = rounds.map(r => {
+      : Math.round(r.gross_score - handicapIndex);
+      
+    // Use stored to_par_net if available, otherwise calculate
     const toParNet = r.to_par_net !== undefined && r.to_par_net !== null
       ? r.to_par_net
-      : null;
+      : Math.round(r.to_par_gross - handicapIndex);
+      
     return {
       ...r,
+      calculatedNetScore: netScore,
       calculatedToParNet: toParNet
     };
-  }).filter(r => r.calculatedToParNet !== null);
-  
-  const bestToParNet = roundsWithToParNet.length > 0 ? 
-    Math.min(...roundsWithToParNet.map(r => r.calculatedToParNet!)) : null;
-  
-  console.log("Best scores found:", {
-    bestGross: bestGrossScore,
-    bestNet: bestNetScore,
-    bestToPar: bestToPar,
-    bestToParNet: bestToParNet
   });
+  
+  console.log("Rounds with calculated scores:", 
+    roundsWithCalculatedScores.map(r => ({
+      id: r.id,
+      gross: r.gross_score,
+      net: r.calculatedNetScore,
+      toPar: r.to_par_gross,
+      toParNet: r.calculatedToParNet
+    }))
+  );
+  
+  // Find the best scores
+  const bestNetScore = roundsWithCalculatedScores.length > 0 ? 
+    Math.min(...roundsWithCalculatedScores.map(r => r.calculatedNetScore)) : null;
+  
+  const bestToParNet = roundsWithCalculatedScores.length > 0 ? 
+    Math.min(...roundsWithCalculatedScores.map(r => r.calculatedToParNet)) : null;
+  
+  // Log the best round info for debugging
+  const bestNetRound = roundsWithCalculatedScores.sort((a, b) => a.calculatedNetScore - b.calculatedNetScore)[0];
+  const bestToParNetRound = roundsWithCalculatedScores.sort((a, b) => a.calculatedToParNet - b.calculatedToParNet)[0];
+  
+  console.log("Best net score round:", bestNetRound ? {
+    id: bestNetRound.id,
+    date: new Date(bestNetRound.date).toLocaleDateString(),
+    course: bestNetRound.courses?.courseName,
+    gross: bestNetRound.gross_score,
+    net: bestNetRound.calculatedNetScore,
+    toParNet: bestNetRound.calculatedToParNet,
+    handicapUsed: handicapIndex
+  } : "No rounds found");
+  
+  console.log("Best to par net round:", bestToParNetRound ? {
+    id: bestToParNetRound.id,
+    date: new Date(bestToParNetRound.date).toLocaleDateString(),
+    course: bestToParNetRound.courses?.courseName,
+    gross: bestToParNetRound.gross_score,
+    net: bestToParNetRound.calculatedNetScore,
+    toParNet: bestToParNetRound.calculatedToParNet,
+    handicapUsed: handicapIndex
+  } : "No rounds found");
   
   const averageScore = rounds.reduce((sum, r) => sum + r.gross_score, 0) / totalRounds;
   
@@ -150,7 +179,7 @@ export const calculateStats = (rounds: Round[]): Stats => {
     bestDifferentials.reduce((sum, diff) => sum + diff, 0) / bestDifferentials.length : 0;
   
   // Apply handicap formula (0.96 multiplier as per WHS)
-  const handicapIndex = scoresToUse > 0 ? 
+  const calculatedHandicapIndex = scoresToUse > 0 ? 
     Math.max(0, Math.round(averageDifferential * 0.96 * 10) / 10) : 0;
   
   console.log("Calculated handicap:", {
@@ -158,7 +187,7 @@ export const calculateStats = (rounds: Round[]): Stats => {
     scoresToUse,
     bestDifferentials,
     averageDifferential,
-    handicapIndex
+    handicapIndex: calculatedHandicapIndex
   });
   
   const roundsNeededForHandicap = validRoundsCount >= ROUNDS_NEEDED_FOR_HANDICAP ? 
@@ -171,9 +200,16 @@ export const calculateStats = (rounds: Round[]): Stats => {
     bestToPar,
     bestToParNet,
     averageScore,
-    handicapIndex,
+    handicapIndex: calculatedHandicapIndex,
     roundsNeededForHandicap
   };
+};
+
+// Import and use the handicapCalculator function directly
+import { calculateHandicapIndex as whsCalculateHandicapIndex } from "@/integrations/supabase/handicap/handicap-calculator";
+
+const calculateHandicapIndex = (scores: number[]): number => {
+  return whsCalculateHandicapIndex(scores);
 };
 
 // Group rounds by course and calculate course stats

@@ -37,22 +37,14 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
     roundsCount: userRounds.length,
     bestGrossScore: stats.bestGrossScore,
     bestNetScore: stats.bestNetScore,
+    bestToPar: stats.bestToPar,
+    bestToParNet: stats.bestToParNet,
     handicapIndex: stats.handicapIndex
   });
   
-  // Calculate net scores based on handicap if not already available
-  // Always round to nearest integer as per user requirement
-  const bestNetScore = stats.bestNetScore !== null 
-    ? stats.bestNetScore 
-    : (stats.handicapIndex > 0 ? Math.round(stats.bestGrossScore - stats.handicapIndex) : stats.bestGrossScore);
-    
-  const bestNetToPar = stats.bestToParNet !== null
-    ? stats.bestToParNet
-    : (stats.handicapIndex > 0 ? Math.round(stats.bestToPar - stats.handicapIndex) : stats.bestToPar);
-  
-  // Find the round with the best net score for debugging
+  // Find the round with the best net score and best net to par for debugging
   if (scoreType === 'net' && userRounds.length > 0) {
-    const roundsWithNetScores = userRounds.map(round => {
+    const calculatedRounds = userRounds.map(round => {
       const netScore = round.net_score || Math.round(round.gross_score - stats.handicapIndex);
       const netToPar = round.to_par_net || Math.round(round.to_par_gross - stats.handicapIndex);
       return { 
@@ -67,22 +59,15 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
     });
     
     // Sort by net score to find the best one
-    const sortedByNetScore = [...roundsWithNetScores].sort((a, b) => a.net - b.net);
+    const sortedByNetScore = [...calculatedRounds].sort((a, b) => a.net - b.net);
     // Sort by to par net to find the best one
-    const sortedByToParNet = [...roundsWithNetScores].sort((a, b) => a.toParNet - b.toParNet);
+    const sortedByToParNet = [...calculatedRounds].sort((a, b) => a.toParNet - b.toParNet);
     
     console.log("[MainStats] Best rounds by net score:", sortedByNetScore.slice(0, 3));
     console.log("[MainStats] Best rounds by net to par:", sortedByToParNet.slice(0, 3));
+    console.log("[MainStats] Round with best net score:", sortedByNetScore[0]);
     console.log("[MainStats] Round with best net to par:", sortedByToParNet[0]);
   }
-  
-  console.log("[MainStats] Final calculated best scores:", {
-    bestGrossScore: stats.bestGrossScore,
-    calculatedBestNetScore: bestNetScore,
-    difference: stats.bestGrossScore - bestNetScore,
-    bestToPar: stats.bestToPar,
-    bestNetToPar: bestNetToPar
-  });
   
   return (
     <div key={roundsKey} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -103,7 +88,7 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
           <div className="space-y-1">
             <p className="text-sm font-medium text-muted-foreground">Best Score</p>
             <p className="text-3xl font-bold">
-              {scoreType === 'gross' ? stats.bestGrossScore : bestNetScore}
+              {scoreType === 'gross' ? stats.bestGrossScore : stats.bestNetScore}
             </p>
           </div>
           <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary/10">
@@ -119,7 +104,7 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
             <p className="text-3xl font-bold">
               {scoreType === 'gross' 
                 ? (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar 
-                : (bestNetToPar > 0 ? '+' : '') + bestNetToPar}
+                : (stats.bestToParNet !== null && stats.bestToParNet > 0 ? '+' : '') + stats.bestToParNet}
             </p>
           </div>
           <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary/10">
