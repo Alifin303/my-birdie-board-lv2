@@ -19,6 +19,7 @@ interface LeaderboardEntry {
   rank?: number;
   tee_name?: string;
   user_id?: string;
+  player_handicap?: number;
 }
 
 interface CourseLeaderboardProps {
@@ -207,6 +208,8 @@ export const CourseLeaderboard = ({
       }
       
       const userMap = new Map();
+      const handicapMap = new Map();
+      
       profilesData.forEach(profile => {
         let displayName = profile.username;
         
@@ -215,17 +218,20 @@ export const CourseLeaderboard = ({
         }
         
         userMap.set(profile.id, displayName || 'Unknown Player');
+        handicapMap.set(profile.id, profile.handicap || 0);
       });
       
       console.log("User map created:", Array.from(userMap.entries()));
+      console.log("Handicap map created:", Array.from(handicapMap.entries()));
       console.log("Query result data:", roundsData);
       
       let processedData = roundsData.map(round => {
         const username = userMap.get(round.user_id) || 'Unknown Player';
+        const playerHandicap = handicapMap.get(round.user_id) || 0;
         
         const score = scoreType === 'gross' 
           ? round.gross_score 
-          : (round.net_score || (handicapIndex > 0 ? Math.max(0, round.gross_score - handicapIndex) : round.gross_score));
+          : (round.net_score || Math.max(0, round.gross_score - playerHandicap));
             
         return {
           id: round.id,
@@ -234,7 +240,8 @@ export const CourseLeaderboard = ({
           score: score,
           isCurrentUser: round.user_id === currentUserId,
           tee_name: round.tee_name,
-          user_id: round.user_id
+          user_id: round.user_id,
+          player_handicap: playerHandicap
         };
       });
       
