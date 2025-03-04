@@ -135,7 +135,7 @@ export const CourseLeaderboard = ({
         };
       }
       
-      // Get all rounds for the specified course
+      // Get all rounds for the specified course WITHOUT filtering by user_id
       let query = supabase
         .from('rounds')
         .select(`
