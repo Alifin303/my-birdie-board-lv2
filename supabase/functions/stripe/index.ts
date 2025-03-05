@@ -293,11 +293,16 @@ serve(async (req) => {
               throw new Error(`Customer ${checkoutCustomerId} does not exist`);
             }
             if (customer.deleted === true) {
+              console.error(`Customer ${checkoutCustomerId} has been deleted and cannot be used`);
               throw new Error(`Customer ${checkoutCustomerId} has been deleted and cannot be used. Please create a new customer.`);
             }
             console.log(`Customer verified: ${checkoutCustomerId}`);
           } catch (customerError) {
             console.error(`Error verifying customer: ${customerError.message}`);
+            // Check if this is a stripe error about deleted customer
+            if (customerError.message && customerError.message.includes('No such customer')) {
+              throw new Error(`Customer ${checkoutCustomerId} does not exist. Please create a new customer.`);
+            }
             throw new Error(`Failed to verify customer: ${customerError.message}`);
           }
           
@@ -353,17 +358,21 @@ serve(async (req) => {
         
         // Verify customer exists and is not deleted
         try {
-          const customerData = await stripe.customers.retrieve(data.customerId);
-          if (customerData.deleted === true) {
-            console.error(`Customer ${data.customerId} has been deleted`);
-            throw new Error(`Customer ${data.customerId} has been deleted. Please create a new customer.`);
+          try {
+            const customerData = await stripe.customers.retrieve(data.customerId);
+            if (customerData.deleted === true) {
+              console.error(`Customer ${data.customerId} has been deleted`);
+              throw new Error(`Customer ${data.customerId} has been deleted. Please create a new customer.`);
+            }
+          } catch (retrieveError) {
+            console.error(`Error retrieving customer: ${retrieveError.message}`);
+            // If this is a "no such customer" error, it's likely been deleted
+            if (retrieveError.message && retrieveError.message.includes('No such customer')) {
+              throw new Error(`Customer ${data.customerId} does not exist in Stripe. Please create a new customer.`);
+            }
+            throw retrieveError;
           }
-        } catch (error) {
-          console.error(`Error verifying customer: ${error.message}`);
-          throw new Error(`Failed to verify customer: ${error.message}`);
-        }
-        
-        try {
+          
           result = await stripe.billingPortal.sessions.create({
             customer: data.customerId,
             return_url: data.returnUrl,

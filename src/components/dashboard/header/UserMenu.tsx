@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
@@ -153,8 +152,17 @@ export const UserMenu = ({
       switch (action) {
         case "subscribe": {
           let customerId = subscriptionData?.data?.customerId;
+          let needToCreateNewCustomer = false;
           
           if (!customerId) {
+            console.log("No customer ID found, will create a new one");
+            needToCreateNewCustomer = true;
+          } else if (subscriptionData?.data?.status === "customer_deleted") {
+            console.log("Customer was previously deleted, creating a new one");
+            needToCreateNewCustomer = true;
+          }
+          
+          if (needToCreateNewCustomer) {
             const { data: userData } = await supabase.auth.getUser();
             console.log("Creating new Stripe customer for:", userData.user?.email);
             try {
@@ -170,6 +178,8 @@ export const UserMenu = ({
                   customer_id: customerId,
                   status: "created"
                 });
+                
+              await refetchSubscription();
             } catch (customerError) {
               console.error("Error creating Stripe customer:", customerError);
               throw new Error(`Failed to create Stripe customer: ${customerError.message}`);
@@ -181,7 +191,6 @@ export const UserMenu = ({
             throw new Error(`Stripe environment not configured properly: ${envCheck.message}`);
           }
           
-          // This is our test product ID - must exist in your Stripe account
           const productId = 'prod_Rsn4QjMLVpGDSl';
           
           console.log("Fetching product prices for product:", productId);
@@ -198,15 +207,45 @@ export const UserMenu = ({
             
             console.log(`Using price ID: ${priceId} for checkout`);
             
-            const checkoutSession = await stripeService.createCheckoutSession(
-              customerId,
-              priceId,
-              `${baseUrl}/dashboard?subscription=success`,
-              `${baseUrl}/dashboard?subscription=canceled`
-            );
-            
-            console.log("Created checkout session, redirecting to:", checkoutSession.url);
-            window.location.href = checkoutSession.url;
+            try {
+              const checkoutSession = await stripeService.createCheckoutSession(
+                customerId,
+                priceId,
+                `${baseUrl}/dashboard?subscription=success`,
+                `${baseUrl}/dashboard?subscription=canceled`
+              );
+              
+              console.log("Created checkout session, redirecting to:", checkoutSession.url);
+              window.location.href = checkoutSession.url;
+            } catch (checkoutError: any) {
+              if (checkoutError.message && checkoutError.message.includes("deleted")) {
+                console.log("Customer appears to be deleted, creating a new one and retrying");
+                const { data: userData } = await supabase.auth.getUser();
+                const customer = await stripeService.createCustomer(userData.user?.email || "");
+                const newCustomerId = customer.id;
+                
+                await supabase
+                  .from('customer_subscriptions')
+                  .update({
+                    customer_id: newCustomerId,
+                    status: "created",
+                    subscription_id: null
+                  })
+                  .eq('user_id', session.user.id);
+                
+                const checkoutSession = await stripeService.createCheckoutSession(
+                  newCustomerId,
+                  priceId,
+                  `${baseUrl}/dashboard?subscription=success`,
+                  `${baseUrl}/dashboard?subscription=canceled`
+                );
+                
+                console.log("Created checkout session with new customer, redirecting to:", checkoutSession.url);
+                window.location.href = checkoutSession.url;
+              } else {
+                throw checkoutError;
+              }
+            }
           } catch (priceError) {
             console.error("Error handling price or checkout:", priceError);
             throw new Error(`Payment processing error: ${priceError.message}`);
@@ -219,12 +258,28 @@ export const UserMenu = ({
             throw new Error("No customer found");
           }
           
-          const portalSession = await stripeService.createBillingPortalSession(
-            subscriptionData.data.customerId,
-            `${baseUrl}/dashboard`
-          );
-          
-          window.location.href = portalSession.url;
+          try {
+            const portalSession = await stripeService.createBillingPortalSession(
+              subscriptionData.data.customerId,
+              `${baseUrl}/dashboard`
+            );
+            
+            window.location.href = portalSession.url;
+          } catch (portalError: any) {
+            if (portalError.message && portalError.message.includes("deleted")) {
+              await supabase
+                .from('customer_subscriptions')
+                .update({
+                  status: "customer_deleted",
+                  subscription_id: null
+                })
+                .eq('user_id', session.user.id);
+                
+              throw new Error("Your customer record has been deleted. Please try subscribing again to create a new one.");
+            } else {
+              throw portalError;
+            }
+          }
           break;
         }
         

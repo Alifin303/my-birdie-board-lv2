@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface StripeCustomer {
@@ -300,6 +299,19 @@ class StripeService {
 
       if (error) {
         console.error("Error creating checkout session:", error);
+        
+        if (error.message && typeof error.message === 'string' && error.message.includes('deleted')) {
+          await supabase
+            .from('customer_subscriptions')
+            .update({
+              status: 'customer_deleted',
+              subscription_id: null
+            })
+            .eq('user_id', session.user.id);
+          
+          throw new Error(`Customer has been deleted in Stripe. Please try subscribing again to create a new customer.`);
+        }
+        
         throw new Error(`Failed to create checkout session: ${error.message}`);
       }
       
@@ -333,6 +345,19 @@ class StripeService {
 
       if (error) {
         console.error("Error creating billing portal session:", error);
+        
+        if (error.message && typeof error.message === 'string' && error.message.includes('deleted')) {
+          await supabase
+            .from('customer_subscriptions')
+            .update({
+              status: 'customer_deleted',
+              subscription_id: null
+            })
+            .eq('user_id', session.user.id);
+          
+          throw new Error(`Customer has been deleted in Stripe. Please try subscribing again to create a new customer.`);
+        }
+        
         throw error;
       }
       
