@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.170.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@11.18.0?target=deno";
 
@@ -8,14 +7,14 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
 };
 
-console.log('Check Stripe webhook function is starting...');
+console.log('Check Stripe webhook function is starting at ' + new Date().toISOString());
 
 serve(async (req) => {
-  console.log(`Received request: ${req.method} ${new URL(req.url).pathname}`);
+  console.log(`[${new Date().toISOString()}] Received request: ${req.method} ${new URL(req.url).pathname}`);
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    console.log('Handling OPTIONS request');
+    console.log('['+new Date().toISOString()+'] Handling OPTIONS request');
     return new Response(null, { 
       status: 204,
       headers: corsHeaders 
@@ -23,13 +22,14 @@ serve(async (req) => {
   }
   
   try {
-    console.log('Starting Stripe webhook secrets check...');
+    console.log('['+new Date().toISOString()+'] Starting Stripe webhook secrets check...');
     
     // Check all possible webhook secret environment variables
     const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
     const signingSecret = Deno.env.get('STRIPE_WEBHOOK_SIGNING_SECRET');
     const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
     
+    console.log('['+new Date().toISOString()+'] Environment variables present:');
     console.log(`STRIPE_WEBHOOK_SECRET exists: ${!!webhookSecret}`);
     console.log(`STRIPE_WEBHOOK_SIGNING_SECRET exists: ${!!signingSecret}`);
     console.log(`STRIPE_SECRET_KEY exists: ${!!stripeKey}`);
@@ -57,10 +57,19 @@ serve(async (req) => {
         length: stripeKey ? stripeKey.length : 0,
         first_chars: stripeKey ? stripeKey.substring(0, 8) + '...' : '',
         last_chars: stripeKey ? '...' + stripeKey.substring(stripeKey.length - 8) : '',
-      }
+      },
+      supabase_url: Deno.env.get('SUPABASE_URL') ? 'exists' : 'missing',
+      supabase_service_role: Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ? 'exists' : 'missing',
+      function_url: `https://${req.headers.get('host')}/stripe-webhook`,
+      function_check_url: `https://${req.headers.get('host')}/check-stripe-webhook`,
     };
     
-    console.log('Checking Stripe environment variables:');
+    // Log additional system info that might be useful
+    console.log('['+new Date().toISOString()+'] Function URL info:');
+    console.log(`Host: ${req.headers.get('host')}`);
+    console.log(`Function URL: ${results.function_url}`);
+    
+    console.log('['+new Date().toISOString()+'] Checking Stripe environment variables:');
     console.log(JSON.stringify(results, null, 2));
     
     // Try to initialize Stripe with the secret key
@@ -144,7 +153,7 @@ serve(async (req) => {
       }
     }
     
-    console.log('Returning check results...');
+    console.log('['+new Date().toISOString()+'] Returning check results...');
     return new Response(
       JSON.stringify({
         results,
@@ -155,13 +164,15 @@ serve(async (req) => {
           STRIPE_WEBHOOK_SIGNING_SECRET: signingSecretError
         },
         sample_signature: sampleSignature,
+        supabase_url_exists: !!Deno.env.get('SUPABASE_URL'),
+        supabase_key_exists: !!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
         recommendations: [
           "Ensure your webhook secret in Supabase starts with 'whsec_'",
-          "If Supabase is transforming your webhook secret, try both STRIPE_WEBHOOK_SECRET and STRIPE_WEBHOOK_SIGNING_SECRET",
-          "Copy your raw webhook secret directly from Stripe without any modifications",
-          "Test by sending a test webhook from Stripe after adding both environment variables",
-          "Check the Stripe webhook function logs immediately after sending a test webhook",
-          "For live environments, consider using the CLI to set secrets to avoid transformation"
+          "Make sure Stripe is sending to the correct URL: " + results.function_url,
+          "Verify events are configured to be sent in Stripe's webhook settings",
+          "In Stripe webhook settings, check 'Send test webhook' to trigger a test event",
+          "Check the Edge Function logs immediately after sending a test webhook",
+          "Verify both STRIPE_WEBHOOK_SECRET and STRIPE_WEBHOOK_SIGNING_SECRET are set"
         ]
       }),
       {
@@ -170,7 +181,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error(`Error checking Stripe environment: ${error.message}`);
+    console.error(`[${new Date().toISOString()}] Error checking Stripe environment: ${error.message}`);
     console.error(`Error stack: ${error.stack}`);
     
     return new Response(

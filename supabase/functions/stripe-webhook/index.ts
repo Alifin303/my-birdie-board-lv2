@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.170.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.8.0';
 import Stripe from 'https://esm.sh/stripe@11.18.0?target=deno';
@@ -10,8 +9,8 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
 };
 
-// Immediately log startup - useful to know if the function is even executed
-console.log('Stripe webhook function is starting...');
+// Log immediately on module load - this will help us know if the function is being deployed
+console.log('STRIPE-WEBHOOK FUNCTION: Module loaded at ' + new Date().toISOString());
 
 // Get Supabase admin client
 const getSupabaseAdmin = () => {
@@ -330,6 +329,11 @@ async function handleStripeEvent(event, supabase) {
 }
 
 serve(async (req) => {
+  // Log immediately to see if the function is being called
+  console.log(`STRIPE-WEBHOOK FUNCTION: Request received at ${new Date().toISOString()}`);
+  console.log(`STRIPE-WEBHOOK FUNCTION: Request method: ${req.method}`);
+  console.log(`STRIPE-WEBHOOK FUNCTION: URL: ${req.url}`);
+  
   // Add timestamp to log entries for better debugging
   const requestTimestamp = new Date().toISOString();
   console.log(`[${requestTimestamp}] Stripe webhook received: ${req.method} ${new URL(req.url).pathname}`);
