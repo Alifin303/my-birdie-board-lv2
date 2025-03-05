@@ -38,11 +38,13 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
   const [hasSubscription, setHasSubscription] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingPhase, setLoadingPhase] = useState<string>("initializing");
+  const [initialCheckComplete, setInitialCheckComplete] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
     // Track if the component is mounted to prevent state updates after unmount
     let isMounted = true;
+    let timeoutId: number | undefined;
     
     const checkSession = async () => {
       try {
@@ -55,9 +57,12 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
         const isAuth = !!session;
         
         if (!isMounted) return;
-        setIsAuthenticated(isAuth);
         
-        console.log(`Authentication check: User is ${isAuth ? "authenticated" : "not authenticated"}`);
+        // Only update authentication state if it's different to avoid re-renders
+        if (isAuthenticated !== isAuth) {
+          setIsAuthenticated(isAuth);
+          console.log(`Authentication check: User is ${isAuth ? "authenticated" : "not authenticated"}`);
+        }
 
         // If user is authenticated and subscription is required, check for active subscription
         if (isAuth && requireSubscription) {
@@ -108,6 +113,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
         setLoadingPhase("completed");
         setIsLoaded(true);
         setIsLoading(false);
+        setInitialCheckComplete(true);
       }
     };
 
@@ -121,7 +127,11 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
         console.log(`Auth state changed: ${_event}, User: ${session?.user?.id || "none"}`);
         
         const isAuth = !!session;
-        setIsAuthenticated(isAuth);
+        
+        // Avoid unnecessary state updates if authentication status hasn't changed
+        if (isAuthenticated !== isAuth) {
+          setIsAuthenticated(isAuth);
+        }
         
         // If auth state changes and user is authenticated, check subscription
         if (isAuth && requireSubscription) {
@@ -156,7 +166,11 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
             });
             
             if (!isMounted) return;
-            setHasSubscription(isValid);
+            
+            // Only update subscription state if it's different
+            if (hasSubscription !== isValid) {
+              setHasSubscription(isValid);
+            }
           } catch (error) {
             console.error("Error checking subscription on auth change:", error);
             if (!isMounted) return;
@@ -164,15 +178,20 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
           } finally {
             if (!isMounted) return;
             setIsLoading(false);
+            setInitialCheckComplete(true);
           }
         } else if (!requireSubscription) {
           // If subscription is not required, set hasSubscription to true to allow access
           if (!isMounted) return;
-          setHasSubscription(true);
+          if (!hasSubscription) {
+            setHasSubscription(true);
+          }
           setIsLoading(false);
+          setInitialCheckComplete(true);
         } else {
           if (!isMounted) return;
           setIsLoading(false);
+          setInitialCheckComplete(true);
         }
         
         if (!isMounted) return;
@@ -180,37 +199,31 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
       }
     );
 
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
-  }, [requireSubscription, location.pathname]);
-
-  // Set a timeout to proceed anyway if we're stuck loading for too long
-  useEffect(() => {
-    let timeoutId: number;
-    
-    if (isLoading) {
-      timeoutId = window.setTimeout(() => {
+    // Set a timeout to proceed anyway if we're stuck loading for too long
+    timeoutId = window.setTimeout(() => {
+      if (isMounted && isLoading) {
         console.log("Loading timeout reached - proceeding to render protected route");
         setIsLoaded(true);
         setIsLoading(false);
+        setInitialCheckComplete(true);
         
         // If we're timing out on subscription check, default to true to avoid blocking users
         if (loadingPhase === "checking subscription") {
           console.log("Subscription check timed out - proceeding with access granted");
           setHasSubscription(true);
         }
-      }, 5000); // 5 second timeout
-    }
-    
+      }
+    }, 5000); // 5 second timeout
+
     return () => {
+      isMounted = false;
       if (timeoutId) window.clearTimeout(timeoutId);
+      subscription.unsubscribe();
     };
-  }, [isLoading, loadingPhase]);
+  }, [requireSubscription]);
 
   // Show loading state with more details
-  if (!isLoaded || isLoading) {
+  if (!initialCheckComplete || isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
@@ -219,14 +232,16 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
     );
   }
 
-  // Handle authentication check
-  if (!isAuthenticated) {
+  // Handle authentication check - avoid redirect loops using the initialCheckComplete flag
+  if (initialCheckComplete && !isAuthenticated) {
     console.log("User is not authenticated, redirecting to login");
     return <Navigate to="/" replace />;
   }
 
-  // Handle subscription check - Redirect to checkout instead of homepage
-  if (requireSubscription && !hasSubscription) {
+  // Handle subscription check - only redirect to checkout when we have confirmed both:
+  // 1. The user is authenticated
+  // 2. They don't have a valid subscription
+  if (initialCheckComplete && requireSubscription && !hasSubscription && isAuthenticated) {
     console.log("User does not have valid subscription, redirecting to checkout");
     return <Navigate to="/checkout" state={{ from: location }} replace />;
   }

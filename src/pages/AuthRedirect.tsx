@@ -10,21 +10,27 @@ import { useToast } from "@/hooks/use-toast";
 export const AuthRedirect = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
 
   useEffect(() => {
+    // Prevent multiple processing attempts
+    if (isProcessing) return;
+    
     const handleAuthRedirect = async () => {
       try {
+        setIsProcessing(true);
+        
         // Get the full URL including search params and hash
         const fullUrl = window.location.href;
         const urlSearchParams = new URLSearchParams(window.location.search);
         const urlHashParams = new URLSearchParams(window.location.hash.substring(1));
         
-        console.log("Full URL:", fullUrl);
-        console.log("Search params:", urlSearchParams.toString());
-        console.log("Hash params:", urlHashParams.toString());
+        console.log("Auth redirect - Full URL:", fullUrl);
+        console.log("Auth redirect - Search params:", urlSearchParams.toString());
+        console.log("Auth redirect - Hash params:", urlHashParams.toString());
         
         // Check if this is a recovery operation from search parameters
         const isRecovery = fullUrl.includes('type=recovery') || urlSearchParams.get('type') === 'recovery';
@@ -118,14 +124,15 @@ export const AuthRedirect = () => {
               description: "Your email has been successfully verified.",
             });
             navigate("/dashboard");
+            return;
           } else {
             toast({
               title: "Success",
               description: "You have successfully logged in.",
             });
             navigate("/dashboard");
+            return;
           }
-          return;
         }
 
         // If no code or token was found, check if user is already logged in
@@ -159,11 +166,12 @@ export const AuthRedirect = () => {
         });
       } finally {
         setIsLoading(false);
+        setIsProcessing(false);
       }
     };
 
     handleAuthRedirect();
-  }, [location, navigate, toast]);
+  }, [location, navigate, toast, isProcessing]);
 
   if (isLoading) {
     return (

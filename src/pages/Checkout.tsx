@@ -9,6 +9,7 @@ import { isSubscriptionValid } from "@/components/ProtectedRoute";
 
 export default function Checkout() {
   const [isLoading, setIsLoading] = useState(false);
+  const [initialCheckDone, setInitialCheckDone] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [subscription, setSubscription] = useState<any>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState<string>("");
@@ -19,52 +20,61 @@ export default function Checkout() {
   // Check if user is logged in
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/");
-        return;
-      }
-      setUser(session.user);
-      
-      // Check if the user already has an active subscription
-      const { data: sub, error } = await supabase
-        .from("customer_subscriptions")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
+      try {
+        // First set initial state - prevent flashes
+        setIsLoading(true);
+        
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.log("No session found, redirecting to homepage");
+          navigate("/");
+          return;
+        }
+        
+        setUser(session.user);
+        
+        // Check if the user already has an active subscription
+        const { data: sub, error } = await supabase
+          .from("customer_subscriptions")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching subscription:", error);
-      }
-      
-      setSubscription(sub);
-      
-      if (sub) {
-        setSubscriptionStatus(sub.status);
-        if (sub.current_period_end) {
-          setSubscriptionEndDate(new Date(sub.current_period_end).toLocaleDateString());
+        if (error) {
+          console.error("Error fetching subscription:", error);
         }
         
-        console.log("Current subscription data:", sub);
-        console.log("Subscription validation:", {
-          status: sub.status,
-          cancelAtPeriodEnd: sub.cancel_at_period_end,
-          currentPeriodEnd: sub.current_period_end,
-          now: new Date().toISOString(),
-          isStillValid: sub.current_period_end ? new Date(sub.current_period_end) > new Date() : false
-        });
+        setSubscription(sub);
         
-        // Use the shared isSubscriptionValid function
-        const hasValidSubscription = isSubscriptionValid(sub);
-        
-        if (hasValidSubscription) {
-          console.log("User has valid subscription, redirecting to dashboard");
-          toast({
-            title: "Active subscription found",
-            description: "Redirecting to dashboard..."
+        if (sub) {
+          setSubscriptionStatus(sub.status);
+          if (sub.current_period_end) {
+            setSubscriptionEndDate(new Date(sub.current_period_end).toLocaleDateString());
+          }
+          
+          console.log("Current subscription data:", sub);
+          console.log("Subscription validation:", {
+            status: sub.status,
+            cancelAtPeriodEnd: sub.cancel_at_period_end,
+            currentPeriodEnd: sub.current_period_end,
+            now: new Date().toISOString(),
+            isStillValid: sub.current_period_end ? new Date(sub.current_period_end) > new Date() : false
           });
-          navigate("/dashboard");
+          
+          // Use the shared isSubscriptionValid function
+          const hasValidSubscription = isSubscriptionValid(sub);
+          
+          if (hasValidSubscription) {
+            console.log("User has valid subscription, but staying on checkout page");
+            // We don't auto-redirect anymore to prevent loops
+            // Just show the current subscription status on this page
+          }
         }
+      } catch (err) {
+        console.error("Error in checkSession:", err);
+      } finally {
+        setIsLoading(false);
+        setInitialCheckDone(true);
       }
     };
     
@@ -128,12 +138,18 @@ export default function Checkout() {
     return `Status: ${subscription.status}`;
   };
 
-  if (!user) {
+  if (!initialCheckDone) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
+  }
+
+  // Check if user exists
+  if (!user) {
+    navigate("/");
+    return null;
   }
 
   return (
@@ -221,6 +237,16 @@ export default function Checkout() {
                       </>
                     )}
                   </Button>
+                  
+                  {isSubscriptionValid(subscription) && (
+                    <Button 
+                      onClick={() => navigate("/dashboard")} 
+                      variant="outline"
+                      className="mt-4 w-full"
+                    >
+                      Return to Dashboard
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
