@@ -54,13 +54,20 @@ class StripeService {
   async checkEnvironment(): Promise<StripeEnvCheck> {
     try {
       console.log("Checking Stripe environment configuration...");
-      const { data, error } = await supabase.functions.invoke('check-stripe-env');
+      const response = await fetch(`${supabase.functions.url}/check-stripe-env`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
       
-      if (error) {
-        console.error("Failed to check Stripe environment:", error);
-        throw error;
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Failed to check Stripe environment:", errorText);
+        throw new Error(errorText || "HTTP error " + response.status);
       }
       
+      const data = await response.json();
       console.log("Stripe environment check result:", data);
       return data;
     } catch (error) {
@@ -76,17 +83,22 @@ class StripeService {
   async validateStripeConfig(): Promise<boolean> {
     try {
       console.log("Validating Stripe configuration...");
-      const { data, error } = await supabase.functions.invoke('stripe', {
-        body: {
+      const response = await fetch(`${supabase.functions.url}/stripe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           action: 'check-config'
-        }
+        })
       });
       
-      if (error) {
-        console.error("Error validating Stripe configuration:", error);
+      if (!response.ok) {
+        console.error("Error validating Stripe configuration:", await response.text());
         return false;
       }
       
+      const data = await response.json();
       console.log("Stripe configuration validation result:", data);
       return data.success === true;
     } catch (error) {
@@ -98,18 +110,25 @@ class StripeService {
   async createCustomer(email: string): Promise<StripeCustomer> {
     try {
       console.log(`Creating Stripe customer for email: ${email}`);
-      const { data, error } = await supabase.functions.invoke('stripe', {
-        body: {
+      const response = await fetch(`${supabase.functions.url}/stripe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           action: 'create-customer',
           userId: null,
           email
-        }
+        })
       });
-
-      if (error) {
-        console.error("Error creating Stripe customer:", error);
-        throw error;
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Error creating Stripe customer:", errorText);
+        throw new Error(errorText || "HTTP error " + response.status);
       }
+      
+      const data = await response.json();
       
       if (!data || !data.id) {
         throw new Error('Invalid response from server when creating customer');
@@ -270,9 +289,6 @@ class StripeService {
   }
 
   async createCheckoutSession(customerId: string, priceId: string, successUrl: string, cancelUrl: string): Promise<CheckoutSession> {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
-
     try {
       console.log(`Creating checkout session for customer: ${customerId}, price: ${priceId}`);
       console.log(`Success URL: ${successUrl}`);
@@ -283,62 +299,72 @@ class StripeService {
       if (!successUrl) throw new Error('Missing successUrl parameter');
       if (!cancelUrl) throw new Error('Missing cancelUrl parameter');
 
-      const { data, error } = await supabase.functions.invoke('stripe', {
-        body: {
+      const response = await fetch(`${supabase.functions.url}/stripe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           action: 'create-checkout-session',
-          userId: session.user.id,
+          userId: null,
           customerId,
           priceId,
           successUrl,
           cancelUrl
-        }
+        })
       });
 
-      if (error) {
-        console.error("Error creating checkout session:", error);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Error creating checkout session:", errorText);
         
-        if (error.message && typeof error.message === 'string' && error.message.includes('deleted')) {
+        if (errorText.includes('deleted')) {
           console.log('Customer has been deleted in Stripe. Will recreate the customer and try again.');
           
           // Update our database record to mark the customer as deleted
-          await supabase
-            .from('customer_subscriptions')
-            .update({
-              status: 'customer_deleted',
-              subscription_id: null
-            })
-            .eq('user_id', session.user.id);
-          
-          // Get the user's email to create a new customer
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('email')
-            .eq('id', session.user.id)
-            .single();
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            await supabase
+              .from('customer_subscriptions')
+              .update({
+                status: 'customer_deleted',
+                subscription_id: null
+              })
+              .eq('user_id', session.user.id);
             
-          if (!profile || !profile.email) {
-            throw new Error('Could not find user email to recreate Stripe customer');
+            // Get the user's email to create a new customer
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('email')
+              .eq('id', session.user.id)
+              .single();
+              
+            if (!profile || !profile.email) {
+              throw new Error('Could not find user email to recreate Stripe customer');
+            }
+            
+            // Create a new customer
+            const newCustomer = await this.createCustomer(profile.email);
+            
+            // Update the customer_subscriptions table with the new customer ID
+            await supabase
+              .from('customer_subscriptions')
+              .update({
+                customer_id: newCustomer.id,
+                status: 'created',
+                updated_at: new Date().toISOString()
+              })
+              .eq('user_id', session.user.id);
+              
+            // Try again with the new customer ID
+            return await this.createCheckoutSession(newCustomer.id, priceId, successUrl, cancelUrl);
           }
-          
-          // Create a new customer
-          const newCustomer = await this.createCustomer(profile.email);
-          
-          // Update the customer_subscriptions table with the new customer ID
-          await supabase
-            .from('customer_subscriptions')
-            .update({
-              customer_id: newCustomer.id,
-              status: 'created',
-              updated_at: new Date().toISOString()
-            })
-            .eq('user_id', session.user.id);
-            
-          // Try again with the new customer ID
-          return await this.createCheckoutSession(newCustomer.id, priceId, successUrl, cancelUrl);
         }
         
-        throw new Error(`Failed to create checkout session: ${error.message}`);
+        throw new Error(`Failed to create checkout session: ${errorText}`);
       }
+      
+      const data = await response.json();
       
       if (!data || !data.url) {
         console.error("Invalid response data:", data);
@@ -354,65 +380,73 @@ class StripeService {
   }
 
   async createBillingPortalSession(customerId: string, returnUrl: string): Promise<BillingPortalSession> {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
-
     try {
       console.log(`Creating billing portal session for customer: ${customerId}`);
-      const { data, error } = await supabase.functions.invoke('stripe', {
-        body: {
+      
+      const response = await fetch(`${supabase.functions.url}/stripe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           action: 'create-billing-portal-session',
-          userId: session.user.id,
+          userId: null,
           customerId,
           returnUrl
-        }
+        })
       });
 
-      if (error) {
-        console.error("Error creating billing portal session:", error);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Error creating billing portal session:", errorText);
         
-        if (error.message && typeof error.message === 'string' && error.message.includes('deleted')) {
+        if (errorText.includes('deleted')) {
           console.log('Customer has been deleted in Stripe. Will recreate the customer and try again.');
           
           // Update our database record to mark the customer as deleted
-          await supabase
-            .from('customer_subscriptions')
-            .update({
-              status: 'customer_deleted',
-              subscription_id: null
-            })
-            .eq('user_id', session.user.id);
-          
-          // Get the user's email to create a new customer
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('email')
-            .eq('id', session.user.id)
-            .single();
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            await supabase
+              .from('customer_subscriptions')
+              .update({
+                status: 'customer_deleted',
+                subscription_id: null
+              })
+              .eq('user_id', session.user.id);
             
-          if (!profile || !profile.email) {
-            throw new Error('Could not find user email to recreate Stripe customer');
+            // Get the user's email to create a new customer
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('email')
+              .eq('id', session.user.id)
+              .single();
+              
+            if (!profile || !profile.email) {
+              throw new Error('Could not find user email to recreate Stripe customer');
+            }
+            
+            // Create a new customer
+            const newCustomer = await this.createCustomer(profile.email);
+            
+            // Update the customer_subscriptions table with the new customer ID
+            await supabase
+              .from('customer_subscriptions')
+              .update({
+                customer_id: newCustomer.id,
+                status: 'created',
+                updated_at: new Date().toISOString()
+              })
+              .eq('user_id', session.user.id);
+              
+            // Try again with the new customer ID
+            return await this.createBillingPortalSession(newCustomer.id, returnUrl);
           }
-          
-          // Create a new customer
-          const newCustomer = await this.createCustomer(profile.email);
-          
-          // Update the customer_subscriptions table with the new customer ID
-          await supabase
-            .from('customer_subscriptions')
-            .update({
-              customer_id: newCustomer.id,
-              status: 'created',
-              updated_at: new Date().toISOString()
-            })
-            .eq('user_id', session.user.id);
-            
-          // Try again with the new customer ID
-          return await this.createBillingPortalSession(newCustomer.id, returnUrl);
         }
         
-        throw error;
+        throw new Error(`Failed to create billing portal session: ${errorText}`);
       }
+      
+      const data = await response.json();
       
       if (!data || !data.url) {
         throw new Error('Invalid response from server when creating billing portal session');
