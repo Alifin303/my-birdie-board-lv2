@@ -1,11 +1,12 @@
 
 import { serve } from "https://deno.land/std@0.170.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.8.0';
 import Stripe from 'https://esm.sh/stripe@11.18.0?target=deno';
 
 // CORS headers for preflight requests
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
 };
 
@@ -18,9 +19,29 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
 // Webhook secret from environment variables
 const endpointSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
 
+// Helper function to create a Supabase client with service role key
+const getSupabaseAdmin = () => {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+  
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Missing Supabase URL or service key');
+  }
+  
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: { persistSession: false }
+  });
+};
+
+// Format date as ISO string
+const formatDateFromUnixTimestamp = (timestamp: number): string => {
+  return new Date(timestamp * 1000).toISOString();
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log("Received OPTIONS request");
     return new Response(null, {
       status: 204,
       headers: corsHeaders,
@@ -73,6 +94,9 @@ serve(async (req) => {
       });
     }
     
+    // Create Supabase admin client
+    const supabase = getSupabaseAdmin();
+    
     // Handle different event types
     switch (event.type) {
       case 'checkout.session.completed':
@@ -80,12 +104,64 @@ serve(async (req) => {
         const checkoutSession = event.data.object;
         
         try {
-          // Update the subscription in the database
-          // This would typically be done by your application code
-          console.log(`Checkout session completed for customer: ${checkoutSession.customer}`);
-          console.log(`Subscription: ${checkoutSession.subscription}`);
+          // Extract relevant data
+          const customerId = checkoutSession.customer;
+          const subscriptionId = checkoutSession.subscription;
+          console.log(`Checkout session completed for customer: ${customerId}`);
+          console.log(`Subscription: ${subscriptionId}`);
           
-          // Here you would update your database with the subscription information
+          if (!customerId || !subscriptionId) {
+            throw new Error('Missing customer ID or subscription ID in checkout session');
+          }
+          
+          // Get customer metadata to find the user ID
+          const customer = await stripe.customers.retrieve(customerId);
+          const userId = customer.metadata?.userId;
+          
+          console.log(`User ID from metadata: ${userId}`);
+          
+          if (!userId) {
+            console.warn(`No user ID found in metadata for customer: ${customerId}`);
+            
+            // Try to find the user ID by querying the customer_subscriptions table
+            const { data: existingData, error: queryError } = await supabase
+              .from('customer_subscriptions')
+              .select('user_id')
+              .eq('customer_id', customerId)
+              .single();
+              
+            if (queryError || !existingData) {
+              console.error(`Unable to find user for customer ${customerId}: ${queryError?.message}`);
+              throw new Error(`Unable to find user for customer ${customerId}`);
+            }
+            
+            console.log(`Found user ID from database: ${existingData.user_id}`);
+          }
+          
+          // Fetch the subscription to get the status and other details
+          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          
+          // Update or insert the subscription data in the database
+          const { error: upsertError } = await supabase
+            .from('customer_subscriptions')
+            .upsert({
+              user_id: userId || existingData.user_id,
+              customer_id: customerId,
+              subscription_id: subscriptionId,
+              status: subscription.status,
+              current_period_end: formatDateFromUnixTimestamp(subscription.current_period_end),
+              cancel_at_period_end: subscription.cancel_at_period_end,
+              price_id: subscription.items.data[0]?.price.id,
+              updated_at: new Date().toISOString()
+            });
+            
+          if (upsertError) {
+            console.error(`Error updating subscription in database: ${upsertError.message}`);
+            throw upsertError;
+          }
+          
+          console.log(`Subscription ${subscriptionId} data saved to database`);
+          
         } catch (error) {
           console.error('Error processing checkout.session.completed event:', error);
         }
@@ -96,10 +172,43 @@ serve(async (req) => {
         const subscription = event.data.object;
         
         try {
-          console.log(`Subscription ${subscription.id} updated for customer: ${subscription.customer}`);
+          const customerId = subscription.customer;
+          const subscriptionId = subscription.id;
+          console.log(`Subscription ${subscriptionId} updated for customer: ${customerId}`);
           console.log(`New status: ${subscription.status}`);
           
-          // Here you would update your database with the subscription status
+          // Find the user associated with this customer
+          const { data: customerData, error: customerError } = await supabase
+            .from('customer_subscriptions')
+            .select('user_id')
+            .eq('customer_id', customerId)
+            .single();
+            
+          if (customerError || !customerData) {
+            console.error(`Unable to find user for customer ${customerId}: ${customerError?.message}`);
+            throw new Error(`Unable to find user for customer ${customerId}`);
+          }
+          
+          // Update the subscription data in the database
+          const { error: updateError } = await supabase
+            .from('customer_subscriptions')
+            .update({
+              subscription_id: subscriptionId,
+              status: subscription.status,
+              current_period_end: formatDateFromUnixTimestamp(subscription.current_period_end),
+              cancel_at_period_end: subscription.cancel_at_period_end,
+              price_id: subscription.items.data[0]?.price.id,
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', customerData.user_id);
+            
+          if (updateError) {
+            console.error(`Error updating subscription in database: ${updateError.message}`);
+            throw updateError;
+          }
+          
+          console.log(`Subscription ${subscriptionId} data updated in database`);
+          
         } catch (error) {
           console.error('Error processing customer.subscription.updated event:', error);
         }
@@ -110,9 +219,26 @@ serve(async (req) => {
         const customer = event.data.object;
         
         try {
-          console.log(`Customer ${customer.id} was deleted`);
+          const customerId = customer.id;
+          console.log(`Customer ${customerId} was deleted`);
           
-          // Here you would update your database to mark the customer as deleted
+          // Update the customer_subscriptions table to mark the customer as deleted
+          const { error: deleteError } = await supabase
+            .from('customer_subscriptions')
+            .update({
+              status: 'customer_deleted',
+              subscription_id: null,
+              updated_at: new Date().toISOString()
+            })
+            .eq('customer_id', customerId);
+            
+          if (deleteError) {
+            console.error(`Error updating customer deletion in database: ${deleteError.message}`);
+            throw deleteError;
+          }
+          
+          console.log(`Customer ${customerId} marked as deleted in database`);
+          
         } catch (error) {
           console.error('Error processing customer.deleted event:', error);
         }
