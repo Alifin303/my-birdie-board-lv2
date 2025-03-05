@@ -11,9 +11,23 @@ const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 // This is for demonstration purposes only.
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+// CORS headers for API responses
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 serve(async (req) => {
   try {
     console.log("Received webhook request");
+    
+    // Handle CORS preflight requests
+    if (req.method === 'OPTIONS') {
+      return new Response(null, { 
+        status: 200,
+        headers: corsHeaders
+      });
+    }
     
     // Get the Stripe secret key and webhook secret from environment variables
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
@@ -25,7 +39,7 @@ serve(async (req) => {
         error: 'Server configuration error: Missing Stripe secret key' 
       }), { 
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
     
@@ -35,7 +49,7 @@ serve(async (req) => {
         error: 'Server configuration error: Missing webhook secret' 
       }), { 
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
     
@@ -52,7 +66,7 @@ serve(async (req) => {
         error: 'Missing stripe-signature header' 
       }), { 
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
     
@@ -72,7 +86,7 @@ serve(async (req) => {
         error: `Webhook signature verification failed: ${err.message}`
       }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
     
@@ -94,53 +108,84 @@ serve(async (req) => {
             // Get the customer information
             const customerId = session.customer;
             
-            // Check if customer still exists
             try {
+              // Verify the customer exists
               const customer = await stripe.customers.retrieve(customerId);
+              console.log(`Customer verification successful: ${customerId}`);
+              
               if (customer.deleted === true) {
                 console.error(`Customer ${customerId} has been deleted, cannot update subscription`);
                 throw new Error(`Customer ${customerId} has been deleted`);
               }
+              
+              // Update our database to reflect the new subscription
+              const { data: customerData, error: customerError } = await supabase
+                .from('customer_subscriptions')
+                .select('*')
+                .eq('customer_id', customerId)
+                .maybeSingle();
+                
+              if (customerError) {
+                console.error(`Error fetching customer data: ${customerError.message}`);
+                throw customerError;
+              }
+              
+              if (!customerData) {
+                console.error(`No customer subscription record found for Stripe customer: ${customerId}`);
+                throw new Error(`No customer subscription record found for Stripe customer: ${customerId}`);
+              }
+              
+              console.log(`Updating subscription for user: ${customerData.user_id}`);
+              
+              // Update the subscription record
+              const { error: updateError } = await supabase
+                .from('customer_subscriptions')
+                .update({
+                  subscription_id: subscription.id,
+                  status: subscription.status,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', customerData.id);
+                
+              if (updateError) {
+                console.error(`Error updating subscription record: ${updateError.message}`);
+                throw updateError;
+              }
+              
+              console.log(`Successfully updated subscription record for user: ${customerData.user_id}`);
             } catch (customerRetrieveError) {
-              console.error(`Error retrieving Stripe customer: ${customerRetrieveError.message}`);
-              throw customerRetrieveError;
-            }
-            
-            // Update our database to reflect the new subscription
-            const { data: customerData, error: customerError } = await supabase
-              .from('customer_subscriptions')
-              .select('*')
-              .eq('customer_id', customerId)
-              .maybeSingle();
+              console.error(`Error processing checkout.session.completed: ${customerRetrieveError.message}`);
               
-            if (customerError) {
-              console.error(`Error fetching customer data: ${customerError.message}`);
-              throw customerError;
+              // If customer deleted, update our database to reflect this
+              if (customerRetrieveError.message.includes('has been deleted')) {
+                try {
+                  const { data: customerData, error: customerError } = await supabase
+                    .from('customer_subscriptions')
+                    .select('*')
+                    .eq('customer_id', customerId)
+                    .maybeSingle();
+                    
+                  if (!customerError && customerData) {
+                    const { error: updateError } = await supabase
+                      .from('customer_subscriptions')
+                      .update({
+                        status: 'customer_deleted',
+                        subscription_id: null,
+                        updated_at: new Date().toISOString()
+                      })
+                      .eq('id', customerData.id);
+                      
+                    if (updateError) {
+                      console.error(`Error updating customer status to deleted: ${updateError.message}`);
+                    } else {
+                      console.log(`Updated customer status to deleted for customer: ${customerId}`);
+                    }
+                  }
+                } catch (dbErr) {
+                  console.error(`Failed to update customer_deleted status: ${dbErr.message}`);
+                }
+              }
             }
-            
-            if (!customerData) {
-              console.error(`No customer subscription record found for Stripe customer: ${customerId}`);
-              throw new Error(`No customer subscription record found for Stripe customer: ${customerId}`);
-            }
-            
-            console.log(`Updating subscription for user: ${customerData.user_id}`);
-            
-            // Update the subscription record
-            const { error: updateError } = await supabase
-              .from('customer_subscriptions')
-              .update({
-                subscription_id: subscription.id,
-                status: subscription.status,
-                updated_at: new Date().toISOString()
-              })
-              .eq('id', customerData.id);
-              
-            if (updateError) {
-              console.error(`Error updating subscription record: ${updateError.message}`);
-              throw updateError;
-            }
-            
-            console.log(`Successfully updated subscription record for user: ${customerData.user_id}`);
           } else {
             console.log(`Not a subscription checkout or missing subscription ID. Mode: ${session.mode}`);
           }
@@ -151,83 +196,111 @@ serve(async (req) => {
           const subscription = event.data.object;
           console.log(`Subscription updated: ${subscription.id}, status: ${subscription.status}`);
           
-          // Check if customer still exists
           try {
+            // Try to get customer details
             const customer = await stripe.customers.retrieve(subscription.customer);
+            
+            // Handle deleted customer
             if (customer.deleted === true) {
-              console.error(`Customer ${subscription.customer} has been deleted, but will proceed with update using customer_id`);
-              // We continue with the update since we need to handle updates even for deleted customers
+              console.log(`Customer ${subscription.customer} has been deleted, proceeding with subscription update using customer_id`);
+            } else {
+              console.log(`Customer ${subscription.customer} is valid, proceeding with subscription update`);
+            }
+            
+            // Update our database to reflect the updated subscription
+            const { data: subscriptionData, error: subscriptionError } = await supabase
+              .from('customer_subscriptions')
+              .select('*')
+              .eq('subscription_id', subscription.id)
+              .maybeSingle();
+              
+            if (subscriptionError) {
+              console.error(`Error fetching subscription data: ${subscriptionError.message}`);
+              throw subscriptionError;
+            }
+            
+            if (!subscriptionData) {
+              // Try to find by customer id instead
+              console.log(`No subscription record found with ID ${subscription.id}, checking by customer ID: ${subscription.customer}`);
+              
+              const { data: customerData, error: customerError } = await supabase
+                .from('customer_subscriptions')
+                .select('*')
+                .eq('customer_id', subscription.customer)
+                .maybeSingle();
+                
+              if (customerError) {
+                console.error(`Error fetching customer data: ${customerError.message}`);
+                throw customerError;
+              }
+              
+              if (!customerData) {
+                console.error(`No customer record found for Stripe customer: ${subscription.customer}`);
+                throw new Error(`No customer record found for Stripe customer: ${subscription.customer}`);
+              }
+              
+              // Update the subscription record with the subscription ID and status
+              const { error: updateError } = await supabase
+                .from('customer_subscriptions')
+                .update({
+                  subscription_id: subscription.id,
+                  status: subscription.status,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', customerData.id);
+                
+              if (updateError) {
+                console.error(`Error updating subscription record: ${updateError.message}`);
+                throw updateError;
+              }
+              
+              console.log(`Successfully updated subscription record for customer: ${subscription.customer}`);
+            } else {
+              // Update the existing subscription record
+              const { error: updateError } = await supabase
+                .from('customer_subscriptions')
+                .update({
+                  status: subscription.status,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', subscriptionData.id);
+                
+              if (updateError) {
+                console.error(`Error updating subscription record: ${updateError.message}`);
+                throw updateError;
+              }
+              
+              console.log(`Successfully updated subscription record for user: ${subscriptionData.user_id}`);
             }
           } catch (customerRetrieveError) {
             console.error(`Error retrieving Stripe customer: ${customerRetrieveError.message}`);
-            // We continue with the update since we still need to handle subscription updates
             console.log(`Will attempt to process subscription update despite customer retrieval error`);
-          }
-          
-          // Update our database to reflect the updated subscription
-          const { data: subscriptionData, error: subscriptionError } = await supabase
-            .from('customer_subscriptions')
-            .select('*')
-            .eq('subscription_id', subscription.id)
-            .maybeSingle();
             
-          if (subscriptionError) {
-            console.error(`Error fetching subscription data: ${subscriptionError.message}`);
-            throw subscriptionError;
-          }
-          
-          if (!subscriptionData) {
-            // Try to find by customer id instead
-            console.log(`No subscription record found with ID ${subscription.id}, checking by customer ID: ${subscription.customer}`);
-            
-            const { data: customerData, error: customerError } = await supabase
-              .from('customer_subscriptions')
-              .select('*')
-              .eq('customer_id', subscription.customer)
-              .maybeSingle();
-              
-            if (customerError) {
-              console.error(`Error fetching customer data: ${customerError.message}`);
-              throw customerError;
+            // Continue with subscription update even if customer retrieval failed
+            try {
+              const { data: customerData, error: customerError } = await supabase
+                .from('customer_subscriptions')
+                .select('*')
+                .eq('customer_id', subscription.customer)
+                .maybeSingle();
+                
+              if (!customerError && customerData) {
+                const { error: updateError } = await supabase
+                  .from('customer_subscriptions')
+                  .update({
+                    subscription_id: subscription.id,
+                    status: subscription.status,
+                    updated_at: new Date().toISOString()
+                  })
+                  .eq('id', customerData.id);
+                  
+                if (!updateError) {
+                  console.log(`Successfully updated subscription despite customer retrieval error`);
+                }
+              }
+            } catch (dbErr) {
+              console.error(`Failed to update subscription after customer retrieval error: ${dbErr.message}`);
             }
-            
-            if (!customerData) {
-              console.error(`No customer record found for Stripe customer: ${subscription.customer}`);
-              throw new Error(`No customer record found for Stripe customer: ${subscription.customer}`);
-            }
-            
-            // Update the subscription record with the subscription ID and status
-            const { error: updateError } = await supabase
-              .from('customer_subscriptions')
-              .update({
-                subscription_id: subscription.id,
-                status: subscription.status,
-                updated_at: new Date().toISOString()
-              })
-              .eq('id', customerData.id);
-              
-            if (updateError) {
-              console.error(`Error updating subscription record: ${updateError.message}`);
-              throw updateError;
-            }
-            
-            console.log(`Successfully updated subscription record for customer: ${subscription.customer}`);
-          } else {
-            // Update the existing subscription record
-            const { error: updateError } = await supabase
-              .from('customer_subscriptions')
-              .update({
-                status: subscription.status,
-                updated_at: new Date().toISOString()
-              })
-              .eq('id', subscriptionData.id);
-              
-            if (updateError) {
-              console.error(`Error updating subscription record: ${updateError.message}`);
-              throw updateError;
-            }
-            
-            console.log(`Successfully updated subscription record for user: ${subscriptionData.user_id}`);
           }
           break;
         }
@@ -356,14 +429,14 @@ serve(async (req) => {
         error: `Error processing webhook event: ${err.message}`
       }), {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
     
     // Return a response to acknowledge receipt of the event
     return new Response(JSON.stringify({ received: true }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   } catch (err) {
     console.error(`Webhook error: ${err.message}`);
@@ -371,7 +444,7 @@ serve(async (req) => {
       error: `Webhook error: ${err.message}`
     }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
 });

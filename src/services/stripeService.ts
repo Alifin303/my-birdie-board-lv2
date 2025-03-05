@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface StripeCustomer {
@@ -301,6 +302,9 @@ class StripeService {
         console.error("Error creating checkout session:", error);
         
         if (error.message && typeof error.message === 'string' && error.message.includes('deleted')) {
+          console.log('Customer has been deleted in Stripe. Will recreate the customer and try again.');
+          
+          // Update our database record to mark the customer as deleted
           await supabase
             .from('customer_subscriptions')
             .update({
@@ -309,7 +313,32 @@ class StripeService {
             })
             .eq('user_id', session.user.id);
           
-          throw new Error(`Customer has been deleted in Stripe. Please try subscribing again to create a new customer.`);
+          // Get the user's email to create a new customer
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('email')
+            .eq('id', session.user.id)
+            .single();
+            
+          if (!profile || !profile.email) {
+            throw new Error('Could not find user email to recreate Stripe customer');
+          }
+          
+          // Create a new customer
+          const newCustomer = await this.createCustomer(profile.email);
+          
+          // Update the customer_subscriptions table with the new customer ID
+          await supabase
+            .from('customer_subscriptions')
+            .update({
+              customer_id: newCustomer.id,
+              status: 'created',
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', session.user.id);
+            
+          // Try again with the new customer ID
+          return await this.createCheckoutSession(newCustomer.id, priceId, successUrl, cancelUrl);
         }
         
         throw new Error(`Failed to create checkout session: ${error.message}`);
@@ -347,6 +376,9 @@ class StripeService {
         console.error("Error creating billing portal session:", error);
         
         if (error.message && typeof error.message === 'string' && error.message.includes('deleted')) {
+          console.log('Customer has been deleted in Stripe. Will recreate the customer and try again.');
+          
+          // Update our database record to mark the customer as deleted
           await supabase
             .from('customer_subscriptions')
             .update({
@@ -355,7 +387,32 @@ class StripeService {
             })
             .eq('user_id', session.user.id);
           
-          throw new Error(`Customer has been deleted in Stripe. Please try subscribing again to create a new customer.`);
+          // Get the user's email to create a new customer
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('email')
+            .eq('id', session.user.id)
+            .single();
+            
+          if (!profile || !profile.email) {
+            throw new Error('Could not find user email to recreate Stripe customer');
+          }
+          
+          // Create a new customer
+          const newCustomer = await this.createCustomer(profile.email);
+          
+          // Update the customer_subscriptions table with the new customer ID
+          await supabase
+            .from('customer_subscriptions')
+            .update({
+              customer_id: newCustomer.id,
+              status: 'created',
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', session.user.id);
+            
+          // Try again with the new customer ID
+          return await this.createBillingPortalSession(newCustomer.id, returnUrl);
         }
         
         throw error;
