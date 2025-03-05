@@ -1,1 +1,7 @@
+
 project_id = "rbhzesocmhazynkfyhst"
+
+# Functions will inherit the project setting if not explicitly set
+[functions]
+verify_jwt = false
+no_auth = true
