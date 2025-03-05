@@ -1,7 +1,5 @@
 
 project_id = "rbhzesocmhazynkfyhst"
 
-# Functions will inherit the project setting if not explicitly set
-[functions]
-verify_jwt = false
-no_auth = true
+# This is the default project-level configuration
+# Individual function configs should be in their own config.toml files
