@@ -25,6 +25,7 @@ type SignUpFormData = z.infer<typeof signUpSchema>;
 export function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -43,6 +44,7 @@ export function SignUpForm() {
     try {
       setIsLoading(true);
       setSignupSuccess(false);
+      setErrorMessage(null);
       
       // Get site URL dynamically
       const siteUrl = getSiteUrl();
@@ -62,6 +64,17 @@ export function SignUpForm() {
       });
 
       if (error) {
+        console.error("Sign up error:", error);
+        
+        // Check for username duplication error
+        if (error.message.includes("duplicate key") && error.message.includes("profiles_username_key")) {
+          setErrorMessage("This username is already taken. Please choose a different username.");
+        } else if (error.message.includes("User already registered")) {
+          setErrorMessage("This email is already registered. Please use a different email or try logging in.");
+        } else {
+          setErrorMessage(error.message || "Something went wrong. Please try again.");
+        }
+        
         throw error;
       }
 
@@ -82,11 +95,15 @@ export function SignUpForm() {
       
     } catch (error: any) {
       console.error("Sign up error:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
+      
+      // Don't show toast if we've already set a specific error message
+      if (!errorMessage) {
+        toast({
+          title: "Error",
+          description: error.message || "Something went wrong. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -100,6 +117,12 @@ export function SignUpForm() {
           You're just one step away from better golf insights
         </p>
       </div>
+      
+      {errorMessage && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
+      )}
       
       {signupSuccess ? (
         <div className="flex flex-col items-center justify-center py-6 space-y-4">

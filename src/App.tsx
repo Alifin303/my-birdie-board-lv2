@@ -42,7 +42,7 @@ function App() {
             } 
           />
           <Route path="/auth-redirect" element={<AuthRedirect />} />
-          <Route path="?code=*" element={<AuthConfirm />} />
+          <Route path="/auth/callback" element={<AuthConfirm />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />
