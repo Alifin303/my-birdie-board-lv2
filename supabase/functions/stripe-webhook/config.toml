@@ -1,6 +1,0 @@
-
-project_id = "rbhzesocmhazynkfyhst"
-
-[functions.stripe-webhook]
-verify_jwt = false
-no_auth = true
