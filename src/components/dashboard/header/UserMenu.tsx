@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
@@ -48,6 +49,7 @@ export const UserMenu = ({
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const handleLogout = async () => {
     try {
@@ -166,7 +168,8 @@ export const UserMenu = ({
               });
           }
           
-          const priceId = 'price_1OXYZABCDEFGHIJKLMNOPQRSTprice';
+          // Use a test price ID that works with Stripe Checkout for testing
+          const priceId = 'price_1OtfvdKvwWfM66JCUMZGhw9c';
           const checkoutSession = await stripeService.createCheckoutSession(
             customerId,
             priceId,
@@ -235,8 +238,6 @@ export const UserMenu = ({
       setLoading(false);
     }
   };
-
-  const queryClient = useQueryClient();
 
   return (
     <div className="absolute top-4 right-4 z-10">

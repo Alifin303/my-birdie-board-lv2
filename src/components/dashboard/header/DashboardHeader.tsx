@@ -1,10 +1,11 @@
 
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import { DashboardWelcome } from "./DashboardWelcome";
 import { UserMenu } from "./UserMenu";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { stripeService } from "@/services/stripeService";
 import { supabase } from "@/integrations/supabase/client";
+import { stripeService } from "@/services/stripeService";
 
 interface DashboardHeaderProps {
   profileData: any;
@@ -12,78 +13,76 @@ interface DashboardHeaderProps {
 }
 
 export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProps) => {
-  const queryClient = useQueryClient();
-  
+  const { toast } = useToast();
+
   const { data: subscriptionData, isLoading: subscriptionLoading, error: subscriptionError } = useQuery({
     queryKey: ['subscription'],
     queryFn: async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return { status: "none" };
+        // First check if Stripe environment is correctly set up
+        const envCheck = await stripeService.checkEnvironment();
         
-        try {
-          const envCheck = await stripeService.checkEnvironment();
-          if (!envCheck.success) {
-            console.warn("Stripe environment not properly configured:", envCheck.message);
-            return { status: "config_error", message: envCheck.message };
-          }
-        } catch (envError) {
-          console.error("Error checking Stripe environment:", envError);
+        if (!envCheck.success) {
+          console.error("Stripe environment check failed:", envCheck.message);
+          return { status: "config_error", message: envCheck.message };
         }
+        
+        // Get customer subscription data
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error('No session found');
         
         const { data, error } = await supabase
           .from('customer_subscriptions')
           .select('*')
           .eq('user_id', session.user.id)
-          .maybeSingle();
-          
+          .single();
+        
         if (error) {
-          console.error("Error fetching subscription:", error);
+          if (error.code === 'PGRST116') {
+            // No subscription found
+            return { status: "none" };
+          }
           throw error;
         }
         
-        if (!data) return { status: "none" };
-        
+        // If we have a subscription ID, get details from Stripe
         if (data.subscription_id) {
-          try {
-            const subscription = await stripeService.getSubscription(data.subscription_id);
-            return {
-              status: subscription.cancel_at_period_end ? "cancelled" : "active",
-              data: {
-                id: subscription.id,
-                customerId: data.customer_id,
-                endDate: new Date(subscription.current_period_end * 1000).toLocaleDateString(),
-                priceId: subscription.items.data[0]?.price.id
-              }
-            };
-          } catch (stripeError) {
-            console.error("Error fetching Stripe subscription:", stripeError);
-            return {
-              status: data.status || "error",
-              data: {
-                id: data.subscription_id,
-                customerId: data.customer_id
-              },
-              error: stripeError.message
-            };
-          }
+          const subscription = await stripeService.getSubscription(data.subscription_id);
+          
+          // Format subscription data
+          const isActive = subscription.status === 'active' || subscription.status === 'trialing';
+          const isCancelled = subscription.cancel_at_period_end;
+          
+          const endDate = new Date(subscription.current_period_end * 1000).toLocaleDateString();
+          
+          return {
+            status: isActive ? (isCancelled ? "cancelled" : "active") : "inactive",
+            data: {
+              id: subscription.id,
+              customerId: data.customer_id,
+              status: subscription.status,
+              endDate,
+              priceId: subscription.items.data[0]?.price?.id
+            }
+          };
         }
         
-        return { 
-          status: data.status || "none",
-          data: { customerId: data.customer_id }
+        // Customer exists but no subscription
+        return {
+          status: "none",
+          data: {
+            customerId: data.customer_id
+          }
         };
       } catch (error) {
-        console.error("Error fetching subscription:", error);
+        console.error("Error fetching subscription data:", error);
         return { status: "error", error: error.message };
       }
-    },
-    retry: 1,
-    retryDelay: 1000
+    }
   });
 
   return (
-    <>
+    <div className="mb-6 relative flex flex-col">
       <DashboardWelcome 
         firstName={profileData?.first_name} 
         onAddRound={onAddRound} 
@@ -95,6 +94,6 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
         subscriptionLoading={subscriptionLoading}
         subscriptionError={subscriptionError}
       />
-    </>
+    </div>
   );
 };
