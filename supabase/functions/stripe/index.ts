@@ -25,14 +25,40 @@ serve(async (req) => {
       apiVersion: '2023-10-16',
     });
 
-    const { action, userId, ...data } = await req.json();
+    // Parse request payload
+    let requestData;
+    try {
+      requestData = await req.json();
+    } catch (error) {
+      console.error(`Error parsing request JSON: ${error.message}`);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid JSON in request body',
+          details: error.message 
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        }
+      );
+    }
+
+    const { action, userId, ...data } = requestData;
     console.log(`Processing Stripe action: ${action} for user: ${userId}`);
     console.log('Action data:', JSON.stringify(data));
+
+    if (!action) {
+      throw new Error('Missing required action parameter');
+    }
 
     let result;
     switch (action) {
       case 'create-customer':
         // Create a new customer in Stripe
+        if (!data.email) {
+          throw new Error('Missing email for customer creation');
+        }
+        
         result = await stripe.customers.create({
           email: data.email,
           metadata: {
@@ -56,19 +82,27 @@ serve(async (req) => {
         
         console.log(`Creating subscription for customer: ${customerId} with price: ${priceId}`);
         
-        // Attach the payment method to the customer
+        // Attach the payment method to the customer if provided
         if (paymentMethodId) {
           console.log(`Attaching payment method: ${paymentMethodId} to customer: ${customerId}`);
-          await stripe.paymentMethods.attach(paymentMethodId, {
-            customer: customerId,
-          });
-          
-          // Set as default payment method
-          await stripe.customers.update(customerId, {
-            invoice_settings: {
-              default_payment_method: paymentMethodId,
-            },
-          });
+          try {
+            await stripe.paymentMethods.attach(paymentMethodId, {
+              customer: customerId,
+            });
+            
+            // Set as default payment method
+            await stripe.customers.update(customerId, {
+              invoice_settings: {
+                default_payment_method: paymentMethodId,
+              },
+            });
+          } catch (attachError) {
+            console.error(`Error attaching payment method: ${attachError.message}`);
+            if (attachError.raw) {
+              console.error(`Stripe raw error: ${JSON.stringify(attachError.raw)}`);
+            }
+            throw attachError;
+          }
         }
         
         // Create the subscription with expanded invoice and payment intent
@@ -90,12 +124,25 @@ serve(async (req) => {
 
       case 'get-subscription':
         // Get subscription details
+        if (!data.subscriptionId) {
+          throw new Error('Missing subscriptionId for subscription retrieval');
+        }
+        
         result = await stripe.subscriptions.retrieve(data.subscriptionId);
         break;
 
       case 'update-payment-method':
         // Update payment method for customer
         const { customer, paymentMethod } = data;
+        
+        if (!customer) {
+          throw new Error('Missing customer ID for payment method update');
+        }
+        
+        if (!paymentMethod) {
+          throw new Error('Missing payment method ID for payment method update');
+        }
+        
         await stripe.paymentMethods.attach(paymentMethod, {
           customer,
         });
@@ -109,6 +156,10 @@ serve(async (req) => {
 
       case 'cancel-subscription':
         // Cancel a subscription
+        if (!data.subscriptionId) {
+          throw new Error('Missing subscriptionId for subscription cancellation');
+        }
+        
         result = await stripe.subscriptions.update(data.subscriptionId, {
           cancel_at_period_end: true,
         });
@@ -116,6 +167,10 @@ serve(async (req) => {
 
       case 'reactivate-subscription':
         // Reactivate a canceled subscription that hasn't expired yet
+        if (!data.subscriptionId) {
+          throw new Error('Missing subscriptionId for subscription reactivation');
+        }
+        
         result = await stripe.subscriptions.update(data.subscriptionId, {
           cancel_at_period_end: false,
         });
@@ -123,6 +178,10 @@ serve(async (req) => {
 
       case 'get-product-prices':
         // Get all prices for a specific product
+        if (!data.productId) {
+          throw new Error('Missing productId for price retrieval');
+        }
+        
         console.log(`Getting prices for product: ${data.productId}`);
         try {
           const prices = await stripe.prices.list({
@@ -184,6 +243,14 @@ serve(async (req) => {
 
       case 'create-billing-portal-session':
         // Create a billing portal session for managing subscriptions
+        if (!data.customerId) {
+          throw new Error('Missing customerId for billing portal session creation');
+        }
+        
+        if (!data.returnUrl) {
+          throw new Error('Missing returnUrl for billing portal session creation');
+        }
+        
         result = await stripe.billingPortal.sessions.create({
           customer: data.customerId,
           return_url: data.returnUrl,
