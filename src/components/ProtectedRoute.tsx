@@ -44,9 +44,15 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
           console.log("Subscription status:", subscription?.status, "Valid:", hasValidSubscription);
           setHasSubscription(hasValidSubscription);
           
-          // If subscription is incomplete or incomplete_expired, user needs to complete checkout
-          if (subscription && ['incomplete', 'incomplete_expired', 'past_due'].includes(subscription.status)) {
-            console.log("Subscription needs attention:", subscription.status);
+          // Log additional details for debugging
+          if (subscription) {
+            console.log("Subscription details:", {
+              id: subscription.subscription_id,
+              status: subscription.status,
+              isValid: hasValidSubscription
+            });
+          } else {
+            console.log("No subscription found for user");
           }
         }
       } catch (error) {
@@ -72,7 +78,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
           try {
             const { data: subscription, error } = await supabase
               .from("customer_subscriptions")
-              .select("status")
+              .select("status, subscription_id")
               .eq("user_id", session.user.id)
               .maybeSingle();
             
@@ -82,7 +88,14 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
               
             // Valid subscription statuses according to Stripe
             const validStatuses = ['active', 'trialing', 'paid'];
-            setHasSubscription(subscription && validStatuses.includes(subscription.status));
+            const hasValidSub = subscription && validStatuses.includes(subscription.status);
+            setHasSubscription(hasValidSub);
+            
+            console.log("Auth change - subscription check:", {
+              status: subscription?.status,
+              id: subscription?.subscription_id,
+              isValid: hasValidSub
+            });
           } catch (error) {
             console.error("Error checking subscription on auth change:", error);
             setHasSubscription(false);
@@ -116,8 +129,10 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
 
   // If subscription is required but user doesn't have one, redirect to checkout
   if (requireSubscription && !hasSubscription) {
+    console.log("User does not have valid subscription, redirecting to checkout");
     return <Navigate to="/checkout" state={{ from: location }} replace />;
   }
 
+  console.log("User has valid subscription, allowing access to protected route");
   return <>{children}</>;
 };

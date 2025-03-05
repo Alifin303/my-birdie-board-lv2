@@ -79,61 +79,44 @@ serve(async (req) => {
     switch (event.type) {
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
-      case 'customer.subscription.pending': // Added to handle pending subscriptions
-      case 'invoice.payment_succeeded': // Added to handle successful payments
+      case 'customer.subscription.pending':
         const subscription = event.data.object;
-        let subscriptionId, customerId, userId, status;
-
-        if (event.type === 'invoice.payment_succeeded') {
-          // For invoice events, we need to get the subscription ID from the invoice
-          const invoiceObject = subscription;
-          console.log(`Processing invoice: ${invoiceObject.id}, subscription: ${invoiceObject.subscription}`);
-          
-          if (invoiceObject.subscription) {
-            // Get the subscription details
-            try {
-              const stripeSubscription = await stripe.subscriptions.retrieve(invoiceObject.subscription);
-              subscriptionId = stripeSubscription.id;
-              customerId = stripeSubscription.customer;
-              userId = stripeSubscription.metadata?.user_id;
-              status = stripeSubscription.status;
-              
-              console.log(`Retrieved subscription: ${subscriptionId}, status: ${status}, for user: ${userId}`);
-            } catch (err) {
-              console.error(`Error retrieving subscription for invoice: ${err.message}`);
-              throw err;
-            }
-          } else {
-            console.log('Invoice has no subscription, skipping');
-            break;
-          }
-        } else {
-          // For subscription events
-          subscriptionId = subscription.id;
-          customerId = subscription.customer;
-          userId = subscription.metadata?.user_id;
-          status = subscription.status;
-          
-          console.log(`Processing subscription: ${subscriptionId}, status: ${status}, for user: ${userId}`);
-        }
+        const subscriptionId = subscription.id;
+        const customerId = subscription.customer;
+        const userId = subscription.metadata?.user_id;
+        const status = subscription.status;
         
-        // If we don't have a subscription ID, we can't do anything
-        if (!subscriptionId) {
-          console.log('No subscription ID, skipping');
-          break;
-        }
+        console.log(`Processing subscription: ${subscriptionId}, status: ${status}, for user: ${userId}`);
         
+        // Critical fix: Only update the subscription status if it's not downgrading from active/trialing/paid to incomplete
         try {
           // First check if we have an existing record with this subscription ID
           const { data: existingBySubId, error: subIdQueryError } = await supabase
             .from('customer_subscriptions')
-            .select()
+            .select('status, subscription_id')
             .eq('subscription_id', subscriptionId)
             .maybeSingle();
             
           if (subIdQueryError) {
             console.error('Error checking for existing subscription by ID:', subIdQueryError);
             throw subIdQueryError;
+          }
+          
+          // Define valid active statuses
+          const validStatuses = ['active', 'trialing', 'paid'];
+          
+          // CRITICAL FIX: Don't downgrade active subscriptions to incomplete status
+          // Only update if:
+          // 1. No existing subscription OR
+          // 2. The new status is a valid active status OR
+          // 3. The existing status is not already a valid active status
+          const shouldUpdate = !existingBySubId || 
+                               validStatuses.includes(status) || 
+                               (existingBySubId && !validStatuses.includes(existingBySubId.status));
+          
+          if (existingBySubId && validStatuses.includes(existingBySubId.status) && !validStatuses.includes(status)) {
+            console.log(`Preventing downgrade of subscription ${subscriptionId} from ${existingBySubId.status} to ${status}`);
+            break; // Skip the update to prevent downgrading an active subscription
           }
           
           // If we have a user_id in the metadata but not in the existing record, check if the user already has a subscription record
@@ -153,6 +136,13 @@ serve(async (req) => {
             
             if (existingByUserId) {
               console.log(`User ${userId} already has a subscription record. Updating it.`);
+              
+              // Only update if we're not downgrading from an active status to an inactive one
+              if (validStatuses.includes(existingByUserId.status) && !validStatuses.includes(status)) {
+                console.log(`Preventing downgrade of user ${userId} subscription from ${existingByUserId.status} to ${status}`);
+                break; // Skip the update
+              }
+              
               // Update the existing record with the new subscription ID
               const { error: updateError } = await supabase
                 .from('customer_subscriptions')
@@ -175,8 +165,9 @@ serve(async (req) => {
           }
           
           // If we found an existing record by subscription ID, update it
-          if (existingBySubId) {
+          if (existingBySubId && shouldUpdate) {
             console.log(`Found existing subscription record with ID: ${subscriptionId}. Updating it to status: ${status}`);
+            
             const { error: updateError } = await supabase
               .from('customer_subscriptions')
               .update({
@@ -193,7 +184,7 @@ serve(async (req) => {
             }
             
             console.log(`Successfully updated subscription: ${subscriptionId} to status: ${status}`);
-          } else if (customerId && subscriptionId) {
+          } else if (customerId && subscriptionId && !existingBySubId) {
             // Insert new subscription if no existing record was found
             console.log(`No existing subscription found. Creating new record with status: ${status}`);
             
@@ -219,7 +210,7 @@ serve(async (req) => {
             
             console.log(`Successfully created new subscription record for: ${subscriptionId}`);
           } else {
-            console.log('Missing required data for subscription record, skipping');
+            console.log('No update needed or missing required data for subscription record');
           }
         } catch (dbError) {
           console.error('Database error processing subscription:', dbError);
@@ -227,6 +218,48 @@ serve(async (req) => {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
+        }
+        break;
+        
+      case 'invoice.payment_succeeded':
+        // For invoice events, ensure we mark the subscription as active
+        const invoiceObject = event.data.object;
+        console.log(`Processing invoice: ${invoiceObject.id}, subscription: ${invoiceObject.subscription}`);
+        
+        if (invoiceObject.subscription) {
+          // Get the subscription details
+          try {
+            const stripeSubscription = await stripe.subscriptions.retrieve(invoiceObject.subscription);
+            const subId = stripeSubscription.id;
+            const custId = stripeSubscription.customer;
+            const uId = stripeSubscription.metadata?.user_id;
+            
+            // Force status to active for successful payments
+            const subStatus = 'active';
+            
+            console.log(`Retrieved subscription after successful payment: ${subId}, setting status to: ${subStatus}, for user: ${uId}`);
+            
+            // Update the subscription status to active in our database
+            const { error: paymentUpdateError } = await supabase
+              .from('customer_subscriptions')
+              .update({ 
+                status: subStatus,
+                updated_at: new Date().toISOString()
+              })
+              .eq('subscription_id', subId);
+              
+            if (paymentUpdateError) {
+              console.error('Error updating subscription after successful payment:', paymentUpdateError);
+              throw paymentUpdateError;
+            }
+            
+            console.log(`Successfully updated subscription ${subId} to active status after payment`);
+          } catch (err) {
+            console.error(`Error updating subscription after payment: ${err.message}`);
+            throw err;
+          }
+        } else {
+          console.log('Invoice has no subscription, skipping');
         }
         break;
         
@@ -251,7 +284,6 @@ serve(async (req) => {
         console.log(`Successfully marked subscription ${deletedSubscription.id} as canceled`);
         break;
         
-      // Add more event types as needed
       default:
         console.log(`Unhandled event type: ${event.type}`);
     }
