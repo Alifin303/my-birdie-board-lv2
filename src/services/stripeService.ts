@@ -50,11 +50,16 @@ export interface StripeEnvCheck {
   stripeMessage?: string;
 }
 
+const getSupabaseFunctionUrl = (functionName: string): string => {
+  const supabaseUrl = 'https://rbhzesocmhazynkfyhst.supabase.co';
+  return `${supabaseUrl}/functions/v1/${functionName}`;
+};
+
 class StripeService {
   async checkEnvironment(): Promise<StripeEnvCheck> {
     try {
       console.log("Checking Stripe environment configuration...");
-      const response = await fetch(`${supabase.functions.url}/check-stripe-env`, {
+      const response = await fetch(getSupabaseFunctionUrl('check-stripe-env'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,7 +88,7 @@ class StripeService {
   async validateStripeConfig(): Promise<boolean> {
     try {
       console.log("Validating Stripe configuration...");
-      const response = await fetch(`${supabase.functions.url}/stripe`, {
+      const response = await fetch(getSupabaseFunctionUrl('stripe'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -110,7 +115,7 @@ class StripeService {
   async createCustomer(email: string): Promise<StripeCustomer> {
     try {
       console.log(`Creating Stripe customer for email: ${email}`);
-      const response = await fetch(`${supabase.functions.url}/stripe`, {
+      const response = await fetch(getSupabaseFunctionUrl('stripe'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -299,7 +304,7 @@ class StripeService {
       if (!successUrl) throw new Error('Missing successUrl parameter');
       if (!cancelUrl) throw new Error('Missing cancelUrl parameter');
 
-      const response = await fetch(`${supabase.functions.url}/stripe`, {
+      const response = await fetch(getSupabaseFunctionUrl('stripe'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -383,7 +388,7 @@ class StripeService {
     try {
       console.log(`Creating billing portal session for customer: ${customerId}`);
       
-      const response = await fetch(`${supabase.functions.url}/stripe`, {
+      const response = await fetch(getSupabaseFunctionUrl('stripe'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
