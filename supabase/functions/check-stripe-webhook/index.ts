@@ -18,23 +18,28 @@ serve(async (req) => {
   }
   
   try {
+    // Check all possible webhook secret environment variables
     const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
     const signingSecret = Deno.env.get('STRIPE_WEBHOOK_SIGNING_SECRET');
     const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
     
     // Check if secrets are available
     const results = {
-      webhook_secret: {
-        exists: !!webhookSecret,
-        length: webhookSecret ? webhookSecret.length : 0,
-        first_chars: webhookSecret ? webhookSecret.substring(0, 8) + '...' : '',
-        last_chars: webhookSecret ? '...' + webhookSecret.substring(webhookSecret.length - 8) : '',
-      },
-      signing_secret: {
-        exists: !!signingSecret,
-        length: signingSecret ? signingSecret.length : 0,
-        first_chars: signingSecret ? signingSecret.substring(0, 8) + '...' : '',
-        last_chars: signingSecret ? '...' + signingSecret.substring(signingSecret.length - 8) : '',
+      webhook_secrets: {
+        STRIPE_WEBHOOK_SECRET: {
+          exists: !!webhookSecret,
+          length: webhookSecret ? webhookSecret.length : 0,
+          starts_with_whsec: webhookSecret ? webhookSecret.startsWith('whsec_') : false,
+          first_chars: webhookSecret ? webhookSecret.substring(0, 8) + '...' : '',
+          last_chars: webhookSecret ? '...' + webhookSecret.substring(webhookSecret.length - 8) : '',
+        },
+        STRIPE_WEBHOOK_SIGNING_SECRET: {
+          exists: !!signingSecret,
+          length: signingSecret ? signingSecret.length : 0,
+          starts_with_whsec: signingSecret ? signingSecret.startsWith('whsec_') : false,
+          first_chars: signingSecret ? signingSecret.substring(0, 8) + '...' : '',
+          last_chars: signingSecret ? '...' + signingSecret.substring(signingSecret.length - 8) : '',
+        }
       },
       stripe_key: {
         exists: !!stripeKey,
@@ -70,7 +75,7 @@ serve(async (req) => {
     let webhookSecretError = null;
     let signingSecretError = null;
     
-    // Test the regular webhook secret if it exists
+    // Test the first webhook secret if it exists
     if (webhookSecret) {
       try {
         const stripe = new Stripe('sk_test_dummy', { // Dummy key for testing
@@ -79,7 +84,6 @@ serve(async (req) => {
         
         const testBody = JSON.stringify({ test: true });
         const timestamp = Math.floor(Date.now() / 1000);
-        const signedPayload = `${timestamp}.${testBody}`;
         
         // This will throw an error because we're using a dummy key,
         // but it helps us understand if the webhook secret format is compatible
@@ -89,7 +93,7 @@ serve(async (req) => {
       }
     }
     
-    // Test the signing secret if it exists
+    // Test the second webhook secret if it exists
     if (signingSecret) {
       try {
         const stripe = new Stripe('sk_test_dummy', { // Dummy key for testing
@@ -98,7 +102,6 @@ serve(async (req) => {
         
         const testBody = JSON.stringify({ test: true });
         const timestamp = Math.floor(Date.now() / 1000);
-        const signedPayload = `${timestamp}.${testBody}`;
         
         // This will throw an error because we're using a dummy key,
         // but it helps us understand if the webhook secret format is compatible
@@ -125,16 +128,18 @@ serve(async (req) => {
         results,
         stripe_connected: stripeConnected,
         stripe_error: stripeError,
-        webhook_secret_error: webhookSecretError,
-        signing_secret_error: signingSecretError,
+        webhook_secret_errors: {
+          STRIPE_WEBHOOK_SECRET: webhookSecretError,
+          STRIPE_WEBHOOK_SIGNING_SECRET: signingSecretError
+        },
         sample_signature: sampleSignature,
         recommendations: [
-          "Try using both STRIPE_WEBHOOK_SECRET and STRIPE_WEBHOOK_SIGNING_SECRET in the Supabase secrets",
-          "Update the stripe-webhook function to check both environment variables",
-          "Look for the variable that contains the value starting with 'whsec_'",
-          "If neither variable has the 'whsec_' prefix, Supabase may be transforming the value",
-          "Try testing a webhook delivery from Stripe to confirm it's reaching your function",
-          "Check the function logs immediately after sending a test webhook from Stripe"
+          "Ensure your webhook secret in Supabase starts with 'whsec_'",
+          "If Supabase is transforming your webhook secret, try both STRIPE_WEBHOOK_SECRET and STRIPE_WEBHOOK_SIGNING_SECRET",
+          "Copy your raw webhook secret directly from Stripe without any modifications",
+          "Test by sending a test webhook from Stripe after adding both environment variables",
+          "Check the Stripe webhook function logs immediately after sending a test webhook",
+          "For live environments, consider using the CLI to set secrets to avoid transformation"
         ]
       }),
       {
