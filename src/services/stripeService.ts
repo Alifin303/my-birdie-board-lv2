@@ -279,6 +279,14 @@ class StripeService {
 
     try {
       console.log(`Creating checkout session for customer: ${customerId}, price: ${priceId}`);
+      console.log(`Success URL: ${successUrl}`);
+      console.log(`Cancel URL: ${cancelUrl}`);
+      
+      if (!customerId) throw new Error('Missing customerId parameter');
+      if (!priceId) throw new Error('Missing priceId parameter');
+      if (!successUrl) throw new Error('Missing successUrl parameter');
+      if (!cancelUrl) throw new Error('Missing cancelUrl parameter');
+
       const { data, error } = await supabase.functions.invoke('stripe', {
         body: {
           action: 'create-checkout-session',
@@ -296,6 +304,7 @@ class StripeService {
       }
       
       if (!data || !data.url) {
+        console.error("Invalid response data:", data);
         throw new Error('Invalid response from server when creating checkout session');
       }
       

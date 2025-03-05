@@ -256,20 +256,38 @@ serve(async (req) => {
         }
         
         console.log(`Creating checkout session for customer: ${checkoutCustomerId}, price: ${checkoutPriceId}`);
+        console.log(`Success URL: ${successUrl}`);
+        console.log(`Cancel URL: ${cancelUrl}`);
         
         try {
           // Verify that the customer exists before trying to create a checkout session
-          const customer = await stripe.customers.retrieve(checkoutCustomerId);
-          if (!customer || customer.deleted) {
-            throw new Error(`Customer ${checkoutCustomerId} does not exist or is deleted`);
+          console.log(`Verifying customer existence: ${checkoutCustomerId}`);
+          try {
+            const customer = await stripe.customers.retrieve(checkoutCustomerId);
+            if (!customer || customer.deleted === true) {
+              throw new Error(`Customer ${checkoutCustomerId} does not exist or is deleted`);
+            }
+            console.log(`Customer verified: ${checkoutCustomerId}`);
+          } catch (customerError) {
+            console.error(`Error verifying customer: ${customerError.message}`);
+            throw new Error(`Failed to verify customer: ${customerError.message}`);
           }
           
           // Verify that the price exists before trying to create a checkout session
-          const price = await stripe.prices.retrieve(checkoutPriceId);
-          if (!price || !price.active) {
-            throw new Error(`Price ${checkoutPriceId} does not exist or is not active`);
+          console.log(`Verifying price existence: ${checkoutPriceId}`);
+          try {
+            const price = await stripe.prices.retrieve(checkoutPriceId);
+            if (!price || !price.active) {
+              throw new Error(`Price ${checkoutPriceId} does not exist or is not active`);
+            }
+            console.log(`Price verified: ${checkoutPriceId} (${price.nickname || 'no nickname'})`);
+          } catch (priceError) {
+            console.error(`Error verifying price: ${priceError.message}`);
+            throw new Error(`Failed to verify price: ${priceError.message}`);
           }
           
+          // Create the checkout session
+          console.log(`Creating checkout session with validated parameters`);
           result = await stripe.checkout.sessions.create({
             customer: checkoutCustomerId,
             payment_method_types: ['card'],

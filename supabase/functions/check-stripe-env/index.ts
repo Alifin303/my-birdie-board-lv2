@@ -14,6 +14,8 @@ serve(async (req) => {
   }
   
   try {
+    console.log("Starting Stripe environment check");
+    
     // List of required environment variables
     const requiredEnvVars = [
       'STRIPE_SECRET_KEY',
@@ -27,12 +29,17 @@ serve(async (req) => {
     let missingVars: string[] = [];
     
     for (const varName of requiredEnvVars) {
-      const isPresent = !!Deno.env.get(varName);
+      const value = Deno.env.get(varName);
+      const isPresent = !!value;
       environmentVariables[varName] = isPresent;
+      
+      console.log(`Checking for ${varName}: ${isPresent ? 'PRESENT' : 'MISSING'}`);
       
       if (!isPresent) {
         allVarsPresent = false;
         missingVars.push(varName);
+      } else if (varName === 'STRIPE_SECRET_KEY' && value.startsWith('sk_test_')) {
+        console.log(`Using Stripe test mode with key starting with: ${value.substring(0, 10)}...`);
       }
     }
     
@@ -43,19 +50,24 @@ serve(async (req) => {
     if (environmentVariables['STRIPE_SECRET_KEY']) {
       try {
         const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY') || '';
+        console.log(`Validating Stripe key (first 4 chars): ${stripeSecretKey.substring(0, 4)}...`);
+        
         const stripe = new Stripe(stripeSecretKey, {
           apiVersion: '2023-10-16',
         });
         
         // Try making a simple API call to validate the key
-        await stripe.customers.list({ limit: 1 });
+        console.log("Making test request to Stripe API...");
+        const customers = await stripe.customers.list({ limit: 1 });
+        
         stripeConnectionValid = true;
-        stripeMessage = "Successfully connected to Stripe API";
+        stripeMessage = `Successfully connected to Stripe API. Found ${customers.data.length} customer(s)`;
         console.log(stripeMessage);
       } catch (stripeError) {
         stripeConnectionValid = false;
         stripeMessage = `Stripe API connection failed: ${stripeError.message}`;
         console.error(stripeMessage);
+        console.error("Full Stripe error:", stripeError);
       }
     } else {
       stripeMessage = "Cannot test Stripe connection: STRIPE_SECRET_KEY is missing";
@@ -66,7 +78,7 @@ serve(async (req) => {
       ? "All required Stripe environment variables are configured properly."
       : `Missing required environment variables: ${missingVars.join(', ')}`;
       
-    console.log(message);
+    console.log(`Environment check result: ${message}`);
     
     return new Response(
       JSON.stringify({
@@ -83,6 +95,7 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error(`Error checking environment: ${error.message}`);
+    console.error("Stack trace:", error.stack);
     
     return new Response(
       JSON.stringify({
