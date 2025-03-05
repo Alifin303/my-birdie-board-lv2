@@ -31,16 +31,6 @@ export function ForgotPasswordDialog({
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const generateTemporaryPassword = () => {
-    // Generate a random 12-character password with letters, numbers and special characters
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
-    let result = '';
-    for (let i = 0; i < 12; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-  };
-
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -53,56 +43,23 @@ export function ForgotPasswordDialog({
     try {
       setIsLoading(true);
       
-      // Generate a temporary password
-      const tempPassword = generateTemporaryPassword();
-      
-      // First, check if the user exists
-      const { data: userExists, error: checkError } = await supabase.auth.signInWithOtp({
-        email: emailInput,
-        options: {
-          shouldCreateUser: false
-        }
+      // Use Supabase's built-in password reset functionality
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(emailInput, {
+        redirectTo: `${window.location.origin}/reset-password`,
       });
       
-      if (checkError) {
-        if (checkError.message.includes("Email not confirmed")) {
-          // This means the user exists but hasn't confirmed their email
-          // We can proceed with password update
-        } else if (checkError.message.includes("Invalid login credentials")) {
-          throw new Error("No account found with this email address");
-        } else {
-          throw checkError;
-        }
-      }
-      
-      // Try to update password with admin privileges
-      try {
-        const { error: updateError } = await supabase.auth.updateUser({
-          password: tempPassword
-        });
-        
-        if (updateError) throw updateError;
-      } catch (updateError: any) {
-        console.log("Direct password update failed, trying edge function:", updateError);
-        
-        // Send email with temporary password via Edge Function
-        const { error: sendError } = await supabase.functions.invoke("send-temp-password", {
-          body: { email: emailInput, tempPassword }
-        });
-        
-        if (sendError) throw sendError;
-      }
+      if (resetError) throw resetError;
       
       setIsSuccess(true);
       
       toast({
-        title: "Temporary password sent",
-        description: "Check your email for your temporary password",
+        title: "Reset link sent",
+        description: "Check your email for a password reset link",
       });
       
     } catch (error: any) {
       console.error("Password reset error:", error);
-      setError(error.message || "Failed to send temporary password");
+      setError(error.message || "Failed to send password reset link");
       
       toast({
         title: "Reset request failed",
@@ -128,7 +85,7 @@ export function ForgotPasswordDialog({
         <DialogHeader>
           <DialogTitle className="text-2xl">Reset Password</DialogTitle>
           <DialogDescription>
-            Enter your email to receive a temporary password
+            Enter your email to receive a password reset link
           </DialogDescription>
         </DialogHeader>
         
@@ -142,8 +99,8 @@ export function ForgotPasswordDialog({
           <div className="flex flex-col items-center justify-center py-4 space-y-4">
             <CheckCircle className="h-16 w-16 text-green-500" />
             <p className="text-center">
-              We've sent a temporary password to <strong>{emailInput}</strong>. 
-              Please check your email and use it to log in, then update your password in your account settings.
+              We've sent a password reset link to <strong>{emailInput}</strong>. 
+              Please check your email and click the link to reset your password.
             </p>
             <Button onClick={closeDialog} className="mt-4">Close</Button>
           </div>
@@ -165,10 +122,10 @@ export function ForgotPasswordDialog({
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-                  Sending temporary password...
+                  Sending reset link...
                 </>
               ) : (
-                "Send Temporary Password"
+                "Send Reset Link"
               )}
             </Button>
           </form>

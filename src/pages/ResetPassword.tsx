@@ -20,23 +20,18 @@ export const ResetPassword = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if the user has a recovery session
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      
-      // If no valid recovery session is found, redirect to home
-      if (!data.session) {
-        toast({
-          title: "Invalid Reset Link",
-          description: "This password reset link is invalid or has expired. Please request a new one.",
-          variant: "destructive",
-        });
-        navigate("/");
-      }
-    };
+    // Check if we have a hash fragment in the URL (from password reset email)
+    const hash = window.location.hash;
     
-    checkSession();
-  }, [navigate, toast]);
+    if (!hash || !hash.includes('type=recovery')) {
+      // Inform the user if this is not a valid reset link
+      toast({
+        title: "Invalid Reset Link",
+        description: "Use the link from your email to reset your password",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
