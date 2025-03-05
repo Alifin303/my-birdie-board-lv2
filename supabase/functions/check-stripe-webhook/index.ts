@@ -8,9 +8,14 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
 };
 
+console.log('Check Stripe webhook function is starting...');
+
 serve(async (req) => {
+  console.log(`Received request: ${req.method} ${new URL(req.url).pathname}`);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling OPTIONS request');
     return new Response(null, { 
       status: 204,
       headers: corsHeaders 
@@ -18,10 +23,16 @@ serve(async (req) => {
   }
   
   try {
+    console.log('Starting Stripe webhook secrets check...');
+    
     // Check all possible webhook secret environment variables
     const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
     const signingSecret = Deno.env.get('STRIPE_WEBHOOK_SIGNING_SECRET');
     const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+    
+    console.log(`STRIPE_WEBHOOK_SECRET exists: ${!!webhookSecret}`);
+    console.log(`STRIPE_WEBHOOK_SIGNING_SECRET exists: ${!!signingSecret}`);
+    console.log(`STRIPE_SECRET_KEY exists: ${!!stripeKey}`);
     
     // Check if secrets are available
     const results = {
@@ -58,15 +69,19 @@ serve(async (req) => {
     
     if (stripeKey) {
       try {
+        console.log('Initializing Stripe with secret key...');
         const stripe = new Stripe(stripeKey, {
           httpClient: Stripe.createFetchHttpClient(),
           apiVersion: '2023-10-16',
         });
         
         // Try a simple call to verify the API key works
+        console.log('Testing Stripe connection with customers.list call...');
         await stripe.customers.list({ limit: 1 });
         stripeConnected = true;
+        console.log('✅ Successfully connected to Stripe API');
       } catch (error) {
+        console.error(`❌ Failed to connect to Stripe: ${error.message}`);
         stripeError = error.message;
       }
     }
@@ -78,6 +93,7 @@ serve(async (req) => {
     // Test the first webhook secret if it exists
     if (webhookSecret) {
       try {
+        console.log('Testing STRIPE_WEBHOOK_SECRET...');
         const stripe = new Stripe('sk_test_dummy', { // Dummy key for testing
           apiVersion: '2023-10-16',
         });
@@ -89,6 +105,7 @@ serve(async (req) => {
         // but it helps us understand if the webhook secret format is compatible
         stripe.webhooks.constructEvent(testBody, 'dummy_signature', webhookSecret);
       } catch (error) {
+        console.log(`STRIPE_WEBHOOK_SECRET test error: ${error.message}`);
         webhookSecretError = error.message;
       }
     }
@@ -96,6 +113,7 @@ serve(async (req) => {
     // Test the second webhook secret if it exists
     if (signingSecret) {
       try {
+        console.log('Testing STRIPE_WEBHOOK_SIGNING_SECRET...');
         const stripe = new Stripe('sk_test_dummy', { // Dummy key for testing
           apiVersion: '2023-10-16',
         });
@@ -107,6 +125,7 @@ serve(async (req) => {
         // but it helps us understand if the webhook secret format is compatible
         stripe.webhooks.constructEvent(testBody, 'dummy_signature', signingSecret);
       } catch (error) {
+        console.log(`STRIPE_WEBHOOK_SIGNING_SECRET test error: ${error.message}`);
         signingSecretError = error.message;
       }
     }
@@ -115,14 +134,17 @@ serve(async (req) => {
     let sampleSignature = '';
     if (stripeConnected) {
       try {
+        console.log('Creating sample Stripe signature for testing...');
         const timestamp = Math.floor(Date.now() / 1000);
         const payload = JSON.stringify({ test: true });
         sampleSignature = `t=${timestamp},v1=5257a869e7ecebeda32affa62cdca3fa51cad7e77a0e56ff536d0ce8e108d8bd,v0=6ffbb59b2300aae63f272406069a9788598b792a944a07aba816edb039989a39`;
+        console.log(`Sample signature created: ${sampleSignature.substring(0, 20)}...`);
       } catch (error) {
-        console.error('Error creating sample signature:', error);
+        console.error(`Error creating sample signature: ${error}`);
       }
     }
     
+    console.log('Returning check results...');
     return new Response(
       JSON.stringify({
         results,
@@ -149,6 +171,7 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error(`Error checking Stripe environment: ${error.message}`);
+    console.error(`Error stack: ${error.stack}`);
     
     return new Response(
       JSON.stringify({ error: error.message }),

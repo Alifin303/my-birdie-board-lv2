@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.170.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.8.0';
 import Stripe from 'https://esm.sh/stripe@11.18.0?target=deno';
@@ -8,6 +9,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
 };
+
+// Immediately log startup - useful to know if the function is even executed
+console.log('Stripe webhook function is starting...');
 
 // Get Supabase admin client
 const getSupabaseAdmin = () => {
@@ -328,7 +332,7 @@ async function handleStripeEvent(event, supabase) {
 serve(async (req) => {
   // Add timestamp to log entries for better debugging
   const requestTimestamp = new Date().toISOString();
-  console.log(`[${requestTimestamp}] Webhook request received: ${req.method} ${new URL(req.url).pathname}`);
+  console.log(`[${requestTimestamp}] Stripe webhook received: ${req.method} ${new URL(req.url).pathname}`);
   
   // Detailed header logging
   const headers = Object.fromEntries(req.headers.entries());
@@ -339,6 +343,8 @@ serve(async (req) => {
   console.log(`[${requestTimestamp}] Has stripe-signature header: ${hasSignature}`);
   if (hasSignature) {
     console.log(`[${requestTimestamp}] Stripe signature value length: ${req.headers.get('stripe-signature')?.length || 0}`);
+  } else {
+    console.warn(`[${requestTimestamp}] No stripe-signature header found - this is likely not a real Stripe webhook call`);
   }
   
   // Handle CORS preflight requests
