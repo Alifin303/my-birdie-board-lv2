@@ -9,6 +9,8 @@ const corsHeaders = {
 };
 
 console.log('Test public function is starting - NO AUTH REQUIRED');
+console.log('Function config settings: verify_jwt=false, no_auth=true');
+console.log('This should be accessible without any authorization header');
 
 serve(async (req) => {
   // Log all request details to help debug
@@ -32,6 +34,10 @@ serve(async (req) => {
     JSON.stringify({
       message: "This is a public test function. No authorization required.",
       timestamp: new Date().toISOString(),
+      auth_config: {
+        no_auth: true,
+        verify_jwt: false
+      },
       request_info: {
         method: req.method,
         url: req.url,
