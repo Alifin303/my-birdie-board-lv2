@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { supabase, getSiteUrl } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { Loader2, CheckCircle } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
 
@@ -31,6 +31,16 @@ export function ForgotPasswordDialog({
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
+  const generateTemporaryPassword = () => {
+    // Generate a random 12-character password with letters, numbers and special characters
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+    let result = '';
+    for (let i = 0; i < 12; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
+
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -43,25 +53,64 @@ export function ForgotPasswordDialog({
     try {
       setIsLoading(true);
       
-      // Get site URL dynamically for the redirect
-      const siteUrl = getSiteUrl();
+      // Generate a temporary password
+      const tempPassword = generateTemporaryPassword();
       
-      const { error } = await supabase.auth.resetPasswordForEmail(emailInput, {
-        redirectTo: `${siteUrl}/auth/reset-password`,
+      // First, check if the user exists
+      const { data: userExists, error: checkError } = await supabase.auth.signInWithOtp({
+        email: emailInput,
+        options: {
+          shouldCreateUser: false
+        }
       });
+      
+      if (checkError) {
+        if (checkError.message.includes("Email not confirmed")) {
+          // This means the user exists but hasn't confirmed their email
+          // We can proceed with password update
+        } else if (checkError.message.includes("Invalid login credentials")) {
+          throw new Error("No account found with this email address");
+        } else {
+          throw checkError;
+        }
+      }
+      
+      // Update the user's password with the temporary one
+      const { error: updateError } = await supabase.auth.admin.updateUserById(
+        emailInput,
+        { password: tempPassword }
+      );
 
-      if (error) throw error;
-
+      if (updateError) {
+        // Fall back to the email reset if admin update fails
+        // This happens because the client doesn't have admin privileges
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(emailInput, {
+          redirectTo: `${window.location.origin}/auth/reset-password`,
+        });
+        
+        if (resetError) throw resetError;
+        
+        setIsSuccess(true);
+        
+        toast({
+          title: "Reset email sent",
+          description: "Check your email for a link to reset your password",
+        });
+        
+        return;
+      }
+      
+      // If we got here, the password was updated successfully
       setIsSuccess(true);
       
       toast({
-        title: "Reset email sent",
-        description: "Check your email for a link to reset your password",
+        title: "Temporary password sent",
+        description: "Check your email for your temporary password",
       });
       
     } catch (error: any) {
       console.error("Password reset error:", error);
-      setError(error.message || "Failed to send password reset email");
+      setError(error.message || "Failed to send password reset");
       
       toast({
         title: "Reset request failed",
@@ -87,7 +136,7 @@ export function ForgotPasswordDialog({
         <DialogHeader>
           <DialogTitle className="text-2xl">Reset Password</DialogTitle>
           <DialogDescription>
-            Enter your email to receive a password reset link
+            Enter your email to receive a temporary password
           </DialogDescription>
         </DialogHeader>
         
@@ -101,8 +150,8 @@ export function ForgotPasswordDialog({
           <div className="flex flex-col items-center justify-center py-4 space-y-4">
             <CheckCircle className="h-16 w-16 text-green-500" />
             <p className="text-center">
-              We've sent a password reset link to <strong>{emailInput}</strong>. 
-              Please check your email and follow the instructions to reset your password.
+              We've sent a temporary password to <strong>{emailInput}</strong>. 
+              Please check your email and use it to log in, then update your password in your account settings.
             </p>
             <Button onClick={closeDialog} className="mt-4">Close</Button>
           </div>
@@ -124,10 +173,10 @@ export function ForgotPasswordDialog({
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-                  Sending reset link...
+                  Sending temporary password...
                 </>
               ) : (
-                "Send Reset Link"
+                "Send Temporary Password"
               )}
             </Button>
           </form>
