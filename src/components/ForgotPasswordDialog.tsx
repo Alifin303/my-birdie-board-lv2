@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, CheckCircle } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
+import { getSiteUrl } from "@/integrations/supabase/client";
 
 export function ForgotPasswordDialog({ 
   open, 
@@ -43,9 +44,13 @@ export function ForgotPasswordDialog({
     try {
       setIsLoading(true);
       
-      // Use Supabase's built-in password reset functionality
+      // Get the proper site URL for redirection
+      const siteUrl = window.location.origin;
+      console.log("Using redirect URL:", `${siteUrl}/reset-password`);
+      
+      // Use Supabase's built-in password reset functionality with the correct redirect URL
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(emailInput, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${siteUrl}/reset-password`,
       });
       
       if (resetError) throw resetError;
