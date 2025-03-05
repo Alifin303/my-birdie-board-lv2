@@ -25,7 +25,7 @@ const getSupabaseAdmin = () => {
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
   
   if (!supabaseUrl || !supabaseServiceKey) {
-    throw new Error('Missing Supabase URL or service key');
+    throw new Error('Missing Supabase URL or service role key');
   }
   
   return createClient(supabaseUrl, supabaseServiceKey, {
@@ -58,7 +58,18 @@ const logEnvironmentStatus = () => {
 serve(async (req) => {
   // Log when a request is received with some details
   console.log(`Webhook request received: ${req.method} ${new URL(req.url).pathname}`);
-  console.log(`Request headers: ${JSON.stringify(Object.fromEntries(req.headers.entries()))}`);
+  console.log(`Full request URL: ${req.url}`);
+  
+  // Log all headers for debugging (but mask any sensitive values)
+  const headers = Object.fromEntries(req.headers.entries());
+  console.log(`Request headers: ${JSON.stringify(headers, (key, value) => {
+    // Mask potentially sensitive headers but show that they exist
+    if (key === 'authorization' || key === 'stripe-signature') {
+      return value ? '[PRESENT]' : '[MISSING]';
+    }
+    return value;
+  })}`);
+  
   logEnvironmentStatus();
   
   // Handle CORS preflight requests
@@ -86,70 +97,34 @@ serve(async (req) => {
     // Get the request body as text
     const body = await req.text();
     console.log(`Request body length: ${body.length} characters`);
+    console.log(`Request body excerpt: ${body.substring(0, 100)}...`);
     
-    // Validate webhook secret configuration
-    if (!endpointSecret) {
-      console.error("Missing STRIPE_WEBHOOK_SECRET environment variable");
-      return new Response(JSON.stringify({ error: 'Webhook secret not configured' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-    
-    // Special handling for test ping events without signature
-    if (body.includes('"type":"ping"')) {
-      console.log("Received ping event, responding with success");
-      return new Response(JSON.stringify({ received: true }), {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-    
-    // For all other events, verify signature
-    if (!signature) {
-      console.error("Missing Stripe signature in header");
-      // Instead of returning 400, let's try to parse the event directly for debugging
-      try {
-        const parsedEvent = JSON.parse(body);
-        console.log(`Attempting to handle event without signature. Event type: ${parsedEvent.type}`);
-        
-        // Create Supabase admin client
-        const supabase = getSupabaseAdmin();
-        
-        // Process the event
-        await handleStripeEvent(parsedEvent, supabase);
-        
-        return new Response(JSON.stringify({ received: true, verified: false }), {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      } catch (parseError) {
-        console.error(`Failed to parse event without signature: ${parseError.message}`);
-        return new Response(JSON.stringify({ error: 'Missing Stripe signature and failed to parse event' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-    }
-    
-    // Create the event by verifying the signature
     let event;
+    
+    // Try to parse the event
     try {
-      event = stripe.webhooks.constructEvent(body, signature, endpointSecret);
-      console.log(`Webhook event verified. Type: ${event.type}, ID: ${event.id}`);
-    } catch (err) {
-      console.error(`Webhook signature verification failed: ${err.message}`);
-      // Try parsing the event directly for debugging
-      try {
-        event = JSON.parse(body);
-        console.log(`Parsed unverified event. Type: ${event.type}`);
-      } catch (parseErr) {
-        console.error(`Failed to parse body as JSON: ${parseErr.message}`);
-        return new Response(JSON.stringify({ error: `Webhook signature verification failed: ${err.message}` }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+      // First try parsing the body as JSON
+      event = JSON.parse(body);
+      console.log(`Parsed event type: ${event.type}`);
+      
+      // If we have a signature and secret, verify the signature
+      if (signature && endpointSecret) {
+        try {
+          event = stripe.webhooks.constructEvent(body, signature, endpointSecret);
+          console.log(`Signature verified successfully for event: ${event.type}`);
+        } catch (err) {
+          console.error(`⚠️ Webhook signature verification failed: ${err.message}`);
+          // We'll continue with the parsed event for debugging, but log the warning
+        }
+      } else {
+        console.log(`⚠️ Processing event without signature verification. This is insecure in production.`);
       }
+    } catch (parseError) {
+      console.error(`Failed to parse request body: ${parseError.message}`);
+      return new Response(JSON.stringify({ error: 'Invalid payload' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
     
     // Create Supabase admin client

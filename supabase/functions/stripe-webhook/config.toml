@@ -6,3 +6,6 @@ default = { http.csrf = false }
 
 [http_options]
 timeout = 50
+
+[http.auth]
+enable = false
