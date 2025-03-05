@@ -101,29 +101,12 @@ serve(async (req) => {
       const finalReturnUrl = return_url || 'https://rbhzesocmhazynkfyhst.supabase.co/dashboard';
       console.log('Creating portal session with return URL:', finalReturnUrl);
       
-      // Basic configuration for the portal
-      const portalOptions = {
+      // Create a basic portal session without configuration
+      // Let Stripe use the default configuration from the dashboard
+      const session = await stripe.billingPortal.sessions.create({
         customer: customerId,
-        return_url: finalReturnUrl,
-        // Add configuration to avoid the "No configuration provided" error
-        configuration: {
-          business_profile: {
-            headline: "Manage your subscription"
-          },
-          features: {
-            subscription_cancel: { enabled: true },
-            subscription_pause: { enabled: true },
-            customer_update: { 
-              enabled: true,
-              allowed_updates: ["email", "address", "shipping", "phone", "tax_id"]
-            },
-            invoice_history: { enabled: true },
-            payment_method_update: { enabled: true }
-          }
-        }
-      };
-      
-      const session = await stripe.billingPortal.sessions.create(portalOptions);
+        return_url: finalReturnUrl
+      });
 
       console.log('Portal session created successfully:', session.id);
       
@@ -135,12 +118,11 @@ serve(async (req) => {
     } catch (stripeError) {
       console.error('Error creating portal session:', stripeError);
       
-      // Provide more specific error message for customer portal configuration
+      // Handle specific errors
       if (stripeError.message && stripeError.message.includes('No configuration provided')) {
         return new Response(JSON.stringify({ 
           error: "Stripe Customer Portal is not configured. Please set up your Customer Portal in the Stripe Dashboard.",
-          details: "Go to https://dashboard.stripe.com/test/settings/billing/portal to configure your Customer Portal settings.",
-          stripe_error: stripeError.message
+          details: "Go to https://dashboard.stripe.com/test/settings/billing/portal to configure your Customer Portal settings."
         }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
