@@ -1,12 +1,17 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { SignUpDialog } from "@/components/SignUpDialog";
 import { LoginDialog } from "@/components/LoginDialog";
 
 const About = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    navigate('/quiz');
+  };
 
   return (
     <div 
@@ -70,7 +75,14 @@ const About = () => {
           </div>
 
           <div className="mt-6 sm:mt-8 text-center">
-            <SignUpDialog />
+            <Button 
+              size="lg"
+              className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300"
+              onClick={handleGetStarted}
+            >
+              <span className="mr-2">🏌️‍♂️</span>
+              Get Started
+            </Button>
           </div>
         </div>
       </div>
