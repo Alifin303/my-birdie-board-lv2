@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,23 +24,19 @@ export const isSubscriptionValid = (subscription: any): boolean => {
     subscription.current_period_end && 
     new Date(subscription.current_period_end) > new Date();
   
-  // Also consider incomplete subscriptions as valid if they are still in their period
-  // This is a common case where the subscription might be marked as incomplete in our database
-  // but is actually active in Stripe
-  const hasIncompleteButValidPeriod = 
-    (subscription.status === "incomplete" || subscription.status === "past_due") && 
+  // IMPORTANT: Special handling for incomplete subscriptions
+  // We now prioritize the end date over the status for "incomplete" subscriptions
+  // This fixes the issue where Stripe shows active but our DB says incomplete
+  const hasValidPeriodEndDate = 
     subscription.current_period_end && 
     new Date(subscription.current_period_end) > new Date();
+    
+  // If the subscription has a valid end date in the future, we'll consider it valid
+  // regardless of status - this is a more accurate measure of validity than the status field
+  // when there are syncing issues between Stripe and our database
   
-  // Fix for incorrect incomplete status: if the subscription has a valid period end date in the future
-  // we'll consider it valid even if marked as incomplete (this handles the case where Stripe says active
-  // but our database says incomplete)
-  const fixForIncompleteStatus = 
-    subscription.status === "incomplete" &&
-    subscription.current_period_end && 
-    new Date(subscription.current_period_end) > new Date();
-  
-  return hasValidStatus || isCanceledButStillActive || hasIncompleteButValidPeriod || fixForIncompleteStatus;
+  return hasValidStatus || isCanceledButStillActive || 
+         (hasValidPeriodEndDate && (subscription.status === "incomplete" || subscription.status === "past_due"));
 };
 
 export const ProtectedRoute = ({ children, requireSubscription = true }: ProtectedRouteProps) => {

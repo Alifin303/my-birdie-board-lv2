@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Loader2, Check } from "lucide-react";
+import { Loader2, Check, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { isSubscriptionValid } from "@/components/ProtectedRoute";
 
@@ -15,6 +15,8 @@ export default function Checkout() {
   const [subscriptionStatus, setSubscriptionStatus] = useState<string>("");
   const [subscriptionEndDate, setSubscriptionEndDate] = useState<string | null>(null);
   const [shouldShowPage, setShouldShowPage] = useState(true);
+  const [isVerifyingWithStripe, setIsVerifyingWithStripe] = useState(false);
+  const [stripeVerificationComplete, setStripeVerificationComplete] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -54,21 +56,61 @@ export default function Checkout() {
           }
           
           console.log("Current subscription data:", sub);
-          console.log("Subscription validation:", {
-            status: sub.status,
-            cancelAtPeriodEnd: sub.cancel_at_period_end,
-            currentPeriodEnd: sub.current_period_end,
-            now: new Date().toISOString(),
-            isStillValid: sub.current_period_end ? new Date(sub.current_period_end) > new Date() : false
-          });
           
           // Handle the case where subscription is incomplete but still valid
-          if (sub.status === 'incomplete' && sub.current_period_end && new Date(sub.current_period_end) > new Date()) {
-            console.log("Fixing incorrect incomplete status: Subscription has future end date but status is incomplete");
+          if ((sub.status === 'incomplete' || sub.status === 'past_due') && 
+              sub.current_period_end && new Date(sub.current_period_end) > new Date()) {
+            console.log("Detected potential issue: Subscription has future end date but status is", sub.status);
             
-            // Use the shared isSubscriptionValid function to check if it should be considered valid
-            const hasValidSubscription = isSubscriptionValid(sub);
-            console.log("Subscription is considered valid:", hasValidSubscription);
+            // If subscription appears to be valid by end date but status is incorrect,
+            // verify with Stripe directly
+            setIsVerifyingWithStripe(true);
+            try {
+              // Call our Supabase Edge Function to verify the subscription status directly with Stripe
+              const { data: stripeData, error: stripeError } = await supabase.functions.invoke("verify-subscription", {
+                body: {
+                  subscription_id: sub.subscription_id
+                }
+              });
+              
+              if (stripeError) {
+                console.error("Error verifying with Stripe:", stripeError);
+              } else if (stripeData && stripeData.status) {
+                console.log("Stripe verification result:", stripeData);
+                
+                // If Stripe says the subscription is active but our DB says incomplete,
+                // update our database record
+                if (stripeData.status === 'active' && sub.status !== 'active') {
+                  console.log("Fixing subscription status discrepancy");
+                  const { error: updateError } = await supabase
+                    .from("customer_subscriptions")
+                    .update({ 
+                      status: stripeData.status,
+                      updated_at: new Date().toISOString()
+                    })
+                    .eq("subscription_id", sub.subscription_id);
+                    
+                  if (updateError) {
+                    console.error("Error updating subscription status:", updateError);
+                  } else {
+                    // Update local state
+                    setSubscriptionStatus(stripeData.status);
+                    setSubscription({...sub, status: stripeData.status});
+                    
+                    toast({
+                      title: "Subscription Updated",
+                      description: "We've fixed an issue with your subscription status.",
+                      variant: "default",
+                    });
+                  }
+                }
+              }
+            } catch (verifyError) {
+              console.error("Error in Stripe verification:", verifyError);
+            } finally {
+              setIsVerifyingWithStripe(false);
+              setStripeVerificationComplete(true);
+            }
           }
           
           // Determine if we should show the checkout page
@@ -195,7 +237,7 @@ export default function Checkout() {
               
               {subscription && (
                 <div className="mt-2 p-2 bg-white/20 rounded">
-                  <p className="text-sm">
+                  <p className="text-sm flex items-center">
                     {getSubscriptionMessage()}
                     {subscription.status === "active" && (
                       <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -203,7 +245,19 @@ export default function Checkout() {
                         Active
                       </span>
                     )}
+                    {subscription.status === "incomplete" && isSubscriptionValid(subscription) && (
+                      <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        <AlertTriangle className="w-3 h-3 mr-1" />
+                        {isVerifyingWithStripe ? "Verifying..." : "Payment Issue Detected"}
+                      </span>
+                    )}
                   </p>
+                  
+                  {subscription.status === "incomplete" && isSubscriptionValid(subscription) && stripeVerificationComplete && (
+                    <p className="text-xs mt-1 text-white/80">
+                      We've detected a discrepancy with your subscription status. Please contact support if this persists.
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -242,14 +296,14 @@ export default function Checkout() {
                   
                   <Button 
                     onClick={handleCheckout} 
-                    disabled={isLoading} 
+                    disabled={isLoading || isVerifyingWithStripe} 
                     size="lg"
                     className="w-full bg-accent hover:bg-accent/90 text-white text-lg px-8 h-12 shadow-lg transition-all duration-300"
                   >
-                    {isLoading ? (
+                    {isLoading || isVerifyingWithStripe ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Setting up payment...
+                        {isVerifyingWithStripe ? "Verifying subscription..." : "Setting up payment..."}
                       </>
                     ) : (
                       <>
