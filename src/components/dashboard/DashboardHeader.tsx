@@ -27,7 +27,6 @@ interface DashboardHeaderProps {
   subscription?: Subscription | null;
 }
 
-// Form schema for profile update
 const profileFormSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
@@ -35,7 +34,6 @@ const profileFormSchema = z.object({
   email: z.string().email("Invalid email address")
 });
 
-// Form schema for password change
 const passwordFormSchema = z.object({
   currentPassword: z.string().min(6, "Current password is required"),
   newPassword: z.string().min(8, "Password must be at least 8 characters"),
@@ -53,10 +51,8 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
   const [loading, setLoading] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   
-  // Determine subscription status from props
   const subscriptionStatus = subscription?.status || "none";
 
-  // Initialize the profile form
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
@@ -67,7 +63,6 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
     }
   });
 
-  // Initialize the password form
   const passwordForm = useForm<z.infer<typeof passwordFormSchema>>({
     resolver: zodResolver(passwordFormSchema),
     defaultValues: {
@@ -77,7 +72,6 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
     }
   });
 
-  // Load profile data into form when it changes
   React.useEffect(() => {
     if (profileData) {
       profileForm.reset({
@@ -87,7 +81,6 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
         email: profileData.email || ""
       });
 
-      // Fetch user email if not in profileData
       const getUserEmail = async () => {
         const { data } = await supabase.auth.getUser();
         if (data?.user?.email) {
@@ -116,7 +109,6 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
   const handleProfileUpdate = async (values: z.infer<typeof profileFormSchema>) => {
     setLoading(true);
     try {
-      // Update profile in database
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -128,7 +120,6 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
 
       if (profileError) throw profileError;
 
-      // Update email if changed
       const { data: userData } = await supabase.auth.getUser();
       if (userData?.user && userData.user.email !== values.email) {
         const { error: emailError } = await supabase.auth.updateUser({
@@ -159,7 +150,6 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
   const handlePasswordChange = async (values: z.infer<typeof passwordFormSchema>) => {
     setLoading(true);
     try {
-      // First verify current password
       const { data: { session }, error: signInError } = await supabase.auth.signInWithPassword({
         email: profileForm.getValues("email"),
         password: values.currentPassword
@@ -167,7 +157,6 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
 
       if (signInError) throw new Error("Current password is incorrect");
 
-      // Then update password
       const { error: updateError } = await supabase.auth.updateUser({
         password: values.newPassword
       });
@@ -198,13 +187,11 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
       setCheckoutLoading(true);
       
       if (action === "create_checkout") {
-        // Get current user session
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
           throw new Error("You must be logged in to subscribe");
         }
         
-        // Call our Stripe checkout function
         const { data, error } = await supabase.functions.invoke('create-checkout', {
           body: { 
             user_id: session.user.id,
@@ -215,7 +202,6 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
         
         if (error) throw error;
         
-        // Redirect to Stripe checkout
         if (data?.url) {
           window.location.href = data.url;
         } else {
@@ -223,13 +209,11 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
         }
       } 
       else if (action === "manage_subscription") {
-        // Get current user session
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
           throw new Error("You must be logged in to manage your subscription");
         }
         
-        // Call our customer portal function
         const { data, error } = await supabase.functions.invoke('create-portal-session', {
           body: { 
             user_id: session.user.id,
@@ -239,7 +223,6 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
         
         if (error) throw error;
         
-        // Redirect to customer portal
         if (data?.url) {
           window.location.href = data.url;
         } else {
@@ -350,7 +333,7 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
                 )}
                 {checkoutLoading ? "Processing..." : "Add Subscription"}
               </Button>
-            )}
+            ) : null}
             
             {subscriptionStatus === "active" && (
               <div className="space-y-2">
@@ -410,7 +393,7 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
       </Form>
     );
   };
-  
+
   const renderPasswordContent = () => {
     return (
       <Form {...passwordForm}>
