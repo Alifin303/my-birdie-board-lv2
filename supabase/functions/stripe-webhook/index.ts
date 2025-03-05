@@ -36,7 +36,7 @@ serve(async (req) => {
     // Parse the webhook payload
     const payload = await req.text();
     
-    // Verify the webhook signature
+    // Verify the webhook signature using the async method
     const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SIGNING_SECRET') || '';
     
     console.log('Received webhook with signature:', signature.substring(0, 10) + '...');
@@ -45,7 +45,12 @@ serve(async (req) => {
     let event;
     
     try {
-      event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+      // Use constructEventAsync instead of constructEvent
+      event = await stripe.webhooks.constructEventAsync(
+        payload, 
+        signature, 
+        webhookSecret
+      );
     } catch (err) {
       console.error(`Webhook signature verification failed: ${err.message}`);
       return new Response(JSON.stringify({ error: `Webhook signature verification failed: ${err.message}` }), {
