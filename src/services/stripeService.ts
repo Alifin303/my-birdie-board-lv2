@@ -51,20 +51,24 @@ export interface StripeEnvCheck {
 }
 
 const getSupabaseFunctionUrl = (functionName: string): string => {
-  const supabaseUrl = 'https://rbhzesocmhazynkfyhst.supabase.co';
-  return `${supabaseUrl}/functions/v1/${functionName}`;
+  return `https://rbhzesocmhazynkfyhst.supabase.co/functions/v1/${functionName}`;
 };
 
 class StripeService {
   async checkEnvironment(): Promise<StripeEnvCheck> {
     try {
       console.log("Checking Stripe environment configuration...");
-      const response = await fetch(getSupabaseFunctionUrl('check-stripe-env'), {
+      const fullUrl = getSupabaseFunctionUrl('check-stripe-env');
+      console.log("Calling URL:", fullUrl);
+      
+      const response = await fetch(fullUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         }
       });
+      
+      console.log("Response status:", response.status);
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -88,7 +92,10 @@ class StripeService {
   async validateStripeConfig(): Promise<boolean> {
     try {
       console.log("Validating Stripe configuration...");
-      const response = await fetch(getSupabaseFunctionUrl('stripe'), {
+      const fullUrl = getSupabaseFunctionUrl('stripe');
+      console.log("Calling URL:", fullUrl);
+      
+      const response = await fetch(fullUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -97,6 +104,8 @@ class StripeService {
           action: 'check-config'
         })
       });
+      
+      console.log("Response status:", response.status);
       
       if (!response.ok) {
         console.error("Error validating Stripe configuration:", await response.text());
@@ -115,7 +124,10 @@ class StripeService {
   async createCustomer(email: string): Promise<StripeCustomer> {
     try {
       console.log(`Creating Stripe customer for email: ${email}`);
-      const response = await fetch(getSupabaseFunctionUrl('stripe'), {
+      const fullUrl = getSupabaseFunctionUrl('stripe');
+      console.log("Calling URL:", fullUrl);
+      
+      const response = await fetch(fullUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -126,6 +138,8 @@ class StripeService {
           email
         })
       });
+      
+      console.log("Response status:", response.status);
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -304,7 +318,10 @@ class StripeService {
       if (!successUrl) throw new Error('Missing successUrl parameter');
       if (!cancelUrl) throw new Error('Missing cancelUrl parameter');
 
-      const response = await fetch(getSupabaseFunctionUrl('stripe'), {
+      const fullUrl = getSupabaseFunctionUrl('stripe');
+      console.log("Calling URL:", fullUrl);
+      
+      const response = await fetch(fullUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -319,6 +336,8 @@ class StripeService {
         })
       });
 
+      console.log("Response status:", response.status);
+      
       if (!response.ok) {
         const errorText = await response.text();
         console.error("Error creating checkout session:", errorText);
@@ -388,7 +407,10 @@ class StripeService {
     try {
       console.log(`Creating billing portal session for customer: ${customerId}`);
       
-      const response = await fetch(getSupabaseFunctionUrl('stripe'), {
+      const fullUrl = getSupabaseFunctionUrl('stripe');
+      console.log("Calling URL:", fullUrl);
+      
+      const response = await fetch(fullUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -401,6 +423,8 @@ class StripeService {
         })
       });
 
+      console.log("Response status:", response.status);
+      
       if (!response.ok) {
         const errorText = await response.text();
         console.error("Error creating billing portal session:", errorText);
