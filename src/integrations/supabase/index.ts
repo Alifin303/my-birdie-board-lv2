@@ -24,7 +24,7 @@ export {
 } from './handicap/handicap-calculator';
 
 // Export subscription utils
-export { isSubscriptionValid } from '@/components/ProtectedRoute';
+export { isSubscriptionValid, fetchUserSubscription } from './subscription/subscription-utils';
 
 // Define DatabaseError type directly in this file since it's not in types.ts
 export type DatabaseError = {

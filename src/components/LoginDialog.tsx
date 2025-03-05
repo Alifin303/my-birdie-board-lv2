@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,12 +14,12 @@ import {
 } from "@/components/ui/dialog";
 import { SignUpDialog } from "./SignUpDialog";
 import { useToast } from "@/hooks/use-toast";
-import { supabase, getSiteUrl } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
 import { ForgotPasswordDialog } from "./ForgotPasswordDialog";
-import { isSubscriptionValid } from "./ProtectedRoute";
+import { isSubscriptionValid } from "@/integrations/supabase/subscription/subscription-utils";
 
 export function LoginDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const [email, setEmail] = useState("");

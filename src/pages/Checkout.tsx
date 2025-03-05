@@ -1,11 +1,10 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, Check, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { isSubscriptionValid } from "@/components/ProtectedRoute";
+import { isSubscriptionValid } from "@/integrations/supabase/subscription/subscription-utils";
 
 export default function Checkout() {
   const [isLoading, setIsLoading] = useState(false);
@@ -17,11 +16,14 @@ export default function Checkout() {
   const [shouldShowPage, setShouldShowPage] = useState(true);
   const [isVerifyingWithStripe, setIsVerifyingWithStripe] = useState(false);
   const [stripeVerificationComplete, setStripeVerificationComplete] = useState(false);
+  const [redirectingToDashboard, setRedirectingToDashboard] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   // Check if user is logged in
   useEffect(() => {
+    let isMounted = true;
+    
     const checkSession = async () => {
       try {
         // First set initial state - prevent flashes
@@ -30,11 +32,11 @@ export default function Checkout() {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
           console.log("No session found, redirecting to homepage");
-          navigate("/");
+          if (isMounted) navigate("/");
           return;
         }
         
-        setUser(session.user);
+        if (isMounted) setUser(session.user);
         
         // Check if the user already has an active subscription
         const { data: sub, error } = await supabase
@@ -47,6 +49,7 @@ export default function Checkout() {
           console.error("Error fetching subscription:", error);
         }
         
+        if (!isMounted) return;
         setSubscription(sub);
         
         if (sub) {
@@ -108,6 +111,7 @@ export default function Checkout() {
             } catch (verifyError) {
               console.error("Error in Stripe verification:", verifyError);
             } finally {
+              if (!isMounted) return;
               setIsVerifyingWithStripe(false);
               setStripeVerificationComplete(true);
             }
@@ -119,24 +123,35 @@ export default function Checkout() {
           const isCancelled = sub.cancel_at_period_end === true;
           
           // Show page only if subscription is cancelled or not valid
-          setShouldShowPage(!hasValidSub || isCancelled);
+          if (isMounted) setShouldShowPage(!hasValidSub || isCancelled);
           
           // If user has a valid subscription and it's not cancelled, redirect to dashboard
           if (hasValidSub && !isCancelled) {
             console.log("User has valid subscription and it's not cancelled, redirecting to dashboard");
-            navigate("/dashboard");
-            return;
+            if (isMounted) {
+              setRedirectingToDashboard(true);
+              setTimeout(() => {
+                if (isMounted) navigate("/dashboard");
+              }, 500); // Small delay to avoid race conditions
+              return;
+            }
           }
         }
       } catch (err) {
         console.error("Error in checkSession:", err);
       } finally {
-        setIsLoading(false);
-        setInitialCheckDone(true);
+        if (isMounted) {
+          setIsLoading(false);
+          setInitialCheckDone(true);
+        }
       }
     };
     
     checkSession();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [navigate, toast]);
 
   const handleCheckout = async () => {
@@ -203,10 +218,13 @@ export default function Checkout() {
     return `Status: ${subscription.status}`;
   };
 
-  if (!initialCheckDone) {
+  if (!initialCheckDone || redirectingToDashboard) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
+        <p className="ml-2 text-sm text-gray-500">
+          {redirectingToDashboard ? "Redirecting to dashboard..." : "Loading subscription details..."}
+        </p>
       </div>
     );
   }
@@ -214,6 +232,12 @@ export default function Checkout() {
   // Check if user exists
   if (!user) {
     navigate("/");
+    return null;
+  }
+
+  // If user shouldn't see this page, redirect to dashboard
+  if (!shouldShowPage && initialCheckDone) {
+    navigate("/dashboard");
     return null;
   }
 
@@ -318,9 +342,9 @@ export default function Checkout() {
                   {isSubscriptionValid(subscription) && (
                     <Button 
                       onClick={() => navigate("/dashboard")} 
-                      variant="secondary"
+                      variant="accent"
                       size="lg"
-                      className="mt-4 w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg transition-all duration-300"
+                      className="mt-4 w-full bg-accent/80 hover:bg-accent/90 text-white shadow-lg transition-all duration-300"
                     >
                       Return to Dashboard
                     </Button>

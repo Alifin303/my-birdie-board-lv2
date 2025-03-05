@@ -3,40 +3,12 @@ import { useEffect, useState, useRef } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { isSubscriptionValid, fetchUserSubscription } from "@/integrations/supabase/subscription/subscription-utils";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireSubscription?: boolean;
 }
-
-// Helper function to check subscription validity - used across the app
-export const isSubscriptionValid = (subscription: any): boolean => {
-  if (!subscription) return false;
-  
-  // Valid subscription statuses
-  const validStatuses = ['active', 'trialing', 'paid'];
-  
-  // Check if the subscription status is valid in Stripe
-  const hasValidStatus = validStatuses.includes(subscription.status);
-  
-  // Check if it's canceled but still in active period
-  const isCanceledButStillActive = 
-    subscription.cancel_at_period_end === true && 
-    subscription.current_period_end && 
-    new Date(subscription.current_period_end) > new Date();
-  
-  // Special handling for incomplete subscriptions
-  const hasValidPeriodEndDate = 
-    subscription.current_period_end && 
-    new Date(subscription.current_period_end) > new Date();
-    
-  // If the subscription has a valid end date in the future, we'll consider it valid
-  // regardless of status - this is a more accurate measure of validity than the status field
-  // when there are syncing issues between Stripe and our database
-  
-  return hasValidStatus || isCanceledButStillActive || 
-         (hasValidPeriodEndDate && (subscription.status === "incomplete" || subscription.status === "past_due"));
-};
 
 export const ProtectedRoute = ({ children, requireSubscription = true }: ProtectedRouteProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -46,14 +18,18 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
   const [loadingPhase, setLoadingPhase] = useState<string>("initializing");
   const [initialCheckComplete, setInitialCheckComplete] = useState(false);
   const authCheckCompleted = useRef(false);
+  const authStateChangeInProgress = useRef(false);
   const location = useLocation();
 
+  // This effect runs once on mount to check the initial session and subscription
   useEffect(() => {
     // Track if the component is mounted to prevent state updates after unmount
     let isMounted = true;
     let timeoutId: number | undefined;
     
     const checkSession = async () => {
+      if (authCheckCompleted.current) return; // Prevent duplicate checks
+      
       try {
         if (!isMounted) return;
         setIsLoading(true);
@@ -75,36 +51,29 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
         if (isAuth && requireSubscription) {
           if (!isMounted) return;
           setLoadingPhase("checking subscription");
-          console.log(`Checking subscription for user: ${session.user.id}`);
           
-          const { data: subscription, error } = await supabase
-            .from("customer_subscriptions")
-            .select("status, subscription_id, cancel_at_period_end, current_period_end")
-            .eq("user_id", session.user.id)
-            .maybeSingle();
+          const subscription = await fetchUserSubscription(session.user.id, supabase);
           
-          if (error) {
-            console.error("Error fetching subscription:", error);
-            throw error;
+          if (!isMounted) return;
+          
+          if (subscription) {
+            console.log("Retrieved subscription data:", subscription);
+            
+            const isValid = isSubscriptionValid(subscription);
+            
+            console.log(`Subscription check results:`, {
+              hasSubscriptionRecord: !!subscription,
+              subscriptionStatus: subscription?.status || "none",
+              cancelAtPeriodEnd: subscription?.cancel_at_period_end || false,
+              currentPeriodEnd: subscription?.current_period_end || "none",
+              currentTime: new Date().toISOString(),
+              isStillValid: subscription?.current_period_end ? new Date(subscription.current_period_end) > new Date() : false,
+              isValidStatus: isValid
+            });
+            
+            if (!isMounted) return;
+            setHasSubscription(isValid);
           }
-          
-          if (!isMounted) return;
-          console.log("Retrieved subscription data:", subscription);
-          
-          const isValid = isSubscriptionValid(subscription);
-          
-          console.log(`Subscription check results:`, {
-            hasSubscriptionRecord: !!subscription,
-            subscriptionStatus: subscription?.status || "none",
-            cancelAtPeriodEnd: subscription?.cancel_at_period_end || false,
-            currentPeriodEnd: subscription?.current_period_end || "none",
-            currentTime: new Date().toISOString(),
-            isStillValid: subscription?.current_period_end ? new Date(subscription.current_period_end) > new Date() : false,
-            isValidStatus: isValid
-          });
-          
-          if (!isMounted) return;
-          setHasSubscription(isValid);
         } else if (!requireSubscription) {
           // If subscription is not required, set hasSubscription to true to allow access
           if (!isMounted) return;
@@ -132,86 +101,6 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
       checkSession();
     }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        if (!isMounted) return;
-        
-        setLoadingPhase("auth state changed");
-        console.log(`Auth state changed: ${_event}, User: ${session?.user?.id || "none"}`);
-        
-        const isAuth = !!session;
-        
-        // Avoid unnecessary state updates if authentication status hasn't changed
-        if (isAuthenticated !== isAuth) {
-          setIsAuthenticated(isAuth);
-        }
-        
-        // If auth state changes and user is authenticated, check subscription
-        if (isAuth && requireSubscription) {
-          setIsLoading(true);
-          try {
-            console.log(`Checking subscription after auth change for user: ${session.user.id}`);
-            
-            const { data: subscription, error } = await supabase
-              .from("customer_subscriptions")
-              .select("status, subscription_id, cancel_at_period_end, current_period_end")
-              .eq("user_id", session.user.id)
-              .maybeSingle();
-            
-            if (error) {
-              console.error("Error fetching subscription on auth change:", error);
-              throw error;
-            }
-            
-            if (!isMounted) return;
-            console.log("Retrieved subscription after auth change:", subscription);
-            
-            const isValid = isSubscriptionValid(subscription);
-            
-            console.log(`Subscription check after auth change:`, {
-              hasSubscription: !!subscription,
-              status: subscription?.status || "none",
-              cancelAtPeriodEnd: subscription?.cancel_at_period_end || false,
-              currentPeriodEnd: subscription?.current_period_end || "none",
-              currentTime: new Date().toISOString(),
-              isStillValid: subscription?.current_period_end ? new Date(subscription.current_period_end) > new Date() : false,
-              isValid
-            });
-            
-            if (!isMounted) return;
-            
-            // Only update subscription state if it's different
-            if (hasSubscription !== isValid) {
-              setHasSubscription(isValid);
-            }
-          } catch (error) {
-            console.error("Error checking subscription on auth change:", error);
-            if (!isMounted) return;
-            setHasSubscription(false);
-          } finally {
-            if (!isMounted) return;
-            setIsLoading(false);
-            setInitialCheckComplete(true);
-          }
-        } else if (!requireSubscription) {
-          // If subscription is not required, set hasSubscription to true to allow access
-          if (!isMounted) return;
-          if (!hasSubscription) {
-            setHasSubscription(true);
-          }
-          setIsLoading(false);
-          setInitialCheckComplete(true);
-        } else {
-          if (!isMounted) return;
-          setIsLoading(false);
-          setInitialCheckComplete(true);
-        }
-        
-        if (!isMounted) return;
-        setIsLoaded(true);
-      }
-    );
-
     // Set a timeout to proceed anyway if we're stuck loading for too long
     timeoutId = window.setTimeout(() => {
       if (isMounted && isLoading) {
@@ -226,11 +115,98 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
           setHasSubscription(true);
         }
       }
-    }, 3000); // Reduced timeout from 5 seconds to 3 seconds
+    }, 2500); // Further reduced timeout from 3 seconds to 2.5 seconds
 
     return () => {
       isMounted = false;
       if (timeoutId) window.clearTimeout(timeoutId);
+    };
+  }, [requireSubscription, isAuthenticated]);
+
+  // This effect handles auth state changes
+  useEffect(() => {
+    // Track if the component is mounted to prevent state updates after unmount
+    let isMounted = true;
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        // Prevent concurrent auth state change processing
+        if (authStateChangeInProgress.current) return;
+        authStateChangeInProgress.current = true;
+        
+        try {
+          if (!isMounted) return;
+          
+          setLoadingPhase("auth state changed");
+          console.log(`Auth state changed: ${_event}, User: ${session?.user?.id || "none"}`);
+          
+          const isAuth = !!session;
+          
+          // Avoid unnecessary state updates if authentication status hasn't changed
+          if (isAuthenticated !== isAuth) {
+            setIsAuthenticated(isAuth);
+          }
+          
+          // If auth state changes and user is authenticated, check subscription
+          if (isAuth && requireSubscription) {
+            setIsLoading(true);
+            try {
+              const subscription = await fetchUserSubscription(session.user.id, supabase);
+              
+              if (!isMounted) return;
+              
+              if (subscription) {
+                console.log("Retrieved subscription after auth change:", subscription);
+                
+                const isValid = isSubscriptionValid(subscription);
+                
+                console.log(`Subscription check after auth change:`, {
+                  hasSubscription: !!subscription,
+                  status: subscription?.status || "none",
+                  currentTime: new Date().toISOString(),
+                  isValid
+                });
+                
+                if (!isMounted) return;
+                
+                // Only update subscription state if it's different
+                if (hasSubscription !== isValid) {
+                  setHasSubscription(isValid);
+                }
+              }
+            } catch (error) {
+              console.error("Error checking subscription on auth change:", error);
+              if (!isMounted) return;
+              setHasSubscription(false);
+            } finally {
+              if (!isMounted) return;
+              setIsLoading(false);
+              setInitialCheckComplete(true);
+            }
+          } else if (!requireSubscription) {
+            // If subscription is not required, set hasSubscription to true to allow access
+            if (!isMounted) return;
+            if (!hasSubscription) {
+              setHasSubscription(true);
+            }
+            setIsLoading(false);
+            setInitialCheckComplete(true);
+          } else {
+            if (!isMounted) return;
+            setIsLoading(false);
+            setInitialCheckComplete(true);
+          }
+          
+          if (!isMounted) return;
+          setIsLoaded(true);
+        } finally {
+          authStateChangeInProgress.current = false;
+        }
+      }
+    );
+
+    return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, [requireSubscription, isAuthenticated, hasSubscription]);
