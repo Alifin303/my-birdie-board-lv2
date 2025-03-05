@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
 import { ForgotPasswordDialog } from "./ForgotPasswordDialog";
+import { isSubscriptionValid } from "./ProtectedRoute";
 
 export function LoginDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const [email, setEmail] = useState("");
@@ -51,35 +51,19 @@ export function LoginDialog({ open, onOpenChange }: { open: boolean; onOpenChang
         return false;
       }
       
-      // Valid subscription statuses
-      const validStatuses = ['active', 'trialing', 'paid'];
-      
-      // Check if subscription is valid OR if it's canceled but still in active period
-      const hasValidSubscription = subscription && (
-        validStatuses.includes(subscription.status) || 
-        (subscription.cancel_at_period_end === true && subscription.current_period_end && 
-         new Date(subscription.current_period_end) > new Date())
-      );
-      
-      // Also consider incomplete subscriptions as valid if they are still in their period
-      const hasIncompleteButValidPeriod = subscription && 
-        subscription.status === "incomplete" && 
-        subscription.current_period_end && 
-        new Date(subscription.current_period_end) > new Date();
+      // Use the shared isSubscriptionValid function
+      const isValid = isSubscriptionValid(subscription);
       
       console.log("Subscription validation results:", {
         status: subscription.status,
-        hasValidStatus: validStatuses.includes(subscription.status),
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
         currentPeriodEnd: subscription.current_period_end,
         now: new Date().toISOString(),
-        isStillInPeriod: subscription.current_period_end ? new Date(subscription.current_period_end) > new Date() : false,
-        hasValidSubscription,
-        hasIncompleteButValidPeriod,
-        finalVerdict: hasValidSubscription || hasIncompleteButValidPeriod
+        isStillValid: subscription.current_period_end ? new Date(subscription.current_period_end) > new Date() : false,
+        isValid
       });
       
-      return hasValidSubscription || hasIncompleteButValidPeriod;
+      return isValid;
     } catch (error) {
       console.error("Error in checkSubscriptionStatus:", error);
       return false;
@@ -138,7 +122,6 @@ export function LoginDialog({ open, onOpenChange }: { open: boolean; onOpenChang
     }
   };
 
-  // Handle displaying the forgot password dialog
   const handleForgotPasswordClick = (e: React.MouseEvent) => {
     e.preventDefault();
     setShowForgotPassword(true);
@@ -181,7 +164,7 @@ export function LoginDialog({ open, onOpenChange }: { open: boolean; onOpenChang
                   size="sm" 
                   className="px-0 font-normal h-auto"
                   onClick={handleForgotPasswordClick}
-                  type="button" // Add type="button" to prevent form submission
+                  type="button"
                 >
                   Forgot password?
                 </Button>

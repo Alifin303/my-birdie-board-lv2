@@ -5,12 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { isSubscriptionValid } from "@/components/ProtectedRoute";
 
 export default function Checkout() {
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [subscription, setSubscription] = useState<any>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState<string>("");
+  const [subscriptionEndDate, setSubscriptionEndDate] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -39,34 +41,23 @@ export default function Checkout() {
       
       if (sub) {
         setSubscriptionStatus(sub.status);
-        console.log("Current subscription status:", sub.status);
+        if (sub.current_period_end) {
+          setSubscriptionEndDate(new Date(sub.current_period_end).toLocaleDateString());
+        }
         
-        // Check for valid subscription
-        const validStatuses = ['active', 'trialing', 'paid'];
-        
-        // Check if subscription is valid OR if it's canceled but still in active period
-        const hasValidSubscription = sub && (
-          validStatuses.includes(sub.status) || 
-          (sub.cancel_at_period_end === true && sub.current_period_end && 
-           new Date(sub.current_period_end) > new Date())
-        );
-        
-        // Also consider incomplete subscriptions as valid if they are still in their period
-        const hasIncompleteButValidPeriod = sub && 
-          sub.status === "incomplete" && 
-          sub.current_period_end && 
-          new Date(sub.current_period_end) > new Date();
-          
+        console.log("Current subscription data:", sub);
         console.log("Subscription validation:", {
-          hasValidSubscription,
-          hasIncompleteButValidPeriod,
           status: sub.status,
           cancelAtPeriodEnd: sub.cancel_at_period_end,
           currentPeriodEnd: sub.current_period_end,
-          now: new Date().toISOString()
+          now: new Date().toISOString(),
+          isStillValid: sub.current_period_end ? new Date(sub.current_period_end) > new Date() : false
         });
         
-        if (hasValidSubscription || hasIncompleteButValidPeriod) {
+        // Use the shared isSubscriptionValid function
+        const hasValidSubscription = isSubscriptionValid(sub);
+        
+        if (hasValidSubscription) {
           console.log("User has valid subscription, redirecting to dashboard");
           toast({
             title: "Active subscription found",
@@ -118,6 +109,25 @@ export default function Checkout() {
     }
   };
 
+  // Helper function to get a human-readable subscription status message
+  const getSubscriptionMessage = () => {
+    if (!subscription) return null;
+    
+    if (subscription.status === "active") {
+      return "Active subscription";
+    }
+    
+    if (subscription.cancel_at_period_end && subscriptionEndDate) {
+      return `Canceled - active until ${subscriptionEndDate}`;
+    }
+    
+    if (subscription.status === "past_due" || subscription.status === "incomplete") {
+      return `Payment issue - access until ${subscriptionEndDate || 'unknown date'}`;
+    }
+    
+    return `Status: ${subscription.status}`;
+  };
+
   if (!user) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -147,9 +157,12 @@ export default function Checkout() {
               {subscription && (
                 <div className="mt-2 p-2 bg-white/20 rounded">
                   <p className="text-sm">
-                    Current subscription status: <span className="font-bold">{subscriptionStatus}</span>
-                    {subscription.current_period_end && (
-                      <> (valid until {new Date(subscription.current_period_end).toLocaleDateString()})</>
+                    {getSubscriptionMessage()}
+                    {subscription.status === "active" && (
+                      <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <Check className="w-3 h-3 mr-1" />
+                        Active
+                      </span>
                     )}
                   </p>
                 </div>
@@ -202,7 +215,9 @@ export default function Checkout() {
                     ) : (
                       <>
                         <span className="mr-2">🏌️‍♂️</span>
-                        {subscription ? "Update Subscription" : "Subscribe Now"}
+                        {subscription ? 
+                          (subscription.cancel_at_period_end ? "Renew Subscription" : "Update Subscription") 
+                          : "Subscribe Now"}
                       </>
                     )}
                   </Button>

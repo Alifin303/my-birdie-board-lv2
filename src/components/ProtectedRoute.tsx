@@ -9,6 +9,29 @@ interface ProtectedRouteProps {
   requireSubscription?: boolean;
 }
 
+// Helper function to check subscription validity - used across the app
+export const isSubscriptionValid = (subscription: any): boolean => {
+  if (!subscription) return false;
+  
+  // Valid subscription statuses
+  const validStatuses = ['active', 'trialing', 'paid'];
+  
+  // Check if subscription is valid OR if it's canceled but still in active period
+  const hasValidSubscription = 
+    validStatuses.includes(subscription.status) || 
+    (subscription.cancel_at_period_end === true && 
+     subscription.current_period_end && 
+     new Date(subscription.current_period_end) > new Date());
+  
+  // Also consider incomplete subscriptions as valid if they are still in their period
+  const hasIncompleteButValidPeriod = 
+    (subscription.status === "incomplete" || subscription.status === "past_due") && 
+    subscription.current_period_end && 
+    new Date(subscription.current_period_end) > new Date();
+  
+  return hasValidSubscription || hasIncompleteButValidPeriod;
+};
+
 export const ProtectedRoute = ({ children, requireSubscription = true }: ProtectedRouteProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -16,29 +39,6 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
   const [isLoading, setIsLoading] = useState(true);
   const [loadingPhase, setLoadingPhase] = useState<string>("initializing");
   const location = useLocation();
-
-  // Function to check if a subscription is valid
-  const checkSubscriptionValidity = (subscription: any) => {
-    if (!subscription) return false;
-    
-    // Valid subscription statuses
-    const validStatuses = ['active', 'trialing', 'paid'];
-    
-    // Check if subscription is valid OR if it's canceled but still in active period
-    const hasValidSubscription = 
-      validStatuses.includes(subscription.status) || 
-      (subscription.cancel_at_period_end === true && 
-       subscription.current_period_end && 
-       new Date(subscription.current_period_end) > new Date());
-    
-    // Also consider incomplete subscriptions as valid if they are still in their period
-    const hasIncompleteButValidPeriod = 
-      subscription.status === "incomplete" && 
-      subscription.current_period_end && 
-      new Date(subscription.current_period_end) > new Date();
-    
-    return hasValidSubscription || hasIncompleteButValidPeriod;
-  };
 
   useEffect(() => {
     // Track if the component is mounted to prevent state updates after unmount
@@ -79,7 +79,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
           if (!isMounted) return;
           console.log("Retrieved subscription data:", subscription);
           
-          const isValid = checkSubscriptionValidity(subscription);
+          const isValid = isSubscriptionValid(subscription);
           
           console.log(`Subscription check results:`, {
             hasSubscriptionRecord: !!subscription,
@@ -143,7 +143,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
             if (!isMounted) return;
             console.log("Retrieved subscription after auth change:", subscription);
             
-            const isValid = checkSubscriptionValidity(subscription);
+            const isValid = isSubscriptionValid(subscription);
             
             console.log(`Subscription check after auth change:`, {
               hasSubscription: !!subscription,
