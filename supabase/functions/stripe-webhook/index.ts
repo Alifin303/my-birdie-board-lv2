@@ -1,17 +1,17 @@
-
 import { serve } from "https://deno.land/std@0.170.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.8.0';
 import Stripe from 'https://esm.sh/stripe@11.18.0?target=deno';
 
-// CORS headers for all responses
+// Enhanced CORS headers for all responses
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, content-length, stripe-signature',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Max-Age': '86400',
 };
 
-console.log('Stripe webhook function is starting at ' + new Date().toISOString());
-console.log('No authorization is required for this function. Public access is enabled.');
+console.log('[STARTUP] Stripe webhook function is starting at ' + new Date().toISOString());
+console.log('[STARTUP] NO AUTHORIZATION REQUIRED - PUBLIC ACCESS ENABLED');
 
 // Initialize Stripe with the secret key from environment variables
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
@@ -30,13 +30,14 @@ const supabaseAdmin = createClient(
 
 serve(async (req) => {
   const url = new URL(req.url);
-  console.log(`Received ${req.method} request to ${url.pathname}`);
-  console.log(`Request headers:`, Object.fromEntries([...req.headers.entries()]));
-  console.log(`Auth status: No authorization required - public access enabled`);
+  const requestId = crypto.randomUUID();
+  console.log(`[${requestId}] [${new Date().toISOString()}] Received ${req.method} request to ${url.pathname}`);
+  console.log(`[${requestId}] Request headers:`, Object.fromEntries([...req.headers.entries()]));
+  console.log(`[${requestId}] Auth status: NO AUTHORIZATION REQUIRED - PUBLIC ACCESS ENABLED`);
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    console.log('Handling OPTIONS request');
+    console.log(`[${requestId}] [${new Date().toISOString()}] Handling OPTIONS request - CORS preflight`);
     return new Response(null, { 
       status: 204,
       headers: corsHeaders 
@@ -45,18 +46,19 @@ serve(async (req) => {
   
   // For direct browser testing - return a friendly message
   if (req.method === 'GET') {
-    console.log('Handling GET request - browser test - PUBLIC ACCESS ENABLED');
+    console.log(`[${requestId}] [${new Date().toISOString()}] Handling GET request - browser test - PUBLIC ACCESS ENABLED`);
     return new Response(
       JSON.stringify({ 
         message: "This is the Stripe webhook endpoint. POST requests from Stripe will be processed.",
         timestamp: new Date().toISOString(),
+        requestId: requestId,
         env_check: {
           stripe_key_exists: !!Deno.env.get('STRIPE_SECRET_KEY'),
           webhook_secret_exists: !!Deno.env.get('STRIPE_WEBHOOK_SECRET') || !!Deno.env.get('STRIPE_WEBHOOK_SIGNING_SECRET'),
           supabase_url_exists: !!Deno.env.get('SUPABASE_URL'),
           supabase_service_role_exists: !!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
         },
-        auth_status: "No authorization required - public access enabled",
+        auth_status: "NO AUTHORIZATION REQUIRED - PUBLIC ACCESS ENABLED",
         note: "This endpoint does not require authorization. POST requests from Stripe will be processed."
       }),
       { 
@@ -68,27 +70,28 @@ serve(async (req) => {
   
   if (req.method === 'POST') {
     try {
-      console.log('['+new Date().toISOString()+'] Processing POST request from Stripe - PUBLIC ACCESS ENABLED');
+      console.log(`[${requestId}] [${new Date().toISOString()}] Processing POST request from Stripe - PUBLIC ACCESS ENABLED`);
       
       // Get the raw request body
       const body = await req.text();
-      console.log(`[${new Date().toISOString()}] Webhook body length: ${body.length} chars`);
+      console.log(`[${requestId}] [${new Date().toISOString()}] Webhook body length: ${body.length} chars`);
       
       // Log the first 200 chars of the body for debugging (avoid logging sensitive info)
       if (body.length > 0) {
-        console.log(`[${new Date().toISOString()}] Webhook body preview: ${body.substring(0, 200)}...`);
+        console.log(`[${requestId}] [${new Date().toISOString()}] Webhook body preview: ${body.substring(0, 200)}...`);
       }
       
       // Get the Stripe signature from the headers
       const signature = req.headers.get('stripe-signature');
       
       if (!signature) {
-        console.error('['+new Date().toISOString()+'] No Stripe signature found in request headers');
-        console.log('Headers received:', Object.fromEntries([...req.headers.entries()]));
+        console.error(`[${requestId}] [${new Date().toISOString()}] No Stripe signature found in request headers`);
+        console.log(`[${requestId}] Headers received:`, Object.fromEntries([...req.headers.entries()]));
         return new Response(
           JSON.stringify({ 
             error: 'No Stripe signature found in request headers',
-            auth_status: 'No authorization required - public access enabled'
+            request_id: requestId,
+            auth_status: 'NO AUTHORIZATION REQUIRED - PUBLIC ACCESS ENABLED'
           }),
           { 
             status: 400, 
@@ -97,18 +100,19 @@ serve(async (req) => {
         );
       }
       
-      console.log(`[${new Date().toISOString()}] Stripe signature: ${signature.substring(0, 20)}...`);
+      console.log(`[${requestId}] [${new Date().toISOString()}] Stripe signature: ${signature.substring(0, 20)}...`);
       
       // Get the webhook secret from environment variables
       // Try both possible environment variable names
       const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET') || Deno.env.get('STRIPE_WEBHOOK_SIGNING_SECRET');
       
       if (!webhookSecret) {
-        console.error('['+new Date().toISOString()+'] No webhook secret found in environment variables');
+        console.error(`[${requestId}] [${new Date().toISOString()}] No webhook secret found in environment variables`);
         return new Response(
           JSON.stringify({ 
             error: 'No webhook secret found in environment variables',
-            auth_status: 'No authorization required - public access enabled'
+            request_id: requestId,
+            auth_status: 'NO AUTHORIZATION REQUIRED - PUBLIC ACCESS ENABLED'
           }),
           { 
             status: 500, 
@@ -117,19 +121,20 @@ serve(async (req) => {
         );
       }
       
-      console.log(`[${new Date().toISOString()}] Using webhook secret: ${webhookSecret.substring(0, 8)}...`);
+      console.log(`[${requestId}] [${new Date().toISOString()}] Using webhook secret: ${webhookSecret.substring(0, 8)}...`);
       
       // Construct the Stripe event
       let event;
       try {
         event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-        console.log(`[${new Date().toISOString()}] Successfully constructed Stripe event: ${event.type}`);
+        console.log(`[${requestId}] [${new Date().toISOString()}] Successfully constructed Stripe event: ${event.type}`);
       } catch (err) {
-        console.error(`[${new Date().toISOString()}] Error constructing webhook event: ${err.message}`);
+        console.error(`[${requestId}] [${new Date().toISOString()}] Error constructing webhook event: ${err.message}`);
         return new Response(
           JSON.stringify({ 
             error: `Webhook Error: ${err.message}`,
-            auth_status: 'No authorization required - public access enabled'
+            request_id: requestId,
+            auth_status: 'NO AUTHORIZATION REQUIRED - PUBLIC ACCESS ENABLED'
           }),
           { 
             status: 400, 
@@ -334,7 +339,8 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           received: true,
-          auth_status: 'No authorization required - public access enabled'
+          request_id: requestId,
+          auth_status: 'NO AUTHORIZATION REQUIRED - PUBLIC ACCESS ENABLED'
         }),
         { 
           status: 200, 
@@ -342,13 +348,14 @@ serve(async (req) => {
         }
       );
     } catch (error) {
-      console.error(`[${new Date().toISOString()}] Unexpected error processing webhook: ${error.message}`);
+      console.error(`[${requestId}] [${new Date().toISOString()}] Unexpected error processing webhook: ${error.message}`);
       console.error(`Error stack: ${error.stack}`);
       
       return new Response(
         JSON.stringify({ 
           error: `Unexpected error: ${error.message}`,
-          auth_status: 'No authorization required - public access enabled'
+          request_id: requestId,
+          auth_status: 'NO AUTHORIZATION REQUIRED - PUBLIC ACCESS ENABLED'
         }),
         { 
           status: 500, 
@@ -362,7 +369,8 @@ serve(async (req) => {
   return new Response(
     JSON.stringify({ 
       error: 'Method not allowed',
-      auth_status: 'No authorization required - public access enabled',
+      request_id: requestId,
+      auth_status: 'NO AUTHORIZATION REQUIRED - PUBLIC ACCESS ENABLED',
       note: "This endpoint does not require authorization. Use GET for browser testing or POST for Stripe webhooks."
     }),
     { 
