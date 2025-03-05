@@ -30,6 +30,14 @@ interface Round {
   };
 }
 
+interface Subscription {
+  id: string;
+  subscription_id: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export default function Dashboard() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -57,6 +65,29 @@ export default function Dashboard() {
         
       if (error) throw error;
       console.log("Retrieved user profile with handicap:", data?.handicap);
+      return data;
+    }
+  });
+  
+  // Add a query to fetch subscription data
+  const { data: subscription, isLoading: subscriptionLoading } = useQuery({
+    queryKey: ['subscription'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session found');
+      
+      const { data, error } = await supabase
+        .from('customer_subscriptions')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+        
+      if (error) {
+        console.error("Error fetching subscription:", error);
+        throw error;
+      }
+      
+      console.log("Subscription data:", data);
       return data;
     }
   });
@@ -159,6 +190,9 @@ export default function Dashboard() {
       return <div className="flex justify-center py-10"><div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div></div>;
     }
     
+    // Get subscription status for the DashboardHeader
+    const subscriptionStatus = subscription?.status || "none";
+    
     // CRITICAL FIX: Use the profile handicap directly from Supabase instead of calculating it
     // This ensures consistency across the dashboard
     const handicapFromProfile = typeof profile.handicap === 'number' ? profile.handicap : 
@@ -174,7 +208,8 @@ export default function Dashboard() {
       <div className="space-y-6 sm:space-y-8">
         <DashboardHeader 
           profileData={profile} 
-          onAddRound={handleOpenModal} 
+          onAddRound={handleOpenModal}
+          subscription={subscription}
         />
         
         {!selectedCourseId && (

@@ -1,9 +1,8 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User, LogOut, CreditCard, Key } from "lucide-react";
+import { User, LogOut, CreditCard, Key, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -14,9 +13,18 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+interface Subscription {
+  id?: string;
+  subscription_id?: string;
+  status?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 interface DashboardHeaderProps {
   profileData: any;
   onAddRound: () => void;
+  subscription?: Subscription | null;
 }
 
 // Form schema for profile update
@@ -37,13 +45,16 @@ const passwordFormSchema = z.object({
   path: ["confirmPassword"]
 });
 
-export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProps) => {
+export const DashboardHeader = ({ profileData, onAddRound, subscription }: DashboardHeaderProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [subscriptionStatus, setSubscriptionStatus] = useState("none"); // can be "none", "active", "cancelled"
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  
+  // Determine subscription status from props
+  const subscriptionStatus = subscription?.status || "none";
 
   // Initialize the profile form
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
@@ -182,12 +193,69 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
     }
   };
 
-  const handleSubscriptionAction = (action: string) => {
-    // This is a placeholder for future Stripe integration
-    toast({
-      title: "Subscription",
-      description: `${action} feature will be implemented with Stripe integration.`,
-    });
+  const handleSubscriptionAction = async (action: string) => {
+    try {
+      setCheckoutLoading(true);
+      
+      if (action === "create_checkout") {
+        // Get current user session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          throw new Error("You must be logged in to subscribe");
+        }
+        
+        // Call our Stripe checkout function
+        const { data, error } = await supabase.functions.invoke('create-checkout', {
+          body: { 
+            user_id: session.user.id,
+            email: session.user.email,
+            return_url: window.location.origin + '/dashboard'
+          }
+        });
+        
+        if (error) throw error;
+        
+        // Redirect to Stripe checkout
+        if (data?.url) {
+          window.location.href = data.url;
+        } else {
+          throw new Error("Failed to create checkout session");
+        }
+      } 
+      else if (action === "manage_subscription") {
+        // Get current user session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          throw new Error("You must be logged in to manage your subscription");
+        }
+        
+        // Call our customer portal function
+        const { data, error } = await supabase.functions.invoke('create-portal-session', {
+          body: { 
+            user_id: session.user.id,
+            return_url: window.location.origin + '/dashboard'
+          }
+        });
+        
+        if (error) throw error;
+        
+        // Redirect to customer portal
+        if (data?.url) {
+          window.location.href = data.url;
+        } else {
+          throw new Error("Failed to create customer portal session");
+        }
+      }
+    } catch (error: any) {
+      console.error('Error managing subscription:', error);
+      toast({
+        title: "Subscription Error",
+        description: error.message || "An error occurred with your subscription. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setCheckoutLoading(false);
+    }
   };
 
   const renderProfileContent = () => {
@@ -267,51 +335,69 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
           
           <div className="pt-4 border-t">
             <h4 className="font-medium mb-3">Subscription Management</h4>
-            {subscriptionStatus === "none" && (
+            {subscriptionStatus === "none" || !subscriptionStatus ? (
               <Button 
                 type="button" 
                 variant="default" 
                 className="flex items-center gap-2"
-                onClick={() => handleSubscriptionAction("Add Subscription")}
+                onClick={() => handleSubscriptionAction("create_checkout")}
+                disabled={checkoutLoading}
               >
-                <CreditCard className="w-4 h-4" />
-                Add Subscription
+                {checkoutLoading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <CreditCard className="w-4 h-4" />
+                )}
+                {checkoutLoading ? "Processing..." : "Add Subscription"}
               </Button>
             )}
             
             {subscriptionStatus === "active" && (
-              <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm py-1 px-2 bg-green-50 text-green-700 rounded-md w-fit">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>Active Subscription</span>
+                </div>
+                
                 <Button 
                   type="button" 
                   variant="outline" 
                   className="flex items-center gap-2"
-                  onClick={() => handleSubscriptionAction("Update Payment Details")}
+                  onClick={() => handleSubscriptionAction("manage_subscription")}
+                  disabled={checkoutLoading}
                 >
-                  <CreditCard className="w-4 h-4" />
-                  Update Payment Details
-                </Button>
-                
-                <Button 
-                  type="button" 
-                  variant="destructive" 
-                  className="flex items-center gap-2"
-                  onClick={() => handleSubscriptionAction("Cancel Subscription")}
-                >
-                  Cancel Subscription
+                  {checkoutLoading ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <CreditCard className="w-4 h-4" />
+                  )}
+                  {checkoutLoading ? "Processing..." : "Manage Subscription"}
                 </Button>
               </div>
             )}
             
-            {subscriptionStatus === "cancelled" && (
-              <Button 
-                type="button" 
-                variant="default" 
-                className="flex items-center gap-2"
-                onClick={() => handleSubscriptionAction("Re-subscribe")}
-              >
-                <CreditCard className="w-4 h-4" />
-                Re-subscribe
-              </Button>
+            {(subscriptionStatus === "canceled" || subscriptionStatus === "past_due" || subscriptionStatus === "unpaid") && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm py-1 px-2 bg-amber-50 text-amber-700 rounded-md w-fit">
+                  <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                  <span>Subscription {subscriptionStatus === "canceled" ? "Canceled" : "Inactive"}</span>
+                </div>
+                
+                <Button 
+                  type="button" 
+                  variant="default" 
+                  className="flex items-center gap-2"
+                  onClick={() => handleSubscriptionAction("create_checkout")}
+                  disabled={checkoutLoading}
+                >
+                  {checkoutLoading ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <CreditCard className="w-4 h-4" />
+                  )}
+                  {checkoutLoading ? "Processing..." : "Reactivate Subscription"}
+                </Button>
+              </div>
             )}
           </div>
           
