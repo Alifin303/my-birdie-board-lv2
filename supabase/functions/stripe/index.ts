@@ -17,6 +17,7 @@ serve(async (req) => {
     // Get the Stripe secret key from environment variables
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
     if (!stripeSecretKey) {
+      console.error('Missing STRIPE_SECRET_KEY');
       throw new Error('Missing STRIPE_SECRET_KEY');
     }
 
@@ -26,6 +27,7 @@ serve(async (req) => {
 
     const { action, userId, ...data } = await req.json();
     console.log(`Processing Stripe action: ${action} for user: ${userId}`);
+    console.log('Action data:', JSON.stringify(data));
 
     let result;
     switch (action) {
@@ -43,8 +45,20 @@ serve(async (req) => {
         // Create a subscription for a customer
         const { customerId, priceId, paymentMethodId } = data;
         
+        // Validate required fields
+        if (!customerId) {
+          throw new Error('Missing customerId for subscription creation');
+        }
+        
+        if (!priceId) {
+          throw new Error('Missing priceId for subscription creation');
+        }
+        
+        console.log(`Creating subscription for customer: ${customerId} with price: ${priceId}`);
+        
         // Attach the payment method to the customer
         if (paymentMethodId) {
+          console.log(`Attaching payment method: ${paymentMethodId} to customer: ${customerId}`);
           await stripe.paymentMethods.attach(paymentMethodId, {
             customer: customerId,
           });
@@ -57,12 +71,21 @@ serve(async (req) => {
           });
         }
         
-        // Create the subscription
-        result = await stripe.subscriptions.create({
-          customer: customerId,
-          items: [{ price: priceId }],
-          expand: ['latest_invoice.payment_intent'],
-        });
+        // Create the subscription with expanded invoice and payment intent
+        try {
+          result = await stripe.subscriptions.create({
+            customer: customerId,
+            items: [{ price: priceId }],
+            expand: ['latest_invoice.payment_intent'],
+          });
+          console.log(`Subscription created successfully: ${result.id}`);
+        } catch (subError) {
+          console.error(`Error creating subscription: ${subError.message}`);
+          if (subError.raw) {
+            console.error(`Stripe raw error: ${JSON.stringify(subError.raw)}`);
+          }
+          throw subError;
+        }
         break;
 
       case 'get-subscription':
@@ -101,32 +124,62 @@ serve(async (req) => {
       case 'get-product-prices':
         // Get all prices for a specific product
         console.log(`Getting prices for product: ${data.productId}`);
-        const prices = await stripe.prices.list({
-          product: data.productId,
-          active: true,
-          expand: ['data.product'],
-        });
-        
-        console.log(`Found ${prices.data.length} prices for product ${data.productId}`);
-        result = prices.data;
+        try {
+          const prices = await stripe.prices.list({
+            product: data.productId,
+            active: true,
+            expand: ['data.product'],
+          });
+          
+          console.log(`Found ${prices.data.length} prices for product ${data.productId}`);
+          result = prices.data;
+        } catch (priceError) {
+          console.error(`Error fetching prices: ${priceError.message}`);
+          throw priceError;
+        }
         break;
 
       case 'create-checkout-session':
         // Create a checkout session for subscription
         const { priceId: checkoutPriceId, customerId: checkoutCustomerId, successUrl, cancelUrl } = data;
-        result = await stripe.checkout.sessions.create({
-          customer: checkoutCustomerId,
-          payment_method_types: ['card'],
-          line_items: [
-            {
-              price: checkoutPriceId,
-              quantity: 1,
-            },
-          ],
-          mode: 'subscription',
-          success_url: successUrl,
-          cancel_url: cancelUrl,
-        });
+        
+        // Validate required fields
+        if (!checkoutCustomerId) {
+          throw new Error('Missing customerId for checkout session creation');
+        }
+        
+        if (!checkoutPriceId) {
+          throw new Error('Missing priceId for checkout session creation');
+        }
+        
+        if (!successUrl || !cancelUrl) {
+          throw new Error('Missing return URLs for checkout session');
+        }
+        
+        console.log(`Creating checkout session for customer: ${checkoutCustomerId}, price: ${checkoutPriceId}`);
+        
+        try {
+          result = await stripe.checkout.sessions.create({
+            customer: checkoutCustomerId,
+            payment_method_types: ['card'],
+            line_items: [
+              {
+                price: checkoutPriceId,
+                quantity: 1,
+              },
+            ],
+            mode: 'subscription',
+            success_url: successUrl,
+            cancel_url: cancelUrl,
+          });
+          console.log(`Checkout session created: ${result.id}, URL: ${result.url}`);
+        } catch (checkoutError) {
+          console.error(`Error creating checkout session: ${checkoutError.message}`);
+          if (checkoutError.raw) {
+            console.error(`Stripe raw error: ${JSON.stringify(checkoutError.raw)}`);
+          }
+          throw checkoutError;
+        }
         break;
 
       case 'create-billing-portal-session':
@@ -138,6 +191,7 @@ serve(async (req) => {
         break;
 
       default:
+        console.error(`Unsupported action: ${action}`);
         throw new Error(`Unsupported action: ${action}`);
     }
 
@@ -147,6 +201,9 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error(`Stripe API error: ${error.message}`);
+    if (error.raw) {
+      console.error(`Stripe raw error: ${JSON.stringify(error.raw)}`);
+    }
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,

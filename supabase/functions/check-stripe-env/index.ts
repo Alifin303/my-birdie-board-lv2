@@ -7,55 +7,63 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
   
   try {
-    // Check required environment variables
+    // List of required environment variables
     const requiredEnvVars = [
       'STRIPE_SECRET_KEY',
       'STRIPE_WEBHOOK_SECRET',
       'SUPABASE_SERVICE_ROLE_KEY'
     ];
     
-    const results = {};
-    let allSet = true;
+    // Check if all required env vars are set
+    const environmentVariables: Record<string, boolean> = {};
+    let allVarsPresent = true;
+    let missingVars: string[] = [];
     
-    for (const envVar of requiredEnvVars) {
-      const value = Deno.env.get(envVar);
-      const isSet = !!value;
-      results[envVar] = isSet;
+    for (const varName of requiredEnvVars) {
+      const isPresent = !!Deno.env.get(varName);
+      environmentVariables[varName] = isPresent;
       
-      if (!isSet) {
-        allSet = false;
+      if (!isPresent) {
+        allVarsPresent = false;
+        missingVars.push(varName);
       }
     }
     
+    let message = allVarsPresent 
+      ? "All required Stripe environment variables are configured properly."
+      : `Missing required environment variables: ${missingVars.join(', ')}`;
+      
+    console.log(message);
+    
     return new Response(
       JSON.stringify({
-        success: allSet,
-        environmentVariables: results,
-        message: allSet 
-          ? "All required Stripe environment variables are configured properly." 
-          : "Some required environment variables are missing."
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: allSet ? 200 : 400
-      }
-    );
-  } catch (error) {
-    console.error(`Error: ${error.message}`);
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message
+        success: allVarsPresent,
+        environmentVariables,
+        message
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500
+        status: 200,
+      }
+    );
+  } catch (error) {
+    console.error(`Error checking environment: ${error.message}`);
+    
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message,
+        message: `Error checking Stripe environment: ${error.message}`
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
       }
     );
   }

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
@@ -156,18 +157,23 @@ export const UserMenu = ({
           if (!customerId) {
             const { data: userData } = await supabase.auth.getUser();
             console.log("Creating new Stripe customer for:", userData.user?.email);
-            const customer = await stripeService.createCustomer(userData.user?.email || "");
-            customerId = customer.id;
-            
-            console.log("Created new Stripe customer:", customerId);
-            
-            await supabase
-              .from('customer_subscriptions')
-              .upsert({
-                user_id: session.user.id,
-                customer_id: customerId,
-                status: "created"
-              });
+            try {
+              const customer = await stripeService.createCustomer(userData.user?.email || "");
+              customerId = customer.id;
+              
+              console.log("Created new Stripe customer:", customerId);
+              
+              await supabase
+                .from('customer_subscriptions')
+                .upsert({
+                  user_id: session.user.id,
+                  customer_id: customerId,
+                  status: "created"
+                });
+            } catch (customerError) {
+              console.error("Error creating Stripe customer:", customerError);
+              throw new Error(`Failed to create Stripe customer: ${customerError.message}`);
+            }
           }
           
           const envCheck = await stripeService.checkEnvironment();
@@ -175,30 +181,36 @@ export const UserMenu = ({
             throw new Error(`Stripe environment not configured properly: ${envCheck.message}`);
           }
           
+          // This is our test product ID - must exist in your Stripe account
           const productId = 'prod_Rsn4QjMLVpGDSl';
           
           console.log("Fetching product prices for product:", productId);
-          const prices = await stripeService.getProductPrices(productId);
-          
-          if (!prices || prices.length === 0) {
-            throw new Error("No prices found for this product. Please check your Stripe configuration.");
+          try {
+            const prices = await stripeService.getProductPrices(productId);
+            
+            if (!prices || prices.length === 0) {
+              throw new Error("No prices found for this product. Please check your Stripe configuration.");
+            }
+            
+            console.log("Available prices:", prices);
+            
+            const priceId = prices[0].id;
+            
+            console.log(`Using price ID: ${priceId} for checkout`);
+            
+            const checkoutSession = await stripeService.createCheckoutSession(
+              customerId,
+              priceId,
+              `${baseUrl}/dashboard?subscription=success`,
+              `${baseUrl}/dashboard?subscription=canceled`
+            );
+            
+            console.log("Created checkout session, redirecting to:", checkoutSession.url);
+            window.location.href = checkoutSession.url;
+          } catch (priceError) {
+            console.error("Error handling price or checkout:", priceError);
+            throw new Error(`Payment processing error: ${priceError.message}`);
           }
-          
-          console.log("Available prices:", prices);
-          
-          const priceId = prices[0].id;
-          
-          console.log(`Using price ID: ${priceId} for checkout`);
-          
-          const checkoutSession = await stripeService.createCheckoutSession(
-            customerId,
-            priceId,
-            `${baseUrl}/dashboard?subscription=success`,
-            `${baseUrl}/dashboard?subscription=canceled`
-          );
-          
-          console.log("Created checkout session, redirecting to:", checkoutSession.url);
-          window.location.href = checkoutSession.url;
           break;
         }
         

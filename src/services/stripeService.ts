@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface StripeCustomer {
@@ -53,7 +54,10 @@ class StripeService {
     try {
       const { data, error } = await supabase.functions.invoke('check-stripe-env');
       
-      if (error) throw error;
+      if (error) {
+        console.error("Failed to check Stripe environment:", error);
+        throw error;
+      }
       return data;
     } catch (error) {
       console.error("Failed to check Stripe environment:", error);
@@ -69,151 +73,256 @@ class StripeService {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
 
-    const { data, error } = await supabase.functions.invoke('stripe', {
-      body: {
-        action: 'create-customer',
-        userId: session.user.id,
-        email
-      }
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('stripe', {
+        body: {
+          action: 'create-customer',
+          userId: session.user.id,
+          email
+        }
+      });
 
-    if (error) throw error;
-    return data;
+      if (error) {
+        console.error("Error creating Stripe customer:", error);
+        throw error;
+      }
+      
+      if (!data || !data.id) {
+        throw new Error('Invalid response from server when creating customer');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error("Error in createCustomer:", error);
+      throw error;
+    }
   }
 
   async createSubscription(customerId: string, priceId: string, paymentMethodId?: string): Promise<StripeSubscription> {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
 
-    const { data, error } = await supabase.functions.invoke('stripe', {
-      body: {
-        action: 'create-subscription',
-        userId: session.user.id,
-        customerId,
-        priceId,
-        paymentMethodId
-      }
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('stripe', {
+        body: {
+          action: 'create-subscription',
+          userId: session.user.id,
+          customerId,
+          priceId,
+          paymentMethodId
+        }
+      });
 
-    if (error) throw error;
-    return data;
+      if (error) {
+        console.error("Error creating Stripe subscription:", error);
+        throw error;
+      }
+      
+      if (!data || !data.id) {
+        throw new Error('Invalid response from server when creating subscription');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error("Error in createSubscription:", error);
+      throw error;
+    }
   }
 
   async getSubscription(subscriptionId: string): Promise<StripeSubscription> {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
 
-    const { data, error } = await supabase.functions.invoke('stripe', {
-      body: {
-        action: 'get-subscription',
-        userId: session.user.id,
-        subscriptionId
-      }
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('stripe', {
+        body: {
+          action: 'get-subscription',
+          userId: session.user.id,
+          subscriptionId
+        }
+      });
 
-    if (error) throw error;
-    return data;
+      if (error) {
+        console.error("Error getting Stripe subscription:", error);
+        throw error;
+      }
+      
+      if (!data || !data.id) {
+        throw new Error('Invalid response from server when retrieving subscription');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error("Error in getSubscription:", error);
+      throw error;
+    }
   }
 
   async updatePaymentMethod(customerId: string, paymentMethodId: string): Promise<{ success: boolean }> {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
 
-    const { data, error } = await supabase.functions.invoke('stripe', {
-      body: {
-        action: 'update-payment-method',
-        userId: session.user.id,
-        customer: customerId,
-        paymentMethod: paymentMethodId
-      }
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('stripe', {
+        body: {
+          action: 'update-payment-method',
+          userId: session.user.id,
+          customer: customerId,
+          paymentMethod: paymentMethodId
+        }
+      });
 
-    if (error) throw error;
-    return data;
+      if (error) {
+        console.error("Error updating payment method:", error);
+        throw error;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error("Error in updatePaymentMethod:", error);
+      throw error;
+    }
   }
 
   async cancelSubscription(subscriptionId: string): Promise<StripeSubscription> {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
 
-    const { data, error } = await supabase.functions.invoke('stripe', {
-      body: {
-        action: 'cancel-subscription',
-        userId: session.user.id,
-        subscriptionId
-      }
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('stripe', {
+        body: {
+          action: 'cancel-subscription',
+          userId: session.user.id,
+          subscriptionId
+        }
+      });
 
-    if (error) throw error;
-    return data;
+      if (error) {
+        console.error("Error canceling subscription:", error);
+        throw error;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error("Error in cancelSubscription:", error);
+      throw error;
+    }
   }
 
   async reactivateSubscription(subscriptionId: string): Promise<StripeSubscription> {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
 
-    const { data, error } = await supabase.functions.invoke('stripe', {
-      body: {
-        action: 'reactivate-subscription',
-        userId: session.user.id,
-        subscriptionId
-      }
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('stripe', {
+        body: {
+          action: 'reactivate-subscription',
+          userId: session.user.id,
+          subscriptionId
+        }
+      });
 
-    if (error) throw error;
-    return data;
+      if (error) {
+        console.error("Error reactivating subscription:", error);
+        throw error;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error("Error in reactivateSubscription:", error);
+      throw error;
+    }
   }
 
   async createCheckoutSession(customerId: string, priceId: string, successUrl: string, cancelUrl: string): Promise<CheckoutSession> {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
 
-    const { data, error } = await supabase.functions.invoke('stripe', {
-      body: {
-        action: 'create-checkout-session',
-        userId: session.user.id,
-        customerId,
-        priceId,
-        successUrl,
-        cancelUrl
-      }
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('stripe', {
+        body: {
+          action: 'create-checkout-session',
+          userId: session.user.id,
+          customerId,
+          priceId,
+          successUrl,
+          cancelUrl
+        }
+      });
 
-    if (error) throw error;
-    return data;
+      if (error) {
+        console.error("Error creating checkout session:", error);
+        throw error;
+      }
+      
+      if (!data || !data.url) {
+        throw new Error('Invalid response from server when creating checkout session');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error("Error in createCheckoutSession:", error);
+      throw error;
+    }
   }
 
   async createBillingPortalSession(customerId: string, returnUrl: string): Promise<BillingPortalSession> {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
 
-    const { data, error } = await supabase.functions.invoke('stripe', {
-      body: {
-        action: 'create-billing-portal-session',
-        userId: session.user.id,
-        customerId,
-        returnUrl
-      }
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('stripe', {
+        body: {
+          action: 'create-billing-portal-session',
+          userId: session.user.id,
+          customerId,
+          returnUrl
+        }
+      });
 
-    if (error) throw error;
-    return data;
+      if (error) {
+        console.error("Error creating billing portal session:", error);
+        throw error;
+      }
+      
+      if (!data || !data.url) {
+        throw new Error('Invalid response from server when creating billing portal session');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error("Error in createBillingPortalSession:", error);
+      throw error;
+    }
   }
 
   async getProductPrices(productId: string): Promise<StripePrice[]> {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
 
-    const { data, error } = await supabase.functions.invoke('stripe', {
-      body: {
-        action: 'get-product-prices',
-        userId: session.user.id,
-        productId
-      }
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('stripe', {
+        body: {
+          action: 'get-product-prices',
+          userId: session.user.id,
+          productId
+        }
+      });
 
-    if (error) throw error;
-    return data;
+      if (error) {
+        console.error("Error fetching product prices:", error);
+        throw error;
+      }
+      
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid response from server when fetching product prices');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error("Error in getProductPrices:", error);
+      throw error;
+    }
   }
 }
 
