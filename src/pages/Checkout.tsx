@@ -9,6 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 export default function Checkout() {
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [subscription, setSubscription] = useState<any>(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string>("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -23,20 +25,60 @@ export default function Checkout() {
       setUser(session.user);
       
       // Check if the user already has an active subscription
-      const { data: subscription } = await supabase
+      const { data: sub, error } = await supabase
         .from("customer_subscriptions")
         .select("*")
         .eq("user_id", session.user.id)
-        .single();
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching subscription:", error);
+      }
+      
+      setSubscription(sub);
+      
+      if (sub) {
+        setSubscriptionStatus(sub.status);
+        console.log("Current subscription status:", sub.status);
         
-      if (subscription && subscription.status === "active") {
-        // User already has an active subscription, redirect to dashboard
-        navigate("/dashboard");
+        // Check for valid subscription
+        const validStatuses = ['active', 'trialing', 'paid'];
+        
+        // Check if subscription is valid OR if it's canceled but still in active period
+        const hasValidSubscription = sub && (
+          validStatuses.includes(sub.status) || 
+          (sub.cancel_at_period_end === true && sub.current_period_end && 
+           new Date(sub.current_period_end) > new Date())
+        );
+        
+        // Also consider incomplete subscriptions as valid if they are still in their period
+        const hasIncompleteButValidPeriod = sub && 
+          sub.status === "incomplete" && 
+          sub.current_period_end && 
+          new Date(sub.current_period_end) > new Date();
+          
+        console.log("Subscription validation:", {
+          hasValidSubscription,
+          hasIncompleteButValidPeriod,
+          status: sub.status,
+          cancelAtPeriodEnd: sub.cancel_at_period_end,
+          currentPeriodEnd: sub.current_period_end,
+          now: new Date().toISOString()
+        });
+        
+        if (hasValidSubscription || hasIncompleteButValidPeriod) {
+          console.log("User has valid subscription, redirecting to dashboard");
+          toast({
+            title: "Active subscription found",
+            description: "Redirecting to dashboard..."
+          });
+          navigate("/dashboard");
+        }
       }
     };
     
     checkSession();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const handleCheckout = async () => {
     if (!user) return;
@@ -101,6 +143,17 @@ export default function Checkout() {
             <div className="bg-primary p-6 sm:p-8 text-primary-foreground">
               <h1 className="text-2xl sm:text-3xl font-bold">Join BirdieBoard Premium</h1>
               <p className="mt-2 opacity-90">Take your golf game to the next level with our premium features</p>
+              
+              {subscription && (
+                <div className="mt-2 p-2 bg-white/20 rounded">
+                  <p className="text-sm">
+                    Current subscription status: <span className="font-bold">{subscriptionStatus}</span>
+                    {subscription.current_period_end && (
+                      <> (valid until {new Date(subscription.current_period_end).toLocaleDateString()})</>
+                    )}
+                  </p>
+                </div>
+              )}
             </div>
             
             <div className="p-6 sm:p-8">
@@ -149,7 +202,7 @@ export default function Checkout() {
                     ) : (
                       <>
                         <span className="mr-2">🏌️‍♂️</span>
-                        Subscribe Now
+                        {subscription ? "Update Subscription" : "Subscribe Now"}
                       </>
                     )}
                   </Button>

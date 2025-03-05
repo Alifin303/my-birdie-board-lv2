@@ -29,6 +29,63 @@ export function LoginDialog({ open, onOpenChange }: { open: boolean; onOpenChang
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const checkSubscriptionStatus = async (userId: string) => {
+    try {
+      console.log(`Checking subscription status for user: ${userId}`);
+      
+      const { data: subscription, error: subError } = await supabase
+        .from("customer_subscriptions")
+        .select("status, subscription_id, cancel_at_period_end, current_period_end")
+        .eq("user_id", userId)
+        .maybeSingle();
+        
+      if (subError) {
+        console.error("Error checking subscription after login:", subError);
+        return false;
+      }
+      
+      console.log("Login - Subscription data:", subscription);
+      
+      if (!subscription) {
+        console.log("No subscription found for this user");
+        return false;
+      }
+      
+      // Valid subscription statuses
+      const validStatuses = ['active', 'trialing', 'paid'];
+      
+      // Check if subscription is valid OR if it's canceled but still in active period
+      const hasValidSubscription = subscription && (
+        validStatuses.includes(subscription.status) || 
+        (subscription.cancel_at_period_end === true && subscription.current_period_end && 
+         new Date(subscription.current_period_end) > new Date())
+      );
+      
+      // Also consider incomplete subscriptions as valid if they are still in their period
+      const hasIncompleteButValidPeriod = subscription && 
+        subscription.status === "incomplete" && 
+        subscription.current_period_end && 
+        new Date(subscription.current_period_end) > new Date();
+      
+      console.log("Subscription validation results:", {
+        status: subscription.status,
+        hasValidStatus: validStatuses.includes(subscription.status),
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        currentPeriodEnd: subscription.current_period_end,
+        now: new Date().toISOString(),
+        isStillInPeriod: subscription.current_period_end ? new Date(subscription.current_period_end) > new Date() : false,
+        hasValidSubscription,
+        hasIncompleteButValidPeriod,
+        finalVerdict: hasValidSubscription || hasIncompleteButValidPeriod
+      });
+      
+      return hasValidSubscription || hasIncompleteButValidPeriod;
+    } catch (error) {
+      console.error("Error in checkSubscriptionStatus:", error);
+      return false;
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -56,40 +113,14 @@ export function LoginDialog({ open, onOpenChange }: { open: boolean; onOpenChang
       onOpenChange(false);
       
       // After successful login, check subscription status to determine redirect
-      const { data: subscription, error: subError } = await supabase
-        .from("customer_subscriptions")
-        .select("status, subscription_id, cancel_at_period_end, current_period_end")
-        .eq("user_id", data.user.id)
-        .maybeSingle();
-        
-      if (subError) {
-        console.error("Error checking subscription after login:", subError);
-        navigate("/dashboard");
-        return;
-      }
+      const hasValidSubscription = await checkSubscriptionStatus(data.user.id);
       
-      console.log("Login - Subscription check:", subscription);
-      
-      // Valid subscription statuses
-      const validStatuses = ['active', 'trialing', 'paid'];
-      
-      // Check if subscription is valid OR if it's canceled but still in active period
-      const hasValidSubscription = subscription && (
-        validStatuses.includes(subscription.status) || 
-        (subscription.cancel_at_period_end === true && subscription.current_period_end && 
-         new Date(subscription.current_period_end) > new Date())
-      );
-      
-      // Also consider incomplete subscriptions as valid if they are still in their period
-      const hasIncompleteButValidPeriod = subscription && 
-        subscription.status === "incomplete" && 
-        subscription.current_period_end && 
-        new Date(subscription.current_period_end) > new Date();
-      
-      if (hasValidSubscription || hasIncompleteButValidPeriod) {
+      if (hasValidSubscription) {
+        console.log("User has valid subscription, redirecting to dashboard");
         navigate("/dashboard");
       } else {
         // Redirect to checkout if no valid subscription
+        console.log("No valid subscription found, redirecting to checkout");
         navigate("/checkout");
       }
       
