@@ -7,7 +7,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.33.1';
 // Define CORS headers for preflight requests
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
 };
 
 serve(async (req) => {
@@ -37,7 +37,11 @@ serve(async (req) => {
     const payload = await req.text();
     
     // Verify the webhook signature
-    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET') || '';
+    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SIGNING_SECRET') || '';
+    
+    console.log('Received webhook with signature:', signature.substring(0, 10) + '...');
+    console.log('Using webhook secret:', webhookSecret ? 'Configured (not showing for security)' : 'Not configured');
+    
     let event;
     
     try {
@@ -55,6 +59,15 @@ serve(async (req) => {
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('Missing Supabase credentials');
+      return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Handle different event types
