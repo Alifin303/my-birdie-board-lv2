@@ -46,8 +46,8 @@ export function ForgotPasswordDialog({
       // Get the proper site URL for redirection
       const siteUrl = window.location.origin;
       
-      // Use the auth/callback endpoint that's already configured to handle various auth flows
-      const redirectTo = `${siteUrl}/auth/callback`;
+      // Make sure to include the /auth/callback path
+      const redirectTo = `${siteUrl}/auth/callback?type=recovery`;
       
       console.log("Using reset password redirect URL:", redirectTo);
       

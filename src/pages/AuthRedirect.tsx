@@ -17,26 +17,50 @@ export const AuthRedirect = () => {
   useEffect(() => {
     const handleAuthRedirect = async () => {
       try {
+        // Get the full URL including search params and hash
+        const fullUrl = window.location.href;
+        const urlSearchParams = new URLSearchParams(window.location.search);
+        const urlHashParams = new URLSearchParams(window.location.hash.substring(1));
+        
+        console.log("Full URL:", fullUrl);
+        console.log("Search params:", urlSearchParams.toString());
+        console.log("Hash params:", urlHashParams.toString());
+        
+        // Check if this is a recovery operation from search parameters
+        const isRecovery = fullUrl.includes('type=recovery') || urlSearchParams.get('type') === 'recovery';
+        
+        if (isRecovery) {
+          console.log("Recovery flow detected from URL params");
+          
+          // Get the code from URL if present
+          const code = urlSearchParams.get('code');
+          
+          if (code) {
+            // Exchange the code for a session
+            await supabase.auth.exchangeCodeForSession(code);
+          }
+          
+          // Redirect to reset password page
+          toast({
+            title: "Password Reset",
+            description: "Please enter your new password",
+          });
+          navigate("/auth/reset-password");
+          return;
+        }
+        
         // Check for code in URL search params (traditional redirect)
-        const params = new URLSearchParams(location.search);
-        const code = params.get('code');
+        const code = urlSearchParams.get('code');
         
         // Also check hash fragment for access_token (hash-based redirect)
-        const hashParams = new URLSearchParams(location.hash.substring(1));
-        const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
-        const type = hashParams.get('type');
-
-        console.log("URL params:", { 
-          search: location.search,
-          hash: location.hash,
-          code,
-          accessToken,
-          type
-        });
+        const accessToken = urlHashParams.get('access_token');
+        const refreshToken = urlHashParams.get('refresh_token');
+        const type = urlHashParams.get('type');
 
         // If we have a code, it's the traditional OAuth flow (email confirmation)
         if (code) {
+          console.log("Code found in URL:", code);
+          
           // Let Supabase handle the code exchange
           const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
           
@@ -45,12 +69,9 @@ export const AuthRedirect = () => {
           }
 
           if (data?.session) {
-            // Check for recovery tokens by looking at the request URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const fullUrl = window.location.href;
-            
-            // If this is a recovery operation
-            if (fullUrl.includes('type=recovery') || data.session.user.recovery_sent_at) {
+            // Check if this might be a recovery flow based on session
+            if (data.session.user.recovery_sent_at) {
+              console.log("Recovery detected from session data");
               toast({
                 title: "Password Reset",
                 description: "Please enter your new password",
@@ -70,6 +91,8 @@ export const AuthRedirect = () => {
         
         // If we have an access token, it's the token-based flow
         if (accessToken) {
+          console.log("Access token found in URL hash");
+          
           const { error: signInError } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken || "",
@@ -80,13 +103,8 @@ export const AuthRedirect = () => {
           }
 
           // Check what type of operation this was
-          if (type === "signup") {
-            toast({
-              title: "Email Verified",
-              description: "Your email has been successfully verified.",
-            });
-            navigate("/dashboard");
-          } else if (type === "recovery") {
+          if (type === "recovery") {
+            console.log("Recovery type found in hash params");
             // For password recovery, redirect to the reset password page
             toast({
               title: "Password Reset",
@@ -94,6 +112,12 @@ export const AuthRedirect = () => {
             });
             navigate("/auth/reset-password");
             return;
+          } else if (type === "signup") {
+            toast({
+              title: "Email Verified",
+              description: "Your email has been successfully verified.",
+            });
+            navigate("/dashboard");
           } else {
             toast({
               title: "Success",
@@ -104,27 +128,27 @@ export const AuthRedirect = () => {
           return;
         }
 
-        // If no code or token was found
-        if (!code && !accessToken) {
-          // Check if user is already logged in
-          const { data } = await supabase.auth.getSession();
-          if (data.session) {
-            // If this is a recovery operation (check the URL)
-            if (window.location.href.includes('type=recovery')) {
-              toast({
-                title: "Password Reset",
-                description: "Please enter your new password.",
-              });
-              navigate("/auth/reset-password");
-              return;
-            }
-            
-            navigate("/dashboard");
+        // If no code or token was found, check if user is already logged in
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
+          console.log("User already has an active session");
+          
+          // Check recovery timestamp to see if this might be a recovery flow
+          if (data.session.user.recovery_sent_at) {
+            console.log("Recovery detected from session recovery timestamp");
+            toast({
+              title: "Password Reset",
+              description: "Please enter your new password.",
+            });
+            navigate("/auth/reset-password");
             return;
           }
           
-          throw new Error("No authentication code or token found in the URL. Please try logging in again.");
+          navigate("/dashboard");
+          return;
         }
+          
+        throw new Error("No authentication code or token found in the URL. Please try logging in again.");
       } catch (err: any) {
         console.error("Auth redirect error:", err);
         setError(err.message || "An unexpected error occurred during authentication.");

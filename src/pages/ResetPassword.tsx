@@ -1,8 +1,8 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,21 +14,25 @@ export const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [validLink, setValidLink] = useState(true); // Default to true and check in useEffect
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
 
   useEffect(() => {
-    const checkSession = async () => {
+    const checkRecoverySession = async () => {
       try {
-        // First, check if we already have a session with recovery type
+        console.log("Checking for recovery session");
+        setIsInitializing(true);
+        
+        // First, check if we already have a session
         const { data: { session } } = await supabase.auth.getSession();
         console.log("Current session:", session);
         
         if (!session) {
+          console.error("No active session found for password reset");
           setError("Your reset link has expired or is invalid. Please request a new password reset link.");
           setValidLink(false);
           toast({
@@ -36,15 +40,26 @@ export const ResetPassword = () => {
             description: "Please request a new password reset",
             variant: "destructive",
           });
+          return;
         }
+        
+        // Check if this is a recovery session by looking for recovery_sent_at
+        if (!session.user.recovery_sent_at) {
+          console.warn("Session exists but doesn't appear to be a recovery session");
+          // We'll still allow the reset as they have an authenticated session
+        }
+        
+        console.log("Valid session found for password reset");
       } catch (err: any) {
         console.error("Session check error:", err);
         setError(err.message || "Failed to validate your reset link");
         setValidLink(false);
+      } finally {
+        setIsInitializing(false);
       }
     };
     
-    checkSession();
+    checkRecoverySession();
   }, [toast]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -114,7 +129,12 @@ export const ResetPassword = () => {
             </Alert>
           )}
           
-          {!validLink ? (
+          {isInitializing ? (
+            <div className="flex flex-col items-center justify-center py-6 space-y-4">
+              <Loader2 className="h-16 w-16 animate-spin text-primary" />
+              <p className="text-center">Validating your reset link...</p>
+            </div>
+          ) : !validLink ? (
             <div className="flex flex-col items-center justify-center py-6 space-y-4">
               <XCircle className="h-16 w-16 text-red-500" />
               <p className="text-center">
