@@ -71,19 +71,22 @@ export const AuthRedirect = () => {
               title: "Email Verified",
               description: "Your email has been successfully verified.",
             });
+            navigate("/dashboard");
           } else if (type === "recovery") {
+            // For password recovery, redirect to the reset password page
             toast({
               title: "Password Reset",
-              description: "Your password has been reset successfully.",
+              description: "Please enter your new password.",
             });
+            navigate("/auth/reset-password");
+            return;
           } else {
             toast({
               title: "Success",
               description: "You have successfully logged in.",
             });
+            navigate("/dashboard");
           }
-          
-          navigate("/dashboard");
           return;
         }
 

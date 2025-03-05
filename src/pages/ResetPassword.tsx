@@ -16,29 +16,35 @@ export const ResetPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [validLink, setValidLink] = useState(false);
+  const [validLink, setValidLink] = useState(true); // Default to true and check in useEffect
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Use the hash fragment from the URL to determine if this is a valid reset link
-    const hash = window.location.hash;
-    console.log("Current URL hash:", hash);
+    const checkSession = async () => {
+      try {
+        // First, check if we already have a session with recovery type
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log("Current session:", session);
+        
+        if (!session) {
+          setError("Your reset link has expired or is invalid. Please request a new password reset link.");
+          setValidLink(false);
+          toast({
+            title: "Invalid Reset Link",
+            description: "Please request a new password reset",
+            variant: "destructive",
+          });
+        }
+      } catch (err: any) {
+        console.error("Session check error:", err);
+        setError(err.message || "Failed to validate your reset link");
+        setValidLink(false);
+      }
+    };
     
-    // Check if we have the recovery type parameter in the URL hash
-    if (hash && hash.includes('type=recovery')) {
-      setValidLink(true);
-    } else {
-      setError("Invalid or expired password reset link. Please request a new one.");
-      setValidLink(false);
-      
-      toast({
-        title: "Invalid Reset Link",
-        description: "Please use the link from your email to reset your password",
-        variant: "destructive",
-      });
-    }
+    checkSession();
   }, [toast]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
