@@ -79,25 +79,65 @@ serve(async (req) => {
     switch (event.type) {
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
+      case 'customer.subscription.pending': // Added to handle pending subscriptions
+      case 'invoice.payment_succeeded': // Added to handle successful payments
         const subscription = event.data.object;
-        console.log(`Processing subscription: ${subscription.id}, status: ${subscription.status}`);
+        let subscriptionId, customerId, userId, status;
+
+        if (event.type === 'invoice.payment_succeeded') {
+          // For invoice events, we need to get the subscription ID from the invoice
+          const invoiceObject = subscription;
+          console.log(`Processing invoice: ${invoiceObject.id}, subscription: ${invoiceObject.subscription}`);
+          
+          if (invoiceObject.subscription) {
+            // Get the subscription details
+            try {
+              const stripeSubscription = await stripe.subscriptions.retrieve(invoiceObject.subscription);
+              subscriptionId = stripeSubscription.id;
+              customerId = stripeSubscription.customer;
+              userId = stripeSubscription.metadata?.user_id;
+              status = stripeSubscription.status;
+              
+              console.log(`Retrieved subscription: ${subscriptionId}, status: ${status}, for user: ${userId}`);
+            } catch (err) {
+              console.error(`Error retrieving subscription for invoice: ${err.message}`);
+              throw err;
+            }
+          } else {
+            console.log('Invoice has no subscription, skipping');
+            break;
+          }
+        } else {
+          // For subscription events
+          subscriptionId = subscription.id;
+          customerId = subscription.customer;
+          userId = subscription.metadata?.user_id;
+          status = subscription.status;
+          
+          console.log(`Processing subscription: ${subscriptionId}, status: ${status}, for user: ${userId}`);
+        }
+        
+        // If we don't have a subscription ID, we can't do anything
+        if (!subscriptionId) {
+          console.log('No subscription ID, skipping');
+          break;
+        }
         
         try {
           // First check if we have an existing record with this subscription ID
           const { data: existingBySubId, error: subIdQueryError } = await supabase
             .from('customer_subscriptions')
             .select()
-            .eq('subscription_id', subscription.id)
+            .eq('subscription_id', subscriptionId)
             .maybeSingle();
             
-          if (subIdQueryError && subIdQueryError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+          if (subIdQueryError) {
             console.error('Error checking for existing subscription by ID:', subIdQueryError);
             throw subIdQueryError;
           }
           
-          // If we have a user_id in the metadata, check if the user already has a subscription record
-          if (subscription.metadata?.user_id && !existingBySubId) {
-            const userId = subscription.metadata.user_id;
+          // If we have a user_id in the metadata but not in the existing record, check if the user already has a subscription record
+          if (userId && !existingBySubId) {
             console.log(`Checking for existing subscription for user: ${userId}`);
             
             const { data: existingByUserId, error: userIdQueryError } = await supabase
@@ -106,7 +146,7 @@ serve(async (req) => {
               .eq('user_id', userId)
               .maybeSingle();
               
-            if (userIdQueryError && userIdQueryError.code !== 'PGRST116') {
+            if (userIdQueryError) {
               console.error('Error checking for existing subscription by user ID:', userIdQueryError);
               throw userIdQueryError;
             }
@@ -117,9 +157,9 @@ serve(async (req) => {
               const { error: updateError } = await supabase
                 .from('customer_subscriptions')
                 .update({
-                  subscription_id: subscription.id,
-                  customer_id: subscription.customer,
-                  status: subscription.status,
+                  subscription_id: subscriptionId,
+                  customer_id: customerId,
+                  status: status,
                   updated_at: new Date().toISOString()
                 })
                 .eq('user_id', userId);
@@ -128,45 +168,58 @@ serve(async (req) => {
                 console.error('Error updating subscription for existing user:', updateError);
                 throw updateError;
               }
+
+              console.log(`Updated subscription for user: ${userId}, new status: ${status}`);
               break; // Exit early since update was successful
             }
           }
           
           // If we found an existing record by subscription ID, update it
           if (existingBySubId) {
-            console.log(`Found existing subscription record with ID: ${subscription.id}. Updating it.`);
+            console.log(`Found existing subscription record with ID: ${subscriptionId}. Updating it to status: ${status}`);
             const { error: updateError } = await supabase
               .from('customer_subscriptions')
               .update({
-                status: subscription.status,
+                status: status,
                 updated_at: new Date().toISOString(),
                 // Update user_id if it was missing before
-                ...(subscription.metadata?.user_id && !existingBySubId.user_id ? { user_id: subscription.metadata.user_id } : {})
+                ...(userId && !existingBySubId.user_id ? { user_id: userId } : {})
               })
-              .eq('subscription_id', subscription.id);
+              .eq('subscription_id', subscriptionId);
               
             if (updateError) {
               console.error('Error updating existing subscription:', updateError);
               throw updateError;
             }
-          } else {
+            
+            console.log(`Successfully updated subscription: ${subscriptionId} to status: ${status}`);
+          } else if (customerId && subscriptionId) {
             // Insert new subscription if no existing record was found
-            console.log('No existing subscription found. Creating new record.');
+            console.log(`No existing subscription found. Creating new record with status: ${status}`);
+            
+            const subscriptionData = {
+              subscription_id: subscriptionId,
+              customer_id: customerId,
+              status: status,
+              user_id: userId || '',
+              updated_at: new Date().toISOString(),
+              created_at: new Date().toISOString()
+            };
+            
+            console.log('Inserting new subscription record:', JSON.stringify(subscriptionData));
+            
             const { error: insertError } = await supabase
               .from('customer_subscriptions')
-              .insert({
-                subscription_id: subscription.id,
-                customer_id: subscription.customer,
-                status: subscription.status,
-                user_id: subscription.metadata?.user_id || '', // Make sure to include user_id in metadata when creating subscriptions
-                updated_at: new Date().toISOString(),
-                created_at: new Date().toISOString()
-              });
+              .insert(subscriptionData);
               
             if (insertError) {
               console.error('Error inserting new subscription:', insertError);
               throw insertError;
             }
+            
+            console.log(`Successfully created new subscription record for: ${subscriptionId}`);
+          } else {
+            console.log('Missing required data for subscription record, skipping');
           }
         } catch (dbError) {
           console.error('Database error processing subscription:', dbError);
@@ -194,6 +247,8 @@ serve(async (req) => {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
         }
+        
+        console.log(`Successfully marked subscription ${deletedSubscription.id} as canceled`);
         break;
         
       // Add more event types as needed
