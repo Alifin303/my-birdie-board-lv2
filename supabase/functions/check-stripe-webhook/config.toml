@@ -1,0 +1,11 @@
+
+project_id = "rbhzesocmhazynkfyhst"
+
+[hooks]
+default = { http.csrf = false }
+
+[http_options]
+timeout = 30
+
+[http.auth]
+enable = false

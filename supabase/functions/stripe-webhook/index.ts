@@ -44,6 +44,29 @@ const getStripe = () => {
   });
 };
 
+// Verify Stripe Webhook signature
+const verifyStripeSignature = (body: string, signature: string): Stripe.Event | null => {
+  try {
+    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+    
+    if (!webhookSecret) {
+      console.error('STRIPE_WEBHOOK_SECRET environment variable is not set');
+      return null;
+    }
+    
+    console.log(`Using webhook secret with length: ${webhookSecret.length}`);
+    
+    const stripe = getStripe();
+    const event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    
+    console.log(`Webhook signature verified successfully for event: ${event.id}`);
+    return event;
+  } catch (error) {
+    console.error(`⚠️ Webhook signature verification failed: ${error.message}`);
+    return null;
+  }
+};
+
 // Function to handle different event types
 async function handleStripeEvent(event, supabase) {
   console.log(`Processing event type: ${event.type}`);
@@ -201,6 +224,38 @@ async function handleStripeEvent(event, supabase) {
       }
       break;
       
+    case 'customer.subscription.deleted':
+      console.log('Subscription deleted event received');
+      const deletedSubscription = event.data.object;
+      
+      try {
+        const customerId = deletedSubscription.customer;
+        const subscriptionId = deletedSubscription.id;
+        console.log(`Subscription ${subscriptionId} deleted for customer: ${customerId}`);
+        
+        // Update the database to mark the subscription as canceled
+        const { error: updateError } = await supabase
+          .from('customer_subscriptions')
+          .update({
+            status: 'canceled',
+            updated_at: new Date().toISOString()
+          })
+          .eq('subscription_id', subscriptionId);
+          
+        if (updateError) {
+          console.error(`Error updating deleted subscription in database: ${updateError.message}`);
+          throw updateError;
+        }
+        
+        console.log(`Subscription ${subscriptionId} marked as canceled in database`);
+        
+      } catch (error) {
+        console.error('Error processing customer.subscription.deleted event:', error.message);
+        console.error(error.stack);
+        throw error; // Re-throw to be caught by the main handler
+      }
+      break;
+    
     case 'customer.deleted':
       console.log('Customer deleted event received');
       const customer = event.data.object;
@@ -289,21 +344,28 @@ serve(async (req) => {
       console.log(`[${requestTimestamp}] Request body excerpt: ${body.substring(0, 100)}...`);
     }
     
-    // IMPORTANT: For this endpoint, we'll accept and process all events without verification
-    // This is a temporary solution for debugging purposes
-    console.log(`[${requestTimestamp}] ⚠️ PROCESSING EVENT WITHOUT SIGNATURE VERIFICATION - FOR DEBUGGING ONLY`);
+    // Get the stripe signature header
+    const signature = req.headers.get('stripe-signature');
     
-    // Parse the event
-    let event;
-    try {
-      event = JSON.parse(body);
-      console.log(`[${requestTimestamp}] Parsed event type: ${event.type}`);
-    } catch (parseError) {
-      console.error(`[${requestTimestamp}] Failed to parse request body: ${parseError.message}`);
-      return new Response(JSON.stringify({ error: 'Invalid payload' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    // Try to verify the webhook signature
+    let event = null;
+    if (signature) {
+      console.log(`[${requestTimestamp}] Attempting to verify Stripe signature...`);
+      event = verifyStripeSignature(body, signature);
+    }
+    
+    // If signature verification failed or there was no signature, parse the body directly
+    if (!event) {
+      console.log(`[${requestTimestamp}] Processing event without signature verification (for debugging)`);
+      try {
+        event = JSON.parse(body);
+      } catch (parseError) {
+        console.error(`[${requestTimestamp}] Failed to parse request body: ${parseError.message}`);
+        return new Response(JSON.stringify({ error: 'Invalid payload' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
     
     if (!event || !event.type) {
