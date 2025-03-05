@@ -58,11 +58,16 @@ serve(async (req) => {
         
         // Try making a simple API call to validate the key
         console.log("Making test request to Stripe API...");
-        const customers = await stripe.customers.list({ limit: 1 });
-        
-        stripeConnectionValid = true;
-        stripeMessage = `Successfully connected to Stripe API. Found ${customers.data.length} customer(s)`;
-        console.log(stripeMessage);
+        try {
+          const customers = await stripe.customers.list({ limit: 1 });
+          stripeConnectionValid = true;
+          stripeMessage = `Successfully connected to Stripe API. Found ${customers.data.length} customer(s)`;
+          console.log(stripeMessage);
+        } catch (listError) {
+          console.error(`Error listing customers: ${listError.message}`);
+          stripeConnectionValid = false;
+          stripeMessage = `Stripe API customers.list failed: ${listError.message}`;
+        }
       } catch (stripeError) {
         stripeConnectionValid = false;
         stripeMessage = `Stripe API connection failed: ${stripeError.message}`;

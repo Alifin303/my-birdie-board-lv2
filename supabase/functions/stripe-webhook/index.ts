@@ -94,6 +94,18 @@ serve(async (req) => {
             // Get the customer information
             const customerId = session.customer;
             
+            // Check if customer still exists
+            try {
+              const customer = await stripe.customers.retrieve(customerId);
+              if (customer.deleted === true) {
+                console.error(`Customer ${customerId} has been deleted, cannot update subscription`);
+                throw new Error(`Customer ${customerId} has been deleted`);
+              }
+            } catch (customerRetrieveError) {
+              console.error(`Error retrieving Stripe customer: ${customerRetrieveError.message}`);
+              throw customerRetrieveError;
+            }
+            
             // Update our database to reflect the new subscription
             const { data: customerData, error: customerError } = await supabase
               .from('customer_subscriptions')
@@ -138,6 +150,19 @@ serve(async (req) => {
         case 'customer.subscription.updated': {
           const subscription = event.data.object;
           console.log(`Subscription updated: ${subscription.id}, status: ${subscription.status}`);
+          
+          // Check if customer still exists
+          try {
+            const customer = await stripe.customers.retrieve(subscription.customer);
+            if (customer.deleted === true) {
+              console.error(`Customer ${subscription.customer} has been deleted, but will proceed with update using customer_id`);
+              // We continue with the update since we need to handle updates even for deleted customers
+            }
+          } catch (customerRetrieveError) {
+            console.error(`Error retrieving Stripe customer: ${customerRetrieveError.message}`);
+            // We continue with the update since we still need to handle subscription updates
+            console.log(`Will attempt to process subscription update despite customer retrieval error`);
+          }
           
           // Update our database to reflect the updated subscription
           const { data: subscriptionData, error: subscriptionError } = await supabase
@@ -211,6 +236,9 @@ serve(async (req) => {
           const subscription = event.data.object;
           console.log(`Subscription deleted: ${subscription.id}`);
           
+          // No need to check if customer exists, we need to update our records regardless
+          console.log(`Processing subscription deletion without customer verification`);
+          
           // Update our database to reflect the deleted subscription
           const { data: subscriptionData, error: subscriptionError } = await supabase
             .from('customer_subscriptions')
@@ -275,6 +303,46 @@ serve(async (req) => {
             }
             
             console.log(`Successfully marked subscription as expired for user: ${subscriptionData.user_id}`);
+          }
+          break;
+        }
+        
+        case 'customer.deleted': {
+          const customer = event.data.object;
+          console.log(`Customer deleted: ${customer.id}`);
+          
+          // Update our database to reflect the deleted customer
+          const { data: customerData, error: customerError } = await supabase
+            .from('customer_subscriptions')
+            .select('*')
+            .eq('customer_id', customer.id)
+            .maybeSingle();
+            
+          if (customerError) {
+            console.error(`Error fetching customer data: ${customerError.message}`);
+            throw customerError;
+          }
+          
+          if (!customerData) {
+            console.log(`No customer record found for deleted Stripe customer: ${customer.id}`);
+            // No record to update, so we can just log and continue
+          } else {
+            // Mark the customer record with a special status
+            const { error: updateError } = await supabase
+              .from('customer_subscriptions')
+              .update({
+                subscription_id: null,
+                status: 'customer_deleted',
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', customerData.id);
+              
+            if (updateError) {
+              console.error(`Error updating customer record: ${updateError.message}`);
+              throw updateError;
+            }
+            
+            console.log(`Successfully marked customer as deleted for user: ${customerData.user_id}`);
           }
           break;
         }

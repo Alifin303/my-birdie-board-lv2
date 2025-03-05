@@ -94,6 +94,18 @@ serve(async (req) => {
         
         console.log(`Creating subscription for customer: ${customerId} with price: ${priceId}`);
         
+        // Verify customer exists and is not deleted before proceeding
+        try {
+          const customer = await stripe.customers.retrieve(customerId);
+          if (customer.deleted === true) {
+            console.error(`Customer ${customerId} has been deleted`);
+            throw new Error(`Customer ${customerId} has been deleted and cannot be used. Please create a new customer.`);
+          }
+        } catch (error) {
+          console.error(`Error verifying customer: ${error.message}`);
+          throw new Error(`Failed to verify customer: ${error.message}`);
+        }
+        
         // Attach the payment method to the customer if provided
         if (paymentMethodId) {
           console.log(`Attaching payment method: ${paymentMethodId} to customer: ${customerId}`);
@@ -163,6 +175,19 @@ serve(async (req) => {
         }
         
         console.log(`Updating payment method: ${paymentMethod} for customer: ${customer}`);
+        
+        // Verify customer exists and is not deleted
+        try {
+          const customerData = await stripe.customers.retrieve(customer);
+          if (customerData.deleted === true) {
+            console.error(`Customer ${customer} has been deleted`);
+            throw new Error(`Customer ${customer} has been deleted and cannot be updated. Please create a new customer.`);
+          }
+        } catch (error) {
+          console.error(`Error verifying customer: ${error.message}`);
+          throw new Error(`Failed to verify customer: ${error.message}`);
+        }
+        
         try {
           await stripe.paymentMethods.attach(paymentMethod, {
             customer,
@@ -264,8 +289,11 @@ serve(async (req) => {
           console.log(`Verifying customer existence: ${checkoutCustomerId}`);
           try {
             const customer = await stripe.customers.retrieve(checkoutCustomerId);
-            if (!customer || customer.deleted === true) {
-              throw new Error(`Customer ${checkoutCustomerId} does not exist or is deleted`);
+            if (!customer) {
+              throw new Error(`Customer ${checkoutCustomerId} does not exist`);
+            }
+            if (customer.deleted === true) {
+              throw new Error(`Customer ${checkoutCustomerId} has been deleted and cannot be used. Please create a new customer.`);
             }
             console.log(`Customer verified: ${checkoutCustomerId}`);
           } catch (customerError) {
@@ -322,6 +350,19 @@ serve(async (req) => {
         }
         
         console.log(`Creating billing portal session for customer: ${data.customerId}`);
+        
+        // Verify customer exists and is not deleted
+        try {
+          const customerData = await stripe.customers.retrieve(data.customerId);
+          if (customerData.deleted === true) {
+            console.error(`Customer ${data.customerId} has been deleted`);
+            throw new Error(`Customer ${data.customerId} has been deleted. Please create a new customer.`);
+          }
+        } catch (error) {
+          console.error(`Error verifying customer: ${error.message}`);
+          throw new Error(`Failed to verify customer: ${error.message}`);
+        }
+        
         try {
           result = await stripe.billingPortal.sessions.create({
             customer: data.customerId,
