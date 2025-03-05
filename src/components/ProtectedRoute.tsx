@@ -37,7 +37,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
           
           const { data: subscription, error } = await supabase
             .from("customer_subscriptions")
-            .select("status, subscription_id")
+            .select("status, subscription_id, cancel_at_period_end, current_period_end")
             .eq("user_id", session.user.id)
             .maybeSingle();
           
@@ -48,11 +48,19 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
             
           // Valid subscription statuses according to Stripe
           const validStatuses = ['active', 'trialing', 'paid'];
-          const hasValidSubscription = subscription && validStatuses.includes(subscription.status);
+          
+          // Check if subscription is valid OR if it's canceled but still in active period
+          const hasValidSubscription = subscription && (
+            validStatuses.includes(subscription.status) || 
+            (subscription.status === 'canceled' && subscription.current_period_end && 
+             new Date(subscription.current_period_end) > new Date())
+          );
           
           console.log(`Subscription check results:`, {
             hasSubscriptionRecord: !!subscription,
             subscriptionStatus: subscription?.status || "none",
+            cancelAtPeriodEnd: subscription?.cancel_at_period_end || false,
+            currentPeriodEnd: subscription?.current_period_end || "none",
             isValidStatus: hasValidSubscription
           });
           
@@ -90,7 +98,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
             
             const { data: subscription, error } = await supabase
               .from("customer_subscriptions")
-              .select("status, subscription_id")
+              .select("status, subscription_id, cancel_at_period_end, current_period_end")
               .eq("user_id", session.user.id)
               .maybeSingle();
             
@@ -101,11 +109,19 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
               
             // Valid subscription statuses according to Stripe
             const validStatuses = ['active', 'trialing', 'paid'];
-            const hasValidSub = subscription && validStatuses.includes(subscription.status);
+            
+            // Check if subscription is valid OR if it's canceled but still in active period
+            const hasValidSub = subscription && (
+              validStatuses.includes(subscription.status) || 
+              (subscription.status === 'canceled' && subscription.current_period_end && 
+               new Date(subscription.current_period_end) > new Date())
+            );
             
             console.log(`Subscription check after auth change:`, {
               hasSubscription: !!subscription,
               status: subscription?.status || "none",
+              cancelAtPeriodEnd: subscription?.cancel_at_period_end || false,
+              currentPeriodEnd: subscription?.current_period_end || "none",
               isValid: hasValidSub
             });
             

@@ -86,7 +86,13 @@ serve(async (req) => {
         const userId = subscription.metadata?.user_id;
         const status = subscription.status;
         
+        // Get additional subscription details
+        const cancelAtPeriodEnd = subscription.cancel_at_period_end || false;
+        const currentPeriodEnd = subscription.current_period_end ? 
+          new Date(subscription.current_period_end * 1000).toISOString() : null;
+        
         console.log(`Processing subscription: ${subscriptionId}, status: ${status}, for user: ${userId}`);
+        console.log(`Subscription details: cancel_at_period_end: ${cancelAtPeriodEnd}, current_period_end: ${currentPeriodEnd}`);
         
         // Critical fix: Only update the subscription status if it's not downgrading from active/trialing/paid to incomplete
         try {
@@ -150,6 +156,8 @@ serve(async (req) => {
                   subscription_id: subscriptionId,
                   customer_id: customerId,
                   status: status,
+                  cancel_at_period_end: cancelAtPeriodEnd,
+                  current_period_end: currentPeriodEnd,
                   updated_at: new Date().toISOString()
                 })
                 .eq('user_id', userId);
@@ -172,6 +180,8 @@ serve(async (req) => {
               .from('customer_subscriptions')
               .update({
                 status: status,
+                cancel_at_period_end: cancelAtPeriodEnd,
+                current_period_end: currentPeriodEnd,
                 updated_at: new Date().toISOString(),
                 // Update user_id if it was missing before
                 ...(userId && !existingBySubId.user_id ? { user_id: userId } : {})
@@ -193,6 +203,8 @@ serve(async (req) => {
               customer_id: customerId,
               status: status,
               user_id: userId || '',
+              cancel_at_period_end: cancelAtPeriodEnd,
+              current_period_end: currentPeriodEnd,
               updated_at: new Date().toISOString(),
               created_at: new Date().toISOString()
             };
@@ -221,6 +233,33 @@ serve(async (req) => {
         }
         break;
         
+      case 'customer.subscription.deleted':
+        const deletedSubscription = event.data.object;
+        console.log(`Subscription deleted: ${deletedSubscription.id}`);
+        
+        // Update the subscription status to 'canceled'
+        const { error: deleteError } = await supabase
+          .from('customer_subscriptions')
+          .update({ 
+            status: 'canceled', 
+            updated_at: new Date().toISOString(),
+            cancel_at_period_end: true,
+            current_period_end: deletedSubscription.current_period_end ? 
+              new Date(deletedSubscription.current_period_end * 1000).toISOString() : null
+          })
+          .eq('subscription_id', deletedSubscription.id);
+          
+        if (deleteError) {
+          console.error('Error updating deleted subscription:', deleteError);
+          return new Response(JSON.stringify({ error: deleteError.message }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        
+        console.log(`Successfully marked subscription ${deletedSubscription.id} as canceled with period end: ${deletedSubscription.current_period_end}`);
+        break;
+        
       case 'invoice.payment_succeeded':
         // For invoice events, ensure we mark the subscription as active
         const invoiceObject = event.data.object;
@@ -237,13 +276,21 @@ serve(async (req) => {
             // Force status to active for successful payments
             const subStatus = 'active';
             
+            // Get additional subscription details
+            const cancelAtEnd = stripeSubscription.cancel_at_period_end || false;
+            const periodEnd = stripeSubscription.current_period_end ? 
+              new Date(stripeSubscription.current_period_end * 1000).toISOString() : null;
+            
             console.log(`Retrieved subscription after successful payment: ${subId}, setting status to: ${subStatus}, for user: ${uId}`);
+            console.log(`Payment details: cancel_at_period_end: ${cancelAtEnd}, current_period_end: ${periodEnd}`);
             
             // Update the subscription status to active in our database
             const { error: paymentUpdateError } = await supabase
               .from('customer_subscriptions')
               .update({ 
                 status: subStatus,
+                cancel_at_period_end: cancelAtEnd,
+                current_period_end: periodEnd,
                 updated_at: new Date().toISOString()
               })
               .eq('subscription_id', subId);
@@ -263,25 +310,44 @@ serve(async (req) => {
         }
         break;
         
-      case 'customer.subscription.deleted':
-        const deletedSubscription = event.data.object;
-        console.log(`Subscription deleted: ${deletedSubscription.id}`);
+      case 'customer.subscription.pending_update_applied':
+      case 'customer.subscription.pending_update_expired':
+      case 'customer.subscription.trial_will_end':
+        // Handle other subscription events
+        console.log(`Received event ${event.type}, processing subscription update`);
+        const subObject = event.data.object;
         
-        // Update the subscription status to 'canceled'
-        const { error: deleteError } = await supabase
-          .from('customer_subscriptions')
-          .update({ status: 'canceled', updated_at: new Date().toISOString() })
-          .eq('subscription_id', deletedSubscription.id);
-          
-        if (deleteError) {
-          console.error('Error updating deleted subscription:', deleteError);
-          return new Response(JSON.stringify({ error: deleteError.message }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
+        if (subObject && subObject.id) {
+          try {
+            // Get the latest subscription data from Stripe
+            const stripeSubscription = await stripe.subscriptions.retrieve(subObject.id);
+            
+            const subData = {
+              status: stripeSubscription.status,
+              cancel_at_period_end: stripeSubscription.cancel_at_period_end || false,
+              current_period_end: stripeSubscription.current_period_end ? 
+                new Date(stripeSubscription.current_period_end * 1000).toISOString() : null,
+              updated_at: new Date().toISOString()
+            };
+            
+            console.log(`Updating subscription ${subObject.id} with latest data:`, JSON.stringify(subData));
+            
+            const { error: updateError } = await supabase
+              .from('customer_subscriptions')
+              .update(subData)
+              .eq('subscription_id', subObject.id);
+              
+            if (updateError) {
+              console.error(`Error updating subscription on ${event.type}:`, updateError);
+              throw updateError;
+            }
+            
+            console.log(`Successfully updated subscription ${subObject.id} from ${event.type} event`);
+          } catch (err) {
+            console.error(`Error processing ${event.type} event:`, err);
+            throw err;
+          }
         }
-        
-        console.log(`Successfully marked subscription ${deletedSubscription.id} as canceled`);
         break;
         
       default:
