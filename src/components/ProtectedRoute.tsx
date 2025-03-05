@@ -173,7 +173,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
     return <Navigate to="/" replace />;
   }
 
-  // Handle subscription check
+  // Handle subscription check - FIXED: Redirect to checkout instead of homepage
   if (requireSubscription && !hasSubscription) {
     console.log("User does not have valid subscription, redirecting to checkout");
     return <Navigate to="/checkout" state={{ from: location }} replace />;
