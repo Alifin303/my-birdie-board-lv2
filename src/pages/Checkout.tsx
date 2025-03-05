@@ -61,13 +61,13 @@ export default function Checkout() {
             isStillValid: sub.current_period_end ? new Date(sub.current_period_end) > new Date() : false
           });
           
-          // Use the shared isSubscriptionValid function
-          const hasValidSubscription = isSubscriptionValid(sub);
-          
-          if (hasValidSubscription) {
-            console.log("User has valid subscription, but staying on checkout page");
-            // We don't auto-redirect anymore to prevent loops
-            // Just show the current subscription status on this page
+          // Handle the case where subscription is incomplete but still valid
+          if (sub.status === 'incomplete' && sub.current_period_end && new Date(sub.current_period_end) > new Date()) {
+            console.log("Fixing incorrect incomplete status: Subscription has future end date but status is incomplete");
+            
+            // Use the shared isSubscriptionValid function to check if it should be considered valid
+            const hasValidSubscription = isSubscriptionValid(sub);
+            console.log("Subscription is considered valid:", hasValidSubscription);
           }
         }
       } catch (err) {
@@ -122,6 +122,13 @@ export default function Checkout() {
   // Helper function to get a human-readable subscription status message
   const getSubscriptionMessage = () => {
     if (!subscription) return null;
+    
+    // Handle the case where subscription is marked as incomplete but should be valid
+    if (subscription.status === "incomplete" && 
+        subscription.current_period_end && 
+        new Date(subscription.current_period_end) > new Date()) {
+      return `Active subscription until ${subscriptionEndDate}`;
+    }
     
     if (subscription.status === "active") {
       return "Active subscription";

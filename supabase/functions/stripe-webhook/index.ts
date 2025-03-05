@@ -99,7 +99,7 @@ serve(async (req) => {
           // First check if we have an existing record with this subscription ID
           const { data: existingBySubId, error: subIdQueryError } = await supabase
             .from('customer_subscriptions')
-            .select('status, subscription_id')
+            .select('status, subscription_id, user_id')
             .eq('subscription_id', subscriptionId)
             .maybeSingle();
             
@@ -110,6 +110,27 @@ serve(async (req) => {
           
           // Define valid active statuses
           const validStatuses = ['active', 'trialing', 'paid'];
+          
+          // Check if the user ID exists in the metadata but is missing in the database record
+          // This is critical for fixing the issue where user_id might be empty in the subscription record
+          if (existingBySubId && userId && !existingBySubId.user_id) {
+            console.log(`Found subscription ${subscriptionId} without user_id. Adding user_id: ${userId}`);
+            
+            const { error: updateUserIdError } = await supabase
+              .from('customer_subscriptions')
+              .update({ 
+                user_id: userId,
+                updated_at: new Date().toISOString()
+              })
+              .eq('subscription_id', subscriptionId);
+              
+            if (updateUserIdError) {
+              console.error('Error updating subscription with user_id:', updateUserIdError);
+              throw updateUserIdError;
+            }
+            
+            console.log(`Successfully updated subscription ${subscriptionId} with user_id: ${userId}`);
+          }
           
           // CRITICAL FIX: Don't downgrade active subscriptions to incomplete status
           // Only update if:
@@ -198,11 +219,20 @@ serve(async (req) => {
             // Insert new subscription if no existing record was found
             console.log(`No existing subscription found. Creating new record with status: ${status}`);
             
+            // CRITICAL FIX: Ensure user_id is never empty when creating a new record
+            if (!userId) {
+              console.error('Cannot create subscription record without user_id');
+              return new Response(JSON.stringify({ error: 'Missing user_id in subscription metadata' }), {
+                status: 400,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+              });
+            }
+            
             const subscriptionData = {
               subscription_id: subscriptionId,
               customer_id: customerId,
               status: status,
-              user_id: userId || '',
+              user_id: userId,
               cancel_at_period_end: cancelAtPeriodEnd,
               current_period_end: currentPeriodEnd,
               updated_at: new Date().toISOString(),
@@ -284,6 +314,39 @@ serve(async (req) => {
             console.log(`Retrieved subscription after successful payment: ${subId}, setting status to: ${subStatus}, for user: ${uId}`);
             console.log(`Payment details: cancel_at_period_end: ${cancelAtEnd}, current_period_end: ${periodEnd}`);
             
+            // CRITICAL FIX: Ensure the user ID is correctly associated with the subscription
+            // First check if there's a subscription record with this ID
+            const { data: existingSub, error: checkError } = await supabase
+              .from('customer_subscriptions')
+              .select('user_id, status')
+              .eq('subscription_id', subId)
+              .maybeSingle();
+              
+            if (checkError) {
+              console.error('Error checking existing subscription:', checkError);
+              throw checkError;
+            }
+            
+            // If user_id is missing in the record but present in metadata, update it
+            if (existingSub && !existingSub.user_id && uId) {
+              console.log(`Fixing subscription ${subId} by adding missing user_id: ${uId}`);
+              
+              const { error: fixUserIdError } = await supabase
+                .from('customer_subscriptions')
+                .update({ 
+                  user_id: uId,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('subscription_id', subId);
+                
+              if (fixUserIdError) {
+                console.error('Error fixing user_id in subscription:', fixUserIdError);
+                throw fixUserIdError;
+              }
+              
+              console.log(`Successfully fixed user_id for subscription ${subId}`);
+            }
+            
             // Update the subscription status to active in our database
             const { error: paymentUpdateError } = await supabase
               .from('customer_subscriptions')
@@ -307,6 +370,60 @@ serve(async (req) => {
           }
         } else {
           console.log('Invoice has no subscription, skipping');
+        }
+        break;
+        
+      // FIXING INCOMPLETE SUBSCRIPTIONS
+      case 'invoice.payment_failed':
+        // When payment fails, we should still track it but not downgrade an active subscription
+        const failedInvoice = event.data.object;
+        console.log(`Processing failed payment invoice: ${failedInvoice.id}, subscription: ${failedInvoice.subscription}`);
+        
+        if (failedInvoice.subscription) {
+          try {
+            // Get the subscription details
+            const stripeSubscription = await stripe.subscriptions.retrieve(failedInvoice.subscription);
+            
+            // Log the subscription status from Stripe
+            console.log(`Stripe subscription status: ${stripeSubscription.status}`);
+            
+            // Check our database for this subscription
+            const { data: dbSubscription, error: fetchError } = await supabase
+              .from('customer_subscriptions')
+              .select('status, user_id')
+              .eq('subscription_id', failedInvoice.subscription)
+              .maybeSingle();
+              
+            if (fetchError) {
+              console.error('Error fetching subscription for failed payment:', fetchError);
+              throw fetchError;
+            }
+            
+            console.log(`Database subscription status: ${dbSubscription?.status || 'not found'}`);
+            
+            // If Stripe says it's active but our DB says incomplete, fix it
+            if (stripeSubscription.status === 'active' && dbSubscription?.status === 'incomplete') {
+              console.log(`Fixing incorrect incomplete status for subscription: ${failedInvoice.subscription}`);
+              
+              const { error: fixStatusError } = await supabase
+                .from('customer_subscriptions')
+                .update({ 
+                  status: 'active',
+                  updated_at: new Date().toISOString()
+                })
+                .eq('subscription_id', failedInvoice.subscription);
+                
+              if (fixStatusError) {
+                console.error('Error fixing subscription status:', fixStatusError);
+                throw fixStatusError;
+              }
+              
+              console.log(`Successfully fixed subscription status to active`);
+            }
+          } catch (err) {
+            console.error(`Error processing failed payment: ${err.message}`);
+            throw err;
+          }
         }
         break;
         
