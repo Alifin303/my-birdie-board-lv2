@@ -1,11 +1,5 @@
 
 project_id = "rbhzesocmhazynkfyhst"
-
-[hooks]
-default = { http.csrf = false }
-
-[http_options]
-timeout = 90
-
-[http.auth]
-enable = false
+# Completely disable HTTP auth for this function
+[functions.stripe-webhook]
+verify_jwt = false
