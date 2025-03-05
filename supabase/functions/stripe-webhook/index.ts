@@ -239,16 +239,24 @@ async function handleStripeEvent(event, supabase) {
 }
 
 serve(async (req) => {
-  // Log when a request is received with some details
-  console.log(`Webhook request received: ${req.method} ${new URL(req.url).pathname}`);
+  // Add timestamp to log entries for better debugging
+  const requestTimestamp = new Date().toISOString();
+  console.log(`[${requestTimestamp}] Webhook request received: ${req.method} ${new URL(req.url).pathname}`);
   
   // Detailed header logging
   const headers = Object.fromEntries(req.headers.entries());
-  console.log(`Request headers: ${JSON.stringify(headers)}`);
+  console.log(`[${requestTimestamp}] Request headers: ${JSON.stringify(headers)}`);
+  
+  // Check if there's a stripe-signature header
+  const hasSignature = req.headers.has('stripe-signature');
+  console.log(`[${requestTimestamp}] Has stripe-signature header: ${hasSignature}`);
+  if (hasSignature) {
+    console.log(`[${requestTimestamp}] Stripe signature value length: ${req.headers.get('stripe-signature')?.length || 0}`);
+  }
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    console.log("Handling OPTIONS preflight request");
+    console.log(`[${requestTimestamp}] Handling OPTIONS preflight request`);
     return new Response(null, {
       status: 204,
       headers: corsHeaders,
@@ -256,7 +264,7 @@ serve(async (req) => {
   }
   
   if (req.method !== 'POST') {
-    console.error(`Invalid method: ${req.method}`);
+    console.error(`[${requestTimestamp}] Invalid method: ${req.method}`);
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -266,10 +274,10 @@ serve(async (req) => {
   try {
     // Get the request body as text
     const body = await req.text();
-    console.log(`Request body length: ${body.length} characters`);
+    console.log(`[${requestTimestamp}] Request body length: ${body.length} characters`);
     
     if (body.length === 0) {
-      console.error('Request body is empty!');
+      console.error(`[${requestTimestamp}] Request body is empty!`);
       return new Response(JSON.stringify({ error: 'Empty request body' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -278,20 +286,20 @@ serve(async (req) => {
     
     // Log a small portion of the body for debugging
     if (body.length > 0) {
-      console.log(`Request body excerpt: ${body.substring(0, 100)}...`);
+      console.log(`[${requestTimestamp}] Request body excerpt: ${body.substring(0, 100)}...`);
     }
     
     // IMPORTANT: For this endpoint, we'll accept and process all events without verification
     // This is a temporary solution for debugging purposes
-    console.log("⚠️ PROCESSING EVENT WITHOUT SIGNATURE VERIFICATION - FOR DEBUGGING ONLY");
+    console.log(`[${requestTimestamp}] ⚠️ PROCESSING EVENT WITHOUT SIGNATURE VERIFICATION - FOR DEBUGGING ONLY`);
     
     // Parse the event
     let event;
     try {
       event = JSON.parse(body);
-      console.log(`Parsed event type: ${event.type}`);
+      console.log(`[${requestTimestamp}] Parsed event type: ${event.type}`);
     } catch (parseError) {
-      console.error(`Failed to parse request body: ${parseError.message}`);
+      console.error(`[${requestTimestamp}] Failed to parse request body: ${parseError.message}`);
       return new Response(JSON.stringify({ error: 'Invalid payload' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -299,15 +307,15 @@ serve(async (req) => {
     }
     
     if (!event || !event.type) {
-      console.error('Event object is invalid or missing type');
+      console.error(`[${requestTimestamp}] Event object is invalid or missing type`);
       return new Response(JSON.stringify({ error: 'Invalid event object' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
     
-    console.log(`Event id: ${event.id}`);
-    console.log(`Event type: ${event.type}`);
+    console.log(`[${requestTimestamp}] Event id: ${event.id}`);
+    console.log(`[${requestTimestamp}] Event type: ${event.type}`);
     
     try {
       // Process the event with Supabase client
@@ -315,13 +323,13 @@ serve(async (req) => {
       await handleStripeEvent(event, supabase);
       
       // Return a success response
-      console.log("Webhook processing completed successfully");
+      console.log(`[${requestTimestamp}] Webhook processing completed successfully`);
       return new Response(JSON.stringify({ received: true }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     } catch (processingError) {
-      console.error(`Error processing webhook: ${processingError.message}`);
+      console.error(`[${requestTimestamp}] Error processing webhook: ${processingError.message}`);
       console.error(processingError.stack);
       
       return new Response(JSON.stringify({ error: processingError.message }), {
@@ -330,7 +338,7 @@ serve(async (req) => {
       });
     }
   } catch (error) {
-    console.error(`Webhook general error: ${error.message}`);
+    console.error(`[${requestTimestamp}] Webhook general error: ${error.message}`);
     console.error(error.stack);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,

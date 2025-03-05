@@ -5,7 +5,7 @@ project_id = "rbhzesocmhazynkfyhst"
 default = { http.csrf = false }
 
 [http_options]
-timeout = 50
+timeout = 90
 
 [http.auth]
 enable = false
