@@ -82,49 +82,95 @@ serve(async (req) => {
         const subscription = event.data.object;
         console.log(`Processing subscription: ${subscription.id}, status: ${subscription.status}`);
         
-        // First check if the subscription already exists
-        const { data: existingSubscription, error: queryError } = await supabase
-          .from('customer_subscriptions')
-          .select()
-          .eq('subscription_id', subscription.id)
-          .single();
+        try {
+          // First check if we have an existing record with this subscription ID
+          const { data: existingBySubId, error: subIdQueryError } = await supabase
+            .from('customer_subscriptions')
+            .select()
+            .eq('subscription_id', subscription.id)
+            .maybeSingle();
+            
+          if (subIdQueryError && subIdQueryError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+            console.error('Error checking for existing subscription by ID:', subIdQueryError);
+            throw subIdQueryError;
+          }
           
-        if (queryError && queryError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
-          console.error('Error checking for existing subscription:', queryError);
-          return new Response(JSON.stringify({ error: queryError.message }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
-        }
-        
-        let result;
-        
-        if (existingSubscription) {
-          // Update existing subscription
-          result = await supabase
-            .from('customer_subscriptions')
-            .update({
-              status: subscription.status,
-              updated_at: new Date().toISOString()
-            })
-            .eq('subscription_id', subscription.id);
-        } else {
-          // Insert new subscription
-          result = await supabase
-            .from('customer_subscriptions')
-            .insert({
-              subscription_id: subscription.id,
-              customer_id: subscription.customer,
-              status: subscription.status,
-              user_id: subscription.metadata?.user_id || '', // Make sure to include user_id in metadata when creating subscriptions
-              updated_at: new Date().toISOString(),
-              created_at: new Date().toISOString()
-            });
-        }
-        
-        if (result.error) {
-          console.error('Error updating subscription in database:', result.error);
-          return new Response(JSON.stringify({ error: result.error.message }), {
+          // If we have a user_id in the metadata, check if the user already has a subscription record
+          if (subscription.metadata?.user_id && !existingBySubId) {
+            const userId = subscription.metadata.user_id;
+            console.log(`Checking for existing subscription for user: ${userId}`);
+            
+            const { data: existingByUserId, error: userIdQueryError } = await supabase
+              .from('customer_subscriptions')
+              .select()
+              .eq('user_id', userId)
+              .maybeSingle();
+              
+            if (userIdQueryError && userIdQueryError.code !== 'PGRST116') {
+              console.error('Error checking for existing subscription by user ID:', userIdQueryError);
+              throw userIdQueryError;
+            }
+            
+            if (existingByUserId) {
+              console.log(`User ${userId} already has a subscription record. Updating it.`);
+              // Update the existing record with the new subscription ID
+              const { error: updateError } = await supabase
+                .from('customer_subscriptions')
+                .update({
+                  subscription_id: subscription.id,
+                  customer_id: subscription.customer,
+                  status: subscription.status,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('user_id', userId);
+                
+              if (updateError) {
+                console.error('Error updating subscription for existing user:', updateError);
+                throw updateError;
+              }
+              break; // Exit early since update was successful
+            }
+          }
+          
+          // If we found an existing record by subscription ID, update it
+          if (existingBySubId) {
+            console.log(`Found existing subscription record with ID: ${subscription.id}. Updating it.`);
+            const { error: updateError } = await supabase
+              .from('customer_subscriptions')
+              .update({
+                status: subscription.status,
+                updated_at: new Date().toISOString(),
+                // Update user_id if it was missing before
+                ...(subscription.metadata?.user_id && !existingBySubId.user_id ? { user_id: subscription.metadata.user_id } : {})
+              })
+              .eq('subscription_id', subscription.id);
+              
+            if (updateError) {
+              console.error('Error updating existing subscription:', updateError);
+              throw updateError;
+            }
+          } else {
+            // Insert new subscription if no existing record was found
+            console.log('No existing subscription found. Creating new record.');
+            const { error: insertError } = await supabase
+              .from('customer_subscriptions')
+              .insert({
+                subscription_id: subscription.id,
+                customer_id: subscription.customer,
+                status: subscription.status,
+                user_id: subscription.metadata?.user_id || '', // Make sure to include user_id in metadata when creating subscriptions
+                updated_at: new Date().toISOString(),
+                created_at: new Date().toISOString()
+              });
+              
+            if (insertError) {
+              console.error('Error inserting new subscription:', insertError);
+              throw insertError;
+            }
+          }
+        } catch (dbError) {
+          console.error('Database error processing subscription:', dbError);
+          return new Response(JSON.stringify({ error: dbError.message }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
