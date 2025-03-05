@@ -97,7 +97,7 @@ export default function Checkout() {
             <div className="flex flex-col sm:flex-row gap-8">
               <div className="flex-1">
                 <h2 className="text-xl font-semibold mb-4">BirdieBoard Premium</h2>
-                <div className="text-3xl font-bold mb-2">$9.99<span className="text-base font-normal text-gray-500">/month</span></div>
+                <div className="text-3xl font-bold mb-2">£2.99<span className="text-base font-normal text-gray-500">/month</span></div>
                 <p className="text-gray-500 mb-6">Cancel anytime</p>
                 
                 <ul className="space-y-3">
