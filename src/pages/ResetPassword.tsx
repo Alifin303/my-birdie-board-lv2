@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,18 +16,26 @@ export const ResetPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [validLink, setValidLink] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if we have a hash fragment in the URL (from password reset email)
+    // Use the hash fragment from the URL to determine if this is a valid reset link
     const hash = window.location.hash;
+    console.log("Current URL hash:", hash);
     
-    if (!hash || !hash.includes('type=recovery')) {
-      // Inform the user if this is not a valid reset link
+    // Check if we have the recovery type parameter in the URL hash
+    if (hash && hash.includes('type=recovery')) {
+      setValidLink(true);
+    } else {
+      setError("Invalid or expired password reset link. Please request a new one.");
+      setValidLink(false);
+      
       toast({
         title: "Invalid Reset Link",
-        description: "Use the link from your email to reset your password",
+        description: "Please use the link from your email to reset your password",
         variant: "destructive",
       });
     }
@@ -100,7 +108,20 @@ export const ResetPassword = () => {
             </Alert>
           )}
           
-          {success ? (
+          {!validLink ? (
+            <div className="flex flex-col items-center justify-center py-6 space-y-4">
+              <XCircle className="h-16 w-16 text-red-500" />
+              <p className="text-center">
+                Invalid or expired password reset link. Please request a new password reset.
+              </p>
+              <Button 
+                onClick={() => navigate("/")} 
+                className="mt-4"
+              >
+                Return to Home
+              </Button>
+            </div>
+          ) : success ? (
             <div className="flex flex-col items-center justify-center py-6 space-y-4">
               <CheckCircle className="h-16 w-16 text-green-500" />
               <p className="text-center">
