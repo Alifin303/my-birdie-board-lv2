@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Button } from "./ui/button";
@@ -63,8 +62,6 @@ export function SignUpDialog() {
           },
           // Use /auth/callback for a consistent redirect path
           emailRedirectTo: `${siteUrl}/auth/callback`,
-          // Skip email verification
-          emailConfirm: false
         },
       });
 
@@ -83,7 +80,7 @@ export function SignUpDialog() {
         throw error;
       }
 
-      // Also sign in the user immediately since we're skipping verification
+      // Also sign in the user immediately since we want to skip verification
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,

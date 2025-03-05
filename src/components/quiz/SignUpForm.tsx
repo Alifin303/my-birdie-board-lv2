@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -60,8 +59,6 @@ export function SignUpForm() {
           },
           // Use /auth/callback for a consistent redirect path
           emailRedirectTo: `${siteUrl}/auth/callback`,
-          // Skip email verification
-          emailConfirm: false
         },
       });
 
@@ -83,7 +80,7 @@ export function SignUpForm() {
       // Show success message
       setSignupSuccess(true);
       
-      // Also sign in the user immediately since we're skipping verification
+      // Also sign in the user immediately since we want to skip verification
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
