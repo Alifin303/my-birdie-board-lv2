@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+
+import { useEffect, useState, useRef } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -24,9 +25,7 @@ export const isSubscriptionValid = (subscription: any): boolean => {
     subscription.current_period_end && 
     new Date(subscription.current_period_end) > new Date();
   
-  // IMPORTANT: Special handling for incomplete subscriptions
-  // We now prioritize the end date over the status for "incomplete" subscriptions
-  // This fixes the issue where Stripe shows active but our DB says incomplete
+  // Special handling for incomplete subscriptions
   const hasValidPeriodEndDate = 
     subscription.current_period_end && 
     new Date(subscription.current_period_end) > new Date();
@@ -46,6 +45,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
   const [isLoading, setIsLoading] = useState(true);
   const [loadingPhase, setLoadingPhase] = useState<string>("initializing");
   const [initialCheckComplete, setInitialCheckComplete] = useState(false);
+  const authCheckCompleted = useRef(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -91,15 +91,6 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
           if (!isMounted) return;
           console.log("Retrieved subscription data:", subscription);
           
-          // Double-check with Stripe if we have an incomplete status but a valid period end
-          if (subscription && 
-              (subscription.status === 'incomplete' || subscription.status === 'past_due') &&
-              subscription.current_period_end && 
-              new Date(subscription.current_period_end) > new Date()) {
-            
-            console.log("Subscription has incomplete status but valid period end. Treating as valid.");
-          }
-          
           const isValid = isSubscriptionValid(subscription);
           
           console.log(`Subscription check results:`, {
@@ -119,6 +110,9 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
           if (!isMounted) return;
           setHasSubscription(true);
         }
+
+        // Mark authentication check as completed
+        authCheckCompleted.current = true;
       } catch (error) {
         console.error("Error in checkSession:", error);
         if (!isMounted) return;
@@ -133,7 +127,10 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
       }
     };
 
-    checkSession();
+    // Only run the initial check if it hasn't been completed yet
+    if (!authCheckCompleted.current) {
+      checkSession();
+    }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
@@ -229,14 +226,14 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
           setHasSubscription(true);
         }
       }
-    }, 5000); // 5 second timeout
+    }, 3000); // Reduced timeout from 5 seconds to 3 seconds
 
     return () => {
       isMounted = false;
       if (timeoutId) window.clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
-  }, [requireSubscription]);
+  }, [requireSubscription, isAuthenticated, hasSubscription]);
 
   // Show loading state with more details
   if (!initialCheckComplete || isLoading) {
