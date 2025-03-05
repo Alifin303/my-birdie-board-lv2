@@ -47,22 +47,58 @@ const getStripe = () => {
 // Verify Stripe Webhook signature
 const verifyStripeSignature = (body: string, signature: string): Stripe.Event | null => {
   try {
+    // Try both possible webhook secret environment variable names
     const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+    const signingSecret = Deno.env.get('STRIPE_WEBHOOK_SIGNING_SECRET');
     
-    if (!webhookSecret) {
-      console.error('STRIPE_WEBHOOK_SECRET environment variable is not set');
+    console.log(`STRIPE_WEBHOOK_SECRET exists: ${!!webhookSecret}`);
+    console.log(`STRIPE_WEBHOOK_SIGNING_SECRET exists: ${!!signingSecret}`);
+    
+    if (webhookSecret) {
+      console.log(`Using STRIPE_WEBHOOK_SECRET with length: ${webhookSecret.length}`);
+      if (webhookSecret.startsWith('whsec_')) {
+        console.log('STRIPE_WEBHOOK_SECRET appears to be in the correct format (starts with whsec_)');
+      } else {
+        console.log('STRIPE_WEBHOOK_SECRET does not start with whsec_, it may be transformed');
+      }
+      
+      try {
+        const stripe = getStripe();
+        const event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+        console.log(`Webhook signature verified successfully using STRIPE_WEBHOOK_SECRET for event: ${event.id}`);
+        return event;
+      } catch (error) {
+        console.error(`⚠️ Webhook signature verification failed with STRIPE_WEBHOOK_SECRET: ${error.message}`);
+        // Continue to try the other secret if this one fails
+      }
+    }
+    
+    if (signingSecret) {
+      console.log(`Using STRIPE_WEBHOOK_SIGNING_SECRET with length: ${signingSecret.length}`);
+      if (signingSecret.startsWith('whsec_')) {
+        console.log('STRIPE_WEBHOOK_SIGNING_SECRET appears to be in the correct format (starts with whsec_)');
+      } else {
+        console.log('STRIPE_WEBHOOK_SIGNING_SECRET does not start with whsec_, it may be transformed');
+      }
+      
+      try {
+        const stripe = getStripe();
+        const event = stripe.webhooks.constructEvent(body, signature, signingSecret);
+        console.log(`Webhook signature verified successfully using STRIPE_WEBHOOK_SIGNING_SECRET for event: ${event.id}`);
+        return event;
+      } catch (error) {
+        console.error(`⚠️ Webhook signature verification failed with STRIPE_WEBHOOK_SIGNING_SECRET: ${error.message}`);
+      }
+    }
+    
+    if (!webhookSecret && !signingSecret) {
+      console.error('Neither STRIPE_WEBHOOK_SECRET nor STRIPE_WEBHOOK_SIGNING_SECRET environment variables are set');
       return null;
     }
     
-    console.log(`Using webhook secret with length: ${webhookSecret.length}`);
-    
-    const stripe = getStripe();
-    const event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-    
-    console.log(`Webhook signature verified successfully for event: ${event.id}`);
-    return event;
+    return null;
   } catch (error) {
-    console.error(`⚠️ Webhook signature verification failed: ${error.message}`);
+    console.error(`⚠️ General error in webhook verification: ${error.message}`);
     return null;
   }
 };
@@ -347,7 +383,7 @@ serve(async (req) => {
     // Get the stripe signature header
     const signature = req.headers.get('stripe-signature');
     
-    // Try to verify the webhook signature
+    // Try to verify the webhook signature with either secret
     let event = null;
     if (signature) {
       console.log(`[${requestTimestamp}] Attempting to verify Stripe signature...`);
