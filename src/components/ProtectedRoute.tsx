@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,13 +20,21 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
   const authCheckCompleted = useRef(false);
   const subscriptionCheckCompleted = useRef(false);
   const authStateChangeInProgress = useRef(false);
+  const timeoutRef = useRef<number | null>(null);
   const location = useLocation();
+
+  // Function to clear timeout safely
+  const clearTimeoutSafely = () => {
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  };
 
   // This effect runs once on mount to check the initial session and subscription
   useEffect(() => {
     // Track if the component is mounted to prevent state updates after unmount
     let isMounted = true;
-    let timeoutId: number | undefined;
     
     const checkSession = async () => {
       if (authCheckCompleted.current) return; // Prevent duplicate checks
@@ -90,6 +99,9 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
 
         // Mark authentication check as completed
         authCheckCompleted.current = true;
+        
+        // Clear any existing timeout since we've completed the check
+        clearTimeoutSafely();
       } catch (error) {
         console.error("Error in checkSession:", error);
         if (!isMounted) return;
@@ -110,26 +122,34 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
     }
 
     // Set a timeout to proceed anyway if we're stuck loading for too long
-    // Increased timeout to 4 seconds to give more time for subscription check
-    timeoutId = window.setTimeout(() => {
+    // We're increasing the timeout to 6 seconds to give more time for both checks
+    timeoutRef.current = window.setTimeout(() => {
       if (isMounted && isLoading) {
         console.log("Loading timeout reached - proceeding to render protected route");
+        console.log("Current state of checks:", {
+          authCheckCompleted: authCheckCompleted.current,
+          subscriptionCheckCompleted: subscriptionCheckCompleted.current,
+          loadingPhase,
+          isAuthenticated
+        });
+        
+        // IMPORTANT: Don't force a decision on subscription status if we're still checking
+        // This avoids the redirect loop
+        if (loadingPhase === "checking subscription" && !subscriptionCheckCompleted.current && isAuthenticated) {
+          console.log("Subscription check timed out - defaulting to allowing access");
+          // Default to allowing access rather than forcing a redirect that might be wrong
+          setHasSubscription(true);
+        }
+        
         setIsLoaded(true);
         setIsLoading(false);
         setInitialCheckComplete(true);
-        
-        // FIXED: Don't automatically set hasSubscription to true on timeout
-        // Instead, log the issue but maintain current subscription state
-        if (loadingPhase === "checking subscription" && !subscriptionCheckCompleted.current) {
-          console.log("Subscription check timed out - using current subscription state");
-          // We'll keep the current subscription state instead of overriding it
-        }
       }
-    }, 4000); // Increased timeout to 4 seconds for more reliable subscription checking
+    }, 6000); // Increased timeout to 6 seconds
 
     return () => {
       isMounted = false;
-      if (timeoutId) window.clearTimeout(timeoutId);
+      clearTimeoutSafely();
     };
   }, [requireSubscription, isAuthenticated]);
 
@@ -243,7 +263,8 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
   // Handle subscription check - only redirect to checkout when we have confirmed both:
   // 1. The user is authenticated
   // 2. They don't have a valid subscription
-  if (initialCheckComplete && requireSubscription && !hasSubscription && isAuthenticated) {
+  // 3. The subscription check has actually completed
+  if (initialCheckComplete && requireSubscription && !hasSubscription && isAuthenticated && subscriptionCheckCompleted.current) {
     console.log("User does not have valid subscription, redirecting to checkout");
     return <Navigate to="/checkout" state={{ from: location }} replace />;
   }

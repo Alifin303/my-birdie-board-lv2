@@ -46,6 +46,11 @@ export default function Checkout() {
 
         if (error) {
           console.error("Error fetching subscription:", error);
+          toast({
+            title: "Error",
+            description: "Could not fetch subscription details. Please try again.",
+            variant: "destructive",
+          });
         }
         
         if (!isMounted) return;
@@ -77,6 +82,11 @@ export default function Checkout() {
               
               if (stripeError) {
                 console.error("Error verifying with Stripe:", stripeError);
+                toast({
+                  title: "Verification Error",
+                  description: "Could not verify subscription with Stripe.",
+                  variant: "destructive",
+                });
               } else if (stripeData && stripeData.status) {
                 console.log("Stripe verification result:", stripeData);
                 
@@ -122,21 +132,19 @@ export default function Checkout() {
           console.log(`Checkout page determination: Valid subscription: ${hasValidSub}, Cancelled: ${isCancelled}`);
           if (isMounted) setShouldShowPage(!hasValidSub || isCancelled);
           
-          // Don't automatically redirect to dashboard, let the user choose
-          // This fixes the redirection loop issue
+          // Don't automatically redirect to dashboard, always show the page and let the user choose
+          // This prevents redirect loops
           if (hasValidSub && !isCancelled) {
             console.log("User has valid subscription and it's not cancelled - showing return to dashboard button");
-            if (isMounted) {
-              // Remove automatic redirect to dashboard
-              // setRedirectingToDashboard(true);
-              // setTimeout(() => {
-              //   if (isMounted) navigate("/dashboard");
-              // }, 500);
-            }
           }
         }
       } catch (err) {
         console.error("Error in checkSession:", err);
+        toast({
+          title: "Error",
+          description: "Something went wrong. Please try again.",
+          variant: "destructive",
+        });
       } finally {
         if (isMounted) {
           setIsLoading(false);

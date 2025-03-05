@@ -5,7 +5,10 @@
 
 // Helper function to check subscription validity - extracted from ProtectedRoute
 export const isSubscriptionValid = (subscription: any): boolean => {
-  if (!subscription) return false;
+  if (!subscription) {
+    console.log("No subscription provided to isSubscriptionValid");
+    return false;
+  }
   
   // Valid subscription statuses
   const validStatuses = ['active', 'trialing', 'paid'];
@@ -78,4 +81,20 @@ export const fetchUserSubscription = async (userId: string, supabaseClient: any)
     console.error("Error in fetchUserSubscription:", error);
     return null;
   }
+};
+
+// New helper function to check if we should try Stripe verification
+export const shouldVerifyWithStripe = (subscription: any): boolean => {
+  if (!subscription) return false;
+  
+  // If it's incomplete or past_due but has a valid end date in the future, we should verify
+  const hasValidPeriodEndDate = 
+    subscription.current_period_end && 
+    new Date(subscription.current_period_end) > new Date();
+    
+  const needsVerification = 
+    (subscription.status === 'incomplete' || subscription.status === 'past_due') && 
+    hasValidPeriodEndDate;
+    
+  return needsVerification;
 };
