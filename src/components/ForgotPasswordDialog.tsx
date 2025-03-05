@@ -46,11 +46,12 @@ export function ForgotPasswordDialog({
       
       // Get the proper site URL for redirection
       const siteUrl = window.location.origin;
-      console.log("Using redirect URL:", `${siteUrl}/reset-password`);
+      // Use the correct path that matches the router configuration in App.tsx
+      console.log("Using redirect URL:", `${siteUrl}/auth/reset-password`);
       
       // Use Supabase's built-in password reset functionality with the correct redirect URL
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(emailInput, {
-        redirectTo: `${siteUrl}/reset-password`,
+        redirectTo: `${siteUrl}/auth/reset-password`,
       });
       
       if (resetError) throw resetError;
