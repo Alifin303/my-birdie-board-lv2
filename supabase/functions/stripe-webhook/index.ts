@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.170.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.8.0';
 import Stripe from 'https://esm.sh/stripe@11.18.0?target=deno';
@@ -360,7 +361,21 @@ serve(async (req) => {
     });
   }
   
-  if (req.method !== 'POST') {
+  // For direct browser access - return a friendly message instead of auth error
+  if (req.method === 'GET') {
+    console.log(`[${requestTimestamp}] Handling direct browser GET request`);
+    return new Response(JSON.stringify({
+      message: "Stripe webhook endpoint is functional. This endpoint is meant to be called by Stripe, not directly accessed through a browser.",
+      info: "If you're testing, use the Stripe Dashboard to send test webhooks to this endpoint.",
+      url: req.url,
+      status: "ready"
+    }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+  
+  if (req.method !== 'POST' && req.method !== 'GET' && req.method !== 'OPTIONS') {
     console.error(`[${requestTimestamp}] Invalid method: ${req.method}`);
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
@@ -373,7 +388,7 @@ serve(async (req) => {
     const body = await req.text();
     console.log(`[${requestTimestamp}] Request body length: ${body.length} characters`);
     
-    if (body.length === 0) {
+    if (body.length === 0 && req.method === 'POST') {
       console.error(`[${requestTimestamp}] Request body is empty!`);
       return new Response(JSON.stringify({ error: 'Empty request body' }), {
         status: 400,
@@ -397,7 +412,7 @@ serve(async (req) => {
     }
     
     // If signature verification failed or there was no signature, parse the body directly
-    if (!event) {
+    if (!event && body.length > 0) {
       console.log(`[${requestTimestamp}] Processing event without signature verification (for debugging)`);
       try {
         event = JSON.parse(body);
@@ -410,7 +425,7 @@ serve(async (req) => {
       }
     }
     
-    if (!event || !event.type) {
+    if ((!event || !event.type) && req.method === 'POST') {
       console.error(`[${requestTimestamp}] Event object is invalid or missing type`);
       return new Response(JSON.stringify({ error: 'Invalid event object' }), {
         status: 400,
@@ -418,20 +433,33 @@ serve(async (req) => {
       });
     }
     
-    console.log(`[${requestTimestamp}] Event id: ${event.id}`);
-    console.log(`[${requestTimestamp}] Event type: ${event.type}`);
+    if (event && event.id) {
+      console.log(`[${requestTimestamp}] Event id: ${event.id}`);
+      console.log(`[${requestTimestamp}] Event type: ${event.type}`);
+    }
     
     try {
-      // Process the event with Supabase client
-      const supabase = getSupabaseAdmin();
-      await handleStripeEvent(event, supabase);
-      
-      // Return a success response
-      console.log(`[${requestTimestamp}] Webhook processing completed successfully`);
-      return new Response(JSON.stringify({ received: true }), {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      // Process the event with Supabase client if it's a valid POST request with event data
+      if (req.method === 'POST' && event && event.type) {
+        const supabase = getSupabaseAdmin();
+        await handleStripeEvent(event, supabase);
+        
+        // Return a success response
+        console.log(`[${requestTimestamp}] Webhook processing completed successfully`);
+        return new Response(JSON.stringify({ received: true }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } else if (req.method === 'POST') {
+        // This is a POST request but without valid event data
+        return new Response(JSON.stringify({ 
+          error: 'Invalid webhook data',
+          message: 'The request was received but did not contain valid Stripe event data'
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     } catch (processingError) {
       console.error(`[${requestTimestamp}] Error processing webhook: ${processingError.message}`);
       console.error(processingError.stack);
