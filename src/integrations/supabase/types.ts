@@ -138,7 +138,9 @@ export type Database = {
       }
       customer_subscriptions: {
         Row: {
+          cancel_at_period_end: boolean | null
           created_at: string
+          current_period_end: string | null
           customer_id: string
           id: string
           status: string
@@ -147,7 +149,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          cancel_at_period_end?: boolean | null
           created_at?: string
+          current_period_end?: string | null
           customer_id: string
           id?: string
           status?: string
@@ -156,7 +160,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          cancel_at_period_end?: boolean | null
           created_at?: string
+          current_period_end?: string | null
           customer_id?: string
           id?: string
           status?: string

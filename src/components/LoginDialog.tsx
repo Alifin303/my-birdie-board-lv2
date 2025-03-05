@@ -144,6 +144,7 @@ export function LoginDialog({ open, onOpenChange }: { open: boolean; onOpenChang
                   size="sm" 
                   className="px-0 font-normal h-auto"
                   onClick={handleForgotPasswordClick}
+                  type="button" // Add type="button" to prevent form submission
                 >
                   Forgot password?
                 </Button>
