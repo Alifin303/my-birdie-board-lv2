@@ -38,10 +38,31 @@ const formatDateFromUnixTimestamp = (timestamp: number): string => {
   return new Date(timestamp * 1000).toISOString();
 };
 
+// Debug function to log environment variables (without exposing values)
+const logEnvironmentStatus = () => {
+  const envVars = [
+    'STRIPE_SECRET_KEY',
+    'STRIPE_WEBHOOK_SECRET',
+    'SUPABASE_URL',
+    'SUPABASE_SERVICE_ROLE_KEY'
+  ];
+  
+  const status = envVars.reduce((acc, varName) => {
+    acc[varName] = !!Deno.env.get(varName);
+    return acc;
+  }, {});
+  
+  console.log('Environment variables status:', JSON.stringify(status));
+};
+
 serve(async (req) => {
+  // Log when a request is received with some details
+  console.log(`Webhook request received: ${req.method} ${new URL(req.url).pathname}`);
+  logEnvironmentStatus();
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    console.log("Received OPTIONS request");
+    console.log("Handling OPTIONS preflight request");
     return new Response(null, {
       status: 204,
       headers: corsHeaders,
@@ -56,11 +77,10 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-
-    console.log("Received webhook request");
     
     // Get the signature from the headers
     const signature = req.headers.get('stripe-signature');
+    console.log(`Stripe signature present: ${!!signature}`);
     
     if (!signature) {
       console.error("Missing Stripe signature in header");
@@ -80,12 +100,13 @@ serve(async (req) => {
     
     // Get the request body as text
     const body = await req.text();
+    console.log(`Request body length: ${body.length} characters`);
     
     // Create the event by verifying the signature
     let event;
     try {
       event = stripe.webhooks.constructEvent(body, signature, endpointSecret);
-      console.log(`Webhook event type: ${event.type}`);
+      console.log(`Webhook event verified. Type: ${event.type}, ID: ${event.id}`);
     } catch (err) {
       console.error(`Webhook signature verification failed: ${err.message}`);
       return new Response(JSON.stringify({ error: `Webhook signature verification failed: ${err.message}` }), {
@@ -96,6 +117,8 @@ serve(async (req) => {
     
     // Create Supabase admin client
     const supabase = getSupabaseAdmin();
+    
+    console.log(`Processing event type: ${event.type}`);
     
     // Handle different event types
     switch (event.type) {
@@ -131,7 +154,7 @@ serve(async (req) => {
               .single();
               
             if (queryError || !existingData) {
-              console.error(`Unable to find user for customer ${customerId}: ${queryError?.message}`);
+              console.error(`Unable to find user for customer ${customerId}: ${queryError?.message || 'No data found'}`);
               throw new Error(`Unable to find user for customer ${customerId}`);
             }
             
@@ -140,6 +163,7 @@ serve(async (req) => {
           
           // Fetch the subscription to get the status and other details
           const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          console.log(`Retrieved subscription details. Status: ${subscription.status}`);
           
           // Update or insert the subscription data in the database
           const { error: upsertError } = await supabase
@@ -163,7 +187,8 @@ serve(async (req) => {
           console.log(`Subscription ${subscriptionId} data saved to database`);
           
         } catch (error) {
-          console.error('Error processing checkout.session.completed event:', error);
+          console.error('Error processing checkout.session.completed event:', error.message);
+          console.error(error.stack);
         }
         break;
         
@@ -185,7 +210,7 @@ serve(async (req) => {
             .single();
             
           if (customerError || !customerData) {
-            console.error(`Unable to find user for customer ${customerId}: ${customerError?.message}`);
+            console.error(`Unable to find user for customer ${customerId}: ${customerError?.message || 'No data found'}`);
             throw new Error(`Unable to find user for customer ${customerId}`);
           }
           
@@ -210,7 +235,8 @@ serve(async (req) => {
           console.log(`Subscription ${subscriptionId} data updated in database`);
           
         } catch (error) {
-          console.error('Error processing customer.subscription.updated event:', error);
+          console.error('Error processing customer.subscription.updated event:', error.message);
+          console.error(error.stack);
         }
         break;
         
@@ -240,22 +266,25 @@ serve(async (req) => {
           console.log(`Customer ${customerId} marked as deleted in database`);
           
         } catch (error) {
-          console.error('Error processing customer.deleted event:', error);
+          console.error('Error processing customer.deleted event:', error.message);
+          console.error(error.stack);
         }
         break;
         
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        console.log(`Unhandled event type: ${event.type}. No action taken.`);
     }
     
     // Return a success response
+    console.log("Webhook processing completed successfully");
     return new Response(JSON.stringify({ received: true }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
     
   } catch (error) {
-    console.error(`Webhook error: ${error.message}`);
+    console.error(`Webhook general error: ${error.message}`);
+    console.error(error.stack);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
