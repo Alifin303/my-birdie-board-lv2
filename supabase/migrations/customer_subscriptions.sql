@@ -6,9 +6,13 @@ CREATE TABLE IF NOT EXISTS public.customer_subscriptions (
   customer_id TEXT NOT NULL,
   subscription_id TEXT,
   status TEXT NOT NULL DEFAULT 'created',
-  current_period_end TIMESTAMP WITH TIME ZONE,
-  cancel_at_period_end BOOLEAN DEFAULT false,
   price_id TEXT,
+  quantity INTEGER,
+  cancel_at_period_end BOOLEAN DEFAULT false,
+  cancel_at TIMESTAMP WITH TIME ZONE,
+  canceled_at TIMESTAMP WITH TIME ZONE,
+  current_period_start TIMESTAMP WITH TIME ZONE,
+  current_period_end TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL
 );

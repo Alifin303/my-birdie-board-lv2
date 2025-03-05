@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface StripeCustomer {
@@ -161,39 +162,6 @@ class StripeService {
     }
   }
 
-  async createSubscription(customerId: string, priceId: string, paymentMethodId?: string): Promise<StripeSubscription> {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
-
-    try {
-      console.log(`Creating subscription for customer: ${customerId}, price: ${priceId}`);
-      const { data, error } = await supabase.functions.invoke('stripe', {
-        body: {
-          action: 'create-subscription',
-          userId: session.user.id,
-          customerId,
-          priceId,
-          paymentMethodId
-        }
-      });
-
-      if (error) {
-        console.error("Error creating Stripe subscription:", error);
-        throw error;
-      }
-      
-      if (!data || !data.id) {
-        throw new Error('Invalid response from server when creating subscription');
-      }
-      
-      console.log(`Successfully created subscription: ${data.id}`);
-      return data;
-    } catch (error) {
-      console.error("Error in createSubscription:", error);
-      throw error;
-    }
-  }
-
   async getSubscription(subscriptionId: string): Promise<StripeSubscription> {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
@@ -221,34 +189,6 @@ class StripeService {
       return data;
     } catch (error) {
       console.error("Error in getSubscription:", error);
-      throw error;
-    }
-  }
-
-  async updatePaymentMethod(customerId: string, paymentMethodId: string): Promise<{ success: boolean }> {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
-
-    try {
-      console.log(`Updating payment method for customer: ${customerId}`);
-      const { data, error } = await supabase.functions.invoke('stripe', {
-        body: {
-          action: 'update-payment-method',
-          userId: session.user.id,
-          customer: customerId,
-          paymentMethod: paymentMethodId
-        }
-      });
-
-      if (error) {
-        console.error("Error updating payment method:", error);
-        throw error;
-      }
-      
-      console.log("Payment method updated successfully");
-      return data;
-    } catch (error) {
-      console.error("Error in updatePaymentMethod:", error);
       throw error;
     }
   }
@@ -341,50 +281,6 @@ class StripeService {
       if (!response.ok) {
         const errorText = await response.text();
         console.error("Error creating checkout session:", errorText);
-        
-        if (errorText.includes('deleted')) {
-          console.log('Customer has been deleted in Stripe. Will recreate the customer and try again.');
-          
-          // Update our database record to mark the customer as deleted
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-            await supabase
-              .from('customer_subscriptions')
-              .update({
-                status: 'customer_deleted',
-                subscription_id: null
-              })
-              .eq('user_id', session.user.id);
-            
-            // Get the user's email to create a new customer
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('email')
-              .eq('id', session.user.id)
-              .single();
-              
-            if (!profile || !profile.email) {
-              throw new Error('Could not find user email to recreate Stripe customer');
-            }
-            
-            // Create a new customer
-            const newCustomer = await this.createCustomer(profile.email);
-            
-            // Update the customer_subscriptions table with the new customer ID
-            await supabase
-              .from('customer_subscriptions')
-              .update({
-                customer_id: newCustomer.id,
-                status: 'created',
-                updated_at: new Date().toISOString()
-              })
-              .eq('user_id', session.user.id);
-              
-            // Try again with the new customer ID
-            return await this.createCheckoutSession(newCustomer.id, priceId, successUrl, cancelUrl);
-          }
-        }
-        
         throw new Error(`Failed to create checkout session: ${errorText}`);
       }
       
@@ -428,50 +324,6 @@ class StripeService {
       if (!response.ok) {
         const errorText = await response.text();
         console.error("Error creating billing portal session:", errorText);
-        
-        if (errorText.includes('deleted')) {
-          console.log('Customer has been deleted in Stripe. Will recreate the customer and try again.');
-          
-          // Update our database record to mark the customer as deleted
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-            await supabase
-              .from('customer_subscriptions')
-              .update({
-                status: 'customer_deleted',
-                subscription_id: null
-              })
-              .eq('user_id', session.user.id);
-            
-            // Get the user's email to create a new customer
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('email')
-              .eq('id', session.user.id)
-              .single();
-              
-            if (!profile || !profile.email) {
-              throw new Error('Could not find user email to recreate Stripe customer');
-            }
-            
-            // Create a new customer
-            const newCustomer = await this.createCustomer(profile.email);
-            
-            // Update the customer_subscriptions table with the new customer ID
-            await supabase
-              .from('customer_subscriptions')
-              .update({
-                customer_id: newCustomer.id,
-                status: 'created',
-                updated_at: new Date().toISOString()
-              })
-              .eq('user_id', session.user.id);
-              
-            // Try again with the new customer ID
-            return await this.createBillingPortalSession(newCustomer.id, returnUrl);
-          }
-        }
-        
         throw new Error(`Failed to create billing portal session: ${errorText}`);
       }
       
