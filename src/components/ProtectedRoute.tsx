@@ -45,6 +45,8 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
             console.error("Error fetching subscription:", error);
             throw error;
           }
+          
+          console.log("Retrieved subscription data:", subscription);
             
           // Valid subscription statuses according to Stripe
           const validStatuses = ['active', 'trialing', 'paid'];
@@ -52,7 +54,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
           // Check if subscription is valid OR if it's canceled but still in active period
           const hasValidSubscription = subscription && (
             validStatuses.includes(subscription.status) || 
-            (subscription.status === 'canceled' && subscription.current_period_end && 
+            (subscription.cancel_at_period_end === true && subscription.current_period_end && 
              new Date(subscription.current_period_end) > new Date())
           );
           
@@ -61,6 +63,8 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
             subscriptionStatus: subscription?.status || "none",
             cancelAtPeriodEnd: subscription?.cancel_at_period_end || false,
             currentPeriodEnd: subscription?.current_period_end || "none",
+            currentTime: new Date().toISOString(),
+            isStillValid: subscription?.current_period_end ? new Date(subscription.current_period_end) > new Date() : false,
             isValidStatus: hasValidSubscription
           });
           
@@ -106,6 +110,8 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
               console.error("Error fetching subscription on auth change:", error);
               throw error;
             }
+            
+            console.log("Retrieved subscription after auth change:", subscription);
               
             // Valid subscription statuses according to Stripe
             const validStatuses = ['active', 'trialing', 'paid'];
@@ -113,7 +119,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
             // Check if subscription is valid OR if it's canceled but still in active period
             const hasValidSub = subscription && (
               validStatuses.includes(subscription.status) || 
-              (subscription.status === 'canceled' && subscription.current_period_end && 
+              (subscription.cancel_at_period_end === true && subscription.current_period_end && 
                new Date(subscription.current_period_end) > new Date())
             );
             
@@ -122,6 +128,8 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
               status: subscription?.status || "none",
               cancelAtPeriodEnd: subscription?.cancel_at_period_end || false,
               currentPeriodEnd: subscription?.current_period_end || "none",
+              currentTime: new Date().toISOString(),
+              isStillValid: subscription?.current_period_end ? new Date(subscription.current_period_end) > new Date() : false,
               isValid: hasValidSub
             });
             

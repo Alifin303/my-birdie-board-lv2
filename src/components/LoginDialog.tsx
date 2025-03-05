@@ -52,7 +52,38 @@ export function LoginDialog({ open, onOpenChange }: { open: boolean; onOpenChang
       });
       
       onOpenChange(false);
-      navigate("/dashboard");
+      
+      // After successful login, check subscription status to determine redirect
+      const { data: subscription, error: subError } = await supabase
+        .from("customer_subscriptions")
+        .select("status, subscription_id, cancel_at_period_end, current_period_end")
+        .eq("user_id", data.user.id)
+        .maybeSingle();
+        
+      if (subError) {
+        console.error("Error checking subscription after login:", subError);
+        navigate("/dashboard");
+        return;
+      }
+      
+      console.log("Login - Subscription check:", subscription);
+      
+      // Valid subscription statuses
+      const validStatuses = ['active', 'trialing', 'paid'];
+      
+      // Check if subscription is valid OR if it's canceled but still in active period
+      const hasValidSubscription = subscription && (
+        validStatuses.includes(subscription.status) || 
+        (subscription.cancel_at_period_end === true && subscription.current_period_end && 
+         new Date(subscription.current_period_end) > new Date())
+      );
+      
+      if (hasValidSubscription) {
+        navigate("/dashboard");
+      } else {
+        // Redirect to checkout if no valid subscription
+        navigate("/checkout");
+      }
       
     } catch (error: any) {
       console.error("Login error:", error);
