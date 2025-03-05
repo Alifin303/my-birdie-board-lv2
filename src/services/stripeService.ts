@@ -47,17 +47,22 @@ export interface StripeEnvCheck {
   success: boolean;
   environmentVariables: Record<string, boolean>;
   message: string;
+  stripeConnectionValid?: boolean;
+  stripeMessage?: string;
 }
 
 class StripeService {
   async checkEnvironment(): Promise<StripeEnvCheck> {
     try {
+      console.log("Checking Stripe environment configuration...");
       const { data, error } = await supabase.functions.invoke('check-stripe-env');
       
       if (error) {
         console.error("Failed to check Stripe environment:", error);
         throw error;
       }
+      
+      console.log("Stripe environment check result:", data);
       return data;
     } catch (error) {
       console.error("Failed to check Stripe environment:", error);
@@ -69,11 +74,34 @@ class StripeService {
     }
   }
 
+  async validateStripeConfig(): Promise<boolean> {
+    try {
+      console.log("Validating Stripe configuration...");
+      const { data, error } = await supabase.functions.invoke('stripe', {
+        body: {
+          action: 'check-config'
+        }
+      });
+      
+      if (error) {
+        console.error("Error validating Stripe configuration:", error);
+        return false;
+      }
+      
+      console.log("Stripe configuration validation result:", data);
+      return data.success === true;
+    } catch (error) {
+      console.error("Error validating Stripe configuration:", error);
+      return false;
+    }
+  }
+
   async createCustomer(email: string): Promise<StripeCustomer> {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
 
     try {
+      console.log(`Creating Stripe customer for email: ${email}`);
       const { data, error } = await supabase.functions.invoke('stripe', {
         body: {
           action: 'create-customer',
@@ -91,6 +119,7 @@ class StripeService {
         throw new Error('Invalid response from server when creating customer');
       }
       
+      console.log(`Successfully created Stripe customer: ${data.id}`);
       return data;
     } catch (error) {
       console.error("Error in createCustomer:", error);
@@ -103,6 +132,7 @@ class StripeService {
     if (!session) throw new Error('Not authenticated');
 
     try {
+      console.log(`Creating subscription for customer: ${customerId}, price: ${priceId}`);
       const { data, error } = await supabase.functions.invoke('stripe', {
         body: {
           action: 'create-subscription',
@@ -122,6 +152,7 @@ class StripeService {
         throw new Error('Invalid response from server when creating subscription');
       }
       
+      console.log(`Successfully created subscription: ${data.id}`);
       return data;
     } catch (error) {
       console.error("Error in createSubscription:", error);
@@ -134,6 +165,7 @@ class StripeService {
     if (!session) throw new Error('Not authenticated');
 
     try {
+      console.log(`Getting subscription: ${subscriptionId}`);
       const { data, error } = await supabase.functions.invoke('stripe', {
         body: {
           action: 'get-subscription',
@@ -151,6 +183,7 @@ class StripeService {
         throw new Error('Invalid response from server when retrieving subscription');
       }
       
+      console.log(`Successfully retrieved subscription: ${data.id}`);
       return data;
     } catch (error) {
       console.error("Error in getSubscription:", error);
@@ -163,6 +196,7 @@ class StripeService {
     if (!session) throw new Error('Not authenticated');
 
     try {
+      console.log(`Updating payment method for customer: ${customerId}`);
       const { data, error } = await supabase.functions.invoke('stripe', {
         body: {
           action: 'update-payment-method',
@@ -177,6 +211,7 @@ class StripeService {
         throw error;
       }
       
+      console.log("Payment method updated successfully");
       return data;
     } catch (error) {
       console.error("Error in updatePaymentMethod:", error);
@@ -189,6 +224,7 @@ class StripeService {
     if (!session) throw new Error('Not authenticated');
 
     try {
+      console.log(`Cancelling subscription: ${subscriptionId}`);
       const { data, error } = await supabase.functions.invoke('stripe', {
         body: {
           action: 'cancel-subscription',
@@ -202,6 +238,7 @@ class StripeService {
         throw error;
       }
       
+      console.log(`Successfully cancelled subscription: ${data.id}`);
       return data;
     } catch (error) {
       console.error("Error in cancelSubscription:", error);
@@ -214,6 +251,7 @@ class StripeService {
     if (!session) throw new Error('Not authenticated');
 
     try {
+      console.log(`Reactivating subscription: ${subscriptionId}`);
       const { data, error } = await supabase.functions.invoke('stripe', {
         body: {
           action: 'reactivate-subscription',
@@ -227,6 +265,7 @@ class StripeService {
         throw error;
       }
       
+      console.log(`Successfully reactivated subscription: ${data.id}`);
       return data;
     } catch (error) {
       console.error("Error in reactivateSubscription:", error);
@@ -239,6 +278,7 @@ class StripeService {
     if (!session) throw new Error('Not authenticated');
 
     try {
+      console.log(`Creating checkout session for customer: ${customerId}, price: ${priceId}`);
       const { data, error } = await supabase.functions.invoke('stripe', {
         body: {
           action: 'create-checkout-session',
@@ -252,13 +292,14 @@ class StripeService {
 
       if (error) {
         console.error("Error creating checkout session:", error);
-        throw error;
+        throw new Error(`Failed to create checkout session: ${error.message}`);
       }
       
       if (!data || !data.url) {
         throw new Error('Invalid response from server when creating checkout session');
       }
       
+      console.log(`Checkout session created successfully: ${data.id}`);
       return data;
     } catch (error) {
       console.error("Error in createCheckoutSession:", error);
@@ -271,6 +312,7 @@ class StripeService {
     if (!session) throw new Error('Not authenticated');
 
     try {
+      console.log(`Creating billing portal session for customer: ${customerId}`);
       const { data, error } = await supabase.functions.invoke('stripe', {
         body: {
           action: 'create-billing-portal-session',
@@ -289,6 +331,7 @@ class StripeService {
         throw new Error('Invalid response from server when creating billing portal session');
       }
       
+      console.log(`Billing portal session created successfully`);
       return data;
     } catch (error) {
       console.error("Error in createBillingPortalSession:", error);
@@ -301,6 +344,7 @@ class StripeService {
     if (!session) throw new Error('Not authenticated');
 
     try {
+      console.log(`Getting prices for product: ${productId}`);
       const { data, error } = await supabase.functions.invoke('stripe', {
         body: {
           action: 'get-product-prices',
@@ -318,6 +362,7 @@ class StripeService {
         throw new Error('Invalid response from server when fetching product prices');
       }
       
+      console.log(`Found ${data.length} prices for product: ${productId}`);
       return data;
     } catch (error) {
       console.error("Error in getProductPrices:", error);

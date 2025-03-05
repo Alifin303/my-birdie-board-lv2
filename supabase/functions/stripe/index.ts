@@ -51,6 +51,11 @@ serve(async (req) => {
       throw new Error('Missing required action parameter');
     }
 
+    // Validate userId is present for most operations
+    if (!userId && action !== 'check-config') {
+      throw new Error('Missing required userId parameter');
+    }
+
     let result;
     switch (action) {
       case 'create-customer':
@@ -59,12 +64,19 @@ serve(async (req) => {
           throw new Error('Missing email for customer creation');
         }
         
-        result = await stripe.customers.create({
-          email: data.email,
-          metadata: {
-            supabaseUserId: userId,
-          },
-        });
+        console.log(`Creating customer for email: ${data.email}`);
+        try {
+          result = await stripe.customers.create({
+            email: data.email,
+            metadata: {
+              supabaseUserId: userId,
+            },
+          });
+          console.log(`Successfully created customer: ${result.id}`);
+        } catch (error) {
+          console.error(`Error creating Stripe customer: ${error.message}`);
+          throw error;
+        }
         break;
 
       case 'create-subscription':
@@ -128,7 +140,14 @@ serve(async (req) => {
           throw new Error('Missing subscriptionId for subscription retrieval');
         }
         
-        result = await stripe.subscriptions.retrieve(data.subscriptionId);
+        console.log(`Retrieving subscription: ${data.subscriptionId}`);
+        try {
+          result = await stripe.subscriptions.retrieve(data.subscriptionId);
+          console.log(`Successfully retrieved subscription: ${result.id}`);
+        } catch (error) {
+          console.error(`Error retrieving subscription: ${error.message}`);
+          throw error;
+        }
         break;
 
       case 'update-payment-method':
@@ -143,15 +162,22 @@ serve(async (req) => {
           throw new Error('Missing payment method ID for payment method update');
         }
         
-        await stripe.paymentMethods.attach(paymentMethod, {
-          customer,
-        });
-        await stripe.customers.update(customer, {
-          invoice_settings: {
-            default_payment_method: paymentMethod,
-          },
-        });
-        result = { success: true };
+        console.log(`Updating payment method: ${paymentMethod} for customer: ${customer}`);
+        try {
+          await stripe.paymentMethods.attach(paymentMethod, {
+            customer,
+          });
+          await stripe.customers.update(customer, {
+            invoice_settings: {
+              default_payment_method: paymentMethod,
+            },
+          });
+          result = { success: true };
+          console.log(`Successfully updated payment method for customer: ${customer}`);
+        } catch (error) {
+          console.error(`Error updating payment method: ${error.message}`);
+          throw error;
+        }
         break;
 
       case 'cancel-subscription':
@@ -160,9 +186,16 @@ serve(async (req) => {
           throw new Error('Missing subscriptionId for subscription cancellation');
         }
         
-        result = await stripe.subscriptions.update(data.subscriptionId, {
-          cancel_at_period_end: true,
-        });
+        console.log(`Cancelling subscription: ${data.subscriptionId}`);
+        try {
+          result = await stripe.subscriptions.update(data.subscriptionId, {
+            cancel_at_period_end: true,
+          });
+          console.log(`Successfully cancelled subscription: ${result.id}`);
+        } catch (error) {
+          console.error(`Error cancelling subscription: ${error.message}`);
+          throw error;
+        }
         break;
 
       case 'reactivate-subscription':
@@ -171,9 +204,16 @@ serve(async (req) => {
           throw new Error('Missing subscriptionId for subscription reactivation');
         }
         
-        result = await stripe.subscriptions.update(data.subscriptionId, {
-          cancel_at_period_end: false,
-        });
+        console.log(`Reactivating subscription: ${data.subscriptionId}`);
+        try {
+          result = await stripe.subscriptions.update(data.subscriptionId, {
+            cancel_at_period_end: false,
+          });
+          console.log(`Successfully reactivated subscription: ${result.id}`);
+        } catch (error) {
+          console.error(`Error reactivating subscription: ${error.message}`);
+          throw error;
+        }
         break;
 
       case 'get-product-prices':
@@ -218,6 +258,18 @@ serve(async (req) => {
         console.log(`Creating checkout session for customer: ${checkoutCustomerId}, price: ${checkoutPriceId}`);
         
         try {
+          // Verify that the customer exists before trying to create a checkout session
+          const customer = await stripe.customers.retrieve(checkoutCustomerId);
+          if (!customer || customer.deleted) {
+            throw new Error(`Customer ${checkoutCustomerId} does not exist or is deleted`);
+          }
+          
+          // Verify that the price exists before trying to create a checkout session
+          const price = await stripe.prices.retrieve(checkoutPriceId);
+          if (!price || !price.active) {
+            throw new Error(`Price ${checkoutPriceId} does not exist or is not active`);
+          }
+          
           result = await stripe.checkout.sessions.create({
             customer: checkoutCustomerId,
             payment_method_types: ['card'],
@@ -251,10 +303,39 @@ serve(async (req) => {
           throw new Error('Missing returnUrl for billing portal session creation');
         }
         
-        result = await stripe.billingPortal.sessions.create({
-          customer: data.customerId,
-          return_url: data.returnUrl,
-        });
+        console.log(`Creating billing portal session for customer: ${data.customerId}`);
+        try {
+          result = await stripe.billingPortal.sessions.create({
+            customer: data.customerId,
+            return_url: data.returnUrl,
+          });
+          console.log(`Successfully created billing portal session: ${result.url}`);
+        } catch (error) {
+          console.error(`Error creating billing portal session: ${error.message}`);
+          throw error;
+        }
+        break;
+
+      case 'check-config':
+        // Check if Stripe is properly configured
+        console.log('Checking Stripe configuration');
+        try {
+          // Attempt to make a simple API call to verify the API key works
+          const testCall = await stripe.customers.list({ limit: 1 });
+          result = { 
+            success: true, 
+            message: 'Stripe API key is valid and working correctly.',
+            testResult: testCall.data.length > 0 ? 'Successfully connected to Stripe API' : 'Connected to Stripe API but no customers found'
+          };
+          console.log('Stripe configuration check successful');
+        } catch (error) {
+          console.error(`Stripe configuration check failed: ${error.message}`);
+          result = { 
+            success: false, 
+            message: `Stripe API key validation failed: ${error.message}`,
+            error: error.message
+          };
+        }
         break;
 
       default:
@@ -271,9 +352,19 @@ serve(async (req) => {
     if (error.raw) {
       console.error(`Stripe raw error: ${JSON.stringify(error.raw)}`);
     }
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400,
-    });
+    
+    // Return a well-structured error response
+    return new Response(
+      JSON.stringify({ 
+        error: error.message,
+        code: error.code || 'unknown_error',
+        type: error.type || 'api_error',
+        detail: error.raw ? JSON.stringify(error.raw) : undefined
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      }
+    );
   }
 });

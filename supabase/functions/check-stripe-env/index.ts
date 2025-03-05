@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import Stripe from "https://esm.sh/stripe@13.11.0?target=deno";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -35,6 +36,32 @@ serve(async (req) => {
       }
     }
     
+    // If stripe key is present, test if it's valid
+    let stripeConnectionValid = false;
+    let stripeMessage = "";
+    
+    if (environmentVariables['STRIPE_SECRET_KEY']) {
+      try {
+        const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY') || '';
+        const stripe = new Stripe(stripeSecretKey, {
+          apiVersion: '2023-10-16',
+        });
+        
+        // Try making a simple API call to validate the key
+        await stripe.customers.list({ limit: 1 });
+        stripeConnectionValid = true;
+        stripeMessage = "Successfully connected to Stripe API";
+        console.log(stripeMessage);
+      } catch (stripeError) {
+        stripeConnectionValid = false;
+        stripeMessage = `Stripe API connection failed: ${stripeError.message}`;
+        console.error(stripeMessage);
+      }
+    } else {
+      stripeMessage = "Cannot test Stripe connection: STRIPE_SECRET_KEY is missing";
+      console.log(stripeMessage);
+    }
+    
     let message = allVarsPresent 
       ? "All required Stripe environment variables are configured properly."
       : `Missing required environment variables: ${missingVars.join(', ')}`;
@@ -43,9 +70,11 @@ serve(async (req) => {
     
     return new Response(
       JSON.stringify({
-        success: allVarsPresent,
+        success: allVarsPresent && stripeConnectionValid,
         environmentVariables,
-        message
+        message,
+        stripeConnectionValid,
+        stripeMessage
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
