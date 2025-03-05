@@ -75,32 +75,24 @@ export function ForgotPasswordDialog({
         }
       }
       
-      // Update the user's password with the temporary one
-      const { error: updateError } = await supabase.auth.admin.updateUserById(
-        emailInput,
-        { password: tempPassword }
-      );
-
-      if (updateError) {
-        // Fall back to the email reset if admin update fails
-        // This happens because the client doesn't have admin privileges
-        const { error: resetError } = await supabase.auth.resetPasswordForEmail(emailInput, {
-          redirectTo: `${window.location.origin}/auth/reset-password`,
+      // Try to update password with admin privileges
+      try {
+        const { error: updateError } = await supabase.auth.updateUser({
+          password: tempPassword
         });
         
-        if (resetError) throw resetError;
+        if (updateError) throw updateError;
+      } catch (updateError: any) {
+        console.log("Direct password update failed, trying edge function:", updateError);
         
-        setIsSuccess(true);
-        
-        toast({
-          title: "Reset email sent",
-          description: "Check your email for a link to reset your password",
+        // Send email with temporary password via Edge Function
+        const { error: sendError } = await supabase.functions.invoke("send-temp-password", {
+          body: { email: emailInput, tempPassword }
         });
         
-        return;
+        if (sendError) throw sendError;
       }
       
-      // If we got here, the password was updated successfully
       setIsSuccess(true);
       
       toast({
@@ -110,7 +102,7 @@ export function ForgotPasswordDialog({
       
     } catch (error: any) {
       console.error("Password reset error:", error);
-      setError(error.message || "Failed to send password reset");
+      setError(error.message || "Failed to send temporary password");
       
       toast({
         title: "Reset request failed",
