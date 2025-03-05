@@ -1,7 +1,7 @@
-
 /**
  * Calculates a handicap index based on a set of scores
  * This follows a simplified version of the World Handicap System
+ * with a maximum handicap index of 54
  */
 export const calculateHandicapIndex = (scores: number[]): number => {
   if (!scores || scores.length === 0) return 0;
@@ -27,10 +27,13 @@ export const calculateHandicapIndex = (scores: number[]): number => {
   
   // Apply a simplified handicap formula (0.96 multiplier as per WHS)
   // In a real implementation, this would consider course rating and slope
-  const handicapIndex = Math.max(0, (averageScore - 72) * 0.96);
+  const calculatedHandicap = Math.max(0, (averageScore - 72) * 0.96);
+
+  // Cap the handicap at 54, which is the maximum allowed in the World Handicap System
+  const cappedHandicap = Math.min(54, calculatedHandicap);
 
   // Return the exact calculated value (don't round) to match Supabase's decimal storage
-  return handicapIndex;
+  return cappedHandicap;
 };
 
 /**
@@ -102,6 +105,7 @@ export const updateUserHandicap = async (userId: string, rounds: number[]): Prom
     const { supabase } = await import('@/integrations/supabase');
     
     // Calculate the new handicap index - DO NOT round, store exact value in database
+    // The maximum handicap index is capped at 54 in the calculateHandicapIndex function
     const newHandicap = calculateHandicapIndex(rounds);
     console.log(`Updating handicap for user ${userId}: New handicap=${newHandicap} based on ${rounds.length} rounds`);
     

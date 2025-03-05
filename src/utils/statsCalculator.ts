@@ -1,4 +1,3 @@
-
 interface Round {
   id: number;
   date: string;
@@ -180,15 +179,17 @@ export const calculateStats = (rounds: Round[]): Stats => {
     bestDifferentials.reduce((sum, diff) => sum + diff, 0) / bestDifferentials.length : 0;
   
   // This is just for debugging - the actual handicap will come from the profile
+  // Apply 0.96 multiplier and ensure maximum of 54 as per WHS
   const calculatedHandicapIndex = scoresToUse > 0 ? 
-    Math.max(0, Math.round(averageDifferential * 0.96 * 10) / 10) : 0;
+    Math.min(54, Math.max(0, Math.round(averageDifferential * 0.96 * 10) / 10)) : 0;
   
   console.log("Calculated handicap:", {
     validRounds: validRoundsCount,
     scoresToUse,
     bestDifferentials,
     averageDifferential,
-    handicapIndex: calculatedHandicapIndex
+    handicapIndex: calculatedHandicapIndex,
+    maxCap: 54
   });
   
   const roundsNeededForHandicap = validRoundsCount >= ROUNDS_NEEDED_FOR_HANDICAP ? 
