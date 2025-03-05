@@ -24,11 +24,15 @@ const stripe = new Stripe(stripeSecretKey, {
 
 console.log('Stripe webhook function starting at ' + new Date().toISOString());
 console.log('This function is publicly accessible and no authorization is required');
+console.log('NO_AUTH=true, VERIFY_JWT=false in config.toml');
 
 serve(async (req) => {
+  // Log full request details for debugging
   const url = new URL(req.url);
   console.log(`[${new Date().toISOString()}] Received request: ${req.method} ${url.pathname}`);
   console.log(`[${new Date().toISOString()}] Request headers:`, Object.fromEntries([...req.headers.entries()]));
+  console.log(`[${new Date().toISOString()}] Client IP: ${req.headers.get('x-forwarded-for') || 'unknown'}`);
+  console.log(`[${new Date().toISOString()}] User Agent: ${req.headers.get('user-agent') || 'unknown'}`);
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -45,7 +49,13 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       message: "Stripe webhook endpoint is working. Send a POST request from Stripe to use it.",
       timestamp: new Date().toISOString(),
-      auth_status: "No authorization required - public access enabled"
+      auth_status: "No authorization required - public access enabled",
+      request_info: {
+        method: req.method,
+        url: req.url,
+        headers: Object.fromEntries([...req.headers.entries()]),
+        client_ip: req.headers.get('x-forwarded-for') || 'unknown',
+      }
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

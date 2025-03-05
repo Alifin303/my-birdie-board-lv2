@@ -1,0 +1,6 @@
+
+project_id = "rbhzesocmhazynkfyhst"
+
+[functions.test-public]
+verify_jwt = false
+no_auth = true
