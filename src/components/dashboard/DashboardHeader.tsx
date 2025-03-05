@@ -318,25 +318,31 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
           
           <div className="pt-4 border-t">
             <h4 className="font-medium mb-3">Subscription Management</h4>
+            
+            <Button 
+              type="button" 
+              variant="default" 
+              className="flex items-center gap-2 mb-2"
+              onClick={() => handleSubscriptionAction("create_checkout")}
+              disabled={checkoutLoading}
+            >
+              {checkoutLoading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <CreditCard className="w-4 h-4" />
+              )}
+              {checkoutLoading ? "Processing..." : "Add Subscription"}
+            </Button>
+            
             {subscriptionStatus === "none" || !subscriptionStatus ? (
-              <Button 
-                type="button" 
-                variant="default" 
-                className="flex items-center gap-2"
-                onClick={() => handleSubscriptionAction("create_checkout")}
-                disabled={checkoutLoading}
-              >
-                {checkoutLoading ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <CreditCard className="w-4 h-4" />
-                )}
-                {checkoutLoading ? "Processing..." : "Add Subscription"}
-              </Button>
+              <div className="flex items-center gap-2 text-sm py-1 px-2 bg-zinc-100 text-zinc-700 rounded-md w-fit mt-2">
+                <div className="w-2 h-2 bg-zinc-400 rounded-full"></div>
+                <span>No active subscription</span>
+              </div>
             ) : null}
             
             {subscriptionStatus === "active" && (
-              <div className="space-y-2">
+              <div className="space-y-2 mt-2">
                 <div className="flex items-center gap-2 text-sm py-1 px-2 bg-green-50 text-green-700 rounded-md w-fit">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span>Active Subscription</span>
@@ -360,26 +366,11 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
             )}
             
             {(subscriptionStatus === "canceled" || subscriptionStatus === "past_due" || subscriptionStatus === "unpaid") && (
-              <div className="space-y-2">
+              <div className="space-y-2 mt-2">
                 <div className="flex items-center gap-2 text-sm py-1 px-2 bg-amber-50 text-amber-700 rounded-md w-fit">
                   <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
                   <span>Subscription {subscriptionStatus === "canceled" ? "Canceled" : "Inactive"}</span>
                 </div>
-                
-                <Button 
-                  type="button" 
-                  variant="default" 
-                  className="flex items-center gap-2"
-                  onClick={() => handleSubscriptionAction("create_checkout")}
-                  disabled={checkoutLoading}
-                >
-                  {checkoutLoading ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <CreditCard className="w-4 h-4" />
-                  )}
-                  {checkoutLoading ? "Processing..." : "Reactivate Subscription"}
-                </Button>
               </div>
             )}
           </div>
