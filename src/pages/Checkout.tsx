@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -326,9 +327,8 @@ export default function Checkout() {
                   {isSubscriptionValid(subscription) && (
                     <Button 
                       onClick={() => navigate("/dashboard")} 
-                      variant="secondary"
+                      className="mt-4 w-full bg-accent hover:bg-accent/90 text-white shadow-lg transition-all duration-300"
                       size="lg"
-                      className="mt-4 w-full text-white shadow-lg transition-all duration-300"
                     >
                       Return to Dashboard
                     </Button>
