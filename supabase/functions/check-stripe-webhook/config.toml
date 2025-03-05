@@ -1,5 +1,5 @@
 
 project_id = "rbhzesocmhazynkfyhst"
-# Completely disable HTTP auth for this function
+
 [functions.check-stripe-webhook]
 verify_jwt = false
