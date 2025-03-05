@@ -82,22 +82,49 @@ serve(async (req) => {
         const subscription = event.data.object;
         console.log(`Processing subscription: ${subscription.id}, status: ${subscription.status}`);
         
-        // Update subscription in database
-        const { error: upsertError } = await supabase
+        // First check if the subscription already exists
+        const { data: existingSubscription, error: queryError } = await supabase
           .from('customer_subscriptions')
-          .upsert({
-            subscription_id: subscription.id,
-            customer_id: subscription.customer,
-            status: subscription.status,
-            user_id: subscription.metadata?.user_id || '', // Make sure to include user_id in metadata when creating subscriptions
-            updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'subscription_id'
-          });
+          .select()
+          .eq('subscription_id', subscription.id)
+          .single();
           
-        if (upsertError) {
-          console.error('Error updating subscription in database:', upsertError);
-          return new Response(JSON.stringify({ error: upsertError.message }), {
+        if (queryError && queryError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+          console.error('Error checking for existing subscription:', queryError);
+          return new Response(JSON.stringify({ error: queryError.message }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        
+        let result;
+        
+        if (existingSubscription) {
+          // Update existing subscription
+          result = await supabase
+            .from('customer_subscriptions')
+            .update({
+              status: subscription.status,
+              updated_at: new Date().toISOString()
+            })
+            .eq('subscription_id', subscription.id);
+        } else {
+          // Insert new subscription
+          result = await supabase
+            .from('customer_subscriptions')
+            .insert({
+              subscription_id: subscription.id,
+              customer_id: subscription.customer,
+              status: subscription.status,
+              user_id: subscription.metadata?.user_id || '', // Make sure to include user_id in metadata when creating subscriptions
+              updated_at: new Date().toISOString(),
+              created_at: new Date().toISOString()
+            });
+        }
+        
+        if (result.error) {
+          console.error('Error updating subscription in database:', result.error);
+          return new Response(JSON.stringify({ error: result.error.message }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
