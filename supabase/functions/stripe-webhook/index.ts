@@ -28,7 +28,9 @@ const supabaseAdmin = createClient(
 );
 
 serve(async (req) => {
-  console.log(`[${new Date().toISOString()}] Received ${req.method} request to ${req.url}`);
+  const url = new URL(req.url);
+  console.log(`[${new Date().toISOString()}] Received ${req.method} request to ${url.pathname}`);
+  console.log(`[${new Date().toISOString()}] Request headers:`, Object.fromEntries([...req.headers.entries()]));
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {

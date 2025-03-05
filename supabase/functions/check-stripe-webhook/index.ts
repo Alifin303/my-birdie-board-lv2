@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.170.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@11.18.0?target=deno";
 
@@ -11,7 +10,9 @@ const corsHeaders = {
 console.log('Check Stripe webhook function is starting at ' + new Date().toISOString());
 
 serve(async (req) => {
-  console.log(`[${new Date().toISOString()}] Received request: ${req.method} ${new URL(req.url).pathname}`);
+  const url = new URL(req.url);
+  console.log(`[${new Date().toISOString()}] Received request: ${req.method} ${url.pathname}`);
+  console.log(`[${new Date().toISOString()}] Request headers:`, Object.fromEntries([...req.headers.entries()]));
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -53,14 +54,14 @@ serve(async (req) => {
             length: signingSecret ? signingSecret.length : 0,
             starts_with_whsec: signingSecret ? signingSecret.startsWith('whsec_') : false,
             first_chars: signingSecret ? signingSecret.substring(0, 8) + '...' : '',
-            last_chars: signingSecret ? '...' + signingSecret.substring(signingSecret.length - 8) : '',
+            last_chars: '...' + signingSecret.substring(signingSecret.length - 8),
           }
         },
         stripe_key: {
           exists: !!stripeKey,
           length: stripeKey ? stripeKey.length : 0,
           first_chars: stripeKey ? stripeKey.substring(0, 8) + '...' : '',
-          last_chars: stripeKey ? '...' + stripeKey.substring(stripeKey.length - 8) : '',
+          last_chars: '...' + stripeKey.substring(stripeKey.length - 8),
         },
         supabase_url: Deno.env.get('SUPABASE_URL') ? 'exists' : 'missing',
         supabase_service_role: Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ? 'exists' : 'missing',
