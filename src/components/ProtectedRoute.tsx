@@ -14,19 +14,27 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [hasSubscription, setHasSubscription] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingPhase, setLoadingPhase] = useState<string>("initializing");
   const location = useLocation();
 
   useEffect(() => {
     const checkSession = async () => {
       try {
         setIsLoading(true);
+        setLoadingPhase("checking authentication");
+        
+        // Get session
         const { data: { session } } = await supabase.auth.getSession();
         const isAuth = !!session;
         setIsAuthenticated(isAuth);
+        
+        console.log(`Authentication check: User is ${isAuth ? "authenticated" : "not authenticated"}`);
 
         // If user is authenticated and subscription is required, check for active subscription
         if (isAuth && requireSubscription) {
-          console.log("Checking subscription for user:", session.user.id);
+          setLoadingPhase("checking subscription");
+          console.log(`Checking subscription for user: ${session.user.id}`);
+          
           const { data: subscription, error } = await supabase
             .from("customer_subscriptions")
             .select("status, subscription_id")
@@ -35,31 +43,30 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
           
           if (error) {
             console.error("Error fetching subscription:", error);
+            throw error;
           }
             
           // Valid subscription statuses according to Stripe
           const validStatuses = ['active', 'trialing', 'paid'];
           const hasValidSubscription = subscription && validStatuses.includes(subscription.status);
           
-          console.log("Subscription status:", subscription?.status, "Valid:", hasValidSubscription);
-          setHasSubscription(hasValidSubscription);
+          console.log(`Subscription check results:`, {
+            hasSubscriptionRecord: !!subscription,
+            subscriptionStatus: subscription?.status || "none",
+            isValidStatus: hasValidSubscription
+          });
           
-          // Log additional details for debugging
-          if (subscription) {
-            console.log("Subscription details:", {
-              id: subscription.subscription_id,
-              status: subscription.status,
-              isValid: hasValidSubscription
-            });
-          } else {
-            console.log("No subscription found for user");
-          }
+          setHasSubscription(hasValidSubscription);
+        } else if (!requireSubscription) {
+          // If subscription is not required, set hasSubscription to true to allow access
+          setHasSubscription(true);
         }
       } catch (error) {
-        console.error("Error checking session:", error);
+        console.error("Error in checkSession:", error);
         setIsAuthenticated(false);
         setHasSubscription(false);
       } finally {
+        setLoadingPhase("completed");
         setIsLoaded(true);
         setIsLoading(false);
       }
@@ -69,6 +76,9 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        setLoadingPhase("auth state changed");
+        console.log(`Auth state changed: ${_event}, User: ${session?.user?.id || "none"}`);
+        
         const isAuth = !!session;
         setIsAuthenticated(isAuth);
         
@@ -76,6 +86,8 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
         if (isAuth && requireSubscription) {
           setIsLoading(true);
           try {
+            console.log(`Checking subscription after auth change for user: ${session.user.id}`);
+            
             const { data: subscription, error } = await supabase
               .from("customer_subscriptions")
               .select("status, subscription_id")
@@ -84,24 +96,30 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
             
             if (error) {
               console.error("Error fetching subscription on auth change:", error);
+              throw error;
             }
               
             // Valid subscription statuses according to Stripe
             const validStatuses = ['active', 'trialing', 'paid'];
             const hasValidSub = subscription && validStatuses.includes(subscription.status);
-            setHasSubscription(hasValidSub);
             
-            console.log("Auth change - subscription check:", {
-              status: subscription?.status,
-              id: subscription?.subscription_id,
+            console.log(`Subscription check after auth change:`, {
+              hasSubscription: !!subscription,
+              status: subscription?.status || "none",
               isValid: hasValidSub
             });
+            
+            setHasSubscription(hasValidSub);
           } catch (error) {
             console.error("Error checking subscription on auth change:", error);
             setHasSubscription(false);
           } finally {
             setIsLoading(false);
           }
+        } else if (!requireSubscription) {
+          // If subscription is not required, set hasSubscription to true to allow access
+          setHasSubscription(true);
+          setIsLoading(false);
         } else {
           setIsLoading(false);
         }
@@ -115,24 +133,28 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
     };
   }, [requireSubscription]);
 
+  // Show loading state with more details
   if (!isLoaded || isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex flex-col items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+        <p className="text-gray-500">Loading: {loadingPhase}...</p>
       </div>
     );
   }
 
+  // Handle authentication check
   if (!isAuthenticated) {
+    console.log("User is not authenticated, redirecting to login");
     return <Navigate to="/" replace />;
   }
 
-  // If subscription is required but user doesn't have one, redirect to checkout
+  // Handle subscription check
   if (requireSubscription && !hasSubscription) {
     console.log("User does not have valid subscription, redirecting to checkout");
     return <Navigate to="/checkout" state={{ from: location }} replace />;
   }
 
-  console.log("User has valid subscription, allowing access to protected route");
+  console.log("Access granted to protected route");
   return <>{children}</>;
 };
