@@ -45,6 +45,20 @@ export const AuthRedirect = () => {
           }
 
           if (data?.session) {
+            // Check for recovery tokens by looking at the request URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const fullUrl = window.location.href;
+            
+            // If this is a recovery operation
+            if (fullUrl.includes('type=recovery') || data.session.user.recovery_sent_at) {
+              toast({
+                title: "Password Reset",
+                description: "Please enter your new password",
+              });
+              navigate("/auth/reset-password");
+              return;
+            }
+            
             toast({
               title: "Success",
               description: "You have successfully verified your email.",
@@ -95,6 +109,16 @@ export const AuthRedirect = () => {
           // Check if user is already logged in
           const { data } = await supabase.auth.getSession();
           if (data.session) {
+            // If this is a recovery operation (check the URL)
+            if (window.location.href.includes('type=recovery')) {
+              toast({
+                title: "Password Reset",
+                description: "Please enter your new password.",
+              });
+              navigate("/auth/reset-password");
+              return;
+            }
+            
             navigate("/dashboard");
             return;
           }
