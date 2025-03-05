@@ -32,7 +32,7 @@ const formatDateFromUnixTimestamp = (timestamp: number): string => {
 // Initialize Stripe with the secret key from environment variables
 const getStripe = () => {
   const stripeKey = Deno.env.get('STRIPE_SECRET_KEY') || '';
-  console.log(`STRIPE_SECRET_KEY starts with: ${stripeKey.substring(0, 4)}...`);
+  console.log(`STRIPE_SECRET_KEY length: ${stripeKey.length} chars`);
   
   if (!stripeKey) {
     throw new Error('Missing STRIPE_SECRET_KEY environment variable');
