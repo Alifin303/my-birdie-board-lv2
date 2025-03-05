@@ -5,16 +5,25 @@ import Stripe from "https://esm.sh/stripe@13.11.0?target=deno";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
 };
 
 serve(async (req) => {
+  console.log(`[${new Date().toISOString()}] Received ${req.method} request to check-stripe-env`);
+  console.log(`[${new Date().toISOString()}] Request headers:`, Object.fromEntries([...req.headers.entries()]));
+  console.log(`[${new Date().toISOString()}] Auth status: No authorization required - public access enabled`);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    console.log('['+new Date().toISOString()+'] Handling OPTIONS request');
+    return new Response(null, { 
+      status: 204,
+      headers: corsHeaders 
+    });
   }
   
   try {
-    console.log("Starting Stripe environment check");
+    console.log("Starting Stripe environment check - PUBLIC ACCESS ENABLED");
     
     // List of required environment variables
     const requiredEnvVars = [
@@ -91,7 +100,8 @@ serve(async (req) => {
         environmentVariables,
         message,
         stripeConnectionValid,
-        stripeMessage
+        stripeMessage,
+        auth_status: "No authorization required - public access enabled"
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -106,7 +116,8 @@ serve(async (req) => {
       JSON.stringify({
         success: false,
         error: error.message,
-        message: `Error checking Stripe environment: ${error.message}`
+        message: `Error checking Stripe environment: ${error.message}`,
+        auth_status: "No authorization required - public access enabled"
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
