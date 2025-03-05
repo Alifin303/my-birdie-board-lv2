@@ -33,13 +33,15 @@ interface UserMenuProps {
   subscriptionData: any;
   subscriptionLoading: boolean;
   subscriptionError: any;
+  refetchSubscription: () => void;
 }
 
 export const UserMenu = ({ 
   profileData,
   subscriptionData,
   subscriptionLoading,
-  subscriptionError
+  subscriptionError,
+  refetchSubscription
 }: UserMenuProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -153,8 +155,11 @@ export const UserMenu = ({
           
           if (!customerId) {
             const { data: userData } = await supabase.auth.getUser();
+            console.log("Creating new Stripe customer for:", userData.user?.email);
             const customer = await stripeService.createCustomer(userData.user?.email || "");
             customerId = customer.id;
+            
+            console.log("Created new Stripe customer:", customerId);
             
             await supabase
               .from('customer_subscriptions')
@@ -172,6 +177,7 @@ export const UserMenu = ({
           
           const productId = 'prod_Rsn4QjMLVpGDSl';
           
+          console.log("Fetching product prices for product:", productId);
           const prices = await stripeService.getProductPrices(productId);
           
           if (!prices || prices.length === 0) {
@@ -191,6 +197,7 @@ export const UserMenu = ({
             `${baseUrl}/dashboard?subscription=canceled`
           );
           
+          console.log("Created checkout session, redirecting to:", checkoutSession.url);
           window.location.href = checkoutSession.url;
           break;
         }
@@ -221,7 +228,7 @@ export const UserMenu = ({
             description: "Your subscription will end at the current billing period.",
           });
           
-          queryClient.invalidateQueries({ queryKey: ['subscription'] });
+          refetchSubscription();
           break;
         }
         
@@ -237,7 +244,7 @@ export const UserMenu = ({
             description: "Your subscription has been successfully reactivated.",
           });
           
-          queryClient.invalidateQueries({ queryKey: ['subscription'] });
+          refetchSubscription();
           break;
         }
       }
@@ -283,6 +290,7 @@ export const UserMenu = ({
               subscriptionLoading={subscriptionLoading}
               subscriptionError={subscriptionError}
               handleSubscriptionAction={handleSubscriptionAction}
+              refetchSubscription={refetchSubscription}
             />
           </Dialog>
           

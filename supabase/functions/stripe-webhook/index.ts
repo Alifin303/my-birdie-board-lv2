@@ -41,12 +41,23 @@ serve(async (req) => {
     // Get the raw body
     const body = await req.text();
     
+    console.log("Received webhook request with signature:", signature.substring(0, 20) + "...");
+    
+    let event;
     // Verify the webhook
-    const event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      stripeWebhookSecret
-    );
+    try {
+      event = stripe.webhooks.constructEvent(
+        body,
+        signature,
+        stripeWebhookSecret
+      );
+    } catch (err) {
+      console.error(`Webhook signature verification failed: ${err.message}`);
+      return new Response(
+        JSON.stringify({ error: `Webhook signature verification failed: ${err.message}` }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
+    }
 
     console.log(`Received Stripe webhook event: ${event.type}`);
 
@@ -63,6 +74,12 @@ serve(async (req) => {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
+        console.log("Processing checkout.session.completed:", session.id);
+        
+        if (!session.subscription) {
+          console.log("No subscription ID in checkout session, skipping update");
+          break;
+        }
         
         // Find customer by Stripe customer ID
         const { data: subscription, error: selectError } = await supabase
@@ -71,9 +88,13 @@ serve(async (req) => {
           .eq('customer_id', session.customer)
           .maybeSingle();
         
-        if (selectError) throw selectError;
+        if (selectError) {
+          console.error("Error finding customer subscription:", selectError);
+          throw selectError;
+        }
         
         if (subscription) {
+          console.log(`Updating subscription record for user ${subscription.user_id}`);
           // Update the subscription record
           const { error: updateError } = await supabase
             .from('customer_subscriptions')
@@ -84,7 +105,14 @@ serve(async (req) => {
             })
             .eq('id', subscription.id);
           
-          if (updateError) throw updateError;
+          if (updateError) {
+            console.error("Error updating subscription record:", updateError);
+            throw updateError;
+          }
+          
+          console.log(`Successfully updated subscription record for user ${subscription.user_id}`);
+        } else {
+          console.error(`No subscription record found for customer ${session.customer}`);
         }
         
         break;
@@ -92,6 +120,7 @@ serve(async (req) => {
       
       case 'customer.subscription.updated': {
         const subscriptionData = event.data.object;
+        console.log("Processing customer.subscription.updated:", subscriptionData.id);
         
         // Find subscription by Stripe subscription ID
         const { data: customerSubscription, error: selectError } = await supabase
@@ -100,9 +129,13 @@ serve(async (req) => {
           .eq('subscription_id', subscriptionData.id)
           .maybeSingle();
         
-        if (selectError) throw selectError;
+        if (selectError) {
+          console.error("Error finding customer subscription:", selectError);
+          throw selectError;
+        }
         
         if (customerSubscription) {
+          console.log(`Updating subscription status for user ${customerSubscription.user_id}`);
           // Determine the status
           let status;
           if (subscriptionData.cancel_at_period_end) {
@@ -113,6 +146,8 @@ serve(async (req) => {
             status = subscriptionData.status;
           }
           
+          console.log(`Setting subscription status to: ${status}`);
+          
           // Update the subscription record
           const { error: updateError } = await supabase
             .from('customer_subscriptions')
@@ -122,7 +157,14 @@ serve(async (req) => {
             })
             .eq('id', customerSubscription.id);
           
-          if (updateError) throw updateError;
+          if (updateError) {
+            console.error("Error updating subscription status:", updateError);
+            throw updateError;
+          }
+          
+          console.log(`Successfully updated subscription status for user ${customerSubscription.user_id}`);
+        } else {
+          console.error(`No subscription record found for subscription ID ${subscriptionData.id}`);
         }
         
         break;
@@ -130,6 +172,7 @@ serve(async (req) => {
       
       case 'customer.subscription.deleted': {
         const subscriptionData = event.data.object;
+        console.log("Processing customer.subscription.deleted:", subscriptionData.id);
         
         // Find subscription by Stripe subscription ID
         const { data: customerSubscription, error: selectError } = await supabase
@@ -138,9 +181,13 @@ serve(async (req) => {
           .eq('subscription_id', subscriptionData.id)
           .maybeSingle();
         
-        if (selectError) throw selectError;
+        if (selectError) {
+          console.error("Error finding customer subscription:", selectError);
+          throw selectError;
+        }
         
         if (customerSubscription) {
+          console.log(`Setting subscription to expired for user ${customerSubscription.user_id}`);
           // Update the subscription record
           const { error: updateError } = await supabase
             .from('customer_subscriptions')
@@ -150,7 +197,14 @@ serve(async (req) => {
             })
             .eq('id', customerSubscription.id);
           
-          if (updateError) throw updateError;
+          if (updateError) {
+            console.error("Error updating subscription to expired:", updateError);
+            throw updateError;
+          }
+          
+          console.log(`Successfully updated subscription to expired for user ${customerSubscription.user_id}`);
+        } else {
+          console.error(`No subscription record found for subscription ID ${subscriptionData.id}`);
         }
         
         break;

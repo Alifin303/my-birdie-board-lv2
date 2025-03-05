@@ -30,6 +30,7 @@ interface ProfileDialogProps {
   subscriptionLoading: boolean;
   subscriptionError: any;
   handleSubscriptionAction: (action: string) => Promise<void>;
+  refetchSubscription: () => void;
 }
 
 export const ProfileDialog = ({ 
@@ -42,7 +43,8 @@ export const ProfileDialog = ({
   subscriptionData,
   subscriptionLoading,
   subscriptionError,
-  handleSubscriptionAction
+  handleSubscriptionAction,
+  refetchSubscription
 }: ProfileDialogProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -157,6 +159,7 @@ export const ProfileDialog = ({
             handleSubscriptionAction={handleSubscriptionAction}
             loading={loading}
             queryClient={queryClient}
+            refetchSubscription={refetchSubscription}
           />
           
           <DialogFooter>
@@ -177,6 +180,7 @@ interface SubscriptionSectionProps {
   handleSubscriptionAction: (action: string) => Promise<void>;
   loading: boolean;
   queryClient: any;
+  refetchSubscription: () => void;
 }
 
 const SubscriptionSection = ({ 
@@ -185,53 +189,62 @@ const SubscriptionSection = ({
   subscriptionError, 
   handleSubscriptionAction,
   loading,
-  queryClient
+  queryClient,
+  refetchSubscription
 }: SubscriptionSectionProps) => {
   // Helper function to determine subscription state
   const getSubscriptionState = () => {
+    if (subscriptionLoading) return "loading";
+    if (subscriptionError) return "error";
     if (!subscriptionData) return "none";
     
-    // Check if subscription has a status field
-    if (subscriptionData.status === "none") return "none";
+    // Check for configuration errors
     if (subscriptionData.status === "config_error") return "config_error";
+    
+    // Check specific subscription states
+    if (subscriptionData.status === "none" || subscriptionData.status === "expired") return "none";
     if (subscriptionData.status === "error") return "error";
     
-    // Check if subscription is active
+    // Active subscription
     if (subscriptionData.status === "active") return "active";
     
-    // Check if subscription is cancelled but still has time remaining
-    if (subscriptionData.status === "cancelled") {
-      // If we have end date data, the subscription still has time remaining
-      return "cancelled_with_time";
+    // Cancelled subscription with time remaining
+    if (subscriptionData.status === "cancelled") return "cancelled_with_time";
+    
+    // Handle any other status (inactive, past_due, etc)
+    if (subscriptionData.data?.status === "canceled" || 
+        subscriptionData.data?.status === "incomplete_expired") {
+      return "none";
     }
     
-    // Default to none
+    // Default to none for any other unknown states
     return "none";
   };
   
   const subscriptionState = getSubscriptionState();
+  console.log("Current subscription state:", subscriptionState, subscriptionData);
   
   return (
     <div className="pt-4 border-t">
       <h4 className="font-medium mb-3">Subscription Management</h4>
-      {subscriptionLoading ? (
+      {subscriptionState === "loading" ? (
         <div className="flex items-center space-x-2">
           <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
           <span>Loading subscription info...</span>
         </div>
-      ) : subscriptionData?.status === "config_error" ? (
+      ) : subscriptionState === "config_error" ? (
         <div className="text-sm text-amber-600 mb-3">
           <p>Stripe configuration issue: {subscriptionData.message}</p>
           <p className="mt-2">Please contact support to enable subscriptions.</p>
         </div>
-      ) : subscriptionError || subscriptionData?.error ? (
+      ) : subscriptionState === "error" ? (
         <div className="text-sm text-destructive mb-3">
           <p>Error loading subscription data: {subscriptionError?.message || subscriptionData?.error}</p>
           <Button
             type="button"
             variant="outline"
             className="mt-2"
-            onClick={() => queryClient.invalidateQueries({ queryKey: ['subscription'] })}
+            onClick={() => refetchSubscription()}
           >
             Retry
           </Button>
