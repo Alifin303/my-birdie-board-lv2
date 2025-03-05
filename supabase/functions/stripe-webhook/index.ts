@@ -11,6 +11,7 @@ const corsHeaders = {
 };
 
 console.log('['+new Date().toISOString()+'] Stripe webhook function is starting up');
+console.log('['+new Date().toISOString()+'] No authorization is required for this function. Public access is enabled.');
 
 // Initialize Stripe with the secret key from environment variables
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
@@ -31,6 +32,7 @@ serve(async (req) => {
   const url = new URL(req.url);
   console.log(`[${new Date().toISOString()}] Received ${req.method} request to ${url.pathname}`);
   console.log(`[${new Date().toISOString()}] Request headers:`, Object.fromEntries([...req.headers.entries()]));
+  console.log(`[${new Date().toISOString()}] Auth status: No authorization required - public access enabled`);
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -43,7 +45,7 @@ serve(async (req) => {
   
   // For direct browser testing - return a friendly message
   if (req.method === 'GET') {
-    console.log('['+new Date().toISOString()+'] Handling GET request - browser test');
+    console.log('['+new Date().toISOString()+'] Handling GET request - browser test - PUBLIC ACCESS ENABLED');
     return new Response(
       JSON.stringify({ 
         message: "This is the Stripe webhook endpoint. POST requests from Stripe will be processed.",
@@ -54,6 +56,7 @@ serve(async (req) => {
           supabase_url_exists: !!Deno.env.get('SUPABASE_URL'),
           supabase_service_role_exists: !!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
         },
+        auth_status: "No authorization required - public access enabled",
         note: "This endpoint does not require authorization. POST requests from Stripe will be processed."
       }),
       { 
@@ -65,7 +68,7 @@ serve(async (req) => {
   
   if (req.method === 'POST') {
     try {
-      console.log('['+new Date().toISOString()+'] Processing POST request from Stripe');
+      console.log('['+new Date().toISOString()+'] Processing POST request from Stripe - PUBLIC ACCESS ENABLED');
       
       // Get the raw request body
       const body = await req.text();
@@ -83,7 +86,10 @@ serve(async (req) => {
         console.error('['+new Date().toISOString()+'] No Stripe signature found in request headers');
         console.log('Headers received:', Object.fromEntries([...req.headers.entries()]));
         return new Response(
-          JSON.stringify({ error: 'No Stripe signature found in request headers' }),
+          JSON.stringify({ 
+            error: 'No Stripe signature found in request headers',
+            auth_status: 'No authorization required - public access enabled'
+          }),
           { 
             status: 400, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -100,7 +106,10 @@ serve(async (req) => {
       if (!webhookSecret) {
         console.error('['+new Date().toISOString()+'] No webhook secret found in environment variables');
         return new Response(
-          JSON.stringify({ error: 'No webhook secret found in environment variables' }),
+          JSON.stringify({ 
+            error: 'No webhook secret found in environment variables',
+            auth_status: 'No authorization required - public access enabled'
+          }),
           { 
             status: 500, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -118,7 +127,10 @@ serve(async (req) => {
       } catch (err) {
         console.error(`[${new Date().toISOString()}] Error constructing webhook event: ${err.message}`);
         return new Response(
-          JSON.stringify({ error: `Webhook Error: ${err.message}` }),
+          JSON.stringify({ 
+            error: `Webhook Error: ${err.message}`,
+            auth_status: 'No authorization required - public access enabled'
+          }),
           { 
             status: 400, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -320,7 +332,10 @@ serve(async (req) => {
       
       // Return a success response
       return new Response(
-        JSON.stringify({ received: true }),
+        JSON.stringify({ 
+          received: true,
+          auth_status: 'No authorization required - public access enabled'
+        }),
         { 
           status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -331,7 +346,10 @@ serve(async (req) => {
       console.error(`Error stack: ${error.stack}`);
       
       return new Response(
-        JSON.stringify({ error: `Unexpected error: ${error.message}` }),
+        JSON.stringify({ 
+          error: `Unexpected error: ${error.message}`,
+          auth_status: 'No authorization required - public access enabled'
+        }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -344,6 +362,7 @@ serve(async (req) => {
   return new Response(
     JSON.stringify({ 
       error: 'Method not allowed',
+      auth_status: 'No authorization required - public access enabled',
       note: "This endpoint does not require authorization. Use GET for browser testing or POST for Stripe webhooks."
     }),
     { 

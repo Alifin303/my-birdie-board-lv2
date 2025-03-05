@@ -10,6 +10,7 @@ const corsHeaders = {
 };
 
 console.log('Check Stripe webhook function is starting at ' + new Date().toISOString());
+console.log('No authorization is required for this function. Public access is enabled.');
 
 serve(async (req) => {
   const url = new URL(req.url);
@@ -27,7 +28,7 @@ serve(async (req) => {
   
   // For direct browser access
   if (req.method === 'GET') {
-    console.log('['+new Date().toISOString()+'] Handling GET request');
+    console.log('['+new Date().toISOString()+'] Handling GET request - PUBLIC ACCESS ENABLED');
     try {
       console.log('['+new Date().toISOString()+'] Starting Stripe webhook secrets check...');
       
@@ -69,6 +70,7 @@ serve(async (req) => {
         supabase_service_role: Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ? 'exists' : 'missing',
         function_url: `https://${req.headers.get('host')}/stripe-webhook`,
         function_check_url: `https://${req.headers.get('host')}/check-stripe-webhook`,
+        auth_status: 'No authorization required - public access enabled',
       };
       
       // Log additional system info that might be useful
@@ -173,6 +175,7 @@ serve(async (req) => {
           sample_signature: sampleSignature,
           supabase_url_exists: !!Deno.env.get('SUPABASE_URL'),
           supabase_key_exists: !!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
+          auth_status: 'No authorization required - public access enabled',
           recommendations: [
             "Ensure your webhook secret in Supabase starts with 'whsec_'",
             "Make sure Stripe is sending to the correct URL: " + results.function_url,
@@ -192,7 +195,10 @@ serve(async (req) => {
       console.error(`Error stack: ${error.stack}`);
       
       return new Response(
-        JSON.stringify({ error: error.message }),
+        JSON.stringify({ 
+          error: error.message, 
+          auth_status: 'No authorization required - public access enabled'
+        }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 500,
@@ -207,7 +213,7 @@ serve(async (req) => {
       message: "Use GET method to check Stripe environment variables",
       url: req.url,
       method: req.method,
-      note: "This endpoint does not require authorization"
+      note: "This endpoint does not require authorization - public access enabled"
     }),
     {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
