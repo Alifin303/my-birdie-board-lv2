@@ -14,6 +14,7 @@ export default function Checkout() {
   const [subscription, setSubscription] = useState<any>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState<string>("");
   const [subscriptionEndDate, setSubscriptionEndDate] = useState<string | null>(null);
+  const [shouldShowPage, setShouldShowPage] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -68,6 +69,21 @@ export default function Checkout() {
             // Use the shared isSubscriptionValid function to check if it should be considered valid
             const hasValidSubscription = isSubscriptionValid(sub);
             console.log("Subscription is considered valid:", hasValidSubscription);
+          }
+          
+          // Determine if we should show the checkout page
+          // Only show for users with cancelled subscriptions or no valid subscription
+          const hasValidSub = isSubscriptionValid(sub);
+          const isCancelled = sub.cancel_at_period_end === true;
+          
+          // Show page only if subscription is cancelled or not valid
+          setShouldShowPage(!hasValidSub || isCancelled);
+          
+          // If user has a valid subscription and it's not cancelled, redirect to dashboard
+          if (hasValidSub && !isCancelled) {
+            console.log("User has valid subscription and it's not cancelled, redirecting to dashboard");
+            navigate("/dashboard");
+            return;
           }
         }
       } catch (err) {
@@ -248,8 +264,9 @@ export default function Checkout() {
                   {isSubscriptionValid(subscription) && (
                     <Button 
                       onClick={() => navigate("/dashboard")} 
-                      variant="outline"
-                      className="mt-4 w-full"
+                      variant="secondary"
+                      size="lg"
+                      className="mt-4 w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg transition-all duration-300"
                     >
                       Return to Dashboard
                     </Button>
