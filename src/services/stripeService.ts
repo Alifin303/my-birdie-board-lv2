@@ -51,7 +51,7 @@ export interface StripeEnvCheck {
 }
 
 const getSupabaseFunctionUrl = (functionName: string): string => {
-  return `https://rbhzesocmhazynkfyhst.supabase.co/functions/v1/${functionName}`;
+  return `https://rbhzesocmhazynkfyhst.functions.supabase.co/${functionName}`;
 };
 
 class StripeService {

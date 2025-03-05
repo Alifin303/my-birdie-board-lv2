@@ -10,8 +10,8 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
 };
 
-console.log('['+new Date().toISOString()+'] Stripe webhook function is starting up');
-console.log('['+new Date().toISOString()+'] No authorization is required for this function. Public access is enabled.');
+console.log('Stripe webhook function is starting at ' + new Date().toISOString());
+console.log('No authorization is required for this function. Public access is enabled.');
 
 // Initialize Stripe with the secret key from environment variables
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
@@ -30,13 +30,13 @@ const supabaseAdmin = createClient(
 
 serve(async (req) => {
   const url = new URL(req.url);
-  console.log(`[${new Date().toISOString()}] Received ${req.method} request to ${url.pathname}`);
-  console.log(`[${new Date().toISOString()}] Request headers:`, Object.fromEntries([...req.headers.entries()]));
-  console.log(`[${new Date().toISOString()}] Auth status: No authorization required - public access enabled`);
+  console.log(`Received ${req.method} request to ${url.pathname}`);
+  console.log(`Request headers:`, Object.fromEntries([...req.headers.entries()]));
+  console.log(`Auth status: No authorization required - public access enabled`);
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    console.log('['+new Date().toISOString()+'] Handling OPTIONS request');
+    console.log('Handling OPTIONS request');
     return new Response(null, { 
       status: 204,
       headers: corsHeaders 
@@ -45,7 +45,7 @@ serve(async (req) => {
   
   // For direct browser testing - return a friendly message
   if (req.method === 'GET') {
-    console.log('['+new Date().toISOString()+'] Handling GET request - browser test - PUBLIC ACCESS ENABLED');
+    console.log('Handling GET request - browser test - PUBLIC ACCESS ENABLED');
     return new Response(
       JSON.stringify({ 
         message: "This is the Stripe webhook endpoint. POST requests from Stripe will be processed.",
