@@ -46,14 +46,14 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
               <h3 className="text-xs sm:text-sm font-bold text-white mb-1">Upload & Store Your Scorecards</h3>
               <p className="text-white/80 mb-1 text-xs hidden sm:block">Keep a history of your rounds and track stats effortlessly.</p>
               <div className="mt-auto pt-1">
-                <Button 
-                  variant="link" 
-                  className="text-white p-0 hover:text-white/80 text-xs"
-                  as={Link}
-                  to="/about"
-                >
-                  Learn More <ArrowRight className="ml-1 h-3 w-3" />
-                </Button>
+                <Link to="/about">
+                  <Button 
+                    variant="link" 
+                    className="text-white p-0 hover:text-white/80 text-xs"
+                  >
+                    Learn More <ArrowRight className="ml-1 h-3 w-3" />
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
@@ -66,14 +66,14 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
               <h3 className="text-xs sm:text-sm font-bold text-white mb-1">Visual Progress Tracking</h3>
               <p className="text-white/80 mb-1 text-xs hidden sm:block">Charts and graphs give you insights into your strengths and areas to improve.</p>
               <div className="mt-auto pt-1">
-                <Button 
-                  variant="link" 
-                  className="text-white p-0 hover:text-white/80 text-xs"
-                  as={Link}
-                  to="/about"
-                >
-                  Learn More <ArrowRight className="ml-1 h-3 w-3" />
-                </Button>
+                <Link to="/about">
+                  <Button 
+                    variant="link" 
+                    className="text-white p-0 hover:text-white/80 text-xs"
+                  >
+                    Learn More <ArrowRight className="ml-1 h-3 w-3" />
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
@@ -86,14 +86,14 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
               <h3 className="text-xs sm:text-sm font-bold text-white mb-1">Handicap Generator</h3>
               <p className="text-white/80 mb-1 text-xs hidden sm:block">Get an accurate handicap calculation based on your rounds.</p>
               <div className="mt-auto pt-1">
-                <Button 
-                  variant="link" 
-                  className="text-white p-0 hover:text-white/80 text-xs"
-                  as={Link}
-                  to="/about"
-                >
-                  Learn More <ArrowRight className="ml-1 h-3 w-3" />
-                </Button>
+                <Link to="/about">
+                  <Button 
+                    variant="link" 
+                    className="text-white p-0 hover:text-white/80 text-xs"
+                  >
+                    Learn More <ArrowRight className="ml-1 h-3 w-3" />
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
@@ -106,14 +106,14 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
               <h3 className="text-xs sm:text-sm font-bold text-white mb-1">Course Leaderboards</h3>
               <p className="text-white/80 mb-1 text-xs hidden sm:block">Compete with friends and other golfers at your favorite courses.</p>
               <div className="mt-auto pt-1">
-                <Button 
-                  variant="link" 
-                  className="text-white p-0 hover:text-white/80 text-xs"
-                  as={Link}
-                  to="/about"
-                >
-                  Learn More <ArrowRight className="ml-1 h-3 w-3" />
-                </Button>
+                <Link to="/about">
+                  <Button 
+                    variant="link" 
+                    className="text-white p-0 hover:text-white/80 text-xs"
+                  >
+                    Learn More <ArrowRight className="ml-1 h-3 w-3" />
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
