@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface StripeCustomer {
@@ -97,15 +96,12 @@ class StripeService {
   }
 
   async createCustomer(email: string): Promise<StripeCustomer> {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
-
     try {
       console.log(`Creating Stripe customer for email: ${email}`);
       const { data, error } = await supabase.functions.invoke('stripe', {
         body: {
           action: 'create-customer',
-          userId: session.user.id,
+          userId: null,
           email
         }
       });

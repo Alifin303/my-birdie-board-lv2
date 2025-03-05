@@ -1,2 +1,7 @@
 
+# Project configuration
 project_id = "rbhzesocmhazynkfyhst"
+
+[functions.stripe]
+verify_jwt = false
+no_auth = true

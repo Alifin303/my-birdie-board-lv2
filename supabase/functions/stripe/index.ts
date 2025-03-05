@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.170.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.8.0';
 import Stripe from 'https://esm.sh/stripe@11.18.0?target=deno';
@@ -8,6 +9,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
 };
+
+console.log('['+new Date().toISOString()+'] Stripe function is starting up');
+console.log('['+new Date().toISOString()+'] No authorization is required for this function. Public access is enabled.');
 
 // Initialize Stripe with the secret key from environment variables
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
@@ -21,10 +25,20 @@ const getSupabaseClient = (req) => {
   const authHeader = req.headers.get('Authorization');
   
   if (!authHeader) {
-    throw new Error('Missing authorization header');
+    console.log('['+new Date().toISOString()+'] No authorization header provided, but this is OK as auth is disabled');
+    // Create a client without auth header since auth is disabled
+    return createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: { },
+        auth: { persistSession: false }
+      }
+    );
   }
   
-  // Create and return the Supabase client with the Authorization header
+  // If auth header is provided, use it (for backwards compatibility)
+  console.log('['+new Date().toISOString()+'] Authorization header provided, using it');
   return createClient(
     Deno.env.get('SUPABASE_URL') ?? '',
     Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -57,8 +71,12 @@ const verifyCustomer = async (customerId) => {
 
 // Serve HTTP requests
 serve(async (req) => {
+  console.log(`[${new Date().toISOString()}] Received ${req.method} request to Stripe function`);
+  console.log(`[${new Date().toISOString()}] Auth status: No authorization required - public access enabled`);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('['+new Date().toISOString()+'] Handling OPTIONS request');
     return new Response(null, {
       status: 204,
       headers: corsHeaders,
@@ -70,14 +88,20 @@ serve(async (req) => {
     const requestData = await req.json();
     const { action, userId } = requestData;
     
+    console.log(`[${new Date().toISOString()}] Processing action: ${action}`);
+    
     // Create a Supabase client
     let supabaseClient;
     try {
       supabaseClient = getSupabaseClient(req);
+      console.log('['+new Date().toISOString()+'] Successfully created Supabase client');
     } catch (error) {
-      console.error(`Supabase client error: ${error.message}`);
+      console.error(`[${new Date().toISOString()}] Supabase client error: ${error.message}`);
       return new Response(
-        JSON.stringify({ error: error.message }),
+        JSON.stringify({ 
+          error: error.message,
+          auth_status: "No authorization required - public access enabled" 
+        }),
         { 
           status: 401, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -352,10 +376,13 @@ serve(async (req) => {
         throw new Error(`Unknown action: ${action}`);
     }
   } catch (error) {
-    console.error(`Error: ${error.message}`);
+    console.error(`[${new Date().toISOString()}] Error: ${error.message}`);
     
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        auth_status: "No authorization required - public access enabled" 
+      }),
       { 
         status: 400, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
