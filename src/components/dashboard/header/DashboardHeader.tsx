@@ -50,6 +50,7 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
         }
         
         console.log("Database subscription status:", dbSubscription.status);
+        console.log("Database subscription record:", dbSubscription);
         
         // If we have an 'expired' status in the database, the subscription is completely gone
         if (dbSubscription.status === 'expired') {
@@ -124,6 +125,18 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
           }
         }
         
+        // If the status is 'active' in the database but we don't have a subscription ID,
+        // it might be that the webhook hasn't processed yet
+        if (dbSubscription.status === 'active') {
+          return {
+            status: "active",
+            data: {
+              customerId: dbSubscription.customer_id,
+              pendingWebhook: true
+            }
+          };
+        }
+        
         // Customer exists but no active subscription (default or 'created' status)
         return {
           status: "none",
@@ -136,7 +149,7 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
         return { status: "error", error: error.message };
       }
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 1, // 1 minute
     refetchOnWindowFocus: true,
   });
 
@@ -149,9 +162,21 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
       console.log("Subscription success detected in URL, refetching subscription data");
       toast({
         title: "Subscription Activated",
-        description: "Your subscription has been successfully activated.",
+        description: "Your subscription has been successfully activated. If it doesn't appear immediately, please refresh the page in a few moments.",
       });
+      
+      // Refetch immediately and then set up an interval to check a few more times
       refetchSubscription();
+      
+      const checkInterval = setInterval(() => {
+        console.log("Checking subscription status again...");
+        refetchSubscription();
+      }, 5000); // Check every 5 seconds
+      
+      // Stop checking after 30 seconds (6 checks)
+      setTimeout(() => {
+        clearInterval(checkInterval);
+      }, 30000);
       
       // Remove the query parameter
       const url = new URL(window.location.href);
