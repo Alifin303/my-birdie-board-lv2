@@ -1,2 +1,8 @@
 
 project_id = "rbhzesocmhazynkfyhst"
+
+[hooks]
+default = { http.csrf = false }
+
+[http_options]
+timeout = 50
