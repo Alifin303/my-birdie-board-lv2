@@ -66,6 +66,12 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
              new Date(subscription.current_period_end) > new Date())
           );
           
+          // Also consider incomplete subscriptions as valid if they are still in their period
+          const hasIncompleteButValidPeriod = subscription && 
+            subscription.status === "incomplete" && 
+            subscription.current_period_end && 
+            new Date(subscription.current_period_end) > new Date();
+          
           console.log(`Subscription check results:`, {
             hasSubscriptionRecord: !!subscription,
             subscriptionStatus: subscription?.status || "none",
@@ -73,11 +79,11 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
             currentPeriodEnd: subscription?.current_period_end || "none",
             currentTime: new Date().toISOString(),
             isStillValid: subscription?.current_period_end ? new Date(subscription.current_period_end) > new Date() : false,
-            isValidStatus: hasValidSubscription
+            isValidStatus: hasValidSubscription || hasIncompleteButValidPeriod
           });
           
           if (!isMounted) return;
-          setHasSubscription(hasValidSubscription);
+          setHasSubscription(hasValidSubscription || hasIncompleteButValidPeriod);
         } else if (!requireSubscription) {
           // If subscription is not required, set hasSubscription to true to allow access
           if (!isMounted) return;
@@ -138,6 +144,12 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
                new Date(subscription.current_period_end) > new Date())
             );
             
+            // Also consider incomplete subscriptions as valid if they are still in their period
+            const hasIncompleteButValidPeriod = subscription && 
+              subscription.status === "incomplete" && 
+              subscription.current_period_end && 
+              new Date(subscription.current_period_end) > new Date();
+            
             console.log(`Subscription check after auth change:`, {
               hasSubscription: !!subscription,
               status: subscription?.status || "none",
@@ -145,11 +157,11 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
               currentPeriodEnd: subscription?.current_period_end || "none",
               currentTime: new Date().toISOString(),
               isStillValid: subscription?.current_period_end ? new Date(subscription.current_period_end) > new Date() : false,
-              isValid: hasValidSub
+              isValid: hasValidSub || hasIncompleteButValidPeriod
             });
             
             if (!isMounted) return;
-            setHasSubscription(hasValidSub);
+            setHasSubscription(hasValidSub || hasIncompleteButValidPeriod);
           } catch (error) {
             console.error("Error checking subscription on auth change:", error);
             if (!isMounted) return;

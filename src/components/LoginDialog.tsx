@@ -80,7 +80,13 @@ export function LoginDialog({ open, onOpenChange }: { open: boolean; onOpenChang
          new Date(subscription.current_period_end) > new Date())
       );
       
-      if (hasValidSubscription) {
+      // Also consider incomplete subscriptions as valid if they are still in their period
+      const hasIncompleteButValidPeriod = subscription && 
+        subscription.status === "incomplete" && 
+        subscription.current_period_end && 
+        new Date(subscription.current_period_end) > new Date();
+      
+      if (hasValidSubscription || hasIncompleteButValidPeriod) {
         navigate("/dashboard");
       } else {
         // Redirect to checkout if no valid subscription
