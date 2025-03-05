@@ -49,9 +49,10 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
                 <Button 
                   variant="link" 
                   className="text-white p-0 hover:text-white/80 text-xs"
-                  onClick={onStartQuiz}
+                  as={Link}
+                  to="/about"
                 >
-                  Get Started <ArrowRight className="ml-1 h-3 w-3" />
+                  Learn More <ArrowRight className="ml-1 h-3 w-3" />
                 </Button>
               </div>
             </CardContent>
@@ -68,9 +69,10 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
                 <Button 
                   variant="link" 
                   className="text-white p-0 hover:text-white/80 text-xs"
-                  onClick={onStartQuiz}
+                  as={Link}
+                  to="/about"
                 >
-                  Get Started <ArrowRight className="ml-1 h-3 w-3" />
+                  Learn More <ArrowRight className="ml-1 h-3 w-3" />
                 </Button>
               </div>
             </CardContent>
@@ -87,9 +89,10 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
                 <Button 
                   variant="link" 
                   className="text-white p-0 hover:text-white/80 text-xs"
-                  onClick={onStartQuiz}
+                  as={Link}
+                  to="/about"
                 >
-                  Get Started <ArrowRight className="ml-1 h-3 w-3" />
+                  Learn More <ArrowRight className="ml-1 h-3 w-3" />
                 </Button>
               </div>
             </CardContent>
@@ -106,9 +109,10 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
                 <Button 
                   variant="link" 
                   className="text-white p-0 hover:text-white/80 text-xs"
-                  onClick={onStartQuiz}
+                  as={Link}
+                  to="/about"
                 >
-                  Get Started <ArrowRight className="ml-1 h-3 w-3" />
+                  Learn More <ArrowRight className="ml-1 h-3 w-3" />
                 </Button>
               </div>
             </CardContent>
