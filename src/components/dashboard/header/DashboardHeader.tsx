@@ -47,24 +47,37 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
         
         // If we have a subscription ID, get details from Stripe
         if (data.subscription_id) {
-          const subscription = await stripeService.getSubscription(data.subscription_id);
-          
-          // Format subscription data
-          const isActive = subscription.status === 'active' || subscription.status === 'trialing';
-          const isCancelled = subscription.cancel_at_period_end;
-          
-          const endDate = new Date(subscription.current_period_end * 1000).toLocaleDateString();
-          
-          return {
-            status: isActive ? (isCancelled ? "cancelled" : "active") : "inactive",
-            data: {
-              id: subscription.id,
-              customerId: data.customer_id,
-              status: subscription.status,
-              endDate,
-              priceId: subscription.items.data[0]?.price?.id
-            }
-          };
+          try {
+            const subscription = await stripeService.getSubscription(data.subscription_id);
+            
+            // Format subscription data
+            const isActive = subscription.status === 'active' || subscription.status === 'trialing';
+            const isCancelled = subscription.cancel_at_period_end;
+            
+            const endDate = new Date(subscription.current_period_end * 1000).toLocaleDateString();
+            
+            return {
+              status: isActive ? (isCancelled ? "cancelled" : "active") : "inactive",
+              data: {
+                id: subscription.id,
+                customerId: data.customer_id,
+                status: subscription.status,
+                endDate,
+                priceId: subscription.items.data[0]?.price?.id
+              }
+            };
+          } catch (subscriptionError) {
+            console.error("Error fetching subscription details from Stripe:", subscriptionError);
+            
+            // Return customer ID so we can still manage the subscription
+            return {
+              status: "error",
+              error: subscriptionError.message,
+              data: {
+                customerId: data.customer_id
+              }
+            };
+          }
         }
         
         // Customer exists but no subscription

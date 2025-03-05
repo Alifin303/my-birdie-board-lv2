@@ -168,8 +168,30 @@ export const UserMenu = ({
               });
           }
           
-          // Use a test price ID that works with Stripe Checkout for testing
-          const priceId = 'price_1OtfvdKvwWfM66JCUMZGhw9c';
+          // Check Stripe environment and get available prices
+          const envCheck = await stripeService.checkEnvironment();
+          if (!envCheck.success) {
+            throw new Error(`Stripe environment not configured properly: ${envCheck.message}`);
+          }
+          
+          // Use the product ID to create a checkout for the first available price
+          // We'll retrieve available prices for this product from Stripe
+          const productId = 'prod_Rsn4QjMLVpGDSl'; // Using the product ID you provided
+          
+          // Get prices for the product
+          const prices = await stripeService.getProductPrices(productId);
+          
+          if (!prices || prices.length === 0) {
+            throw new Error("No prices found for this product. Please check your Stripe configuration.");
+          }
+          
+          console.log("Available prices:", prices);
+          
+          // Use the first available price
+          const priceId = prices[0].id;
+          
+          console.log(`Using price ID: ${priceId} for checkout`);
+          
           const checkoutSession = await stripeService.createCheckoutSession(
             customerId,
             priceId,

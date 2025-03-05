@@ -98,6 +98,19 @@ serve(async (req) => {
         });
         break;
 
+      case 'get-product-prices':
+        // Get all prices for a specific product
+        console.log(`Getting prices for product: ${data.productId}`);
+        const prices = await stripe.prices.list({
+          product: data.productId,
+          active: true,
+          expand: ['data.product'],
+        });
+        
+        console.log(`Found ${prices.data.length} prices for product ${data.productId}`);
+        result = prices.data;
+        break;
+
       case 'create-checkout-session':
         // Create a checkout session for subscription
         const { priceId: checkoutPriceId, customerId: checkoutCustomerId, successUrl, cancelUrl } = data;

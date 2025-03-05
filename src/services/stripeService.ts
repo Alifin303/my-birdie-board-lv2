@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface StripeCustomer {
@@ -20,6 +19,18 @@ export interface StripeSubscription {
       }
     }>
   };
+}
+
+export interface StripePrice {
+  id: string;
+  product: string;
+  unit_amount: number;
+  currency: string;
+  recurring: {
+    interval: string;
+    interval_count: number;
+  };
+  nickname?: string;
 }
 
 export interface CheckoutSession {
@@ -182,6 +193,22 @@ class StripeService {
         userId: session.user.id,
         customerId,
         returnUrl
+      }
+    });
+
+    if (error) throw error;
+    return data;
+  }
+
+  async getProductPrices(productId: string): Promise<StripePrice[]> {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase.functions.invoke('stripe', {
+      body: {
+        action: 'get-product-prices',
+        userId: session.user.id,
+        productId
       }
     });
 
