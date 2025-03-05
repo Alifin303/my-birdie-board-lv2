@@ -16,6 +16,8 @@ serve(async (req) => {
   const url = new URL(req.url);
   console.log(`[${new Date().toISOString()}] Received request: ${req.method} ${url.pathname}`);
   console.log(`[${new Date().toISOString()}] Request headers:`, Object.fromEntries([...req.headers.entries()]));
+  console.log(`[${new Date().toISOString()}] Client IP: ${req.headers.get('x-forwarded-for') || 'unknown'}`);
+  console.log(`[${new Date().toISOString()}] User Agent: ${req.headers.get('user-agent') || 'unknown'}`);
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -71,6 +73,13 @@ serve(async (req) => {
         function_url: `https://${req.headers.get('host')}/stripe-webhook`,
         function_check_url: `https://${req.headers.get('host')}/check-stripe-webhook`,
         auth_status: 'No authorization required - public access enabled',
+        request_info: {
+          method: req.method,
+          url: req.url,
+          headers: Object.fromEntries([...req.headers.entries()]),
+          client_ip: req.headers.get('x-forwarded-for') || 'unknown',
+          user_agent: req.headers.get('user-agent') || 'unknown',
+        }
       };
       
       // Log additional system info that might be useful
