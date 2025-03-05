@@ -4,9 +4,15 @@ import { MainContent } from "@/components/MainContent";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const navigate = useNavigate();
+
+  const handleStartQuiz = () => {
+    navigate('/quiz');
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -47,7 +53,7 @@ const Index = () => {
           </div>
         </header>
         <div className="relative z-[1]">
-          <MainContent />
+          <MainContent onStartQuiz={handleStartQuiz} />
         </div>
       </div>
       <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />

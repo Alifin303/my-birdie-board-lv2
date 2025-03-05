@@ -3,10 +3,13 @@ import React from 'react';
 import { Button } from './ui/button';
 import { ArrowRight, Upload, BarChart2, Award, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { SignUpDialog } from './SignUpDialog';
 import { Card, CardContent } from './ui/card';
 
-export const MainContent = () => {
+interface MainContentProps {
+  onStartQuiz: () => void;
+}
+
+export const MainContent = ({ onStartQuiz }: MainContentProps) => {
   return (
     <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
       {/* Hero Section - Reduced padding */}
@@ -20,7 +23,14 @@ export const MainContent = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-4">
-            <SignUpDialog />
+            <Button 
+              size="lg"
+              className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300"
+              onClick={onStartQuiz}
+            >
+              <span className="mr-2">🏌️‍♂️</span>
+              Take the quiz to get started
+            </Button>
           </div>
         </div>
       </div>
@@ -102,8 +112,15 @@ export const MainContent = () => {
       <div className="w-full py-4 sm:py-6 bg-black/30 backdrop-blur-sm mt-2 sm:mt-3">
         <div className="max-w-5xl mx-auto text-center px-4">
           <h2 className="text-lg sm:text-xl font-bold text-white mb-2">Ready to take your game to the next level?</h2>
-          <p className="text-sm sm:text-base text-white/90 mb-3">Sign up today and start tracking your journey to better golf!</p>
-          <SignUpDialog />
+          <p className="text-sm sm:text-base text-white/90 mb-3">Find out how BirdieBoard can help improve your golf game!</p>
+          <Button 
+            size="lg"
+            className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300"
+            onClick={onStartQuiz}
+          >
+            <span className="mr-2">🏌️‍♂️</span>
+            Take the quiz
+          </Button>
         </div>
       </div>
     </div>
