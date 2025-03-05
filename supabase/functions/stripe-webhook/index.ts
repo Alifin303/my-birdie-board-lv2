@@ -101,7 +101,7 @@ serve(async (req) => {
         );
       }
       
-      console.log(`[${requestId}] [${new Date().toISOString()}] Stripe signature: ${signature.substring(0, 20)}...`);
+      console.log(`[${requestId}] [${new Date().toISOString()}] Stripe signature received: ${signature.substring(0, 20)}...`);
       
       // Get the webhook secret from environment variables
       // Try both possible environment variable names
@@ -122,23 +122,16 @@ serve(async (req) => {
         );
       }
       
-      console.log(`[${requestId}] [${new Date().toISOString()}] Using webhook secret: ${webhookSecret.substring(0, 8)}...`);
-      
-      // Instead of using constructEvent, we'll manually process the webhook
-      // This avoids the SubtleCryptoProvider synchronous context error
+      // Parse the body as JSON directly - skipping Stripe's signature verification
+      // This is due to the SubtleCryptoProvider issue in Deno
       let event;
       try {
-        // Parse the body as JSON instead of using Stripe's constructEvent
-        const jsonData = JSON.parse(body);
+        event = JSON.parse(body);
         
-        // Note: We're skipping signature verification here
-        // In a production environment, you should implement your own verification logic
-        // or use a different approach that works with Deno's async nature
+        console.log(`[${requestId}] [${new Date().toISOString()}] Successfully parsed webhook data, type: ${event.type}`);
         
-        console.log(`[${requestId}] [${new Date().toISOString()}] Successfully parsed webhook data, type: ${jsonData.type}`);
-        
-        // Use the parsed data directly
-        event = jsonData;
+        // Note: we're not using stripe.webhooks.constructEvent due to the Deno limitation
+        // In a production environment, you should implement alternate verification
       } catch (err) {
         console.error(`[${requestId}] [${new Date().toISOString()}] Error parsing webhook data: ${err.message}`);
         return new Response(
