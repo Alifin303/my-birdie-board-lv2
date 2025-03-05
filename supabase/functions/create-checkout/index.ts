@@ -62,6 +62,9 @@ serve(async (req) => {
       });
     }
     
+    // Log the actual stripe price ID being used for debugging
+    console.log('Using Stripe Price ID:', stripePriceId);
+    
     if (!supabaseUrl || !supabaseKey) {
       console.error('Missing Supabase credentials');
       return new Response(JSON.stringify({ error: 'Supabase configuration missing' }), {
@@ -139,6 +142,21 @@ serve(async (req) => {
     try {
       const finalReturnUrl = return_url || 'https://rbhzesocmhazynkfyhst.supabase.co/dashboard';
       console.log('Creating checkout session with return URL:', finalReturnUrl);
+      
+      // First try to fetch the price from Stripe to verify it exists
+      try {
+        const price = await stripe.prices.retrieve(stripePriceId);
+        console.log('Successfully retrieved price from Stripe:', price.id);
+      } catch (priceError) {
+        console.error('Error retrieving price from Stripe:', priceError);
+        return new Response(JSON.stringify({ 
+          error: `Invalid price ID: ${stripePriceId}. Error: ${priceError.message}`,
+          hint: 'Check the STRIPE_PRICE_ID in your environment variables. It should be a price ID (price_xxx) not a product ID (prod_xxx).'
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
       
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
