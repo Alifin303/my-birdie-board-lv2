@@ -18,20 +18,27 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
   const location = useLocation();
 
   useEffect(() => {
+    // Track if the component is mounted to prevent state updates after unmount
+    let isMounted = true;
+    
     const checkSession = async () => {
       try {
+        if (!isMounted) return;
         setIsLoading(true);
         setLoadingPhase("checking authentication");
         
         // Get session
         const { data: { session } } = await supabase.auth.getSession();
         const isAuth = !!session;
+        
+        if (!isMounted) return;
         setIsAuthenticated(isAuth);
         
         console.log(`Authentication check: User is ${isAuth ? "authenticated" : "not authenticated"}`);
 
         // If user is authenticated and subscription is required, check for active subscription
         if (isAuth && requireSubscription) {
+          if (!isMounted) return;
           setLoadingPhase("checking subscription");
           console.log(`Checking subscription for user: ${session.user.id}`);
           
@@ -46,6 +53,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
             throw error;
           }
           
+          if (!isMounted) return;
           console.log("Retrieved subscription data:", subscription);
             
           // Valid subscription statuses according to Stripe
@@ -68,16 +76,20 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
             isValidStatus: hasValidSubscription
           });
           
+          if (!isMounted) return;
           setHasSubscription(hasValidSubscription);
         } else if (!requireSubscription) {
           // If subscription is not required, set hasSubscription to true to allow access
+          if (!isMounted) return;
           setHasSubscription(true);
         }
       } catch (error) {
         console.error("Error in checkSession:", error);
+        if (!isMounted) return;
         setIsAuthenticated(false);
         setHasSubscription(false);
       } finally {
+        if (!isMounted) return;
         setLoadingPhase("completed");
         setIsLoaded(true);
         setIsLoading(false);
@@ -88,6 +100,8 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        if (!isMounted) return;
+        
         setLoadingPhase("auth state changed");
         console.log(`Auth state changed: ${_event}, User: ${session?.user?.id || "none"}`);
         
@@ -111,6 +125,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
               throw error;
             }
             
+            if (!isMounted) return;
             console.log("Retrieved subscription after auth change:", subscription);
               
             // Valid subscription statuses according to Stripe
@@ -133,29 +148,59 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
               isValid: hasValidSub
             });
             
+            if (!isMounted) return;
             setHasSubscription(hasValidSub);
           } catch (error) {
             console.error("Error checking subscription on auth change:", error);
+            if (!isMounted) return;
             setHasSubscription(false);
           } finally {
+            if (!isMounted) return;
             setIsLoading(false);
           }
         } else if (!requireSubscription) {
           // If subscription is not required, set hasSubscription to true to allow access
+          if (!isMounted) return;
           setHasSubscription(true);
           setIsLoading(false);
         } else {
+          if (!isMounted) return;
           setIsLoading(false);
         }
         
+        if (!isMounted) return;
         setIsLoaded(true);
       }
     );
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
-  }, [requireSubscription]);
+  }, [requireSubscription, location.pathname]);
+
+  // Set a timeout to proceed anyway if we're stuck loading for too long
+  useEffect(() => {
+    let timeoutId: number;
+    
+    if (isLoading) {
+      timeoutId = window.setTimeout(() => {
+        console.log("Loading timeout reached - proceeding to render protected route");
+        setIsLoaded(true);
+        setIsLoading(false);
+        
+        // If we're timing out on subscription check, default to true to avoid blocking users
+        if (loadingPhase === "checking subscription") {
+          console.log("Subscription check timed out - proceeding with access granted");
+          setHasSubscription(true);
+        }
+      }, 5000); // 5 second timeout
+    }
+    
+    return () => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
+  }, [isLoading, loadingPhase]);
 
   // Show loading state with more details
   if (!isLoaded || isLoading) {
@@ -173,7 +218,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
     return <Navigate to="/" replace />;
   }
 
-  // Handle subscription check - FIXED: Redirect to checkout instead of homepage
+  // Handle subscription check - Redirect to checkout instead of homepage
   if (requireSubscription && !hasSubscription) {
     console.log("User does not have valid subscription, redirecting to checkout");
     return <Navigate to="/checkout" state={{ from: location }} replace />;
