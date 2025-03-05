@@ -20,13 +20,11 @@ export default function Checkout() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check if user is logged in
   useEffect(() => {
     let isMounted = true;
     
     const checkSession = async () => {
       try {
-        // First set initial state - prevent flashes
         setIsLoading(true);
         
         const { data: { session } } = await supabase.auth.getSession();
@@ -38,7 +36,6 @@ export default function Checkout() {
         
         if (isMounted) setUser(session.user);
         
-        // Check if the user already has an active subscription
         const { data: sub, error } = await supabase
           .from("customer_subscriptions")
           .select("*")
@@ -60,16 +57,12 @@ export default function Checkout() {
           
           console.log("Current subscription data:", sub);
           
-          // Handle the case where subscription is incomplete but still valid
           if ((sub.status === 'incomplete' || sub.status === 'past_due') && 
               sub.current_period_end && new Date(sub.current_period_end) > new Date()) {
             console.log("Detected potential issue: Subscription has future end date but status is", sub.status);
             
-            // If subscription appears to be valid by end date but status is incorrect,
-            // verify with Stripe directly
             setIsVerifyingWithStripe(true);
             try {
-              // Call our Supabase Edge Function to verify the subscription status directly with Stripe
               const { data: stripeData, error: stripeError } = await supabase.functions.invoke("verify-subscription", {
                 body: {
                   subscription_id: sub.subscription_id
@@ -81,8 +74,6 @@ export default function Checkout() {
               } else if (stripeData && stripeData.status) {
                 console.log("Stripe verification result:", stripeData);
                 
-                // If Stripe says the subscription is active but our DB says incomplete,
-                // update our database record
                 if (stripeData.status === 'active' && sub.status !== 'active') {
                   console.log("Fixing subscription status discrepancy");
                   const { error: updateError } = await supabase
@@ -96,7 +87,6 @@ export default function Checkout() {
                   if (updateError) {
                     console.error("Error updating subscription status:", updateError);
                   } else {
-                    // Update local state
                     setSubscriptionStatus(stripeData.status);
                     setSubscription({...sub, status: stripeData.status});
                     
@@ -117,22 +107,18 @@ export default function Checkout() {
             }
           }
           
-          // Determine if we should show the checkout page
-          // Only show for users with cancelled subscriptions or no valid subscription
           const hasValidSub = isSubscriptionValid(sub);
           const isCancelled = sub.cancel_at_period_end === true;
           
-          // Show page only if subscription is cancelled or not valid
           if (isMounted) setShouldShowPage(!hasValidSub || isCancelled);
           
-          // If user has a valid subscription and it's not cancelled, redirect to dashboard
           if (hasValidSub && !isCancelled) {
             console.log("User has valid subscription and it's not cancelled, redirecting to dashboard");
             if (isMounted) {
               setRedirectingToDashboard(true);
               setTimeout(() => {
                 if (isMounted) navigate("/dashboard");
-              }, 500); // Small delay to avoid race conditions
+              }, 500);
               return;
             }
           }
@@ -160,10 +146,8 @@ export default function Checkout() {
     setIsLoading(true);
     
     try {
-      // Get return URL (current origin + /dashboard)
       const returnUrl = `${window.location.origin}/dashboard`;
       
-      // Call the create-checkout Supabase Edge Function
       const { data, error } = await supabase.functions.invoke("create-checkout", {
         body: {
           user_id: user.id,
@@ -175,7 +159,6 @@ export default function Checkout() {
       if (error) throw error;
       
       if (data && data.url) {
-        // Redirect to Stripe checkout
         window.location.href = data.url;
       } else {
         throw new Error("No checkout URL received");
@@ -192,11 +175,9 @@ export default function Checkout() {
     }
   };
 
-  // Helper function to get a human-readable subscription status message
   const getSubscriptionMessage = () => {
     if (!subscription) return null;
     
-    // Handle the case where subscription is marked as incomplete but should be valid
     if (subscription.status === "incomplete" && 
         subscription.current_period_end && 
         new Date(subscription.current_period_end) > new Date()) {
@@ -229,13 +210,11 @@ export default function Checkout() {
     );
   }
 
-  // Check if user exists
   if (!user) {
     navigate("/");
     return null;
   }
 
-  // If user shouldn't see this page, redirect to dashboard
   if (!shouldShowPage && initialCheckDone) {
     navigate("/dashboard");
     return null;
@@ -246,10 +225,9 @@ export default function Checkout() {
       className="min-h-screen bg-cover bg-center bg-no-repeat overflow-hidden"
       style={{
         backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
-        backgroundColor: "#2C4A3B", // Fallback color if image fails to load
+        backgroundColor: "#2C4A3B",
       }}
     >
-      {/* Dark overlay */}
       <div className="absolute inset-0 bg-black opacity-60 z-0"></div>
       
       <div className="relative z-10 py-12 px-4 flex flex-col justify-center min-h-screen">
@@ -342,7 +320,7 @@ export default function Checkout() {
                   {isSubscriptionValid(subscription) && (
                     <Button 
                       onClick={() => navigate("/dashboard")} 
-                      variant="accent"
+                      variant="secondary"
                       size="lg"
                       className="mt-4 w-full bg-accent/80 hover:bg-accent/90 text-white shadow-lg transition-all duration-300"
                     >
