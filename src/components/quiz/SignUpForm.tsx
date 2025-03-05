@@ -60,6 +60,8 @@ export function SignUpForm() {
           },
           // Use /auth/callback for a consistent redirect path
           emailRedirectTo: `${siteUrl}/auth/callback`,
+          // Skip email verification
+          emailConfirm: false
         },
       });
 
@@ -80,6 +82,17 @@ export function SignUpForm() {
 
       // Show success message
       setSignupSuccess(true);
+      
+      // Also sign in the user immediately since we're skipping verification
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (signInError) {
+        console.error("Auto sign-in error:", signInError);
+        // We'll continue with the flow even if auto sign-in fails
+      }
       
       toast({
         title: "Account created!",

@@ -52,7 +52,7 @@ export function SignUpDialog() {
       // Get site URL dynamically
       const siteUrl = getSiteUrl();
       
-      const { error } = await supabase.auth.signUp({
+      const { data: authData, error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
@@ -63,6 +63,8 @@ export function SignUpDialog() {
           },
           // Use /auth/callback for a consistent redirect path
           emailRedirectTo: `${siteUrl}/auth/callback`,
+          // Skip email verification
+          emailConfirm: false
         },
       });
 
@@ -81,14 +83,31 @@ export function SignUpDialog() {
         throw error;
       }
 
-      // Instead of closing the dialog, show success message
+      // Also sign in the user immediately since we're skipping verification
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (signInError) {
+        console.error("Auto sign-in error:", signInError);
+        // We'll continue with the flow even if auto sign-in fails
+      }
+
+      // Show success message
       setSignupSuccess(true);
       
       toast({
         title: "Account created!",
-        description: "Please check your email to verify your account before logging in.",
-        duration: 10000, // longer duration so user can read the message
+        description: "You are now logged in and can access the app.",
+        duration: 5000,
       });
+      
+      setTimeout(() => {
+        setOpen(false);
+        // Navigate to checkout for subscription setup
+        navigate("/checkout");
+      }, 2000);
       
       form.reset();
     } catch (error: any) {
