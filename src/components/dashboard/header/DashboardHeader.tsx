@@ -35,14 +35,16 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
           .from('customer_subscriptions')
           .select('*')
           .eq('user_id', session.user.id)
-          .single();
+          .maybeSingle();
         
         if (error) {
-          if (error.code === 'PGRST116') {
-            // No subscription found
-            return { status: "none" };
-          }
+          console.error("Error fetching subscription data from database:", error);
           throw error;
+        }
+        
+        if (!data) {
+          console.log("No subscription data found for user");
+          return { status: "none" };
         }
         
         // If we have a subscription ID, get details from Stripe
@@ -91,7 +93,9 @@ export const DashboardHeader = ({ profileData, onAddRound }: DashboardHeaderProp
         console.error("Error fetching subscription data:", error);
         return { status: "error", error: error.message };
       }
-    }
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: true,
   });
 
   return (

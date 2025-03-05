@@ -187,6 +187,30 @@ const SubscriptionSection = ({
   loading,
   queryClient
 }: SubscriptionSectionProps) => {
+  // Helper function to determine subscription state
+  const getSubscriptionState = () => {
+    if (!subscriptionData) return "none";
+    
+    // Check if subscription has a status field
+    if (subscriptionData.status === "none") return "none";
+    if (subscriptionData.status === "config_error") return "config_error";
+    if (subscriptionData.status === "error") return "error";
+    
+    // Check if subscription is active
+    if (subscriptionData.status === "active") return "active";
+    
+    // Check if subscription is cancelled but still has time remaining
+    if (subscriptionData.status === "cancelled") {
+      // If we have end date data, the subscription still has time remaining
+      return "cancelled_with_time";
+    }
+    
+    // Default to none
+    return "none";
+  };
+  
+  const subscriptionState = getSubscriptionState();
+  
   return (
     <div className="pt-4 border-t">
       <h4 className="font-medium mb-3">Subscription Management</h4>
@@ -214,20 +238,27 @@ const SubscriptionSection = ({
         </div>
       ) : (
         <>
-          {subscriptionData?.status === "none" && (
-            <Button 
-              type="button" 
-              variant="default" 
-              className="flex items-center gap-2"
-              onClick={() => handleSubscriptionAction("subscribe")}
-              disabled={loading}
-            >
-              <CreditCard className="w-4 h-4" />
-              {loading ? "Processing..." : "Add Subscription"}
-            </Button>
+          {/* 1. No Subscription */}
+          {subscriptionState === "none" && (
+            <div className="space-y-2">
+              <div className="text-sm text-muted-foreground mb-3">
+                You don't currently have an active subscription.
+              </div>
+              <Button 
+                type="button" 
+                variant="default" 
+                className="flex items-center gap-2"
+                onClick={() => handleSubscriptionAction("subscribe")}
+                disabled={loading}
+              >
+                <CreditCard className="w-4 h-4" />
+                {loading ? "Processing..." : "Add Subscription"}
+              </Button>
+            </div>
           )}
           
-          {subscriptionData?.status === "active" && (
+          {/* 2. Active Subscription */}
+          {subscriptionState === "active" && (
             <div className="space-y-2">
               <div className="text-sm text-muted-foreground mb-3">
                 Your subscription is active until {subscriptionData.data?.endDate}.
@@ -241,7 +272,7 @@ const SubscriptionSection = ({
                   disabled={loading}
                 >
                   <CreditCard className="w-4 h-4" />
-                  <span>Manage Billing</span>
+                  <span>Update Payment Details</span>
                   <ExternalLink className="w-3 h-3 ml-1" />
                 </Button>
                 
@@ -258,7 +289,8 @@ const SubscriptionSection = ({
             </div>
           )}
           
-          {subscriptionData?.status === "cancelled" && (
+          {/* 3. Cancelled Subscription (with time remaining) */}
+          {subscriptionState === "cancelled_with_time" && (
             <div className="space-y-2">
               <div className="text-sm text-muted-foreground mb-3">
                 Your subscription will end on {subscriptionData.data?.endDate}.
@@ -271,21 +303,7 @@ const SubscriptionSection = ({
                 disabled={loading}
               >
                 <CreditCard className="w-4 h-4" />
-                {loading ? "Processing..." : "Reactivate Subscription"}
-              </Button>
-            </div>
-          )}
-          
-          {subscriptionData?.status === "error" && (
-            <div className="text-sm text-destructive">
-              There was an error loading your subscription. Please try again later.
-              <Button
-                type="button"
-                variant="outline"
-                className="mt-2 w-full"
-                onClick={() => queryClient.invalidateQueries({ queryKey: ['subscription'] })}
-              >
-                Retry
+                {loading ? "Processing..." : "Re-subscribe"}
               </Button>
             </div>
           )}

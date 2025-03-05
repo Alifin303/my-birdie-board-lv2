@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
@@ -13,7 +12,6 @@ import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { stripeService } from "@/services/stripeService";
 
-// Form schema for profile update
 const profileFormSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
@@ -21,7 +19,6 @@ const profileFormSchema = z.object({
   email: z.string().email("Invalid email address")
 });
 
-// Form schema for password change
 const passwordFormSchema = z.object({
   currentPassword: z.string().min(6, "Current password is required"),
   newPassword: z.string().min(8, "Password must be at least 8 characters"),
@@ -168,17 +165,13 @@ export const UserMenu = ({
               });
           }
           
-          // Check Stripe environment and get available prices
           const envCheck = await stripeService.checkEnvironment();
           if (!envCheck.success) {
             throw new Error(`Stripe environment not configured properly: ${envCheck.message}`);
           }
           
-          // Use the product ID to create a checkout for the first available price
-          // We'll retrieve available prices for this product from Stripe
-          const productId = 'prod_Rsn4QjMLVpGDSl'; // Using the product ID you provided
+          const productId = 'prod_Rsn4QjMLVpGDSl';
           
-          // Get prices for the product
           const prices = await stripeService.getProductPrices(productId);
           
           if (!prices || prices.length === 0) {
@@ -187,7 +180,6 @@ export const UserMenu = ({
           
           console.log("Available prices:", prices);
           
-          // Use the first available price
           const priceId = prices[0].id;
           
           console.log(`Using price ID: ${priceId} for checkout`);
