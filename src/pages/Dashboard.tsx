@@ -1,9 +1,7 @@
-
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase, parseCourseName, updateCourseWithUserId } from "@/integrations/supabase/client";
 import { AddRoundModal } from "@/components/add-round/AddRoundModal";
-import { DebugPanel } from "@/components/DebugPanel";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MainStats, HandicapCircle } from "@/components/dashboard/StatsDisplay";
 import { CourseStatsTable, CourseRoundHistory } from "@/components/dashboard/CourseStats";
@@ -45,8 +43,6 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
   
-  const [showDebugPanel, setShowDebugPanel] = useState(true);
-
   useEffect(() => {
     console.log("Modal state changed:", isModalOpen);
   }, [isModalOpen]);
@@ -69,7 +65,6 @@ export default function Dashboard() {
     }
   });
   
-  // Add a query to fetch subscription data
   const { data: subscription, isLoading: subscriptionLoading } = useQuery({
     queryKey: ['subscription'],
     queryFn: async () => {
@@ -127,11 +122,9 @@ export default function Dashboard() {
           parsedNames = parseCourseName(round.courses.name);
         }
         
-        // CRITICAL - Preserve the exact tee_name as it is in the database
-        // Ensure we're not modifying the tee_name in any way
         return {
           ...round,
-          tee_name: round.tee_name, // Explicitly assign to ensure it's preserved
+          tee_name: round.tee_name,
           courses: round.courses ? {
             ...round.courses,
             clubName: parsedNames.clubName,
@@ -149,7 +142,6 @@ export default function Dashboard() {
         }))
       );
       
-      // Update user IDs for courses without them
       if (processedRounds.length > 0) {
         processedRounds.forEach(round => {
           if (round.courses && round.courses.id) {
@@ -178,9 +170,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!isModalOpen) {
-      // Invalidate query cache when modal is closed to refresh data
       queryClient.invalidateQueries({ queryKey: ['userRounds'] });
-      // Also invalidate profile to refresh the handicap
       queryClient.invalidateQueries({ queryKey: ['profile'] });
     }
   }, [isModalOpen, queryClient]);
@@ -190,11 +180,8 @@ export default function Dashboard() {
       return <div className="flex justify-center py-10"><div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div></div>;
     }
     
-    // Get subscription status for the DashboardHeader
     const subscriptionStatus = subscription?.status || "none";
     
-    // CRITICAL FIX: Use the profile handicap directly from Supabase instead of calculating it
-    // This ensures consistency across the dashboard
     const handicapFromProfile = typeof profile.handicap === 'number' ? profile.handicap : 
                                (parseFloat(String(profile.handicap)) || 0);
     
@@ -268,8 +255,6 @@ export default function Dashboard() {
         open={isModalOpen} 
         onOpenChange={setIsModalOpen}
       />
-      
-      {showDebugPanel && <DebugPanel />}
     </div>
   );
 }
