@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.170.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@11.18.0?target=deno";
 
+// Comprehensive CORS headers for all response types
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -200,10 +201,13 @@ serve(async (req) => {
     }
   }
   
+  // For POST or any other request method
   return new Response(
     JSON.stringify({ 
       message: "Use GET method to check Stripe environment variables",
-      url: req.url 
+      url: req.url,
+      method: req.method,
+      note: "This endpoint does not require authorization"
     }),
     {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

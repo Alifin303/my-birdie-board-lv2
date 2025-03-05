@@ -53,7 +53,8 @@ serve(async (req) => {
           webhook_secret_exists: !!Deno.env.get('STRIPE_WEBHOOK_SECRET') || !!Deno.env.get('STRIPE_WEBHOOK_SIGNING_SECRET'),
           supabase_url_exists: !!Deno.env.get('SUPABASE_URL'),
           supabase_service_role_exists: !!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
-        }
+        },
+        note: "This endpoint does not require authorization. POST requests from Stripe will be processed."
       }),
       { 
         status: 200,
@@ -341,7 +342,10 @@ serve(async (req) => {
   
   // For any other request methods
   return new Response(
-    JSON.stringify({ error: 'Method not allowed' }),
+    JSON.stringify({ 
+      error: 'Method not allowed',
+      note: "This endpoint does not require authorization. Use GET for browser testing or POST for Stripe webhooks."
+    }),
     { 
       status: 405, 
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

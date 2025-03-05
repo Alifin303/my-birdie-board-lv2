@@ -1,4 +1,5 @@
 
+# Project configuration
 project_id = "rbhzesocmhazynkfyhst"
 
 [functions.check-stripe-webhook]
