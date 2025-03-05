@@ -24,21 +24,43 @@ export const isSubscriptionValid = (subscription: any): boolean => {
     subscription.current_period_end && 
     new Date(subscription.current_period_end) > new Date();
     
+  // Log more details to help debug subscription validation
+  console.log("Subscription validation details:", {
+    subscriptionId: subscription.subscription_id,
+    status: subscription.status,
+    hasValidStatus,
+    isCanceledButStillActive,
+    hasValidPeriodEndDate,
+    currentTime: new Date().toISOString(),
+    endDate: subscription.current_period_end,
+    timeDiff: subscription.current_period_end ? 
+      (new Date(subscription.current_period_end).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24) + " days" : 
+      "no end date"
+  });
+  
   // If the subscription has a valid end date in the future, we'll consider it valid
   // regardless of status - this is a more accurate measure of validity than the status field
   // when there are syncing issues between Stripe and our database
-  
-  return hasValidStatus || isCanceledButStillActive || 
+  const isValid = hasValidStatus || isCanceledButStillActive || 
          (hasValidPeriodEndDate && (subscription.status === "incomplete" || subscription.status === "past_due"));
+         
+  console.log(`Subscription validity final result: ${isValid}`);
+  
+  return isValid;
 };
 
 /**
  * Fetch a user's subscription from Supabase
  */
 export const fetchUserSubscription = async (userId: string, supabaseClient: any) => {
-  if (!userId) return null;
+  if (!userId) {
+    console.log("Cannot fetch subscription: No user ID provided");
+    return null;
+  }
   
   try {
+    console.log(`Fetching subscription for user: ${userId}`);
+    
     const { data: subscription, error } = await supabaseClient
       .from("customer_subscriptions")
       .select("status, subscription_id, cancel_at_period_end, current_period_end")
@@ -50,6 +72,7 @@ export const fetchUserSubscription = async (userId: string, supabaseClient: any)
       return null;
     }
     
+    console.log(`Subscription fetch result:`, subscription || "No subscription found");
     return subscription;
   } catch (error) {
     console.error("Error in fetchUserSubscription:", error);

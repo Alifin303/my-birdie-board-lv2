@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +17,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
   const [loadingPhase, setLoadingPhase] = useState<string>("initializing");
   const [initialCheckComplete, setInitialCheckComplete] = useState(false);
   const authCheckCompleted = useRef(false);
+  const subscriptionCheckCompleted = useRef(false);
   const authStateChangeInProgress = useRef(false);
   const location = useLocation();
 
@@ -73,11 +73,19 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
             
             if (!isMounted) return;
             setHasSubscription(isValid);
+            subscriptionCheckCompleted.current = true;
+          } else {
+            // If no subscription found, log this information
+            console.log("No subscription found for user");
+            if (!isMounted) return;
+            setHasSubscription(false);
+            subscriptionCheckCompleted.current = true;
           }
         } else if (!requireSubscription) {
           // If subscription is not required, set hasSubscription to true to allow access
           if (!isMounted) return;
           setHasSubscription(true);
+          subscriptionCheckCompleted.current = true;
         }
 
         // Mark authentication check as completed
@@ -102,6 +110,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
     }
 
     // Set a timeout to proceed anyway if we're stuck loading for too long
+    // Increased timeout to 4 seconds to give more time for subscription check
     timeoutId = window.setTimeout(() => {
       if (isMounted && isLoading) {
         console.log("Loading timeout reached - proceeding to render protected route");
@@ -109,13 +118,14 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
         setIsLoading(false);
         setInitialCheckComplete(true);
         
-        // If we're timing out on subscription check, default to true to avoid blocking users
-        if (loadingPhase === "checking subscription") {
-          console.log("Subscription check timed out - proceeding with access granted");
-          setHasSubscription(true);
+        // FIXED: Don't automatically set hasSubscription to true on timeout
+        // Instead, log the issue but maintain current subscription state
+        if (loadingPhase === "checking subscription" && !subscriptionCheckCompleted.current) {
+          console.log("Subscription check timed out - using current subscription state");
+          // We'll keep the current subscription state instead of overriding it
         }
       }
-    }, 2500); // Further reduced timeout from 3 seconds to 2.5 seconds
+    }, 4000); // Increased timeout to 4 seconds for more reliable subscription checking
 
     return () => {
       isMounted = false;
@@ -169,10 +179,14 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
                 
                 if (!isMounted) return;
                 
-                // Only update subscription state if it's different
-                if (hasSubscription !== isValid) {
-                  setHasSubscription(isValid);
-                }
+                // Store subscription validation result
+                setHasSubscription(isValid);
+                subscriptionCheckCompleted.current = true;
+              } else {
+                console.log("No subscription found after auth change");
+                if (!isMounted) return;
+                setHasSubscription(false);
+                subscriptionCheckCompleted.current = true;
               }
             } catch (error) {
               console.error("Error checking subscription on auth change:", error);
@@ -186,9 +200,8 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
           } else if (!requireSubscription) {
             // If subscription is not required, set hasSubscription to true to allow access
             if (!isMounted) return;
-            if (!hasSubscription) {
-              setHasSubscription(true);
-            }
+            setHasSubscription(true);
+            subscriptionCheckCompleted.current = true;
             setIsLoading(false);
             setInitialCheckComplete(true);
           } else {
@@ -209,7 +222,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [requireSubscription, isAuthenticated, hasSubscription]);
+  }, [requireSubscription, isAuthenticated]);
 
   // Show loading state with more details
   if (!initialCheckComplete || isLoading) {

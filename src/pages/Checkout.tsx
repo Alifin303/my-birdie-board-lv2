@@ -36,6 +36,7 @@ export default function Checkout() {
         
         if (isMounted) setUser(session.user);
         
+        console.log("Fetching subscription data for checkout page");
         const { data: sub, error } = await supabase
           .from("customer_subscriptions")
           .select("*")
@@ -47,6 +48,8 @@ export default function Checkout() {
         }
         
         if (!isMounted) return;
+        
+        console.log("Checkout page retrieved subscription:", sub);
         setSubscription(sub);
         
         if (sub) {
@@ -61,8 +64,10 @@ export default function Checkout() {
               sub.current_period_end && new Date(sub.current_period_end) > new Date()) {
             console.log("Detected potential issue: Subscription has future end date but status is", sub.status);
             
+            // Check if we should proceed with verification
             setIsVerifyingWithStripe(true);
             try {
+              console.log("Verifying subscription with Stripe function");
               const { data: stripeData, error: stripeError } = await supabase.functions.invoke("verify-subscription", {
                 body: {
                   subscription_id: sub.subscription_id
@@ -107,19 +112,25 @@ export default function Checkout() {
             }
           }
           
+          // Check if the user has a valid subscription
           const hasValidSub = isSubscriptionValid(sub);
           const isCancelled = sub.cancel_at_period_end === true;
           
+          // Determine if we should show the checkout page
+          // Only show the page if there's no valid subscription or if it's cancelled
+          console.log(`Checkout page determination: Valid subscription: ${hasValidSub}, Cancelled: ${isCancelled}`);
           if (isMounted) setShouldShowPage(!hasValidSub || isCancelled);
           
+          // Don't automatically redirect to dashboard, let the user choose
+          // This fixes the redirection loop issue
           if (hasValidSub && !isCancelled) {
-            console.log("User has valid subscription and it's not cancelled, redirecting to dashboard");
+            console.log("User has valid subscription and it's not cancelled - showing return to dashboard button");
             if (isMounted) {
-              setRedirectingToDashboard(true);
-              setTimeout(() => {
-                if (isMounted) navigate("/dashboard");
-              }, 500);
-              return;
+              // Remove automatic redirect to dashboard
+              // setRedirectingToDashboard(true);
+              // setTimeout(() => {
+              //   if (isMounted) navigate("/dashboard");
+              // }, 500);
             }
           }
         }
@@ -212,11 +223,6 @@ export default function Checkout() {
 
   if (!user) {
     navigate("/");
-    return null;
-  }
-
-  if (!shouldShowPage && initialCheckDone) {
-    navigate("/dashboard");
     return null;
   }
 
@@ -322,7 +328,7 @@ export default function Checkout() {
                       onClick={() => navigate("/dashboard")} 
                       variant="secondary"
                       size="lg"
-                      className="mt-4 w-full bg-accent/80 hover:bg-accent/90 text-white shadow-lg transition-all duration-300"
+                      className="mt-4 w-full text-white shadow-lg transition-all duration-300"
                     >
                       Return to Dashboard
                     </Button>
