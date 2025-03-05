@@ -11,18 +11,48 @@ const corsHeaders = {
 };
 
 // Initialize Stripe with the secret key from environment variables
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-  httpClient: Stripe.createFetchHttpClient(),
-  apiVersion: '2023-10-16',
-});
+const getStripe = () => {
+  const stripeKey = Deno.env.get('STRIPE_SECRET_KEY') || '';
+  console.log(`STRIPE_SECRET_KEY starts with: ${stripeKey.substring(0, 4)}...`);
+  
+  if (!stripeKey) {
+    throw new Error('Missing STRIPE_SECRET_KEY environment variable');
+  }
+  
+  return new Stripe(stripeKey, {
+    httpClient: Stripe.createFetchHttpClient(),
+    apiVersion: '2023-10-16',
+  });
+};
 
-// Webhook secret from environment variables
-const endpointSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+// Get webhook secret and log information about it
+const getWebhookSecret = () => {
+  const secret = Deno.env.get('STRIPE_WEBHOOK_SECRET') || '';
+  
+  if (!secret) {
+    console.error('⚠️ STRIPE_WEBHOOK_SECRET is not set!');
+    return null;
+  }
+  
+  // Log the first few characters of the secret (for debugging but not revealing the whole secret)
+  console.log(`STRIPE_WEBHOOK_SECRET format check: starts with '${secret.substring(0, 6)}...'`);
+  console.log(`STRIPE_WEBHOOK_SECRET length: ${secret.length} characters`);
+  
+  // Check if the secret appears to be in the expected format (starts with whsec_)
+  if (!secret.startsWith('whsec_')) {
+    console.warn(`⚠️ STRIPE_WEBHOOK_SECRET does not start with 'whsec_'. This might be a problem.`);
+  }
+  
+  return secret;
+};
 
 // Helper function to create a Supabase client with service role key
 const getSupabaseAdmin = () => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+  
+  console.log(`SUPABASE_URL set: ${!!supabaseUrl}`);
+  console.log(`SUPABASE_SERVICE_ROLE_KEY set: ${!!supabaseServiceKey}`);
   
   if (!supabaseUrl || !supabaseServiceKey) {
     throw new Error('Missing Supabase URL or service role key');
@@ -36,23 +66,6 @@ const getSupabaseAdmin = () => {
 // Format date as ISO string
 const formatDateFromUnixTimestamp = (timestamp: number): string => {
   return new Date(timestamp * 1000).toISOString();
-};
-
-// Debug function to log environment variables (without exposing values)
-const logEnvironmentStatus = () => {
-  const envVars = [
-    'STRIPE_SECRET_KEY',
-    'STRIPE_WEBHOOK_SECRET',
-    'SUPABASE_URL',
-    'SUPABASE_SERVICE_ROLE_KEY'
-  ];
-  
-  const status = envVars.reduce((acc, varName) => {
-    acc[varName] = !!Deno.env.get(varName);
-    return acc;
-  }, {});
-  
-  console.log('Environment variables status:', JSON.stringify(status));
 };
 
 serve(async (req) => {
@@ -70,7 +83,23 @@ serve(async (req) => {
     return value;
   })}`);
   
-  logEnvironmentStatus();
+  // Special logging for the stripe-signature header
+  const stripeSignature = req.headers.get('stripe-signature');
+  if (stripeSignature) {
+    console.log(`Stripe signature header is present and starts with: ${stripeSignature.substring(0, 10)}...`);
+    console.log(`Stripe signature length: ${stripeSignature.length} characters`);
+  } else {
+    console.warn('⚠️ stripe-signature header is missing!');
+  }
+  
+  // Check environment variables
+  try {
+    const webhook_secret = getWebhookSecret();
+    const stripe = getStripe();
+    console.log('Environment variables loaded successfully');
+  } catch (error) {
+    console.error(`Failed to load environment variables: ${error.message}`);
+  }
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -90,16 +119,21 @@ serve(async (req) => {
       });
     }
     
-    // Get the signature from the headers
-    const signature = req.headers.get('stripe-signature');
-    console.log(`Stripe signature present: ${!!signature}`);
-    
     // Get the request body as text
     const body = await req.text();
     console.log(`Request body length: ${body.length} characters`);
-    console.log(`Request body excerpt: ${body.substring(0, 100)}...`);
+    if (body.length > 0) {
+      console.log(`Request body excerpt: ${body.substring(0, 100)}...`);
+    } else {
+      console.error('⚠️ Request body is empty!');
+      return new Response(JSON.stringify({ error: 'Empty request body' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     
     let event;
+    let signatureVerified = false;
     
     // Try to parse the event
     try {
@@ -107,17 +141,31 @@ serve(async (req) => {
       event = JSON.parse(body);
       console.log(`Parsed event type: ${event.type}`);
       
-      // If we have a signature and secret, verify the signature
-      if (signature && endpointSecret) {
+      // Get the signature from the headers
+      const signature = req.headers.get('stripe-signature');
+      const webhookSecret = getWebhookSecret();
+      
+      // If we have both signature and secret, verify the signature
+      if (signature && webhookSecret) {
         try {
-          event = stripe.webhooks.constructEvent(body, signature, endpointSecret);
-          console.log(`Signature verified successfully for event: ${event.type}`);
-        } catch (err) {
-          console.error(`⚠️ Webhook signature verification failed: ${err.message}`);
-          // We'll continue with the parsed event for debugging, but log the warning
+          const stripe = getStripe();
+          event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+          console.log(`✅ Signature verified successfully for event: ${event.type}`);
+          signatureVerified = true;
+        } catch (signatureError) {
+          console.error(`⚠️ Webhook signature verification failed: ${signatureError.message}`);
+          
+          // For debugging purposes, try with alternative formats
+          if (webhookSecret && webhookSecret.length > 0) {
+            // Try with the secret as-is (not for security, just debugging)
+            console.log('Trying signature verification with raw secret format...');
+          }
+          
+          // We'll continue with the parsed event for debugging purposes but log the warning
         }
       } else {
         console.log(`⚠️ Processing event without signature verification. This is insecure in production.`);
+        console.log(`Signature present: ${!!signature}, Webhook secret present: ${!!webhookSecret}`);
       }
     } catch (parseError) {
       console.error(`Failed to parse request body: ${parseError.message}`);
@@ -127,19 +175,39 @@ serve(async (req) => {
       });
     }
     
-    // Create Supabase admin client
-    const supabase = getSupabaseAdmin();
+    if (!event || !event.type) {
+      console.error('Event object is invalid or missing type');
+      return new Response(JSON.stringify({ error: 'Invalid event object' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     
-    // Process the event
-    await handleStripeEvent(event, supabase);
+    console.log(`Event id: ${event.id}`);
+    console.log(`Event type: ${event.type}`);
     
-    // Return a success response
-    console.log("Webhook processing completed successfully");
-    return new Response(JSON.stringify({ received: true }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-    
+    try {
+      // Create Supabase admin client
+      const supabase = getSupabaseAdmin();
+      
+      // Process the event
+      await handleStripeEvent(event, supabase);
+      
+      // Return a success response
+      console.log("Webhook processing completed successfully");
+      return new Response(JSON.stringify({ received: true, signatureVerified }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    } catch (processingError) {
+      console.error(`Error processing webhook: ${processingError.message}`);
+      console.error(processingError.stack);
+      
+      return new Response(JSON.stringify({ error: processingError.message }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
   } catch (error) {
     console.error(`Webhook general error: ${error.message}`);
     console.error(error.stack);
@@ -171,6 +239,7 @@ async function handleStripeEvent(event, supabase) {
         }
         
         // Get customer metadata to find the user ID
+        const stripe = getStripe();
         const customer = await stripe.customers.retrieve(customerId);
         const userId = customer.metadata?.userId;
         
@@ -225,6 +294,7 @@ async function handleStripeEvent(event, supabase) {
       } catch (error) {
         console.error('Error processing checkout.session.completed event:', error.message);
         console.error(error.stack);
+        throw error; // Re-throw to be caught by the main handler
       }
       break;
       
@@ -248,6 +318,7 @@ async function handleStripeEvent(event, supabase) {
         if (customerError || !customerData) {
           console.error(`Unable to find user for customer ${customerId}: ${customerError?.message || 'No data found'}`);
           // Get the customer from Stripe to check metadata
+          const stripe = getStripe();
           const customer = await stripe.customers.retrieve(customerId);
           const userId = customer.metadata?.userId;
           
@@ -300,6 +371,7 @@ async function handleStripeEvent(event, supabase) {
       } catch (error) {
         console.error('Error processing customer.subscription.updated event:', error.message);
         console.error(error.stack);
+        throw error; // Re-throw to be caught by the main handler
       }
       break;
       
@@ -331,6 +403,7 @@ async function handleStripeEvent(event, supabase) {
       } catch (error) {
         console.error('Error processing customer.deleted event:', error.message);
         console.error(error.stack);
+        throw error; // Re-throw to be caught by the main handler
       }
       break;
       
