@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.170.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@11.18.0?target=deno";
 
@@ -165,6 +164,13 @@ serve(async (req) => {
       console.log('['+new Date().toISOString()+'] Returning check results...');
       return new Response(
         JSON.stringify({
+          auth_check: {
+            function_url: `https://${req.headers.get('host')}/check-stripe-webhook`,
+            request_has_auth_header: !!req.headers.get('authorization'),
+            expected_auth_header: "None - public access should be enabled",
+            config_no_auth: true,
+            config_verify_jwt: false,
+          },
           results,
           stripe_connected: stripeConnected,
           stripe_error: stripeError,

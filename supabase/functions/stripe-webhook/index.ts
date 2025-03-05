@@ -28,6 +28,7 @@ console.log('This function is publicly accessible and no authorization is requir
 serve(async (req) => {
   const url = new URL(req.url);
   console.log(`[${new Date().toISOString()}] Received request: ${req.method} ${url.pathname}`);
+  console.log(`[${new Date().toISOString()}] Request headers:`, Object.fromEntries([...req.headers.entries()]));
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
