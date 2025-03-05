@@ -43,7 +43,7 @@ export function QuizResults({ onContinue }: QuizResultsProps) {
       <div className="text-center space-y-4">
         <p className="text-lg font-medium">📊 Want to start improving faster?</p>
         
-        <Button onClick={onContinue} size="lg" className="px-6">
+        <Button onClick={onContinue} size="lg" className="px-6 bg-accent hover:bg-accent/90 text-accent-foreground">
           <span className="mr-2">👉</span> Join BirdieBoard today
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>

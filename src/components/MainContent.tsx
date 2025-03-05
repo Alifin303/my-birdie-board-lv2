@@ -29,7 +29,7 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
               onClick={onStartQuiz}
             >
               <span className="mr-2">🏌️‍♂️</span>
-              Take the quiz to get started
+              Get started
             </Button>
           </div>
         </div>
@@ -119,7 +119,7 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
             onClick={onStartQuiz}
           >
             <span className="mr-2">🏌️‍♂️</span>
-            Take the quiz
+            Get started
           </Button>
         </div>
       </div>

@@ -45,7 +45,6 @@ export function SignUpForm() {
       setSignupSuccess(false);
       setErrorMessage(null);
       
-      // Get site URL dynamically
       const siteUrl = getSiteUrl();
       
       const { data: authData, error } = await supabase.auth.signUp({
@@ -57,7 +56,6 @@ export function SignUpForm() {
             first_name: data.firstName,
             last_name: data.lastName,
           },
-          // Use /auth/callback for a consistent redirect path
           emailRedirectTo: `${siteUrl}/auth/callback`,
         },
       });
@@ -65,7 +63,6 @@ export function SignUpForm() {
       if (error) {
         console.error("Sign up error:", error);
         
-        // Check for username duplication error
         if (error.message.includes("duplicate key") && error.message.includes("profiles_username_key")) {
           setErrorMessage("This username is already taken. Please choose a different username.");
         } else if (error.message.includes("User already registered")) {
@@ -77,10 +74,8 @@ export function SignUpForm() {
         throw error;
       }
 
-      // Show success message
       setSignupSuccess(true);
       
-      // Also sign in the user immediately since we want to skip verification
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
@@ -88,7 +83,6 @@ export function SignUpForm() {
 
       if (signInError) {
         console.error("Auto sign-in error:", signInError);
-        // We'll continue with the flow even if auto sign-in fails
       }
       
       toast({
@@ -97,16 +91,13 @@ export function SignUpForm() {
         duration: 3000,
       });
       
-      // Automatically direct to checkout page after signup
       setTimeout(() => {
-        // User is now logged in, redirect to a checkout page
         navigate("/checkout");
       }, 2000);
       
     } catch (error: any) {
       console.error("Sign up error:", error);
       
-      // Don't show toast if we've already set a specific error message
       if (!errorMessage) {
         toast({
           title: "Error",
@@ -156,7 +147,7 @@ export function SignUpForm() {
                 <FormItem>
                   <FormLabel>Username (displayed on leaderboards)</FormLabel>
                   <FormControl>
-                    <Input placeholder="golfpro123" {...field} />
+                    <Input placeholder="golfpro123" {...field} className="bg-white/80" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -170,7 +161,7 @@ export function SignUpForm() {
                   <FormItem>
                     <FormLabel>First Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="John" {...field} />
+                      <Input placeholder="John" {...field} className="bg-white/80" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -183,7 +174,7 @@ export function SignUpForm() {
                   <FormItem>
                     <FormLabel>Last Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Doe" {...field} />
+                      <Input placeholder="Doe" {...field} className="bg-white/80" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -197,7 +188,7 @@ export function SignUpForm() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="john.doe@example.com" {...field} />
+                    <Input type="email" placeholder="john.doe@example.com" {...field} className="bg-white/80" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -210,13 +201,13 @@ export function SignUpForm() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                    <Input type="password" placeholder="••••••••" {...field} className="bg-white/80" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+            <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" size="lg" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 

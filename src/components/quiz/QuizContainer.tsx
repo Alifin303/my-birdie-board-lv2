@@ -91,7 +91,7 @@ export function QuizContainer() {
   return (
     <div className="w-full max-w-2xl mx-auto px-4 py-8">
       {step.startsWith('question') && (
-        <>
+        <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg animate-fade-in">
           <div className="mb-8">
             <div className="flex justify-between mb-2">
               <span className="text-sm font-medium text-muted-foreground">
@@ -120,22 +120,26 @@ export function QuizContainer() {
             <Button 
               onClick={handleNext}
               disabled={!answers[step]}
-              className="flex items-center"
+              className="flex items-center bg-accent hover:bg-accent/90 text-accent-foreground"
               size="lg"
             >
               Continue
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
-        </>
+        </div>
       )}
       
       {step === 'results' && (
-        <QuizResults onContinue={handleNext} />
+        <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg">
+          <QuizResults onContinue={handleNext} />
+        </div>
       )}
       
       {step === 'signup' && (
-        <SignUpForm />
+        <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg">
+          <SignUpForm />
+        </div>
       )}
     </div>
   );
