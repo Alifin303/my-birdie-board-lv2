@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import About from "@/pages/About";
 import Index from "@/pages/Index";
@@ -12,8 +12,33 @@ import Dashboard from "@/pages/Dashboard";
 import { Toaster } from "@/components/ui/toaster";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ResetPassword from "@/pages/ResetPassword";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 function App() {
+  // Setup persistence enhancement for Supabase auth
+  useEffect(() => {
+    // Try to restore session on app load
+    const initializeAuth = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error initializing auth:", error);
+          return;
+        }
+        
+        if (data && data.session) {
+          console.log("Session restored successfully");
+        }
+      } catch (error) {
+        console.error("Unexpected error during auth initialization:", error);
+      }
+    };
+    
+    initializeAuth();
+  }, []);
+
   return (
     <div className="min-h-screen">
       <BrowserRouter>

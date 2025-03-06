@@ -64,6 +64,26 @@ export const fetchUserSubscription = async (userId: string, supabaseClient: any)
   try {
     console.log(`Fetching subscription for user: ${userId}`);
     
+    // Check localStorage cache first for faster response
+    try {
+      const cachedSubscription = localStorage.getItem(`subscription_${userId}`);
+      const cacheTimestamp = localStorage.getItem(`subscription_${userId}_timestamp`);
+      
+      // Only use cache if it's recent (less than 5 minutes old)
+      if (cachedSubscription && cacheTimestamp) {
+        const cacheTime = new Date(cacheTimestamp);
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        
+        if (cacheTime > fiveMinutesAgo) {
+          console.log("Using cached subscription data");
+          return JSON.parse(cachedSubscription);
+        }
+      }
+    } catch (cacheError) {
+      console.error("Error reading subscription cache:", cacheError);
+      // Continue to fetch from Supabase if cache fails
+    }
+    
     const { data: subscription, error } = await supabaseClient
       .from("customer_subscriptions")
       .select("status, subscription_id, cancel_at_period_end, current_period_end")
@@ -76,6 +96,17 @@ export const fetchUserSubscription = async (userId: string, supabaseClient: any)
     }
     
     console.log(`Subscription fetch result:`, subscription || "No subscription found");
+    
+    // Cache the result for faster future checks
+    if (subscription) {
+      try {
+        localStorage.setItem(`subscription_${userId}`, JSON.stringify(subscription));
+        localStorage.setItem(`subscription_${userId}_timestamp`, new Date().toISOString());
+      } catch (cacheError) {
+        console.error("Error caching subscription data:", cacheError);
+      }
+    }
+    
     return subscription;
   } catch (error) {
     console.error("Error in fetchUserSubscription:", error);
@@ -83,7 +114,7 @@ export const fetchUserSubscription = async (userId: string, supabaseClient: any)
   }
 };
 
-// New helper function to check if we should try Stripe verification
+// Helper function to check if we should try Stripe verification
 export const shouldVerifyWithStripe = (subscription: any): boolean => {
   if (!subscription) return false;
   
@@ -97,4 +128,20 @@ export const shouldVerifyWithStripe = (subscription: any): boolean => {
     hasValidPeriodEndDate;
     
   return needsVerification;
+};
+
+// Helper to clear subscription cache when needed (e.g., after purchases or updates)
+export const clearSubscriptionCache = (userId?: string) => {
+  try {
+    if (userId) {
+      localStorage.removeItem(`subscription_${userId}`);
+      localStorage.removeItem(`subscription_${userId}_timestamp`);
+    }
+    
+    // Clear the general subscription status cache
+    localStorage.removeItem('subscriptionStatus');
+    localStorage.removeItem('subscriptionCheckedAt');
+  } catch (error) {
+    console.error("Error clearing subscription cache:", error);
+  }
 };

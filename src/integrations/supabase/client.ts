@@ -20,5 +20,6 @@ export {
   updateCourseWithUserId,
   isSubscriptionValid,
   fetchUserSubscription,
+  clearSubscriptionCache,
   type DatabaseError
 } from './index';

@@ -21,6 +21,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
   const subscriptionCheckCompleted = useRef(false);
   const authStateChangeInProgress = useRef(false);
   const timeoutRef = useRef<number | null>(null);
+  const sessionChecksAttempted = useRef(0);
   const location = useLocation();
 
   // Function to clear timeout safely
@@ -31,13 +32,38 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
     }
   };
 
+  // Function to store session data in localStorage for persistence
+  const storeSessionData = (session: any) => {
+    if (session) {
+      try {
+        // Store minimal session info to improve persistence between refreshes
+        localStorage.setItem('lastAuthenticated', new Date().toISOString());
+        localStorage.setItem('userAuthenticated', 'true');
+        
+        // Optional: store user ID for faster lookups
+        if (session.user && session.user.id) {
+          localStorage.setItem('userId', session.user.id);
+        }
+      } catch (error) {
+        console.error("Error storing session data:", error);
+      }
+    } else {
+      // Clear session data if logged out
+      localStorage.removeItem('lastAuthenticated');
+      localStorage.removeItem('userAuthenticated');
+      localStorage.removeItem('userId');
+    }
+  };
+
   // This effect runs once on mount to check the initial session and subscription
   useEffect(() => {
     // Track if the component is mounted to prevent state updates after unmount
     let isMounted = true;
     
     const checkSession = async () => {
-      if (authCheckCompleted.current) return; // Prevent duplicate checks
+      if (authCheckCompleted.current && sessionChecksAttempted.current > 2) return; // Prevent excessive checks
+      
+      sessionChecksAttempted.current += 1;
       
       try {
         if (!isMounted) return;
@@ -50,10 +76,13 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
         
         if (!isMounted) return;
         
-        // Only update authentication state if it's different to avoid re-renders
+        // Update authentication state if it's different
         if (isAuthenticated !== isAuth) {
           setIsAuthenticated(isAuth);
           console.log(`Authentication check: User is ${isAuth ? "authenticated" : "not authenticated"}`);
+          
+          // Store session data for persistence
+          storeSessionData(session);
         }
 
         // If user is authenticated and subscription is required, check for active subscription
@@ -82,12 +111,30 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
             
             if (!isMounted) return;
             setHasSubscription(isValid);
+            
+            // Cache subscription status in localStorage to improve refresh experience
+            try {
+              localStorage.setItem('subscriptionStatus', isValid ? 'valid' : 'invalid');
+              localStorage.setItem('subscriptionCheckedAt', new Date().toISOString());
+            } catch (error) {
+              console.error("Error caching subscription status:", error);
+            }
+            
             subscriptionCheckCompleted.current = true;
           } else {
             // If no subscription found, log this information
             console.log("No subscription found for user");
             if (!isMounted) return;
             setHasSubscription(false);
+            
+            // Cache negative subscription result
+            try {
+              localStorage.setItem('subscriptionStatus', 'invalid');
+              localStorage.setItem('subscriptionCheckedAt', new Date().toISOString());
+            } catch (error) {
+              console.error("Error caching subscription status:", error);
+            }
+            
             subscriptionCheckCompleted.current = true;
           }
         } else if (!requireSubscription) {
@@ -116,13 +163,34 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
       }
     };
 
-    // Only run the initial check if it hasn't been completed yet
-    if (!authCheckCompleted.current) {
-      checkSession();
+    // Check for cached authentication data for a smoother initial load
+    const cachedAuth = localStorage.getItem('userAuthenticated') === 'true';
+    const userId = localStorage.getItem('userId');
+    const cachedSubscription = localStorage.getItem('subscriptionStatus');
+    const subscriptionCheckedAt = localStorage.getItem('subscriptionCheckedAt');
+    
+    // If we have cached data, use it for initial state to avoid spinners
+    if (cachedAuth && !authCheckCompleted.current) {
+      console.log("Using cached authentication data");
+      setIsAuthenticated(true);
+      
+      // For subscription data, only use cache if checked recently (within last hour)
+      if (cachedSubscription && subscriptionCheckedAt) {
+        const lastChecked = new Date(subscriptionCheckedAt);
+        const oneHourAgo = new Date(Date.now() - 3600000);
+        
+        if (lastChecked > oneHourAgo) {
+          console.log("Using cached subscription data");
+          setHasSubscription(cachedSubscription === 'valid');
+        }
+      }
     }
 
+    // Run the session check
+    checkSession();
+
     // Set a timeout to proceed anyway if we're stuck loading for too long
-    // We're increasing the timeout to 6 seconds to give more time for both checks
+    // Using a shorter timeout (4 seconds) for better UX but still giving enough time for checks
     timeoutRef.current = window.setTimeout(() => {
       if (isMounted && isLoading) {
         console.log("Loading timeout reached - proceeding to render protected route");
@@ -133,11 +201,10 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
           isAuthenticated
         });
         
-        // IMPORTANT: Don't force a decision on subscription status if we're still checking
-        // This avoids the redirect loop
+        // IMPORTANT: If we're authenticated but subscription check is timing out,
+        // assume the subscription is valid to avoid blocking the user
         if (loadingPhase === "checking subscription" && !subscriptionCheckCompleted.current && isAuthenticated) {
           console.log("Subscription check timed out - defaulting to allowing access");
-          // Default to allowing access rather than forcing a redirect that might be wrong
           setHasSubscription(true);
         }
         
@@ -145,7 +212,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
         setIsLoading(false);
         setInitialCheckComplete(true);
       }
-    }, 6000); // Increased timeout to 6 seconds
+    }, 4000); // Reduced timeout for better UX
 
     return () => {
       isMounted = false;
@@ -171,6 +238,9 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
           console.log(`Auth state changed: ${_event}, User: ${session?.user?.id || "none"}`);
           
           const isAuth = !!session;
+          
+          // Update session persistence data
+          storeSessionData(session);
           
           // Avoid unnecessary state updates if authentication status hasn't changed
           if (isAuthenticated !== isAuth) {
@@ -201,11 +271,29 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
                 
                 // Store subscription validation result
                 setHasSubscription(isValid);
+                
+                // Cache subscription status
+                try {
+                  localStorage.setItem('subscriptionStatus', isValid ? 'valid' : 'invalid');
+                  localStorage.setItem('subscriptionCheckedAt', new Date().toISOString());
+                } catch (error) {
+                  console.error("Error caching subscription status:", error);
+                }
+                
                 subscriptionCheckCompleted.current = true;
               } else {
                 console.log("No subscription found after auth change");
                 if (!isMounted) return;
                 setHasSubscription(false);
+                
+                // Cache negative subscription result
+                try {
+                  localStorage.setItem('subscriptionStatus', 'invalid');
+                  localStorage.setItem('subscriptionCheckedAt', new Date().toISOString());
+                } catch (error) {
+                  console.error("Error caching subscription status:", error);
+                }
+                
                 subscriptionCheckCompleted.current = true;
               }
             } catch (error) {
