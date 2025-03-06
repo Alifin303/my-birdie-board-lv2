@@ -1,4 +1,3 @@
-
 // Follow Deno's ESM URL imports pattern
 import Stripe from 'https://esm.sh/stripe@12.16.0?target=deno';
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
@@ -140,7 +139,7 @@ serve(async (req) => {
 
     // Create a new checkout session
     try {
-      const finalReturnUrl = return_url || 'https://rbhzesocmhazynkfyhst.supabase.co/dashboard';
+      const finalReturnUrl = return_url || `${Deno.env.get('SITE_URL')}/dashboard`;
       console.log('Creating checkout session with return URL:', finalReturnUrl);
       
       // First try to fetch the price from Stripe to verify it exists
@@ -168,7 +167,7 @@ serve(async (req) => {
           },
         ],
         mode: 'subscription',
-        success_url: finalReturnUrl,
+        success_url: `${finalReturnUrl}?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: finalReturnUrl,
         subscription_data: {
           metadata: { user_id },
@@ -177,7 +176,6 @@ serve(async (req) => {
 
       console.log('Checkout session created successfully:', session.id);
       
-      // Return the checkout URL
       return new Response(JSON.stringify({ url: session.url }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

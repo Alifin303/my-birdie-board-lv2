@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, Check, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { isSubscriptionValid } from "@/integrations/supabase/subscription/subscription-utils";
+import { isSubscriptionValid, clearSubscriptionCache } from "@/integrations/supabase/subscription/subscription-utils";
 
 export default function Checkout() {
   const [isLoading, setIsLoading] = useState(false);
@@ -38,6 +38,10 @@ export default function Checkout() {
         if (isMounted) setUser(session.user);
         
         console.log("Fetching subscription data for checkout page");
+        
+        // Clear any existing subscription cache before checking
+        clearSubscriptionCache(session.user.id);
+        
         const { data: sub, error } = await supabase
           .from("customer_subscriptions")
           .select("*")
@@ -106,11 +110,16 @@ export default function Checkout() {
                     setSubscriptionStatus(stripeData.status);
                     setSubscription({...sub, status: stripeData.status});
                     
+                    // Clear subscription cache after update
+                    clearSubscriptionCache(session.user.id);
+                    
                     toast({
                       title: "Subscription Updated",
-                      description: "We've fixed an issue with your subscription status.",
-                      variant: "default",
+                      description: "Your subscription is now active.",
                     });
+                    
+                    // Redirect to dashboard after successful verification
+                    navigate("/dashboard");
                   }
                 }
               }
@@ -127,15 +136,10 @@ export default function Checkout() {
           const hasValidSub = isSubscriptionValid(sub);
           const isCancelled = sub.cancel_at_period_end === true;
           
-          // Determine if we should show the checkout page
-          // Only show the page if there's no valid subscription or if it's cancelled
-          console.log(`Checkout page determination: Valid subscription: ${hasValidSub}, Cancelled: ${isCancelled}`);
-          if (isMounted) setShouldShowPage(!hasValidSub || isCancelled);
-          
-          // Don't automatically redirect to dashboard, always show the page and let the user choose
-          // This prevents redirect loops
           if (hasValidSub && !isCancelled) {
-            console.log("User has valid subscription and it's not cancelled - showing return to dashboard button");
+            console.log("User has valid subscription - redirecting to dashboard");
+            navigate("/dashboard");
+            return;
           }
         }
       } catch (err) {
