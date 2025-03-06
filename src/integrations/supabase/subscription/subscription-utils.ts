@@ -41,9 +41,10 @@ export const isSubscriptionValid = (subscription: any): boolean => {
       "no end date"
   });
   
-  // If the subscription has a valid end date in the future, we'll consider it valid
-  // regardless of status - this is a more accurate measure of validity than the status field
-  // when there are syncing issues between Stripe and our database
+  // Consider a subscription valid if:
+  // 1. It has a valid status OR
+  // 2. It's canceled but still in active period OR
+  // 3. It has a valid end date and is either incomplete or past_due (temporary grace period)
   const isValid = hasValidStatus || isCanceledButStillActive || 
          (hasValidPeriodEndDate && (subscription.status === "incomplete" || subscription.status === "past_due"));
          
@@ -53,7 +54,7 @@ export const isSubscriptionValid = (subscription: any): boolean => {
 };
 
 /**
- * Fetch a user's subscription from Supabase
+ * Fetch a user's subscription from Supabase with improved caching and error handling
  */
 export const fetchUserSubscription = async (userId: string, supabaseClient: any) => {
   if (!userId) {
@@ -64,26 +65,26 @@ export const fetchUserSubscription = async (userId: string, supabaseClient: any)
   try {
     console.log(`Fetching subscription for user: ${userId}`);
     
-    // Check localStorage cache first for faster response
+    // Check localStorage cache first for faster initial load
     try {
       const cachedSubscription = localStorage.getItem(`subscription_${userId}`);
       const cacheTimestamp = localStorage.getItem(`subscription_${userId}_timestamp`);
       
-      // Only use cache if it's recent (less than 5 minutes old)
+      // Only use cache if it's recent (less than 1 minute old for new subscriptions)
       if (cachedSubscription && cacheTimestamp) {
         const cacheTime = new Date(cacheTimestamp);
-        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        const oneMinuteAgo = new Date(Date.now() - 60 * 1000); // 1 minute cache for new subscriptions
         
-        if (cacheTime > fiveMinutesAgo) {
+        if (cacheTime > oneMinuteAgo) {
           console.log("Using cached subscription data");
           return JSON.parse(cachedSubscription);
         }
       }
     } catch (cacheError) {
       console.error("Error reading subscription cache:", cacheError);
-      // Continue to fetch from Supabase if cache fails
     }
     
+    // Fetch fresh data from Supabase
     const { data: subscription, error } = await supabaseClient
       .from("customer_subscriptions")
       .select("status, subscription_id, cancel_at_period_end, current_period_end")
@@ -97,7 +98,7 @@ export const fetchUserSubscription = async (userId: string, supabaseClient: any)
     
     console.log(`Subscription fetch result:`, subscription || "No subscription found");
     
-    // Cache the result for faster future checks
+    // Cache the result for faster subsequent checks
     if (subscription) {
       try {
         localStorage.setItem(`subscription_${userId}`, JSON.stringify(subscription));
@@ -118,7 +119,6 @@ export const fetchUserSubscription = async (userId: string, supabaseClient: any)
 export const shouldVerifyWithStripe = (subscription: any): boolean => {
   if (!subscription) return false;
   
-  // If it's incomplete or past_due but has a valid end date in the future, we should verify
   const hasValidPeriodEndDate = 
     subscription.current_period_end && 
     new Date(subscription.current_period_end) > new Date();
@@ -130,7 +130,7 @@ export const shouldVerifyWithStripe = (subscription: any): boolean => {
   return needsVerification;
 };
 
-// Helper to clear subscription cache when needed (e.g., after purchases or updates)
+// Helper to clear subscription cache when needed
 export const clearSubscriptionCache = (userId?: string) => {
   try {
     if (userId) {
