@@ -201,7 +201,7 @@ export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTy
             <>
               <p className="text-sm font-medium text-muted-foreground">Handicap Index</p>
               <p className="text-5xl font-bold my-2">{displayHandicap}</p>
-              <p className="text-sm text-muted-foreground">Based on {stats.totalRounds} rounds</p>
+              {/* Removed "Based on X rounds" text */}
             </>
           ) : (
             <>
