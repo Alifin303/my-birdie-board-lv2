@@ -89,23 +89,41 @@ export const CourseRoundHistory = ({
     const bestGrossScore = Math.min(...courseRounds.map(r => r.gross_score));
     const bestToPar = Math.min(...courseRounds.map(r => r.to_par_gross));
     
-    const roundsWithNetScore = courseRounds.map(r => ({
-      ...r,
-      calculatedNetScore: r.net_score !== undefined && r.net_score !== null 
-        ? r.net_score 
-        : Math.max(0, r.gross_score - handicapIndex)
-    }));
+    console.log(`[CourseRoundHistory] Calculating stats with handicap: ${handicapIndex}`);
+    
+    const roundsWithNetScore = courseRounds.map(r => {
+      const calculatedNetScore = Math.round(r.gross_score - handicapIndex);
+      const calculatedToParNet = Math.round(r.to_par_gross - handicapIndex);
+      
+      console.log(`[CourseRoundHistory] Round ${r.id} calculation:`, {
+        gross: r.gross_score,
+        net: calculatedNetScore,
+        toPar: r.to_par_gross,
+        toParNet: calculatedToParNet,
+        date: new Date(r.date).toLocaleDateString()
+      });
+      
+      return {
+        ...r,
+        calculatedNetScore,
+        calculatedToParNet
+      };
+    });
     
     const bestNetScore = Math.min(...roundsWithNetScore.map(r => r.calculatedNetScore));
     
-    const roundsWithToParNet = courseRounds.map(r => ({
-      ...r,
-      calculatedToParNet: r.to_par_net !== undefined && r.to_par_net !== null
-        ? r.to_par_net
-        : Math.max(-72, r.to_par_gross - handicapIndex)
-    }));
+    const bestToParNet = Math.min(...roundsWithNetScore.map(r => r.calculatedToParNet));
     
-    const bestToParNet = Math.min(...roundsWithToParNet.map(r => r.calculatedToParNet));
+    console.log("[CourseRoundHistory] Rounds with calculated net scores:", 
+      roundsWithNetScore.map(r => ({
+        id: r.id,
+        date: new Date(r.date).toLocaleDateString(),
+        gross: r.gross_score,
+        net: r.calculatedNetScore,
+        toPar: r.to_par_gross,
+        toParNet: r.calculatedToParNet
+      }))
+    );
       
     return { roundsPlayed, bestGrossScore, bestNetScore, bestToPar, bestToParNet };
   };

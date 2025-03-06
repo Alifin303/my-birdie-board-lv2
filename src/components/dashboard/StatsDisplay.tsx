@@ -1,3 +1,4 @@
+
 import { CalendarDays, Trophy, Flag } from "lucide-react";
 import { Stats, Round } from "./types";
 import React, { useEffect } from "react";
@@ -44,6 +45,8 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
     handicapIndex: handicapIndex
   });
   
+  // CRITICAL FIX: Ensure we consistently use the passed handicapIndex parameter
+  // rather than calculating a new one, to match with other components
   if (scoreType === 'net' && userRounds.length > 0) {
     const calculatedRounds = userRounds.map(round => {
       const netScore = Math.round(round.gross_score - handicapIndex);
@@ -74,10 +77,19 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
       toParNet: r.toParNet
     })));
     
-    console.log("[MainStats] Best rounds by net score:", sortedByNetScore.slice(0, 3));
-    console.log("[MainStats] Best rounds by net to par:", sortedByToParNet.slice(0, 3));
-    console.log("[MainStats] Round with best net score:", sortedByNetScore[0]);
-    console.log("[MainStats] Round with best net to par:", sortedByToParNet[0]);
+    console.log("[MainStats] Best rounds by net score:", sortedByNetScore.slice(0, 3).map(r => ({
+      id: r.id,
+      course: r.courseName,
+      score: r.net,
+      date: new Date(r.date).toLocaleDateString()
+    })));
+    
+    console.log("[MainStats] Best rounds by net to par:", sortedByToParNet.slice(0, 3).map(r => ({
+      id: r.id,
+      course: r.courseName,
+      toPar: r.toParNet,
+      date: new Date(r.date).toLocaleDateString()
+    })));
 
     stats.bestNetScore = sortedByNetScore[0]?.net || null;
     stats.bestToParNet = sortedByToParNet[0]?.toParNet || null;

@@ -29,7 +29,7 @@ export const CourseStatsTable = ({
     const courseStats = calculateCourseStats(userRounds, handicapIndex);
     
     // Log courses with their scores for debugging
-    console.log("Courses with scores before sorting:", courseStats.map(course => ({
+    console.log("[CourseStatsTable] Courses with scores before sorting:", courseStats.map(course => ({
       id: course.courseId,
       name: course.courseName,
       club: course.clubName,
@@ -75,7 +75,7 @@ export const CourseStatsTable = ({
     });
     
     // Log the sorted results
-    console.log("Courses after sorting:", sorted.map(course => ({
+    console.log("[CourseStatsTable] Courses after sorting:", sorted.map(course => ({
       name: course.courseName,
       club: course.clubName,
       field: sortField,

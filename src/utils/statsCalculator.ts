@@ -256,6 +256,17 @@ export const calculateCourseStats = (rounds: Round[], handicapIndex?: number): C
       const netScore = Math.round(r.gross_score - currentHandicapIndex);
       // Calculate net to par - round to nearest integer
       const toParNet = Math.round(r.to_par_gross - currentHandicapIndex);
+      
+      // Log each round's calculation for debugging
+      console.log(`Round ${r.id} at ${courseName} calculation:`, {
+        gross: r.gross_score,
+        netScore,
+        toPar: r.to_par_gross,
+        toParNet,
+        handicapUsed: currentHandicapIndex,
+        date: new Date(r.date).toLocaleDateString()
+      });
+      
       return {
         ...r,
         calculatedNetScore: netScore,
@@ -283,6 +294,26 @@ export const calculateCourseStats = (rounds: Round[], handicapIndex?: number): C
         handicapUsed: currentHandicapIndex
       }))
     );
+    
+    // Log the best round for this course
+    const bestNetRound = roundsWithCalculatedScores.sort((a, b) => a.calculatedNetScore - b.calculatedNetScore)[0];
+    const bestToParNetRound = roundsWithCalculatedScores.sort((a, b) => a.calculatedToParNet - b.calculatedToParNet)[0];
+    
+    console.log(`Best net score round for ${courseName}:`, bestNetRound ? {
+      id: bestNetRound.id,
+      date: new Date(bestNetRound.date).toLocaleDateString(),
+      gross: bestNetRound.gross_score,
+      net: bestNetRound.calculatedNetScore,
+      toParNet: bestNetRound.calculatedToParNet
+    } : "No rounds found");
+    
+    console.log(`Best to par net round for ${courseName}:`, bestToParNetRound ? {
+      id: bestToParNetRound.id,
+      date: new Date(bestToParNetRound.date).toLocaleDateString(),
+      gross: bestToParNetRound.gross_score,
+      net: bestToParNetRound.calculatedNetScore,
+      toParNet: bestToParNetRound.calculatedToParNet
+    } : "No rounds found");
 
     return {
       courseId,
