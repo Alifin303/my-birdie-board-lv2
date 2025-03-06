@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Flag, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase";
 import { updateUserHandicap } from "@/integrations/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -179,7 +180,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
   const renderHoleScores = () => {
     if (!scores || scores.length === 0) {
       return (
-        <div className="mt-4 text-center p-4 bg-muted/20 rounded-md">
+        <div className="mt-4 text-center p-4 bg-secondary/20 rounded-md">
           <p className="text-muted-foreground">No hole-by-hole data available for this round.</p>
         </div>
       );
@@ -220,10 +221,12 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>Round Scorecard</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="max-w-3xl bg-background">
+        <DialogHeader className="golf-header rounded-t-lg px-6 py-4 -mx-6 -mt-6 mb-2">
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            <Flag className="h-5 w-5" /> Round Scorecard
+          </DialogTitle>
+          <DialogDescription className="text-white/90">
             {isEditing ? (
               "Edit your round details"
             ) : (
@@ -232,7 +235,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
           </DialogDescription>
         </DialogHeader>
 
-        <Card>
+        <Card className="border-secondary/30 shadow-md">
           <CardContent className="pt-6">
             <ScorecardHeader 
               round={round}
@@ -250,8 +253,9 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
               <div className="mt-4 mb-2 flex justify-end">
                 <button 
                   onClick={toggleNetScores}
-                  className={`px-3 py-1 text-sm rounded-full ${showNet ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+                  className={`px-3 py-1 text-sm rounded-full flex items-center gap-1.5 transition-colors ${showNet ? 'bg-primary text-primary-foreground' : 'bg-secondary hover:bg-secondary/80'}`}
                 >
+                  <Calendar className="h-3.5 w-3.5" />
                   {showNet ? 'Show Gross Score' : 'Show Net Score'}
                 </button>
               </div>

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase, parseCourseName, updateCourseWithUserId } from "@/integrations/supabase/client";
@@ -192,7 +193,7 @@ export default function Dashboard() {
     });
     
     return (
-      <div className="space-y-6 sm:space-y-8">
+      <div className="space-y-6 sm:space-y-8 golf-grass-pattern animate-fade-in">
         <DashboardHeader 
           profileData={profile} 
           onAddRound={handleOpenModal}
@@ -231,7 +232,7 @@ export default function Dashboard() {
               /> 
             : (
               <>
-                <h2 className="text-xl sm:text-2xl font-semibold">Your Courses</h2>
+                <h2 className="text-xl sm:text-2xl font-semibold text-primary">Your Courses</h2>
                 <CourseStatsTable 
                   userRounds={userRounds}
                   scoreType={scoreType}
