@@ -254,7 +254,7 @@ export default function Checkout() {
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg shadow-2xl overflow-hidden">
             <div className="bg-primary p-6 sm:p-8 text-primary-foreground">
               <h1 className="text-2xl sm:text-3xl font-bold">Join BirdieBoard</h1>
-              <p className="mt-2 opacity-90">Take your golf game to the next level with our premium features</p>
+              <p className="mt-2 opacity-90">Stop guessing your way to better golf - use BirdieBoard</p>
               
               {subscription && (
                 <div className="mt-2 p-2 bg-white/20 rounded">
@@ -297,7 +297,7 @@ export default function Checkout() {
                       "Course leaderboards",
                       "Advanced progress tracking",
                       "Compare with other golfers",
-                      "Track handicap trends"
+                      "Track handicap"
                     ].map((feature, i) => (
                       <li key={i} className="flex items-center gap-2 text-white">
                         <Check className="h-5 w-5 text-green-400 flex-shrink-0" />
