@@ -297,6 +297,16 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
     }
   };
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString(undefined, { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
   const renderSubscriptionManagement = () => {
     return (
       <div className="pt-4 border-t">
@@ -359,7 +369,7 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
             
             {subscription?.current_period_end && (
               <p className="text-sm text-muted-foreground mb-3">
-                You can still use BirdieBoard Premium until {new Date(subscription.current_period_end).toLocaleDateString()}
+                Your subscription will end on {formatDate(subscription.current_period_end)}
               </p>
             )}
             
@@ -389,7 +399,7 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
             
             {subscription?.current_period_end && (
               <p className="text-sm text-muted-foreground mb-3">
-                Access available until {new Date(subscription.current_period_end).toLocaleDateString()}
+                Access available until {formatDate(subscription.current_period_end)}
               </p>
             )}
             

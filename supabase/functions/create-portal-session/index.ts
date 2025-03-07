@@ -73,7 +73,7 @@ serve(async (req) => {
     console.log('Looking up customer ID for user:', user_id);
     const { data: subscription, error: subscriptionError } = await supabase
       .from('customer_subscriptions')
-      .select('customer_id, subscription_id')
+      .select('customer_id, subscription_id, current_period_end, cancel_at_period_end')
       .eq('user_id', user_id)
       .maybeSingle();
       
@@ -96,26 +96,49 @@ serve(async (req) => {
     const customerId = subscription.customer_id;
     console.log('Found customer ID:', customerId);
     console.log('Found subscription ID:', subscription.subscription_id);
+    console.log('Subscription details:', {
+      current_period_end: subscription.current_period_end,
+      is_canceled: subscription.cancel_at_period_end
+    });
 
     // Create a Stripe customer portal session
     try {
       const finalReturnUrl = return_url || `${req.headers.get('origin') || 'https://rbhzesocmhazynkfyhst.supabase.co'}/dashboard`;
       console.log('Creating portal session with return URL:', finalReturnUrl);
       
-      // Create portal session with explicit configuration
-      const session = await stripe.billingPortal.sessions.create({
-        customer: customerId,
-        return_url: finalReturnUrl,
-        // Force Stripe to use the default configuration if available
-        // This ensures we use the configured portal settings
-        configuration: undefined
-      });
+      // Create portal session - try different approaches
+      let session;
+      
+      try {
+        // First attempt: Try to use Stripe's default configuration
+        session = await stripe.billingPortal.sessions.create({
+          customer: customerId,
+          return_url: finalReturnUrl
+        });
+      } catch (configError) {
+        console.log('Error with default configuration, trying with explicit parameter set to null:', configError);
+        
+        // Second attempt: Try with explicit configuration set to null to force using default
+        try {
+          session = await stripe.billingPortal.sessions.create({
+            customer: customerId,
+            return_url: finalReturnUrl,
+            configuration: null
+          });
+        } catch (nullConfigError) {
+          console.log('Error with null configuration, error:', nullConfigError);
+          throw nullConfigError;
+        }
+      }
       
       console.log('Portal session created successfully:', session.id);
       console.log('Portal URL:', session.url);
       
-      // Return the portal URL
-      return new Response(JSON.stringify({ url: session.url }), {
+      // Return the portal URL and subscription details
+      return new Response(JSON.stringify({ 
+        url: session.url,
+        subscription_ends: subscription.cancel_at_period_end ? subscription.current_period_end : null
+      }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -130,7 +153,8 @@ serve(async (req) => {
         
         return new Response(JSON.stringify({ 
           url: directPortalUrl,
-          directPortal: true
+          directPortal: true,
+          subscription_ends: subscription.cancel_at_period_end ? subscription.current_period_end : null
         }), {
           status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -145,7 +169,8 @@ serve(async (req) => {
           url: subscriptionURL,
           fallback: true,
           error: stripeError.message,
-          message: "Could not access customer portal. Redirecting to subscription details."
+          message: "Could not access customer portal. Redirecting to subscription details.",
+          subscription_ends: subscription.cancel_at_period_end ? subscription.current_period_end : null
         }), {
           status: 200, // Return 200 to prevent frontend errors
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
