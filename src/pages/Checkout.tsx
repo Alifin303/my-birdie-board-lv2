@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, Check, AlertTriangle } from "lucide-react";
@@ -20,8 +20,29 @@ export default function Checkout() {
   const [redirectingToDashboard, setRedirectingToDashboard] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const sessionId = searchParams.get('session_id');
 
   useEffect(() => {
+    // If we have a session_id in the URL, it means the user is returning from Stripe Checkout
+    if (sessionId) {
+      console.log("Detected return from Stripe with session ID:", sessionId);
+      setRedirectingToDashboard(true);
+      
+      // Show success toast and redirect to dashboard
+      toast({
+        title: "Payment successful!",
+        description: "Redirecting to your dashboard...",
+        duration: 5000,
+      });
+      
+      // We redirect to dashboard with the session_id so it can handle further processing
+      setTimeout(() => {
+        navigate(`/dashboard?session_id=${sessionId}`);
+      }, 1500);
+      return;
+    }
+
     let isMounted = true;
     
     const checkSession = async () => {
@@ -162,7 +183,7 @@ export default function Checkout() {
     return () => {
       isMounted = false;
     };
-  }, [navigate, toast]);
+  }, [navigate, toast, sessionId]);
 
   const handleCheckout = async () => {
     if (!user) return;
@@ -170,7 +191,7 @@ export default function Checkout() {
     setIsLoading(true);
     
     try {
-      const returnUrl = `${window.location.origin}/dashboard`;
+      const returnUrl = `${window.location.origin}/checkout`;
       
       const { data, error } = await supabase.functions.invoke("create-checkout", {
         body: {
@@ -225,10 +246,10 @@ export default function Checkout() {
 
   if (!initialCheckDone || redirectingToDashboard) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-        <p className="ml-2 text-sm text-gray-500">
-          {redirectingToDashboard ? "Redirecting to dashboard..." : "Loading subscription details..."}
+      <div className="flex flex-col items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin mb-4" />
+        <p className="text-sm text-gray-500">
+          {redirectingToDashboard ? "Payment successful! Redirecting to dashboard..." : "Loading subscription details..."}
         </p>
       </div>
     );

@@ -32,28 +32,65 @@ serve(async (req) => {
       httpClient: Stripe.createFetchHttpClient(),
     });
 
-    // Retrieve the subscription directly from Stripe
-    const subscription = await stripe.subscriptions.retrieve(subscription_id);
-    
-    console.log('Stripe subscription info:', {
-      id: subscription.id,
-      status: subscription.status,
-      current_period_end: subscription.current_period_end,
-      cancel_at_period_end: subscription.cancel_at_period_end
-    });
+    try {
+      // Retrieve the subscription directly from Stripe
+      const subscription = await stripe.subscriptions.retrieve(subscription_id);
+      
+      console.log('Stripe subscription info:', {
+        id: subscription.id,
+        status: subscription.status,
+        current_period_end: subscription.current_period_end,
+        cancel_at_period_end: subscription.cancel_at_period_end
+      });
 
-    return new Response(JSON.stringify({
-      id: subscription.id,
-      status: subscription.status,
-      current_period_end: subscription.current_period_end ? 
-        new Date(subscription.current_period_end * 1000).toISOString() : null,
-      cancel_at_period_end: subscription.cancel_at_period_end
-    }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+      // Initialize Supabase client to update subscription status
+      const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+      
+      if (supabaseUrl && supabaseKey) {
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        
+        // Update the subscription in the database to match Stripe
+        if (subscription.status === 'active') {
+          console.log('Updating subscription in database to active status');
+          const { error } = await supabase
+            .from('customer_subscriptions')
+            .update({ 
+              status: subscription.status,
+              updated_at: new Date().toISOString() 
+            })
+            .eq('subscription_id', subscription_id);
+            
+          if (error) {
+            console.error('Error updating subscription in database:', error);
+          } else {
+            console.log('Successfully updated subscription status in database');
+          }
+        }
+      }
+
+      return new Response(JSON.stringify({
+        id: subscription.id,
+        status: subscription.status,
+        current_period_end: subscription.current_period_end ? 
+          new Date(subscription.current_period_end * 1000).toISOString() : null,
+        cancel_at_period_end: subscription.cancel_at_period_end
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    } catch (stripeError) {
+      console.error('Stripe error:', stripeError);
+      return new Response(JSON.stringify({ 
+        error: stripeError.message,
+        type: 'stripe_error'
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
   } catch (error) {
-    console.error('Error:', error);
+    console.error('General error:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

@@ -1,5 +1,7 @@
+
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import { supabase, parseCourseName, updateCourseWithUserId } from "@/integrations/supabase/client";
 import { AddRoundModal } from "@/components/add-round/AddRoundModal";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
@@ -7,6 +9,7 @@ import { MainStats, HandicapCircle } from "@/components/dashboard/StatsDisplay";
 import { CourseStatsTable, CourseRoundHistory } from "@/components/dashboard/CourseStats";
 import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
 import { useToast } from "@/hooks/use-toast";
+import { clearSubscriptionCache } from "@/integrations/supabase/subscription/subscription-utils";
 
 interface Round {
   id: number;
@@ -39,9 +42,47 @@ interface Subscription {
 export default function Dashboard() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
+  const [processingStripeSession, setProcessingStripeSession] = useState(false);
+  
+  // Get the session_id from URL for Stripe redirects
+  const sessionId = searchParams.get('session_id');
+  
+  // Handle Stripe session redirect
+  useEffect(() => {
+    if (sessionId) {
+      console.log("Processing Stripe checkout session:", sessionId);
+      setProcessingStripeSession(true);
+      
+      // Clear subscription cache to force a fresh check
+      const { data } = supabase.auth.getSession();
+      if (data?.session?.user?.id) {
+        clearSubscriptionCache(data.session.user.id);
+      }
+      
+      // Force refetch subscription data
+      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      
+      // Show success toast
+      toast({
+        title: "Payment successful!",
+        description: "Thank you for subscribing to BirdieBoard",
+        duration: 5000,
+      });
+      
+      // Clean up URL by removing the session_id parameter
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+      
+      // Set a timeout to ensure subscription data is properly fetched from backend
+      setTimeout(() => {
+        setProcessingStripeSession(false);
+      }, 3000);
+    }
+  }, [sessionId, toast, queryClient]);
   
   useEffect(() => {
     console.log("Modal state changed:", isModalOpen);
@@ -84,7 +125,9 @@ export default function Dashboard() {
       
       console.log("Subscription data:", data);
       return data;
-    }
+    },
+    retry: 3,
+    retryDelay: 1000
   });
 
   const { data: userRounds, isLoading: roundsLoading } = useQuery({
@@ -176,6 +219,28 @@ export default function Dashboard() {
   }, [isModalOpen, queryClient]);
 
   const renderDashboard = () => {
+    // Handle Stripe session processing state
+    if (processingStripeSession) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 space-y-6 animate-fade-in">
+          <div className="w-20 h-20 relative">
+            <div className="absolute inset-0 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
+            <div className="absolute inset-2 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </div>
+          <h2 className="text-2xl font-semibold text-primary">Processing Your Payment</h2>
+          <p className="text-muted-foreground text-center max-w-md">
+            Your payment was successful! We're setting up your account access.
+            <br />This should only take a few seconds...
+          </p>
+        </div>
+      );
+    }
+
+    // Handle regular loading state
     if (profileLoading || !profile) {
       return <div className="flex justify-center py-10"><div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div></div>;
     }
