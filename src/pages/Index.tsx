@@ -30,7 +30,7 @@ const Index = () => {
           <div className="container mx-auto px-4 py-2">
             <nav className="flex items-center justify-between">
               <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">
-                BirdieBoard
+                MyBirdieBoard
               </h1>
               <Button 
                 onClick={() => setShowLoginDialog(true)}

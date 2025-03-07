@@ -137,7 +137,7 @@ export function SignUpForm() {
   return (
     <div className="animate-fade-in space-y-6">
       <div className="text-center mb-6">
-        <h2 className="text-2xl sm:text-3xl font-bold">Create your BirdieBoard account</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold">Create your MyBirdieBoard account</h2>
         <p className="text-muted-foreground mt-2">
           You're just one step away from better golf insights
         </p>

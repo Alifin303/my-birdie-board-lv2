@@ -161,7 +161,7 @@ export function SignUpDialog() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] bg-card">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Create your BirdieBoard account</DialogTitle>
+          <DialogTitle className="text-2xl">Create your MyBirdieBoard account</DialogTitle>
         </DialogHeader>
         
         {errorMessage && (

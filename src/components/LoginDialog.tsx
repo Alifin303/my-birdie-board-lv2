@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,7 +51,6 @@ export function LoginDialog({ open, onOpenChange }: { open: boolean; onOpenChang
         return false;
       }
       
-      // Use the shared isSubscriptionValid function
       const isValid = isSubscriptionValid(subscription);
       
       console.log("Subscription validation results:", {
@@ -97,14 +95,12 @@ export function LoginDialog({ open, onOpenChange }: { open: boolean; onOpenChang
       
       onOpenChange(false);
       
-      // After successful login, check subscription status to determine redirect
       const hasValidSubscription = await checkSubscriptionStatus(data.user.id);
       
       if (hasValidSubscription) {
         console.log("User has valid subscription, redirecting to dashboard");
         navigate("/dashboard");
       } else {
-        // Redirect to checkout if no valid subscription
         console.log("No valid subscription found, redirecting to checkout");
         navigate("/checkout");
       }
@@ -134,7 +130,7 @@ export function LoginDialog({ open, onOpenChange }: { open: boolean; onOpenChang
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[425px] bg-card">
           <DialogHeader>
-            <DialogTitle className="text-2xl">Log in to BirdieBoard</DialogTitle>
+            <DialogTitle className="text-2xl">Log in to MyBirdieBoard</DialogTitle>
             <DialogDescription>
               Enter your credentials to access your account
             </DialogDescription>

@@ -39,15 +39,15 @@ const About = () => {
           ← Back to home
         </Link>
         <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-8 text-white">
-          <h1 className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6">BirdieBoard</h1>
+          <h1 className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6">MyBirdieBoard</h1>
           
           <div className="space-y-4 sm:space-y-6 text-white/90 text-sm sm:text-base">
             <p>
-              At BirdieBoard, we believe every golfer deserves a smarter way to track their game. Keeping score on paper is a thing of the past—our digital platform allows you to store, analyze, and compete like never before.
+              At MyBirdieBoard, we believe every golfer deserves a smarter way to track their game. Keeping score on paper is a thing of the past—our digital platform allows you to store, analyze, and compete like never before.
             </p>
 
             <p>
-              We built BirdieBoard with three goals in mind:
+              We built MyBirdieBoard with three goals in mind:
             </p>
 
             <div className="pl-3 sm:pl-4 border-l-4 border-primary/60 my-4 sm:my-6">
@@ -62,15 +62,15 @@ const About = () => {
 
             <div className="pl-3 sm:pl-4 border-l-4 border-primary/60 my-4 sm:my-6">
               <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">📊 Compete with Friends & Leaderboards</h3>
-              <p>BirdieBoard connects golfers worldwide through course-based leaderboards. Compare your scores with other players at your favorite courses and challenge yourself to climb the ranks.</p>
+              <p>MyBirdieBoard connects golfers worldwide through course-based leaderboards. Compare your scores with other players at your favorite courses and challenge yourself to climb the ranks.</p>
             </div>
 
             <p>
-              Whether you're aiming for lower scores, a better handicap, or just bragging rights at the clubhouse, BirdieBoard is here to help you elevate your game.
+              Whether you're aiming for lower scores, a better handicap, or just bragging rights at the clubhouse, MyBirdieBoard is here to help you elevate your game.
             </p>
 
             <p className="font-bold text-center text-lg sm:text-xl my-6 sm:my-8">
-              📌 Join the BirdieBoard community today and start tracking your way to better golf!
+              📌 Join the MyBirdieBoard community today and start tracking your way to better golf!
             </p>
           </div>
 

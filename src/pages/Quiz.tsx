@@ -7,7 +7,7 @@ export default function Quiz() {
       <header className="bg-primary shadow-sm">
         <div className="container mx-auto px-4 py-3">
           <h1 className="text-lg font-bold tracking-tight text-white">
-            BirdieBoard
+            MyBirdieBoard
           </h1>
         </div>
       </header>

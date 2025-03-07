@@ -47,16 +47,13 @@ export default function Dashboard() {
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
   const [processingStripeSession, setProcessingStripeSession] = useState(false);
   
-  // Get the session_id from URL for Stripe redirects
   const sessionId = searchParams.get('session_id');
   
-  // Handle Stripe session redirect
   useEffect(() => {
     if (sessionId) {
       console.log("Processing Stripe checkout session:", sessionId);
       setProcessingStripeSession(true);
       
-      // Clear subscription cache to force a fresh check
       const initSession = async () => {
         const { data } = await supabase.auth.getSession();
         if (data?.session?.user?.id) {
@@ -66,21 +63,17 @@ export default function Dashboard() {
       
       initSession();
       
-      // Force refetch subscription data
       queryClient.invalidateQueries({ queryKey: ['subscription'] });
       
-      // Show success toast
       toast({
         title: "Payment successful!",
         description: "Thank you for subscribing to BirdieBoard",
         duration: 5000,
       });
       
-      // Clean up URL by removing the session_id parameter
       const newUrl = window.location.pathname;
       window.history.replaceState({}, document.title, newUrl);
       
-      // Set a timeout to ensure subscription data is properly fetched from backend
       setTimeout(() => {
         setProcessingStripeSession(false);
       }, 3000);
@@ -154,13 +147,6 @@ export default function Dashboard() {
         throw error;
       }
       
-      console.log("IMPORTANT - RAW ROUNDS FROM DATABASE:", JSON.stringify(data?.slice(0, 3).map(round => ({ 
-        id: round.id, 
-        tee_name: round.tee_name,
-        tee_name_type: typeof round.tee_name,
-        tee_id: round.tee_id
-      })), null, 2));
-      
       const processedRounds = data?.map(round => {
         let parsedNames = { clubName: "Unknown Club", courseName: "Unknown Course" };
         
@@ -178,15 +164,6 @@ export default function Dashboard() {
           } : undefined
         };
       }) || [];
-      
-      console.log("PROCESSED ROUNDS - First few with tee info:", 
-        processedRounds.slice(0, 3).map(r => ({
-          id: r.id,
-          tee_name: r.tee_name,
-          tee_name_type: typeof r.tee_name,
-          tee_id: r.tee_id
-        }))
-      );
       
       if (processedRounds.length > 0) {
         processedRounds.forEach(round => {
@@ -222,7 +199,6 @@ export default function Dashboard() {
   }, [isModalOpen, queryClient]);
 
   const renderDashboard = () => {
-    // Handle Stripe session processing state
     if (processingStripeSession) {
       return (
         <div className="flex flex-col items-center justify-center py-20 space-y-6 animate-fade-in">
@@ -243,7 +219,6 @@ export default function Dashboard() {
       );
     }
 
-    // Handle regular loading state
     if (profileLoading || !profile) {
       return <div className="flex justify-center py-10"><div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div></div>;
     }
@@ -263,7 +238,7 @@ export default function Dashboard() {
       <div className="space-y-6 sm:space-y-8 golf-grass-pattern animate-fade-in">
         <div className="mb-4">
           <h1 className="text-lg sm:text-xl font-bold text-primary tracking-tight">
-            BirdieBoard
+            MyBirdieBoard
           </h1>
         </div>
         <DashboardHeader 

@@ -16,10 +16,10 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
       <div className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center">
         <div className="max-w-5xl mx-auto animate-fade-in mb-4">
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight mb-4 drop-shadow-md">
-            Welcome to BirdieBoard – <br className="hidden sm:block" />Your Ultimate Golf Tracking Hub!
+            Welcome to MyBirdieBoard – <br className="hidden sm:block" />Your Ultimate Golf Tracking Hub!
           </h1>
           <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium mb-6 max-w-3xl mx-auto">
-            BirdieBoard is the all-in-one platform for golfers looking to track progress, analyze performance, and compete on leaderboards. Whether you're a casual weekend golfer or a dedicated player chasing lower scores, BirdieBoard helps you upload scorecards, track your handicap, and see your game improve over time.
+            MyBirdieBoard is the all-in-one platform for golfers looking to track progress, analyze performance, and compete on leaderboards. Whether you're a casual weekend golfer or a dedicated player chasing lower scores, MyBirdieBoard helps you upload scorecards, track your handicap, and see your game improve over time.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-4">
@@ -124,7 +124,7 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
       <div className="w-full py-4 sm:py-6 bg-black/30 backdrop-blur-sm mt-2 sm:mt-3">
         <div className="max-w-5xl mx-auto text-center px-4">
           <h2 className="text-lg sm:text-xl font-bold text-white mb-2">Ready to take your game to the next level?</h2>
-          <p className="text-sm sm:text-base text-white/90 mb-3">Find out how BirdieBoard can help improve your golf game!</p>
+          <p className="text-sm sm:text-base text-white/90 mb-3">Find out how MyBirdieBoard can help improve your golf game!</p>
           <Button 
             size="lg"
             className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300"

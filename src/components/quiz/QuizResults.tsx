@@ -29,7 +29,7 @@ export function QuizResults({ onContinue }: QuizResultsProps) {
       <div className="bg-green-50 p-5 rounded-lg border border-green-100">
         <div className="flex items-center gap-3 mb-3">
           <Check className="h-6 w-6 text-green-500 flex-shrink-0" />
-          <p className="font-bold text-gray-800">With BirdieBoard, you can:</p>
+          <p className="font-bold text-gray-800">With MyBirdieBoard, you can:</p>
         </div>
         
         <ul className="space-y-3 pl-10 list-disc">
@@ -44,12 +44,12 @@ export function QuizResults({ onContinue }: QuizResultsProps) {
         <p className="text-lg font-medium">📊 Want to start improving faster?</p>
         
         <Button onClick={onContinue} size="lg" className="px-6 bg-accent hover:bg-accent/90 text-accent-foreground">
-          <span className="mr-2">👉</span> Join BirdieBoard today
+          <span className="mr-2">👉</span> Join MyBirdieBoard today
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
         
         <p className="text-sm text-muted-foreground">
-          Don't guess your way to better golf. Let BirdieBoard show you the way.
+          Don't guess your way to better golf. Let MyBirdieBoard show you the way.
         </p>
       </div>
     </div>
