@@ -6,18 +6,9 @@ export default function Quiz() {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex flex-col">
       <header className="bg-primary shadow-sm">
         <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center gap-2">
-            <div className="bg-white/10 backdrop-blur-sm p-1.5 rounded-lg">
-              <img 
-                src="https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/favicon.ico" 
-                alt="BirdieBoard" 
-                className="w-5 h-5"
-              />
-            </div>
-            <h1 className="text-lg font-bold tracking-tight text-white">
-              BirdieBoard
-            </h1>
-          </div>
+          <h1 className="text-lg font-bold tracking-tight text-white">
+            BirdieBoard
+          </h1>
         </div>
       </header>
       
