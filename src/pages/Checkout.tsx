@@ -253,7 +253,7 @@ export default function Checkout() {
         <div className="max-w-3xl mx-auto w-full">
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg shadow-2xl overflow-hidden">
             <div className="bg-primary p-6 sm:p-8 text-primary-foreground">
-              <h1 className="text-2xl sm:text-3xl font-bold">Join BirdieBoard Premium</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold">Join BirdieBoard</h1>
               <p className="mt-2 opacity-90">Take your golf game to the next level with our premium features</p>
               
               {subscription && (
@@ -286,7 +286,7 @@ export default function Checkout() {
             <div className="p-6 sm:p-8">
               <div className="flex flex-col sm:flex-row gap-8">
                 <div className="flex-1">
-                  <h2 className="text-xl font-semibold mb-4 text-white">BirdieBoard Premium</h2>
+                  <h2 className="text-xl font-semibold mb-4 text-white">BirdieBoard</h2>
                   <div className="text-3xl font-bold mb-2 text-white">£2.99<span className="text-base font-normal text-white/70">/month</span></div>
                   <p className="text-white/70 mb-6">Cancel anytime</p>
                   
