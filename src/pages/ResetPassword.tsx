@@ -87,17 +87,16 @@ export const ResetPassword = () => {
       
       if (error) throw error;
       
+      // Sign out the user after successful password reset
+      // This ensures they log in fresh with their new credentials
+      await supabase.auth.signOut();
+      
       setSuccess(true);
       
       toast({
         title: "Password updated",
-        description: "Your password has been successfully reset",
+        description: "Your password has been successfully reset. Please log in with your new password.",
       });
-      
-      // Redirect to dashboard after a short delay
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 3000);
       
     } catch (error: any) {
       console.error("Password reset error:", error);
@@ -111,6 +110,10 @@ export const ResetPassword = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleLogin = () => {
+    navigate("/");
   };
 
   return (
@@ -151,8 +154,14 @@ export const ResetPassword = () => {
             <div className="flex flex-col items-center justify-center py-6 space-y-4">
               <CheckCircle className="h-16 w-16 text-green-500" />
               <p className="text-center">
-                Your password has been successfully reset. You'll be redirected to the dashboard shortly.
+                Your password has been successfully reset. Please log in with your new password.
               </p>
+              <Button 
+                onClick={handleLogin} 
+                className="mt-4"
+              >
+                Log In
+              </Button>
             </div>
           ) : (
             <form onSubmit={handleResetPassword} className="space-y-4">
