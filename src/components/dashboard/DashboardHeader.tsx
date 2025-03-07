@@ -258,8 +258,27 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
           }
           
           if (data?.url) {
-            console.log("Redirecting to portal URL:", data.url);
+            console.log("Redirecting to URL:", data.url);
+            
+            if (data.portalNotConfigured) {
+              toast({
+                title: "Stripe Portal Not Configured",
+                description: "Your Stripe Customer Portal is not configured yet. Redirecting to subscription details in Stripe Dashboard.",
+                variant: "default",
+              });
+            }
+            
             window.location.href = data.url;
+          } else if (data?.portalConfigUrl) {
+            toast({
+              title: "Stripe Portal Not Configured",
+              description: "The Stripe Customer Portal needs to be configured. Opening subscription details instead.",
+              variant: "default",
+            });
+            
+            if (data.alternativeUrl) {
+              window.open(data.alternativeUrl, '_blank');
+            }
           } else if (data?.error) {
             throw new Error(data.error);
           } else {
