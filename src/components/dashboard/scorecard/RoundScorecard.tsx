@@ -1,9 +1,9 @@
 
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Flag, Calendar } from "lucide-react";
+import { Flag, Calendar, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase";
 import { updateUserHandicap } from "@/integrations/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -233,6 +233,10 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
               <>Details for your round at {round.courses?.clubName} - {round.courses?.courseName} ({round.tee_name || "Standard"})</>
             )}
           </DialogDescription>
+          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-80 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+            <X className="h-5 w-5 text-white" />
+            <span className="sr-only">Close</span>
+          </DialogClose>
         </DialogHeader>
 
         <Card className="border-secondary/30 shadow-md">
