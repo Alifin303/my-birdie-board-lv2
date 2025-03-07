@@ -83,7 +83,18 @@ export function SignUpDialog() {
             message: 'This email is already registered' 
           });
         } else {
-          setErrorMessage(error.message || "Something went wrong. Please try again.");
+          // Generic error handling with specific check for potential username conflicts
+          const errorMsg = error.message || "Something went wrong. Please try again.";
+          setErrorMessage(errorMsg);
+          
+          // Try to determine if it's a username issue from database errors
+          if (errorMsg.includes("Database error") && error.status === 500) {
+            setErrorMessage("This username may already be taken. Please try a different username.");
+            form.setError('username', { 
+              type: 'manual', 
+              message: 'This username may already be taken' 
+            });
+          }
         }
         
         throw error;
