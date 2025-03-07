@@ -1,0 +1,7 @@
+
+User-agent: *
+Allow: /
+Disallow: /auth/
+Disallow: /checkout
+
+Sitemap: https://mybirdieboard.com/sitemap.xml

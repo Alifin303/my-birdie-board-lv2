@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 import About from "@/pages/About";
 import Index from "@/pages/Index";
 import Quiz from "@/pages/Quiz";
@@ -40,44 +41,83 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen">
-      <BrowserRouter>
-        <div className="flex flex-col min-h-screen">
-          <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/quiz" element={<Quiz />} />
-              <Route path="/auth/callback" element={<AuthRedirect />} />
-              <Route path="/auth/confirm" element={<AuthConfirm />} />
-              <Route path="/auth/reset-password" element={<ResetPassword />} />
-              <Route path="/checkout" element={<Checkout />} />
-              
-              {/* Add direct redirects for Supabase auth URLs */}
-              <Route path="/verify" element={<Navigate to="/auth/callback" replace />} />
-              <Route path="/auth/v1/verify" element={<Navigate to="/auth/callback" replace />} />
-              
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-        </div>
-      </BrowserRouter>
-      <Toaster />
-      {process.env.NODE_ENV === 'development' && (
-        <div className="fixed bottom-4 right-4 z-50 bg-black/10 p-2 rounded-md text-xs">
-          DEV MODE
-        </div>
-      )}
-    </div>
+    <HelmetProvider>
+      <div className="min-h-screen">
+        <BrowserRouter>
+          <div className="flex flex-col min-h-screen">
+            <main className="flex-1">
+              <Routes>
+                <Route path="/" element={
+                  <>
+                    <Helmet>
+                      <title>MyBirdieBoard - Golf Score Tracking & Performance Analytics</title>
+                      <meta name="description" content="Track your golf scores, challenge friends on course leaderboards, and improve your game with detailed performance analytics on MyBirdieBoard" />
+                      <link rel="canonical" href="https://mybirdieboard.com/" />
+                    </Helmet>
+                    <Index />
+                  </>
+                } />
+                
+                <Route path="/about" element={
+                  <>
+                    <Helmet>
+                      <title>About MyBirdieBoard - Your Ultimate Golf Tracking Solution</title>
+                      <meta name="description" content="Learn how MyBirdieBoard helps golfers track scores, analyze performance, and compete on leaderboards to improve their game." />
+                      <link rel="canonical" href="https://mybirdieboard.com/about" />
+                    </Helmet>
+                    <About />
+                  </>
+                } />
+                
+                <Route path="/quiz" element={
+                  <>
+                    <Helmet>
+                      <title>Golf Improvement Quiz - Find Your Weaknesses | MyBirdieBoard</title>
+                      <meta name="description" content="Take our quick quiz to identify what's holding your golf game back and get personalized recommendations for improvement." />
+                      <link rel="canonical" href="https://mybirdieboard.com/quiz" />
+                    </Helmet>
+                    <Quiz />
+                  </>
+                } />
+                
+                <Route path="/auth/callback" element={<AuthRedirect />} />
+                <Route path="/auth/confirm" element={<AuthConfirm />} />
+                <Route path="/auth/reset-password" element={<ResetPassword />} />
+                <Route path="/checkout" element={<Checkout />} />
+                
+                {/* Add direct redirects for Supabase auth URLs */}
+                <Route path="/verify" element={<Navigate to="/auth/callback" replace />} />
+                <Route path="/auth/v1/verify" element={<Navigate to="/auth/callback" replace />} />
+                
+                <Route
+                  path="/dashboard"
+                  element={
+                    <>
+                      <Helmet>
+                        <title>Your Golf Dashboard | MyBirdieBoard</title>
+                        <meta name="description" content="View your golf stats, track your progress, and analyze your performance with MyBirdieBoard's comprehensive dashboard." />
+                        <link rel="canonical" href="https://mybirdieboard.com/dashboard" />
+                      </Helmet>
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    </>
+                  }
+                />
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+          </div>
+        </BrowserRouter>
+        <Toaster />
+        {process.env.NODE_ENV === 'development' && (
+          <div className="fixed bottom-4 right-4 z-50 bg-black/10 p-2 rounded-md text-xs">
+            DEV MODE
+          </div>
+        )}
+      </div>
+    </HelmetProvider>
   );
 }
 
