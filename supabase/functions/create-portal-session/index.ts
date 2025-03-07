@@ -73,7 +73,7 @@ serve(async (req) => {
     console.log('Looking up customer ID for user:', user_id);
     const { data: subscription, error: subscriptionError } = await supabase
       .from('customer_subscriptions')
-      .select('customer_id')
+      .select('customer_id, subscription_id')
       .eq('user_id', user_id)
       .maybeSingle();
       
@@ -95,17 +95,24 @@ serve(async (req) => {
 
     const customerId = subscription.customer_id;
     console.log('Found customer ID:', customerId);
+    console.log('Found subscription ID:', subscription.subscription_id);
 
     // Create a Stripe customer portal session
     try {
-      const finalReturnUrl = return_url || 'https://rbhzesocmhazynkfyhst.supabase.co/dashboard';
+      const finalReturnUrl = return_url || `${req.headers.get('origin') || 'https://rbhzesocmhazynkfyhst.supabase.co'}/dashboard`;
       console.log('Creating portal session with return URL:', finalReturnUrl);
       
-      // Create a basic portal session without configuration
-      // Let Stripe use the default configuration from the dashboard
+      // Create the portal session with configuration
       const session = await stripe.billingPortal.sessions.create({
         customer: customerId,
-        return_url: finalReturnUrl
+        return_url: finalReturnUrl,
+        // Adding explicit configuration to avoid "No configuration provided" error
+        flow_data: {
+          type: 'subscription_cancel',
+          subscription_cancel: {
+            subscription: subscription.subscription_id
+          }
+        }
       });
 
       console.log('Portal session created successfully:', session.id);
@@ -117,6 +124,35 @@ serve(async (req) => {
       });
     } catch (stripeError) {
       console.error('Error creating portal session:', stripeError);
+      
+      // If there's an error about configuration missing, try without flow_data
+      if (stripeError.message && stripeError.message.includes('No configuration provided')) {
+        try {
+          // Try again without flow_data, using just the basic settings
+          const finalReturnUrl = return_url || `${req.headers.get('origin') || 'https://rbhzesocmhazynkfyhst.supabase.co'}/dashboard`;
+          const session = await stripe.billingPortal.sessions.create({
+            customer: customerId,
+            return_url: finalReturnUrl
+          });
+          
+          console.log('Portal session created successfully (fallback mode):', session.id);
+          
+          // Return the portal URL
+          return new Response(JSON.stringify({ url: session.url }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        } catch (fallbackError) {
+          console.error('Fallback error creating portal session:', fallbackError);
+          return new Response(JSON.stringify({ 
+            error: "Stripe Customer Portal configuration error. Please contact support.",
+            details: fallbackError.message
+          }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+      }
       
       // Handle specific errors
       if (stripeError.message && stripeError.message.includes('No configuration provided')) {

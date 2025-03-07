@@ -240,6 +240,8 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
           throw new Error("You must be logged in to manage your subscription");
         }
         
+        console.log("Calling create-portal-session with user ID:", session.user.id);
+        
         const { data, error } = await supabase.functions.invoke('create-portal-session', {
           body: { 
             user_id: session.user.id,
@@ -247,10 +249,18 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
           }
         });
         
-        if (error) throw error;
+        console.log("Portal session response:", { data, error });
+        
+        if (error) {
+          console.error("Portal session error:", error);
+          throw new Error(error.message || "Failed to create customer portal session");
+        }
         
         if (data?.url) {
+          console.log("Redirecting to portal URL:", data.url);
           window.location.href = data.url;
+        } else if (data?.error) {
+          throw new Error(data.error);
         } else {
           throw new Error("Failed to create customer portal session");
         }
