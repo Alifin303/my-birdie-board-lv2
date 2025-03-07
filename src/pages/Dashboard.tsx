@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
@@ -58,10 +57,14 @@ export default function Dashboard() {
       setProcessingStripeSession(true);
       
       // Clear subscription cache to force a fresh check
-      const { data } = supabase.auth.getSession();
-      if (data?.session?.user?.id) {
-        clearSubscriptionCache(data.session.user.id);
-      }
+      const initSession = async () => {
+        const { data } = await supabase.auth.getSession();
+        if (data?.session?.user?.id) {
+          clearSubscriptionCache(data.session.user.id);
+        }
+      };
+      
+      initSession();
       
       // Force refetch subscription data
       queryClient.invalidateQueries({ queryKey: ['subscription'] });
