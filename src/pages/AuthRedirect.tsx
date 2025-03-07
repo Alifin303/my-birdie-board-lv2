@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,15 +37,29 @@ export const AuthRedirect = () => {
         if (isRecovery) {
           console.log("Recovery flow detected from URL params");
           
-          // Get the code from URL if present
-          const code = urlSearchParams.get('code');
+          // Get the code or token from URL if present
+          const code = urlSearchParams.get('code') || urlSearchParams.get('token');
           
           if (code) {
-            // Exchange the code for a session
+            console.log("Code/token found for recovery:", code);
+            // Exchange the code for a session - this establishes the recovery session
             await supabase.auth.exchangeCodeForSession(code);
+            
+            // After exchange, check if we have a valid session for recovery
+            const { data: sessionData } = await supabase.auth.getSession();
+            if (sessionData.session) {
+              console.log("Recovery session established, redirecting to reset password");
+              toast({
+                title: "Password Reset",
+                description: "Please enter your new password",
+              });
+              navigate("/auth/reset-password");
+              return;
+            }
           }
           
-          // Redirect to reset password page
+          // Redirect to reset password page even if code exchange fails
+          // The ResetPassword component will handle validating the session
           toast({
             title: "Password Reset",
             description: "Please enter your new password",
