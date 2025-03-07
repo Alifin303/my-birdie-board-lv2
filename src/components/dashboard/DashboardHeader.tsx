@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User, LogOut, CreditCard, Key, Loader2, AlertCircle } from "lucide-react";
+import { User, LogOut, CreditCard, Key, Loader2, AlertCircle, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -260,32 +260,21 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
           if (data?.url) {
             console.log("Redirecting to URL:", data.url);
             
-            if (data.portalNotConfigured) {
+            if (data.directPortal) {
               toast({
-                title: "Redirecting to Stripe",
-                description: "Your Stripe Customer Portal is not configured yet. Opening subscription details in Stripe Dashboard.",
+                title: "Opening Stripe Billing Portal",
+                description: "Redirecting to your Stripe billing portal...",
+                variant: "default",
+              });
+            } else if (data.fallback) {
+              toast({
+                title: "Portal Access Issue",
+                description: data.message || "Opening subscription details in Stripe Dashboard instead.",
                 variant: "default",
               });
             }
             
-            window.location.href = data.url;
-          } else if (data?.customerPortalUrl) {
-            toast({
-              title: "Opening Stripe Billing Portal",
-              description: "Redirecting to the Stripe hosted billing portal for your subscription.",
-              variant: "default",
-            });
-            window.location.href = data.customerPortalUrl;
-          } else if (data?.portalConfigUrl) {
-            toast({
-              title: "Stripe Portal Not Configured",
-              description: "The Stripe Customer Portal needs to be configured. Opening subscription details instead.",
-              variant: "default",
-            });
-            
-            if (data.alternativeUrl) {
-              window.open(data.alternativeUrl, '_blank');
-            }
+            window.open(data.url, '_blank');
           } else if (data?.error) {
             throw new Error(data.error);
           } else {
