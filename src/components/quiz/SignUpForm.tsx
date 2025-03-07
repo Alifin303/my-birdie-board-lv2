@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -63,10 +64,19 @@ export function SignUpForm() {
       if (error) {
         console.error("Sign up error:", error);
         
+        // Improved error handling for the most common error scenarios
         if (error.message.includes("duplicate key") && error.message.includes("profiles_username_key")) {
           setErrorMessage("This username is already taken. Please choose a different username.");
+          form.setError('username', { 
+            type: 'manual', 
+            message: 'This username is already taken' 
+          });
         } else if (error.message.includes("User already registered")) {
           setErrorMessage("This email is already registered. Please use a different email or try logging in.");
+          form.setError('email', { 
+            type: 'manual', 
+            message: 'This email is already registered' 
+          });
         } else {
           setErrorMessage(error.message || "Something went wrong. Please try again.");
         }

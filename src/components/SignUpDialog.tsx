@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Button } from "./ui/button";
@@ -68,11 +69,19 @@ export function SignUpDialog() {
       if (error) {
         console.error("Sign up error:", error);
         
-        // Check for username duplication error
+        // Enhanced error handling for username/email conflicts
         if (error.message.includes("duplicate key") && error.message.includes("profiles_username_key")) {
           setErrorMessage("This username is already taken. Please choose a different username.");
+          form.setError('username', { 
+            type: 'manual', 
+            message: 'This username is already taken' 
+          });
         } else if (error.message.includes("User already registered")) {
           setErrorMessage("This email is already registered. Please use a different email or try logging in.");
+          form.setError('email', { 
+            type: 'manual', 
+            message: 'This email is already registered' 
+          });
         } else {
           setErrorMessage(error.message || "Something went wrong. Please try again.");
         }
@@ -126,8 +135,6 @@ export function SignUpDialog() {
   const handleSignupComplete = () => {
     setOpen(false);
     setSignupSuccess(false);
-    // In a production app, you might want to redirect to a welcome page
-    // navigate('/welcome');
   };
 
   return (
