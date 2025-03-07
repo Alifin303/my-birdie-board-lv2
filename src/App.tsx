@@ -53,8 +53,9 @@ function App() {
               <Route path="/auth/reset-password" element={<ResetPassword />} />
               <Route path="/checkout" element={<Checkout />} />
               
-              {/* Add a direct redirect from /verify to the auth redirect handler */}
+              {/* Add direct redirects for Supabase auth URLs */}
               <Route path="/verify" element={<Navigate to="/auth/callback" replace />} />
+              <Route path="/auth/v1/verify" element={<Navigate to="/auth/callback" replace />} />
               
               <Route
                 path="/dashboard"

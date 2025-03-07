@@ -31,24 +31,59 @@ export const AuthRedirect = () => {
         console.log("Auth redirect - Search params:", urlSearchParams.toString());
         console.log("Auth redirect - Hash params:", urlHashParams.toString());
         
-        // Check if this is a recovery operation from search parameters
-        const isRecovery = fullUrl.includes('type=recovery') || urlSearchParams.get('type') === 'recovery';
+        // Check if this is a recovery operation from URL
+        // We need to check multiple places as the type can be in different locations
+        const isRecovery = 
+          fullUrl.includes('type=recovery') || 
+          urlSearchParams.get('type') === 'recovery' || 
+          urlHashParams.get('type') === 'recovery';
         
         if (isRecovery) {
-          console.log("Recovery flow detected from URL params");
+          console.log("Recovery flow detected");
           
-          // Get the code or token from URL if present
-          const code = urlSearchParams.get('code') || urlSearchParams.get('token');
+          // Look for token in multiple places
+          const token = 
+            urlSearchParams.get('token') || 
+            urlHashParams.get('token') ||
+            urlSearchParams.get('code') || 
+            urlHashParams.get('code');
           
-          if (code) {
-            console.log("Code/token found for recovery:", code);
-            // Exchange the code for a session - this establishes the recovery session
-            await supabase.auth.exchangeCodeForSession(code);
+          if (token) {
+            console.log("Recovery token found:", token);
+            try {
+              // Exchange the token for a session
+              const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(token);
+              
+              if (exchangeError) {
+                console.error("Token exchange error:", exchangeError);
+                throw exchangeError;
+              }
+              
+              console.log("Token exchange successful:", data);
+              
+              // Navigate to reset password page
+              toast({
+                title: "Password Reset",
+                description: "Please enter your new password",
+              });
+              navigate("/auth/reset-password");
+              return;
+            } catch (tokenError) {
+              console.error("Failed to process recovery token:", tokenError);
+              // Continue to check other auth methods before giving up
+            }
+          } else {
+            console.log("No recovery token found in URL, checking for active session");
+          }
+          
+          // Even without a valid token, check if we have an active session that might be a recovery session
+          const { data: sessionData } = await supabase.auth.getSession();
+          if (sessionData.session) {
+            console.log("Active session found, checking for recovery status");
             
-            // After exchange, check if we have a valid session for recovery
-            const { data: sessionData } = await supabase.auth.getSession();
-            if (sessionData.session) {
-              console.log("Recovery session established, redirecting to reset password");
+            // Check if this is a recovery flow based on session data
+            if (sessionData.session.user.recovery_sent_at) {
+              console.log("Recovery session confirmed from session data");
               toast({
                 title: "Password Reset",
                 description: "Please enter your new password",
@@ -58,16 +93,17 @@ export const AuthRedirect = () => {
             }
           }
           
-          // Redirect to reset password page even if code exchange fails
-          // The ResetPassword component will handle validating the session
+          // If we've reached this point in a recovery flow but couldn't establish a valid recovery session,
+          // still redirect to reset password page where further validation will happen
           toast({
-            title: "Password Reset",
-            description: "Please enter your new password",
+            title: "Password Reset Verification",
+            description: "Verifying your reset request...",
           });
           navigate("/auth/reset-password");
           return;
         }
         
+        // Handle normal authentication flows (non-recovery)
         // Check for code in URL search params (traditional redirect)
         const code = urlSearchParams.get('code');
         
