@@ -262,13 +262,20 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
             
             if (data.portalNotConfigured) {
               toast({
-                title: "Stripe Portal Not Configured",
-                description: "Your Stripe Customer Portal is not configured yet. Redirecting to subscription details in Stripe Dashboard.",
+                title: "Redirecting to Stripe",
+                description: "Your Stripe Customer Portal is not configured yet. Opening subscription details in Stripe Dashboard.",
                 variant: "default",
               });
             }
             
             window.location.href = data.url;
+          } else if (data?.customerPortalUrl) {
+            toast({
+              title: "Opening Stripe Billing Portal",
+              description: "Redirecting to the Stripe hosted billing portal for your subscription.",
+              variant: "default",
+            });
+            window.location.href = data.customerPortalUrl;
           } else if (data?.portalConfigUrl) {
             toast({
               title: "Stripe Portal Not Configured",

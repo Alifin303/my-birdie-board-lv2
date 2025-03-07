@@ -102,30 +102,49 @@ serve(async (req) => {
       const finalReturnUrl = return_url || `${req.headers.get('origin') || 'https://rbhzesocmhazynkfyhst.supabase.co'}/dashboard`;
       console.log('Creating portal session with return URL:', finalReturnUrl);
       
-      // Since Stripe Portal has not been configured yet, redirect to Stripe Dashboard
-      // This is a temporary solution until the Stripe Customer Portal is configured
+      // First try to create a customer portal session
       try {
-        const subscriptionURL = `https://dashboard.stripe.com/subscriptions/${subscription.subscription_id}`;
-        console.log("Redirecting to Stripe subscription URL instead:", subscriptionURL);
+        const session = await stripe.billingPortal.sessions.create({
+          customer: customerId,
+          return_url: finalReturnUrl
+        });
         
-        return new Response(JSON.stringify({ 
-          url: subscriptionURL,
-          portalNotConfigured: true,
-          portalConfigUrl: "https://dashboard.stripe.com/settings/billing/portal",
-          message: "Stripe Customer Portal is not configured yet. Redirecting to subscription details."
-        }), {
+        console.log('Portal session created successfully:', session.id);
+        
+        // Return the portal URL if successful
+        return new Response(JSON.stringify({ url: session.url }), {
           status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
-      } catch (fallbackError) {
-        console.error('Error creating fallback URL:', fallbackError);
-        throw fallbackError;
+      } catch (portalError) {
+        console.error('Portal creation error:', portalError);
+        
+        // If portal creation fails, check if it's due to portal not being configured
+        if (portalError.message && portalError.message.includes('No configuration provided')) {
+          // Provide a direct link to the subscription in Stripe Dashboard
+          const subscriptionURL = `https://dashboard.stripe.com/subscriptions/${subscription.subscription_id}`;
+          console.log("Portal not configured, redirecting to subscription URL:", subscriptionURL);
+          
+          // Also provide a link to the Stripe Customer Portal configuration page
+          return new Response(JSON.stringify({ 
+            url: subscriptionURL,
+            portalNotConfigured: true,
+            portalConfigUrl: "https://dashboard.stripe.com/settings/billing/portal",
+            message: "Stripe Customer Portal is not configured yet. Redirecting to subscription details.",
+            customerPortalUrl: "https://billing.stripe.com/p/login/fZe4huew7a0072UcMM"
+          }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        
+        // For other errors, rethrow to be caught by the outer catch block
+        throw portalError;
       }
-      
     } catch (stripeError) {
       console.error('Error creating portal session:', stripeError);
       
-      // If the specific error is about customer portal not being configured
+      // Handle the specific case of portal not being configured
       if (stripeError.message && stripeError.message.includes('No configuration provided')) {
         const stripeConfigUrl = "https://dashboard.stripe.com/settings/billing/portal";
         const subscriptionURL = `https://dashboard.stripe.com/subscriptions/${subscription.subscription_id}`;
@@ -134,6 +153,7 @@ serve(async (req) => {
           error: "Stripe Customer Portal not configured",
           portalConfigUrl: stripeConfigUrl,
           alternativeUrl: subscriptionURL,
+          customerPortalUrl: "https://billing.stripe.com/p/login/fZe4huew7a0072UcMM",
           message: "Please configure your Stripe Customer Portal or use the subscription URL instead."
         }), {
           status: 200, // Return 200 to prevent frontend errors, but with special fields
