@@ -242,7 +242,7 @@ export default function Dashboard() {
             <img 
               src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" 
               alt="BirdieBoard Logo" 
-              className="h-16 w-auto object-contain" 
+              className="h-32 w-auto object-contain" 
             />
           </Link>
         </div>
