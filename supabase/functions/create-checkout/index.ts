@@ -1,9 +1,7 @@
-// Follow Deno's ESM URL imports pattern
-import Stripe from 'https://esm.sh/stripe@12.16.0?target=deno';
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.33.1';
 
-// Define CORS headers for preflight requests
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import Stripe from 'https://esm.sh/stripe@13.11.0';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -16,183 +14,114 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Create checkout function called');
+    const { user_id, user_email, user_name, success_url, cancel_url } = await req.json();
     
-    // Parse request body
-    const requestData = await req.json();
-    const { user_id, email, return_url } = requestData;
-    
-    console.log('Request parameters:', { user_id, email, return_url_provided: !!return_url });
-    
-    if (!user_id) {
-      console.error('Missing user_id in request');
-      return new Response(JSON.stringify({ error: 'User ID is required' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+    // Log request for debugging
+    console.log(`Checkout request: ${JSON.stringify({
+      user_id,
+      user_email,
+      success_url_provided: !!success_url,
+      cancel_url_provided: !!cancel_url
+    }, null, 2)}`);
+
+    if (!user_id || !user_email) {
+      return new Response(
+        JSON.stringify({ error: 'User ID and email are required' }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
-    // Validate environment variables
-    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
-    const stripePriceId = Deno.env.get('STRIPE_PRICE_ID');
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    
-    console.log('Environment variables check:', { 
-      hasStripeKey: !!stripeSecretKey, 
-      hasStripePriceId: !!stripePriceId,
-      hasSupabaseUrl: !!supabaseUrl,
-      hasSupabaseKey: !!supabaseKey
-    });
-    
-    if (!stripeSecretKey) {
-      console.error('STRIPE_SECRET_KEY not configured');
-      return new Response(JSON.stringify({ error: 'Stripe configuration missing' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-    
-    if (!stripePriceId) {
-      console.error('STRIPE_PRICE_ID not configured');
-      return new Response(JSON.stringify({ error: 'Stripe price ID missing' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-    
-    // Log the actual stripe price ID being used for debugging
-    console.log('Using Stripe Price ID:', stripePriceId);
-    
-    if (!supabaseUrl || !supabaseKey) {
-      console.error('Missing Supabase credentials');
-      return new Response(JSON.stringify({ error: 'Supabase configuration missing' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    // Initialize Stripe
-    const stripe = new Stripe(stripeSecretKey, {
+    // Initialize Stripe with the secret key
+    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
       httpClient: Stripe.createFetchHttpClient(),
     });
 
-    // Initialize Supabase client
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Check if user already has a customer ID
-    console.log('Checking for existing subscription for user:', user_id);
-    const { data: existingSubscription, error: subscriptionError } = await supabase
-      .from('customer_subscriptions')
-      .select('customer_id')
-      .eq('user_id', user_id)
-      .maybeSingle();
-      
-    if (subscriptionError) {
-      console.error('Error querying existing subscription:', subscriptionError);
-      return new Response(JSON.stringify({ error: `Database error: ${subscriptionError.message}` }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    let customerId = existingSubscription?.customer_id;
-    console.log('Existing customer ID:', customerId || 'None found');
-
-    // If no customer ID exists, create a new customer
-    if (!customerId) {
-      console.log('Creating new Stripe customer with email:', email);
-      try {
-        const customer = await stripe.customers.create({
-          email: email,
-          metadata: { user_id },
-        });
-        
-        customerId = customer.id;
-        console.log('New customer created with ID:', customerId);
-        
-        // Store the customer ID in our database
-        const { error: customerError } = await supabase
-          .from('customer_subscriptions')
-          .insert({
-            user_id,
-            customer_id: customerId,
-            subscription_id: null,
-            status: 'created'
-          });
-          
-        if (customerError) {
-          console.error('Error storing customer ID:', customerError);
-          throw new Error(`Failed to store customer ID: ${customerError.message}`);
-        }
-      } catch (stripeError) {
-        console.error('Stripe customer creation error:', stripeError);
-        return new Response(JSON.stringify({ error: `Stripe error: ${stripeError.message}` }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-    }
+    const origin = req.headers.get('origin');
+    const priceId = Deno.env.get('STRIPE_PRICE_ID');
     
-    console.log(`Using customer ID: ${customerId} for checkout session`);
+    if (!priceId) {
+      console.error('STRIPE_PRICE_ID environment variable is not set');
+      throw new Error('Stripe configuration error');
+    }
 
-    // Create a new checkout session
-    try {
-      const finalReturnUrl = return_url || `${Deno.env.get('SITE_URL')}/dashboard`;
-      console.log('Creating checkout session with return URL:', finalReturnUrl);
+    // Use the origin from the request to build the success and cancel URLs
+    const defaultSuccessUrl = `${origin}/auth/callback?subscription_status=success`;
+    const defaultCancelUrl = `${origin}/checkout?canceled=true`;
+
+    // Create or retrieve the customer first to ensure they exist
+    let customerId: string;
+    
+    // Search for existing customer
+    const { data: customers } = await stripe.customers.search({
+      query: `metadata["user_id"]:"${user_id}"`,
+    });
+
+    if (customers && customers.length > 0) {
+      // Use existing customer
+      customerId = customers[0].id;
+      console.log(`Using existing customer: ${customerId}`);
       
-      // First try to fetch the price from Stripe to verify it exists
-      try {
-        const price = await stripe.prices.retrieve(stripePriceId);
-        console.log('Successfully retrieved price from Stripe:', price.id);
-      } catch (priceError) {
-        console.error('Error retrieving price from Stripe:', priceError);
-        return new Response(JSON.stringify({ 
-          error: `Invalid price ID: ${stripePriceId}. Error: ${priceError.message}`,
-          hint: 'Check the STRIPE_PRICE_ID in your environment variables. It should be a price ID (price_xxx) not a product ID (prod_xxx).'
-        }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-      
-      const session = await stripe.checkout.sessions.create({
-        customer: customerId,
-        payment_method_types: ['card'],
-        line_items: [
-          {
-            price: stripePriceId,
-            quantity: 1,
-          },
-        ],
-        mode: 'subscription',
-        success_url: `${finalReturnUrl}?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: finalReturnUrl,
-        subscription_data: {
-          metadata: { user_id },
+      // Update customer information in case it has changed
+      await stripe.customers.update(customerId, {
+        email: user_email,
+        name: user_name || undefined,
+      });
+    } else {
+      // Create new customer
+      const customer = await stripe.customers.create({
+        email: user_email,
+        name: user_name || undefined,
+        metadata: {
+          user_id: user_id,
         },
       });
+      customerId = customer.id;
+      console.log(`Created new customer: ${customerId}`);
+    }
 
-      console.log('Checkout session created successfully:', session.id);
-      
-      return new Response(JSON.stringify({ url: session.url }), {
+    // Create Checkout session
+    const session = await stripe.checkout.sessions.create({
+      customer: customerId,
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      mode: 'subscription',
+      success_url: success_url || defaultSuccessUrl,
+      cancel_url: cancel_url || defaultCancelUrl,
+      subscription_data: {
+        metadata: {
+          user_id: user_id,
+        },
+      },
+      allow_promotion_codes: true,
+    });
+
+    console.log(`Created checkout session: ${session.id}`);
+    console.log(`Checkout URL: ${session.url}`);
+
+    return new Response(
+      JSON.stringify({ url: session.url }),
+      {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    } catch (stripeError) {
-      console.error('Error creating checkout session:', stripeError);
-      return new Response(JSON.stringify({ error: `Stripe checkout error: ${stripeError.message}` }), {
+      }
+    );
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    
+    return new Response(
+      JSON.stringify({ error: error.message || 'Failed to create checkout session' }),
+      {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-    
-  } catch (error) {
-    console.error('Unhandled error in create-checkout function:', error);
-    return new Response(JSON.stringify({ error: `Unhandled error: ${error.message}` }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+      }
+    );
   }
 });

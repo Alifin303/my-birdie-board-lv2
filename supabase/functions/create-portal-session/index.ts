@@ -1,10 +1,7 @@
 
-// Follow Deno's ESM URL imports pattern
-import Stripe from 'https://esm.sh/stripe@12.16.0?target=deno';
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.33.1';
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import Stripe from 'https://esm.sh/stripe@13.11.0';
 
-// Define CORS headers for preflight requests
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -17,171 +14,79 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Create portal session function called');
+    const { user_id, return_url } = await req.json();
     
-    // Parse request body
-    const requestData = await req.json();
-    const { user_id, return_url } = requestData;
-    
-    console.log('Request parameters:', { user_id, return_url_provided: !!return_url });
-    
+    // Log request parameters for debugging
+    console.log(`Request parameters: ${JSON.stringify({
+      user_id,
+      return_url_provided: !!return_url
+    }, null, 2)}\n`);
+
     if (!user_id) {
-      console.error('Missing user_id in request');
-      return new Response(JSON.stringify({ error: 'User ID is required' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+      return new Response(
+        JSON.stringify({ error: 'User ID is required' }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
-    // Validate environment variables
-    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    
-    console.log('Environment variables check:', { 
-      hasStripeKey: !!stripeSecretKey, 
-      hasSupabaseUrl: !!supabaseUrl,
-      hasSupabaseKey: !!supabaseKey
-    });
-    
-    if (!stripeSecretKey) {
-      console.error('STRIPE_SECRET_KEY not configured');
-      return new Response(JSON.stringify({ error: 'Stripe configuration missing' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-    
-    if (!supabaseUrl || !supabaseKey) {
-      console.error('Missing Supabase credentials');
-      return new Response(JSON.stringify({ error: 'Supabase configuration missing' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    // Initialize Stripe
-    const stripe = new Stripe(stripeSecretKey, {
+    // Initialize Stripe with the secret key
+    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
       httpClient: Stripe.createFetchHttpClient(),
     });
 
-    // Initialize Supabase client
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Get customer ID for this user
-    console.log('Looking up customer ID for user:', user_id);
-    const { data: subscription, error: subscriptionError } = await supabase
-      .from('customer_subscriptions')
-      .select('customer_id, subscription_id, current_period_end, cancel_at_period_end')
-      .eq('user_id', user_id)
-      .maybeSingle();
-      
-    if (subscriptionError) {
-      console.error('Error querying customer subscription:', subscriptionError);
-      return new Response(JSON.stringify({ error: `Database error: ${subscriptionError.message}` }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    if (!subscription?.customer_id) {
-      console.error('No customer ID found for this user');
-      return new Response(JSON.stringify({ error: 'No subscription found for this user' }), {
-        status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    const customerId = subscription.customer_id;
-    console.log('Found customer ID:', customerId);
-    console.log('Found subscription ID:', subscription.subscription_id);
-    console.log('Subscription details:', {
-      current_period_end: subscription.current_period_end,
-      is_canceled: subscription.cancel_at_period_end
+    // Find customer by user ID
+    const { data: customers, error: searchError } = await stripe.customers.search({
+      query: `metadata["user_id"]:"${user_id}"`,
     });
 
-    // Create a Stripe customer portal session
-    try {
-      const finalReturnUrl = return_url || `${req.headers.get('origin') || 'https://rbhzesocmhazynkfyhst.supabase.co'}/dashboard`;
-      console.log('Creating portal session with return URL:', finalReturnUrl);
-      
-      // Create portal session - try different approaches
-      let session;
-      
-      try {
-        // First attempt: Try to use Stripe's default configuration
-        session = await stripe.billingPortal.sessions.create({
-          customer: customerId,
-          return_url: finalReturnUrl
-        });
-      } catch (configError) {
-        console.log('Error with default configuration, trying with explicit parameter set to null:', configError);
-        
-        // Second attempt: Try with explicit configuration set to null to force using default
-        try {
-          session = await stripe.billingPortal.sessions.create({
-            customer: customerId,
-            return_url: finalReturnUrl,
-            configuration: null
-          });
-        } catch (nullConfigError) {
-          console.log('Error with null configuration, error:', nullConfigError);
-          throw nullConfigError;
+    if (searchError) {
+      console.error('Stripe customer search error:', searchError);
+      throw new Error('Failed to find Stripe customer');
+    }
+
+    if (!customers || customers.length === 0) {
+      console.log(`No Stripe customer found for user_id: ${user_id}`);
+      return new Response(
+        JSON.stringify({ error: 'No Stripe customer found for this account' }),
+        {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
-      }
-      
-      console.log('Portal session created successfully:', session.id);
-      console.log('Portal URL:', session.url);
-      
-      // Return the portal URL and subscription details
-      return new Response(JSON.stringify({ 
-        url: session.url,
-        subscription_ends: subscription.cancel_at_period_end ? subscription.current_period_end : null
-      }), {
+      );
+    }
+
+    const customer = customers[0];
+    console.log(`Found customer: ${customer.id}`);
+
+    // IMPORTANT FIX: Use Stripe's portal configuration instead of hardcoded URL
+    const session = await stripe.billingPortal.sessions.create({
+      customer: customer.id,
+      return_url: return_url || `${req.headers.get('origin')}/dashboard`,
+    });
+
+    console.log(`Created portal session: ${session.id}`);
+    console.log(`Portal URL: ${session.url}`);
+
+    return new Response(
+      JSON.stringify({ url: session.url }),
+      {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    } catch (stripeError) {
-      console.error('Error creating portal session:', stripeError);
-      
-      // If we can't create a portal session, try a direct link to the customer portal
-      try {
-        // Direct link to customer portal (uses customer ID)
-        const directPortalUrl = `https://billing.stripe.com/p/login/${customerId}`;
-        console.log('Using direct portal URL:', directPortalUrl);
-        
-        return new Response(JSON.stringify({ 
-          url: directPortalUrl,
-          directPortal: true,
-          subscription_ends: subscription.cancel_at_period_end ? subscription.current_period_end : null
-        }), {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      } catch (directError) {
-        console.error('Error creating direct portal link:', directError);
-        
-        // As a last resort, provide a subscription URL in the Stripe Dashboard
-        const subscriptionURL = `https://dashboard.stripe.com/subscriptions/${subscription.subscription_id}`;
-        
-        return new Response(JSON.stringify({ 
-          url: subscriptionURL,
-          fallback: true,
-          error: stripeError.message,
-          message: "Could not access customer portal. Redirecting to subscription details.",
-          subscription_ends: subscription.cancel_at_period_end ? subscription.current_period_end : null
-        }), {
-          status: 200, // Return 200 to prevent frontend errors
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
       }
-    }
+    );
   } catch (error) {
-    console.error('Unhandled error in create-portal-session function:', error);
-    return new Response(JSON.stringify({ error: `Unhandled error: ${error.message}` }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+    console.error('Error creating portal session:', error);
+    
+    return new Response(
+      JSON.stringify({ error: error.message || 'Failed to create portal session' }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
   }
 });
