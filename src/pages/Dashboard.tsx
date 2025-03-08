@@ -239,8 +239,8 @@ export default function Dashboard() {
         <div className="mb-4">
           <Link to="/" className="inline-block">
             <img 
-              src="/logo.png" 
-              alt="MyBirdieBoard Logo" 
+              src="/lovable-uploads/8ea9976a-881c-45a6-aae4-f5aeb3ad907f.png" 
+              alt="BirdieBoard Logo" 
               className="h-16 w-auto object-contain" 
             />
           </Link>
