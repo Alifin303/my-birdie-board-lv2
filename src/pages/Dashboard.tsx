@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams, Link } from "react-router-dom";
@@ -239,7 +240,7 @@ export default function Dashboard() {
         <div className="mb-4">
           <Link to="/" className="inline-block">
             <img 
-              src="/lovable-uploads/8ea9976a-881c-45a6-aae4-f5aeb3ad907f.png" 
+              src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" 
               alt="BirdieBoard Logo" 
               className="h-16 w-auto object-contain" 
             />
