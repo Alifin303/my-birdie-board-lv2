@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { ChevronUp, ChevronDown, Trash, Eye, ArrowLeft, Trophy, PieChart } from "lucide-react";
+import { ChevronUp, ChevronDown, Trash, Eye, ArrowLeft, Trophy, PieChart, Calendar as CalendarIcon, TrendingUp, History } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { 
@@ -16,6 +16,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import ScoreProgressChart from "./ScoreProgressChart";
 import { RoundScorecard } from "./scorecard/RoundScorecard";
 import { CourseLeaderboard } from "./CourseLeaderboard";
@@ -33,6 +41,9 @@ interface CourseRoundHistoryProps {
 // Define the types of golf scores
 type ScoreType = 'eagle' | 'birdie' | 'par' | 'bogey' | 'doubleBogey' | 'other';
 
+// Define the period types for filtering
+type PeriodType = 'month' | 'year' | 'all';
+
 export const CourseRoundHistory = ({ 
   userRounds, 
   selectedCourseId, 
@@ -48,6 +59,8 @@ export const CourseRoundHistory = ({
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const [sortField, setSortField] = useState<'date' | 'gross_score' | 'to_par_gross'>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [periodType, setPeriodType] = useState<PeriodType>('all');
+  const [currentDate, setCurrentDate] = useState(new Date());
   
   useEffect(() => {
     if (selectedCourseId) {
@@ -86,6 +99,87 @@ export const CourseRoundHistory = ({
   const displayName = clubName !== courseName 
     ? `${clubName} - ${courseName}`
     : courseName;
+  
+  // Get available years from rounds
+  const getAvailableYears = () => {
+    if (!courseRounds?.length) return [new Date().getFullYear()];
+    
+    const years = courseRounds.map(round => new Date(round.date).getFullYear());
+    return [...new Set(years)].sort((a, b) => b - a); // Unique years in descending order
+  };
+  
+  // Get available months for the selected year
+  const getAvailableMonths = () => {
+    if (!courseRounds?.length) return Array.from({ length: 12 }, (_, i) => i);
+    
+    if (periodType !== 'month') return [];
+    
+    const selectedYear = currentDate.getFullYear();
+    const months = courseRounds
+      .filter(round => new Date(round.date).getFullYear() === selectedYear)
+      .map(round => new Date(round.date).getMonth());
+    
+    const availableMonths = [...new Set(months)].sort((a, b) => a - b);
+    
+    // If no months found for the year, return all months
+    return availableMonths.length ? availableMonths : Array.from({ length: 12 }, (_, i) => i);
+  };
+  
+  // Handle year selection
+  const handleYearSelect = (year: string) => {
+    const newDate = new Date(currentDate);
+    newDate.setFullYear(parseInt(year));
+    setCurrentDate(newDate);
+  };
+  
+  // Handle month selection
+  const handleMonthSelect = (month: string) => {
+    const newDate = new Date(currentDate);
+    newDate.setMonth(parseInt(month));
+    setCurrentDate(newDate);
+  };
+  
+  // Format month number to name
+  const formatMonthName = (monthIndex: number) => {
+    return new Date(2000, monthIndex, 1).toLocaleString('default', { month: 'long' });
+  };
+  
+  // Function to go to current period
+  const goToCurrentPeriod = () => {
+    setCurrentDate(new Date());
+  };
+  
+  // Function to format the current period for display
+  const formatPeriod = () => {
+    if (periodType === 'month') {
+      return currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    } else if (periodType === 'year') {
+      return currentDate.getFullYear().toString();
+    } else {
+      return 'All Time';
+    }
+  };
+  
+  // Filter rounds based on the selected period
+  const getFilteredRounds = () => {
+    if (!courseRounds) return [];
+    
+    return courseRounds.filter(round => {
+      const roundDate = new Date(round.date);
+      
+      if (periodType === 'month') {
+        return roundDate.getMonth() === currentDate.getMonth() && 
+               roundDate.getFullYear() === currentDate.getFullYear();
+      } else if (periodType === 'year') {
+        return roundDate.getFullYear() === currentDate.getFullYear();
+      } else {
+        return true; // All time - no filtering
+      }
+    });
+  };
+  
+  const filteredRounds = getFilteredRounds();
+  const filteredRoundsCount = filteredRounds.length;
   
   const calculateCourseSpecificStats = () => {
     if (courseRounds.length === 0) return null;
@@ -135,8 +229,24 @@ export const CourseRoundHistory = ({
   
   const stats = calculateCourseSpecificStats();
   
-  // Calculate hole stats specific to this course
-  const courseHoleStats = calculateHoleStats(courseRounds);
+  // Calculate hole stats specific to this course but now using filtered rounds
+  const courseHoleStats = calculateHoleStats(filteredRounds);
+  
+  // Available years and months
+  const availableYears = getAvailableYears();
+  const availableMonths = getAvailableMonths();
+  
+  // Initialize the default month
+  useEffect(() => {
+    if (periodType === 'month' && availableMonths.length > 0) {
+      // If current month is not available, select the first available month
+      if (!availableMonths.includes(currentDate.getMonth())) {
+        const newDate = new Date(currentDate);
+        newDate.setMonth(availableMonths[0]);
+        setCurrentDate(newDate);
+      }
+    }
+  }, [periodType, availableMonths]);
   
   const handleDeleteRound = async () => {
     if (!deletingRoundId) return;
@@ -310,7 +420,7 @@ export const CourseRoundHistory = ({
         />
       </div>
       
-      {/* Course-specific performance stats */}
+      {/* Course-specific performance stats with period filtering */}
       <div className="space-y-4 mb-6">
         <div className="flex items-center gap-2">
           <PieChart className="h-5 w-5 text-primary" />
@@ -318,6 +428,109 @@ export const CourseRoundHistory = ({
         </div>
         
         <div className="bg-background rounded-lg border p-5">
+          <Tabs defaultValue="all" onValueChange={(value) => setPeriodType(value as PeriodType)} className="mb-5">
+            <div className="flex flex-col space-y-4">
+              <div className="flex items-center justify-between">
+                <TabsList className="bg-muted/70">
+                  <TabsTrigger value="month" className="flex items-center gap-1">
+                    <CalendarIcon className="h-4 w-4" />
+                    <span>Monthly</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="year" className="flex items-center gap-1">
+                    <TrendingUp className="h-4 w-4" />
+                    <span>Yearly</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="all" className="flex items-center gap-1">
+                    <History className="h-4 w-4" />
+                    <span>All Time</span>
+                  </TabsTrigger>
+                </TabsList>
+                
+                <div className="text-sm text-muted-foreground">
+                  {filteredRoundsCount} {filteredRoundsCount === 1 ? 'round' : 'rounds'}
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap gap-3 items-center">
+                {periodType === 'month' && (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <Select
+                        value={currentDate.getFullYear().toString()}
+                        onValueChange={handleYearSelect}
+                      >
+                        <SelectTrigger className="w-[100px]">
+                          <SelectValue placeholder="Year" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableYears.map((year) => (
+                            <SelectItem key={year} value={year.toString()}>
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      
+                      <Select
+                        value={currentDate.getMonth().toString()}
+                        onValueChange={handleMonthSelect}
+                      >
+                        <SelectTrigger className="w-[140px]">
+                          <SelectValue placeholder="Month" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableMonths.map((month) => (
+                            <SelectItem key={month} value={month.toString()}>
+                              {formatMonthName(month)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <button 
+                      onClick={goToCurrentPeriod} 
+                      className="px-3 py-1.5 text-xs font-medium text-primary border border-primary rounded-md hover:bg-primary/10 transition-colors ml-auto"
+                    >
+                      Current Month
+                    </button>
+                  </>
+                )}
+                
+                {periodType === 'year' && (
+                  <>
+                    <Select
+                      value={currentDate.getFullYear().toString()}
+                      onValueChange={handleYearSelect}
+                    >
+                      <SelectTrigger className="w-[100px]">
+                        <SelectValue placeholder="Year" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableYears.map((year) => (
+                          <SelectItem key={year} value={year.toString()}>
+                            {year}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    <button 
+                      onClick={goToCurrentPeriod} 
+                      className="px-3 py-1.5 text-xs font-medium text-primary border border-primary rounded-md hover:bg-primary/10 transition-colors ml-auto"
+                    >
+                      Current Year
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </Tabs>
+          
+          <h4 className="text-base font-medium mb-3">
+            {formatPeriod()} Statistics
+          </h4>
+          
           <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
             <StatsCard type="eagle" count={courseHoleStats.eagles} />
             <StatsCard type="birdie" count={courseHoleStats.birdies} />
