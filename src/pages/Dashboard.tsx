@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams, Link } from "react-router-dom";
@@ -203,7 +202,7 @@ export default function Dashboard() {
   const renderDashboard = () => {
     if (processingStripeSession) {
       return (
-        <div className="flex flex-col items-center justify-center py-20 space-y-6 animate-fade-in">
+        <div className="flex flex-col items-center justify-center py-20 space-y-6 animate-fade-in bg-white/90 rounded-lg shadow-md p-8">
           <div className="w-20 h-20 relative">
             <div className="absolute inset-0 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
             <div className="absolute inset-2 flex items-center justify-center">
@@ -222,7 +221,7 @@ export default function Dashboard() {
     }
 
     if (profileLoading || !profile) {
-      return <div className="flex justify-center py-10"><div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div></div>;
+      return <div className="flex justify-center py-10 bg-white/90 rounded-lg shadow-md p-8"><div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div></div>;
     }
     
     const subscriptionStatus = subscription?.status || "none";
@@ -237,8 +236,8 @@ export default function Dashboard() {
     });
     
     return (
-      <div className="space-y-6 sm:space-y-8 golf-grass-pattern animate-fade-in">
-        <div className="mb-4">
+      <div className="space-y-6 sm:space-y-8 animate-fade-in">
+        <div className="mb-4 bg-white/90 rounded-lg shadow-md p-4">
           <Link to="/" className="inline-block">
             <img 
               src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" 
@@ -247,31 +246,37 @@ export default function Dashboard() {
             />
           </Link>
         </div>
-        <DashboardHeader 
-          profileData={profile} 
-          onAddRound={handleOpenModal}
-          subscription={subscription}
-        />
+        <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
+          <DashboardHeader 
+            profileData={profile} 
+            onAddRound={handleOpenModal}
+            subscription={subscription}
+          />
+        </div>
         
         {!selectedCourseId && (
           <>
-            <MainStats 
-              userRounds={userRounds}
-              roundsLoading={roundsLoading}
-              scoreType={scoreType}
-              calculateStats={calculateStats}
-              handicapIndex={handicapFromProfile}
-            />
+            <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
+              <MainStats 
+                userRounds={userRounds}
+                roundsLoading={roundsLoading}
+                scoreType={scoreType}
+                calculateStats={calculateStats}
+                handicapIndex={handicapFromProfile}
+              />
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Detailed stats on the left */}
-              <DetailedStats 
-                userRounds={userRounds}
-                isLoading={roundsLoading}
-              />
+              <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
+                <DetailedStats 
+                  userRounds={userRounds}
+                  isLoading={roundsLoading}
+                />
+              </div>
               
               {/* Handicap circle on the right */}
-              <div className="flex flex-col items-center justify-center">
+              <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6 flex flex-col items-center justify-center">
                 <HandicapCircle 
                   userRounds={userRounds}
                   roundsLoading={roundsLoading}
@@ -286,7 +291,7 @@ export default function Dashboard() {
           </>
         )}
         
-        <div className="space-y-3 sm:space-y-4">
+        <div className="space-y-3 sm:space-y-4 bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
           {selectedCourseId 
             ? <CourseRoundHistory 
                 userRounds={userRounds} 
@@ -313,8 +318,17 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="container mx-auto py-4 sm:py-8 px-2 sm:px-4">
-      {renderDashboard()}
+    <div className="min-h-screen py-4 sm:py-8 px-2 sm:px-4"
+      style={{
+        backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+      <div className="container mx-auto">
+        {renderDashboard()}
+      </div>
 
       <AddRoundModal 
         open={isModalOpen} 

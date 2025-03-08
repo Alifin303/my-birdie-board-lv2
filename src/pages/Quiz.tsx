@@ -3,7 +3,14 @@ import { QuizContainer } from "@/components/quiz/QuizContainer";
 
 export default function Quiz() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex flex-col">
+    <div className="min-h-screen flex flex-col"
+      style={{
+        backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
       <header className="bg-primary shadow-sm">
         <div className="container mx-auto px-4 py-3">
           <h1 className="text-lg font-bold tracking-tight text-white">
@@ -13,14 +20,12 @@ export default function Quiz() {
       </header>
       
       <main className="flex-grow flex items-center justify-center py-8 relative">
-        <div 
-          className="absolute inset-0 z-0 bg-cover bg-center opacity-10"
-          style={{
-            backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
-          }}
-        ></div>
         <div className="relative z-10 w-full">
-          <QuizContainer />
+          <div className="container mx-auto">
+            <div className="bg-white/90 rounded-lg shadow-md p-6 backdrop-blur-sm">
+              <QuizContainer />
+            </div>
+          </div>
         </div>
       </main>
     </div>
