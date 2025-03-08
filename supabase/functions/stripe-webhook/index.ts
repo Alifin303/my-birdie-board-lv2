@@ -8,7 +8,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.33.1';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS, GET',
 };
 
 serve(async (req) => {
@@ -24,9 +24,21 @@ serve(async (req) => {
     });
   }
 
-  // Only accept POST requests for the actual webhook
+  // Return a friendly message for GET requests (browser testing)
+  if (req.method === 'GET') {
+    console.log('Handling GET request (likely browser test)');
+    return new Response(JSON.stringify({
+      status: "online",
+      message: "Stripe webhook endpoint is active. This endpoint expects POST requests from Stripe with proper signature headers, not GET requests from a browser."
+    }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+
+  // Only process actual webhook data for POST requests
   if (req.method !== 'POST') {
-    console.error(`Invalid method: ${req.method}. Webhook only accepts POST requests.`);
+    console.error(`Invalid method: ${req.method}. Webhook only accepts POST and GET requests.`);
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
