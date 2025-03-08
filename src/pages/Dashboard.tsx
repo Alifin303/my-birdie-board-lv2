@@ -237,15 +237,6 @@ export default function Dashboard() {
     
     return (
       <div className="space-y-6 sm:space-y-8 animate-fade-in">
-        <div className="mb-4 bg-white/90 rounded-lg shadow-md p-4">
-          <Link to="/" className="inline-block">
-            <img 
-              src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" 
-              alt="BirdieBoard Logo" 
-              className="h-32 w-auto object-contain brightness-[0.85] contrast-[1.15]" 
-            />
-          </Link>
-        </div>
         <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
           <DashboardHeader 
             profileData={profile} 
