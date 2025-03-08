@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Calendar, Flag, Clock, History, Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, History, TrendingUp } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { 
   Select,
@@ -9,12 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Round } from "./types";
 
 // Define the types of golf scores
@@ -52,12 +46,17 @@ export const DetailedStats = ({ userRounds, isLoading }: DetailedStatsProps) => 
   const getAvailableMonths = () => {
     if (!userRounds?.length) return Array.from({ length: 12 }, (_, i) => i);
     
+    if (periodType !== 'month') return [];
+    
     const selectedYear = currentDate.getFullYear();
     const months = userRounds
       .filter(round => new Date(round.date).getFullYear() === selectedYear)
       .map(round => new Date(round.date).getMonth());
     
-    return [...new Set(months)].sort((a, b) => b - a); // Unique months in descending order
+    const availableMonths = [...new Set(months)].sort((a, b) => a - b);
+    
+    // If no months found for the year, return all months
+    return availableMonths.length ? availableMonths : Array.from({ length: 12 }, (_, i) => i);
   };
   
   // Handle year selection
@@ -147,13 +146,6 @@ export const DetailedStats = ({ userRounds, isLoading }: DetailedStatsProps) => 
     });
     
     setStats(newStats);
-    
-    console.log("Filtered rounds for stats:", {
-      period: periodType,
-      date: formatPeriod(),
-      roundsCount: filteredRounds.length,
-      stats: newStats
-    });
   }, [userRounds, periodType, currentDate]);
   
   // Calculate the total number of rounds in the current period
@@ -162,6 +154,18 @@ export const DetailedStats = ({ userRounds, isLoading }: DetailedStatsProps) => 
   // Available years and months
   const availableYears = getAvailableYears();
   const availableMonths = getAvailableMonths();
+
+  // Initialize the default month
+  useEffect(() => {
+    if (periodType === 'month' && availableMonths.length > 0) {
+      // If current month is not available, select the first available month
+      if (!availableMonths.includes(currentDate.getMonth())) {
+        const newDate = new Date(currentDate);
+        newDate.setMonth(availableMonths[0]);
+        setCurrentDate(newDate);
+      }
+    }
+  }, [periodType, availableMonths]);
   
   if (isLoading) {
     return (
@@ -175,145 +179,154 @@ export const DetailedStats = ({ userRounds, isLoading }: DetailedStatsProps) => 
     <div className="space-y-4">
       <h2 className="text-xl sm:text-2xl font-semibold text-primary">Performance Stats</h2>
       
-      <Tabs defaultValue="month" onValueChange={(value) => setPeriodType(value as PeriodType)}>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
-          <TabsList>
-            <TabsTrigger value="month" className="flex items-center gap-1">
-              <CalendarIcon className="h-4 w-4" />
-              <span>Monthly</span>
-            </TabsTrigger>
-            <TabsTrigger value="year" className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              <span>Yearly</span>
-            </TabsTrigger>
-            <TabsTrigger value="all" className="flex items-center gap-1">
-              <History className="h-4 w-4" />
-              <span>All Time</span>
-            </TabsTrigger>
-          </TabsList>
-          
-          {periodType === 'month' && (
-            <div className="flex items-center gap-2">
-              <Select
-                value={currentDate.getMonth().toString()}
-                onValueChange={handleMonthSelect}
-              >
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Select month" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableMonths.map((month) => (
-                    <SelectItem key={month} value={month.toString()}>
-                      {formatMonthName(month)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+      <div className="bg-background rounded-lg p-5 border shadow-sm">
+        <Tabs defaultValue="month" onValueChange={(value) => setPeriodType(value as PeriodType)}>
+          <div className="flex flex-col space-y-4">
+            <div className="flex items-center justify-between">
+              <TabsList className="bg-muted/70">
+                <TabsTrigger value="month" className="flex items-center gap-1">
+                  <CalendarIcon className="h-4 w-4" />
+                  <span>Monthly</span>
+                </TabsTrigger>
+                <TabsTrigger value="year" className="flex items-center gap-1">
+                  <TrendingUp className="h-4 w-4" />
+                  <span>Yearly</span>
+                </TabsTrigger>
+                <TabsTrigger value="all" className="flex items-center gap-1">
+                  <History className="h-4 w-4" />
+                  <span>All Time</span>
+                </TabsTrigger>
+              </TabsList>
               
-              <Select
-                value={currentDate.getFullYear().toString()}
-                onValueChange={handleYearSelect}
-              >
-                <SelectTrigger className="w-[100px]">
-                  <SelectValue placeholder="Select year" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableYears.map((year) => (
-                    <SelectItem key={year} value={year.toString()}>
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              <button 
-                onClick={goToCurrentPeriod} 
-                className="ml-1 px-2 py-1 text-xs font-medium text-primary border border-primary rounded-md hover:bg-primary/10 transition-colors"
-              >
-                Current
-              </button>
+              <div className="text-sm text-muted-foreground">
+                {roundsInPeriod} {roundsInPeriod === 1 ? 'round' : 'rounds'}
+              </div>
             </div>
-          )}
-          
-          {periodType === 'year' && (
-            <div className="flex items-center gap-2">
-              <Select
-                value={currentDate.getFullYear().toString()}
-                onValueChange={handleYearSelect}
-              >
-                <SelectTrigger className="w-[100px]">
-                  <SelectValue placeholder="Select year" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableYears.map((year) => (
-                    <SelectItem key={year} value={year.toString()}>
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            
+            <div className="flex flex-wrap gap-3 items-center">
+              {periodType === 'month' && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <Select
+                      value={currentDate.getFullYear().toString()}
+                      onValueChange={handleYearSelect}
+                    >
+                      <SelectTrigger className="w-[100px]">
+                        <SelectValue placeholder="Year" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableYears.map((year) => (
+                          <SelectItem key={year} value={year.toString()}>
+                            {year}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    <Select
+                      value={currentDate.getMonth().toString()}
+                      onValueChange={handleMonthSelect}
+                    >
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue placeholder="Month" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableMonths.map((month) => (
+                          <SelectItem key={month} value={month.toString()}>
+                            {formatMonthName(month)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <button 
+                    onClick={goToCurrentPeriod} 
+                    className="px-3 py-1.5 text-xs font-medium text-primary border border-primary rounded-md hover:bg-primary/10 transition-colors ml-auto"
+                  >
+                    Current Month
+                  </button>
+                </>
+              )}
               
-              <button 
-                onClick={goToCurrentPeriod} 
-                className="ml-1 px-2 py-1 text-xs font-medium text-primary border border-primary rounded-md hover:bg-primary/10 transition-colors"
-              >
-                Current
-              </button>
+              {periodType === 'year' && (
+                <>
+                  <Select
+                    value={currentDate.getFullYear().toString()}
+                    onValueChange={handleYearSelect}
+                  >
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue placeholder="Year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableYears.map((year) => (
+                        <SelectItem key={year} value={year.toString()}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  <button 
+                    onClick={goToCurrentPeriod} 
+                    className="px-3 py-1.5 text-xs font-medium text-primary border border-primary rounded-md hover:bg-primary/10 transition-colors ml-auto"
+                  >
+                    Current Year
+                  </button>
+                </>
+              )}
             </div>
-          )}
-        </div>
+          </div>
 
-        <TabsContent value="month" className="mt-0">
-          <div className="bg-background rounded-lg p-5 border">
-            <h3 className="text-lg font-medium mb-2 flex items-center justify-between">
-              <span>{formatPeriod()}</span>
-              <span className="text-sm text-muted-foreground">{roundsInPeriod} {roundsInPeriod === 1 ? 'round' : 'rounds'}</span>
-            </h3>
-            <div className="grid grid-cols-3 gap-4">
-              {Object.entries(stats).map(([type, count]) => (
-                <div key={type} className="text-center p-3 rounded-lg bg-background border">
-                  <p className="text-2xl font-bold text-primary">{count}</p>
-                  <p className="text-sm font-medium capitalize">{type === 'doubleBogey' ? 'Double Bogey+' : type}</p>
-                </div>
-              ))}
+          <div className="mt-4 pt-3 border-t">
+            <h3 className="text-base font-medium mb-3">{formatPeriod()} Statistics</h3>
+            
+            <div className="grid grid-cols-3 gap-3 sm:gap-4">
+              <StatsCard type="eagle" count={stats.eagle} />
+              <StatsCard type="birdie" count={stats.birdie} />
+              <StatsCard type="par" count={stats.par} />
+              <StatsCard type="bogey" count={stats.bogey} />
+              <StatsCard type="doubleBogey" count={stats.doubleBogey} />
+              <StatsCard type="other" count={stats.other} />
             </div>
           </div>
-        </TabsContent>
-        
-        <TabsContent value="year" className="mt-0">
-          <div className="bg-background rounded-lg p-5 border">
-            <h3 className="text-lg font-medium mb-2 flex items-center justify-between">
-              <span>{formatPeriod()}</span>
-              <span className="text-sm text-muted-foreground">{roundsInPeriod} {roundsInPeriod === 1 ? 'round' : 'rounds'}</span>
-            </h3>
-            <div className="grid grid-cols-3 gap-4">
-              {Object.entries(stats).map(([type, count]) => (
-                <div key={type} className="text-center p-3 rounded-lg bg-background border">
-                  <p className="text-2xl font-bold text-primary">{count}</p>
-                  <p className="text-sm font-medium capitalize">{type === 'doubleBogey' ? 'Double Bogey+' : type}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="all" className="mt-0">
-          <div className="bg-background rounded-lg p-5 border">
-            <h3 className="text-lg font-medium mb-2 flex items-center justify-between">
-              <span>All Time Stats</span>
-              <span className="text-sm text-muted-foreground">{roundsInPeriod} {roundsInPeriod === 1 ? 'round' : 'rounds'}</span>
-            </h3>
-            <div className="grid grid-cols-3 gap-4">
-              {Object.entries(stats).map(([type, count]) => (
-                <div key={type} className="text-center p-3 rounded-lg bg-background border">
-                  <p className="text-2xl font-bold text-primary">{count}</p>
-                  <p className="text-sm font-medium capitalize">{type === 'doubleBogey' ? 'Double Bogey+' : type}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+        </Tabs>
+      </div>
+    </div>
+  );
+};
+
+interface StatsCardProps {
+  type: ScoreType;
+  count: number;
+}
+
+const StatsCard = ({ type, count }: StatsCardProps) => {
+  // Assign color based on score type
+  const getColorClass = () => {
+    switch(type) {
+      case 'eagle': return 'bg-blue-50 border-blue-200 text-blue-700';
+      case 'birdie': return 'bg-green-50 border-green-200 text-green-700';
+      case 'par': return 'bg-gray-50 border-gray-200 text-gray-700';
+      case 'bogey': return 'bg-orange-50 border-orange-200 text-orange-700';
+      case 'doubleBogey': return 'bg-red-50 border-red-200 text-red-700';
+      case 'other': return 'bg-purple-50 border-purple-200 text-purple-700';
+      default: return 'bg-gray-50 border-gray-200 text-gray-700';
+    }
+  };
+  
+  const getLabel = () => {
+    switch(type) {
+      case 'doubleBogey': return 'Double Bogey+';
+      case 'other': return 'Triple Bogey+';
+      default: return type.charAt(0).toUpperCase() + type.slice(1);
+    }
+  };
+  
+  return (
+    <div className={`text-center p-3 rounded-lg ${getColorClass()} border shadow-sm transition-all hover:shadow-md`}>
+      <p className="text-2xl font-bold">{count}</p>
+      <p className="text-sm font-medium">{getLabel()}</p>
     </div>
   );
 };
