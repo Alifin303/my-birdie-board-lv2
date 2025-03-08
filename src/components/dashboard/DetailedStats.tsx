@@ -111,7 +111,7 @@ export const DetailedStats = ({ userRounds, isLoading }: DetailedStatsProps) => 
       }
     });
   };
-  
+
   // Calculate stats based on filtered rounds
   useEffect(() => {
     const filteredRounds = getFilteredRounds();
@@ -124,14 +124,22 @@ export const DetailedStats = ({ userRounds, isLoading }: DetailedStatsProps) => 
       other: 0
     };
     
+    console.log("Filtered rounds for stats calculation:", filteredRounds.length);
+    
     filteredRounds.forEach(round => {
+      // Debug log to see what hole_scores look like
+      console.log(`Processing round ${round.id} hole_scores:`, round.hole_scores);
+      
       // Process hole-by-hole scores if available
-      if (round.hole_scores) {
+      if (round.hole_scores && typeof round.hole_scores === 'object') {
+        // Convert the hole_scores object to an array of values
         Object.values(round.hole_scores).forEach((holeScore: any) => {
+          if (!holeScore) return;
+          
           const strokes = holeScore.strokes;
           const par = holeScore.par;
           
-          if (strokes && par) {
+          if (typeof strokes === 'number' && typeof par === 'number') {
             const relativeToPar = strokes - par;
             
             if (relativeToPar <= -2) newStats.eagle++;
@@ -145,6 +153,7 @@ export const DetailedStats = ({ userRounds, isLoading }: DetailedStatsProps) => 
       }
     });
     
+    console.log("Calculated stats:", newStats);
     setStats(newStats);
   }, [userRounds, periodType, currentDate]);
   
