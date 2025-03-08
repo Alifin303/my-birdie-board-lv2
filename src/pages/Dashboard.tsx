@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams, Link } from "react-router-dom";
@@ -6,6 +7,7 @@ import { AddRoundModal } from "@/components/add-round/AddRoundModal";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MainStats, HandicapCircle } from "@/components/dashboard/StatsDisplay";
 import { CourseStatsTable, CourseRoundHistory } from "@/components/dashboard/CourseStats";
+import { DetailedStats } from "@/components/dashboard/DetailedStats";
 import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
 import { useToast } from "@/hooks/use-toast";
 import { clearSubscriptionCache } from "@/integrations/supabase/subscription/subscription-utils";
@@ -261,15 +263,26 @@ export default function Dashboard() {
               handicapIndex={handicapFromProfile}
             />
             
-            <HandicapCircle 
-              userRounds={userRounds}
-              roundsLoading={roundsLoading}
-              scoreType={scoreType}
-              onScoreTypeChange={handleScoreTypeChange}
-              calculateStats={calculateStats}
-              handicapIndex={handicapFromProfile}
-              profileHandicap={handicapFromProfile}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Detailed stats on the left */}
+              <DetailedStats 
+                userRounds={userRounds}
+                isLoading={roundsLoading}
+              />
+              
+              {/* Handicap circle on the right */}
+              <div className="flex flex-col items-center justify-center">
+                <HandicapCircle 
+                  userRounds={userRounds}
+                  roundsLoading={roundsLoading}
+                  scoreType={scoreType}
+                  onScoreTypeChange={handleScoreTypeChange}
+                  calculateStats={calculateStats}
+                  handicapIndex={handicapFromProfile}
+                  profileHandicap={handicapFromProfile}
+                />
+              </div>
+            </div>
           </>
         )}
         

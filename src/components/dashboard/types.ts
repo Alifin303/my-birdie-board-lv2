@@ -8,7 +8,14 @@ export interface Round {
   net_score?: number;
   to_par_gross: number;
   to_par_net?: number;
-  hole_scores?: any;
+  hole_scores?: {
+    [holeNumber: string]: {
+      hole: number;
+      par: number;
+      strokes: number;
+      putts?: number;
+    }
+  };
   courses?: {
     id: number;
     name: string;
