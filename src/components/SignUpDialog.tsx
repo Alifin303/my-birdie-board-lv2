@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Button } from "./ui/button";
@@ -24,7 +23,7 @@ const signUpSchema = z.object({
 
 type SignUpFormData = z.infer<typeof signUpSchema>;
 
-export function SignUpDialog() {
+export function SignUpDialog({ onStartQuiz }: { onStartQuiz?: () => void }) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
@@ -43,13 +42,21 @@ export function SignUpDialog() {
     },
   });
 
+  const handleSignupClick = () => {
+    if (onStartQuiz) {
+      setOpen(false);
+      onStartQuiz();
+    } else {
+      setOpen(true);
+    }
+  };
+
   const onSubmit = async (data: SignUpFormData) => {
     try {
       setIsLoading(true);
       setSignupSuccess(false);
       setErrorMessage(null);
       
-      // Get site URL dynamically
       const siteUrl = getSiteUrl();
       
       const { data: authData, error } = await supabase.auth.signUp({
@@ -61,7 +68,6 @@ export function SignUpDialog() {
             first_name: data.firstName,
             last_name: data.lastName,
           },
-          // Use /auth/callback for a consistent redirect path
           emailRedirectTo: `${siteUrl}/auth/callback`,
         },
       });
@@ -69,7 +75,6 @@ export function SignUpDialog() {
       if (error) {
         console.error("Sign up error:", error);
         
-        // Enhanced error handling for username/email conflicts
         if (error.message.includes("duplicate key") && error.message.includes("profiles_username_key")) {
           setErrorMessage("This username is already taken. Please choose a different username.");
           form.setError('username', { 
@@ -83,11 +88,9 @@ export function SignUpDialog() {
             message: 'This email is already registered' 
           });
         } else {
-          // Generic error handling with specific check for potential username conflicts
           const errorMsg = error.message || "Something went wrong. Please try again.";
           setErrorMessage(errorMsg);
           
-          // Try to determine if it's a username issue from database errors
           if (errorMsg.includes("Database error") && error.status === 500) {
             setErrorMessage("This username may already be taken. Please try a different username.");
             form.setError('username', { 
@@ -100,7 +103,6 @@ export function SignUpDialog() {
         throw error;
       }
 
-      // Also sign in the user immediately since we want to skip verification
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
@@ -108,10 +110,8 @@ export function SignUpDialog() {
 
       if (signInError) {
         console.error("Auto sign-in error:", signInError);
-        // We'll continue with the flow even if auto sign-in fails
       }
 
-      // Show success message
       setSignupSuccess(true);
       
       toast({
@@ -122,7 +122,6 @@ export function SignUpDialog() {
       
       setTimeout(() => {
         setOpen(false);
-        // Navigate to checkout for subscription setup
         navigate("/checkout");
       }, 2000);
       
@@ -130,7 +129,6 @@ export function SignUpDialog() {
     } catch (error: any) {
       console.error("Sign up error:", error);
       
-      // Don't show toast if we've already set a specific error message
       if (!errorMessage) {
         toast({
           title: "Error",
@@ -154,6 +152,7 @@ export function SignUpDialog() {
         <Button 
           size="lg"
           className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300"
+          onClick={handleSignupClick}
         >
           <UserPlus className="mr-2" />
           Sign up

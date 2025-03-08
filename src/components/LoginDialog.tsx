@@ -20,7 +20,15 @@ import { Alert, AlertDescription } from "./ui/alert";
 import { ForgotPasswordDialog } from "./ForgotPasswordDialog";
 import { isSubscriptionValid } from "@/integrations/supabase/subscription/subscription-utils";
 
-export function LoginDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+export function LoginDialog({ 
+  open, 
+  onOpenChange,
+  onStartQuiz 
+}: { 
+  open: boolean; 
+  onOpenChange: (open: boolean) => void;
+  onStartQuiz?: () => void;
+}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -189,7 +197,7 @@ export function LoginDialog({ open, onOpenChange }: { open: boolean; onOpenChang
           
           <div className="text-center py-2">
             <div className="text-sm text-muted-foreground">Don't have an account?</div>
-            <SignUpDialog />
+            <SignUpDialog onStartQuiz={onStartQuiz} />
           </div>
         </DialogContent>
       </Dialog>

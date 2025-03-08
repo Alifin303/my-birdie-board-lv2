@@ -52,7 +52,7 @@ const Index = () => {
           <MainContent onStartQuiz={handleStartQuiz} />
         </div>
       </div>
-      <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
+      <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} onStartQuiz={handleStartQuiz} />
     </div>
   );
 };
