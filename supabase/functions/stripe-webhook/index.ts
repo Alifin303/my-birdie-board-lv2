@@ -11,26 +11,59 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+// Verify that required environment variables are set
+const requiredEnvVars = ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SIGNING_SECRET', 'SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'];
+const missingEnvVars = requiredEnvVars.filter(varName => !Deno.env.get(varName));
+
+if (missingEnvVars.length > 0) {
+  console.error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+}
+
 serve(async (req) => {
-  console.log(`Received ${req.method} request to stripe-webhook endpoint`);
+  console.log(`Received ${req.method} request to stripe-webhook endpoint from ${req.headers.get('user-agent') || 'unknown source'}`);
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     console.log('Handling OPTIONS preflight request');
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { 
+      headers: {
+        ...corsHeaders,
+        'Access-Control-Max-Age': '86400', // 24 hours caching for preflight
+      } 
+    });
+  }
+
+  // Verify it's a POST request
+  if (req.method !== 'POST') {
+    console.error(`Invalid method: ${req.method}. Webhook only accepts POST requests.`);
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
 
   try {
+    // Log all headers for debugging (but redact sensitive information)
+    const allHeaders = Object.fromEntries([...req.headers]);
+    console.log('Request headers:', JSON.stringify(Object.keys(allHeaders)));
+    
     // Get the signature from the request header
     const signature = req.headers.get('stripe-signature');
-    
-    // Log request information for debugging
-    console.log('Request headers:', JSON.stringify(Object.fromEntries([...req.headers])));
-    console.log('Stripe-Signature header:', signature ? 'Present' : 'Missing');
+    console.log('Stripe-Signature header present:', !!signature);
     
     if (!signature) {
-      console.error('Missing stripe-signature header');
-      return new Response(JSON.stringify({ error: 'Missing stripe-signature header' }), {
+      console.error('Missing stripe-signature header in the request');
+      
+      // Check if there's an authorization header (might be using the wrong authentication method)
+      const authHeader = req.headers.get('authorization');
+      if (authHeader) {
+        console.log('Request has authorization header but not stripe-signature');
+      }
+      
+      return new Response(JSON.stringify({ 
+        error: 'Missing stripe-signature header',
+        message: 'The Stripe webhook requires a stripe-signature header to verify authenticity'
+      }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -53,6 +86,7 @@ serve(async (req) => {
 
     // Parse the webhook payload
     const payload = await req.text();
+    console.log('Webhook payload size:', payload.length, 'bytes');
     
     // Verify the webhook signature using the async method
     const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SIGNING_SECRET');
@@ -64,8 +98,8 @@ serve(async (req) => {
       });
     }
     
-    console.log('Received webhook with signature:', signature.substring(0, 10) + '...');
-    console.log('Webhook secret is configured');
+    console.log('Received webhook with signature hash:', signature.substring(0, 10) + '...');
+    console.log('Webhook secret is configured and will be used for verification');
     
     let event;
     
@@ -76,16 +110,28 @@ serve(async (req) => {
         signature, 
         webhookSecret
       );
+      console.log(`Successfully verified Stripe event: ${event.type} with ID: ${event.id}`);
     } catch (err) {
       console.error(`Webhook signature verification failed: ${err.message}`);
-      return new Response(JSON.stringify({ error: `Webhook signature verification failed: ${err.message}` }), {
+      console.error(`Error details: ${JSON.stringify(err)}`);
+      
+      // Log extra debugging information
+      if (err.type === 'StripeSignatureVerificationError') {
+        console.error('Signature verification failed. This could be due to:');
+        console.error('1. Incorrect webhook signing secret');
+        console.error('2. Request timing out (too old)');
+        console.error('3. Signature mismatch');
+      }
+      
+      return new Response(JSON.stringify({ 
+        error: `Webhook signature verification failed: ${err.message}`,
+        type: err.type || 'Unknown'
+      }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
     
-    console.log(`Successfully verified Stripe event: ${event.type}`);
-
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -99,6 +145,7 @@ serve(async (req) => {
     }
     
     const supabase = createClient(supabaseUrl, supabaseKey);
+    console.log('Supabase client initialized successfully');
 
     // Handle different event types
     switch (event.type) {
@@ -505,7 +552,12 @@ serve(async (req) => {
     
   } catch (err) {
     console.error(`Error processing webhook: ${err.message}`);
-    return new Response(JSON.stringify({ error: err.message }), {
+    console.error(`Stack trace: ${err.stack}`);
+    return new Response(JSON.stringify({ 
+      error: err.message,
+      stack: err.stack,
+      type: err.type || 'Unknown error'
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
