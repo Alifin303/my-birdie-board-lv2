@@ -354,7 +354,7 @@ export function ManualCourseForm({
       console.log("Saving course with data:", formData);
       
       const userAddedName = formData.name + " [User added course]";
-      const formattedName = formatCourseName(userAddedName, userAddedName);
+      const formattedName = formatCourseName(userAddedName);
       
       const courseData = {
         name: formattedName,

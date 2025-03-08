@@ -5,8 +5,15 @@ import type { Database } from './types';
 
 // Re-export core client utilities from modular imports
 import { getSiteUrl, logSupabaseOperation } from './core/client';
-import { parseCourseName, formatCourseName } from './utils/course-utils';
-import { fetchCourseById, updateCourseWithUserId } from './course/course-queries';
+import { parseCourseName, formatCourseName, isUserAddedCourse } from './utils/course-utils';
+import { 
+  fetchCourseById, 
+  updateCourseWithUserId,
+  findCourseByApiId,
+  findCourseByName,
+  insertCourse,
+  getCourseMetadataFromLocalStorage
+} from './course/course-queries';
 
 const SUPABASE_URL = "https://rbhzesocmhazynkfyhst.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiaHplc29jbWhhenlua2Z5aHN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA1NTcwMDUsImV4cCI6MjA1NjEzMzAwNX0.ckHTv_xaARz6GXc1bWiQ95NleVW2TMaqBzaKzMCiVZ0";
@@ -22,8 +29,13 @@ export {
   logSupabaseOperation,
   parseCourseName,
   formatCourseName,
+  isUserAddedCourse,
   fetchCourseById,
-  updateCourseWithUserId
+  updateCourseWithUserId,
+  findCourseByApiId,
+  findCourseByName,
+  insertCourse,
+  getCourseMetadataFromLocalStorage
 };
 
 // Export type for database errors

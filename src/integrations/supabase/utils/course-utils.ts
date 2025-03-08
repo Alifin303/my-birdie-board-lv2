@@ -18,8 +18,22 @@ export function formatCourseName(name: string): string {
  * Parses a course name to extract relevant components
  * This could be used to extract things like course name, location, etc.
  */
-export function parseCourseName(name: string): { name: string } {
-  // For now, just return the name itself
-  // This can be expanded later to extract more structured data from course names
-  return { name: name || '' };
+export function parseCourseName(name: string): { clubName: string; courseName: string } {
+  if (!name) return { clubName: '', courseName: '' };
+  
+  // If the name contains a separator like " - ", split it into club name and course name
+  if (name.includes(' - ')) {
+    const [clubName, courseName] = name.split(' - ', 2);
+    return { clubName, courseName };
+  }
+  
+  // If no separator, return the entire name as both club and course name
+  return { clubName: name, courseName: name };
+}
+
+/**
+ * Checks if a course name indicates a user-added course
+ */
+export function isUserAddedCourse(name: string): boolean {
+  return name.includes('[User added course]');
 }
