@@ -32,7 +32,7 @@ const Index = () => {
             <nav className="flex items-center justify-between">
               <Link to="/" className="flex items-center">
                 <img 
-                  src="/lovable-uploads/8ea9976a-881c-45a6-aae4-f5aeb3ad907f.png" 
+                  src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" 
                   alt="MyBirdieBoard Logo" 
                   className="h-24 w-auto object-contain"
                 />
