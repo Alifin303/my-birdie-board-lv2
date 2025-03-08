@@ -2,6 +2,19 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Calendar, Flag, Clock, History, Calendar as CalendarIcon } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Round } from "./types";
 
 // Define the types of golf scores
@@ -27,30 +40,43 @@ export const DetailedStats = ({ userRounds, isLoading }: DetailedStatsProps) => 
     other: 0
   });
   
-  // Function to navigate to previous period
-  const goToPreviousPeriod = () => {
+  // Get available years from rounds
+  const getAvailableYears = () => {
+    if (!userRounds?.length) return [new Date().getFullYear()];
+    
+    const years = userRounds.map(round => new Date(round.date).getFullYear());
+    return [...new Set(years)].sort((a, b) => b - a); // Unique years in descending order
+  };
+  
+  // Get available months for the selected year
+  const getAvailableMonths = () => {
+    if (!userRounds?.length) return Array.from({ length: 12 }, (_, i) => i);
+    
+    const selectedYear = currentDate.getFullYear();
+    const months = userRounds
+      .filter(round => new Date(round.date).getFullYear() === selectedYear)
+      .map(round => new Date(round.date).getMonth());
+    
+    return [...new Set(months)].sort((a, b) => b - a); // Unique months in descending order
+  };
+  
+  // Handle year selection
+  const handleYearSelect = (year: string) => {
     const newDate = new Date(currentDate);
-    if (periodType === 'month') {
-      newDate.setMonth(newDate.getMonth() - 1);
-    } else if (periodType === 'year') {
-      newDate.setFullYear(newDate.getFullYear() - 1);
-    }
+    newDate.setFullYear(parseInt(year));
     setCurrentDate(newDate);
   };
   
-  // Function to navigate to next period
-  const goToNextPeriod = () => {
+  // Handle month selection
+  const handleMonthSelect = (month: string) => {
     const newDate = new Date(currentDate);
-    if (periodType === 'month') {
-      newDate.setMonth(newDate.getMonth() + 1);
-    } else if (periodType === 'year') {
-      newDate.setFullYear(newDate.getFullYear() + 1);
-    }
-    
-    // Don't allow going to future dates
-    if (newDate <= new Date()) {
-      setCurrentDate(newDate);
-    }
+    newDate.setMonth(parseInt(month));
+    setCurrentDate(newDate);
+  };
+  
+  // Format month number to name
+  const formatMonthName = (monthIndex: number) => {
+    return new Date(2000, monthIndex, 1).toLocaleString('default', { month: 'long' });
   };
   
   // Function to go to current period
@@ -133,6 +159,10 @@ export const DetailedStats = ({ userRounds, isLoading }: DetailedStatsProps) => 
   // Calculate the total number of rounds in the current period
   const roundsInPeriod = getFilteredRounds().length;
   
+  // Available years and months
+  const availableYears = getAvailableYears();
+  const availableMonths = getAvailableMonths();
+  
   if (isLoading) {
     return (
       <div className="flex flex-1 h-60 items-center justify-center">
@@ -146,7 +176,7 @@ export const DetailedStats = ({ userRounds, isLoading }: DetailedStatsProps) => 
       <h2 className="text-xl sm:text-2xl font-semibold text-primary">Performance Stats</h2>
       
       <Tabs defaultValue="month" onValueChange={(value) => setPeriodType(value as PeriodType)}>
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
           <TabsList>
             <TabsTrigger value="month" className="flex items-center gap-1">
               <CalendarIcon className="h-4 w-4" />
@@ -162,29 +192,72 @@ export const DetailedStats = ({ userRounds, isLoading }: DetailedStatsProps) => 
             </TabsTrigger>
           </TabsList>
           
-          {periodType !== 'all' && (
-            <div className="flex items-center space-x-2">
-              <button 
-                onClick={goToPreviousPeriod} 
-                className="p-1 rounded-full hover:bg-muted transition-colors"
+          {periodType === 'month' && (
+            <div className="flex items-center gap-2">
+              <Select
+                value={currentDate.getMonth().toString()}
+                onValueChange={handleMonthSelect}
               >
-                <ChevronLeft className="h-5 w-5 text-primary" />
-              </button>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Select month" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableMonths.map((month) => (
+                    <SelectItem key={month} value={month.toString()}>
+                      {formatMonthName(month)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Select
+                value={currentDate.getFullYear().toString()}
+                onValueChange={handleYearSelect}
+              >
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue placeholder="Select year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableYears.map((year) => (
+                    <SelectItem key={year} value={year.toString()}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
               <button 
                 onClick={goToCurrentPeriod} 
-                className="text-sm font-medium text-primary hover:underline"
+                className="ml-1 px-2 py-1 text-xs font-medium text-primary border border-primary rounded-md hover:bg-primary/10 transition-colors"
               >
                 Current
               </button>
-              <button 
-                onClick={goToNextPeriod} 
-                className="p-1 rounded-full hover:bg-muted transition-colors"
-                disabled={new Date(currentDate).setDate(1) >= new Date().setDate(1) && periodType === 'month' || 
-                           currentDate.getFullYear() >= new Date().getFullYear() && periodType === 'year'}
+            </div>
+          )}
+          
+          {periodType === 'year' && (
+            <div className="flex items-center gap-2">
+              <Select
+                value={currentDate.getFullYear().toString()}
+                onValueChange={handleYearSelect}
               >
-                <ChevronRight className={`h-5 w-5 ${new Date(currentDate).setDate(1) >= new Date().setDate(1) && periodType === 'month' || 
-                                         currentDate.getFullYear() >= new Date().getFullYear() && periodType === 'year' 
-                                         ? 'text-gray-300' : 'text-primary'}`} />
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue placeholder="Select year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableYears.map((year) => (
+                    <SelectItem key={year} value={year.toString()}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <button 
+                onClick={goToCurrentPeriod} 
+                className="ml-1 px-2 py-1 text-xs font-medium text-primary border border-primary rounded-md hover:bg-primary/10 transition-colors"
+              >
+                Current
               </button>
             </div>
           )}
