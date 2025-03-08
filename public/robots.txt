@@ -1,7 +1,20 @@
 
+# www.robotstxt.org
+
 User-agent: *
 Allow: /
 Disallow: /auth/
 Disallow: /checkout
+Disallow: /auth/callback
+Disallow: /auth/confirm
+Disallow: /auth/reset-password
 
 Sitemap: https://mybirdieboard.com/sitemap.xml
+
+# Prevent media crawling for bandwidth
+User-agent: Googlebot-Image
+Disallow: /lovable-uploads/
+
+# Prevent archive crawling
+User-agent: ia_archiver
+Disallow: /

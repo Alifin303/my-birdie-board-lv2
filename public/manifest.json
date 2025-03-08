@@ -1,0 +1,22 @@
+
+{
+  "name": "MyBirdieBoard - Golf Score Tracking & Performance Analytics",
+  "short_name": "MyBirdieBoard",
+  "description": "Track your golf scores, challenge friends on course leaderboards, and improve your game",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#2C4A3B",
+  "theme_color": "#2C4A3B",
+  "icons": [
+    {
+      "src": "/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
