@@ -4,7 +4,6 @@ project_id = "rbhzesocmhazynkfyhst"
 [api]
 # No custom API configuration needed
 
-[api.edge_functions]
-# Make the webhook accessible without authentication
-[api.edge_functions.stripe-webhook]
+[functions]
+[functions.stripe-webhook]
 verify_jwt = false
