@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -34,6 +33,9 @@
     --ring: 142 35% 23%;
 
     --radius: 0.75rem;
+    
+    --light-blue: 214 85% 91%;
+    --light-blue-foreground: 0 0% 20%;
   }
 }
 
@@ -186,4 +188,9 @@
   table {
     @apply text-sm !important;
   }
+}
+
+/* Dashboard specific styles */
+.dashboard-container {
+  @apply bg-lightBlue;
 }
