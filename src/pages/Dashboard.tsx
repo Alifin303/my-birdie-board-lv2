@@ -236,7 +236,7 @@ export default function Dashboard() {
     
     return (
       <div className="space-y-6 sm:space-y-8 golf-grass-pattern animate-fade-in">
-        <div className="mb-4 flex items-center">
+        <div className="mb-4">
           <Link to="/" className="inline-block">
             <img 
               src="/logo.png" 
@@ -244,9 +244,6 @@ export default function Dashboard() {
               className="h-16 w-auto object-contain" 
             />
           </Link>
-          <h1 className="text-lg sm:text-xl font-bold text-primary tracking-tight ml-2">
-            MyBirdieBoard
-          </h1>
         </div>
         <DashboardHeader 
           profileData={profile} 
