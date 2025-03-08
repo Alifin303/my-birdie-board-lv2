@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Round } from "./types";
+import { calculateHoleStats } from "@/utils/statsCalculator";
 
 // Define the types of golf scores
 type ScoreType = 'eagle' | 'birdie' | 'par' | 'bogey' | 'doubleBogey' | 'other';
@@ -115,45 +116,34 @@ export const DetailedStats = ({ userRounds, isLoading }: DetailedStatsProps) => 
   // Calculate stats based on filtered rounds
   useEffect(() => {
     const filteredRounds = getFilteredRounds();
-    const newStats: Record<ScoreType, number> = {
-      eagle: 0,
-      birdie: 0,
-      par: 0,
-      bogey: 0,
-      doubleBogey: 0,
-      other: 0
-    };
-    
     console.log("Filtered rounds for stats calculation:", filteredRounds.length);
     
-    filteredRounds.forEach(round => {
-      // Debug log to see what hole_scores look like
-      console.log(`Processing round ${round.id} hole_scores:`, round.hole_scores);
-      
-      // Process hole-by-hole scores if available
-      if (round.hole_scores && typeof round.hole_scores === 'object') {
-        // Convert the hole_scores object to an array of values
-        Object.values(round.hole_scores).forEach((holeScore: any) => {
-          if (!holeScore) return;
-          
-          const strokes = holeScore.strokes;
-          const par = holeScore.par;
-          
-          if (typeof strokes === 'number' && typeof par === 'number') {
-            const relativeToPar = strokes - par;
-            
-            if (relativeToPar <= -2) newStats.eagle++;
-            else if (relativeToPar === -1) newStats.birdie++;
-            else if (relativeToPar === 0) newStats.par++;
-            else if (relativeToPar === 1) newStats.bogey++;
-            else if (relativeToPar === 2) newStats.doubleBogey++;
-            else newStats.other++;
-          }
-        });
-      }
-    });
+    if (filteredRounds.length === 0) {
+      setStats({
+        eagle: 0,
+        birdie: 0,
+        par: 0,
+        bogey: 0,
+        doubleBogey: 0,
+        other: 0
+      });
+      return;
+    }
     
-    console.log("Calculated stats:", newStats);
+    // Use the calculateHoleStats utility function
+    const holeStats = calculateHoleStats(filteredRounds);
+    
+    // Map the hole stats to our component's state format
+    const newStats: Record<ScoreType, number> = {
+      eagle: holeStats.eagles,
+      birdie: holeStats.birdies,
+      par: holeStats.pars,
+      bogey: holeStats.bogeys,
+      doubleBogey: holeStats.doubleBogeys,
+      other: holeStats.others
+    };
+    
+    console.log("Setting stats:", newStats);
     setStats(newStats);
   }, [userRounds, periodType, currentDate]);
   
@@ -326,8 +316,8 @@ const StatsCard = ({ type, count }: StatsCardProps) => {
   
   const getLabel = () => {
     switch(type) {
-      case 'doubleBogey': return 'Double Bogey+';
-      case 'other': return 'Triple Bogey+';
+      case 'doubleBogey': return 'Double Bogey';
+      case 'other': return 'Other';
       default: return type.charAt(0).toUpperCase() + type.slice(1);
     }
   };

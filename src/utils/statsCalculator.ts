@@ -1,3 +1,4 @@
+
 interface Round {
   id: number;
   date: string;
@@ -6,6 +7,14 @@ interface Round {
   net_score?: number;
   to_par_gross: number;
   to_par_net?: number;
+  hole_scores?: {
+    [holeNumber: string]: {
+      hole: number;
+      par: number;
+      strokes: number;
+      putts?: number;
+    }
+  };
   courses?: {
     id: number;
     name: string;
@@ -288,25 +297,54 @@ export const calculateHoleStats = (rounds: Round[]) => {
     totalHoles: 0
   };
 
+  if (!rounds || rounds.length === 0) {
+    return stats;
+  }
+
   rounds.forEach(round => {
-    if (round.hole_scores) {
+    console.log(`Processing round ${round.id} hole_scores:`, round.hole_scores);
+    
+    if (round.hole_scores && typeof round.hole_scores === 'object') {
+      // Process each hole score entry
       Object.values(round.hole_scores).forEach((holeScore: any) => {
         if (!holeScore || typeof holeScore.strokes !== 'number' || typeof holeScore.par !== 'number') {
+          console.log("Skipping invalid hole score:", holeScore);
           return;
         }
-
+        
         stats.totalHoles++;
         const relativeToPar = holeScore.strokes - holeScore.par;
         
-        if (relativeToPar <= -2) stats.eagles++;
-        else if (relativeToPar === -1) stats.birdies++;
-        else if (relativeToPar === 0) stats.pars++;
-        else if (relativeToPar === 1) stats.bogeys++;
-        else if (relativeToPar === 2) stats.doubleBogeys++;
-        else stats.others++;
+        if (relativeToPar <= -2) {
+          stats.eagles++;
+          console.log(`Eagle on hole ${holeScore.hole}, par ${holeScore.par}, strokes ${holeScore.strokes}`);
+        }
+        else if (relativeToPar === -1) {
+          stats.birdies++;
+          console.log(`Birdie on hole ${holeScore.hole}, par ${holeScore.par}, strokes ${holeScore.strokes}`);
+        }
+        else if (relativeToPar === 0) {
+          stats.pars++;
+          console.log(`Par on hole ${holeScore.hole}, par ${holeScore.par}, strokes ${holeScore.strokes}`);
+        }
+        else if (relativeToPar === 1) {
+          stats.bogeys++;
+          console.log(`Bogey on hole ${holeScore.hole}, par ${holeScore.par}, strokes ${holeScore.strokes}`);
+        }
+        else if (relativeToPar === 2) {
+          stats.doubleBogeys++;
+          console.log(`Double bogey on hole ${holeScore.hole}, par ${holeScore.par}, strokes ${holeScore.strokes}`);
+        }
+        else {
+          stats.others++;
+          console.log(`Other (${relativeToPar}) on hole ${holeScore.hole}, par ${holeScore.par}, strokes ${holeScore.strokes}`);
+        }
       });
+    } else {
+      console.log(`Round ${round.id} has no hole_scores or invalid format:`, round.hole_scores);
     }
   });
 
+  console.log("Final calculated hole stats:", stats);
   return stats;
 };
