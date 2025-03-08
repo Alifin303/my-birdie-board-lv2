@@ -236,7 +236,7 @@ export default function Dashboard() {
     });
     
     return (
-      <div className="space-y-6 sm:space-y-8 animate-fade-in">
+      <div className="space-y-4 sm:space-y-6 md:space-y-8 animate-fade-in">
         <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
           <DashboardHeader 
             profileData={profile} 
@@ -257,7 +257,7 @@ export default function Dashboard() {
               />
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               {/* Detailed stats on the left */}
               <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
                 <DetailedStats 
@@ -309,7 +309,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen py-4 sm:py-8 px-2 sm:px-4"
+    <div className="min-h-screen py-4 px-2 sm:py-6 sm:px-4"
       style={{
         backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
         backgroundSize: 'cover',
@@ -317,7 +317,7 @@ export default function Dashboard() {
         backgroundAttachment: 'fixed',
       }}
     >
-      <div className="container mx-auto">
+      <div className="container mx-auto max-w-7xl px-2 sm:px-4">
         {renderDashboard()}
       </div>
 

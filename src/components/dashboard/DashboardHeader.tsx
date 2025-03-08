@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
@@ -613,26 +612,28 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
 
   return (
     <>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-4">
           <img 
             src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" 
             alt="BirdieBoard Logo" 
-            className="h-12 w-auto object-contain brightness-[0.85] contrast-[1.15]" 
+            className="h-10 sm:h-12 w-auto object-contain brightness-[0.85] contrast-[1.15]" 
           />
-          <h1 className="text-2xl md:text-3xl font-bold">Welcome, {profileData?.first_name || 'Golfer'}!</h1>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate">Welcome, {profileData?.first_name || 'Golfer'}!</h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-end sm:self-auto">
           <Button 
             onClick={onAddRound}
-            className="relative"
+            className="text-sm sm:text-base px-3 sm:px-4"
+            size="sm"
+            title="Add a New Round"
           >
             Add a New Round
           </Button>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-full h-10 w-10 border border-primary text-primary hover:bg-primary hover:text-white">
+              <Button variant="outline" size="icon" className="rounded-full h-9 w-9 sm:h-10 sm:w-10 border border-primary text-primary hover:bg-primary hover:text-white">
                 <User className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
@@ -681,3 +682,4 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
     </>
   );
 };
+
