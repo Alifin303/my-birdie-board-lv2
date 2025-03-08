@@ -48,7 +48,7 @@ const Index = () => {
             </nav>
           </div>
         </header>
-        <div className="relative z-[1]">
+        <div className="relative z-[1] pt-32 sm:pt-0"> {/* Added padding-top for mobile only */}
           <MainContent onStartQuiz={handleStartQuiz} />
         </div>
       </div>

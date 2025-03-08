@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from './ui/button';
 import { ArrowRight, Upload, BarChart2, Award, Trophy } from 'lucide-react';
@@ -12,8 +11,8 @@ interface MainContentProps {
 export const MainContent = ({ onStartQuiz }: MainContentProps) => {
   return (
     <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
-      {/* Hero Section - Reduced padding */}
-      <div className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center">
+      {/* Hero Section - Added mobile padding */}
+      <div className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center mt-4 sm:mt-0">
         <div className="max-w-5xl mx-auto animate-fade-in mb-4">
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight mb-4 drop-shadow-md">
             Welcome to MyBirdieBoard – <br className="hidden sm:block" />Your Ultimate Golf Tracking Hub!
@@ -120,7 +119,7 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
         </div>
       </div>
       
-      {/* Call to action - Secondary Banner with reduced margins and padding */}
+      {/* Call to action - Secondary Banner */}
       <div className="w-full py-4 sm:py-6 bg-black/30 backdrop-blur-sm mt-2 sm:mt-3">
         <div className="max-w-5xl mx-auto text-center px-4">
           <h2 className="text-lg sm:text-xl font-bold text-white mb-2">Ready to take your game to the next level?</h2>
