@@ -2,7 +2,6 @@
 // Temporary implementation until the real functionality is available
 import { supabase, parseCourseName } from "@/integrations/supabase/client";
 
-// Add missing exports
 export async function fetchUserCourses() {
   try {
     const { data, error } = await supabase
@@ -28,10 +27,19 @@ export async function getUserCourseTees(courseId: number) {
     
     if (error) throw error;
     
-    return data || [];
+    // Return the data object directly, not an array
+    return {
+      id: courseId,
+      name: `Course ${courseId}`, // Placeholder
+      tees: data || []
+    };
   } catch (error) {
     console.error('Error fetching course tees:', error);
-    return [];
+    return {
+      id: courseId,
+      name: `Course ${courseId}`, // Placeholder
+      tees: []
+    };
   }
 }
 

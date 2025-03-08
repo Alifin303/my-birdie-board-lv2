@@ -53,7 +53,9 @@ export const CourseSelector = ({
       
       if (course.isUserAdded) {
         // This is a user-added course, get the tees from localStorage
-        selectedCourse = await getUserCourseTees(course.id);
+        // Convert the id to a number if it's a string
+        const courseId = typeof course.id === 'string' ? parseInt(course.id, 10) : course.id;
+        selectedCourse = await getUserCourseTees(courseId);
         console.log("Selected course:", selectedCourse);
       } else {
         // This is an API course, format it properly
@@ -99,7 +101,8 @@ export const CourseSelector = ({
     setIsSearching(true);
     
     try {
-      const results = await searchForCourses(query, userCourses);
+      // Remove the second parameter that's causing the error
+      const results = await searchForCourses(query);
       setSearchResults(results);
     } catch (error) {
       console.error('Error searching for courses:', error);
@@ -111,7 +114,7 @@ export const CourseSelector = ({
     } finally {
       setIsSearching(false);
     }
-  }, [userCourses, toast]);
+  }, [toast]);
 
   // Load user courses on component mount
   useEffect(() => {
@@ -129,7 +132,9 @@ export const CourseSelector = ({
       if (selectedCourseId && userCourses.length > 0) {
         const course = userCourses.find(c => c.id === selectedCourseId);
         if (course) {
-          const courseWithTees = await getUserCourseTees(course.id);
+          // Convert to number if it's a string
+          const courseId = typeof course.id === 'string' ? parseInt(course.id, 10) : course.id;
+          const courseWithTees = await getUserCourseTees(courseId);
           if (courseWithTees) {
             console.log("Setting selected course:", courseWithTees);
             setSearchQuery(courseWithTees.name);
