@@ -150,9 +150,9 @@ export default function Checkout() {
       <div className="flex-1 flex justify-center items-center px-4 py-8">
         <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-xl p-6 sm:p-8 max-w-2xl w-full">
           <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-primary mb-3">Join BirdieBoard</h1>
+            <h1 className="text-3xl font-bold text-primary mb-3">Join MyBirdieBoard</h1>
             <p className="text-muted-foreground">
-              Stop guessing your way to better golf - use BirdieBoard
+              Stop guessing your way to better golf - use MyBirdieBoard
             </p>
           </div>
           
@@ -166,7 +166,7 @@ export default function Checkout() {
             <div className="bg-accent/10 rounded-lg p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-accent mb-1">BirdieBoard</h2>
+                  <h2 className="text-2xl font-bold text-accent mb-1">MyBirdieBoard</h2>
                   <p className="text-xl font-semibold">£2.99 / month</p>
                   <p className="text-sm text-muted-foreground">Cancel anytime</p>
                 </div>
@@ -202,7 +202,7 @@ export default function Checkout() {
               <div className="mb-6">
                 <p className="text-center font-medium mb-2">Ready to start improving your game?</p>
                 <p className="text-center text-sm text-muted-foreground">
-                  Join thousands of golfers who are using BirdieBoard to track their progress and improve their scores.
+                  Join thousands of golfers who are using MyBirdieBoard to track their progress and improve their scores.
                 </p>
               </div>
               
