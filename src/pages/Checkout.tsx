@@ -1,377 +1,496 @@
-
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Loader2, Check, AlertTriangle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { isSubscriptionValid, clearSubscriptionCache } from "@/integrations/supabase/subscription/subscription-utils";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@/components/ui/table"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { cn } from "@/lib/utils"
+import { format } from "date-fns"
+import { CalendarIcon } from "lucide-react"
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
+import { isSubscriptionValid } from "@/integrations/supabase/subscription/subscription-utils";
 
-export default function Checkout() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [initialCheckDone, setInitialCheckDone] = useState(false);
-  const [user, setUser] = useState<any>(null);
+const billingFormSchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+})
+
+type BillingFormValues = z.infer<typeof billingFormSchema>
+
+const Checkout = () => {
   const [subscription, setSubscription] = useState<any>(null);
-  const [subscriptionStatus, setSubscriptionStatus] = useState<string>("");
-  const [subscriptionEndDate, setSubscriptionEndDate] = useState<string | null>(null);
-  const [shouldShowPage, setShouldShowPage] = useState(true);
-  const [isVerifyingWithStripe, setIsVerifyingWithStripe] = useState(false);
-  const [stripeVerificationComplete, setStripeVerificationComplete] = useState(false);
-  const [redirectingToDashboard, setRedirectingToDashboard] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isSubscriptionValidStatus, setIsSubscriptionValidStatus] = useState(false);
+  const [customerId, setCustomerId] = useState<string | null>(null);
+  const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [isActivating, setIsActivating] = useState(false);
+  const [startDate, setStartDate] = useState<Date | undefined>(new Date());
+  const [stripe, setStripe] = useState<any>(null);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [searchParams] = useSearchParams();
-  const sessionId = searchParams.get('session_id');
+
+  const form = useForm<BillingFormValues>({
+    resolver: zodResolver(billingFormSchema),
+    defaultValues: {
+      name: "",
+    },
+  })
 
   useEffect(() => {
-    // If we have a session_id in the URL, it means the user is returning from Stripe Checkout
-    if (sessionId) {
-      console.log("Detected return from Stripe with session ID:", sessionId);
-      setRedirectingToDashboard(true);
-      
-      // Show success toast and redirect to dashboard
-      toast({
-        title: "Payment successful!",
-        description: "Redirecting to your dashboard...",
-        duration: 5000,
-      });
-      
-      // We redirect to dashboard with the session_id so it can handle further processing
-      setTimeout(() => {
-        navigate(`/dashboard?session_id=${sessionId}`);
-      }, 1500);
-      return;
-    }
+    const loadStripe = async () => {
+      const stripeInstance = await (window as any).Stripe(
+        process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+      );
+      setStripe(stripeInstance);
+    };
 
-    let isMounted = true;
-    
-    const checkSession = async () => {
+    loadStripe();
+  }, []);
+
+  useEffect(() => {
+    const getSubscription = async () => {
+      setLoading(true);
       try {
-        setIsLoading(true);
-        
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          console.log("No session found, redirecting to homepage");
-          if (isMounted) navigate("/");
+        const { data: session } = await supabase.auth.getSession();
+
+        if (!session?.session?.user?.id) {
+          console.error("No user ID found, redirecting to login");
+          navigate("/");
           return;
         }
-        
-        if (isMounted) setUser(session.user);
-        
-        console.log("Fetching subscription data for checkout page");
-        
-        // Clear any existing subscription cache before checking
-        clearSubscriptionCache(session.user.id);
-        
-        const { data: sub, error } = await supabase
+
+        const userId = session.session.user.id;
+
+        const { data, error } = await supabase
           .from("customer_subscriptions")
           .select("*")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
+          .eq("user_id", userId)
+          .single();
 
         if (error) {
           console.error("Error fetching subscription:", error);
-          toast({
-            title: "Error",
-            description: "Could not fetch subscription details. Please try again.",
-            variant: "destructive",
-          });
+          setLoading(false);
+          return;
         }
-        
-        if (!isMounted) return;
-        
-        console.log("Checkout page retrieved subscription:", sub);
-        setSubscription(sub);
-        
-        if (sub) {
-          setSubscriptionStatus(sub.status);
-          if (sub.current_period_end) {
-            setSubscriptionEndDate(new Date(sub.current_period_end).toLocaleDateString());
-          }
-          
-          console.log("Current subscription data:", sub);
-          
-          if ((sub.status === 'incomplete' || sub.status === 'past_due') && 
-              sub.current_period_end && new Date(sub.current_period_end) > new Date()) {
-            console.log("Detected potential issue: Subscription has future end date but status is", sub.status);
-            
-            // Check if we should proceed with verification
-            setIsVerifyingWithStripe(true);
-            try {
-              console.log("Verifying subscription with Stripe function");
-              const { data: stripeData, error: stripeError } = await supabase.functions.invoke("verify-subscription", {
-                body: {
-                  subscription_id: sub.subscription_id
-                }
-              });
-              
-              if (stripeError) {
-                console.error("Error verifying with Stripe:", stripeError);
-                toast({
-                  title: "Verification Error",
-                  description: "Could not verify subscription with Stripe.",
-                  variant: "destructive",
-                });
-              } else if (stripeData && stripeData.status) {
-                console.log("Stripe verification result:", stripeData);
-                
-                if (stripeData.status === 'active' && sub.status !== 'active') {
-                  console.log("Fixing subscription status discrepancy");
-                  const { error: updateError } = await supabase
-                    .from("customer_subscriptions")
-                    .update({ 
-                      status: stripeData.status,
-                      updated_at: new Date().toISOString()
-                    })
-                    .eq("subscription_id", sub.subscription_id);
-                    
-                  if (updateError) {
-                    console.error("Error updating subscription status:", updateError);
-                  } else {
-                    setSubscriptionStatus(stripeData.status);
-                    setSubscription({...sub, status: stripeData.status});
-                    
-                    // Clear subscription cache after update
-                    clearSubscriptionCache(session.user.id);
-                    
-                    toast({
-                      title: "Subscription Updated",
-                      description: "Your subscription is now active.",
-                    });
-                    
-                    // Redirect to dashboard after successful verification
-                    navigate("/dashboard");
-                  }
-                }
-              }
-            } catch (verifyError) {
-              console.error("Error in Stripe verification:", verifyError);
-            } finally {
-              if (!isMounted) return;
-              setIsVerifyingWithStripe(false);
-              setStripeVerificationComplete(true);
-            }
-          }
-          
-          // Check if the user has a valid subscription
-          const hasValidSub = isSubscriptionValid(sub);
-          const isCancelled = sub.cancel_at_period_end === true;
-          
-          if (hasValidSub && !isCancelled) {
-            console.log("User has valid subscription - redirecting to dashboard");
-            navigate("/dashboard");
-            return;
-          }
+
+        if (data) {
+          setSubscription(data);
+          setCustomerId(data.customer_id);
+          setSubscriptionId(data.subscription_id);
+          setIsSubscribed(true);
+          setIsSubscriptionValidStatus(isSubscriptionValid(data));
+        } else {
+          setIsSubscribed(false);
         }
-      } catch (err) {
-        console.error("Error in checkSession:", err);
+      } catch (error) {
+        console.error("Error in getSubscription:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getSubscription();
+  }, [navigate]);
+
+  const handleCancelSubscription = async () => {
+    setIsCancelling(true);
+    try {
+      const { error } = await supabase.functions.invoke('cancel-subscription', {
+        body: { subscriptionId },
+      });
+
+      if (error) {
+        console.error("Error cancelling subscription:", error);
         toast({
           title: "Error",
-          description: "Something went wrong. Please try again.",
+          description: "Failed to cancel subscription. Please try again.",
           variant: "destructive",
         });
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-          setInitialCheckDone(true);
-        }
+        return;
       }
-    };
-    
-    checkSession();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, [navigate, toast, sessionId]);
 
-  const handleCheckout = async () => {
-    if (!user) return;
-    
-    setIsLoading(true);
-    
-    try {
-      const returnUrl = `${window.location.origin}/checkout`;
-      
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: {
-          user_id: user.id,
-          email: user.email,
-          return_url: returnUrl
-        }
-      });
-      
-      if (error) throw error;
-      
-      if (data && data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error("No checkout URL received");
-      }
-    } catch (error: any) {
-      console.error("Checkout error:", error);
       toast({
-        title: "Checkout Error",
-        description: error.message || "There was a problem setting up the payment page.",
+        title: "Subscription cancelled",
+        description: "Your subscription has been cancelled.",
+      });
+
+      setSubscription((prevSubscription: any) => ({
+        ...prevSubscription,
+        status: "canceled",
+      }));
+      setIsSubscribed(false);
+    } catch (error) {
+      console.error("Error in handleCancelSubscription:", error);
+      toast({
+        title: "Error",
+        description: "Failed to cancel subscription. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsCancelling(false);
     }
   };
 
-  const getSubscriptionMessage = () => {
-    if (!subscription) return null;
-    
-    if (subscription.status === "incomplete" && 
-        subscription.current_period_end && 
-        new Date(subscription.current_period_end) > new Date()) {
-      return `Active subscription until ${subscriptionEndDate}`;
+  const handleReactivateSubscription = async () => {
+    setIsActivating(true);
+    try {
+      const { error } = await supabase.functions.invoke('reactivate-subscription', {
+        body: { subscriptionId },
+      });
+
+      if (error) {
+        console.error("Error reactivating subscription:", error);
+        toast({
+          title: "Error",
+          description: "Failed to reactivate subscription. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Subscription reactivated",
+        description: "Your subscription has been reactivated.",
+      });
+
+      setSubscription((prevSubscription: any) => ({
+        ...prevSubscription,
+        status: "active",
+      }));
+      setIsSubscribed(true);
+    } catch (error) {
+      console.error("Error in handleReactivateSubscription:", error);
+      toast({
+        title: "Error",
+        description: "Failed to reactivate subscription. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsActivating(false);
     }
-    
-    if (subscription.status === "active") {
-      return "Active subscription";
-    }
-    
-    if (subscription.cancel_at_period_end && subscriptionEndDate) {
-      return `Canceled - active until ${subscriptionEndDate}`;
-    }
-    
-    if (subscription.status === "past_due" || subscription.status === "incomplete") {
-      return `Payment issue - access until ${subscriptionEndDate || 'unknown date'}`;
-    }
-    
-    return `Status: ${subscription.status}`;
   };
 
-  if (!initialCheckDone || redirectingToDashboard) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin mb-4" />
-        <p className="text-sm text-gray-500">
-          {redirectingToDashboard ? "Payment successful! Redirecting to dashboard..." : "Loading subscription details..."}
-        </p>
-      </div>
-    );
-  }
+  const onSubmit = async (data: BillingFormValues) => {
+    setIsCheckoutLoading(true);
+    try {
+      const { data: session } = await supabase.auth.getSession();
 
-  if (!user) {
-    navigate("/");
-    return null;
+      if (!session?.session?.user?.id) {
+        console.error("No user ID found, redirecting to login");
+        navigate("/");
+        return;
+      }
+
+      const userId = session.session.user.id;
+
+      const { data: setupIntent, error: setupIntentError } = await supabase.functions.invoke('create-setup-intent', {
+        body: { customerId: customerId },
+      });
+
+      if (setupIntentError) {
+        console.error("Error creating setup intent:", setupIntentError);
+        toast({
+          title: "Error",
+          description: "Failed to create setup intent. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setClientSecret(setupIntent.data.client_secret);
+
+      if (!stripe) {
+        console.error("Stripe SDK not loaded");
+        toast({
+          title: "Error",
+          description: "Stripe SDK failed to load. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error } = await stripe.confirmCardSetup(
+        setupIntent.data.client_secret,
+        {
+          payment_method: {
+            card: stripe.elements().create('card'),
+            billing_details: {
+              name: data.name,
+            },
+          },
+        }
+      );
+
+      if (error) {
+        console.error("Error confirming card setup:", error);
+        toast({
+          title: "Error",
+          description: "Failed to confirm card setup. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { data: subscriptionData, error: subscriptionError } = await supabase.functions.invoke('create-subscription', {
+        body: {
+          priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
+          customerId: customerId,
+        },
+      });
+
+      if (subscriptionError) {
+        console.error("Error creating subscription:", subscriptionError);
+        toast({
+          title: "Error",
+          description: "Failed to create subscription. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { data: updatedSubscription, error: updatedSubscriptionError } = await supabase
+        .from("customer_subscriptions")
+        .update({
+          status: subscriptionData.data.status,
+          subscription_id: subscriptionData.data.id,
+        })
+        .eq("customer_id", customerId)
+        .select("*")
+        .single();
+
+      if (updatedSubscriptionError) {
+        console.error("Error updating subscription:", updatedSubscriptionError);
+        toast({
+          title: "Error",
+          description: "Failed to update subscription. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setSubscription(updatedSubscription);
+      setIsSubscribed(true);
+      toast({
+        title: "Success",
+        description: "Subscription created successfully!",
+      });
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Error in onSubmit:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCheckoutLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
   return (
-    <div 
-      className="min-h-screen bg-cover bg-center bg-no-repeat overflow-hidden"
-      style={{
-        backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
-        backgroundColor: "#2C4A3B",
-      }}
-    >
-      <div className="absolute inset-0 bg-black opacity-60 z-0"></div>
-      
-      <div className="relative z-10 py-12 px-4 flex flex-col justify-center min-h-screen">
-        <div className="max-w-3xl mx-auto w-full">
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg shadow-2xl overflow-hidden">
-            <div className="bg-primary p-6 sm:p-8 text-primary-foreground">
-              <h1 className="text-2xl sm:text-3xl font-bold">Join BirdieBoard</h1>
-              <p className="mt-2 opacity-90">Stop guessing your way to better golf - use BirdieBoard</p>
-              
-              {subscription && (
-                <div className="mt-2 p-2 bg-white/20 rounded">
-                  <p className="text-sm flex items-center">
-                    {getSubscriptionMessage()}
-                    {subscription.status === "active" && (
-                      <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        <Check className="w-3 h-3 mr-1" />
-                        Active
-                      </span>
-                    )}
-                    {subscription.status === "incomplete" && isSubscriptionValid(subscription) && (
-                      <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                        <AlertTriangle className="w-3 h-3 mr-1" />
-                        {isVerifyingWithStripe ? "Verifying..." : "Payment Issue Detected"}
-                      </span>
-                    )}
-                  </p>
-                  
-                  {subscription.status === "incomplete" && isSubscriptionValid(subscription) && stripeVerificationComplete && (
-                    <p className="text-xs mt-1 text-white/80">
-                      We've detected a discrepancy with your subscription status. Please contact support if this persists.
-                    </p>
+    <div className="container py-10">
+      <div className="grid gap-10 lg:grid-cols-2">
+        <div className="space-y-3">
+          <h2 className="text-2xl font-bold">Subscription Details</h2>
+          <p className="text-muted-foreground">
+            Manage your subscription and billing details.
+          </p>
+          <Card>
+            <CardHeader>
+              <CardTitle>Subscription Status</CardTitle>
+              <CardDescription>
+                {isSubscribed ? 'You are currently subscribed.' : 'You are not subscribed.'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableCaption>Your subscription details.</TableCaption>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-medium">Status</TableCell>
+                    <TableCell>{subscription?.status || 'N/A'}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Subscription ID</TableCell>
+                    <TableCell>{subscription?.subscription_id || 'N/A'}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Customer ID</TableCell>
+                    <TableCell>{subscription?.customer_id || 'N/A'}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Price ID</TableCell>
+                    <TableCell>{process.env.NEXT_PUBLIC_STRIPE_PRICE_ID || 'N/A'}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Is Valid</TableCell>
+                    <TableCell>{isSubscriptionValidStatus ? 'Yes' : 'No'}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </CardContent>
+            <CardFooter className="flex justify-between">
+              {isSubscribed && subscription && (subscription.status === "incomplete" || subscription.status === "past_due" || subscription.status === "active") ? (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" disabled={isCancelling}>
+                      {isCancelling ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Cancelling...
+                        </>
+                      ) : (
+                        "Cancel Subscription"
+                      )}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will cancel your subscription.
+                        Please be aware that you will lose access to premium features.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleCancelSubscription} disabled={isCancelling}>
+                        {isCancelling ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Cancelling...
+                          </>
+                        ) : (
+                          "Confirm Cancellation"
+                        )}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              ) : subscription && subscription.status === "canceled" ? (
+                <Button onClick={handleReactivateSubscription} disabled={isActivating}>
+                  {isActivating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Reactivating...
+                    </>
+                  ) : (
+                    "Reactivate Subscription"
                   )}
-                </div>
-              )}
-            </div>
-            
-            <div className="p-6 sm:p-8">
-              <div className="flex flex-col sm:flex-row gap-8">
-                <div className="flex-1">
-                  <h2 className="text-xl font-semibold mb-4 text-white">BirdieBoard</h2>
-                  <div className="text-3xl font-bold mb-2 text-white">£2.99<span className="text-base font-normal text-white/70">/month</span></div>
-                  <p className="text-white/70 mb-6">Cancel anytime</p>
-                  
-                  <ul className="space-y-3">
-                    {[
-                      "Track unlimited rounds",
-                      "Access to detailed analytics",
-                      "Course leaderboards",
-                      "Advanced progress tracking",
-                      "Compare with other golfers",
-                      "Track handicap"
-                    ].map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2 text-white">
-                        <Check className="h-5 w-5 text-green-400 flex-shrink-0" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                
-                <div className="flex-1 flex flex-col justify-between text-white">
-                  <div>
-                    <h3 className="font-medium mb-3">Ready to start improving your game?</h3>
-                    <p className="text-white/80 mb-6">
-                      Join thousands of golfers who are using BirdieBoard to track their progress and improve their scores.
-                    </p>
-                  </div>
-                  
-                  <Button 
-                    onClick={handleCheckout} 
-                    disabled={isLoading || isVerifyingWithStripe} 
-                    size="lg"
-                    className="w-full bg-accent hover:bg-accent/90 text-white text-lg px-8 h-12 shadow-lg transition-all duration-300"
-                  >
-                    {isLoading || isVerifyingWithStripe ? (
+                </Button>
+              ) : null}
+              <Button onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
+            </CardFooter>
+          </Card>
+        </div>
+        <div className="space-y-3">
+          <h2 className="text-2xl font-bold">Billing Details</h2>
+          <p className="text-muted-foreground">
+            Update your billing details.
+          </p>
+          <Card>
+            <CardHeader>
+              <CardTitle>Payment Information</CardTitle>
+              <CardDescription>
+                {isSubscribed ? 'Update your payment information.' : 'Enter your payment information.'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="John Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" disabled={isCheckoutLoading}>
+                    {isCheckoutLoading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {isVerifyingWithStripe ? "Verifying subscription..." : "Setting up payment..."}
+                        Processing...
                       </>
                     ) : (
-                      <>
-                        <span className="mr-2">🏌️‍♂️</span>
-                        {subscription ? 
-                          (subscription.cancel_at_period_end ? "Renew Subscription" : "Update Subscription") 
-                          : "Subscribe Now"}
-                      </>
+                      isSubscribed ? "Update Payment Method" : "Subscribe"
                     )}
                   </Button>
-                  
-                  {isSubscriptionValid(subscription) && (
-                    <Button 
-                      onClick={() => navigate("/dashboard")} 
-                      className="mt-4 w-full bg-accent hover:bg-accent/90 text-white shadow-lg transition-all duration-300"
-                      size="lg"
-                    >
-                      Return to Dashboard
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default Checkout;
