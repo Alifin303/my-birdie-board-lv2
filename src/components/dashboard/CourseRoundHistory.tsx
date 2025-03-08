@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { ChevronUp, ChevronDown, Trash, Eye, ArrowLeft, Trophy } from "lucide-react";
+import { ChevronUp, ChevronDown, Trash, Eye, ArrowLeft, Trophy, PieChart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { 
@@ -20,6 +21,7 @@ import { RoundScorecard } from "./scorecard/RoundScorecard";
 import { CourseLeaderboard } from "./CourseLeaderboard";
 import { PotentialBestScore } from "./PotentialBestScore";
 import { Round } from "./types";
+import { calculateHoleStats } from "@/utils/statsCalculator";
 
 interface CourseRoundHistoryProps {
   userRounds: Round[] | undefined; 
@@ -27,6 +29,9 @@ interface CourseRoundHistoryProps {
   onBackClick: () => void;
   handicapIndex?: number;
 }
+
+// Define the types of golf scores
+type ScoreType = 'eagle' | 'birdie' | 'par' | 'bogey' | 'doubleBogey' | 'other';
 
 export const CourseRoundHistory = ({ 
   userRounds, 
@@ -129,6 +134,9 @@ export const CourseRoundHistory = ({
   };
   
   const stats = calculateCourseSpecificStats();
+  
+  // Calculate hole stats specific to this course
+  const courseHoleStats = calculateHoleStats(courseRounds);
   
   const handleDeleteRound = async () => {
     if (!deletingRoundId) return;
@@ -300,6 +308,29 @@ export const CourseRoundHistory = ({
           scoreType={scoreType}
           handicapIndex={handicapIndex}
         />
+      </div>
+      
+      {/* Course-specific performance stats */}
+      <div className="space-y-4 mb-6">
+        <div className="flex items-center gap-2">
+          <PieChart className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-medium">Course Performance</h3>
+        </div>
+        
+        <div className="bg-background rounded-lg border p-5">
+          <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
+            <StatsCard type="eagle" count={courseHoleStats.eagles} />
+            <StatsCard type="birdie" count={courseHoleStats.birdies} />
+            <StatsCard type="par" count={courseHoleStats.pars} />
+            <StatsCard type="bogey" count={courseHoleStats.bogeys} />
+            <StatsCard type="doubleBogey" count={courseHoleStats.doubleBogeys} />
+            <StatsCard type="other" count={courseHoleStats.others} />
+          </div>
+          
+          <div className="text-sm text-muted-foreground text-center mt-4">
+            Total holes played: {courseHoleStats.totalHoles}
+          </div>
+        </div>
       </div>
       
       <PotentialBestScore rounds={courseRounds} />
@@ -478,6 +509,42 @@ export const CourseRoundHistory = ({
         onOpenChange={setLeaderboardOpen}
         handicapIndex={handicapIndex}
       />
+    </div>
+  );
+};
+
+// Stats card component to display various score types
+interface StatsCardProps {
+  type: ScoreType;
+  count: number;
+}
+
+const StatsCard = ({ type, count }: StatsCardProps) => {
+  // Assign color based on score type
+  const getColorClass = () => {
+    switch(type) {
+      case 'eagle': return 'bg-blue-50 border-blue-200 text-blue-700';
+      case 'birdie': return 'bg-green-50 border-green-200 text-green-700';
+      case 'par': return 'bg-gray-50 border-gray-200 text-gray-700';
+      case 'bogey': return 'bg-orange-50 border-orange-200 text-orange-700';
+      case 'doubleBogey': return 'bg-red-50 border-red-200 text-red-700';
+      case 'other': return 'bg-purple-50 border-purple-200 text-purple-700';
+      default: return 'bg-gray-50 border-gray-200 text-gray-700';
+    }
+  };
+  
+  const getLabel = () => {
+    switch(type) {
+      case 'doubleBogey': return 'Double Bogey';
+      case 'other': return 'Other';
+      default: return type.charAt(0).toUpperCase() + type.slice(1);
+    }
+  };
+  
+  return (
+    <div className={`text-center p-3 rounded-lg ${getColorClass()} border shadow-sm transition-all hover:shadow-md`}>
+      <p className="text-2xl font-bold">{count}</p>
+      <p className="text-sm font-medium">{getLabel()}</p>
     </div>
   );
 };
