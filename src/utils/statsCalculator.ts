@@ -1,4 +1,3 @@
-
 interface Round {
   id: number;
   date: string;
@@ -304,9 +303,26 @@ export const calculateHoleStats = (rounds: Round[]) => {
   rounds.forEach(round => {
     console.log(`Processing round ${round.id} hole_scores:`, round.hole_scores);
     
-    if (round.hole_scores && typeof round.hole_scores === 'object') {
-      // Process each hole score entry
-      Object.values(round.hole_scores).forEach((holeScore: any) => {
+    if (round.hole_scores) {
+      let holeScoresArray: any[] = [];
+      
+      if (Array.isArray(round.hole_scores)) {
+        holeScoresArray = round.hole_scores;
+      } else if (typeof round.hole_scores === 'object') {
+        holeScoresArray = Object.values(round.hole_scores);
+      } else if (typeof round.hole_scores === 'string') {
+        try {
+          const parsed = JSON.parse(round.hole_scores);
+          holeScoresArray = Array.isArray(parsed) ? parsed : Object.values(parsed);
+        } catch (e) {
+          console.log(`Error parsing hole_scores string for round ${round.id}:`, e);
+          return;
+        }
+      }
+      
+      console.log(`Processed hole scores for round ${round.id}:`, holeScoresArray);
+      
+      holeScoresArray.forEach(holeScore => {
         if (!holeScore || typeof holeScore.strokes !== 'number' || typeof holeScore.par !== 'number') {
           console.log("Skipping invalid hole score:", holeScore);
           return;
