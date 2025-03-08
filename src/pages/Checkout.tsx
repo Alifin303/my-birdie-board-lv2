@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,7 +33,6 @@ export default function Checkout() {
         
         setUser(session.user);
         
-        // Check if user already has an active subscription
         if (session.user.id) {
           const { data: subscription, error: subError } = await supabase
             .from("customer_subscriptions")
@@ -48,7 +46,6 @@ export default function Checkout() {
             const isStillValid = currentPeriodEnd ? currentPeriodEnd > new Date() : false;
             
             if (isActive && isStillValid) {
-              // User already has a subscription, redirect to dashboard
               navigate("/dashboard");
               return;
             }
@@ -84,7 +81,6 @@ export default function Checkout() {
       setProcessingStatus("redirecting");
       setError(null);
       
-      // Get the user's profile information
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("first_name, last_name")
@@ -99,14 +95,14 @@ export default function Checkout() {
         ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() 
         : user.email;
       
-      // Construct request URL
       const origin = window.location.origin;
       const successUrl = `${origin}/auth/callback?subscription_status=success`;
       const cancelUrl = `${origin}/checkout?canceled=true`;
       
       console.log("Making checkout request with user:", user.id);
+      console.log("Success URL:", successUrl);
+      console.log("Cancel URL:", cancelUrl);
       
-      // Call the Supabase Edge Function to create a Stripe Checkout session
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: {
           user_id: user.id,
@@ -123,11 +119,10 @@ export default function Checkout() {
       }
       
       if (!data || !data.url) {
+        console.error("No checkout URL returned:", data);
         throw new Error("No checkout URL returned");
       }
       
-      // Redirect to Stripe Checkout
-      console.log("Redirecting to Stripe Checkout:", data.url);
       window.location.href = data.url;
       
     } catch (error) {

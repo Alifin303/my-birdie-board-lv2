@@ -16,13 +16,14 @@ serve(async (req) => {
   try {
     const { user_id, user_email, user_name, success_url, cancel_url } = await req.json();
     
-    // Log request for debugging
-    console.log(`Checkout request: ${JSON.stringify({
+    // Enhanced logging for debugging
+    console.log(`Checkout request received with parameters:`, {
       user_id,
       user_email,
-      success_url_provided: !!success_url,
-      cancel_url_provided: !!cancel_url
-    }, null, 2)}`);
+      user_name: user_name || 'Not provided',
+      success_url: success_url ? 'Provided' : 'Not provided',
+      cancel_url: cancel_url ? 'Provided' : 'Not provided'
+    });
 
     if (!user_id || !user_email) {
       return new Response(
@@ -35,18 +36,26 @@ serve(async (req) => {
     }
 
     // Initialize Stripe with the secret key
-    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
+    const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+    if (!stripeKey) {
+      console.error('STRIPE_SECRET_KEY not configured in environment');
+      throw new Error('Stripe configuration error');
+    }
+    
+    const stripe = new Stripe(stripeKey, {
       apiVersion: '2023-10-16',
       httpClient: Stripe.createFetchHttpClient(),
     });
 
     const origin = req.headers.get('origin');
-    const priceId = Deno.env.get('STRIPE_PRICE_ID');
+    console.log(`Request origin: ${origin}`);
     
+    const priceId = Deno.env.get('STRIPE_PRICE_ID');
     if (!priceId) {
       console.error('STRIPE_PRICE_ID environment variable is not set');
       throw new Error('Stripe configuration error');
     }
+    console.log(`Using Stripe price ID: ${priceId}`);
 
     // Use the origin from the request to build the success and cancel URLs
     const defaultSuccessUrl = `${origin}/auth/callback?subscription_status=success`;
@@ -56,6 +65,7 @@ serve(async (req) => {
     let customerId: string;
     
     // Search for existing customer
+    console.log(`Searching for existing Stripe customer with user_id: ${user_id}`);
     const { data: customers } = await stripe.customers.search({
       query: `metadata["user_id"]:"${user_id}"`,
     });
@@ -70,8 +80,10 @@ serve(async (req) => {
         email: user_email,
         name: user_name || undefined,
       });
+      console.log(`Updated customer information`);
     } else {
       // Create new customer
+      console.log(`Creating new Stripe customer for user: ${user_id}`);
       const customer = await stripe.customers.create({
         email: user_email,
         name: user_name || undefined,
@@ -84,6 +96,13 @@ serve(async (req) => {
     }
 
     // Create Checkout session
+    console.log(`Creating checkout session for customer: ${customerId}`);
+    const finalSuccessUrl = success_url || defaultSuccessUrl;
+    const finalCancelUrl = cancel_url || defaultCancelUrl;
+    
+    console.log(`Success URL: ${finalSuccessUrl}`);
+    console.log(`Cancel URL: ${finalCancelUrl}`);
+    
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
@@ -93,8 +112,8 @@ serve(async (req) => {
         },
       ],
       mode: 'subscription',
-      success_url: success_url || defaultSuccessUrl,
-      cancel_url: cancel_url || defaultCancelUrl,
+      success_url: finalSuccessUrl,
+      cancel_url: finalCancelUrl,
       subscription_data: {
         metadata: {
           user_id: user_id,

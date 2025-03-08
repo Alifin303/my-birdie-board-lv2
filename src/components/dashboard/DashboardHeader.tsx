@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
@@ -218,6 +219,8 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
           throw new Error("You must be logged in to subscribe");
         }
         
+        console.log("Creating checkout session for user:", session.user.id);
+        
         const { data, error } = await supabase.functions.invoke('create-checkout', {
           body: { 
             user_id: session.user.id,
@@ -230,13 +233,18 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
           }
         });
         
-        if (error) throw error;
-        
-        if (data?.url) {
-          window.location.href = data.url;
-        } else {
-          throw new Error("Failed to create checkout session");
+        if (error) {
+          console.error("Checkout creation error:", error);
+          throw new Error(error.message || "Failed to create checkout session");
         }
+        
+        if (!data || !data.url) {
+          console.error("No checkout URL returned:", data);
+          throw new Error("No checkout URL returned");
+        }
+        
+        console.log("Redirecting to Stripe Checkout:", data.url);
+        window.location.href = data.url;
       } 
       else if (action === "manage_subscription") {
         const { data: { session } } = await supabase.auth.getSession();
@@ -244,7 +252,7 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
           throw new Error("You must be logged in to manage your subscription");
         }
         
-        console.log("Calling create-portal-session with user ID:", session.user.id);
+        console.log("Creating portal session for user:", session.user.id);
         
         try {
           const { data, error } = await supabase.functions.invoke('create-portal-session', {
@@ -261,12 +269,13 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
             throw new Error(error.message || "Failed to create customer portal session");
           }
           
-          if (data?.url) {
-            console.log("Redirecting to URL:", data.url);
-            window.location.href = data.url;
-          } else {
+          if (!data || !data.url) {
+            console.error("No portal URL returned:", data);
             throw new Error("Failed to create customer portal session");
           }
+          
+          console.log("Redirecting to Stripe Portal:", data.url);
+          window.location.href = data.url;
         } catch (e) {
           console.error("Error invoking create-portal-session:", e);
           throw e;

@@ -16,11 +16,10 @@ serve(async (req) => {
   try {
     const { user_id, return_url } = await req.json();
     
-    // Log request parameters for debugging
-    console.log(`Request parameters: ${JSON.stringify({
-      user_id,
-      return_url_provided: !!return_url
-    }, null, 2)}\n`);
+    // Enhanced logging for debugging
+    console.log(`Portal session request for user ${user_id}`);
+    console.log(`Return URL provided: ${return_url || 'No, using default'}`);
+    console.log(`Origin header: ${req.headers.get('origin')}`);
 
     if (!user_id) {
       return new Response(
@@ -39,6 +38,7 @@ serve(async (req) => {
     });
 
     // Find customer by user ID
+    console.log(`Searching for Stripe customer with user_id: ${user_id}`);
     const { data: customers, error: searchError } = await stripe.customers.search({
       query: `metadata["user_id"]:"${user_id}"`,
     });
