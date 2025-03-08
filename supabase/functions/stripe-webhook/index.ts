@@ -4,21 +4,30 @@ import Stripe from 'https://esm.sh/stripe@12.16.0?target=deno';
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.33.1';
 
-// Define CORS headers for preflight requests
+// Define CORS headers for preflight requests - ensure we include stripe-signature
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 serve(async (req) => {
+  console.log(`Received ${req.method} request to stripe-webhook endpoint`);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling OPTIONS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     // Get the signature from the request header
     const signature = req.headers.get('stripe-signature');
+    
+    // Log request information for debugging
+    console.log('Request headers:', JSON.stringify(Object.fromEntries([...req.headers])));
+    console.log('Stripe-Signature header:', signature ? 'Present' : 'Missing');
+    
     if (!signature) {
       console.error('Missing stripe-signature header');
       return new Response(JSON.stringify({ error: 'Missing stripe-signature header' }), {
@@ -28,8 +37,17 @@ serve(async (req) => {
     }
 
     // Initialize Stripe with your secret key
-    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-      apiVersion: '2023-10-16', // Use your preferred API version
+    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
+    if (!stripeSecretKey) {
+      console.error('Missing STRIPE_SECRET_KEY environment variable');
+      return new Response(JSON.stringify({ error: 'Server configuration error: Missing STRIPE_SECRET_KEY' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+    
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: '2023-10-16',
       httpClient: Stripe.createFetchHttpClient(),
     });
 
@@ -37,10 +55,17 @@ serve(async (req) => {
     const payload = await req.text();
     
     // Verify the webhook signature using the async method
-    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SIGNING_SECRET') || '';
+    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SIGNING_SECRET');
+    if (!webhookSecret) {
+      console.error('Missing STRIPE_WEBHOOK_SIGNING_SECRET environment variable');
+      return new Response(JSON.stringify({ error: 'Server configuration error: Missing STRIPE_WEBHOOK_SIGNING_SECRET' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
     
     console.log('Received webhook with signature:', signature.substring(0, 10) + '...');
-    console.log('Using webhook secret:', webhookSecret ? 'Configured (not showing for security)' : 'Not configured');
+    console.log('Webhook secret is configured');
     
     let event;
     
@@ -59,15 +84,15 @@ serve(async (req) => {
       });
     }
     
-    console.log(`Received Stripe event: ${event.type}`);
+    console.log(`Successfully verified Stripe event: ${event.type}`);
 
     // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     if (!supabaseUrl || !supabaseKey) {
       console.error('Missing Supabase credentials');
-      return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+      return new Response(JSON.stringify({ error: 'Server configuration error: Missing Supabase credentials' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -472,6 +497,7 @@ serve(async (req) => {
     }
 
     // Return a successful response
+    console.log('Successfully processed webhook event');
     return new Response(JSON.stringify({ received: true }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
