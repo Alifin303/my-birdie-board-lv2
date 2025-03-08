@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { supabase, parseCourseName, updateCourseWithUserId } from "@/integrations/supabase/client";
 import { AddRoundModal } from "@/components/add-round/AddRoundModal";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
@@ -236,8 +236,15 @@ export default function Dashboard() {
     
     return (
       <div className="space-y-6 sm:space-y-8 golf-grass-pattern animate-fade-in">
-        <div className="mb-4">
-          <h1 className="text-lg sm:text-xl font-bold text-primary tracking-tight">
+        <div className="mb-4 flex items-center">
+          <Link to="/" className="inline-block">
+            <img 
+              src="/logo.png" 
+              alt="MyBirdieBoard Logo" 
+              className="h-16 w-auto object-contain" 
+            />
+          </Link>
+          <h1 className="text-lg sm:text-xl font-bold text-primary tracking-tight ml-2">
             MyBirdieBoard
           </h1>
         </div>
