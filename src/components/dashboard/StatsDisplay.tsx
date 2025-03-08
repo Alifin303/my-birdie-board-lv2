@@ -1,4 +1,3 @@
-
 import { CalendarDays, Trophy, Flag } from "lucide-react";
 import { Stats, Round } from "./types";
 import React, { useEffect } from "react";
@@ -25,7 +24,7 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
   
   if (roundsLoading || !userRounds) {
     return (
-      <div className="grid grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 p-4 sm:p-6">
         {[1, 2, 3].map((i) => (
           <div key={i} className="bg-background/50 animate-pulse h-24 rounded-lg border"></div>
         ))}
@@ -45,8 +44,6 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
     handicapIndex: handicapIndex
   });
   
-  // CRITICAL FIX: Ensure we consistently use the passed handicapIndex parameter
-  // rather than calculating a new one, to match with other components
   if (scoreType === 'net' && userRounds.length > 0) {
     const calculatedRounds = userRounds.map(round => {
       const netScore = Math.round(round.gross_score - handicapIndex);
@@ -96,45 +93,45 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
   }
   
   return (
-    <div key={roundsKey} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-      <div className="bg-background rounded-lg p-5 border">
+    <div key={roundsKey} className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 p-4 sm:p-6">
+      <div className="bg-background rounded-lg p-4 border">
         <div className="flex items-center justify-between">
-          <div className="space-y-1">
+          <div className="space-y-1 pr-2">
             <p className="text-sm font-medium text-muted-foreground">Rounds Played</p>
-            <p className="text-3xl font-bold">{stats.totalRounds}</p>
+            <p className="text-2xl sm:text-3xl font-bold truncate">{stats.totalRounds}</p>
           </div>
-          <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary/10">
-            <CalendarDays className="h-6 w-6 text-primary" />
+          <div className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 rounded-full flex items-center justify-center bg-primary/10">
+            <CalendarDays className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
           </div>
         </div>
       </div>
       
-      <div className="bg-background rounded-lg p-5 border">
+      <div className="bg-background rounded-lg p-4 border">
         <div className="flex items-center justify-between">
-          <div className="space-y-1">
+          <div className="space-y-1 pr-2">
             <p className="text-sm font-medium text-muted-foreground">Best Score</p>
-            <p className="text-3xl font-bold">
+            <p className="text-2xl sm:text-3xl font-bold truncate">
               {scoreType === 'gross' ? stats.bestGrossScore : stats.bestNetScore}
             </p>
           </div>
-          <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary/10">
-            <Trophy className="h-6 w-6 text-primary" />
+          <div className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 rounded-full flex items-center justify-center bg-primary/10">
+            <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
           </div>
         </div>
       </div>
       
-      <div className="bg-background rounded-lg p-5 border">
+      <div className="bg-background rounded-lg p-4 border">
         <div className="flex items-center justify-between">
-          <div className="space-y-1">
+          <div className="space-y-1 pr-2">
             <p className="text-sm font-medium text-muted-foreground">Best to Par</p>
-            <p className="text-3xl font-bold">
+            <p className="text-2xl sm:text-3xl font-bold truncate">
               {scoreType === 'gross' 
                 ? (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar 
                 : (stats.bestToParNet !== null && stats.bestToParNet > 0 ? '+' : '') + stats.bestToParNet}
             </p>
           </div>
-          <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary/10">
-            <Flag className="h-6 w-6 text-primary" />
+          <div className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 rounded-full flex items-center justify-center bg-primary/10">
+            <Flag className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
           </div>
         </div>
       </div>
@@ -201,7 +198,6 @@ export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTy
             <>
               <p className="text-sm font-medium text-muted-foreground">Handicap Index</p>
               <p className="text-5xl font-bold my-2">{displayHandicap}</p>
-              {/* Removed "Based on X rounds" text */}
             </>
           ) : (
             <>

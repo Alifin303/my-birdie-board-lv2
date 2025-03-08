@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams, Link } from "react-router-dom";
@@ -247,7 +248,8 @@ export default function Dashboard() {
         
         {!selectedCourseId && (
           <>
-            <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
+            {/* Updated stats display with better mobile padding */}
+            <div className="bg-white/90 rounded-lg shadow-md">
               <MainStats 
                 userRounds={userRounds}
                 roundsLoading={roundsLoading}
@@ -258,7 +260,6 @@ export default function Dashboard() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-              {/* Detailed stats on the left */}
               <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
                 <DetailedStats 
                   userRounds={userRounds}
@@ -266,7 +267,6 @@ export default function Dashboard() {
                 />
               </div>
               
-              {/* Handicap circle on the right */}
               <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6 flex flex-col items-center justify-center">
                 <HandicapCircle 
                   userRounds={userRounds}

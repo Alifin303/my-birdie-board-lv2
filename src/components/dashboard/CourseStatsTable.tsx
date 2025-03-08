@@ -123,7 +123,7 @@ export const CourseStatsTable = ({
       <table className="w-full">
         <thead>
           <tr className="border-b bg-secondary/20">
-            <th className="px-4 py-3 text-left text-sm font-medium text-primary">
+            <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-primary">
               <button
                 onClick={() => handleSort('courseName')}
                 className="flex items-center cursor-pointer hover:text-accent transition-colors"
@@ -132,30 +132,30 @@ export const CourseStatsTable = ({
                 {renderSortIndicator('courseName')}
               </button>
             </th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-primary">
+            <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-primary">
               <button
                 onClick={() => handleSort('roundsPlayed')}
                 className="flex items-center cursor-pointer hover:text-accent transition-colors"
               >
-                <span>Rounds Played</span>
+                <span>Rounds</span>
                 {renderSortIndicator('roundsPlayed')}
               </button>
             </th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-primary">
+            <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-primary">
               <button
                 onClick={() => handleSort('bestGrossScore')}
                 className="flex items-center cursor-pointer hover:text-accent transition-colors"
               >
-                <span>Best Score</span>
+                <span>Best</span>
                 {renderSortIndicator('bestGrossScore')}
               </button>
             </th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-primary">
+            <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-primary">
               <button
                 onClick={() => handleSort('bestToPar')}
                 className="flex items-center cursor-pointer hover:text-accent transition-colors"
               >
-                <span>Best to Par</span>
+                <span>Par</span>
                 {renderSortIndicator('bestToPar')}
               </button>
             </th>
@@ -164,38 +164,40 @@ export const CourseStatsTable = ({
         <tbody>
           {sortedStats.map((courseStat) => (
             <tr key={courseStat.courseId} className="border-b last:border-0 hover:bg-secondary/5 transition-colors">
-              <td className="px-4 py-3 text-sm font-medium">
+              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium">
                 <button 
-                  className="hover:underline text-primary flex items-center gap-1.5"
+                  className="hover:underline text-primary flex items-center gap-1"
                   onClick={() => onCourseClick(courseStat.courseId)}
                 >
-                  <Flag className="h-4 w-4 text-primary" />
-                  {courseStat.clubName !== courseStat.courseName 
-                    ? `${courseStat.clubName} - ${courseStat.courseName}`
-                    : courseStat.courseName}
+                  <Flag className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
+                  <span className="truncate">
+                    {courseStat.clubName !== courseStat.courseName 
+                      ? `${courseStat.clubName} - ${courseStat.courseName}`
+                      : courseStat.courseName}
+                  </span>
                 </button>
-                <p className="text-xs text-muted-foreground mt-0.5 pl-5">
+                <p className="text-xs text-muted-foreground mt-0.5 pl-4 truncate">
                   {courseStat.city}{courseStat.state ? `, ${courseStat.state}` : ''}
                 </p>
               </td>
-              <td className="px-4 py-3 text-sm">
-                <div className="bg-secondary/20 rounded-full w-8 h-8 flex items-center justify-center font-medium text-primary">
+              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">
+                <div className="bg-secondary/20 rounded-full w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center font-medium text-primary">
                   {courseStat.roundsPlayed}
                 </div>
               </td>
-              <td className="px-4 py-3 text-sm font-medium">
-                <div className="px-2 py-1 rounded bg-accent/10 inline-block min-w-[3rem] text-center">
+              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium">
+                <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded bg-accent/10 inline-block min-w-[2.5rem] text-center">
                   {scoreType === 'gross' 
                     ? courseStat.bestGrossScore 
                     : courseStat.bestNetScore}
                 </div>
               </td>
-              <td className="px-4 py-3 text-sm font-medium">
-                <div className={`px-2 py-1 rounded ${
+              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium">
+                <div className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded ${
                   (scoreType === 'gross' ? courseStat.bestToPar : courseStat.bestToParNet) <= 0 
                   ? 'bg-success/20 text-success' 
                   : 'bg-destructive/10 text-destructive'
-                } inline-block min-w-[3rem] text-center`}>
+                } inline-block min-w-[2.5rem] text-center`}>
                   {scoreType === 'gross' 
                     ? (courseStat.bestToPar > 0 ? '+' : '') + courseStat.bestToPar
                     : courseStat.bestToParNet !== null 
