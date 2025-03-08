@@ -142,12 +142,21 @@ export default function Checkout() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary to-primary-foreground/30 flex flex-col">
-      <div className="container mx-auto px-4 py-8 flex justify-center">
+    <div 
+      className="min-h-screen flex flex-col bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
+        backgroundColor: "#2C4A3B", // Fallback color if image fails to load
+      }}
+    >
+      {/* Dark overlay div */}
+      <div className="absolute inset-0 bg-black opacity-20 z-0"></div>
+      
+      <div className="container mx-auto px-4 py-8 flex justify-center relative z-10">
         <Logo />
       </div>
       
-      <div className="flex-1 flex justify-center items-center px-4 py-8">
+      <div className="flex-1 flex justify-center items-center px-4 py-8 relative z-10">
         <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-xl p-6 sm:p-8 max-w-2xl w-full">
           <div className="text-center mb-6">
             <h1 className="text-3xl font-bold text-primary mb-3">Join MyBirdieBoard</h1>
