@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -149,9 +150,9 @@ export default function Checkout() {
       <div className="flex-1 flex justify-center items-center px-4 py-8">
         <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-xl p-6 sm:p-8 max-w-2xl w-full">
           <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-primary mb-3">Join MyBirdieBoard Premium</h1>
+            <h1 className="text-3xl font-bold text-primary mb-3">Join BirdieBoard</h1>
             <p className="text-muted-foreground">
-              Unlock all features and take your golf game to the next level
+              Stop guessing your way to better golf - use BirdieBoard
             </p>
           </div>
           
@@ -165,36 +166,45 @@ export default function Checkout() {
             <div className="bg-accent/10 rounded-lg p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-accent mb-1">Pro Membership</h2>
-                  <p className="text-xl font-semibold">$9.99 / month</p>
-                </div>
-                <div className="bg-accent/20 text-accent font-semibold rounded-full px-3 py-1 text-sm">
-                  Best Value
+                  <h2 className="text-2xl font-bold text-accent mb-1">BirdieBoard</h2>
+                  <p className="text-xl font-semibold">£2.99 / month</p>
+                  <p className="text-sm text-muted-foreground">Cancel anytime</p>
                 </div>
               </div>
               
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-accent mr-2" />
-                  <span>Round tracking with advanced stats</span>
+                  <span>Track unlimited rounds</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-accent mr-2" />
-                  <span>Official handicap calculation</span>
+                  <span>Access to detailed analytics</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-accent mr-2" />
-                  <span>Performance analytics and trends</span>
+                  <span>Course leaderboards</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-accent mr-2" />
-                  <span>Course leaderboards with friends</span>
+                  <span>Advanced progress tracking</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-accent mr-2" />
-                  <span>Unlimited round storage</span>
+                  <span>Compare with other golfers</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-accent mr-2" />
+                  <span>Track handicap</span>
                 </li>
               </ul>
+              
+              <div className="mb-6">
+                <p className="text-center font-medium mb-2">Ready to start improving your game?</p>
+                <p className="text-center text-sm text-muted-foreground">
+                  Join thousands of golfers who are using BirdieBoard to track their progress and improve their scores.
+                </p>
+              </div>
               
               <Button 
                 onClick={handleCreateCheckout}
