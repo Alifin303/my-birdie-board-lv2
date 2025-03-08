@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -153,7 +152,13 @@ export default function Checkout() {
       <div className="absolute inset-0 bg-black opacity-20 z-0"></div>
       
       <div className="container mx-auto px-4 py-8 flex justify-center relative z-10">
-        <Logo />
+        <Link to="/" className="flex items-center">
+          <img 
+            src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" 
+            alt="MyBirdieBoard Logo" 
+            className="h-32 w-auto object-contain" 
+          />
+        </Link>
       </div>
       
       <div className="flex-1 flex justify-center items-center px-4 py-8 relative z-10">
@@ -235,12 +240,6 @@ export default function Checkout() {
               
               <p className="text-center text-sm text-muted-foreground mt-3">
                 Secure payment via Stripe. Cancel anytime.
-              </p>
-            </div>
-            
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                By subscribing, you agree to our <a href="#" className="text-primary hover:underline">Terms of Service</a> and <a href="#" className="text-primary hover:underline">Privacy Policy</a>.
               </p>
             </div>
           </div>
