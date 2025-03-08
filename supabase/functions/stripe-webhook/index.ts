@@ -157,6 +157,17 @@ serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
+    } else {
+      // THIS CODE SHOULD NEVER RUN because we check for headers earlier
+      // But adding as an extra safeguard
+      console.error('No valid authentication method (signature or auth header)');
+      return new Response(JSON.stringify({ 
+        error: 'Missing required authentication headers',
+        message: 'The webhook requires either a stripe-signature or authorization header'
+      }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
     
     // Make sure we have a valid event by this point
