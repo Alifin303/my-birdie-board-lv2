@@ -62,7 +62,7 @@ serve(async (req) => {
     const customer = customers[0];
     console.log(`Found customer: ${customer.id}`);
 
-    // IMPORTANT FIX: Use Stripe's portal configuration instead of hardcoded URL
+    // Create a billing portal session
     const session = await stripe.billingPortal.sessions.create({
       customer: customer.id,
       return_url: return_url || `${req.headers.get('origin')}/dashboard`,

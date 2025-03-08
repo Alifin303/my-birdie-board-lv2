@@ -221,8 +221,12 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
         const { data, error } = await supabase.functions.invoke('create-checkout', {
           body: { 
             user_id: session.user.id,
-            email: session.user.email,
-            return_url: window.location.origin + '/dashboard'
+            user_email: session.user.email,
+            user_name: profileData?.first_name && profileData?.last_name 
+              ? `${profileData.first_name} ${profileData.last_name}` 
+              : undefined,
+            success_url: window.location.origin + '/auth/callback?subscription_status=success',
+            cancel_url: window.location.origin + '/checkout?canceled=true'
           }
         });
         
@@ -259,24 +263,7 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
           
           if (data?.url) {
             console.log("Redirecting to URL:", data.url);
-            
-            if (data.directPortal) {
-              toast({
-                title: "Opening Stripe Billing Portal",
-                description: "Redirecting to your Stripe billing portal...",
-                variant: "default",
-              });
-            } else if (data.fallback) {
-              toast({
-                title: "Portal Access Issue",
-                description: data.message || "Opening subscription details in Stripe Dashboard instead.",
-                variant: "default",
-              });
-            }
-            
-            window.open(data.url, '_blank');
-          } else if (data?.error) {
-            throw new Error(data.error);
+            window.location.href = data.url;
           } else {
             throw new Error("Failed to create customer portal session");
           }
@@ -682,4 +669,3 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
     </>
   );
 };
-
