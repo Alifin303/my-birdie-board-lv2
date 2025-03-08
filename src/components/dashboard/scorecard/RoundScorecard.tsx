@@ -220,9 +220,9 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl bg-background">
-        <DialogHeader className="golf-header rounded-t-lg px-6 py-4 -mx-6 -mt-6 mb-2">
+    <Dialog open={isOpen} onOpenChange={onOpenChange} className="round-scorecard-dialog">
+      <DialogContent className="max-w-3xl bg-background round-scorecard-content overflow-y-auto sm:max-h-[90vh]">
+        <DialogHeader className="golf-header rounded-t-lg px-6 py-4 -mx-6 -mt-6 mb-2 sticky top-0 z-10">
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Flag className="h-5 w-5" /> Round Scorecard
           </DialogTitle>
@@ -239,37 +239,39 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
           </DialogClose>
         </DialogHeader>
 
-        <Card className="border-secondary/30 shadow-md">
-          <CardContent className="pt-6">
-            <ScorecardHeader 
-              round={round}
-              isEditing={isEditing}
-              setIsEditing={setIsEditing}
-              roundDate={roundDate}
-              calendarOpen={calendarOpen}
-              setCalendarOpen={setCalendarOpen}
-              handleDateSelect={handleDateSelect}
-              isSaving={isSaving}
-              handleSaveChanges={handleSaveChanges}
-            />
+        <div className="overflow-y-auto">
+          <Card className="border-secondary/30 shadow-md">
+            <CardContent className="pt-6">
+              <ScorecardHeader 
+                round={round}
+                isEditing={isEditing}
+                setIsEditing={setIsEditing}
+                roundDate={roundDate}
+                calendarOpen={calendarOpen}
+                setCalendarOpen={setCalendarOpen}
+                handleDateSelect={handleDateSelect}
+                isSaving={isSaving}
+                handleSaveChanges={handleSaveChanges}
+              />
 
-            {handicapIndex > 0 && !isEditing && (
-              <div className="mt-4 mb-2 flex justify-end">
-                <button 
-                  onClick={toggleNetScores}
-                  className={`px-3 py-1 text-sm rounded-full flex items-center gap-1.5 transition-colors ${showNet ? 'bg-primary text-primary-foreground' : 'bg-secondary hover:bg-secondary/80'}`}
-                >
-                  <Calendar className="h-3.5 w-3.5" />
-                  {showNet ? 'Show Gross Score' : 'Show Net Score'}
-                </button>
-              </div>
-            )}
+              {handicapIndex > 0 && !isEditing && (
+                <div className="mt-4 mb-2 flex justify-end">
+                  <button 
+                    onClick={toggleNetScores}
+                    className={`px-3 py-1 text-sm rounded-full flex items-center gap-1.5 transition-colors ${showNet ? 'bg-primary text-primary-foreground' : 'bg-secondary hover:bg-secondary/80'}`}
+                  >
+                    <Calendar className="h-3.5 w-3.5" />
+                    {showNet ? 'Show Gross Score' : 'Show Net Score'}
+                  </button>
+                </div>
+              )}
 
-            <Separator className="my-4" />
-            
-            {renderHoleScores()}
-          </CardContent>
-        </Card>
+              <Separator className="my-4" />
+              
+              {renderHoleScores()}
+            </CardContent>
+          </Card>
+        </div>
       </DialogContent>
     </Dialog>
   );

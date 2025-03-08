@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -180,6 +179,19 @@
   /* Ensure dialog content is properly sized for mobile */
   [role="dialog"] {
     @apply p-3 !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+  
+  /* Fix for round scorecard dialog on mobile */
+  .round-scorecard-dialog {
+    overflow-y: auto !important;
+    max-height: 100% !important;
+  }
+  
+  .round-scorecard-content {
+    max-height: 100% !important;
+    overflow-y: auto !important;
   }
   
   /* Improve table readability on mobile */
