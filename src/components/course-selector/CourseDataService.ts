@@ -1,61 +1,47 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { parseCourseName } from "@/integrations/supabase/client";
 
-export async function searchCourses(query: string) {
-  try {
+class CourseDataService {
+  async fetchCoursesByName(searchTerm: string) {
     const { data, error } = await supabase
-      .from('courses')
-      .select('*')
-      .ilike('name', `%${query}%`);
-      
-    if (error) throw error;
-    
-    return data || [];
-  } catch (error) {
-    console.error('Error searching courses:', error);
-    return [];
-  }
-}
+      .from("courses")
+      .select("*")
+      .ilike("name", `%${searchTerm}%`)
+      .order("name", { ascending: true });
 
-export async function getCourseById(courseId: number) {
-  if (!courseId) return null;
-  
-  try {
+    return { data, error };
+  }
+
+  async fetchCourseById(courseId: number) {
     const { data, error } = await supabase
-      .from('courses')
-      .select('*')
-      .eq('id', courseId)
+      .from("courses")
+      .select("*")
+      .eq("id", courseId)
       .single();
-      
-    if (error) throw error;
-    
-    return data;
-  } catch (error) {
-    console.error('Error fetching course by ID:', error);
-    return null;
+
+    return { data, error };
+  }
+
+  async fetchTeesByCourseId(courseId: number) {
+    const { data, error } = await supabase
+      .from("course_tees")
+      .select("*")
+      .eq("course_id", courseId)
+      .order("name", { ascending: true });
+
+    return { data, error };
+  }
+
+  async searchCourses(searchTerm: string) {
+    const { data, error } = await supabase
+      .from("courses")
+      .select("*")
+      .ilike("name", `%${searchTerm}%`)
+      .order("name", { ascending: true });
+
+    return { data, error };
   }
 }
 
-export const getCourseMetadata = async (courseId: number) => {
-  try {
-    const course = await getCourseById(courseId);
-
-    if (!course) {
-      console.log(`Course with id ${courseId} not found`);
-      return null;
-    }
-
-    const { clubName, courseName } = parseCourseName(course.name);
-
-    return {
-      id: course.id,
-      name: courseName,
-      clubName: clubName,
-      city: course.city,
-      state: course.state,
-    };
-  } catch (error) {
-    console.error("Error fetching course metadata:", error);
-    return null;
-  }
-};
+export default new CourseDataService();

@@ -392,7 +392,11 @@ const Checkout = () => {
               </Table>
             </CardContent>
             <CardFooter className="flex justify-between">
-              {isSubscribed && subscription && (subscription.status === "incomplete" || subscription.status === "past_due" || subscription.status === "active") ? (
+              {isSubscribed && subscription && (
+                subscription.status === "incomplete" || 
+                subscription.status === "past_due" || 
+                subscription.status === "active"
+              ) ? (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="destructive" disabled={isCancelling}>
