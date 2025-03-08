@@ -4,7 +4,7 @@ import Stripe from 'https://esm.sh/stripe@12.16.0?target=deno';
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.33.1';
 
-// Define CORS headers for preflight requests
+// Define CORS headers
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
@@ -12,7 +12,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Log the function invocation
   console.log(`Stripe webhook function invoked at ${new Date().toISOString()}`);
   console.log(`Request URL: ${req.url}`);
   console.log(`Request method: ${req.method}`);
@@ -21,14 +20,11 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     console.log('Handling OPTIONS preflight request');
     return new Response(null, { 
-      headers: {
-        ...corsHeaders,
-        'Access-Control-Max-Age': '86400', // 24 hours caching for preflight
-      } 
+      headers: corsHeaders 
     });
   }
 
-  // Only accept POST requests
+  // Only accept POST requests for the actual webhook
   if (req.method !== 'POST') {
     console.error(`Invalid method: ${req.method}. Webhook only accepts POST requests.`);
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
@@ -51,10 +47,7 @@ serve(async (req) => {
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
     if (!stripeSecretKey) {
       console.error('Missing STRIPE_SECRET_KEY environment variable');
-      return new Response(JSON.stringify({ 
-        error: 'Server configuration error: Missing STRIPE_SECRET_KEY',
-        headers_received: headerEntries.map(([key]) => key)
-      }), {
+      return new Response(JSON.stringify({ error: 'Server configuration error' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -76,9 +69,7 @@ serve(async (req) => {
       
       if (!webhookSecret) {
         console.error('Missing STRIPE_WEBHOOK_SIGNING_SECRET environment variable');
-        return new Response(JSON.stringify({ 
-          error: 'Server configuration error: Missing STRIPE_WEBHOOK_SIGNING_SECRET'
-        }), {
+        return new Response(JSON.stringify({ error: 'Server configuration error' }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
@@ -93,24 +84,20 @@ serve(async (req) => {
         console.log(`Successfully verified Stripe event: ${event.type}`);
       } catch (err) {
         console.error(`Signature verification failed: ${err.message}`);
-        return new Response(JSON.stringify({ 
-          error: `Webhook signature verification failed: ${err.message}`
-        }), {
+        return new Response(JSON.stringify({ error: `Webhook signature verification failed` }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
     } else {
-      // If no signature, try parsing as JSON
+      // If no signature, try parsing as JSON - not recommended for production
       console.log('No stripe-signature header, parsing payload as JSON');
       try {
         event = JSON.parse(payload);
         console.log(`Parsed event type: ${event.type || 'Unknown type'}`);
       } catch (err) {
         console.error(`Error parsing JSON payload: ${err.message}`);
-        return new Response(JSON.stringify({ 
-          error: `Invalid JSON payload: ${err.message}`
-        }), {
+        return new Response(JSON.stringify({ error: `Invalid JSON payload` }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
@@ -123,7 +110,7 @@ serve(async (req) => {
     
     if (!supabaseUrl || !supabaseKey) {
       console.error('Missing Supabase credentials');
-      return new Response(JSON.stringify({ error: 'Server configuration error: Missing Supabase credentials' }), {
+      return new Response(JSON.stringify({ error: 'Server configuration error' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -156,12 +143,9 @@ serve(async (req) => {
         console.log(`Unhandled event type: ${event.type}`);
     }
 
-    // Return a successful response
+    // Return a successful response to acknowledge receipt
     console.log('Successfully processed webhook event');
-    return new Response(JSON.stringify({ 
-      received: true, 
-      event_type: event.type
-    }), {
+    return new Response(JSON.stringify({ received: true }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
@@ -169,10 +153,7 @@ serve(async (req) => {
   } catch (err) {
     console.error(`Error processing webhook: ${err.message}`);
     console.error(`Stack trace: ${err.stack}`);
-    return new Response(JSON.stringify({ 
-      error: err.message,
-      stack: err.stack
-    }), {
+    return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
