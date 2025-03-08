@@ -56,11 +56,6 @@ export default {
 				card: {
 					DEFAULT: '#FFFFFF',
 					foreground: '#4A5568'
-				},
-				// Add a new light blue color
-				lightBlue: {
-					DEFAULT: '#D3E4FD',  // Soft light blue
-					foreground: '#333333'
 				}
 			},
 			borderRadius: {

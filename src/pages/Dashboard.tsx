@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams, Link } from "react-router-dom";
@@ -235,7 +236,7 @@ export default function Dashboard() {
     });
     
     return (
-      <div className="space-y-6 sm:space-y-8 bg-lightBlue animate-fade-in p-4 sm:p-8 rounded-lg">
+      <div className="space-y-6 sm:space-y-8 golf-grass-pattern animate-fade-in">
         <div className="mb-4">
           <Link to="/" className="inline-block">
             <img 
@@ -300,7 +301,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="container mx-auto py-4 sm:py-8 px-2 sm:px-4 dashboard-container min-h-screen">
+    <div className="container mx-auto py-4 sm:py-8 px-2 sm:px-4">
       {renderDashboard()}
 
       <AddRoundModal 
