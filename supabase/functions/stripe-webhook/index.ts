@@ -12,13 +12,8 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  console.log(`Stripe webhook function invoked at ${new Date().toISOString()}`);
-  console.log(`Request URL: ${req.url}`);
-  console.log(`Request method: ${req.method}`);
-  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    console.log('Handling OPTIONS preflight request');
     return new Response(null, { 
       headers: corsHeaders 
     });
@@ -26,7 +21,6 @@ serve(async (req) => {
 
   // Return a friendly message for GET requests (browser testing)
   if (req.method === 'GET') {
-    console.log('Handling GET request (likely browser test)');
     return new Response(JSON.stringify({
       status: "online",
       message: "Stripe webhook endpoint is active. This endpoint expects POST requests from Stripe with proper signature headers, not GET requests from a browser."
@@ -36,9 +30,8 @@ serve(async (req) => {
     });
   }
 
-  // Only process actual webhook data for POST requests
+  // Only process webhook data for POST requests
   if (req.method !== 'POST') {
-    console.error(`Invalid method: ${req.method}. Webhook only accepts POST and GET requests.`);
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -46,14 +39,19 @@ serve(async (req) => {
   }
 
   try {
-    // Log all headers for debugging
-    const headerEntries = Array.from(req.headers.entries());
-    console.log('Request headers:', JSON.stringify(headerEntries));
+    // Get the signature from the headers
+    const signature = req.headers.get('stripe-signature');
     
-    // Get the payload
+    if (!signature) {
+      console.error('Missing stripe-signature header');
+      return new Response(JSON.stringify({ error: 'Missing stripe-signature header' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+    
+    // Get the request body as text
     const payload = await req.text();
-    console.log('Webhook payload size:', payload.length, 'bytes');
-    console.log('Payload preview:', payload.substring(0, 200) + '...');
     
     // Initialize Stripe
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
@@ -70,50 +68,30 @@ serve(async (req) => {
       httpClient: Stripe.createFetchHttpClient(),
     });
     
-    // Parse the event data
-    let event;
-    const signatureHeader = req.headers.get('stripe-signature');
+    // Get webhook signing secret
+    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SIGNING_SECRET');
+    if (!webhookSecret) {
+      console.error('Missing STRIPE_WEBHOOK_SIGNING_SECRET environment variable');
+      return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
     
-    // Verify with stripe-signature if present
-    if (signatureHeader) {
-      console.log('Verifying webhook with stripe-signature header');
-      const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SIGNING_SECRET');
-      
-      if (!webhookSecret) {
-        console.error('Missing STRIPE_WEBHOOK_SIGNING_SECRET environment variable');
-        return new Response(JSON.stringify({ error: 'Server configuration error' }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-      
-      try {
-        event = await stripe.webhooks.constructEventAsync(
-          payload, 
-          signatureHeader, 
-          webhookSecret
-        );
-        console.log(`Successfully verified Stripe event: ${event.type}`);
-      } catch (err) {
-        console.error(`Signature verification failed: ${err.message}`);
-        return new Response(JSON.stringify({ error: `Webhook signature verification failed` }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-    } else {
-      // If no signature, try parsing as JSON - not recommended for production
-      console.log('No stripe-signature header, parsing payload as JSON');
-      try {
-        event = JSON.parse(payload);
-        console.log(`Parsed event type: ${event.type || 'Unknown type'}`);
-      } catch (err) {
-        console.error(`Error parsing JSON payload: ${err.message}`);
-        return new Response(JSON.stringify({ error: `Invalid JSON payload` }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
+    // Verify the event
+    let event;
+    try {
+      event = await stripe.webhooks.constructEventAsync(
+        payload, 
+        signature, 
+        webhookSecret
+      );
+    } catch (err) {
+      console.error(`Webhook signature verification failed: ${err.message}`);
+      return new Response(JSON.stringify({ error: 'Webhook signature verification failed' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
     
     // Initialize Supabase client
@@ -129,13 +107,13 @@ serve(async (req) => {
     }
     
     const supabase = createClient(supabaseUrl, supabaseKey);
-    console.log('Supabase client initialized successfully');
-
-    // Process the event
+    
+    // Handle the event
+    console.log(`Processing event type: ${event.type}`);
+    
     switch (event.type) {
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
-      case 'customer.subscription.pending':
         await handleSubscriptionChange(event, supabase);
         break;
         
@@ -155,8 +133,7 @@ serve(async (req) => {
         console.log(`Unhandled event type: ${event.type}`);
     }
 
-    // Return a successful response to acknowledge receipt
-    console.log('Successfully processed webhook event');
+    // Return a successful response
     return new Response(JSON.stringify({ received: true }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -164,7 +141,6 @@ serve(async (req) => {
     
   } catch (err) {
     console.error(`Error processing webhook: ${err.message}`);
-    console.error(`Stack trace: ${err.stack}`);
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -179,11 +155,6 @@ async function handleSubscriptionChange(event, supabase) {
   const customerId = subscription.customer;
   const userId = subscription.metadata?.user_id;
   const status = subscription.status;
-  
-  // Get additional subscription details
-  const cancelAtPeriodEnd = subscription.cancel_at_period_end || false;
-  const currentPeriodEnd = subscription.current_period_end ? 
-    new Date(subscription.current_period_end * 1000).toISOString() : null;
   
   console.log(`Processing subscription: ${subscriptionId}, status: ${status}, for user: ${userId}`);
   
@@ -202,13 +173,10 @@ async function handleSubscriptionChange(event, supabase) {
     
     if (existingSubscription) {
       // Update existing subscription
-      console.log(`Updating existing subscription: ${subscriptionId}`);
       const { error: updateError } = await supabase
         .from('customer_subscriptions')
         .update({
           status: status,
-          cancel_at_period_end: cancelAtPeriodEnd,
-          current_period_end: currentPeriodEnd,
           updated_at: new Date().toISOString()
         })
         .eq('subscription_id', subscriptionId);
@@ -221,15 +189,11 @@ async function handleSubscriptionChange(event, supabase) {
       console.log(`Successfully updated subscription: ${subscriptionId}`);
     } else if (userId) {
       // Insert new subscription
-      console.log(`Creating new subscription record for user: ${userId}`);
-      
       const subscriptionData = {
         subscription_id: subscriptionId,
         customer_id: customerId,
         status: status,
         user_id: userId,
-        cancel_at_period_end: cancelAtPeriodEnd,
-        current_period_end: currentPeriodEnd,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -265,10 +229,7 @@ async function handleSubscriptionDeletion(event, supabase) {
       .from('customer_subscriptions')
       .update({ 
         status: 'canceled', 
-        updated_at: new Date().toISOString(),
-        cancel_at_period_end: true,
-        current_period_end: deletedSubscription.current_period_end ? 
-          new Date(deletedSubscription.current_period_end * 1000).toISOString() : null
+        updated_at: new Date().toISOString()
       })
       .eq('subscription_id', deletedSubscription.id);
       
@@ -287,55 +248,60 @@ async function handleSubscriptionDeletion(event, supabase) {
 // Handle successful payment
 async function handlePaymentSuccess(event, supabase, stripe) {
   const invoiceObject = event.data.object;
-  console.log(`Processing invoice: ${invoiceObject.id}, subscription: ${invoiceObject.subscription}`);
+  console.log(`Processing successful payment invoice: ${invoiceObject.id}`);
   
   if (invoiceObject.subscription) {
     try {
-      // Get the subscription details
+      // Get the subscription from Stripe
       const stripeSubscription = await stripe.subscriptions.retrieve(invoiceObject.subscription);
-      const subId = stripeSubscription.id;
-      const status = 'active'; // Force status to active for successful payments
       
-      console.log(`Retrieved subscription after successful payment: ${subId}`);
-      
-      // Update the subscription status to active in our database
+      // Update the subscription status in our database
       const { error: paymentUpdateError } = await supabase
         .from('customer_subscriptions')
         .update({ 
-          status: status,
+          status: stripeSubscription.status,
           updated_at: new Date().toISOString()
         })
-        .eq('subscription_id', subId);
+        .eq('subscription_id', stripeSubscription.id);
         
       if (paymentUpdateError) {
         console.error('Error updating subscription after successful payment:', paymentUpdateError);
         throw paymentUpdateError;
       }
       
-      console.log(`Successfully updated subscription ${subId} to active status after payment`);
+      console.log(`Successfully updated subscription ${stripeSubscription.id} status after payment`);
     } catch (err) {
       console.error(`Error updating subscription after payment: ${err.message}`);
       throw err;
     }
-  } else {
-    console.log('Invoice has no subscription, skipping');
   }
 }
 
 // Handle failed payment
 async function handlePaymentFailure(event, supabase, stripe) {
   const failedInvoice = event.data.object;
-  console.log(`Processing failed payment invoice: ${failedInvoice.id}, subscription: ${failedInvoice.subscription}`);
+  console.log(`Processing failed payment invoice: ${failedInvoice.id}`);
   
   if (failedInvoice.subscription) {
     try {
-      // Get the subscription details from Stripe
+      // Get the subscription from Stripe
       const stripeSubscription = await stripe.subscriptions.retrieve(failedInvoice.subscription);
-      console.log(`Stripe subscription status: ${stripeSubscription.status}`);
       
-      // We don't automatically update the subscription status on payment failure
-      // as the subscription may still be active or in a grace period
-      console.log(`Recorded payment failure for subscription: ${failedInvoice.subscription}`);
+      // Update the subscription status in our database
+      const { error: paymentFailureError } = await supabase
+        .from('customer_subscriptions')
+        .update({ 
+          status: stripeSubscription.status,
+          updated_at: new Date().toISOString()
+        })
+        .eq('subscription_id', stripeSubscription.id);
+        
+      if (paymentFailureError) {
+        console.error('Error updating subscription after failed payment:', paymentFailureError);
+        throw paymentFailureError;
+      }
+      
+      console.log(`Successfully updated subscription ${stripeSubscription.id} status after failed payment`);
     } catch (err) {
       console.error(`Error processing failed payment: ${err.message}`);
       throw err;
