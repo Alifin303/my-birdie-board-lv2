@@ -5,6 +5,7 @@ import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
@@ -29,9 +30,13 @@ const Index = () => {
         <header className="absolute top-0 left-0 right-0 z-10">
           <div className="container mx-auto px-4 py-2">
             <nav className="flex items-center justify-between">
-              <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">
-                MyBirdieBoard
-              </h1>
+              <Link to="/" className="flex items-center">
+                <img 
+                  src="/logo.png" 
+                  alt="MyBirdieBoard Logo" 
+                  className="h-12 w-auto object-contain"
+                />
+              </Link>
               <Button 
                 onClick={() => setShowLoginDialog(true)}
                 variant="ghost" 
