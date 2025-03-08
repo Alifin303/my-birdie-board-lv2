@@ -184,10 +184,6 @@
   }
   
   /* Fix for round scorecard dialog on mobile */
-  .round-scorecard-dialog {
-    overflow-y: auto !important;
-    max-height: 100% !important;
-  }
   
   .round-scorecard-content {
     max-height: 100% !important;

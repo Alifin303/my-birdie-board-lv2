@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -220,7 +219,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange} className="round-scorecard-dialog">
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl bg-background round-scorecard-content overflow-y-auto sm:max-h-[90vh]">
         <DialogHeader className="golf-header rounded-t-lg px-6 py-4 -mx-6 -mt-6 mb-2 sticky top-0 z-10">
           <DialogTitle className="flex items-center gap-2 text-xl">
