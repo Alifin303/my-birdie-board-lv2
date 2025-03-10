@@ -10,6 +10,7 @@ import AuthConfirm from "@/pages/AuthConfirm";
 import Checkout from "@/pages/Checkout";
 import NotFound from "@/pages/NotFound";
 import Dashboard from "@/pages/Dashboard";
+import Admin from "@/pages/Admin";
 import { Toaster } from "@/components/ui/toaster";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ResetPassword from "@/pages/ResetPassword";
@@ -101,6 +102,20 @@ function App() {
                       <ProtectedRoute>
                         <Dashboard />
                       </ProtectedRoute>
+                    </>
+                  }
+                />
+                
+                {/* Admin route - no protection here because we handle it within the component */}
+                <Route
+                  path="/admin"
+                  element={
+                    <>
+                      <Helmet>
+                        <title>Admin Dashboard | MyBirdieBoard</title>
+                        <meta name="robots" content="noindex, nofollow" />
+                      </Helmet>
+                      <Admin />
                     </>
                   }
                 />

@@ -8,6 +8,7 @@ Disallow: /checkout
 Disallow: /auth/callback
 Disallow: /auth/confirm
 Disallow: /auth/reset-password
+Disallow: /admin
 
 Sitemap: https://mybirdieboard.com/sitemap.xml
 
@@ -18,3 +19,4 @@ Disallow: /lovable-uploads/
 # Prevent archive crawling
 User-agent: ia_archiver
 Disallow: /
+
