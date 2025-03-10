@@ -40,38 +40,46 @@ const About = () => {
           ← Back to home
         </Link>
         <article className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-8 text-white">
-          <h1 className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6">About MyBirdieBoard</h1>
+          <h1 className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6">MyBirdieBoard</h1>
           
           <div className="space-y-4 sm:space-y-6 text-white/90 text-sm sm:text-base">
             <p>
-              At MyBirdieBoard, we believe every golfer deserves a smarter way to track their game. Keeping score on paper is a thing of the past—our digital platform allows you to store, analyze, and compete like never before.
+              Welcome to MyBirdieBoard — the ultimate digital clubhouse for golfers who want to track, compete, and improve.
             </p>
 
             <p>
-              We built MyBirdieBoard with three goals in mind:
+              We know that every round of golf tells a story — a clutch birdie, a tough bogey, and the quest for that personal best. But how do you keep track of it all? That's where MyBirdieBoard comes in.
             </p>
 
-            <section className="pl-3 sm:pl-4 border-l-4 border-primary/60 my-4 sm:my-6">
-              <h2 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">🏆 Track Your Performance</h2>
-              <p>Upload scorecards from any course and get detailed insights into your game. Our intuitive graphs help you visualize progress, from tee shots to putting stats.</p>
-            </section>
-
-            <section className="pl-3 sm:pl-4 border-l-4 border-primary/60 my-4 sm:my-6">
-              <h2 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">⛳ Improve Your Handicap</h2>
-              <p>Our built-in handicap calculator provides an accurate reflection of your skill level based on your latest rounds—helping you compete fairly with others.</p>
-            </section>
-
-            <section className="pl-3 sm:pl-4 border-l-4 border-primary/60 my-4 sm:my-6">
-              <h2 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">📊 Compete with Friends & Leaderboards</h2>
-              <p>MyBirdieBoard connects golfers worldwide through course-based leaderboards. Compare your scores with other players at your favorite courses and challenge yourself to climb the ranks.</p>
-            </section>
+            <div className="my-6 sm:my-8">
+              <p className="font-semibold mb-2 sm:mb-4">With MyBirdieBoard, you can:</p>
+              <ul className="space-y-2 sm:space-y-3">
+                <li className="flex items-start">
+                  <span className="mr-2" aria-hidden="true">🏌️</span>
+                  <span>Store every round you play — no more lost scorecards or forgotten wins.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2" aria-hidden="true">📊</span>
+                  <span>Track your progress over time — spot trends, lower your scores, and set new goals.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2" aria-hidden="true">🏆</span>
+                  <span>See how you rank against other golfers with Course Leaderboards — compare Gross and Net scores at every course you play.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2" aria-hidden="true">⛳</span>
+                  <span>Monitor your handicap — watch how your performance impacts your game and work toward lowering your numbers.</span>
+                </li>
+              </ul>
+            </div>
 
             <p>
-              Whether you're aiming for lower scores, a better handicap, or just bragging rights at the clubhouse, MyBirdieBoard is here to help you elevate your game.
+              Whether you're a weekend warrior or a dedicated scratch golfer, MyBirdieBoard is designed to help you stay motivated, track your journey, and push your game to the next level.
             </p>
 
-            <p className="font-bold text-center text-lg sm:text-xl my-6 sm:my-8">
-              📌 Join the MyBirdieBoard community today and start tracking your way to better golf!
+            <p className="font-semibold mt-4 sm:mt-6">
+              Ready to take control of your golf game?<br />
+              Join MyBirdieBoard today. Your best round is yet to come.
             </p>
           </div>
 
