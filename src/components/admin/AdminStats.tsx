@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
-import { User, GolfClub, BarChart, Users } from "lucide-react";
+import { User, BarChart, Users, Flag } from "lucide-react";
 
 export function AdminStats() {
   const [stats, setStats] = useState<{
@@ -76,7 +76,7 @@ export function AdminStats() {
         <StatCard 
           title="Total Rounds" 
           value={stats?.totalRounds || 0}
-          icon={<GolfClub className="h-5 w-5 text-green-500" />}
+          icon={<Flag className="h-5 w-5 text-green-500" />}
           description="Rounds played"
         />
         <StatCard 
