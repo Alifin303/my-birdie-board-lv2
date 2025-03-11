@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from './ui/button';
 import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle } from 'lucide-react';
@@ -12,7 +11,7 @@ interface MainContentProps {
 export const MainContent = ({ onStartQuiz }: MainContentProps) => {
   return (
     <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
-      {/* Hero Section - Added mobile padding */}
+      {/* Hero Section */}
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center mt-4 sm:mt-0">
         <div className="max-w-5xl mx-auto animate-fade-in mb-4">
           <h1 id="hero-heading" className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight mb-4 drop-shadow-md">
@@ -22,7 +21,7 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
             MyBirdieBoard is the all-in-one platform for golfers looking to track progress, analyze performance, and compete on leaderboards. Whether you're a casual weekend golfer or a dedicated player chasing lower scores, MyBirdieBoard helps you upload scorecards, track your handicap, and see your game improve over time.
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-4">
+          <div className="flex justify-center mt-4">
             <Button 
               size="lg"
               className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300"
@@ -32,22 +31,11 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
               <span className="mr-2" aria-hidden="true">🏌️‍♂️</span>
               Get started
             </Button>
-            <Link to="/faq">
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="bg-white/10 hover:bg-white/20 text-white px-8 h-12 shadow-lg transition-all duration-300"
-                aria-label="View frequently asked questions"
-              >
-                <HelpCircle className="mr-2 h-4 w-4" />
-                Read FAQ
-              </Button>
-            </Link>
           </div>
         </div>
       </section>
       
-      {/* Features Section - Reduced padding and card heights */}
+      {/* Features Section */}
       <section aria-labelledby="features-heading" className="w-full max-w-5xl mx-auto px-4 pb-8">
         <h2 id="features-heading" className="sr-only">MyBirdieBoard Features</h2>
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 text-left justify-center">
@@ -150,11 +138,13 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
             </Button>
             <Link to="/faq">
               <Button 
-                variant="link" 
-                className="text-white hover:text-white/80"
-                aria-label="View our FAQ page"
+                size="lg" 
+                variant="outline" 
+                className="bg-white/10 hover:bg-white/20 text-white px-8 h-12 shadow-lg transition-all duration-300"
+                aria-label="View frequently asked questions"
               >
-                Got questions? Check our FAQ
+                <HelpCircle className="mr-2 h-4 w-4" />
+                Read FAQ
               </Button>
             </Link>
           </div>
