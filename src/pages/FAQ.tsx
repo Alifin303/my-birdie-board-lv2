@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
@@ -67,6 +66,14 @@ export default function FAQ() {
                   "acceptedAnswer": {
                     "@type": "Answer",
                     "text": "With MyBirdieBoard, your scores are stored safely online and accessible from any device. Plus, you get dynamic leaderboards, round comparisons, and visual progress tracking — something a notebook just can't do!"
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Is MyBirdieBoard only available in certain countries?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Not at all! MyBirdieBoard has a database of over 30,000 golf courses worldwide. Plus, if a course isn't already listed, you can easily add it yourself. So no matter where you are or where you travel to play golf, MyBirdieBoard is ready to track your rounds and keep you connected to your game."
                   }
                 },
                 {
@@ -180,6 +187,17 @@ export default function FAQ() {
 
               <AccordionItem value="item-7">
                 <AccordionTrigger className="text-lg font-medium">
+                  Is MyBirdieBoard only available in certain countries?
+                </AccordionTrigger>
+                <AccordionContent>
+                  <p className="text-muted-foreground">
+                    Not at all! MyBirdieBoard has a database of over 30,000 golf courses worldwide. Plus, if a course isn't already listed, you can easily add it yourself. So no matter where you are or where you travel to play golf, MyBirdieBoard is ready to track your rounds and keep you connected to your game.
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-8">
+                <AccordionTrigger className="text-lg font-medium">
                   How do I subscribe?
                 </AccordionTrigger>
                 <AccordionContent>
@@ -189,7 +207,7 @@ export default function FAQ() {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="item-8">
+              <AccordionItem value="item-9">
                 <AccordionTrigger className="text-lg font-medium">
                   Can I cancel my subscription?
                 </AccordionTrigger>
@@ -200,7 +218,7 @@ export default function FAQ() {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="item-9">
+              <AccordionItem value="item-10">
                 <AccordionTrigger className="text-lg font-medium">
                   How do I add a new golf course that isn't listed?
                 </AccordionTrigger>
