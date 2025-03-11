@@ -1,9 +1,9 @@
-
 import React from "react";
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import About from "@/pages/About";
 import Index from "@/pages/Index";
+import FAQ from "@/pages/FAQ";
 import Quiz from "@/pages/Quiz";
 import AuthRedirect from "@/pages/AuthRedirect";
 import AuthConfirm from "@/pages/AuthConfirm";
@@ -18,9 +18,7 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 function App() {
-  // Setup persistence enhancement for Supabase auth
   useEffect(() => {
-    // Try to restore session on app load
     const initializeAuth = async () => {
       try {
         const { data, error } = await supabase.auth.getSession();
@@ -70,6 +68,17 @@ function App() {
                   </>
                 } />
                 
+                <Route path="/faq" element={
+                  <>
+                    <Helmet>
+                      <title>Frequently Asked Questions | MyBirdieBoard Golf Tracking</title>
+                      <meta name="description" content="Find answers to common questions about MyBirdieBoard's golf score tracking, handicap calculations, and performance analytics." />
+                      <link rel="canonical" href="https://mybirdieboard.com/faq" />
+                    </Helmet>
+                    <FAQ />
+                  </>
+                } />
+                
                 <Route path="/quiz" element={
                   <>
                     <Helmet>
@@ -86,7 +95,6 @@ function App() {
                 <Route path="/auth/reset-password" element={<ResetPassword />} />
                 <Route path="/checkout" element={<Checkout />} />
                 
-                {/* Add direct redirects for Supabase auth URLs */}
                 <Route path="/verify" element={<Navigate to="/auth/callback" replace />} />
                 <Route path="/auth/v1/verify" element={<Navigate to="/auth/callback" replace />} />
                 
@@ -106,7 +114,6 @@ function App() {
                   }
                 />
                 
-                {/* Admin route - no protection here because we handle it within the component */}
                 <Route
                   path="/admin"
                   element={

@@ -21,6 +21,13 @@
 </url>
 
 <url>
+  <loc>https://mybirdieboard.com/faq</loc>
+  <lastmod>2024-07-30T14:00:00+00:00</lastmod>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+
+<url>
   <loc>https://mybirdieboard.com/quiz</loc>
   <lastmod>2024-07-28T10:54:36+00:00</lastmod>
   <priority>0.7</priority>

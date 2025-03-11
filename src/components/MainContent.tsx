@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from './ui/button';
-import { ArrowRight, Upload, BarChart2, Award, Trophy } from 'lucide-react';
+import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from './ui/card';
 
@@ -32,6 +32,17 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
               <span className="mr-2" aria-hidden="true">🏌️‍♂️</span>
               Get started
             </Button>
+            <Link to="/faq">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="bg-white/10 hover:bg-white/20 text-white px-8 h-12 shadow-lg transition-all duration-300"
+                aria-label="View frequently asked questions"
+              >
+                <HelpCircle className="mr-2 h-4 w-4" />
+                Read FAQ
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -127,15 +138,26 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
         <div className="max-w-5xl mx-auto text-center px-4">
           <h2 id="cta-heading" className="text-lg sm:text-xl font-bold text-white mb-2">Ready to take your game to the next level?</h2>
           <p className="text-sm sm:text-base text-white/90 mb-3">Find out how MyBirdieBoard can help improve your golf game!</p>
-          <Button 
-            size="lg"
-            className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300"
-            onClick={onStartQuiz}
-            aria-label="Start the improvement quiz"
-          >
-            <span className="mr-2" aria-hidden="true">🏌️‍♂️</span>
-            Get started
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button 
+              size="lg"
+              className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300"
+              onClick={onStartQuiz}
+              aria-label="Start the improvement quiz"
+            >
+              <span className="mr-2" aria-hidden="true">🏌️‍♂️</span>
+              Get started
+            </Button>
+            <Link to="/faq">
+              <Button 
+                variant="link" 
+                className="text-white hover:text-white/80"
+                aria-label="View our FAQ page"
+              >
+                Got questions? Check our FAQ
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
     </div>
