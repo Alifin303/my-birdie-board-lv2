@@ -23,42 +23,66 @@ export default function FAQ() {
               "mainEntity": [
                 {
                   "@type": "Question",
-                  "name": "How do I track my golf scores with MyBirdieBoard?",
+                  "name": "What is MyBirdieBoard?",
                   "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "MyBirdieBoard makes score tracking simple. After creating an account, you can add a new round by selecting your course, entering your scores for each hole, and saving. Your scores will be automatically analyzed and added to your performance dashboard."
+                    "text": "MyBirdieBoard is your personal golf score tracker. It lets you log every round you play, view your score history at each course, and compare your performance against other golfers on course leaderboards. It's the perfect tool to track your progress and aim for lower scores!"
                   }
                 },
                 {
                   "@type": "Question",
-                  "name": "How is my handicap calculated?",
+                  "name": "How does the course leaderboard work?",
                   "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "MyBirdieBoard calculates your handicap using the World Handicap System (WHS) method. We take your 8 best scores from your most recent 20 rounds, adjust them for course difficulty, and generate your handicap index."
+                    "text": "The course leaderboards show how your scores compare to other golfers at the same course. You can filter the leaderboards by date (monthly, yearly, or all-time) and choose to display either gross or net scores. Your best round's position is highlighted so you always know where you stand!"
                   }
                 },
                 {
                   "@type": "Question",
-                  "name": "Can I share my scores with friends?",
+                  "name": "Can I track my past rounds?",
                   "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes! MyBirdieBoard allows you to share your scores and compete on course leaderboards with friends. You can invite friends to join your group or view public leaderboards for courses you've played."
+                    "text": "Yes! MyBirdieBoard allows you to store and review all your previous rounds. Whether you played the course last week or last year, you'll have a full record of your scores, helping you see your progress over time."
                   }
                 },
                 {
                   "@type": "Question",
-                  "name": "What analytics does MyBirdieBoard provide?",
+                  "name": "Does MyBirdieBoard track my handicap?",
                   "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "MyBirdieBoard offers comprehensive analytics including: score trends over time, strokes gained/lost per hole, putting performance, driving accuracy, greens in regulation (GIR), and personalized improvement suggestions based on your stats."
+                    "text": "Yes! MyBirdieBoard calculates your handicap using official methods. However, please note that while this gives you a clear and accurate reflection of your playing ability, some golf clubs may not recognize it as an official club handicap."
                   }
                 },
                 {
                   "@type": "Question",
-                  "name": "Is MyBirdieBoard available on mobile devices?",
+                  "name": "How much does MyBirdieBoard cost?",
                   "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes, MyBirdieBoard is fully responsive and works on all mobile devices through your web browser. This allows you to track scores directly from the course using your smartphone."
+                    "text": "We offer a simple, affordable monthly subscription that gives you full access to score tracking, course leaderboards, and round history. Check out our website for the latest pricing!"
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Why should I use MyBirdieBoard instead of a notebook or spreadsheet?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "With MyBirdieBoard, your scores are stored safely online and accessible from any device. Plus, you get dynamic leaderboards, round comparisons, and visual progress tracking — something a notebook just can't do!"
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "How do I subscribe?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "It's simple! Click the Get Started button on the homepage of our website, create your account, and you'll be on your way to better tracking and better scores in no time."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Can I cancel my subscription?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes! You can cancel anytime. If you cancel mid-billing cycle, you'll still have access until your next billing date."
                   }
                 },
                 {
@@ -67,14 +91,6 @@ export default function FAQ() {
                   "acceptedAnswer": {
                     "@type": "Answer",
                     "text": "If you don't find your course in our database, you can easily add it by navigating to 'Add Round' and selecting 'Add New Course'. You'll need to provide the course name, location, and hole information including par and distances."
-                  }
-                },
-                {
-                  "@type": "Question",
-                  "name": "Can I import my scores from other platforms?",
-                  "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "We're currently developing an import feature to allow you to bring your scoring history from other platforms. Stay tuned for updates on this feature!"
                   }
                 }
               ]
@@ -98,60 +114,93 @@ export default function FAQ() {
             <Accordion type="single" collapsible className="mb-12">
               <AccordionItem value="item-1">
                 <AccordionTrigger className="text-lg font-medium">
-                  How do I track my golf scores with MyBirdieBoard?
+                  What is MyBirdieBoard?
                 </AccordionTrigger>
                 <AccordionContent>
                   <p className="text-muted-foreground">
-                    MyBirdieBoard makes score tracking simple. After creating an account, you can add a new round by selecting your course, entering your scores for each hole, and saving. Your scores will be automatically analyzed and added to your performance dashboard.
+                    MyBirdieBoard is your personal golf score tracker. It lets you log every round you play, view your score history at each course, and compare your performance against other golfers on course leaderboards. It's the perfect tool to track your progress and aim for lower scores!
                   </p>
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-2">
                 <AccordionTrigger className="text-lg font-medium">
-                  How is my handicap calculated?
+                  How does the course leaderboard work?
                 </AccordionTrigger>
                 <AccordionContent>
                   <p className="text-muted-foreground">
-                    MyBirdieBoard calculates your handicap using the World Handicap System (WHS) method. We take your 8 best scores from your most recent 20 rounds, adjust them for course difficulty, and generate your handicap index.
+                    The course leaderboards show how your scores compare to other golfers at the same course. You can filter the leaderboards by date (monthly, yearly, or all-time) and choose to display either gross or net scores. Your best round's position is highlighted so you always know where you stand!
                   </p>
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-3">
                 <AccordionTrigger className="text-lg font-medium">
-                  Can I share my scores with friends?
+                  Can I track my past rounds?
                 </AccordionTrigger>
                 <AccordionContent>
                   <p className="text-muted-foreground">
-                    Yes! MyBirdieBoard allows you to share your scores and compete on course leaderboards with friends. You can invite friends to join your group or view public leaderboards for courses you've played.
+                    Yes! MyBirdieBoard allows you to store and review all your previous rounds. Whether you played the course last week or last year, you'll have a full record of your scores, helping you see your progress over time.
                   </p>
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-4">
                 <AccordionTrigger className="text-lg font-medium">
-                  What analytics does MyBirdieBoard provide?
+                  Does MyBirdieBoard track my handicap?
                 </AccordionTrigger>
                 <AccordionContent>
                   <p className="text-muted-foreground">
-                    MyBirdieBoard offers comprehensive analytics including: score trends over time, strokes gained/lost per hole, putting performance, driving accuracy, greens in regulation (GIR), and personalized improvement suggestions based on your stats.
+                    Yes! MyBirdieBoard calculates your handicap using official methods. However, please note that while this gives you a clear and accurate reflection of your playing ability, some golf clubs may not recognize it as an official club handicap.
                   </p>
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-5">
                 <AccordionTrigger className="text-lg font-medium">
-                  Is MyBirdieBoard available on mobile devices?
+                  How much does MyBirdieBoard cost?
                 </AccordionTrigger>
                 <AccordionContent>
                   <p className="text-muted-foreground">
-                    Yes, MyBirdieBoard is fully responsive and works on all mobile devices through your web browser. This allows you to track scores directly from the course using your smartphone.
+                    We offer a simple, affordable monthly subscription that gives you full access to score tracking, course leaderboards, and round history. Check out our website for the latest pricing!
                   </p>
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-6">
+                <AccordionTrigger className="text-lg font-medium">
+                  Why should I use MyBirdieBoard instead of a notebook or spreadsheet?
+                </AccordionTrigger>
+                <AccordionContent>
+                  <p className="text-muted-foreground">
+                    With MyBirdieBoard, your scores are stored safely online and accessible from any device. Plus, you get dynamic leaderboards, round comparisons, and visual progress tracking — something a notebook just can't do!
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-7">
+                <AccordionTrigger className="text-lg font-medium">
+                  How do I subscribe?
+                </AccordionTrigger>
+                <AccordionContent>
+                  <p className="text-muted-foreground">
+                    It's simple! Click the Get Started button on the homepage of our website, create your account, and you'll be on your way to better tracking and better scores in no time.
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-8">
+                <AccordionTrigger className="text-lg font-medium">
+                  Can I cancel my subscription?
+                </AccordionTrigger>
+                <AccordionContent>
+                  <p className="text-muted-foreground">
+                    Yes! You can cancel anytime. If you cancel mid-billing cycle, you'll still have access until your next billing date.
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-9">
                 <AccordionTrigger className="text-lg font-medium">
                   How do I add a new golf course that isn't listed?
                 </AccordionTrigger>
@@ -161,28 +210,12 @@ export default function FAQ() {
                   </p>
                 </AccordionContent>
               </AccordionItem>
-
-              <AccordionItem value="item-7">
-                <AccordionTrigger className="text-lg font-medium">
-                  Can I import my scores from other platforms?
-                </AccordionTrigger>
-                <AccordionContent>
-                  <p className="text-muted-foreground">
-                    We're currently developing an import feature to allow you to bring your scoring history from other platforms. Stay tuned for updates on this feature!
-                  </p>
-                </AccordionContent>
-              </AccordionItem>
             </Accordion>
 
             <div className="text-center mt-12">
-              <h2 className="text-2xl font-bold mb-4">Still have questions?</h2>
-              <p className="mb-6 text-muted-foreground">We're here to help. Feel free to reach out to us for more information.</p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button variant="default">Contact Support</Button>
-                <Link to="/">
-                  <Button variant="outline">Back to Home</Button>
-                </Link>
-              </div>
+              <Link to="/">
+                <Button variant="outline">Back to Home</Button>
+              </Link>
             </div>
           </div>
         </main>
