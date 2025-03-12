@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -166,7 +167,7 @@ export default function Checkout() {
           <div className="text-center mb-6">
             <h1 className="text-3xl font-bold text-primary mb-3">Join MyBirdieBoard</h1>
             <p className="text-muted-foreground">
-              Stop guessing your way to better golf - use MyBirdieBoard
+              Stop guessing your way to better golf — track your progress and lower your scores with MyBirdieBoard.
             </p>
           </div>
           
@@ -178,45 +179,45 @@ export default function Checkout() {
           
           <div className="grid gap-6">
             <div className="bg-accent/10 rounded-lg p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h2 className="text-2xl font-bold text-accent mb-1">MyBirdieBoard</h2>
-                  <p className="text-xl font-semibold">£2.99 / month</p>
-                  <p className="text-sm text-muted-foreground">Cancel anytime</p>
-                </div>
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-accent mb-4">Your Golf Game, Tracked and Transformed</h2>
+                <ul className="space-y-3">
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-accent mr-2" />
+                    <span>Track unlimited rounds</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-accent mr-2" />
+                    <span>Access detailed analytics to spot trends and patterns</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-accent mr-2" />
+                    <span>Course leaderboards — see how you rank at every course you play</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-accent mr-2" />
+                    <span>Advanced progress tracking — monitor your best rounds and personal records</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-accent mr-2" />
+                    <span>Track your handicap</span>
+                  </li>
+                </ul>
               </div>
               
-              <ul className="space-y-3 mb-6">
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-accent mr-2" />
-                  <span>Track unlimited rounds</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-accent mr-2" />
-                  <span>Access to detailed analytics</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-accent mr-2" />
-                  <span>Course leaderboards</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-accent mr-2" />
-                  <span>Advanced progress tracking</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-accent mr-2" />
-                  <span>Compare with other golfers</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-accent mr-2" />
-                  <span>Track handicap</span>
-                </li>
-              </ul>
+              <div className="mb-6">
+                <p className="text-center text-xl font-semibold mb-2">All for just £2.99/month</p>
+                <p className="text-center text-sm text-muted-foreground">
+                  Cheaper than a bucket of range balls — invest in your game and start improving today.
+                </p>
+                <p className="text-center text-sm mt-3">
+                  No long-term commitment. Cancel anytime.
+                </p>
+              </div>
               
               <div className="mb-6">
-                <p className="text-center font-medium mb-2">Ready to start improving your game?</p>
-                <p className="text-center text-sm text-muted-foreground">
-                  Join thousands of golfers who are using MyBirdieBoard to track their progress and improve their scores.
+                <p className="text-center font-medium mb-3">
+                  Join thousands of golfers who trust MyBirdieBoard to sharpen their game.
                 </p>
               </div>
               
@@ -233,7 +234,7 @@ export default function Checkout() {
                 ) : (
                   <>
                     <CreditCard className="mr-2 h-5 w-5" />
-                    Subscribe Now
+                    👉 Subscribe Now
                   </>
                 )}
               </Button>
