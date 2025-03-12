@@ -7,6 +7,7 @@ import { User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { SocialFooter } from "@/components/SocialFooter";
 
 const Index = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
@@ -25,7 +26,7 @@ const Index = () => {
       
       <div className="min-h-screen flex flex-col">
         <div 
-          className="relative min-h-screen bg-cover bg-center bg-no-repeat overflow-hidden"
+          className="relative flex-1 bg-cover bg-center bg-no-repeat overflow-hidden"
           style={{
             backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
             backgroundColor: "#2C4A3B", // Fallback color if image fails to load
@@ -60,6 +61,7 @@ const Index = () => {
             <MainContent onStartQuiz={handleStartQuiz} />
           </main>
         </div>
+        <SocialFooter />
         <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} onStartQuiz={handleStartQuiz} />
       </div>
     </>
