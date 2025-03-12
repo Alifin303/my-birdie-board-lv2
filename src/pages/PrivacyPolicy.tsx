@@ -1,6 +1,9 @@
 
 import React from "react";
 import { Helmet } from "react-helmet-async";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 const PrivacyPolicy = () => {
   return (
@@ -11,6 +14,13 @@ const PrivacyPolicy = () => {
       </Helmet>
       
       <div className="container mx-auto px-4 py-8 md:py-12">
+        <Link to="/">
+          <Button variant="ghost" className="mb-6 flex items-center" aria-label="Return to homepage">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Return to Homepage
+          </Button>
+        </Link>
+        
         <div className="max-w-4xl mx-auto prose prose-slate">
           <h1 className="text-4xl font-bold mb-8">Privacy Policy</h1>
           <p className="text-muted-foreground mb-8">Last updated: 3rd March 2025</p>
