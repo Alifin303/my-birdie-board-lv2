@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Loader2, CheckCircle, XCircle, CreditCard } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, CreditCard, Info } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
@@ -210,6 +210,10 @@ export default function Checkout() {
                 <p className="text-center text-sm text-muted-foreground">
                   Cheaper than a bucket of range balls — invest in your game and start improving today.
                 </p>
+                <div className="flex items-center justify-center mt-2 text-sm text-muted-foreground bg-primary/5 p-2 rounded-md">
+                  <Info className="h-4 w-4 mr-2 text-primary/70" />
+                  <p>Prices are shown in GBP. Your local currency price will be calculated at checkout.</p>
+                </div>
                 <p className="text-center text-sm mt-3">
                   No long-term commitment. Cancel anytime.
                 </p>
