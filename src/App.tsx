@@ -11,6 +11,7 @@ import Checkout from "@/pages/Checkout";
 import NotFound from "@/pages/NotFound";
 import Dashboard from "@/pages/Dashboard";
 import Admin from "@/pages/Admin";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import { Toaster } from "@/components/ui/toaster";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ResetPassword from "@/pages/ResetPassword";
@@ -126,6 +127,17 @@ function App() {
                     </>
                   }
                 />
+                
+                <Route path="/privacy" element={
+                  <>
+                    <Helmet>
+                      <title>Privacy Policy | MyBirdieBoard</title>
+                      <meta name="description" content="MyBirdieBoard's Privacy Policy - Learn how we protect and handle your data" />
+                      <link rel="canonical" href="https://mybirdieboard.com/privacy" />
+                    </Helmet>
+                    <PrivacyPolicy />
+                  </>
+                } />
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>

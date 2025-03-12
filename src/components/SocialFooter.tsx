@@ -22,6 +22,12 @@ export const SocialFooter = () => {
               </Button>
             </Link>
             
+            <Link to="/privacy">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
+                Privacy Policy
+              </Button>
+            </Link>
+            
             <a 
               href="https://instagram.com/mybirdieboard" 
               target="_blank" 
