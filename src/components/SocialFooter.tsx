@@ -5,6 +5,10 @@ import { Instagram, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const SocialFooter = () => {
+  const handleNavigate = () => {
+    window.scrollTo(0, 0);
+  };
+
   return (
     <footer className="bg-primary/5 py-4 mt-auto">
       <div className="container mx-auto px-4">
@@ -16,13 +20,13 @@ export const SocialFooter = () => {
           </div>
           
           <div className="flex items-center space-x-4">
-            <Link to="/faq">
+            <Link to="/faq" onClick={handleNavigate}>
               <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
                 FAQ
               </Button>
             </Link>
             
-            <Link to="/privacy">
+            <Link to="/privacy" onClick={handleNavigate}>
               <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
                 Privacy Policy
               </Button>
