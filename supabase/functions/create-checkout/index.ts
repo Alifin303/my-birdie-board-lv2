@@ -103,6 +103,7 @@ serve(async (req) => {
     console.log(`Success URL: ${finalSuccessUrl}`);
     console.log(`Cancel URL: ${finalCancelUrl}`);
     
+    // Add trial_period_days to subscription_data to enable the free trial
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
@@ -118,6 +119,7 @@ serve(async (req) => {
         metadata: {
           user_id: user_id,
         },
+        trial_period_days: 7, // 7-day free trial
       },
       allow_promotion_codes: true,
     });

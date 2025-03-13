@@ -206,7 +206,14 @@ export default function Checkout() {
               </div>
               
               <div className="mb-6">
-                <p className="text-center text-xl font-semibold mb-2">All for just £2.99/month</p>
+                <div className="bg-primary/10 p-4 rounded-lg mb-4">
+                  <p className="text-center font-bold text-primary mb-2">🎉 Start with a 7-day free trial 🎉</p>
+                  <p className="text-center text-sm">
+                    Try MyBirdieBoard Premium with no risk. Only £2.99/month after your trial ends.
+                  </p>
+                </div>
+                
+                <p className="text-center text-xl font-semibold mb-2">Just £2.99/month after trial</p>
                 <p className="text-center text-sm text-muted-foreground">
                   Cheaper than a bucket of range balls — invest in your game and start improving today.
                 </p>
@@ -238,13 +245,13 @@ export default function Checkout() {
                 ) : (
                   <>
                     <CreditCard className="mr-2 h-5 w-5" />
-                    👉 Subscribe Now
+                    👉 Start 7-Day Free Trial
                   </>
                 )}
               </Button>
               
               <p className="text-center text-sm text-muted-foreground mt-3">
-                Secure payment via Stripe. Cancel anytime.
+                Secure payment via Stripe. You won't be charged until your free trial ends.
               </p>
             </div>
           </div>
