@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -206,14 +205,14 @@ export default function Checkout() {
               </div>
               
               <div className="mb-6">
-                <div className="bg-primary/10 p-4 rounded-lg mb-4">
-                  <p className="text-center font-bold text-primary mb-2">🎉 Start with a 7-day free trial 🎉</p>
-                  <p className="text-center text-sm">
-                    Try MyBirdieBoard Premium with no risk. Only £2.99/month after your trial ends.
+                <div className="bg-primary/10 p-5 rounded-lg mb-5 text-center">
+                  <p className="font-bold text-primary mb-2 text-xl">🎉 Start with a 7-day free trial 🎉</p>
+                  <p className="text-sm">
+                    Try MyBirdieBoard with no risk. Only £2.99/month after your trial ends.
                   </p>
                 </div>
                 
-                <p className="text-center text-xl font-semibold mb-2">Just £2.99/month after trial</p>
+                <p className="text-center text-lg font-semibold mb-2">Just £2.99/month after trial</p>
                 <p className="text-center text-sm text-muted-foreground">
                   Cheaper than a bucket of range balls — invest in your game and start improving today.
                 </p>
