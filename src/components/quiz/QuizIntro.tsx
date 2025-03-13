@@ -1,15 +1,16 @@
 
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, ChevronRight } from "lucide-react";
 
 interface QuizIntroProps {
   isOpen: boolean;
   onClose: () => void;
   onStart: () => void;
+  onSkipToSignup: () => void;
 }
 
-export function QuizIntro({ isOpen, onClose, onStart }: QuizIntroProps) {
+export function QuizIntro({ isOpen, onClose, onStart, onSkipToSignup }: QuizIntroProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md bg-white/95 backdrop-blur-sm border-0 shadow-lg">
@@ -65,6 +66,20 @@ export function QuizIntro({ isOpen, onClose, onStart }: QuizIntroProps) {
             >
               <span className="mr-2" aria-hidden="true">👉</span> Start the Quiz Now
               <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+            </Button>
+          </div>
+
+          <div className="mt-2 text-center">
+            <p className="text-sm font-medium text-gray-600 mb-2">
+              Already know you want to level up your game?
+            </p>
+            <Button
+              onClick={onSkipToSignup}
+              variant="outline"
+              className="text-primary hover:text-primary/90 hover:bg-primary/5"
+            >
+              <span className="mr-1" aria-hidden="true">👉</span> Skip the quiz — Sign up for MyBirdieBoard now!
+              <ChevronRight className="ml-1 h-4 w-4" aria-hidden="true" />
             </Button>
           </div>
         </div>

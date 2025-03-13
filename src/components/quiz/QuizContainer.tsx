@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { QuizQuestion } from "./QuizQuestion";
 import { QuizResults } from "./QuizResults";
@@ -49,7 +48,11 @@ export function QuizContainer() {
     handleNext();
   };
 
-  // Define quiz questions
+  const skipToSignup = () => {
+    setShowIntro(false);
+    setStep('signup');
+  };
+
   const questions = {
     question1: {
       question: "How often do you check your score trends after a round?",
@@ -104,6 +107,7 @@ export function QuizContainer() {
         isOpen={showIntro} 
         onClose={() => setShowIntro(false)}
         onStart={startQuiz}
+        onSkipToSignup={skipToSignup}
       />
       
       {step.startsWith('question') && (
