@@ -212,7 +212,7 @@ export default function Checkout() {
                   </p>
                 </div>
                 
-                <p className="text-center text-lg font-semibold mb-2">Just £2.99/month after trial</p>
+                <p className="text-center text-lg font-semibold mb-2">Only £2.99/month after your free trial</p>
                 <p className="text-center text-sm text-muted-foreground">
                   Cheaper than a bucket of range balls — invest in your game and start improving today.
                 </p>
