@@ -5,12 +5,14 @@ import { QuizResults } from "./QuizResults";
 import { SignUpForm } from "./SignUpForm";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { QuizIntro } from "./QuizIntro";
 
-type QuizStep = 'question1' | 'question2' | 'question3' | 'question4' | 'question5' | 'results' | 'signup';
+type QuizStep = 'intro' | 'question1' | 'question2' | 'question3' | 'question4' | 'question5' | 'results' | 'signup';
 
 export function QuizContainer() {
-  const [step, setStep] = useState<QuizStep>('question1');
+  const [step, setStep] = useState<QuizStep>('intro');
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [showIntro, setShowIntro] = useState(true);
 
   const handleAnswer = (questionId: string, answer: string) => {
     setAnswers(prev => ({ ...prev, [questionId]: answer }));
@@ -18,6 +20,9 @@ export function QuizContainer() {
 
   const handleNext = () => {
     switch (step) {
+      case 'intro':
+        setStep('question1');
+        break;
       case 'question1':
         setStep('question2');
         break;
@@ -37,6 +42,11 @@ export function QuizContainer() {
         setStep('signup');
         break;
     }
+  };
+
+  const startQuiz = () => {
+    setShowIntro(false);
+    handleNext();
   };
 
   // Define quiz questions
@@ -90,8 +100,14 @@ export function QuizContainer() {
 
   return (
     <div className="w-full max-w-2xl mx-auto px-4 py-8">
+      <QuizIntro 
+        isOpen={showIntro} 
+        onClose={() => setShowIntro(false)}
+        onStart={startQuiz}
+      />
+      
       {step.startsWith('question') && (
-        <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg animate-fade-in">
+        <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg animate-fade-in border border-white/20">
           <div className="mb-8">
             <div className="flex justify-between mb-2">
               <span className="text-sm font-medium text-muted-foreground">
@@ -131,13 +147,13 @@ export function QuizContainer() {
       )}
       
       {step === 'results' && (
-        <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg">
+        <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
           <QuizResults onContinue={handleNext} />
         </div>
       )}
       
       {step === 'signup' && (
-        <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg">
+        <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
           <SignUpForm />
         </div>
       )}

@@ -33,10 +33,7 @@ export default function Quiz() {
         <main className="flex-grow flex items-center justify-center py-8 relative">
           <div className="relative z-10 w-full">
             <div className="container mx-auto">
-              <div className="bg-white/90 rounded-lg shadow-md p-6 backdrop-blur-sm">
-                <h2 className="sr-only">Golf Improvement Quiz</h2>
-                <QuizContainer />
-              </div>
+              <QuizContainer />
             </div>
           </div>
         </main>
