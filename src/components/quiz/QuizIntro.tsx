@@ -1,8 +1,32 @@
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Check, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { cn } from "@/lib/utils";
+import * as React from "react";
+
+// Custom DialogContent without close button
+const DialogContentWithoutClose = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
+>(({ className, children, ...props }, ref) => (
+  <DialogPrimitive.Portal>
+    <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+    <DialogPrimitive.Content
+      ref={ref}
+      className={cn(
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </DialogPrimitive.Content>
+  </DialogPrimitive.Portal>
+));
+DialogContentWithoutClose.displayName = "DialogContentWithoutClose";
 
 interface QuizIntroProps {
   isOpen: boolean;
@@ -16,7 +40,7 @@ export function QuizIntro({ isOpen, onClose, onStart, onSkipToSignup }: QuizIntr
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md max-w-[95vw] max-h-[90vh] overflow-y-auto bg-white/95 backdrop-blur-sm border-0 shadow-lg p-4 sm:p-6">
+      <DialogContentWithoutClose className="sm:max-w-md max-w-[95vw] max-h-[90vh] overflow-y-auto bg-white/95 backdrop-blur-sm border-0 shadow-lg p-4 sm:p-6">
         <div className="space-y-3 sm:space-y-4 py-1 sm:py-2">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-gray-800">
             What's Really Holding Your Golf Game Back? ⛳
@@ -87,7 +111,7 @@ export function QuizIntro({ isOpen, onClose, onStart, onSkipToSignup }: QuizIntr
             </Button>
           </div>
         </div>
-      </DialogContent>
+      </DialogContentWithoutClose>
     </Dialog>
   );
 }
