@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown, Trash, Eye, ArrowLeft, Trophy, PieChart, Calendar as CalendarIcon, TrendingUp, History } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,10 +37,8 @@ interface CourseRoundHistoryProps {
   handicapIndex?: number;
 }
 
-// Define the types of golf scores
 type ScoreType = 'eagle' | 'birdie' | 'par' | 'bogey' | 'doubleBogey' | 'other';
 
-// Define the period types for filtering
 type PeriodType = 'month' | 'year' | 'all';
 
 export const CourseRoundHistory = ({ 
@@ -100,15 +97,13 @@ export const CourseRoundHistory = ({
     ? `${clubName} - ${courseName}`
     : courseName;
   
-  // Get available years from rounds
   const getAvailableYears = () => {
     if (!courseRounds?.length) return [new Date().getFullYear()];
     
     const years = courseRounds.map(round => new Date(round.date).getFullYear());
-    return [...new Set(years)].sort((a, b) => b - a); // Unique years in descending order
+    return [...new Set(years)].sort((a, b) => b - a);
   };
   
-  // Get available months for the selected year
   const getAvailableMonths = () => {
     if (!courseRounds?.length) return Array.from({ length: 12 }, (_, i) => i);
     
@@ -121,35 +116,29 @@ export const CourseRoundHistory = ({
     
     const availableMonths = [...new Set(months)].sort((a, b) => a - b);
     
-    // If no months found for the year, return all months
     return availableMonths.length ? availableMonths : Array.from({ length: 12 }, (_, i) => i);
   };
   
-  // Handle year selection
   const handleYearSelect = (year: string) => {
     const newDate = new Date(currentDate);
     newDate.setFullYear(parseInt(year));
     setCurrentDate(newDate);
   };
   
-  // Handle month selection
   const handleMonthSelect = (month: string) => {
     const newDate = new Date(currentDate);
     newDate.setMonth(parseInt(month));
     setCurrentDate(newDate);
   };
   
-  // Format month number to name
   const formatMonthName = (monthIndex: number) => {
     return new Date(2000, monthIndex, 1).toLocaleString('default', { month: 'long' });
   };
   
-  // Function to go to current period
   const goToCurrentPeriod = () => {
     setCurrentDate(new Date());
   };
   
-  // Function to format the current period for display
   const formatPeriod = () => {
     if (periodType === 'month') {
       return currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -160,7 +149,6 @@ export const CourseRoundHistory = ({
     }
   };
   
-  // Filter rounds based on the selected period
   const getFilteredRounds = () => {
     if (!courseRounds) return [];
     
@@ -173,7 +161,7 @@ export const CourseRoundHistory = ({
       } else if (periodType === 'year') {
         return roundDate.getFullYear() === currentDate.getFullYear();
       } else {
-        return true; // All time - no filtering
+        return true;
       }
     });
   };
@@ -229,17 +217,13 @@ export const CourseRoundHistory = ({
   
   const stats = calculateCourseSpecificStats();
   
-  // Calculate hole stats specific to this course but now using filtered rounds
   const courseHoleStats = calculateHoleStats(filteredRounds);
   
-  // Available years and months
   const availableYears = getAvailableYears();
   const availableMonths = getAvailableMonths();
   
-  // Initialize the default month
   useEffect(() => {
     if (periodType === 'month' && availableMonths.length > 0) {
-      // If current month is not available, select the first available month
       if (!availableMonths.includes(currentDate.getMonth())) {
         const newDate = new Date(currentDate);
         newDate.setMonth(availableMonths[0]);
@@ -420,7 +404,6 @@ export const CourseRoundHistory = ({
         />
       </div>
       
-      {/* Course-specific performance stats with period filtering */}
       <div className="space-y-4 mb-6">
         <div className="flex items-center gap-2">
           <PieChart className="h-5 w-5 text-primary" />
@@ -430,7 +413,7 @@ export const CourseRoundHistory = ({
         <div className="bg-background rounded-lg border p-5">
           <Tabs defaultValue="all" onValueChange={(value) => setPeriodType(value as PeriodType)} className="mb-5">
             <div className="flex flex-col space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <TabsList className="bg-muted/70">
                   <TabsTrigger value="month" className="flex items-center gap-1">
                     <CalendarIcon className="h-4 w-4" />
@@ -492,7 +475,7 @@ export const CourseRoundHistory = ({
                       onClick={goToCurrentPeriod} 
                       className="px-3 py-1.5 text-xs font-medium text-primary border border-primary rounded-md hover:bg-primary/10 transition-colors ml-auto"
                     >
-                      Current Month
+                      Show Current Month
                     </button>
                   </>
                 )}
@@ -519,7 +502,7 @@ export const CourseRoundHistory = ({
                       onClick={goToCurrentPeriod} 
                       className="px-3 py-1.5 text-xs font-medium text-primary border border-primary rounded-md hover:bg-primary/10 transition-colors ml-auto"
                     >
-                      Current Year
+                      Show Current Year
                     </button>
                   </>
                 )}
@@ -726,14 +709,12 @@ export const CourseRoundHistory = ({
   );
 };
 
-// Stats card component to display various score types
 interface StatsCardProps {
   type: ScoreType;
   count: number;
 }
 
 const StatsCard = ({ type, count }: StatsCardProps) => {
-  // Assign color based on score type
   const getColorClass = () => {
     switch(type) {
       case 'eagle': return 'bg-blue-50 border-blue-200 text-blue-700';

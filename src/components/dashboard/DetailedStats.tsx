@@ -181,7 +181,7 @@ export const DetailedStats = ({ userRounds, isLoading }: DetailedStatsProps) => 
       <div className="bg-background rounded-lg p-5 border shadow-sm">
         <Tabs defaultValue="month" onValueChange={(value) => setPeriodType(value as PeriodType)}>
           <div className="flex flex-col space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <TabsList className="bg-muted/70">
                 <TabsTrigger value="month" className="flex items-center gap-1">
                   <CalendarIcon className="h-4 w-4" />
@@ -243,7 +243,7 @@ export const DetailedStats = ({ userRounds, isLoading }: DetailedStatsProps) => 
                     onClick={goToCurrentPeriod} 
                     className="px-3 py-1.5 text-xs font-medium text-primary border border-primary rounded-md hover:bg-primary/10 transition-colors ml-auto"
                   >
-                    Current Month
+                    Show Current Month
                   </button>
                 </>
               )}
@@ -270,7 +270,7 @@ export const DetailedStats = ({ userRounds, isLoading }: DetailedStatsProps) => 
                     onClick={goToCurrentPeriod} 
                     className="px-3 py-1.5 text-xs font-medium text-primary border border-primary rounded-md hover:bg-primary/10 transition-colors ml-auto"
                   >
-                    Current Year
+                    Show Current Year
                   </button>
                 </>
               )}
