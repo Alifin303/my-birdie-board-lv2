@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check, X } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 
 interface QuizResultsProps {
   onContinue: () => void;
@@ -16,14 +16,13 @@ export function QuizResults({ onContinue }: QuizResultsProps) {
       </p>
       
       <div className="flex items-center gap-3 p-4 bg-red-50 rounded-lg border border-red-100">
-        <X className="h-6 w-6 text-red-500 flex-shrink-0" aria-hidden="true" />
         <p className="font-medium text-gray-800">
-          They aren't tracking their rounds, patterns, and progress.
+          They don't track their game properly.
         </p>
       </div>
       
       <p className="text-base sm:text-lg font-medium">
-        But guess what? You don't have to stay stuck.
+        But here's the good news — that changes today.
       </p>
       
       <section className="bg-green-50 p-5 rounded-lg border border-green-100">
@@ -32,16 +31,20 @@ export function QuizResults({ onContinue }: QuizResultsProps) {
           With MyBirdieBoard, you can:
         </h3>
         
-        <ul className="space-y-3 pl-10 list-disc">
-          <li>Track every round automatically — no more lost scorecards or forgotten holes.</li>
-          <li>Compare your scores with other golfers at your favorite courses through Course Leaderboards.</li>
-          <li>Spot patterns in your game so you know exactly what to fix.</li>
-          <li>Set clear goals and actually see how close you are to breaking 100, 90, or 80.</li>
+        <ul className="space-y-3 pl-10">
+          <li>✅ Track every round — no more lost scorecards or forgotten scores. Your full golf history, all in one place.</li>
+          <li>✅ See your handicap progress — calculated using official methods, so you always know where you stand.</li>
+          <li>✅ Compare scores at every course — climb the Course Leaderboards and see how you rank against other golfers, gross or net.</li>
+          <li>✅ Spot your strengths and weaknesses — identify scoring patterns and trends so you know exactly what's holding you back — and how to fix it.</li>
         </ul>
       </section>
       
       <div className="text-center space-y-4">
-        <p className="text-lg font-medium">📊 Want to start improving faster?</p>
+        <p className="text-lg font-medium">📈 Stop guessing. Start improving.</p>
+        
+        <p className="text-base">Ready to take control of your golf game?</p>
+        
+        <p className="text-base font-medium">Try MyBirdieBoard FREE for 7 days and start tracking your way to lower scores today.</p>
         
         <Button 
           onClick={onContinue} 
@@ -49,13 +52,9 @@ export function QuizResults({ onContinue }: QuizResultsProps) {
           className="px-6 bg-accent hover:bg-accent/90 text-accent-foreground"
           aria-label="Join MyBirdieBoard to start tracking your golf progress"
         >
-          <span className="mr-2" aria-hidden="true">👉</span> Join MyBirdieBoard today
+          <span className="mr-2" aria-hidden="true">👉</span> Sign up now and let's drop that handicap together
           <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
         </Button>
-        
-        <p className="text-sm text-muted-foreground">
-          Don't guess your way to better golf. Let MyBirdieBoard show you the way.
-        </p>
       </div>
     </article>
   );
