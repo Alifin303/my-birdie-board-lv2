@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -184,6 +185,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       
       const scorecardClone = scorecardRef.current.cloneNode(true) as HTMLElement;
       
+      // Remove UI controls from clone
       const uiControls = scorecardClone.querySelectorAll('button');
       uiControls.forEach(button => {
         if (!button.closest('table')) {
@@ -191,6 +193,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         }
       });
       
+      // Configure container for the image
       const canvasContainer = document.createElement('div');
       canvasContainer.style.width = '1080px';
       canvasContainer.style.height = '1080px';
@@ -201,80 +204,117 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       canvasContainer.style.justifyContent = 'center';
       canvasContainer.style.alignItems = 'center';
       canvasContainer.style.overflow = 'hidden';
-      canvasContainer.style.padding = '60px 40px';
+      canvasContainer.style.padding = '40px'; // Reduced padding to utilize more space
       
+      // Set up logo container
       const logoContainer = document.createElement('div');
       logoContainer.style.position = 'absolute';
-      logoContainer.style.top = '20px';
-      logoContainer.style.left = '20px';
-      logoContainer.style.width = '120px';
+      logoContainer.style.top = '30px';
+      logoContainer.style.left = '30px';
+      logoContainer.style.width = '150px'; // Increased logo size
       logoContainer.style.height = 'auto';
       
+      // Create logo image
       const logoImg = document.createElement('img');
-      logoImg.src = '/logo.png';
+      logoImg.src = '/logo.png'; // Make sure this path is correct
       logoImg.style.width = '100%';
       logoImg.style.height = 'auto';
       logoImg.style.objectFit = 'contain';
       
+      // Add logo to container
       logoContainer.appendChild(logoImg);
       canvasContainer.appendChild(logoContainer);
       
+      // Style scorecard
       scorecardClone.style.width = '100%';
-      scorecardClone.style.maxWidth = '1000px';
+      scorecardClone.style.maxWidth = '1000px'; // Use most of the available width
       scorecardClone.style.borderRadius = '12px';
       scorecardClone.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
       scorecardClone.style.overflow = 'hidden';
+      scorecardClone.style.marginTop = '40px'; // Add more space at the top for logo
       
+      // Increase heading sizes
       const headings = scorecardClone.querySelectorAll('h3');
       headings.forEach(heading => {
-        (heading as HTMLElement).style.fontSize = '22px';
+        (heading as HTMLElement).style.fontSize = '28px'; // Increased from 22px
         (heading as HTMLElement).style.fontWeight = '600';
+        (heading as HTMLElement).style.marginBottom = '10px';
       });
       
+      // Increase paragraph text size
       const courseInfo = scorecardClone.querySelectorAll('p');
       courseInfo.forEach(p => {
-        (p as HTMLElement).style.fontSize = '18px';
-        (p as HTMLElement).style.marginBottom = '6px';
+        (p as HTMLElement).style.fontSize = '22px'; // Increased from 18px
+        (p as HTMLElement).style.marginBottom = '8px';
       });
       
+      // Increase table text size
       const tables = scorecardClone.querySelectorAll('table');
       tables.forEach(table => {
-        (table as HTMLElement).style.fontSize = '18px';
+        (table as HTMLElement).style.fontSize = '22px'; // Increased from 18px
+        (table as HTMLElement).style.width = '100%';
+        (table as HTMLElement).style.tableLayout = 'fixed';
       });
       
+      // Increase cell padding and center content
       const tableCells = scorecardClone.querySelectorAll('td, th');
       tableCells.forEach(cell => {
-        (cell as HTMLElement).style.padding = '8px';
+        (cell as HTMLElement).style.padding = '10px'; // Increased from 8px
+        (cell as HTMLElement).style.verticalAlign = 'middle'; // Ensure vertical centering
+        (cell as HTMLElement).style.textAlign = 'center';
       });
       
+      // Center numeric values in cells
+      const scoreNumbers = scorecardClone.querySelectorAll('.w-7.h-7');
+      scoreNumbers.forEach(num => {
+        (num as HTMLElement).style.display = 'flex';
+        (num as HTMLElement).style.alignItems = 'center';
+        (num as HTMLElement).style.justifyContent = 'center';
+        (num as HTMLElement).style.margin = '0 auto';
+      });
+      
+      // Add scorecard to container
       canvasContainer.appendChild(scorecardClone);
       
+      // Add watermark
       const watermark = document.createElement('div');
       watermark.style.position = 'absolute';
       watermark.style.bottom = '20px';
       watermark.style.right = '20px';
-      watermark.style.fontSize = '16px';
+      watermark.style.fontSize = '18px';
       watermark.style.color = '#666';
       watermark.style.fontWeight = 'bold';
       watermark.innerText = 'MyBirdieBoard.com';
       canvasContainer.appendChild(watermark);
       
+      // Temporarily append to body for html2canvas
       canvasContainer.style.position = 'absolute';
       canvasContainer.style.left = '-9999px';
       document.body.appendChild(canvasContainer);
       
+      // Generate canvas with higher scale for better quality
       const canvas = await html2canvas(canvasContainer, {
         backgroundColor: '#ffffff',
-        scale: 2,
+        scale: 2, // Higher scale for better quality
         logging: false,
         allowTaint: true,
         useCORS: true,
         width: 1080,
-        height: 1080
+        height: 1080,
+        onclone: (clonedDoc) => {
+          // Force logo to load in cloned document
+          const logoInClone = clonedDoc.querySelector('img');
+          if (logoInClone) {
+            logoInClone.onload = () => console.log('Logo loaded in clone');
+            logoInClone.onerror = () => console.error('Logo failed to load in clone');
+          }
+        }
       });
       
+      // Clean up
       document.body.removeChild(canvasContainer);
       
+      // Return as blob
       return new Promise(resolve => {
         canvas.toBlob(blob => {
           resolve(blob);
