@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -201,34 +202,57 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         }
       });
       
+      // Create a square canvas container for Instagram (1080x1080)
+      const canvasContainer = document.createElement('div');
+      canvasContainer.style.width = '1080px';
+      canvasContainer.style.height = '1080px';
+      canvasContainer.style.position = 'relative';
+      canvasContainer.style.backgroundColor = '#ffffff';
+      canvasContainer.style.display = 'flex';
+      canvasContainer.style.flexDirection = 'column';
+      canvasContainer.style.justifyContent = 'center';
+      canvasContainer.style.alignItems = 'center';
+      canvasContainer.style.overflow = 'hidden';
+      
+      // Style the scorecard for the Instagram format
+      scorecardClone.style.width = '90%';
+      scorecardClone.style.maxWidth = '980px';
+      scorecardClone.style.borderRadius = '12px';
+      scorecardClone.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
+      scorecardClone.style.overflow = 'hidden';
+      
+      // Add the scorecard to the container
+      canvasContainer.appendChild(scorecardClone);
+      
       // Add a watermark
       const watermark = document.createElement('div');
       watermark.style.position = 'absolute';
-      watermark.style.bottom = '10px';
-      watermark.style.right = '10px';
-      watermark.style.fontSize = '14px';
+      watermark.style.bottom = '20px';
+      watermark.style.right = '20px';
+      watermark.style.fontSize = '16px';
       watermark.style.color = '#666';
       watermark.style.fontWeight = 'bold';
       watermark.innerText = 'MyBirdieBoard.com';
-      scorecardClone.style.position = 'relative';
-      scorecardClone.appendChild(watermark);
+      canvasContainer.appendChild(watermark);
       
       // Add to body temporarily (needed for html2canvas to work properly)
-      scorecardClone.style.position = 'absolute';
-      scorecardClone.style.left = '-9999px';
-      document.body.appendChild(scorecardClone);
+      canvasContainer.style.position = 'absolute';
+      canvasContainer.style.left = '-9999px';
+      document.body.appendChild(canvasContainer);
       
       // Generate image
-      const canvas = await html2canvas(scorecardClone, {
+      const canvas = await html2canvas(canvasContainer, {
         backgroundColor: '#ffffff',
         scale: 2, // Higher resolution
         logging: false,
         allowTaint: true,
         useCORS: true,
+        width: 1080,
+        height: 1080
       });
       
-      // Remove clone from body
-      document.body.removeChild(scorecardClone);
+      // Remove container from body
+      document.body.removeChild(canvasContainer);
       
       // Convert canvas to blob
       return new Promise(resolve => {
