@@ -1,9 +1,9 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Flag, Calendar, X, Share2 } from "lucide-react";
+import { Flag, Calendar, X, Share2, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase";
 import { updateUserHandicap } from "@/integrations/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +13,8 @@ import { ScoreTable } from "./ScoreTable";
 import { ScoreTableSummary } from "./ScoreTableSummary";
 import { ScorecardHeader } from "./ScorecardHeader";
 import { detectAchievements, createShareData } from "@/components/add-round/utils/scoreUtils";
+import { Button } from "@/components/ui/button";
+import html2canvas from "html2canvas";
 
 export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 }: RoundScorecardProps) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -22,6 +24,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
   const [isSaving, setIsSaving] = useState(false);
   const [showNet, setShowNet] = useState(false);
   const [shareSupported, setShareSupported] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const scorecardRef = useRef<HTMLDivElement>(null);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -182,18 +186,64 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
     console.log(`[RoundScorecard] Toggling net scores: ${!showNet} with handicap: ${handicapIndex}`);
   };
   
-  // New function to handle social sharing
-  const handleShareRound = async () => {
-    if (!navigator.share) {
-      toast({
-        title: "Sharing not supported",
-        description: "Your browser doesn't support the Web Share API.",
-        variant: "destructive",
-      });
-      return;
-    }
+  // Function to generate image from scorecard
+  const generateScorecardImage = async (): Promise<Blob | null> => {
+    if (!scorecardRef.current) return null;
     
     try {
+      setIsGeneratingImage(true);
+      
+      // Create a clone of the scorecard to modify for the image
+      const scorecardClone = scorecardRef.current.cloneNode(true) as HTMLElement;
+      
+      // Add a watermark
+      const watermark = document.createElement('div');
+      watermark.style.position = 'absolute';
+      watermark.style.bottom = '10px';
+      watermark.style.right = '10px';
+      watermark.style.fontSize = '14px';
+      watermark.style.color = '#666';
+      watermark.style.fontWeight = 'bold';
+      watermark.innerText = 'MyBirdieBoard.com';
+      scorecardClone.style.position = 'relative';
+      scorecardClone.appendChild(watermark);
+      
+      // Add to body temporarily (needed for html2canvas to work properly)
+      scorecardClone.style.position = 'absolute';
+      scorecardClone.style.left = '-9999px';
+      document.body.appendChild(scorecardClone);
+      
+      // Generate image
+      const canvas = await html2canvas(scorecardClone, {
+        backgroundColor: '#ffffff',
+        scale: 2, // Higher resolution
+        logging: false,
+        allowTaint: true,
+        useCORS: true,
+      });
+      
+      // Remove clone from body
+      document.body.removeChild(scorecardClone);
+      
+      // Convert canvas to blob
+      return new Promise(resolve => {
+        canvas.toBlob(blob => {
+          resolve(blob);
+        }, 'image/png', 0.95);
+      });
+    } catch (error) {
+      console.error('Error generating scorecard image:', error);
+      return null;
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+  
+  // Updated share function to include image
+  const handleShareRound = async () => {
+    try {
+      setIsGeneratingImage(true);
+      
       // Calculate total score and to par
       const totalScore = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
@@ -208,6 +258,13 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       // Detect achievements
       const achievements = detectAchievements(scores);
       
+      // Generate scorecard image
+      const scorecardBlob = await generateScorecardImage();
+      
+      if (!scorecardBlob) {
+        throw new Error('Failed to generate scorecard image');
+      }
+      
       // Create share data
       const shareData = createShareData(
         courseName,
@@ -217,16 +274,35 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         achievements
       );
       
-      // Use Web Share API
-      await navigator.share({
-        ...shareData,
-        url: "https://mybirdieboard.com"
-      });
-      
-      toast({
-        title: "Shared successfully",
-        description: "Your round was shared successfully!",
-      });
+      if (navigator.share) {
+        // Use Web Share API if available
+        await navigator.share({
+          title: shareData.title,
+          text: shareData.text,
+          files: [new File([scorecardBlob], 'scorecard.png', { type: 'image/png' })],
+          url: "https://mybirdieboard.com"
+        });
+        
+        toast({
+          title: "Shared successfully",
+          description: "Your round was shared successfully!",
+        });
+      } else {
+        // Fallback: download the image
+        const url = URL.createObjectURL(scorecardBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `scorecard-${round.id}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        toast({
+          title: "Image downloaded",
+          description: "Your scorecard image has been downloaded!",
+        });
+      }
     } catch (error) {
       console.error("Error sharing:", error);
       
@@ -240,6 +316,45 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         description: "There was an error sharing your round.",
         variant: "destructive",
       });
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
+  // Function to download scorecard as image
+  const handleDownloadScorecard = async () => {
+    try {
+      setIsGeneratingImage(true);
+      
+      const scorecardBlob = await generateScorecardImage();
+      
+      if (!scorecardBlob) {
+        throw new Error('Failed to generate scorecard image');
+      }
+      
+      // Create download link
+      const url = URL.createObjectURL(scorecardBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `scorecard-${round.id}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Image downloaded",
+        description: "Your scorecard image has been downloaded!",
+      });
+    } catch (error) {
+      console.error("Error downloading scorecard:", error);
+      toast({
+        title: "Error downloading",
+        description: "There was an error creating your scorecard image.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingImage(false);
     }
   };
 
@@ -282,16 +397,31 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
           showNet={showNet} 
         />
         
-        {/* Add Share Button - only if not editing and web share API is supported */}
-        {!isEditing && shareSupported && (
-          <div className="flex justify-center mt-4">
-            <button
+        {/* Add Share and Download Buttons - only if not editing */}
+        {!isEditing && (
+          <div className="flex justify-center mt-4 gap-2">
+            <Button
               onClick={handleShareRound}
+              disabled={isGeneratingImage}
               className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
             >
-              <Share2 className="h-4 w-4" />
-              Share This Round
-            </button>
+              {isGeneratingImage ? 'Generating...' : (
+                <>
+                  <Share2 className="h-4 w-4" />
+                  Share Scorecard
+                </>
+              )}
+            </Button>
+            
+            <Button
+              onClick={handleDownloadScorecard}
+              disabled={isGeneratingImage}
+              variant="outline"
+              className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-secondary/80 transition-colors"
+            >
+              <Download className="h-4 w-4" />
+              Download Image
+            </Button>
           </div>
         )}
       </div>
@@ -320,7 +450,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
 
         <div className="overflow-y-auto p-6">
           <Card className="border-secondary/30 shadow-md">
-            <CardContent className="pt-6">
+            <CardContent className="pt-6" ref={scorecardRef}>
               <ScorecardHeader 
                 round={round}
                 isEditing={isEditing}
