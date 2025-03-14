@@ -196,7 +196,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       // Configure main container for the image
       const canvasContainer = document.createElement('div');
       (canvasContainer as HTMLElement).style.width = '1080px';
-      (canvasContainer as HTMLElement).style.height = '1080px';
+      (canvasContainer as HTMLElement).style.height = '1200px';
       (canvasContainer as HTMLElement).style.position = 'fixed';
       (canvasContainer as HTMLElement).style.backgroundColor = '#ffffff';
       (canvasContainer as HTMLElement).style.display = 'flex';
@@ -246,6 +246,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       (scorecardClone as HTMLElement).style.overflow = 'hidden';
       (scorecardClone as HTMLElement).style.marginTop = '80px';
       (scorecardClone as HTMLElement).style.padding = '20px';
+      (scorecardClone as HTMLElement).style.paddingBottom = '60px';
       
       // Increase heading and text size
       const headings = scorecardClone.querySelectorAll('h3');
@@ -314,12 +315,20 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         (title as HTMLElement).style.marginBottom = '10px';
       });
       
+      // Create a dedicated summary section with more spacing to prevent overlap
+      const summarySection = scorecardClone.querySelector('.pt-2.border-t.space-y-2');
+      if (summarySection) {
+        (summarySection as HTMLElement).style.marginTop = '20px';
+        (summarySection as HTMLElement).style.paddingTop = '20px';
+        (summarySection as HTMLElement).style.marginBottom = '60px';
+      }
+      
       // Fix the summary section layout to prevent overlap with watermark
       const summaryRows = scorecardClone.querySelectorAll('.flex.justify-between');
       summaryRows.forEach(row => {
         (row as HTMLElement).style.fontSize = '24px';
         (row as HTMLElement).style.padding = '8px 0';
-        (row as HTMLElement).style.marginBottom = '6px';
+        (row as HTMLElement).style.marginBottom = '12px';
         
         // Adjust display of the scores to prevent watermark overlap
         const label = row.querySelector('span:first-child');
@@ -343,10 +352,10 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         }
       });
       
-      // Add watermark (positioned to avoid overlapping with scores)
+      // Add watermark (positioned higher to avoid overlapping with scores)
       const watermark = document.createElement('div');
       (watermark as HTMLElement).style.position = 'absolute';
-      (watermark as HTMLElement).style.bottom = '30px';
+      (watermark as HTMLElement).style.bottom = '20px';
       (watermark as HTMLElement).style.right = '30px';
       (watermark as HTMLElement).style.fontSize = '20px';
       (watermark as HTMLElement).style.color = '#666';
@@ -370,7 +379,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         allowTaint: true,
         useCORS: true,
         width: 1080,
-        height: 1080,
+        height: 1200,
         imageTimeout: 5000,
         onclone: (clonedDoc) => {
           // Ensure logo is loaded in cloned document

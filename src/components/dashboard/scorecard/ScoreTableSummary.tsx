@@ -30,7 +30,7 @@ export const ScoreTableSummary = ({ scores, handicapIndex = 0, showNet = false }
   });
   
   return (
-    <div className="pt-2 border-t space-y-2">
+    <div className="pt-2 border-t space-y-3"> {/* Increased spacing between rows */}
       <div className="flex justify-between">
         <span className="font-medium">Total Score:</span>
         <span className="ml-4">
@@ -52,7 +52,7 @@ export const ScoreTableSummary = ({ scores, handicapIndex = 0, showNet = false }
         </span>
       </div>
       {showNet && numericHandicap > 0 && (
-        <div className="flex justify-between text-sm text-muted-foreground mt-1">
+        <div className="flex justify-between text-sm text-muted-foreground mt-2"> {/* Increased margin top */}
           <span>Handicap applied:</span>
           <span className="ml-4">{numericHandicap}</span>
         </div>
