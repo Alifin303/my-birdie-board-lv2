@@ -183,128 +183,184 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
     try {
       setIsGeneratingImage(true);
       
+      // Create a deep clone of the scorecard DOM
       const scorecardClone = scorecardRef.current.cloneNode(true) as HTMLElement;
       
       // Remove UI controls from clone
       const uiControls = scorecardClone.querySelectorAll('button');
       uiControls.forEach(button => {
         if (!button.closest('table')) {
-          button.remove();
+          (button as HTMLElement).remove();
         }
       });
       
-      // Configure container for the image
+      // Configure main container for the image
       const canvasContainer = document.createElement('div');
-      canvasContainer.style.width = '1080px';
-      canvasContainer.style.height = '1080px';
-      canvasContainer.style.position = 'relative';
-      canvasContainer.style.backgroundColor = '#ffffff';
-      canvasContainer.style.display = 'flex';
-      canvasContainer.style.flexDirection = 'column';
-      canvasContainer.style.justifyContent = 'center';
-      canvasContainer.style.alignItems = 'center';
-      canvasContainer.style.overflow = 'hidden';
-      canvasContainer.style.padding = '40px'; // Reduced padding to utilize more space
+      (canvasContainer as HTMLElement).style.width = '1080px';
+      (canvasContainer as HTMLElement).style.height = '1080px';
+      (canvasContainer as HTMLElement).style.position = 'fixed';
+      (canvasContainer as HTMLElement).style.backgroundColor = '#ffffff';
+      (canvasContainer as HTMLElement).style.display = 'flex';
+      (canvasContainer as HTMLElement).style.flexDirection = 'column';
+      (canvasContainer as HTMLElement).style.justifyContent = 'flex-start';
+      (canvasContainer as HTMLElement).style.alignItems = 'center';
+      (canvasContainer as HTMLElement).style.overflow = 'hidden';
+      (canvasContainer as HTMLElement).style.padding = '20px';
+      (canvasContainer as HTMLElement).style.fontFamily = 'Arial, sans-serif';
       
-      // Set up logo container
+      // Create logo container
       const logoContainer = document.createElement('div');
-      logoContainer.style.position = 'absolute';
-      logoContainer.style.top = '30px';
-      logoContainer.style.left = '30px';
-      logoContainer.style.width = '150px'; // Increased logo size
-      logoContainer.style.height = 'auto';
+      (logoContainer as HTMLElement).style.position = 'absolute';
+      (logoContainer as HTMLElement).style.top = '20px';
+      (logoContainer as HTMLElement).style.left = '20px';
+      (logoContainer as HTMLElement).style.width = '180px';
+      (logoContainer as HTMLElement).style.height = 'auto';
+      (logoContainer as HTMLElement).style.zIndex = '10';
       
-      // Create logo image
+      // Add logo image
       const logoImg = document.createElement('img');
-      logoImg.src = '/logo.png'; // Make sure this path is correct
-      logoImg.style.width = '100%';
-      logoImg.style.height = 'auto';
-      logoImg.style.objectFit = 'contain';
+      logoImg.src = '/logo.png';
+      (logoImg as HTMLElement).style.width = '100%';
+      (logoImg as HTMLElement).style.height = 'auto';
+      (logoImg as HTMLElement).style.objectFit = 'contain';
       
-      // Add logo to container
+      // Force logo to load before generating canvas
+      await new Promise((resolve) => {
+        logoImg.onload = resolve;
+        logoImg.onerror = () => {
+          console.error('Failed to load logo');
+          resolve(null);
+        };
+        
+        // Set a timeout in case the image never loads
+        setTimeout(resolve, 1000);
+      });
+      
       logoContainer.appendChild(logoImg);
       canvasContainer.appendChild(logoContainer);
       
-      // Style scorecard
-      scorecardClone.style.width = '100%';
-      scorecardClone.style.maxWidth = '1000px'; // Use most of the available width
-      scorecardClone.style.borderRadius = '12px';
-      scorecardClone.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
-      scorecardClone.style.overflow = 'hidden';
-      scorecardClone.style.marginTop = '40px'; // Add more space at the top for logo
+      // Style scorecard for better display
+      (scorecardClone as HTMLElement).style.width = '90%';
+      (scorecardClone as HTMLElement).style.maxWidth = '980px';
+      (scorecardClone as HTMLElement).style.borderRadius = '12px';
+      (scorecardClone as HTMLElement).style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
+      (scorecardClone as HTMLElement).style.overflow = 'hidden';
+      (scorecardClone as HTMLElement).style.marginTop = '80px';
+      (scorecardClone as HTMLElement).style.padding = '20px';
       
-      // Increase heading sizes
+      // Increase heading and text size
       const headings = scorecardClone.querySelectorAll('h3');
       headings.forEach(heading => {
-        (heading as HTMLElement).style.fontSize = '28px'; // Increased from 22px
-        (heading as HTMLElement).style.fontWeight = '600';
-        (heading as HTMLElement).style.marginBottom = '10px';
+        (heading as HTMLElement).style.fontSize = '32px';
+        (heading as HTMLElement).style.fontWeight = '700';
+        (heading as HTMLElement).style.marginBottom = '15px';
       });
       
-      // Increase paragraph text size
       const courseInfo = scorecardClone.querySelectorAll('p');
       courseInfo.forEach(p => {
-        (p as HTMLElement).style.fontSize = '22px'; // Increased from 18px
-        (p as HTMLElement).style.marginBottom = '8px';
+        (p as HTMLElement).style.fontSize = '24px';
+        (p as HTMLElement).style.marginBottom = '10px';
+        (p as HTMLElement).style.lineHeight = '1.4';
       });
       
-      // Increase table text size
+      // Style table content and cells
       const tables = scorecardClone.querySelectorAll('table');
       tables.forEach(table => {
-        (table as HTMLElement).style.fontSize = '22px'; // Increased from 18px
+        (table as HTMLElement).style.fontSize = '22px';
         (table as HTMLElement).style.width = '100%';
-        (table as HTMLElement).style.tableLayout = 'fixed';
+        (table as HTMLElement).style.borderCollapse = 'separate';
+        (table as HTMLElement).style.borderSpacing = '2px';
+        (table as HTMLElement).style.marginBottom = '20px';
       });
       
-      // Increase cell padding and center content
-      const tableCells = scorecardClone.querySelectorAll('td, th');
+      // Fix table headers
+      const tableHeaders = scorecardClone.querySelectorAll('th');
+      tableHeaders.forEach(th => {
+        (th as HTMLElement).style.padding = '12px 8px';
+        (th as HTMLElement).style.textAlign = 'center';
+        (th as HTMLElement).style.fontWeight = '600';
+        (th as HTMLElement).style.fontSize = '22px';
+      });
+      
+      // Fix table cells alignment and padding
+      const tableCells = scorecardClone.querySelectorAll('td');
       tableCells.forEach(cell => {
-        (cell as HTMLElement).style.padding = '10px'; // Increased from 8px
-        (cell as HTMLElement).style.verticalAlign = 'middle'; // Ensure vertical centering
+        (cell as HTMLElement).style.padding = '12px 8px';
+        (cell as HTMLElement).style.verticalAlign = 'middle';
         (cell as HTMLElement).style.textAlign = 'center';
+        (cell as HTMLElement).style.fontSize = '22px';
       });
       
-      // Center numeric values in cells
-      const scoreNumbers = scorecardClone.querySelectorAll('.w-7.h-7');
-      scoreNumbers.forEach(num => {
-        (num as HTMLElement).style.display = 'flex';
-        (num as HTMLElement).style.alignItems = 'center';
-        (num as HTMLElement).style.justifyContent = 'center';
-        (num as HTMLElement).style.margin = '0 auto';
+      // Fix score numbers alignment
+      const scoreContainers = scorecardClone.querySelectorAll('td > div');
+      scoreContainers.forEach(container => {
+        if (container.parentElement?.tagName === 'TD') {
+          (container as HTMLElement).style.display = 'flex';
+          (container as HTMLElement).style.alignItems = 'center';
+          (container as HTMLElement).style.justifyContent = 'center';
+          (container as HTMLElement).style.height = '40px';
+          (container as HTMLElement).style.width = '40px';
+          (container as HTMLElement).style.margin = '0 auto';
+          (container as HTMLElement).style.fontSize = '22px';
+          (container as HTMLElement).style.fontWeight = '500';
+        }
       });
+      
+      // Style section titles (Front 9, Back 9)
+      const sectionTitles = scorecardClone.querySelectorAll('h4');
+      sectionTitles.forEach(title => {
+        (title as HTMLElement).style.fontSize = '28px';
+        (title as HTMLElement).style.fontWeight = '600';
+        (title as HTMLElement).style.marginTop = '15px';
+        (title as HTMLElement).style.marginBottom = '10px';
+      });
+      
+      // Style summary section
+      const summaryRows = scorecardClone.querySelectorAll('.flex.justify-between');
+      summaryRows.forEach(row => {
+        (row as HTMLElement).style.fontSize = '24px';
+        (row as HTMLElement).style.padding = '8px 0';
+        (row as HTMLElement).style.borderBottom = '1px solid #eee';
+      });
+      
+      // Add watermark
+      const watermark = document.createElement('div');
+      (watermark as HTMLElement).style.position = 'absolute';
+      (watermark as HTMLElement).style.bottom = '20px';
+      (watermark as HTMLElement).style.right = '20px';
+      (watermark as HTMLElement).style.fontSize = '20px';
+      (watermark as HTMLElement).style.color = '#666';
+      (watermark as HTMLElement).style.fontWeight = 'bold';
+      watermark.innerText = 'MyBirdieBoard.com';
+      canvasContainer.appendChild(watermark);
       
       // Add scorecard to container
       canvasContainer.appendChild(scorecardClone);
       
-      // Add watermark
-      const watermark = document.createElement('div');
-      watermark.style.position = 'absolute';
-      watermark.style.bottom = '20px';
-      watermark.style.right = '20px';
-      watermark.style.fontSize = '18px';
-      watermark.style.color = '#666';
-      watermark.style.fontWeight = 'bold';
-      watermark.innerText = 'MyBirdieBoard.com';
-      canvasContainer.appendChild(watermark);
-      
       // Temporarily append to body for html2canvas
-      canvasContainer.style.position = 'absolute';
-      canvasContainer.style.left = '-9999px';
+      (canvasContainer as HTMLElement).style.left = '-9999px';
       document.body.appendChild(canvasContainer);
       
       // Generate canvas with higher scale for better quality
       const canvas = await html2canvas(canvasContainer, {
         backgroundColor: '#ffffff',
-        scale: 2, // Higher scale for better quality
+        scale: 2,
         logging: false,
         allowTaint: true,
         useCORS: true,
         width: 1080,
         height: 1080,
+        imageTimeout: 5000,
         onclone: (clonedDoc) => {
-          // Force logo to load in cloned document
+          // Ensure logo is loaded in cloned document
           const logoInClone = clonedDoc.querySelector('img');
           if (logoInClone) {
+            logoInClone.crossOrigin = 'anonymous';
+            
+            // Try to force load the logo
+            const baseUrl = window.location.origin;
+            logoInClone.src = `${baseUrl}/logo.png?t=${new Date().getTime()}`;
+            
             logoInClone.onload = () => console.log('Logo loaded in clone');
             logoInClone.onerror = () => console.error('Logo failed to load in clone');
           }
@@ -488,3 +544,4 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
     </Dialog>
   );
 };
+
