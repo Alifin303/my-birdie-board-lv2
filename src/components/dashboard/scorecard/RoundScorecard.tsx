@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Flag, Calendar, X } from "lucide-react";
+import { Flag, Calendar, X, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase";
 import { updateUserHandicap } from "@/integrations/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +12,7 @@ import { RoundScorecardProps, HoleScore } from "./types";
 import { ScoreTable } from "./ScoreTable";
 import { ScoreTableSummary } from "./ScoreTableSummary";
 import { ScorecardHeader } from "./ScorecardHeader";
+import { detectAchievements, createShareData } from "@/components/add-round/utils/scoreUtils";
 
 export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 }: RoundScorecardProps) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -19,11 +21,15 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showNet, setShowNet] = useState(false);
+  const [shareSupported, setShareSupported] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    // Check if Web Share API is supported
+    setShareSupported(!!navigator.share);
+    
     if (round && isOpen) {
       console.log("============ ROUND SCORECARD OPENED ============");
       console.log("Round ID:", round.id);
@@ -175,6 +181,67 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
     setShowNet(prev => !prev);
     console.log(`[RoundScorecard] Toggling net scores: ${!showNet} with handicap: ${handicapIndex}`);
   };
+  
+  // New function to handle social sharing
+  const handleShareRound = async () => {
+    if (!navigator.share) {
+      toast({
+        title: "Sharing not supported",
+        description: "Your browser doesn't support the Web Share API.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      // Calculate total score and to par
+      const totalScore = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
+      const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
+      const toPar = totalScore - totalPar;
+      
+      // Get course and tee name
+      const courseName = round.courses 
+        ? `${round.courses.clubName} - ${round.courses.courseName}` 
+        : "Unknown Course";
+      const teeName = round.tee_name || "Standard";
+      
+      // Detect achievements
+      const achievements = detectAchievements(scores);
+      
+      // Create share data
+      const shareData = createShareData(
+        courseName,
+        teeName,
+        toPar,
+        totalScore,
+        achievements
+      );
+      
+      // Use Web Share API
+      await navigator.share({
+        ...shareData,
+        url: "https://mybirdieboard.com"
+      });
+      
+      toast({
+        title: "Shared successfully",
+        description: "Your round was shared successfully!",
+      });
+    } catch (error) {
+      console.error("Error sharing:", error);
+      
+      // User cancelled sharing
+      if ((error as Error).name === 'AbortError') {
+        return;
+      }
+      
+      toast({
+        title: "Error sharing",
+        description: "There was an error sharing your round.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const renderHoleScores = () => {
     if (!scores || scores.length === 0) {
@@ -214,6 +281,19 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
           handicapIndex={handicapIndex} 
           showNet={showNet} 
         />
+        
+        {/* Add Share Button - only if not editing and web share API is supported */}
+        {!isEditing && shareSupported && (
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={handleShareRound}
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              <Share2 className="h-4 w-4" />
+              Share This Round
+            </button>
+          </div>
+        )}
       </div>
     );
   };
