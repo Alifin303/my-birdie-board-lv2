@@ -227,24 +227,24 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       
       const headings = scorecardClone.querySelectorAll('h3');
       headings.forEach(heading => {
-        heading.style.fontSize = '22px';
-        heading.style.fontWeight = '600';
+        (heading as HTMLElement).style.fontSize = '22px';
+        (heading as HTMLElement).style.fontWeight = '600';
       });
       
       const courseInfo = scorecardClone.querySelectorAll('p');
       courseInfo.forEach(p => {
-        p.style.fontSize = '18px';
-        p.style.marginBottom = '6px';
+        (p as HTMLElement).style.fontSize = '18px';
+        (p as HTMLElement).style.marginBottom = '6px';
       });
       
       const tables = scorecardClone.querySelectorAll('table');
       tables.forEach(table => {
-        table.style.fontSize = '18px';
+        (table as HTMLElement).style.fontSize = '18px';
       });
       
       const tableCells = scorecardClone.querySelectorAll('td, th');
       tableCells.forEach(cell => {
-        cell.style.padding = '8px';
+        (cell as HTMLElement).style.padding = '8px';
       });
       
       canvasContainer.appendChild(scorecardClone);
