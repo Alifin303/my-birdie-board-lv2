@@ -1,11 +1,10 @@
 
 # Specific routes
-/about              /about              200
-/faq                /faq                200
-/quiz               /quiz               200
-/dashboard          /dashboard          200
-/privacy            /privacy            200
+/about              /index.html        200
+/faq                /index.html        200
+/quiz               /index.html        200
+/dashboard          /index.html        200
+/privacy            /index.html        200
 
 # Handle dynamic routes and client-side routing
-/*                  /index.html         200
-
+/*                  /index.html        200
