@@ -30,21 +30,21 @@ export const ScoreTableSummary = ({ scores, handicapIndex = 0, showNet = false }
   });
   
   return (
-    <div className="pt-2 border-t">
+    <div className="pt-2 border-t space-y-2">
       <div className="flex justify-between">
         <span className="font-medium">Total Score:</span>
-        <span>
+        <span className="ml-4">
           {showNet && numericHandicap > 0 ? netScore : totalScore}
           {showNet && numericHandicap > 0 ? ` (${totalScore} gross)` : ''}
         </span>
       </div>
       <div className="flex justify-between">
         <span className="font-medium">Total Par:</span>
-        <span>{totalPar}</span>
+        <span className="ml-4">{totalPar}</span>
       </div>
       <div className="flex justify-between">
         <span className="font-medium">To Par:</span>
-        <span>
+        <span className="ml-4">
           {showNet && numericHandicap > 0 
             ? `${netToPar > 0 ? '+' : ''}${netToPar}`
             : `${toPar > 0 ? '+' : ''}${toPar}`}
@@ -54,7 +54,7 @@ export const ScoreTableSummary = ({ scores, handicapIndex = 0, showNet = false }
       {showNet && numericHandicap > 0 && (
         <div className="flex justify-between text-sm text-muted-foreground mt-1">
           <span>Handicap applied:</span>
-          <span>{numericHandicap}</span>
+          <span className="ml-4">{numericHandicap}</span>
         </div>
       )}
     </div>

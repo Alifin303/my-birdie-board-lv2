@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -291,7 +290,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         (cell as HTMLElement).style.fontSize = '22px';
       });
       
-      // Fix score numbers alignment
+      // Fix score numbers alignment - make sure they're centered in their boxes
       const scoreContainers = scorecardClone.querySelectorAll('td > div');
       scoreContainers.forEach(container => {
         if (container.parentElement?.tagName === 'TD') {
@@ -315,22 +314,44 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         (title as HTMLElement).style.marginBottom = '10px';
       });
       
-      // Style summary section
+      // Fix the summary section layout to prevent overlap with watermark
       const summaryRows = scorecardClone.querySelectorAll('.flex.justify-between');
       summaryRows.forEach(row => {
         (row as HTMLElement).style.fontSize = '24px';
         (row as HTMLElement).style.padding = '8px 0';
-        (row as HTMLElement).style.borderBottom = '1px solid #eee';
+        (row as HTMLElement).style.marginBottom = '6px';
+        
+        // Adjust display of the scores to prevent watermark overlap
+        const label = row.querySelector('span:first-child');
+        const value = row.querySelector('span:last-child');
+        
+        if (label && value) {
+          // Change the layout to keep the score closer to the label
+          (row as HTMLElement).style.display = 'flex';
+          (row as HTMLElement).style.flexDirection = 'row';
+          (row as HTMLElement).style.justifyContent = 'flex-start';
+          (row as HTMLElement).style.gap = '12px';
+          
+          // Style the label
+          (label as HTMLElement).style.fontWeight = 'bold';
+          (label as HTMLElement).style.minWidth = '120px';
+          
+          // Remove trailing colon from label if present
+          if (label.textContent?.endsWith(':')) {
+            label.textContent = label.textContent.slice(0, -1);
+          }
+        }
       });
       
-      // Add watermark
+      // Add watermark (positioned to avoid overlapping with scores)
       const watermark = document.createElement('div');
       (watermark as HTMLElement).style.position = 'absolute';
-      (watermark as HTMLElement).style.bottom = '20px';
-      (watermark as HTMLElement).style.right = '20px';
+      (watermark as HTMLElement).style.bottom = '30px';
+      (watermark as HTMLElement).style.right = '30px';
       (watermark as HTMLElement).style.fontSize = '20px';
       (watermark as HTMLElement).style.color = '#666';
       (watermark as HTMLElement).style.fontWeight = 'bold';
+      (watermark as HTMLElement).style.zIndex = '5';
       watermark.innerText = 'MyBirdieBoard.com';
       canvasContainer.appendChild(watermark);
       
@@ -544,4 +565,3 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
     </Dialog>
   );
 };
-
