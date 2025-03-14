@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -98,7 +97,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         teeId: round.tee_id
       });
       
-      // Calculate a proper net score based on current handicap
       const netScore = Math.round(totalStrokes - handicapIndex);
       const toParNet = netScore - totalPar;
       
@@ -128,11 +126,9 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         throw error;
       }
       
-      // Get current user ID to update handicap
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session) {
-        // Fetch all user rounds to recalculate handicap
         const { data: userRounds, error: userRoundsError } = await supabase
           .from('rounds')
           .select('gross_score')
@@ -142,15 +138,12 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         if (userRoundsError) {
           console.error("Error fetching user rounds for handicap update:", userRoundsError);
         } else if (userRounds && userRounds.length > 0) {
-          // Extract gross scores for handicap calculation
           const grossScores = userRounds.map(r => r.gross_score);
           console.log("Updating handicap based on rounds:", grossScores);
           
-          // Update the user's handicap
           const newHandicap = await updateUserHandicap(session.user.id, grossScores);
           console.log("Updated handicap to:", newHandicap);
           
-          // Show handicap update in toast
           toast({
             title: "Handicap Updated",
             description: `Your handicap index is now ${newHandicap}`,
@@ -183,26 +176,21 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
     console.log(`[RoundScorecard] Toggling net scores: ${!showNet} with handicap: ${handicapIndex}`);
   };
   
-  // Function to generate image from scorecard without UI controls
   const generateScorecardImage = async (): Promise<Blob | null> => {
     if (!scorecardRef.current) return null;
     
     try {
       setIsGeneratingImage(true);
       
-      // Create a clone of the scorecard to modify for the image
       const scorecardClone = scorecardRef.current.cloneNode(true) as HTMLElement;
       
-      // Remove UI controls from the clone (Edit button, Show Net Score button, etc.)
       const uiControls = scorecardClone.querySelectorAll('button');
       uiControls.forEach(button => {
-        // Remove all buttons except those inside tables (which may be part of the scorecard data)
         if (!button.closest('table')) {
           button.remove();
         }
       });
       
-      // Create a square canvas container for Instagram (1080x1080)
       const canvasContainer = document.createElement('div');
       canvasContainer.style.width = '1080px';
       canvasContainer.style.height = '1080px';
@@ -213,18 +201,54 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       canvasContainer.style.justifyContent = 'center';
       canvasContainer.style.alignItems = 'center';
       canvasContainer.style.overflow = 'hidden';
+      canvasContainer.style.padding = '60px 40px';
       
-      // Style the scorecard for the Instagram format
-      scorecardClone.style.width = '90%';
-      scorecardClone.style.maxWidth = '980px';
+      const logoContainer = document.createElement('div');
+      logoContainer.style.position = 'absolute';
+      logoContainer.style.top = '20px';
+      logoContainer.style.left = '20px';
+      logoContainer.style.width = '120px';
+      logoContainer.style.height = 'auto';
+      
+      const logoImg = document.createElement('img');
+      logoImg.src = '/logo.png';
+      logoImg.style.width = '100%';
+      logoImg.style.height = 'auto';
+      logoImg.style.objectFit = 'contain';
+      
+      logoContainer.appendChild(logoImg);
+      canvasContainer.appendChild(logoContainer);
+      
+      scorecardClone.style.width = '100%';
+      scorecardClone.style.maxWidth = '1000px';
       scorecardClone.style.borderRadius = '12px';
       scorecardClone.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
       scorecardClone.style.overflow = 'hidden';
       
-      // Add the scorecard to the container
+      const headings = scorecardClone.querySelectorAll('h3');
+      headings.forEach(heading => {
+        heading.style.fontSize = '22px';
+        heading.style.fontWeight = '600';
+      });
+      
+      const courseInfo = scorecardClone.querySelectorAll('p');
+      courseInfo.forEach(p => {
+        p.style.fontSize = '18px';
+        p.style.marginBottom = '6px';
+      });
+      
+      const tables = scorecardClone.querySelectorAll('table');
+      tables.forEach(table => {
+        table.style.fontSize = '18px';
+      });
+      
+      const tableCells = scorecardClone.querySelectorAll('td, th');
+      tableCells.forEach(cell => {
+        cell.style.padding = '8px';
+      });
+      
       canvasContainer.appendChild(scorecardClone);
       
-      // Add a watermark
       const watermark = document.createElement('div');
       watermark.style.position = 'absolute';
       watermark.style.bottom = '20px';
@@ -235,15 +259,13 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       watermark.innerText = 'MyBirdieBoard.com';
       canvasContainer.appendChild(watermark);
       
-      // Add to body temporarily (needed for html2canvas to work properly)
       canvasContainer.style.position = 'absolute';
       canvasContainer.style.left = '-9999px';
       document.body.appendChild(canvasContainer);
       
-      // Generate image
       const canvas = await html2canvas(canvasContainer, {
         backgroundColor: '#ffffff',
-        scale: 2, // Higher resolution
+        scale: 2,
         logging: false,
         allowTaint: true,
         useCORS: true,
@@ -251,10 +273,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         height: 1080
       });
       
-      // Remove container from body
       document.body.removeChild(canvasContainer);
       
-      // Convert canvas to blob
       return new Promise(resolve => {
         canvas.toBlob(blob => {
           resolve(blob);
@@ -268,18 +288,15 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
     }
   };
   
-  // Function to download scorecard as image
   const handleDownloadScorecard = async () => {
     try {
       setIsGeneratingImage(true);
       
-      // Calculate total score and to par for filename
       const totalScore = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
       const toPar = totalScore - totalPar;
       const toParStr = toPar > 0 ? `plus${toPar}` : toPar < 0 ? `minus${Math.abs(toPar)}` : 'even';
       
-      // Generate a clean filename
       const courseName = (round.courses?.courseName || 'golf').replace(/\s+/g, '-').toLowerCase();
       const scoreDate = roundDate ? roundDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
       const fileName = `${courseName}-${scoreDate}-${totalScore}-${toParStr}.png`;
@@ -290,7 +307,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         throw new Error('Failed to generate scorecard image');
       }
       
-      // Create download link
       const url = URL.createObjectURL(scorecardBlob);
       const a = document.createElement('a');
       a.href = url;
@@ -355,7 +371,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
           showNet={showNet} 
         />
         
-        {/* Download button - only if not editing */}
         {!isEditing && (
           <div className="flex justify-center mt-4">
             <Button
