@@ -10,6 +10,13 @@ Disallow: /auth/confirm
 Disallow: /auth/reset-password
 Disallow: /admin
 
+# Explicitly allow important pages
+Allow: /about
+Allow: /faq
+Allow: /quiz
+Allow: /dashboard
+Allow: /privacy
+
 Sitemap: https://mybirdieboard.com/sitemap.xml
 
 # Prevent media crawling for bandwidth
