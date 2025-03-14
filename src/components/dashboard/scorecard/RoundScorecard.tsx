@@ -300,8 +300,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl bg-background round-scorecard-content overflow-y-auto sm:max-h-[90vh]">
-        <DialogHeader className="golf-header rounded-t-lg px-6 py-4 -mx-6 -mt-6 mb-2 sticky top-0 z-10">
+      <DialogContent className="max-w-3xl bg-background round-scorecard-content overflow-y-auto sm:max-h-[90vh] p-0">
+        <DialogHeader className="golf-header rounded-t-lg p-6 sticky top-0 z-10">
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Flag className="h-5 w-5" /> Round Scorecard
           </DialogTitle>
@@ -318,7 +318,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
           </DialogClose>
         </DialogHeader>
 
-        <div className="overflow-y-auto">
+        <div className="overflow-y-auto p-6">
           <Card className="border-secondary/30 shadow-md">
             <CardContent className="pt-6">
               <ScorecardHeader 
