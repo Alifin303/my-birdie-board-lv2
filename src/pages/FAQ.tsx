@@ -62,7 +62,7 @@ export default function FAQ() {
                   "name": "How much does MyBirdieBoard cost?",
                   "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "We offer a simple, affordable monthly subscription that gives you full access to score tracking, course leaderboards, and round history. Check out our website for the latest pricing!"
+                    "text": "MyBirdieBoard costs £2.99 per month — cancel anytime. The price is shown in GBP but will be converted to your local currency at checkout. Plus, all new subscribers get a 7-day free trial — cancel before the trial ends if it's not for you, and you won't be charged."
                   }
                 },
                 {
@@ -174,7 +174,7 @@ export default function FAQ() {
                 </AccordionTrigger>
                 <AccordionContent>
                   <p className="text-muted-foreground">
-                    We offer a simple, affordable monthly subscription that gives you full access to score tracking, course leaderboards, and round history. Check out our website for the latest pricing!
+                    MyBirdieBoard costs £2.99 per month — cancel anytime. The price is shown in GBP but will be converted to your local currency at checkout. Plus, all new subscribers get a 7-day free trial — cancel before the trial ends if it's not for you, and you won't be charged.
                   </p>
                 </AccordionContent>
               </AccordionItem>
