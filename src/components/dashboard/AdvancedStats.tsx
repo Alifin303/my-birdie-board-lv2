@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Target, Golf, AlertCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, Target, GolfBall, AlertCircle } from "lucide-react";
 import { Round } from "./types";
 
 interface AdvancedStatsProps {
@@ -79,7 +79,7 @@ export const AdvancedStats = ({ userRounds, isLoading }: AdvancedStatsProps) => 
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="font-medium flex items-center gap-1.5">
-                    <Golf className="h-4 w-4 text-primary" />
+                    <GolfBall className="h-4 w-4 text-primary" />
                     Putting
                   </h3>
                   <ul className="mt-2 space-y-1 text-sm">
