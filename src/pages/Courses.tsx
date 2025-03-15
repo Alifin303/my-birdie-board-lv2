@@ -35,11 +35,9 @@ const Courses = () => {
           const courseIds = data.map(course => course.id);
           
           if (courseIds.length > 0) {
+            // Using a raw SQL query with .rpc() instead of .group()
             const { data: roundCounts, error: roundsError } = await supabase
-              .from('rounds')
-              .select('course_id, count(*)')
-              .in('course_id', courseIds)
-              .group('course_id');
+              .rpc('get_course_round_counts', { course_ids: courseIds });
               
             if (!roundsError && roundCounts) {
               // Create a map of course_id to count
@@ -56,7 +54,22 @@ const Courses = () => {
               
               setCourses(coursesWithCounts);
             } else {
-              setCourses(data);
+              // Alternative approach: fetch counts individually
+              const coursesWithCounts = await Promise.all(
+                data.map(async (course) => {
+                  const { count, error: countError } = await supabase
+                    .from('rounds')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('course_id', course.id);
+                    
+                  return {
+                    ...course,
+                    roundsCount: countError ? 0 : (count || 0)
+                  };
+                })
+              );
+              
+              setCourses(coursesWithCounts);
             }
           } else {
             setCourses([]);
