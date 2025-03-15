@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams, Link } from "react-router-dom";
@@ -8,6 +7,7 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MainStats, HandicapCircle } from "@/components/dashboard/StatsDisplay";
 import { CourseStatsTable, CourseRoundHistory } from "@/components/dashboard/CourseStats";
 import { DetailedStats } from "@/components/dashboard/DetailedStats";
+import { AdvancedStats } from "@/components/dashboard/AdvancedStats";
 import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
 import { useToast } from "@/hooks/use-toast";
 import { clearSubscriptionCache } from "@/integrations/supabase/subscription/subscription-utils";
@@ -248,7 +248,6 @@ export default function Dashboard() {
         
         {!selectedCourseId && (
           <>
-            {/* Updated stats display with better mobile padding */}
             <div className="bg-white/90 rounded-lg shadow-md">
               <MainStats 
                 userRounds={userRounds}
@@ -278,6 +277,13 @@ export default function Dashboard() {
                   profileHandicap={handicapFromProfile}
                 />
               </div>
+            </div>
+            
+            <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
+              <AdvancedStats 
+                userRounds={userRounds}
+                isLoading={roundsLoading}
+              />
             </div>
           </>
         )}
