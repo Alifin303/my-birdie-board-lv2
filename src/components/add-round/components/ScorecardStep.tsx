@@ -1,7 +1,8 @@
+
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, CalendarIcon, AlertCircle } from "lucide-react";
+import { Loader2, CalendarIcon, AlertCircle, BarChart } from "lucide-react";
 import { 
   Select,
   SelectContent,
@@ -14,7 +15,10 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { HoleSelection, Score, SimplifiedCourseDetail, ScoreSummary, SimplifiedTee } from "../types";
+import { ScoreTable } from "@/components/dashboard/scorecard/ScoreTable";
 
 interface ScorecardStepProps {
   selectedCourse: SimplifiedCourseDetail | null;
@@ -23,7 +27,8 @@ interface ScorecardStepProps {
   handleTeeChange: (teeId: string) => void;
   handleDateSelect: (date: Date | undefined) => void;
   handleHoleSelectionChange: (selection: HoleSelection) => void;
-  handleScoreChange: (index: number, field: 'strokes' | 'putts', value: string) => void;
+  handleScoreChange: (index: number, field: 'strokes' | 'putts' | 'penalties', value: string) => void;
+  handleGIRChange?: (index: number, value: boolean) => void;
   handleBackToSearch: () => void;
   handleSaveRound: () => Promise<void>;
   handleCloseModal: () => void;
@@ -45,6 +50,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   handleDateSelect,
   handleHoleSelectionChange,
   handleScoreChange,
+  handleGIRChange,
   handleBackToSearch,
   handleSaveRound,
   handleCloseModal,
@@ -58,6 +64,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   today
 }) => {
   const [localSelectedTeeId, setLocalSelectedTeeId] = useState<string | null>(selectedTeeId);
+  const [showDetailedStats, setShowDetailedStats] = useState(false);
 
   useEffect(() => {
     if (selectedTeeId !== localSelectedTeeId) {
@@ -140,6 +147,9 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
     if (lowerName.includes('silver')) return '#C0C0C0';
     return '#777';
   };
+
+  const frontNineScores = scores.filter(score => score.hole <= 9);
+  const backNineScores = scores.filter(score => score.hole > 9);
 
   return (
     <div>
@@ -284,134 +294,45 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </div>
       </div>
       
-      <div className="mb-4">
-        <h3 className="text-sm font-medium mb-2">
-          Front Nine 
-          {selectedTee && (
-            <span className="ml-2 text-xs px-2 py-0.5 rounded-full" style={{ 
-              backgroundColor: 'rgba(0,0,0,0.05)',
-              color: getTeeColor(selectedTee.name),
-              borderColor: getTeeColor(selectedTee.name),
-              borderWidth: '1px'
-            }}>
-              {selectedTee.name} Tees
-            </span>
-          )}
-        </h3>
-        <div className="border rounded-md">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="border-b bg-muted/50">
-                  <th className="px-2 py-2 text-left text-sm font-medium whitespace-nowrap">Hole</th>
-                  {scores.filter(score => score.hole <= 9).map(score => (
-                    <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
-                  ))}
-                  <th className="px-2 py-2 text-center text-sm font-medium">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b">
-                  <td className="px-2 py-2 text-sm font-medium">Par</td>
-                  {scores.filter(score => score.hole <= 9).map(score => (
-                    <td key={`par-${score.hole}`} className="px-1 py-2 text-center">
-                      <div className="bg-muted/40 border border-muted rounded-md w-7 h-7 flex items-center justify-center font-medium mx-auto">
-                        {score.par}
-                      </div>
-                    </td>
-                  ))}
-                  <td className="px-2 py-2 text-center font-medium">{scoreSummary.front9Par}</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="px-2 py-2 text-sm font-medium">Strokes</td>
-                  {scores.filter(score => score.hole <= 9).map((score, index) => (
-                    <td key={`strokes-${score.hole}`} className="px-1 py-2 text-center">
-                      <Input
-                        type="number"
-                        min="1"
-                        max="20"
-                        value={score.strokes || ''}
-                        onChange={(e) => handleScoreChange(index, 'strokes', e.target.value)}
-                        className="w-9 h-7 text-center mx-auto px-1"
-                        inputMode="numeric"
-                      />
-                    </td>
-                  ))}
-                  <td className="px-2 py-2 text-center font-medium">
-                    {scoreSummary.front9Strokes || '-'}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+      <div className="flex items-center space-x-2 mb-4">
+        <Switch
+          id="detailed-stats"
+          checked={showDetailedStats}
+          onCheckedChange={setShowDetailedStats}
+        />
+        <Label htmlFor="detailed-stats" className="flex items-center cursor-pointer">
+          <BarChart className="h-4 w-4 mr-1.5 text-primary" />
+          <span>Track advanced stats (putts, GIR, penalties)</span>
+        </Label>
       </div>
       
-      <div className="mb-4">
-        <h3 className="text-sm font-medium mb-2">
-          Back Nine
-          {selectedTee && (
-            <span className="ml-2 text-xs px-2 py-0.5 rounded-full" style={{ 
-              backgroundColor: 'rgba(0,0,0,0.05)',
-              color: getTeeColor(selectedTee.name),
-              borderColor: getTeeColor(selectedTee.name),
-              borderWidth: '1px'
-            }}>
-              {selectedTee.name} Tees
-            </span>
-          )}
-        </h3>
-        <div className="border rounded-md">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="border-b bg-muted/50">
-                  <th className="px-2 py-2 text-left text-sm font-medium whitespace-nowrap">Hole</th>
-                  {scores.filter(score => score.hole > 9).map(score => (
-                    <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
-                  ))}
-                  <th className="px-2 py-2 text-center text-sm font-medium">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b">
-                  <td className="px-2 py-2 text-sm font-medium">Par</td>
-                  {scores.filter(score => score.hole > 9).map(score => (
-                    <td key={`par-${score.hole}`} className="px-1 py-2 text-center">
-                      <div className="bg-muted/40 border border-muted rounded-md w-7 h-7 flex items-center justify-center font-medium mx-auto">
-                        {score.par}
-                      </div>
-                    </td>
-                  ))}
-                  <td className="px-2 py-2 text-center font-medium">{scoreSummary.back9Par}</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="px-2 py-2 text-sm font-medium">Strokes</td>
-                  {scores.filter(score => score.hole > 9).map((score, index) => {
-                    const adjustedIndex = index + scores.filter(s => s.hole <= 9).length;
-                    return (
-                      <td key={`strokes-${score.hole}`} className="px-1 py-2 text-center">
-                        <Input
-                          type="number"
-                          min="1"
-                          max="20"
-                          value={score.strokes || ''}
-                          onChange={(e) => handleScoreChange(adjustedIndex, 'strokes', e.target.value)}
-                          className="w-9 h-7 text-center mx-auto px-1"
-                          inputMode="numeric"
-                        />
-                      </td>
-                    );
-                  })}
-                  <td className="px-2 py-2 text-center font-medium">
-                    {scoreSummary.back9Strokes || '-'}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+      {frontNineScores.length > 0 && (
+        <div className="mb-4">
+          <ScoreTable
+            scores={frontNineScores}
+            isEditing={true}
+            handleScoreChange={handleScoreChange}
+            handleGIRChange={handleGIRChange}
+            title="Front Nine"
+            startIndex={0}
+            showDetailedStats={showDetailedStats}
+          />
         </div>
-      </div>
+      )}
+      
+      {backNineScores.length > 0 && (
+        <div className="mb-4">
+          <ScoreTable
+            scores={backNineScores}
+            isEditing={true}
+            handleScoreChange={handleScoreChange}
+            handleGIRChange={handleGIRChange}
+            title="Back Nine"
+            startIndex={frontNineScores.length}
+            showDetailedStats={showDetailedStats}
+          />
+        </div>
+      )}
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 items-start">
         <Card className="p-3">
@@ -437,6 +358,14 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
                   '-'}
               </span>
             </div>
+            {showDetailedStats && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Putts:</span>
+                <span className="font-medium">
+                  {scoreSummary.puttsRecorded ? scoreSummary.totalPutts : '-'}
+                </span>
+              </div>
+            )}
           </div>
         </Card>
         

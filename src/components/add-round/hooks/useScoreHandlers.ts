@@ -1,4 +1,3 @@
-
 import { 
   Score, 
   HoleSelection, 
@@ -50,28 +49,23 @@ export function useScoreHandlers({
     
     console.log("✅ Found selected tee:", selectedTee.name, "with par:", selectedTee.par);
     
-    // For user-added courses, the holes are directly on the tee
     if (selectedTee.holes && selectedTee.holes.length > 0) {
       console.log("✅ Using hole data specific to the selected tee:", selectedTee.holes);
       
-      // Log the hole data for debugging
       console.log("📊 Par values for tee-specific holes:", 
         selectedTee.holes.map(h => ({ number: h.number, par: h.par || 4 })));
       
-      // Validate par values and ensure each hole has a par value
       const validHoles = selectedTee.holes.map(hole => {
         if (!hole.par || hole.par < 2 || hole.par > 6) {
           console.log(`⚠️ Fixing invalid par value (${hole.par}) for hole ${hole.number}`);
-          return { ...hole, par: 4 }; // Use a reasonable default
+          return { ...hole, par: 4 };
         }
         return hole;
       });
       
-      // Calculate total par to validate
       const totalPar = validHoles.reduce((sum, hole) => sum + (hole.par || 4), 0);
       console.log(`📊 Calculated total par for tee ${selectedTee.name}: ${totalPar}`);
       
-      // Update the tee's par if needed
       if (selectedTee.par !== totalPar) {
         console.log(`⚠️ Updating tee par from ${selectedTee.par} to ${totalPar} based on hole data`);
         selectedTee.par = totalPar;
@@ -81,15 +75,12 @@ export function useScoreHandlers({
     }
     
     console.log("ℹ️ Tee doesn't have specific hole data, using course's default holes");
-    // Fallback to course holes if available
     if (selectedCourse.holes && selectedCourse.holes.length > 0) {
       console.log("✅ Using course-level holes:", selectedCourse.holes);
       
-      // Log the hole data for debugging
       console.log("📊 Par values for course-level holes:", 
         selectedCourse.holes.map(h => ({ number: h.number, par: h.par || 4 })));
       
-      // Check for potential par data issues
       const anyInvalidPar = selectedCourse.holes.some(h => !h.par || h.par < 2 || h.par > 6);
       if (anyInvalidPar) {
         console.warn("⚠️ Some course holes have invalid par values, fixing them");
@@ -99,11 +90,9 @@ export function useScoreHandlers({
         }));
       }
       
-      // Calculate total par for the course holes
       const totalCoursePar = selectedCourse.holes.reduce((sum, hole) => sum + (hole.par || 4), 0);
       console.log(`📊 Calculated total par from course holes: ${totalCoursePar}`);
       
-      // Update the tee's par if needed
       if (selectedTee.par !== totalCoursePar) {
         console.log(`⚠️ Updating tee par from ${selectedTee.par} to ${totalCoursePar} based on course hole data`);
         selectedTee.par = totalCoursePar;
@@ -112,7 +101,6 @@ export function useScoreHandlers({
       return selectedCourse.holes;
     }
     
-    // Last resort: generate default holes
     console.warn("⚠️ No hole data found for course or tee, generating default holes");
     const defaultHoles = Array(18).fill(null).map((_, idx) => ({
       number: idx + 1,
@@ -121,7 +109,6 @@ export function useScoreHandlers({
       handicap: idx + 1
     }));
     
-    // Set default par for the tee based on generated holes
     const defaultPar = defaultHoles.reduce((sum, hole) => sum + hole.par, 0);
     console.log(`📊 Setting default par ${defaultPar} for tee ${selectedTee.name}`);
     selectedTee.par = defaultPar;
@@ -141,7 +128,6 @@ export function useScoreHandlers({
     
     console.log("✅ Using course for scorecard update:", selectedCourse.name, selectedCourse.id);
     
-    // Log available tees for debugging
     console.log("ℹ️ Available tees when updating scorecard:", 
       selectedCourse.tees.map(t => ({ 
         id: t.id, 
@@ -165,13 +151,11 @@ export function useScoreHandlers({
     console.log("📊 All holes data for selected tee:", allHolesData);
     console.log("📊 Par values for holes:", allHolesData.map(h => ({ number: h.number, par: h.par })));
     
-    // Calculate and verify total par
     const totalPar = allHolesData.reduce((sum, hole) => sum + (hole.par || 4), 0);
     console.log(`📊 Calculated total par for tee ${selectedTee.name}: ${totalPar}`);
     
     if (totalPar !== selectedTee.par) {
       console.warn(`⚠️ Par mismatch: Calculated ${totalPar} from holes, but tee.par is ${selectedTee.par}. Using calculated value.`);
-      // Update the tee's par to match the calculated value
       selectedTee.par = totalPar;
     }
     
@@ -214,14 +198,15 @@ export function useScoreHandlers({
       }
     }
     
-    // Log par values explicitly before creating new scores
     console.log("📊 Par values for filtered holes:", filteredHoles.map(h => ({ number: h.number, par: h.par })));
     
     const newScores = filteredHoles.map(hole => ({
       hole: hole.number,
-      par: hole.par || 4, // Ensure we have a valid par value
+      par: hole.par || 4,
       strokes: 0,
       putts: undefined,
+      penalties: undefined,
+      gir: undefined,
       yards: hole.yards,
       handicap: hole.handicap
     }));
@@ -263,10 +248,9 @@ export function useScoreHandlers({
       console.log("✅ TEE SELECTION UI UPDATE - Using tee name:", selectedTee.name, "with ID:", selectedTee.id);
     } else {
       console.error("❌ No tee found with ID:", teeId);
-      return; // Return early to prevent updating with invalid tee
+      return;
     }
     
-    // Update the scorecard with the new tee
     updateScorecardForTee(teeId, 'all');
   };
 
@@ -280,7 +264,6 @@ export function useScoreHandlers({
       return;
     }
     
-    // Find current selected tee
     const teeId = selectedCourse.tees[0]?.id;
     if (!teeId) {
       console.error("❌ No valid tee ID found");
@@ -292,7 +275,7 @@ export function useScoreHandlers({
     setHoleSelection(selection);
   };
 
-  const handleScoreChange = (index: number, field: 'strokes' | 'putts', value: string) => {
+  const handleScoreChange = (index: number, field: 'strokes' | 'putts' | 'penalties', value: string) => {
     const newScores = [...scores];
     const parsedValue = value === '' ? undefined : parseInt(value, 10);
     
@@ -305,8 +288,18 @@ export function useScoreHandlers({
     }
   };
 
+  const handleGIRChange = (index: number, value: boolean) => {
+    const newScores = [...scores];
+    newScores[index] = {
+      ...newScores[index],
+      gir: value
+    };
+    setScores(newScores);
+  };
+
   return {
     handleScoreChange,
+    handleGIRChange,
     handleHoleSelectionChange,
     updateScorecardForTee,
     handleTeeChange,

@@ -1,24 +1,24 @@
 
-import { Score, ScoreSummary } from "../types";
+import { Score } from "../types";
 
-export const calculateScoreSummary = (scores: Score[]): ScoreSummary => {
-  const totalStrokes = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
-  const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
-  const totalPutts = scores.reduce((sum, score) => sum + (score.putts || 0), 0);
-  const toPar = totalStrokes - totalPar;
-  const puttsRecorded = scores.some(score => score.putts !== undefined);
+export const calculateScoreSummary = (scores: Score[]) => {
+  const front9 = scores.filter(score => score.hole <= 9);
+  const back9 = scores.filter(score => score.hole > 9);
   
-  // Add front 9 and back 9 calculations
-  const front9Scores = scores.filter(score => score.hole <= 9);
-  const back9Scores = scores.filter(score => score.hole > 9);
-  
-  const front9Strokes = front9Scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
-  const front9Par = front9Scores.reduce((sum, score) => sum + score.par, 0);
+  const front9Strokes = front9.reduce((sum, score) => sum + (score.strokes || 0), 0);
+  const front9Par = front9.reduce((sum, score) => sum + score.par, 0);
   const front9ToPar = front9Strokes - front9Par;
   
-  const back9Strokes = back9Scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
-  const back9Par = back9Scores.reduce((sum, score) => sum + score.par, 0);
+  const back9Strokes = back9.reduce((sum, score) => sum + (score.strokes || 0), 0);
+  const back9Par = back9.reduce((sum, score) => sum + score.par, 0);
   const back9ToPar = back9Strokes - back9Par;
+  
+  const totalStrokes = front9Strokes + back9Strokes;
+  const totalPar = front9Par + back9Par;
+  const toPar = totalStrokes - totalPar;
+  
+  const totalPutts = scores.reduce((sum, score) => sum + (score.putts || 0), 0);
+  const puttsRecorded = scores.some(score => score.putts !== undefined);
   
   return {
     totalStrokes,
@@ -35,82 +35,66 @@ export const calculateScoreSummary = (scores: Score[]): ScoreSummary => {
   };
 };
 
-// New function to detect achievements in a round
-export const detectAchievements = (scores: Score[]): string[] => {
-  const achievements: string[] = [];
+export const detectAchievements = (scores: Score[]) => {
+  if (!scores || scores.length === 0) return [];
   
-  // Count birdies, eagles, etc.
-  let birdies = 0;
-  let eagles = 0;
-  let pars = 0;
+  const achievements = [];
   
-  // Check each hole for achievements
+  // Check for birdies, eagles, etc.
+  let birdies = 0, eagles = 0, holes = 0;
+  
   scores.forEach(score => {
-    const strokes = score.strokes || 0;
-    const par = score.par;
-    
-    if (strokes === 0) return; // Skip holes without scores
-    
-    const relativeToPar = strokes - par;
-    
-    if (relativeToPar === 0) {
-      pars++;
-    } else if (relativeToPar === -1) {
-      birdies++;
-    } else if (relativeToPar <= -2) {
-      eagles++;
+    if (score.strokes && score.par) {
+      const diff = score.strokes - score.par;
+      holes++;
+      
+      if (diff === -1) birdies++;
+      if (diff <= -2) eagles++;
+      
+      // Check for hole in one
+      if (score.strokes === 1) {
+        achievements.push({
+          type: 'hole-in-one',
+          hole: score.hole,
+          par: score.par
+        });
+      }
     }
   });
   
-  // Add achievements based on count
-  if (birdies === 1) {
-    achievements.push("1 Birdie");
-  } else if (birdies > 1) {
-    achievements.push(`${birdies} Birdies`);
+  if (birdies >= 3) {
+    achievements.push({
+      type: 'multiple-birdies',
+      count: birdies
+    });
   }
   
-  if (eagles === 1) {
-    achievements.push("1 Eagle");
-  } else if (eagles > 1) {
-    achievements.push(`${eagles} Eagles`);
+  if (eagles > 0) {
+    achievements.push({
+      type: 'eagle',
+      count: eagles
+    });
   }
   
-  if (pars === 1) {
-    achievements.push("1 Par");
-  } else if (pars > 1) {
-    achievements.push(`${pars} Pars`);
+  // Check for no three-putts
+  const threePutts = scores.filter(score => score.putts && score.putts >= 3).length;
+  if (threePutts === 0 && scores.every(score => score.putts !== undefined)) {
+    achievements.push({
+      type: 'no-three-putts'
+    });
+  }
+  
+  // Check for under par round
+  const totalStrokes = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
+  const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
+  
+  if (totalStrokes < totalPar && holes >= 9) {
+    achievements.push({
+      type: 'under-par-round',
+      strokes: totalStrokes,
+      par: totalPar
+    });
   }
   
   return achievements;
-};
-
-// Format the "to par" score for display (+5, -2, E, etc.)
-export const formatToPar = (toPar: number): string => {
-  if (toPar === 0) return "E"; // Even par
-  return toPar > 0 ? `+${toPar}` : `${toPar}`;
-};
-
-// Create a share data object for the Web Share API
-export const createShareData = (
-  courseName: string, 
-  teeName: string, 
-  toPar: number,
-  totalScore: number,
-  achievements: string[]
-): { title: string; text: string } => {
-  const formattedToPar = formatToPar(toPar);
-  
-  let shareText = `I shot ${totalScore} (${formattedToPar}) at ${courseName} from the ${teeName} tees using MyBirdieBoard!`;
-  
-  // Add achievements if there are any
-  if (achievements.length > 0) {
-    shareText += `\n\nAchievements: ${achievements.join(', ')}`;
-  }
-  
-  shareText += "\n\nTrack your golf game at MyBirdieBoard.com";
-  
-  return {
-    title: `My Round at ${courseName}`,
-    text: shareText
-  };
 };

@@ -47,6 +47,8 @@ export interface Score {
   par: number;
   strokes?: number;
   putts?: number;
+  penalties?: number;
+  gir?: boolean;
   yards?: number;
   handicap?: number;
 }

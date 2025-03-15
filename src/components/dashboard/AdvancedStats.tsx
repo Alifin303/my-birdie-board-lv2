@@ -18,11 +18,11 @@ interface AdvancedStatsProps {
 export const AdvancedStats = ({ userRounds, isLoading }: AdvancedStatsProps) => {
   const [isOpen, setIsOpen] = useState(false);
   
-  if (isLoading || !userRounds || userRounds.length === 0) {
+  if (isLoading) {
     return null;
   }
   
-  const hasAdvancedStats = userRounds.some(round => {
+  const hasAdvancedStats = userRounds && userRounds.some(round => {
     if (!round.hole_scores) return false;
     
     let scores;
@@ -41,9 +41,9 @@ export const AdvancedStats = ({ userRounds, isLoading }: AdvancedStatsProps) => 
     );
   });
   
-  const puttingStats = calculatePuttingStats(userRounds);
-  const girStats = calculateGIRStats(userRounds);
-  const penaltyStats = calculatePenaltyStats(userRounds);
+  const puttingStats = calculatePuttingStats(userRounds || []);
+  const girStats = calculateGIRStats(userRounds || []);
+  const penaltyStats = calculatePenaltyStats(userRounds || []);
   
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">

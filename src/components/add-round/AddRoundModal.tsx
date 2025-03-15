@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -94,6 +95,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   
   const { 
     handleScoreChange,
+    handleGIRChange,
     handleHoleSelectionChange,
     updateScorecardForTee,
     handleTeeChange
@@ -222,6 +224,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
               handleDateSelect={handleDateSelect}
               handleHoleSelectionChange={handleHoleSelectionChange}
               handleScoreChange={handleScoreChange}
+              handleGIRChange={handleGIRChange}
               handleBackToSearch={handleBackToSearch}
               handleSaveRound={handleSaveRoundAndClose}
               handleCloseModal={handleCloseModal}
