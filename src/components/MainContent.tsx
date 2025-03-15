@@ -23,16 +23,16 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
           
           <ul className="space-y-2">
             <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
-              <span>Log every round played</span>
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">Log every round played</span>
             </li>
             <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
-              <span>View past performances anytime</span>
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">View past performances anytime</span>
             </li>
             <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
-              <span>Keep all your scores safe and organized</span>
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">Keep all your scores safe and organized</span>
             </li>
           </ul>
           
@@ -49,16 +49,16 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
           
           <ul className="space-y-2">
             <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
-              <span>Track scoring trends over time</span>
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">Track scoring trends over time</span>
             </li>
             <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
-              <span>Identify your strongest and weakest holes</span>
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">Identify your strongest and weakest holes</span>
             </li>
             <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
-              <span>Set goals and measure your progress</span>
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">Set goals and measure your progress</span>
             </li>
           </ul>
           
@@ -75,16 +75,16 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
           
           <ul className="space-y-2">
             <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
-              <span>Automatically updated after each round</span>
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">Automatically updated after each round</span>
             </li>
             <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
-              <span>See how your handicap improves over time</span>
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">See how your handicap improves over time</span>
             </li>
             <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
-              <span>Play on a level field with golfers of all skill levels</span>
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">Play on a level field with golfers of all skill levels</span>
             </li>
           </ul>
           
@@ -101,16 +101,16 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
           
           <ul className="space-y-2">
             <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
-              <span>View leaderboard rankings by course</span>
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">View leaderboard rankings by course</span>
             </li>
             <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
-              <span>Compare gross and net scores</span>
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">Compare gross and net scores</span>
             </li>
             <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
-              <span>Challenge friends, even if you're not playing together</span>
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">Challenge friends, even if you're not playing together</span>
             </li>
           </ul>
           
