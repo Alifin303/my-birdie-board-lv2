@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Collapsible,
@@ -7,7 +6,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Target, GolfBall, AlertCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, Target, Circle, AlertCircle } from "lucide-react";
 import { Round } from "./types";
 
 interface AdvancedStatsProps {
@@ -22,7 +21,6 @@ export const AdvancedStats = ({ userRounds, isLoading }: AdvancedStatsProps) => 
     return null;
   }
   
-  // Check if any rounds have advanced stats tracked
   const hasAdvancedStats = userRounds.some(round => {
     if (!round.hole_scores) return false;
     
@@ -42,18 +40,14 @@ export const AdvancedStats = ({ userRounds, isLoading }: AdvancedStatsProps) => 
     );
   });
   
-  // If no advanced stats have been tracked, don't render anything
   if (!hasAdvancedStats) {
     return null;
   }
   
-  // Calculate putting statistics
   const puttingStats = calculatePuttingStats(userRounds);
   
-  // Calculate GIR statistics
   const girStats = calculateGIRStats(userRounds);
   
-  // Calculate penalty statistics
   const penaltyStats = calculatePenaltyStats(userRounds);
   
   return (
@@ -79,7 +73,7 @@ export const AdvancedStats = ({ userRounds, isLoading }: AdvancedStatsProps) => 
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="font-medium flex items-center gap-1.5">
-                    <GolfBall className="h-4 w-4 text-primary" />
+                    <Circle className="h-4 w-4 text-primary" />
                     Putting
                   </h3>
                   <ul className="mt-2 space-y-1 text-sm">
@@ -160,7 +154,6 @@ export const AdvancedStats = ({ userRounds, isLoading }: AdvancedStatsProps) => 
   );
 };
 
-// Helper functions to calculate statistics
 function calculatePuttingStats(rounds: Round[]) {
   let totalPutts = 0;
   let totalHoles = 0;
@@ -196,7 +189,6 @@ function calculatePuttingStats(rounds: Round[]) {
       totalPutts += roundPutts;
       totalHoles += roundHoles;
       
-      // Track the round with fewest putts (minimum 9 holes)
       if (roundHoles >= 9 && roundPutts < fewestPutts) {
         fewestPutts = roundPutts;
       }
