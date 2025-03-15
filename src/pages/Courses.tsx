@@ -35,42 +35,22 @@ const Courses = () => {
           const courseIds = data.map(course => course.id);
           
           if (courseIds.length > 0) {
-            // Using a raw SQL query with .rpc() instead of .group()
-            const { data: roundCounts, error: roundsError } = await supabase
-              .rpc('get_course_round_counts', { course_ids: courseIds });
-              
-            if (!roundsError && roundCounts) {
-              // Create a map of course_id to count
-              const countsMap = new Map();
-              roundCounts.forEach(item => {
-                countsMap.set(item.course_id, item.count);
-              });
-              
-              // Add the counts to the courses
-              const coursesWithCounts = data.map(course => ({
-                ...course,
-                roundsCount: countsMap.get(course.id) || 0
-              }));
-              
-              setCourses(coursesWithCounts);
-            } else {
-              // Alternative approach: fetch counts individually
-              const coursesWithCounts = await Promise.all(
-                data.map(async (course) => {
-                  const { count, error: countError } = await supabase
-                    .from('rounds')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('course_id', course.id);
-                    
-                  return {
-                    ...course,
-                    roundsCount: countError ? 0 : (count || 0)
-                  };
-                })
-              );
-              
-              setCourses(coursesWithCounts);
-            }
+            // Use individual queries for each course to get count
+            const coursesWithCounts = await Promise.all(
+              data.map(async (course) => {
+                const { count, error: countError } = await supabase
+                  .from('rounds')
+                  .select('*', { count: 'exact', head: true })
+                  .eq('course_id', course.id);
+                  
+                return {
+                  ...course,
+                  roundsCount: countError ? 0 : (count || 0)
+                };
+              })
+            );
+            
+            setCourses(coursesWithCounts);
           } else {
             setCourses([]);
           }
