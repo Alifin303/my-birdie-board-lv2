@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -15,7 +15,25 @@ interface Course {
 const Courses = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
-  const [redirecting, setRedirecting] = useState(false);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [isBot, setIsBot] = useState(false);
+  
+  // Check if the visitor is a bot/crawler
+  useEffect(() => {
+    const botPattern = /bot|googlebot|crawler|spider|robot|crawling/i;
+    const isSearchEngine = botPattern.test(navigator.userAgent);
+    setIsBot(isSearchEngine);
+    
+    // Only set redirect for real users, not search engines
+    if (!isSearchEngine) {
+      // Short delay to allow the page to be indexed
+      const timer = setTimeout(() => {
+        setShouldRedirect(true);
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, []);
   
   useEffect(() => {
     const fetchCourses = async () => {
@@ -63,28 +81,15 @@ const Courses = () => {
       }
     };
     
-    fetchCourses();
-  }, []);
-  
-  useEffect(() => {
-    // Only redirect if this is a real user visit (not a crawler)
-    const isBot = /bot|googlebot|crawler|spider|robot|crawling/i.test(
-      navigator.userAgent
-    );
-    
-    if (!isBot && !loading && !redirecting) {
-      const timer = setTimeout(() => {
-        setRedirecting(true);
-      }, 1000); // short delay before redirecting
-      
-      return () => clearTimeout(timer);
+    // Only fetch the data if it's a bot or we haven't loaded yet
+    if (isBot || !shouldRedirect) {
+      fetchCourses();
     }
-  }, [loading, redirecting]);
+  }, [isBot, shouldRedirect]);
   
-  if (redirecting) {
-    return (
-      <meta httpEquiv="refresh" content="0;url=/" />
-    );
+  // Redirect real users to the homepage
+  if (shouldRedirect && !isBot) {
+    return <Navigate to="/" replace />;
   }
   
   return (
@@ -157,13 +162,6 @@ const Courses = () => {
               ))}
             </div>
           )}
-          
-          <div className="text-center py-10 mt-10">
-            <p className="mb-4">You are being redirected to MyBirdieBoard...</p>
-            <a href="/" className="text-primary hover:underline">
-              Click here if you're not redirected automatically
-            </a>
-          </div>
         </div>
       </div>
     </>

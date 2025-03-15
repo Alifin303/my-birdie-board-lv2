@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -26,8 +25,23 @@ const Course = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const [course, setCourse] = useState<CourseDetails | null>(null);
   const [loading, setLoading] = useState(true);
-  const [redirecting, setRedirecting] = useState(false);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [isBot, setIsBot] = useState(false);
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const botPattern = /bot|googlebot|crawler|spider|robot|crawling/i;
+    const isSearchEngine = botPattern.test(navigator.userAgent);
+    setIsBot(isSearchEngine);
+    
+    if (!isSearchEngine && !loading && course) {
+      const timer = setTimeout(() => {
+        setShouldRedirect(true);
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [loading, course]);
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -38,7 +52,6 @@ const Course = () => {
         return;
       }
       
-      // Try to get the course from database first
       try {
         const courseIdNumber = parseInt(courseId, 10);
         
@@ -58,7 +71,6 @@ const Course = () => {
         if (courseData && !error) {
           console.log("Found course in database:", courseData);
           
-          // Try to get rounds data for this course
           const { data: roundsData, error: roundsError } = await supabase
             .from('rounds')
             .select('gross_score, to_par_gross')
@@ -74,7 +86,6 @@ const Course = () => {
             setCourse(courseData);
           }
           
-          // Try to get tee data
           const { data: teeData } = await supabase
             .from('course_tees')
             .select('*')
@@ -85,7 +96,6 @@ const Course = () => {
           }
           
         } else {
-          // If not in database, try to find via API
           console.log("Course not found in database, trying API");
           const searchResult = await searchForCourses(courseId);
           
@@ -104,29 +114,15 @@ const Course = () => {
       }
     };
     
-    fetchCourseDetails();
-  }, [courseId]);
-  
-  useEffect(() => {
-    // Only redirect if this is a real user visit (not a crawler)
-    const isBot = /bot|googlebot|crawler|spider|robot|crawling/i.test(
-      navigator.userAgent
-    );
-    
-    if (!isBot && !loading && course && !redirecting) {
-      const timer = setTimeout(() => {
-        setRedirecting(true);
-      }, 1000); // short delay before redirecting
-      
-      return () => clearTimeout(timer);
+    if (isBot || !shouldRedirect) {
+      fetchCourseDetails();
     }
-  }, [loading, course, redirecting]);
+  }, [courseId, isBot, shouldRedirect]);
   
-  if (redirecting) {
+  if (shouldRedirect && !isBot) {
     return <Navigate to="/" replace />;
   }
   
-  // Helper function to calculate course stats
   const calculateCourseStats = (rounds: any[]) => {
     if (!rounds || rounds.length === 0) {
       return {
@@ -195,7 +191,6 @@ const Course = () => {
         />
         <link rel="canonical" href={`https://mybirdieboard.com/courses/${courseId}`} />
         
-        {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:title" content={`${courseName} | Golf Course Statistics`} />
         <meta 
@@ -204,7 +199,6 @@ const Course = () => {
         />
         <meta property="og:url" content={`https://mybirdieboard.com/courses/${courseId}`} />
         
-        {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={`${courseName} | Golf Course Statistics`} />
         <meta 
@@ -212,7 +206,6 @@ const Course = () => {
           content={`View statistics, leaderboard, and course information for ${courseName}${courseLocation ? ` in ${courseLocation}` : ''}.`} 
         />
         
-        {/* Schema.org structured data */}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -291,13 +284,6 @@ const Course = () => {
               </div>
             </div>
           )}
-          
-          <div className="text-center py-6">
-            <p className="mb-4">You are being redirected to MyBirdieBoard...</p>
-            <a href="/" className="text-primary hover:underline">
-              Click here if you're not redirected automatically
-            </a>
-          </div>
         </div>
       </div>
     </>
