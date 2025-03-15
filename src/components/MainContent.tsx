@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle } from 'lucide-react';
@@ -22,15 +23,15 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
           
           <ul className="space-y-2">
             <li className="flex items-start">
-              <span className="text-accent mr-2">🔹</span>
+              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
               <span>Log every round played</span>
             </li>
             <li className="flex items-start">
-              <span className="text-accent mr-2">🔹</span>
+              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
               <span>View past performances anytime</span>
             </li>
             <li className="flex items-start">
-              <span className="text-accent mr-2">🔹</span>
+              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
               <span>Keep all your scores safe and organized</span>
             </li>
           </ul>
@@ -48,15 +49,15 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
           
           <ul className="space-y-2">
             <li className="flex items-start">
-              <span className="text-accent mr-2">🔹</span>
+              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
               <span>Track scoring trends over time</span>
             </li>
             <li className="flex items-start">
-              <span className="text-accent mr-2">🔹</span>
+              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
               <span>Identify your strongest and weakest holes</span>
             </li>
             <li className="flex items-start">
-              <span className="text-accent mr-2">🔹</span>
+              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
               <span>Set goals and measure your progress</span>
             </li>
           </ul>
@@ -74,15 +75,15 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
           
           <ul className="space-y-2">
             <li className="flex items-start">
-              <span className="text-accent mr-2">🔹</span>
+              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
               <span>Automatically updated after each round</span>
             </li>
             <li className="flex items-start">
-              <span className="text-accent mr-2">🔹</span>
+              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
               <span>See how your handicap improves over time</span>
             </li>
             <li className="flex items-start">
-              <span className="text-accent mr-2">🔹</span>
+              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
               <span>Play on a level field with golfers of all skill levels</span>
             </li>
           </ul>
@@ -100,15 +101,15 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
           
           <ul className="space-y-2">
             <li className="flex items-start">
-              <span className="text-accent mr-2">🔹</span>
+              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
               <span>View leaderboard rankings by course</span>
             </li>
             <li className="flex items-start">
-              <span className="text-accent mr-2">🔹</span>
+              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
               <span>Compare gross and net scores</span>
             </li>
             <li className="flex items-start">
-              <span className="text-accent mr-2">🔹</span>
+              <span className="text-accent mr-2 flex-shrink-0">🔹</span>
               <span>Challenge friends, even if you're not playing together</span>
             </li>
           </ul>
