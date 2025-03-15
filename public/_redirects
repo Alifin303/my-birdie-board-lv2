@@ -8,5 +8,8 @@
 /courses            /index.html        200
 /courses/*          /index.html        200
 
+# Ensure sitemap.xml is served with correct content type
+/sitemap.xml        /sitemap.xml       200!   Content-Type=application/xml
+
 # Handle dynamic routes and client-side routing
 /*                  /index.html        200
