@@ -37,7 +37,7 @@ const Courses = () => {
           if (courseIds.length > 0) {
             const { data: roundCounts, error: roundsError } = await supabase
               .from('rounds')
-              .select('course_id, count')
+              .select('course_id, count(*)')
               .in('course_id', courseIds)
               .group('course_id');
               

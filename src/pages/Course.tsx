@@ -40,10 +40,19 @@ const Course = () => {
       
       // Try to get the course from database first
       try {
+        const courseIdNumber = parseInt(courseId, 10);
+        
+        if (isNaN(courseIdNumber)) {
+          console.error("Invalid course ID:", courseId);
+          setCourse(null);
+          setLoading(false);
+          return;
+        }
+        
         const { data: courseData, error } = await supabase
           .from('courses')
           .select('*')
-          .eq('id', courseId)
+          .eq('id', courseIdNumber)
           .single();
           
         if (courseData && !error) {
@@ -53,7 +62,7 @@ const Course = () => {
           const { data: roundsData, error: roundsError } = await supabase
             .from('rounds')
             .select('gross_score, to_par_gross')
-            .eq('course_id', courseId);
+            .eq('course_id', courseIdNumber);
             
           if (!roundsError && roundsData) {
             const courseStats = calculateCourseStats(roundsData);
@@ -69,7 +78,7 @@ const Course = () => {
           const { data: teeData } = await supabase
             .from('course_tees')
             .select('*')
-            .eq('course_id', courseId);
+            .eq('course_id', courseIdNumber);
             
           if (teeData && teeData.length > 0) {
             setCourse(current => current ? {...current, tees: teeData} : null);
