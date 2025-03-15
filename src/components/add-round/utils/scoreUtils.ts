@@ -98,3 +98,63 @@ export const detectAchievements = (scores: Score[]) => {
   
   return achievements;
 };
+
+/**
+ * Formats a to-par value with a + sign for over par and nothing for under par
+ */
+export const formatToPar = (toPar: number): string => {
+  if (toPar === 0) return "E"; // Even par
+  return toPar > 0 ? `+${toPar}` : `${toPar}`;
+};
+
+/**
+ * Creates a data object for sharing a round
+ */
+export const createShareData = (
+  courseName: string,
+  teeName: string,
+  toPar: number,
+  totalScore: number,
+  achievements: any[] = []
+) => {
+  // Format the to-par score for display
+  const parFormatted = formatToPar(toPar);
+  
+  // Create the title for sharing
+  let title = `Golf score at ${courseName}`;
+  
+  // Create the text description for sharing
+  let text = `I shot ${totalScore} (${parFormatted}) at ${courseName} from the ${teeName} tees.`;
+  
+  // Add achievements to the text if available
+  if (achievements.length > 0) {
+    text += "\n\nAchievements:";
+    
+    achievements.forEach(achievement => {
+      switch (achievement.type) {
+        case 'hole-in-one':
+          text += `\n🎯 Hole in One on hole ${achievement.hole} (par ${achievement.par})!`;
+          break;
+        case 'multiple-birdies':
+          text += `\n🐦 ${achievement.count} Birdies`;
+          break;
+        case 'eagle':
+          text += `\n🦅 ${achievement.count} Eagle${achievement.count > 1 ? 's' : ''}`;
+          break;
+        case 'no-three-putts':
+          text += "\n🏆 No three-putts";
+          break;
+        case 'under-par-round':
+          text += `\n🔥 Under Par Round (${achievement.strokes}/${achievement.par})`;
+          break;
+        default:
+          break;
+      }
+    });
+  }
+  
+  // Add an app mention for sharing
+  text += "\n\nTracked with BirdieBoard";
+  
+  return { title, text };
+};
