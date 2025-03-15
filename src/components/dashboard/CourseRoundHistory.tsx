@@ -27,6 +27,7 @@ import ScoreProgressChart from "./ScoreProgressChart";
 import { RoundScorecard } from "./scorecard/RoundScorecard";
 import { CourseLeaderboard } from "./CourseLeaderboard";
 import { PotentialBestScore } from "./PotentialBestScore";
+import { CourseAdvancedStats } from "./CourseAdvancedStats";
 import { Round } from "./types";
 import { calculateHoleStats } from "@/utils/statsCalculator";
 
@@ -528,6 +529,11 @@ export const CourseRoundHistory = ({
           </div>
         </div>
       </div>
+      
+      <CourseAdvancedStats 
+        rounds={courseRounds}
+        isLoading={false}
+      />
       
       <PotentialBestScore rounds={courseRounds} />
       
