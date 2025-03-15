@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   Collapsible,
@@ -6,7 +7,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Target, Circle, AlertCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, Target, Circle, AlertCircle, Info } from "lucide-react";
 import { Round } from "./types";
 
 interface AdvancedStatsProps {
@@ -40,14 +41,8 @@ export const AdvancedStats = ({ userRounds, isLoading }: AdvancedStatsProps) => 
     );
   });
   
-  if (!hasAdvancedStats) {
-    return null;
-  }
-  
   const puttingStats = calculatePuttingStats(userRounds);
-  
   const girStats = calculateGIRStats(userRounds);
-  
   const penaltyStats = calculatePenaltyStats(userRounds);
   
   return (
@@ -67,88 +62,102 @@ export const AdvancedStats = ({ userRounds, isLoading }: AdvancedStatsProps) => 
       </div>
       
       <CollapsibleContent className="mt-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {puttingStats.tracked && (
-            <Card className="p-4 shadow-sm">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="font-medium flex items-center gap-1.5">
-                    <Circle className="h-4 w-4 text-primary" />
-                    Putting
-                  </h3>
-                  <ul className="mt-2 space-y-1 text-sm">
-                    <li className="flex justify-between">
-                      <span className="text-muted-foreground">Avg Putts/Round:</span>
-                      <span className="font-medium">{puttingStats.avgPuttsPerRound.toFixed(1)}</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span className="text-muted-foreground">Avg Putts/Hole:</span>
-                      <span className="font-medium">{puttingStats.avgPuttsPerHole.toFixed(2)}</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span className="text-muted-foreground">Fewest Putts:</span>
-                      <span className="font-medium">{puttingStats.fewestPutts}</span>
-                    </li>
-                  </ul>
+        {hasAdvancedStats ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {puttingStats.tracked && (
+              <Card className="p-4 shadow-sm">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-medium flex items-center gap-1.5">
+                      <Circle className="h-4 w-4 text-primary" />
+                      Putting
+                    </h3>
+                    <ul className="mt-2 space-y-1 text-sm">
+                      <li className="flex justify-between">
+                        <span className="text-muted-foreground">Avg Putts/Round:</span>
+                        <span className="font-medium">{puttingStats.avgPuttsPerRound.toFixed(1)}</span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span className="text-muted-foreground">Avg Putts/Hole:</span>
+                        <span className="font-medium">{puttingStats.avgPuttsPerHole.toFixed(2)}</span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span className="text-muted-foreground">Fewest Putts:</span>
+                        <span className="font-medium">{puttingStats.fewestPutts}</span>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
-              </div>
-            </Card>
-          )}
-          
-          {girStats.tracked && (
-            <Card className="p-4 shadow-sm">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="font-medium flex items-center gap-1.5">
-                    <Target className="h-4 w-4 text-primary" />
-                    Greens in Regulation
-                  </h3>
-                  <ul className="mt-2 space-y-1 text-sm">
-                    <li className="flex justify-between">
-                      <span className="text-muted-foreground">GIR Percentage:</span>
-                      <span className="font-medium">{girStats.girPercentage}%</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span className="text-muted-foreground">Best GIR Round:</span>
-                      <span className="font-medium">{girStats.bestGIRRound}%</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span className="text-muted-foreground">Rounds Tracked:</span>
-                      <span className="font-medium">{girStats.roundsTracked}</span>
-                    </li>
-                  </ul>
+              </Card>
+            )}
+            
+            {girStats.tracked && (
+              <Card className="p-4 shadow-sm">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-medium flex items-center gap-1.5">
+                      <Target className="h-4 w-4 text-primary" />
+                      Greens in Regulation
+                    </h3>
+                    <ul className="mt-2 space-y-1 text-sm">
+                      <li className="flex justify-between">
+                        <span className="text-muted-foreground">GIR Percentage:</span>
+                        <span className="font-medium">{girStats.girPercentage}%</span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span className="text-muted-foreground">Best GIR Round:</span>
+                        <span className="font-medium">{girStats.bestGIRRound}%</span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span className="text-muted-foreground">Rounds Tracked:</span>
+                        <span className="font-medium">{girStats.roundsTracked}</span>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
-              </div>
-            </Card>
-          )}
-          
-          {penaltyStats.tracked && (
-            <Card className="p-4 shadow-sm">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="font-medium flex items-center gap-1.5">
-                    <AlertCircle className="h-4 w-4 text-primary" />
-                    Penalties
-                  </h3>
-                  <ul className="mt-2 space-y-1 text-sm">
-                    <li className="flex justify-between">
-                      <span className="text-muted-foreground">Avg Penalties/Round:</span>
-                      <span className="font-medium">{penaltyStats.avgPenaltiesPerRound.toFixed(1)}</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span className="text-muted-foreground">Rounds Without Penalties:</span>
-                      <span className="font-medium">{penaltyStats.roundsWithoutPenalties}</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span className="text-muted-foreground">Total Penalties:</span>
-                      <span className="font-medium">{penaltyStats.totalPenalties}</span>
-                    </li>
-                  </ul>
+              </Card>
+            )}
+            
+            {penaltyStats.tracked && (
+              <Card className="p-4 shadow-sm">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-medium flex items-center gap-1.5">
+                      <AlertCircle className="h-4 w-4 text-primary" />
+                      Penalties
+                    </h3>
+                    <ul className="mt-2 space-y-1 text-sm">
+                      <li className="flex justify-between">
+                        <span className="text-muted-foreground">Avg Penalties/Round:</span>
+                        <span className="font-medium">{penaltyStats.avgPenaltiesPerRound.toFixed(1)}</span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span className="text-muted-foreground">Rounds Without Penalties:</span>
+                        <span className="font-medium">{penaltyStats.roundsWithoutPenalties}</span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span className="text-muted-foreground">Total Penalties:</span>
+                        <span className="font-medium">{penaltyStats.totalPenalties}</span>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
+              </Card>
+            )}
+          </div>
+        ) : (
+          <Card className="p-4 shadow-sm">
+            <div className="flex items-start space-x-4">
+              <Info className="h-6 w-6 text-blue-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-medium text-base">No Advanced Stats Available</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Track more details about your game like putts, greens in regulation, and penalties when entering scores to unlock advanced statistics.
+                </p>
               </div>
-            </Card>
-          )}
-        </div>
+            </div>
+          </Card>
+        )}
       </CollapsibleContent>
     </Collapsible>
   );
