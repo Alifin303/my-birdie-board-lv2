@@ -22,6 +22,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showNet, setShowNet] = useState(false);
+  const [showDetailedStats, setShowDetailedStats] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const scorecardRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -62,17 +63,26 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
     setCalendarOpen(false);
   };
 
-  const handleScoreChange = (index: number, value: string) => {
+  const handleScoreChange = (index: number, field: 'strokes' | 'putts' | 'penalties', value: string) => {
     const newScores = [...scores];
     const parsedValue = value === '' ? 0 : parseInt(value, 10);
     
     if (!isNaN(parsedValue)) {
       newScores[index] = {
         ...newScores[index],
-        strokes: parsedValue,
+        [field]: parsedValue,
       };
       setScores(newScores);
     }
+  };
+
+  const handleGIRChange = (index: number, value: boolean) => {
+    const newScores = [...scores];
+    newScores[index] = {
+      ...newScores[index],
+      gir: value,
+    };
+    setScores(newScores);
   };
 
   const handleSaveChanges = async () => {
@@ -173,7 +183,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
 
   const toggleNetScores = () => {
     setShowNet(prev => !prev);
-    console.log(`[RoundScorecard] Toggling net scores: ${!showNet} with handicap: ${handicapIndex}`);
   };
   
   const generateScorecardImage = async (): Promise<Blob | null> => {
@@ -461,64 +470,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
     }
   };
 
-  const renderHoleScores = () => {
-    if (!scores || scores.length === 0) {
-      return (
-        <div className="mt-4 text-center p-4 bg-secondary/20 rounded-md">
-          <p className="text-muted-foreground">No hole-by-hole data available for this round.</p>
-        </div>
-      );
-    }
-
-    const front9 = scores.filter(score => score.hole <= 9);
-    const back9 = scores.filter(score => score.hole > 9);
-
-    return (
-      <div className="mt-4 space-y-6">
-        {front9.length > 0 && (
-          <ScoreTable 
-            scores={front9} 
-            isEditing={isEditing} 
-            handleScoreChange={handleScoreChange}
-            title="Front 9"
-          />
-        )}
-
-        {back9.length > 0 && (
-          <ScoreTable 
-            scores={back9} 
-            isEditing={isEditing} 
-            handleScoreChange={handleScoreChange}
-            title="Back 9"
-            startIndex={front9.length}
-          />
-        )}
-
-        <ScoreTableSummary 
-          scores={scores} 
-          handicapIndex={handicapIndex} 
-          showNet={showNet} 
-        />
-        
-        {!isEditing && (
-          <div className="flex justify-center mt-4">
-            <Button
-              onClick={handleDownloadScorecard}
-              disabled={isGeneratingImage}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              {isGeneratingImage ? 'Generating...' : (
-                <>
-                  <Download className="h-4 w-4" />
-                  Download Scorecard
-                </>
-              )}
-            </Button>
-          </div>
-        )}
-      </div>
-    );
-  };
+  const front9 = scores.filter(score => score.hole <= 9);
+  const back9 = scores.filter(score => score.hole > 9);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -543,7 +496,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         <div className="overflow-y-auto p-6" ref={contentRef}>
           <Card className="border-secondary/30 shadow-md">
             <CardContent className="pt-6" ref={scorecardRef}>
-              <ScorecardHeader 
+              <ScorecardHeader
                 round={round}
                 isEditing={isEditing}
                 setIsEditing={setIsEditing}
@@ -553,6 +506,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
                 handleDateSelect={handleDateSelect}
                 isSaving={isSaving}
                 handleSaveChanges={handleSaveChanges}
+                showDetailedStats={showDetailedStats}
+                setShowDetailedStats={setShowDetailedStats}
               />
 
               {handicapIndex > 0 && !isEditing && (
@@ -569,7 +524,48 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
 
               <Separator className="my-4" />
               
-              {renderHoleScores()}
+              <div className="space-y-6">
+                {front9.length > 0 && (
+                  <ScoreTable
+                    scores={front9}
+                    isEditing={isEditing}
+                    handleScoreChange={handleScoreChange}
+                    handleGIRChange={handleGIRChange}
+                    title="Front Nine"
+                    showDetailedStats={showDetailedStats}
+                  />
+                )}
+                
+                {back9.length > 0 && (
+                  <ScoreTable
+                    scores={back9}
+                    isEditing={isEditing}
+                    handleScoreChange={handleScoreChange}
+                    handleGIRChange={handleGIRChange}
+                    title="Back Nine"
+                    startIndex={front9.length}
+                    showDetailedStats={showDetailedStats}
+                  />
+                )}
+                
+                <ScoreTableSummary 
+                  scores={scores} 
+                  handicapIndex={handicapIndex}
+                  showNet={showNet}
+                  showDetailedStats={showDetailedStats}
+                />
+              </div>
+              
+              <div className="flex justify-between mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleNetScores}
+                  className="text-xs"
+                >
+                  {showNet ? "Hide Net Scores" : "Show Net Scores"}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

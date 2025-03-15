@@ -1,61 +1,93 @@
 
-import { calculateNetScore, calculateNetToPar } from "@/integrations/supabase";
 import { ScoreTableSummaryProps } from "./types";
+import { formatToPar } from "@/components/add-round/utils/scoreUtils";
 
-export const ScoreTableSummary = ({ scores, handicapIndex = 0, showNet = false }: ScoreTableSummaryProps) => {
+export const ScoreTableSummary = ({ 
+  scores, 
+  handicapIndex = 0,
+  showNet = false,
+  showDetailedStats = false
+}: ScoreTableSummaryProps) => {
   if (!scores || scores.length === 0) return null;
   
-  const totalScore = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
+  const totalStrokes = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
   const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
-  const toPar = totalScore - totalPar;
+  const toPar = totalStrokes - totalPar;
   
-  // Ensure handicapIndex is a number
-  const numericHandicap = typeof handicapIndex === 'number' 
-    ? handicapIndex 
-    : parseFloat(String(handicapIndex)) || 0;
-    
-  // Calculate net score by subtracting handicap - ensuring this is rounded to nearest integer
-  const netScore = calculateNetScore(totalScore, numericHandicap);
-  const netToPar = calculateNetToPar(toPar, numericHandicap);
+  // Calculate net score if handicap is provided
+  const netScore = Math.round(totalStrokes - handicapIndex);
+  const toParNet = netScore - totalPar;
   
-  console.log("[ScoreTableSummary] Rendering with:", {
-    totalScore,
-    netScore,
-    handicapIndex: numericHandicap,
-    originalHandicapType: typeof handicapIndex,
-    showNet,
-    toPar,
-    netToPar,
-    difference: totalScore - netScore
-  });
+  // Calculate detailed statistics
+  const totalPutts = scores.reduce((sum, score) => sum + (score.putts || 0), 0);
+  const puttingAverage = totalPutts > 0 ? (totalPutts / scores.filter(s => (s.putts || 0) > 0).length).toFixed(1) : '-';
+  
+  const girCount = scores.filter(score => score.gir).length;
+  const girPercentage = scores.length > 0 ? Math.round((girCount / scores.length) * 100) : 0;
+  
+  const totalPenalties = scores.reduce((sum, score) => sum + (score.penalties || 0), 0);
+  
+  const hasPuttData = scores.some(score => score.putts !== undefined);
+  const hasGIRData = scores.some(score => score.gir !== undefined);
+  const hasPenaltyData = scores.some(score => score.penalties !== undefined);
   
   return (
-    <div className="pt-2 border-t space-y-3"> {/* Increased spacing between rows */}
+    <div className="pt-2 border-t space-y-3">
       <div className="flex justify-between">
         <span className="font-medium">Total Score:</span>
-        <span className="ml-4">
-          {showNet && numericHandicap > 0 ? netScore : totalScore}
-          {showNet && numericHandicap > 0 ? ` (${totalScore} gross)` : ''}
-        </span>
+        <span>{totalStrokes}</span>
       </div>
       <div className="flex justify-between">
         <span className="font-medium">Total Par:</span>
-        <span className="ml-4">{totalPar}</span>
+        <span>{totalPar}</span>
       </div>
       <div className="flex justify-between">
         <span className="font-medium">To Par:</span>
-        <span className="ml-4">
-          {showNet && numericHandicap > 0 
-            ? `${netToPar > 0 ? '+' : ''}${netToPar}`
-            : `${toPar > 0 ? '+' : ''}${toPar}`}
-          {showNet && numericHandicap > 0 ? ` (${toPar > 0 ? '+' : ''}${toPar} gross)` : ''}
-        </span>
+        <span>{formatToPar(toPar)}</span>
       </div>
-      {showNet && numericHandicap > 0 && (
-        <div className="flex justify-between text-sm text-muted-foreground mt-2"> {/* Increased margin top */}
-          <span>Handicap applied:</span>
-          <span className="ml-4">{numericHandicap}</span>
-        </div>
+      
+      {showNet && handicapIndex > 0 && (
+        <>
+          <div className="flex justify-between">
+            <span className="font-medium">Net Score:</span>
+            <span>{netScore}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Net To Par:</span>
+            <span>{formatToPar(toParNet)}</span>
+          </div>
+        </>
+      )}
+      
+      {showDetailedStats && (
+        <>
+          {hasPuttData && (
+            <>
+              <div className="flex justify-between">
+                <span className="font-medium">Total Putts:</span>
+                <span>{totalPutts}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Putts per Hole:</span>
+                <span>{puttingAverage}</span>
+              </div>
+            </>
+          )}
+          
+          {hasGIRData && (
+            <div className="flex justify-between">
+              <span className="font-medium">Greens in Regulation:</span>
+              <span>{girCount}/{scores.length} ({girPercentage}%)</span>
+            </div>
+          )}
+          
+          {hasPenaltyData && (
+            <div className="flex justify-between">
+              <span className="font-medium">Penalty Strokes:</span>
+              <span>{totalPenalties}</span>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
