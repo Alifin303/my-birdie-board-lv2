@@ -16,6 +16,8 @@ Allow: /faq
 Allow: /quiz
 Allow: /dashboard
 Allow: /privacy
+Allow: /courses
+Allow: /courses/
 
 Sitemap: https://mybirdieboard.com/sitemap.xml
 
@@ -26,4 +28,3 @@ Disallow: /lovable-uploads/
 # Prevent archive crawling
 User-agent: ia_archiver
 Disallow: /
-

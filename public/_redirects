@@ -5,6 +5,8 @@
 /quiz               /index.html        200
 /dashboard          /index.html        200
 /privacy            /index.html        200
+/courses            /index.html        200
+/courses/*          /index.html        200
 
 # Handle dynamic routes and client-side routing
 /*                  /index.html        200

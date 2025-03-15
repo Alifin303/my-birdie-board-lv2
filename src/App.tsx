@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import { Helmet, HelmetProvider } from "react-helmet-async";
@@ -12,6 +13,8 @@ import NotFound from "@/pages/NotFound";
 import Dashboard from "@/pages/Dashboard";
 import Admin from "@/pages/Admin";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import Course from "@/pages/Course";
+import Courses from "@/pages/Courses";
 import { Toaster } from "@/components/ui/toaster";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ResetPassword from "@/pages/ResetPassword";
@@ -90,6 +93,10 @@ function App() {
                     <Quiz />
                   </>
                 } />
+                
+                {/* New routes for courses */}
+                <Route path="/courses" element={<Courses />} />
+                <Route path="/courses/:courseId" element={<Course />} />
                 
                 <Route path="/auth/callback" element={<AuthRedirect />} />
                 <Route path="/auth/confirm" element={<AuthConfirm />} />
