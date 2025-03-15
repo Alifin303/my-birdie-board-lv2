@@ -565,6 +565,19 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
                 >
                   {showNet ? "Hide Net Scores" : "Show Net Scores"}
                 </Button>
+                
+                {!isEditing && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDownloadScorecard}
+                    disabled={isGeneratingImage}
+                    className="flex items-center gap-1 text-xs"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    {isGeneratingImage ? "Generating..." : "Download Scorecard"}
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
