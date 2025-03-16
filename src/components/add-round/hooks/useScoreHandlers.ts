@@ -1,3 +1,4 @@
+
 import { 
   Score, 
   HoleSelection, 
@@ -297,9 +298,20 @@ export function useScoreHandlers({
     setScores(newScores);
   };
 
+  const handleFairwayChange = (index: number, hit: boolean, direction?: 'left' | 'right' | 'long' | 'short') => {
+    const newScores = [...scores];
+    newScores[index] = {
+      ...newScores[index],
+      fairwayHit: hit,
+      fairwayMissDirection: hit ? undefined : direction
+    };
+    setScores(newScores);
+  };
+
   return {
     handleScoreChange,
     handleGIRChange,
+    handleFairwayChange,
     handleHoleSelectionChange,
     updateScorecardForTee,
     handleTeeChange,
