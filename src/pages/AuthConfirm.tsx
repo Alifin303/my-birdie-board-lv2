@@ -26,11 +26,11 @@ export const AuthConfirm = () => {
         if (data.session) {
           // User is already logged in
           setStatus("success");
-          setMessage("Your account has been verified. You are now logged in.");
+          setMessage("You are now logged in.");
           
           toast({
-            title: "Account Verified",
-            description: "Your account has been successfully verified.",
+            title: "Success",
+            description: "You are now logged in.",
           });
           
           // Redirect after a short delay
@@ -62,11 +62,11 @@ export const AuthConfirm = () => {
           }
 
           setStatus("success");
-          setMessage("Your email has been verified. You are now logged in.");
+          setMessage("You are now logged in.");
           
           toast({
-            title: "Email Verified",
-            description: "Your email has been successfully verified.",
+            title: "Success",
+            description: "You are now logged in.",
           });
           
           // Redirect after a short delay

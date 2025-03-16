@@ -176,7 +176,7 @@ export function SignUpDialog({ open, onOpenChange }: SignUpDialogProps) {
             </div>
             <h3 className="text-xl font-semibold text-center">Account Created Successfully!</h3>
             <p className="text-center text-muted-foreground">
-              We've sent a verification email to your inbox. Please verify your email to complete the registration process.
+              You will now be redirected to complete your subscription setup.
             </p>
             <Button 
               onClick={() => handleOpenChange(false)} 
