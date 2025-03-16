@@ -174,10 +174,25 @@ export const createShareData = (
 
 // Helper function to calculate GIR percentage consistently across the app
 export const calculateGIRPercentage = (scores: any[]): { girPercentage: number, totalGIR: number, totalHoles: number } => {
+  // Filter scores to only include those with GIR data
   const scoresWithGIRData = scores.filter(score => score.gir !== undefined);
+  
+  // Count how many GIRs are true
   const totalGIR = scoresWithGIRData.filter(score => score.gir).length;
+  
+  // Count total number of holes with GIR data
   const totalHoles = scoresWithGIRData.length;
+  
+  // For a full round of 18 holes, 1 GIR would be about 6%
+  // Calculate percentage - ensure we don't divide by zero
   const girPercentage = totalHoles > 0 ? Math.round((totalGIR / totalHoles) * 100) : 0;
+  
+  console.log("GIR Percentage calculation details:", {
+    totalGIR,
+    totalHoles,
+    girPercentage,
+    scores: scoresWithGIRData.map(s => ({ hole: s.hole, gir: s.gir }))
+  });
   
   return { girPercentage, totalGIR, totalHoles };
 };

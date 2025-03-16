@@ -214,11 +214,10 @@ function calculatePuttingStats(rounds: Round[]) {
 }
 
 function calculateGIRStats(rounds: Round[]) {
-  let totalGIR = 0;
-  let totalHoles = 0;
+  let allScoresWithGIRData: any[] = [];
   let roundsWithGIRData = 0;
-  let bestGIRPercentage = 0;
-  
+  let roundGIRPercentages: number[] = [];
+
   rounds.forEach(round => {
     let scores;
     try {
@@ -232,33 +231,46 @@ function calculateGIRStats(rounds: Round[]) {
     const hasGIRData = scores.some((score: any) => score.gir !== undefined);
     if (!hasGIRData) return;
     
-    const { girPercentage, totalGIR: roundGIR, totalHoles: roundHoles } = calculateGIRPercentage(scores);
+    roundsWithGIRData++;
     
-    if (roundHoles > 0) {
-      if (roundHoles >= 9 && girPercentage > bestGIRPercentage) {
-        bestGIRPercentage = girPercentage;
-      }
-      
-      totalGIR += roundGIR;
-      totalHoles += roundHoles;
-      roundsWithGIRData++;
-    }
+    const { girPercentage, totalGIR, totalHoles } = calculateGIRPercentage(scores);
+    
+    allScoresWithGIRData = [...allScoresWithGIRData, ...scores.filter((score: any) => score.gir !== undefined)];
+    
+    roundGIRPercentages.push({
+      percentage: girPercentage,
+      holeCount: totalHoles
+    });
+    
+    console.log(`Round ${round.id} GIR stats:`, {
+      girPercentage,
+      totalGIR,
+      totalHoles,
+      date: new Date(round.date).toLocaleDateString()
+    });
   });
   
-  const girPercentage = totalHoles > 0 ? Math.round((totalGIR / totalHoles) * 100) : 0;
+  const { girPercentage } = calculateGIRPercentage(allScoresWithGIRData);
   
-  console.log("GIR Stats calculation:", {
-    totalGIR,
-    totalHoles,
-    girPercentage,
-    bestGIRPercentage,
-    roundsWithGIRData
+  let bestGIRRound = 0;
+  const validRounds = roundGIRPercentages.filter(r => r.holeCount >= 9);
+  if (validRounds.length > 0) {
+    bestGIRRound = Math.max(...validRounds.map(r => r.percentage));
+  } else if (roundGIRPercentages.length > 0) {
+    bestGIRRound = Math.max(...roundGIRPercentages.map(r => r.percentage));
+  }
+  
+  console.log("Overall GIR Stats calculation:", {
+    overallGIRPercentage: girPercentage,
+    bestGIRRound,
+    roundsWithGIRData,
+    roundGIRPercentages
   });
   
   return {
     tracked: roundsWithGIRData > 0,
     girPercentage,
-    bestGIRRound: bestGIRPercentage,
+    bestGIRRound,
     roundsTracked: roundsWithGIRData
   };
 }
