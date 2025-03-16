@@ -29,7 +29,6 @@ interface ScorecardStepProps {
   handleHoleSelectionChange: (selection: HoleSelection) => void;
   handleScoreChange: (index: number, field: 'strokes' | 'putts' | 'penalties', value: string) => void;
   handleGIRChange?: (index: number, value: boolean) => void;
-  handleFairwayChange?: (index: number, hit: boolean, direction?: 'left' | 'right' | 'long' | 'short') => void;
   handleBackToSearch: () => void;
   handleSaveRound: () => Promise<void>;
   handleCloseModal: () => void;
@@ -52,7 +51,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   handleHoleSelectionChange,
   handleScoreChange,
   handleGIRChange,
-  handleFairwayChange,
   handleBackToSearch,
   handleSaveRound,
   handleCloseModal,
@@ -315,7 +313,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
             isEditing={true}
             handleScoreChange={handleScoreChange}
             handleGIRChange={handleGIRChange}
-            handleFairwayChange={handleFairwayChange}
             title="Front Nine"
             startIndex={0}
             showDetailedStats={showDetailedStats}
@@ -330,7 +327,6 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
             isEditing={true}
             handleScoreChange={handleScoreChange}
             handleGIRChange={handleGIRChange}
-            handleFairwayChange={handleFairwayChange}
             title="Back Nine"
             startIndex={frontNineScores.length}
             showDetailedStats={showDetailedStats}

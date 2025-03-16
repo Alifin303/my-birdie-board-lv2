@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   Collapsible,
@@ -36,15 +37,13 @@ export const AdvancedStats = ({ userRounds, isLoading }: AdvancedStatsProps) => 
     return scores.some((score: any) => 
       score.putts !== undefined || 
       score.gir !== undefined || 
-      score.penalties !== undefined ||
-      score.fairwayHit !== undefined
+      score.penalties !== undefined
     );
   });
   
   const puttingStats = calculatePuttingStats(userRounds || []);
   const girStats = calculateGIRStats(userRounds || []);
   const penaltyStats = calculatePenaltyStats(userRounds || []);
-  const fairwayStats = calculateFairwayStats(userRounds || []);
   
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
@@ -64,7 +63,7 @@ export const AdvancedStats = ({ userRounds, isLoading }: AdvancedStatsProps) => 
       
       <CollapsibleContent className="mt-4">
         {hasAdvancedStats ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {puttingStats.tracked && (
               <Card className="p-4 shadow-sm">
                 <div className="flex items-start justify-between">
@@ -112,33 +111,6 @@ export const AdvancedStats = ({ userRounds, isLoading }: AdvancedStatsProps) => 
                       <li className="flex justify-between">
                         <span className="text-muted-foreground">Rounds Tracked:</span>
                         <span className="font-medium">{girStats.roundsTracked}</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </Card>
-            )}
-            
-            {fairwayStats.tracked && (
-              <Card className="p-4 shadow-sm">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-medium flex items-center gap-1.5">
-                      <Target className="h-4 w-4 text-primary" />
-                      Fairways
-                    </h3>
-                    <ul className="mt-2 space-y-1 text-sm">
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">FIR Percentage:</span>
-                        <span className="font-medium">{fairwayStats.fairwayPercentage}%</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Miss Patterns:</span>
-                        <span className="font-medium">{fairwayStats.commonMiss}</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Best FIR Round:</span>
-                        <span className="font-medium">{fairwayStats.bestFairwayRound}%</span>
                       </li>
                     </ul>
                   </div>
@@ -332,78 +304,5 @@ function calculatePenaltyStats(rounds: Round[]) {
     avgPenaltiesPerRound: roundsWithPenaltyData > 0 ? totalPenalties / roundsWithPenaltyData : 0,
     roundsWithoutPenalties,
     roundsTracked: roundsWithPenaltyData
-  };
-}
-
-function calculateFairwayStats(rounds: Round[]) {
-  let totalFairways = 0;
-  let totalFairwayHoles = 0;
-  let roundsWithFairwayData = 0;
-  let bestFairwayPercentage = 0;
-  let missDirections = {
-    left: 0,
-    right: 0,
-    long: 0,
-    short: 0
-  };
-  
-  rounds.forEach(round => {
-    let scores;
-    try {
-      scores = typeof round.hole_scores === 'string' 
-        ? JSON.parse(round.hole_scores) 
-        : round.hole_scores || [];
-    } catch (e) {
-      return;
-    }
-    
-    const hasFairwayData = scores.some((score: any) => score.fairwayHit !== undefined);
-    if (!hasFairwayData) return;
-    
-    roundsWithFairwayData++;
-    
-    let roundFairways = 0;
-    let roundFairwayHoles = 0;
-    
-    scores.forEach((score: any) => {
-      if (score.par >= 4) { // Only count fairways on par 4s and 5s
-        if (score.fairwayHit !== undefined) {
-          roundFairwayHoles++;
-          if (score.fairwayHit) {
-            roundFairways++;
-          } else if (score.fairwayMissDirection) {
-            missDirections[score.fairwayMissDirection as keyof typeof missDirections]++;
-          }
-        }
-      }
-    });
-    
-    if (roundFairwayHoles > 0) {
-      totalFairways += roundFairways;
-      totalFairwayHoles += roundFairwayHoles;
-      
-      const roundPercentage = Math.round((roundFairways / roundFairwayHoles) * 100);
-      if (roundPercentage > bestFairwayPercentage && roundFairwayHoles >= 9) {
-        bestFairwayPercentage = roundPercentage;
-      }
-    }
-  });
-  
-  // Determine most common miss
-  let commonMiss = 'None';
-  let maxMisses = 0;
-  Object.entries(missDirections).forEach(([direction, count]) => {
-    if (count > maxMisses) {
-      maxMisses = count;
-      commonMiss = direction.charAt(0).toUpperCase() + direction.slice(1);
-    }
-  });
-  
-  return {
-    tracked: roundsWithFairwayData > 0,
-    fairwayPercentage: totalFairwayHoles > 0 ? Math.round((totalFairways / totalFairwayHoles) * 100) : 0,
-    bestFairwayRound: bestFairwayPercentage,
-    commonMiss,
-    roundsTracked: roundsWithFairwayData
   };
 }

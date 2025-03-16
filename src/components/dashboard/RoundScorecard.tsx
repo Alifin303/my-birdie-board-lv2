@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,7 +13,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScorecardHeader } from "./scorecard/ScorecardHeader";
-import { ScoreTable } from "./scorecard/ScoreTable";
 
 interface RoundScorecardProps {
   round: any;
@@ -30,7 +28,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
   const [isSaving, setIsSaving] = useState(false);
   const [selectedTee, setSelectedTee] = useState<string | undefined>(undefined);
   const [availableTees, setAvailableTees] = useState<Array<{id: string, name: string}>>([]);
-  const [showDetailedStats, setShowDetailedStats] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -98,7 +95,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       setIsEditing(false);
       setSelectedTee(undefined);
       setAvailableTees([]);
-      setShowDetailedStats(false);
     }
   }, [round, isOpen]);
 
@@ -119,36 +115,17 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
     console.log("Selected tee changed to:", teeName);
   };
 
-  const handleScoreChange = (index: number, field: 'strokes' | 'putts' | 'penalties', value: string) => {
+  const handleScoreChange = (index: number, value: string) => {
     const newScores = [...scores];
-    const parsedValue = value === '' ? undefined : parseInt(value, 10);
+    const parsedValue = value === '' ? 0 : parseInt(value, 10);
     
-    if (!isNaN(parsedValue as number) || value === '') {
+    if (!isNaN(parsedValue)) {
       newScores[index] = {
         ...newScores[index],
-        [field]: parsedValue,
+        strokes: parsedValue,
       };
       setScores(newScores);
     }
-  };
-
-  const handleGIRChange = (index: number, value: boolean) => {
-    const newScores = [...scores];
-    newScores[index] = {
-      ...newScores[index],
-      gir: value
-    };
-    setScores(newScores);
-  };
-
-  const handleFairwayChange = (index: number, hit: boolean, direction?: 'left' | 'right' | 'long' | 'short') => {
-    const newScores = [...scores];
-    newScores[index] = {
-      ...newScores[index],
-      fairwayHit: hit,
-      fairwayMissDirection: hit ? undefined : direction
-    };
-    setScores(newScores);
   };
 
   const handleSaveChanges = async () => {
@@ -233,34 +210,126 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
     const front9 = scores.filter(score => score.hole <= 9);
     const back9 = scores.filter(score => score.hole > 9);
 
+    const front9Total = front9.reduce((sum, score) => sum + (score.strokes || 0), 0);
+    const front9Par = front9.reduce((sum, score) => sum + score.par, 0);
+    const back9Total = back9.reduce((sum, score) => sum + (score.strokes || 0), 0);
+    const back9Par = back9.reduce((sum, score) => sum + score.par, 0);
+
     return (
       <div className="mt-4 space-y-6">
         {/* Front 9 */}
         {front9.length > 0 && (
-          <ScoreTable
-            scores={front9}
-            isEditing={isEditing}
-            handleScoreChange={handleScoreChange}
-            handleGIRChange={handleGIRChange}
-            handleFairwayChange={handleFairwayChange}
-            title="Front 9"
-            startIndex={0}
-            showDetailedStats={showDetailedStats}
-          />
+          <div>
+            <h4 className="font-medium mb-2">Front 9</h4>
+            <div className="border rounded-md overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="px-2 py-2 text-left text-sm font-medium">Hole</th>
+                    {front9.map((score) => (
+                      <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
+                    ))}
+                    <th className="px-2 py-2 text-center text-sm font-medium">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b">
+                    <td className="px-2 py-2 text-sm font-medium">Par</td>
+                    {front9.map((score) => (
+                      <td key={`par-${score.hole}`} className="px-1 py-2 text-center">
+                        <div className="bg-muted/40 border border-muted rounded-md w-7 h-7 flex items-center justify-center font-medium mx-auto">
+                          {score.par}
+                        </div>
+                      </td>
+                    ))}
+                    <td className="px-2 py-2 text-center font-medium">{front9Par}</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-2 py-2 text-sm font-medium">Score</td>
+                    {front9.map((score, index) => (
+                      <td key={`score-${score.hole}`} className="px-1 py-2 text-center">
+                        {isEditing ? (
+                          <Input
+                            type="number"
+                            min="1"
+                            max="20"
+                            value={score.strokes || ''}
+                            onChange={(e) => handleScoreChange(index, e.target.value)}
+                            className="w-9 h-7 text-center mx-auto px-1"
+                            inputMode="numeric"
+                          />
+                        ) : (
+                          <div className="w-7 h-7 flex items-center justify-center mx-auto">
+                            {score.strokes || '-'}
+                          </div>
+                        )}
+                      </td>
+                    ))}
+                    <td className="px-2 py-2 text-center font-medium">{front9Total}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         )}
 
         {/* Back 9 */}
         {back9.length > 0 && (
-          <ScoreTable
-            scores={back9}
-            isEditing={isEditing}
-            handleScoreChange={handleScoreChange}
-            handleGIRChange={handleGIRChange}
-            handleFairwayChange={handleFairwayChange}
-            title="Back 9"
-            startIndex={front9.length}
-            showDetailedStats={showDetailedStats}
-          />
+          <div>
+            <h4 className="font-medium mb-2">Back 9</h4>
+            <div className="border rounded-md overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="px-2 py-2 text-left text-sm font-medium">Hole</th>
+                    {back9.map((score) => (
+                      <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
+                    ))}
+                    <th className="px-2 py-2 text-center text-sm font-medium">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b">
+                    <td className="px-2 py-2 text-sm font-medium">Par</td>
+                    {back9.map((score) => (
+                      <td key={`par-${score.hole}`} className="px-1 py-2 text-center">
+                        <div className="bg-muted/40 border border-muted rounded-md w-7 h-7 flex items-center justify-center font-medium mx-auto">
+                          {score.par}
+                        </div>
+                      </td>
+                    ))}
+                    <td className="px-2 py-2 text-center font-medium">{back9Par}</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-2 py-2 text-sm font-medium">Score</td>
+                    {back9.map((score, index) => {
+                      const actualIndex = index + front9.length;
+                      return (
+                        <td key={`score-${score.hole}`} className="px-1 py-2 text-center">
+                          {isEditing ? (
+                            <Input
+                              type="number"
+                              min="1"
+                              max="20"
+                              value={score.strokes || ''}
+                              onChange={(e) => handleScoreChange(actualIndex, e.target.value)}
+                              className="w-9 h-7 text-center mx-auto px-1"
+                              inputMode="numeric"
+                            />
+                          ) : (
+                            <div className="w-7 h-7 flex items-center justify-center mx-auto">
+                              {score.strokes || '-'}
+                            </div>
+                          )}
+                        </td>
+                      );
+                    })}
+                    <td className="px-2 py-2 text-center font-medium">{back9Total}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         )}
 
         {/* Total */}
@@ -315,8 +384,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
               handleDateSelect={handleDateSelect}
               isSaving={isSaving}
               handleSaveChanges={handleSaveChanges}
-              showDetailedStats={showDetailedStats}
-              setShowDetailedStats={setShowDetailedStats}
             />
 
             <Separator className="my-4" />
