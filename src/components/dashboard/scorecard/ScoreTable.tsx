@@ -166,25 +166,22 @@ export const ScoreTable = ({
                                   : ''
                               }`}
                               onClick={(e) => {
-                                // Create and show a custom dropdown
+                                const buttonElement = e.currentTarget;
+                                
                                 const dropdown = document.getElementById(`fairway-dropdown-${score.hole}`);
                                 if (dropdown) {
                                   dropdown.classList.toggle('hidden');
-                                  // Position the dropdown
-                                  const buttonElement = e.currentTarget;
                                   const buttonRect = buttonElement.getBoundingClientRect();
                                   dropdown.style.top = `${buttonRect.bottom + window.scrollY + 5}px`;
                                   dropdown.style.left = `${buttonRect.left + window.scrollX - 30}px`;
                                 }
                                 
-                                // Close other dropdowns
                                 document.querySelectorAll('[id^="fairway-dropdown-"]').forEach((el) => {
                                   if (el.id !== `fairway-dropdown-${score.hole}`) {
                                     el.classList.add('hidden');
                                   }
                                 });
                                 
-                                // Close dropdown when clicking outside
                                 const handleClickOutside = (event: MouseEvent) => {
                                   if (dropdown && !dropdown.contains(event.target as Node) && 
                                       !buttonElement.contains(event.target as Node)) {
@@ -199,7 +196,6 @@ export const ScoreTable = ({
                               {getStatusDisplay()}
                             </Button>
                             
-                            {/* Custom dropdown menu */}
                             <div 
                               id={`fairway-dropdown-${score.hole}`}
                               className="absolute z-50 w-32 mt-1 bg-white rounded-md shadow-lg border border-gray-200 hidden"
