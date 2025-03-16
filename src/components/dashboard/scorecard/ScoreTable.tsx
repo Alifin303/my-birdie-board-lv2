@@ -171,7 +171,7 @@ export const ScoreTable = ({
                                   )}
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="center" className="bg-popover border border-border">
+                              <DropdownMenuContent align="center" className="bg-popover border border-border z-50 shadow-md">
                                 <DropdownMenuItem
                                   onClick={() => handleFairwayChange(actualIndex, true)}
                                   className="text-success hover:bg-success/10 cursor-pointer"
