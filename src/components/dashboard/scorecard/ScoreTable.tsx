@@ -172,8 +172,8 @@ export const ScoreTable = ({
                                 if (dropdown) {
                                   dropdown.classList.toggle('hidden');
                                   // Position the dropdown
-                                  const button = e.currentTarget;
-                                  const buttonRect = button.getBoundingClientRect();
+                                  const Button = e.currentTarget;
+                                  const buttonRect = Button.getBoundingClientRect();
                                   dropdown.style.top = `${buttonRect.bottom + window.scrollY + 5}px`;
                                   dropdown.style.left = `${buttonRect.left + window.scrollX - 30}px`;
                                 }
@@ -188,7 +188,7 @@ export const ScoreTable = ({
                                 // Close dropdown when clicking outside
                                 const handleClickOutside = (event: MouseEvent) => {
                                   if (dropdown && !dropdown.contains(event.target as Node) && 
-                                      !button.contains(event.target as Node)) {
+                                      !Button.contains(event.target as Node)) {
                                     dropdown.classList.add('hidden');
                                     document.removeEventListener('click', handleClickOutside);
                                   }
