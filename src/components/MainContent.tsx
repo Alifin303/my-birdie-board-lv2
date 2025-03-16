@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle } from 'lucide-react';
@@ -137,7 +136,11 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
             Welcome to MyBirdieBoard – <br className="hidden sm:block" />Your Ultimate Golf Tracking Hub!
           </h1>
           <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium mb-6 max-w-3xl mx-auto">
-            MyBirdieBoard is the all-in-one platform for golfers looking to track progress, analyze performance, and compete on leaderboards. Whether you're a casual weekend golfer or a dedicated player chasing lower scores, MyBirdieBoard helps you upload scorecards, track your handicap, and see your game improve over time.
+            MyBirdieBoard is your personal golf tracker, built to help you analyze your game, lower your scores, and compete with fellow golfers. Whether you're a weekend warrior or on a mission to break 80, MyBirdieBoard makes it easy to log rounds, track your handicap, and see real progress over time—all in one place.
+          </p>
+          
+          <p className="text-sm sm:text-base md:text-lg text-white/90 font-bold mb-6 max-w-3xl mx-auto">
+            Track. Improve. Compete. Ready to take your game to the next level? Start today!
           </p>
           
           <div className="flex justify-center mt-4">
