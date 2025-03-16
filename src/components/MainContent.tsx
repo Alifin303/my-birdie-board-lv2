@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle } from 'lucide-react';
@@ -6,10 +7,10 @@ import { Card, CardContent } from './ui/card';
 import { FeatureInfoModal, FeatureInfo } from './FeatureInfoModal';
 
 interface MainContentProps {
-  onStartQuiz: () => void;
+  onStartSignup: () => void;
 }
 
-export const MainContent = ({ onStartQuiz }: MainContentProps) => {
+export const MainContent = ({ onStartSignup }: MainContentProps) => {
   const [selectedFeature, setSelectedFeature] = useState<FeatureInfo | null>(null);
   
   const featureInfo: Record<string, FeatureInfo> = {
@@ -147,7 +148,7 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
             <Button 
               size="lg"
               className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300"
-              onClick={onStartQuiz}
+              onClick={onStartSignup}
               aria-label="Get started with MyBirdieBoard"
             >
               <span className="mr-2" aria-hidden="true">🏌️‍♂️</span>
@@ -252,8 +253,8 @@ export const MainContent = ({ onStartQuiz }: MainContentProps) => {
             <Button 
               size="lg"
               className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300"
-              onClick={onStartQuiz}
-              aria-label="Start the improvement quiz"
+              onClick={onStartSignup}
+              aria-label="Get started with MyBirdieBoard"
             >
               <span className="mr-2" aria-hidden="true">🏌️‍♂️</span>
               Get started

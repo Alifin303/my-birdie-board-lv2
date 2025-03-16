@@ -1,16 +1,16 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { SignUpDialog } from "@/components/SignUpDialog";
 import { LoginDialog } from "@/components/LoginDialog";
 
 const About = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
-  const navigate = useNavigate();
+  const [showSignupDialog, setShowSignupDialog] = useState(false);
 
   const handleGetStarted = () => {
-    navigate('/quiz');
+    setShowSignupDialog(true);
   };
 
   return (
@@ -88,7 +88,7 @@ const About = () => {
               size="lg"
               className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300"
               onClick={handleGetStarted}
-              aria-label="Take the golf improvement quiz"
+              aria-label="Sign up for MyBirdieBoard"
             >
               <span className="mr-2" aria-hidden="true">🏌️‍♂️</span>
               Get Started
@@ -96,6 +96,10 @@ const About = () => {
           </div>
         </article>
       </main>
+      <SignUpDialog 
+        open={showSignupDialog} 
+        onOpenChange={setShowSignupDialog}
+      />
     </div>
   );
 };

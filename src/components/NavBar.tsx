@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LoginDialog } from '@/components/LoginDialog';
 import { Logo } from '@/components/Logo';
+import { SignUpDialog } from '@/components/SignUpDialog';
 
 interface NavBarProps {
   transparent?: boolean;
@@ -11,6 +12,7 @@ interface NavBarProps {
 
 export const NavBar = ({ transparent = false }: NavBarProps) => {
   const [showLogin, setShowLogin] = useState(false);
+  const [showSignup, setShowSignup] = useState(false);
 
   return (
     <nav className={`w-full px-4 py-4 ${transparent ? 'absolute top-0 left-0 z-10' : 'bg-primary/90 shadow-md'}`}>
@@ -28,9 +30,9 @@ export const NavBar = ({ transparent = false }: NavBarProps) => {
           <Button 
             variant="ghost" 
             className={`text-white hover:text-white/80 ${transparent ? 'hover:bg-white/10' : 'hover:bg-primary-foreground/10'}`}
-            asChild
+            onClick={() => setShowSignup(true)}
           >
-            <Link to="/quiz">Quiz</Link>
+            Sign Up
           </Button>
           <Button 
             className="bg-accent hover:bg-accent/90 text-white"
@@ -41,6 +43,7 @@ export const NavBar = ({ transparent = false }: NavBarProps) => {
         </div>
       </div>
       <LoginDialog open={showLogin} onOpenChange={setShowLogin} />
+      <SignUpDialog open={showSignup} onOpenChange={setShowSignup} />
     </nav>
   );
 };

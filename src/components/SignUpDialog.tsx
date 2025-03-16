@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Button } from "./ui/button";
@@ -23,8 +24,13 @@ const signUpSchema = z.object({
 
 type SignUpFormData = z.infer<typeof signUpSchema>;
 
-export function SignUpDialog({ onStartQuiz }: { onStartQuiz?: () => void }) {
-  const [open, setOpen] = useState(false);
+interface SignUpDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function SignUpDialog({ open, onOpenChange }: SignUpDialogProps) {
+  const [isOpen, setIsOpen] = useState(open || false);
   const [isLoading, setIsLoading] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -42,12 +48,10 @@ export function SignUpDialog({ onStartQuiz }: { onStartQuiz?: () => void }) {
     },
   });
 
-  const handleSignupClick = () => {
-    if (onStartQuiz) {
-      setOpen(false);
-      onStartQuiz();
-    } else {
-      setOpen(true);
+  const handleOpenChange = (newOpen: boolean) => {
+    setIsOpen(newOpen);
+    if (onOpenChange) {
+      onOpenChange(newOpen);
     }
   };
 
@@ -121,7 +125,7 @@ export function SignUpDialog({ onStartQuiz }: { onStartQuiz?: () => void }) {
       });
       
       setTimeout(() => {
-        setOpen(false);
+        handleOpenChange(false);
         navigate("/checkout");
       }, 2000);
       
@@ -141,18 +145,12 @@ export function SignUpDialog({ onStartQuiz }: { onStartQuiz?: () => void }) {
     }
   };
 
-  const handleSignupComplete = () => {
-    setOpen(false);
-    setSignupSuccess(false);
-  };
-
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open !== undefined ? open : isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button 
           size="lg"
           className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300"
-          onClick={handleSignupClick}
         >
           <UserPlus className="mr-2" />
           Sign up
@@ -181,7 +179,7 @@ export function SignUpDialog({ onStartQuiz }: { onStartQuiz?: () => void }) {
               We've sent a verification email to your inbox. Please verify your email to complete the registration process.
             </p>
             <Button 
-              onClick={handleSignupComplete} 
+              onClick={() => handleOpenChange(false)} 
               className="mt-4"
             >
               Got it

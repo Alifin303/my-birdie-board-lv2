@@ -5,7 +5,6 @@ import { Helmet, HelmetProvider } from "react-helmet-async";
 import About from "@/pages/About";
 import Index from "@/pages/Index";
 import FAQ from "@/pages/FAQ";
-import Quiz from "@/pages/Quiz";
 import AuthRedirect from "@/pages/AuthRedirect";
 import AuthConfirm from "@/pages/AuthConfirm";
 import Checkout from "@/pages/Checkout";
@@ -83,16 +82,8 @@ function App() {
                   </>
                 } />
                 
-                <Route path="/quiz" element={
-                  <>
-                    <Helmet>
-                      <title>Golf Improvement Quiz - Find Your Weaknesses | MyBirdieBoard</title>
-                      <meta name="description" content="Take our quick quiz to identify what's holding your golf game back and get personalized recommendations for improvement." />
-                      <link rel="canonical" href="https://mybirdieboard.com/quiz" />
-                    </Helmet>
-                    <Quiz />
-                  </>
-                } />
+                {/* Redirect /quiz to root */}
+                <Route path="/quiz" element={<Navigate to="/" replace />} />
                 
                 {/* New routes for courses */}
                 <Route path="/courses" element={<Courses />} />
