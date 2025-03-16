@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Collapsible,
@@ -9,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Target, Circle, AlertCircle, Info } from "lucide-react";
 import { Round } from "./types";
+import { calculateGIRPercentage } from "@/components/add-round/utils/scoreUtils";
 
 interface AdvancedStatsProps {
   userRounds: Round[] | undefined;
@@ -232,32 +232,19 @@ function calculateGIRStats(rounds: Round[]) {
     const hasGIRData = scores.some((score: any) => score.gir !== undefined);
     if (!hasGIRData) return;
     
-    let roundGIR = 0;
-    let roundHoles = 0;
-    
-    scores.forEach((score: any) => {
-      if (score.gir !== undefined) {
-        if (score.gir) roundGIR++;
-        roundHoles++;
-      }
-    });
+    const { girPercentage, totalGIR: roundGIR, totalHoles: roundHoles } = calculateGIRPercentage(scores);
     
     if (roundHoles > 0) {
-      const roundGIRPercentage = Math.round((roundGIR / roundHoles) * 100);
-      
-      // Only consider rounds with at least 9 holes for best GIR round
-      if (roundHoles >= 9 && roundGIRPercentage > bestGIRPercentage) {
-        bestGIRPercentage = roundGIRPercentage;
+      if (roundHoles >= 9 && girPercentage > bestGIRPercentage) {
+        bestGIRPercentage = girPercentage;
       }
       
-      // Add to totals for accurate percentage calculation across all rounds
       totalGIR += roundGIR;
       totalHoles += roundHoles;
       roundsWithGIRData++;
     }
   });
   
-  // Calculate GIR percentage for all holes with GIR data
   const girPercentage = totalHoles > 0 ? Math.round((totalGIR / totalHoles) * 100) : 0;
   
   console.log("GIR Stats calculation:", {

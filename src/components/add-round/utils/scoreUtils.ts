@@ -1,3 +1,4 @@
+
 import { Score } from "../types";
 
 export const calculateScoreSummary = (scores: Score[]) => {
@@ -169,4 +170,14 @@ export const createShareData = (
   text += "\n\nTracked with BirdieBoard";
   
   return { title, text };
+};
+
+// Helper function to calculate GIR percentage consistently across the app
+export const calculateGIRPercentage = (scores: any[]): { girPercentage: number, totalGIR: number, totalHoles: number } => {
+  const scoresWithGIRData = scores.filter(score => score.gir !== undefined);
+  const totalGIR = scoresWithGIRData.filter(score => score.gir).length;
+  const totalHoles = scoresWithGIRData.length;
+  const girPercentage = totalHoles > 0 ? Math.round((totalGIR / totalHoles) * 100) : 0;
+  
+  return { girPercentage, totalGIR, totalHoles };
 };
