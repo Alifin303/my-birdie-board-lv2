@@ -143,9 +143,11 @@ export const ScoreTable = ({
                   <td className="px-2 py-2 text-sm font-medium text-primary">Fairway</td>
                   {scores.map((score, index) => {
                     const actualIndex = index + startIndex;
+                    const isPar4or5 = score.par >= 4;
+                    
                     return (
                       <td key={`fairway-${score.hole}`} className="px-1 py-2 text-center">
-                        {isEditing && handleFairwayChange && score.par >= 4 ? (
+                        {isEditing && handleFairwayChange && isPar4or5 ? (
                           <div className="flex flex-col items-center">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -204,7 +206,7 @@ export const ScoreTable = ({
                             )}
                           </div>
                         ) : (
-                          score.par >= 4 ? (
+                          isPar4or5 ? (
                             <div className="flex flex-col items-center">
                               <span>
                                 {score.fairwayHit ? '✓' : score.fairwayMissDirection ? '✗' : '-'}
