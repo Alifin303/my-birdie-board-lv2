@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   Collapsible,
@@ -237,10 +238,10 @@ function calculateGIRStats(rounds: Round[]) {
     
     allScoresWithGIRData = [...allScoresWithGIRData, ...scores.filter((score: any) => score.gir !== undefined)];
     
-    roundGIRPercentages.push({
-      percentage: girPercentage,
-      holeCount: totalHoles
-    });
+    // Store just the percentage value, not an object
+    if (totalHoles >= 9) {
+      roundGIRPercentages.push(girPercentage);
+    }
     
     console.log(`Round ${round.id} GIR stats:`, {
       girPercentage,
@@ -253,11 +254,11 @@ function calculateGIRStats(rounds: Round[]) {
   const { girPercentage } = calculateGIRPercentage(allScoresWithGIRData);
   
   let bestGIRRound = 0;
-  const validRounds = roundGIRPercentages.filter(r => r.holeCount >= 9);
-  if (validRounds.length > 0) {
-    bestGIRRound = Math.max(...validRounds.map(r => r.percentage));
-  } else if (roundGIRPercentages.length > 0) {
-    bestGIRRound = Math.max(...roundGIRPercentages.map(r => r.percentage));
+  if (roundGIRPercentages.length > 0) {
+    bestGIRRound = Math.max(...roundGIRPercentages);
+  } else {
+    // If we don't have any full rounds (9+ holes), use overall GIR percentage
+    bestGIRRound = girPercentage;
   }
   
   console.log("Overall GIR Stats calculation:", {
