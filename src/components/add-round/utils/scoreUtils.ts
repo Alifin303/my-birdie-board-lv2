@@ -1,4 +1,3 @@
-
 import { Score } from "../types";
 
 export const calculateScoreSummary = (scores: Score[]) => {
@@ -81,6 +80,19 @@ export const detectAchievements = (scores: Score[]) => {
   if (threePutts === 0 && scores.every(score => score.putts !== undefined)) {
     achievements.push({
       type: 'no-three-putts'
+    });
+  }
+  
+  // Calculate GIR percentage if GIR data is available
+  const scoresWithGIRData = scores.filter(score => score.gir !== undefined);
+  if (scoresWithGIRData.length > 0) {
+    const totalGIR = scoresWithGIRData.filter(score => score.gir).length;
+    const girPercentage = Math.round((totalGIR / scoresWithGIRData.length) * 100);
+    
+    console.log("Scorecard GIR calculation:", {
+      totalGIR,
+      totalHoles: scoresWithGIRData.length,
+      girPercentage
     });
   }
   

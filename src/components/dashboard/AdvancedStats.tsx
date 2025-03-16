@@ -250,15 +250,23 @@ function calculateGIRStats(rounds: Round[]) {
         bestGIRPercentage = roundGIRPercentage;
       }
       
+      // Add to totals for accurate percentage calculation across all rounds
       totalGIR += roundGIR;
       totalHoles += roundHoles;
       roundsWithGIRData++;
     }
   });
   
-  // Calculate GIR percentage for all holes, regardless of count
-  // This ensures we show the accurate percentage even for fewer than 9 holes
+  // Calculate GIR percentage for all holes with GIR data
   const girPercentage = totalHoles > 0 ? Math.round((totalGIR / totalHoles) * 100) : 0;
+  
+  console.log("GIR Stats calculation:", {
+    totalGIR,
+    totalHoles,
+    girPercentage,
+    bestGIRPercentage,
+    roundsWithGIRData
+  });
   
   return {
     tracked: roundsWithGIRData > 0,
