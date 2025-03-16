@@ -152,13 +152,13 @@ export const ScoreTable = ({
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button 
-                                  variant="ghost" 
+                                  variant="outline" 
                                   size="sm" 
                                   className={`h-7 w-7 p-0 ${
                                     score.fairwayHit 
-                                      ? 'bg-success/20 hover:bg-success/30 text-success' 
+                                      ? 'bg-success/20 hover:bg-success/30 text-success border-success/30' 
                                       : score.fairwayMissDirection 
-                                      ? 'bg-destructive/10 hover:bg-destructive/20 text-destructive'
+                                      ? 'bg-destructive/10 hover:bg-destructive/20 text-destructive border-destructive/30'
                                       : ''
                                   }`}
                                 >
@@ -171,31 +171,36 @@ export const ScoreTable = ({
                                   )}
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="center">
+                              <DropdownMenuContent align="center" className="bg-popover border border-border">
                                 <DropdownMenuItem
                                   onClick={() => handleFairwayChange(actualIndex, true)}
+                                  className="text-success hover:bg-success/10 cursor-pointer"
                                 >
-                                  Hit
+                                  <Check className="h-4 w-4 mr-2" /> Hit
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() => handleFairwayChange(actualIndex, false, 'left')}
+                                  className="text-destructive hover:bg-destructive/10 cursor-pointer"
                                 >
-                                  Miss Left
+                                  <X className="h-4 w-4 mr-2" /> Miss Left
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() => handleFairwayChange(actualIndex, false, 'right')}
+                                  className="text-destructive hover:bg-destructive/10 cursor-pointer"
                                 >
-                                  Miss Right
+                                  <X className="h-4 w-4 mr-2" /> Miss Right
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() => handleFairwayChange(actualIndex, false, 'long')}
+                                  className="text-destructive hover:bg-destructive/10 cursor-pointer"
                                 >
-                                  Miss Long
+                                  <X className="h-4 w-4 mr-2" /> Miss Long
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() => handleFairwayChange(actualIndex, false, 'short')}
+                                  className="text-destructive hover:bg-destructive/10 cursor-pointer"
                                 >
-                                  Miss Short
+                                  <X className="h-4 w-4 mr-2" /> Miss Short
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
