@@ -49,6 +49,8 @@ export interface Score {
   putts?: number;
   penalties?: number;
   gir?: boolean;
+  fairwayHit?: boolean;
+  fairwayMissDirection?: 'left' | 'right' | 'long' | 'short';
   yards?: number;
   handicap?: number;
 }

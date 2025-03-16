@@ -8,6 +8,8 @@ export interface HoleScore {
   putts?: number;           // Added for putting statistics
   gir?: boolean;            // Added for green in regulation
   penalties?: number;       // Added for penalty tracking
+  fairwayHit?: boolean;     // Added for fairway tracking
+  fairwayMissDirection?: 'left' | 'right' | 'long' | 'short'; // Direction of miss
 }
 
 export interface RoundScorecardProps {
@@ -22,6 +24,7 @@ export interface ScoreTableProps {
   isEditing: boolean;
   handleScoreChange: (index: number, field: 'strokes' | 'putts' | 'penalties', value: string) => void;
   handleGIRChange?: (index: number, value: boolean) => void;
+  handleFairwayChange?: (index: number, hit: boolean, direction?: 'left' | 'right' | 'long' | 'short') => void;
   title: string;
   startIndex?: number;
   showDetailedStats?: boolean;
