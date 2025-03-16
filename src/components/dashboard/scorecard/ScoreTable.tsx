@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScoreTableProps } from "./types";
@@ -143,75 +144,116 @@ export const ScoreTable = ({
                     const actualIndex = index + startIndex;
                     const isPar4or5 = score.par >= 4;
                     
+                    const getStatusDisplay = () => {
+                      if (score.fairwayHit) return "Hit";
+                      if (score.fairwayMissDirection) {
+                        return `Miss ${score.fairwayMissDirection.charAt(0).toUpperCase() + score.fairwayMissDirection.slice(1)}`;
+                      }
+                      return "-";
+                    };
+                    
                     return (
-                      <td key={`fairway-${score.hole}`} className="px-1 py-2 text-center relative">
+                      <td key={`fairway-${score.hole}`} className="px-1 py-2 text-center">
                         {isEditing && handleFairwayChange && isPar4or5 ? (
-                          <div className="flex flex-col items-center">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className={`h-7 w-7 p-0 ${
-                                    score.fairwayHit 
-                                      ? 'bg-success/20 hover:bg-success/30 text-success border-success/30' 
-                                      : score.fairwayMissDirection 
-                                      ? 'bg-destructive/10 hover:bg-destructive/20 text-destructive border-destructive/30'
-                                      : ''
-                                  }`}
-                                >
-                                  {score.fairwayHit ? (
-                                    <Check className="h-4 w-4" />
-                                  ) : score.fairwayMissDirection ? (
-                                    <X className="h-4 w-4" />
-                                  ) : (
-                                    <ChevronDown className="h-4 w-4" />
-                                  )}
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent 
-                                align="center" 
-                                className="z-[100] bg-background border border-input shadow-lg rounded-md"
-                                sideOffset={5}
-                                forceMount
-                              >
-                                <DropdownMenuItem
-                                  onClick={() => handleFairwayChange(actualIndex, true)}
-                                  className="text-success hover:bg-success/10 cursor-pointer"
+                          <div className="relative inline-block text-left">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className={`h-7 w-20 p-0 text-xs ${
+                                score.fairwayHit 
+                                  ? 'bg-success/20 hover:bg-success/30 text-success border-success/30' 
+                                  : score.fairwayMissDirection 
+                                  ? 'bg-destructive/10 hover:bg-destructive/20 text-destructive border-destructive/30'
+                                  : ''
+                              }`}
+                              onClick={(e) => {
+                                // Create and show a custom dropdown
+                                const dropdown = document.getElementById(`fairway-dropdown-${score.hole}`);
+                                if (dropdown) {
+                                  dropdown.classList.toggle('hidden');
+                                  // Position the dropdown
+                                  const button = e.currentTarget;
+                                  const buttonRect = button.getBoundingClientRect();
+                                  dropdown.style.top = `${buttonRect.bottom + window.scrollY + 5}px`;
+                                  dropdown.style.left = `${buttonRect.left + window.scrollX - 30}px`;
+                                }
+                                
+                                // Close other dropdowns
+                                document.querySelectorAll('[id^="fairway-dropdown-"]').forEach((el) => {
+                                  if (el.id !== `fairway-dropdown-${score.hole}`) {
+                                    el.classList.add('hidden');
+                                  }
+                                });
+                                
+                                // Close dropdown when clicking outside
+                                const handleClickOutside = (event: MouseEvent) => {
+                                  if (dropdown && !dropdown.contains(event.target as Node) && 
+                                      !button.contains(event.target as Node)) {
+                                    dropdown.classList.add('hidden');
+                                    document.removeEventListener('click', handleClickOutside);
+                                  }
+                                };
+                                
+                                document.addEventListener('click', handleClickOutside);
+                              }}
+                            >
+                              {getStatusDisplay()}
+                            </Button>
+                            
+                            {/* Custom dropdown menu */}
+                            <div 
+                              id={`fairway-dropdown-${score.hole}`}
+                              className="absolute z-50 w-32 mt-1 bg-white rounded-md shadow-lg border border-gray-200 hidden"
+                              style={{ minWidth: '120px' }}
+                            >
+                              <div className="py-1">
+                                <button 
+                                  className="flex items-center px-4 py-2 text-sm text-green-700 hover:bg-green-100 w-full text-left"
+                                  onClick={() => {
+                                    handleFairwayChange(actualIndex, true);
+                                    document.getElementById(`fairway-dropdown-${score.hole}`)?.classList.add('hidden');
+                                  }}
                                 >
                                   <Check className="h-4 w-4 mr-2" /> Hit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => handleFairwayChange(actualIndex, false, 'left')}
-                                  className="text-destructive hover:bg-destructive/10 cursor-pointer"
+                                </button>
+                                <button 
+                                  className="flex items-center px-4 py-2 text-sm text-red-700 hover:bg-red-100 w-full text-left"
+                                  onClick={() => {
+                                    handleFairwayChange(actualIndex, false, 'left');
+                                    document.getElementById(`fairway-dropdown-${score.hole}`)?.classList.add('hidden');
+                                  }}
                                 >
                                   <X className="h-4 w-4 mr-2" /> Miss Left
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => handleFairwayChange(actualIndex, false, 'right')}
-                                  className="text-destructive hover:bg-destructive/10 cursor-pointer"
+                                </button>
+                                <button 
+                                  className="flex items-center px-4 py-2 text-sm text-red-700 hover:bg-red-100 w-full text-left"
+                                  onClick={() => {
+                                    handleFairwayChange(actualIndex, false, 'right');
+                                    document.getElementById(`fairway-dropdown-${score.hole}`)?.classList.add('hidden');
+                                  }}
                                 >
                                   <X className="h-4 w-4 mr-2" /> Miss Right
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => handleFairwayChange(actualIndex, false, 'long')}
-                                  className="text-destructive hover:bg-destructive/10 cursor-pointer"
+                                </button>
+                                <button 
+                                  className="flex items-center px-4 py-2 text-sm text-red-700 hover:bg-red-100 w-full text-left"
+                                  onClick={() => {
+                                    handleFairwayChange(actualIndex, false, 'long');
+                                    document.getElementById(`fairway-dropdown-${score.hole}`)?.classList.add('hidden');
+                                  }}
                                 >
                                   <X className="h-4 w-4 mr-2" /> Miss Long
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => handleFairwayChange(actualIndex, false, 'short')}
-                                  className="text-destructive hover:bg-destructive/10 cursor-pointer"
+                                </button>
+                                <button 
+                                  className="flex items-center px-4 py-2 text-sm text-red-700 hover:bg-red-100 w-full text-left"
+                                  onClick={() => {
+                                    handleFairwayChange(actualIndex, false, 'short');
+                                    document.getElementById(`fairway-dropdown-${score.hole}`)?.classList.add('hidden');
+                                  }}
                                 >
                                   <X className="h-4 w-4 mr-2" /> Miss Short
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                            {score.fairwayMissDirection && (
-                              <span className="text-xs text-muted-foreground mt-1">
-                                {score.fairwayMissDirection.charAt(0).toUpperCase()}
-                              </span>
-                            )}
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         ) : (
                           isPar4or5 ? (
