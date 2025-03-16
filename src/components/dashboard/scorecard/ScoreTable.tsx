@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScoreTableProps } from "./types";
@@ -172,8 +171,8 @@ export const ScoreTable = ({
                                 if (dropdown) {
                                   dropdown.classList.toggle('hidden');
                                   // Position the dropdown
-                                  const Button = e.currentTarget;
-                                  const buttonRect = Button.getBoundingClientRect();
+                                  const buttonElement = e.currentTarget;
+                                  const buttonRect = buttonElement.getBoundingClientRect();
                                   dropdown.style.top = `${buttonRect.bottom + window.scrollY + 5}px`;
                                   dropdown.style.left = `${buttonRect.left + window.scrollX - 30}px`;
                                 }
@@ -188,7 +187,7 @@ export const ScoreTable = ({
                                 // Close dropdown when clicking outside
                                 const handleClickOutside = (event: MouseEvent) => {
                                   if (dropdown && !dropdown.contains(event.target as Node) && 
-                                      !Button.contains(event.target as Node)) {
+                                      !buttonElement.contains(event.target as Node)) {
                                     dropdown.classList.add('hidden');
                                     document.removeEventListener('click', handleClickOutside);
                                   }
