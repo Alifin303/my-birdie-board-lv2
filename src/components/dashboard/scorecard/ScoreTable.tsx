@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScoreTableProps } from "./types";
@@ -25,7 +24,6 @@ export const ScoreTable = ({
   const girCount = scores.filter(score => score.gir).length;
   const girPercentage = scores.length > 0 ? Math.round((girCount / scores.length) * 100) : 0;
   
-  // Calculate fairway stats
   const fairwayHoles = scores.filter(score => score.par >= 4); // Only par 4 and 5 have fairways
   const fairwayHits = fairwayHoles.filter(score => score.fairwayHit).length;
   const fairwayPercentage = fairwayHoles.length > 0 ? Math.round((fairwayHits / fairwayHoles.length) * 100) : 0;
@@ -146,7 +144,7 @@ export const ScoreTable = ({
                     const isPar4or5 = score.par >= 4;
                     
                     return (
-                      <td key={`fairway-${score.hole}`} className="px-1 py-2 text-center">
+                      <td key={`fairway-${score.hole}`} className="px-1 py-2 text-center relative">
                         {isEditing && handleFairwayChange && isPar4or5 ? (
                           <div className="flex flex-col items-center">
                             <DropdownMenu>
@@ -171,7 +169,12 @@ export const ScoreTable = ({
                                   )}
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="center" className="bg-popover border border-border z-50 shadow-md">
+                              <DropdownMenuContent 
+                                align="center" 
+                                className="z-[100] bg-background border border-input shadow-lg rounded-md"
+                                sideOffset={5}
+                                forceMount
+                              >
                                 <DropdownMenuItem
                                   onClick={() => handleFairwayChange(actualIndex, true)}
                                   className="text-success hover:bg-success/10 cursor-pointer"
