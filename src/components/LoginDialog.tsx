@@ -23,11 +23,9 @@ import { isSubscriptionValid } from "@/integrations/supabase/subscription/subscr
 export function LoginDialog({ 
   open, 
   onOpenChange,
-  onStartQuiz 
 }: { 
   open: boolean; 
   onOpenChange: (open: boolean) => void;
-  onStartQuiz?: () => void;
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -197,7 +195,7 @@ export function LoginDialog({
           
           <div className="text-center py-2">
             <div className="text-sm text-muted-foreground">Don't have an account?</div>
-            <SignUpDialog onStartQuiz={onStartQuiz} />
+            <SignUpDialog />
           </div>
         </DialogContent>
       </Dialog>
