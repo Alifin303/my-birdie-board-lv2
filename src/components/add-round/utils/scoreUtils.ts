@@ -1,4 +1,3 @@
-
 import { Score } from "../types";
 
 export const calculateScoreSummary = (scores: Score[]) => {
@@ -183,7 +182,6 @@ export const calculateGIRPercentage = (scores: any[]): { girPercentage: number, 
   // Count total number of holes with GIR data
   const totalHoles = scoresWithGIRData.length;
   
-  // For a full round of 18 holes, 1 GIR would be about 6%
   // Calculate percentage - ensure we don't divide by zero
   const girPercentage = totalHoles > 0 ? Math.round((totalGIR / totalHoles) * 100) : 0;
   

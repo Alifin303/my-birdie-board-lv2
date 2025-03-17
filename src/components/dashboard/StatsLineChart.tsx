@@ -46,7 +46,7 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
       
       let puttsValue = 0;
       let puttHoles = 0;
-      let girValue = 0;
+      let girHits = 0;
       let girHoles = 0;
       let penaltiesValue = 0;
       
@@ -59,8 +59,8 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
         
         // Count GIR
         if (score.gir !== undefined) {
-          // Only add to girValue if gir is true
-          girValue += score.gir ? 1 : 0;
+          // Only add to girHits if gir is true
+          girHits += score.gir ? 1 : 0;
           girHoles++;
         }
         
@@ -73,12 +73,12 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
       // Calculate GIR percentage only if we have valid data
       let girPercentage = 0;
       if (girHoles > 0) {
-        girPercentage = Math.round((girValue / girHoles) * 100);
+        girPercentage = Math.round((girHits / girHoles) * 100);
         
         // Log for debugging
         console.log(`Round ${round.id} GIR calculation:`, {
           date: formatDate(round.date),
-          girValue, // Number of successful GIRs
+          girHits, // Number of successful GIRs
           girHoles, // Total holes with GIR data
           girPercentage, // Calculated percentage
           scores: scores.filter((s: any) => s.gir !== undefined).map((s: any) => ({ 
