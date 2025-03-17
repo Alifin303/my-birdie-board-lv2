@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Collapsible,
@@ -10,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Target, Circle, AlertCircle, Info } from "lucide-react";
 import { Round } from "./types";
 import { calculateGIRPercentage } from "@/components/add-round/utils/scoreUtils";
-import CourseGIRChart from "./charts/CourseGIRChart";
 
 interface CourseAdvancedStatsProps {
   rounds: Round[] | undefined;
@@ -63,96 +61,90 @@ export const CourseAdvancedStats = ({ rounds, isLoading }: CourseAdvancedStatsPr
         </CollapsibleTrigger>
       </div>
       
-      <CollapsibleContent className="mt-4 space-y-6">
+      <CollapsibleContent className="mt-4">
         {hasAdvancedStats ? (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {puttingStats.tracked && (
-                <Card className="p-4 shadow-sm">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-medium flex items-center gap-1.5">
-                        <Circle className="h-4 w-4 text-primary" />
-                        Putting
-                      </h3>
-                      <ul className="mt-2 space-y-1 text-sm">
-                        <li className="flex justify-between">
-                          <span className="text-muted-foreground">Avg Putts/Round:</span>
-                          <span className="font-medium">{puttingStats.avgPuttsPerRound.toFixed(1)}</span>
-                        </li>
-                        <li className="flex justify-between">
-                          <span className="text-muted-foreground">Avg Putts/Hole:</span>
-                          <span className="font-medium">{puttingStats.avgPuttsPerHole.toFixed(2)}</span>
-                        </li>
-                        <li className="flex justify-between">
-                          <span className="text-muted-foreground">Fewest Putts:</span>
-                          <span className="font-medium">{puttingStats.fewestPutts}</span>
-                        </li>
-                      </ul>
-                    </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {puttingStats.tracked && (
+              <Card className="p-4 shadow-sm">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-medium flex items-center gap-1.5">
+                      <Circle className="h-4 w-4 text-primary" />
+                      Putting
+                    </h3>
+                    <ul className="mt-2 space-y-1 text-sm">
+                      <li className="flex justify-between">
+                        <span className="text-muted-foreground">Avg Putts/Round:</span>
+                        <span className="font-medium">{puttingStats.avgPuttsPerRound.toFixed(1)}</span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span className="text-muted-foreground">Avg Putts/Hole:</span>
+                        <span className="font-medium">{puttingStats.avgPuttsPerHole.toFixed(2)}</span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span className="text-muted-foreground">Fewest Putts:</span>
+                        <span className="font-medium">{puttingStats.fewestPutts}</span>
+                      </li>
+                    </ul>
                   </div>
-                </Card>
-              )}
-              
-              {girStats.tracked && (
-                <Card className="p-4 shadow-sm">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-medium flex items-center gap-1.5">
-                        <Target className="h-4 w-4 text-primary" />
-                        Greens in Regulation
-                      </h3>
-                      <ul className="mt-2 space-y-1 text-sm">
-                        <li className="flex justify-between">
-                          <span className="text-muted-foreground">GIR Percentage:</span>
-                          <span className="font-medium">{girStats.girPercentage}%</span>
-                        </li>
-                        <li className="flex justify-between">
-                          <span className="text-muted-foreground">Best GIR Round:</span>
-                          <span className="font-medium">{girStats.bestGIRRound}%</span>
-                        </li>
-                        <li className="flex justify-between">
-                          <span className="text-muted-foreground">Rounds Tracked:</span>
-                          <span className="font-medium">{girStats.roundsTracked}</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </Card>
-              )}
-              
-              {penaltyStats.tracked && (
-                <Card className="p-4 shadow-sm">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-medium flex items-center gap-1.5">
-                        <AlertCircle className="h-4 w-4 text-primary" />
-                        Penalties
-                      </h3>
-                      <ul className="mt-2 space-y-1 text-sm">
-                        <li className="flex justify-between">
-                          <span className="text-muted-foreground">Avg Penalties/Round:</span>
-                          <span className="font-medium">{penaltyStats.avgPenaltiesPerRound.toFixed(1)}</span>
-                        </li>
-                        <li className="flex justify-between">
-                          <span className="text-muted-foreground">Rounds Without Penalties:</span>
-                          <span className="font-medium">{penaltyStats.roundsWithoutPenalties}</span>
-                        </li>
-                        <li className="flex justify-between">
-                          <span className="text-muted-foreground">Total Penalties:</span>
-                          <span className="font-medium">{penaltyStats.totalPenalties}</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </Card>
-              )}
-            </div>
+                </div>
+              </Card>
+            )}
             
             {girStats.tracked && (
-              <CourseGIRChart rounds={rounds || []} isLoading={isLoading} />
+              <Card className="p-4 shadow-sm">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-medium flex items-center gap-1.5">
+                      <Target className="h-4 w-4 text-primary" />
+                      Greens in Regulation
+                    </h3>
+                    <ul className="mt-2 space-y-1 text-sm">
+                      <li className="flex justify-between">
+                        <span className="text-muted-foreground">GIR Percentage:</span>
+                        <span className="font-medium">{girStats.girPercentage}%</span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span className="text-muted-foreground">Best GIR Round:</span>
+                        <span className="font-medium">{girStats.bestGIRRound}%</span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span className="text-muted-foreground">Rounds Tracked:</span>
+                        <span className="font-medium">{girStats.roundsTracked}</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </Card>
             )}
-          </>
+            
+            {penaltyStats.tracked && (
+              <Card className="p-4 shadow-sm">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-medium flex items-center gap-1.5">
+                      <AlertCircle className="h-4 w-4 text-primary" />
+                      Penalties
+                    </h3>
+                    <ul className="mt-2 space-y-1 text-sm">
+                      <li className="flex justify-between">
+                        <span className="text-muted-foreground">Avg Penalties/Round:</span>
+                        <span className="font-medium">{penaltyStats.avgPenaltiesPerRound.toFixed(1)}</span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span className="text-muted-foreground">Rounds Without Penalties:</span>
+                        <span className="font-medium">{penaltyStats.roundsWithoutPenalties}</span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span className="text-muted-foreground">Total Penalties:</span>
+                        <span className="font-medium">{penaltyStats.totalPenalties}</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </Card>
+            )}
+          </div>
         ) : (
           <Card className="p-4 shadow-sm">
             <div className="flex items-start space-x-4">

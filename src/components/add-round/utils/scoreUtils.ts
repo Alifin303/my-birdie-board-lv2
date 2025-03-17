@@ -1,3 +1,4 @@
+
 import { Score } from "../types";
 
 export const calculateScoreSummary = (scores: Score[]) => {
@@ -194,71 +195,4 @@ export const calculateGIRPercentage = (scores: any[]): { girPercentage: number, 
   });
   
   return { girPercentage, totalGIR, totalHoles };
-};
-
-/**
- * Calculates score distribution (eagles, birdies, pars, etc.) from scores
- */
-export const calculateScoreDistribution = (scores: any[]) => {
-  if (!scores || scores.length === 0) {
-    return {
-      eagles: 0,
-      birdies: 0,
-      pars: 0,
-      bogeys: 0,
-      doubleBogeys: 0,
-      others: 0,
-      totalHoles: 0,
-      eaglesPercentage: 0,
-      birdiesPercentage: 0,
-      parsPercentage: 0,
-      bogeysPercentage: 0,
-      doubleBogeysPercentage: 0,
-      othersPercentage: 0
-    };
-  }
-  
-  let eagleCount = 0;
-  let birdieCount = 0;
-  let parCount = 0;
-  let bogeyCount = 0;
-  let doubleBogeyCount = 0;
-  let otherCount = 0;
-  let validHoles = 0;
-  
-  scores.forEach(score => {
-    if (score && typeof score.strokes === 'number' && typeof score.par === 'number') {
-      validHoles++;
-      const relativeToPar = score.strokes - score.par;
-      
-      if (relativeToPar <= -2) eagleCount++;
-      else if (relativeToPar === -1) birdieCount++;
-      else if (relativeToPar === 0) parCount++;
-      else if (relativeToPar === 1) bogeyCount++;
-      else if (relativeToPar === 2) doubleBogeyCount++;
-      else otherCount++;
-    }
-  });
-  
-  const totalHoles = validHoles;
-  
-  // Calculate percentages
-  const calculatePercentage = (count: number) => 
-    totalHoles > 0 ? Math.round((count / totalHoles) * 100) : 0;
-  
-  return {
-    eagles: eagleCount,
-    birdies: birdieCount,
-    pars: parCount,
-    bogeys: bogeyCount,
-    doubleBogeys: doubleBogeyCount,
-    others: otherCount,
-    totalHoles,
-    eaglesPercentage: calculatePercentage(eagleCount),
-    birdiesPercentage: calculatePercentage(birdieCount),
-    parsPercentage: calculatePercentage(parCount),
-    bogeysPercentage: calculatePercentage(bogeyCount),
-    doubleBogeysPercentage: calculatePercentage(doubleBogeyCount),
-    othersPercentage: calculatePercentage(otherCount)
-  };
 };
