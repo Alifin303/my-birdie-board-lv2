@@ -243,35 +243,64 @@ function calculateGIRStats(rounds: Round[]) {
     
     roundsWithGIRData++;
     
-    const { girPercentage, totalGIR, totalHoles } = calculateGIRPercentage(scores);
+    // Calculate this round's GIR stats
+    let girCount = 0;
+    let girHoles = 0;
     
+    scores.forEach((score: any) => {
+      if (score.gir !== undefined) {
+        girCount += score.gir ? 1 : 0;
+        girHoles++;
+      }
+    });
+    
+    // Add detailed log to track GIR calculations
+    console.log(`Round ${round.id} GIR calculation in stats:`, {
+      date: new Date(round.date).toLocaleDateString(),
+      girCount, // Number of successful GIRs
+      girHoles, // Total holes with GIR data
+      girPercentage: girHoles > 0 ? Math.round((girCount / girHoles) * 100) : 0,
+      scores: scores.filter((s: any) => s.gir !== undefined).map((s: any) => ({ 
+        hole: s.hole, 
+        gir: s.gir 
+      }))
+    });
+    
+    // Calculate percentage for this round
+    const roundGIRPercentage = girHoles > 0 ? Math.round((girCount / girHoles) * 100) : 0;
+    
+    // Track all holes with GIR data for overall percentage
     allScoresWithGIRData = [...allScoresWithGIRData, ...scores.filter((score: any) => score.gir !== undefined)];
     
-    // Store just the percentage value, not an object
-    if (totalHoles >= 9) {
-      roundGIRPercentages.push(girPercentage);
+    // Store this round's percentage for "best round" calculation if it has at least 9 holes
+    if (girHoles >= 9) {
+      roundGIRPercentages.push(roundGIRPercentage);
     }
-    
-    console.log(`Round ${round.id} GIR stats:`, {
-      girPercentage,
-      totalGIR,
-      totalHoles,
-      date: new Date(round.date).toLocaleDateString()
-    });
   });
   
-  const { girPercentage } = calculateGIRPercentage(allScoresWithGIRData);
+  // Calculate overall GIR percentage from all holes
+  let totalGIR = 0;
+  let totalHoles = 0;
   
+  allScoresWithGIRData.forEach(score => {
+    if (score.gir !== undefined) {
+      totalGIR += score.gir ? 1 : 0;
+      totalHoles++;
+    }
+  });
+  
+  const overallGIRPercentage = totalHoles > 0 ? Math.round((totalGIR / totalHoles) * 100) : 0;
+  
+  // Determine best GIR round
   let bestGIRRound = 0;
   if (roundGIRPercentages.length > 0) {
     bestGIRRound = Math.max(...roundGIRPercentages);
-  } else {
-    // If we don't have any full rounds (9+ holes), use overall GIR percentage
-    bestGIRRound = girPercentage;
   }
   
   console.log("Overall GIR Stats calculation:", {
-    overallGIRPercentage: girPercentage,
+    totalGIR,
+    totalHoles,
+    overallGIRPercentage,
     bestGIRRound,
     roundsWithGIRData,
     roundGIRPercentages
@@ -279,7 +308,7 @@ function calculateGIRStats(rounds: Round[]) {
   
   return {
     tracked: roundsWithGIRData > 0,
-    girPercentage,
+    girPercentage: overallGIRPercentage,
     bestGIRRound,
     roundsTracked: roundsWithGIRData
   };

@@ -59,6 +59,7 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
         
         // Count GIR
         if (score.gir !== undefined) {
+          // Only add to girValue if gir is true
           girValue += score.gir ? 1 : 0;
           girHoles++;
         }
@@ -69,9 +70,23 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
         }
       });
       
-      // Calculate GIR percentage if data available
-      // Only calculate GIR percentage if we have data for at least one hole
-      const girPercentage = girHoles > 0 ? Math.round((girValue / girHoles) * 100) : 0;
+      // Calculate GIR percentage only if we have valid data
+      let girPercentage = 0;
+      if (girHoles > 0) {
+        girPercentage = Math.round((girValue / girHoles) * 100);
+        
+        // Log for debugging
+        console.log(`Round ${round.id} GIR calculation:`, {
+          date: formatDate(round.date),
+          girValue, // Number of successful GIRs
+          girHoles, // Total holes with GIR data
+          girPercentage, // Calculated percentage
+          scores: scores.filter((s: any) => s.gir !== undefined).map((s: any) => ({ 
+            hole: s.hole, 
+            gir: s.gir 
+          }))
+        });
+      }
       
       return {
         date: formatDate(round.date),
