@@ -1,3 +1,4 @@
+
 import { useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Target } from "lucide-react";
@@ -126,17 +127,17 @@ const CourseGIRChart = ({ rounds, isLoading }: CourseGIRChartProps) => {
   }
 
   return (
-    <Card className="p-4 overflow-hidden">
+    <Card className="p-4 pb-6 overflow-hidden">
       <div className="flex items-center gap-2 mb-2">
         <Target className="h-5 w-5 text-primary" />
         <h3 className="text-lg font-medium">Course GIR Percentage Over Time</h3>
       </div>
       
-      <div className="h-[350px] w-full">
+      <div className="h-[280px] w-full">
         <ChartContainer config={config}>
           <LineChart 
             data={chartData} 
-            margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
+            margin={{ top: 20, right: 30, left: 20, bottom: 10 }}
           >
             <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
             <XAxis 
@@ -155,7 +156,6 @@ const CourseGIRChart = ({ rounds, isLoading }: CourseGIRChartProps) => {
               tickCount={6} 
               tick={{ fontSize: 12 }}
               tickFormatter={(value) => `${value}%`}
-              padding={{ bottom: 0 }}
             />
             <ChartTooltip
               content={
