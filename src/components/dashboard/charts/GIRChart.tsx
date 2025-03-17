@@ -1,4 +1,3 @@
-
 import { useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Target } from "lucide-react";
@@ -16,8 +15,7 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  ResponsiveContainer,
-  ReferenceLine
+  ResponsiveContainer
 } from "recharts";
 
 interface GIRChartProps {
@@ -159,20 +157,6 @@ const GIRChart = ({ rounds, isLoading }: GIRChartProps) => {
               tick={{ fontSize: 12 }}
               tickFormatter={(value) => `${value}%`}
               padding={{ bottom: 15 }}
-            />
-            <ReferenceLine 
-              y={36} 
-              stroke="#9333ea" 
-              strokeDasharray="3 3" 
-              strokeWidth={1.5}
-              label={{
-                value: "PGA Tour Avg",
-                position: "insideBottomLeft",
-                fill: "#9333ea",
-                fontSize: 12,
-                dy: -5,
-                dx: 5,
-              }}
             />
             <ChartTooltip
               content={
