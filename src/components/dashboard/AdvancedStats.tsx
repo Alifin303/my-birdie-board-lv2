@@ -148,7 +148,6 @@ export const AdvancedStats = ({ userRounds, isLoading }: AdvancedStatsProps) => 
               )}
             </div>
             
-            {/* Add stats line chart */}
             <StatsLineChart 
               roundsData={userRounds || []}
               isLoading={isLoading}
@@ -238,34 +237,28 @@ function calculateGIRStats(rounds: Round[]) {
       return;
     }
     
-    // Only continue if round has any GIR data
     const hasGIRData = scores.some((score: any) => score.gir !== undefined);
     if (!hasGIRData) return;
     
     roundsWithGIRData++;
     
-    // Only count holes that have been played (have a strokes value)
     const playedHoles = scores.filter((score: any) => 
       score.strokes !== undefined && score.strokes > 0
     );
     
-    // Count GIR hits from played holes
     const roundGIRHits = playedHoles.filter((score: any) => score.gir === true).length;
     const roundPlayedHoles = playedHoles.length;
     
-    // Add to totals for overall percentage
     totalGIRHits += roundGIRHits;
     totalPlayedHoles += roundPlayedHoles;
     
-    // Calculate percentage for this round
     const roundGIRPercentage = roundPlayedHoles > 0 ? 
       Math.round((roundGIRHits / roundPlayedHoles) * 100) : 0;
     
-    // Add detailed log to track GIR calculations
     console.log(`Round ${round.id} GIR calculation in stats:`, {
       date: new Date(round.date).toLocaleDateString(),
-      roundGIRHits,  // Number of successful GIRs
-      roundPlayedHoles, // Total played holes
+      roundGIRHits,
+      roundPlayedHoles,
       girPercentage: roundGIRPercentage,
       holes: playedHoles.map((s: any) => ({ 
         hole: s.hole, 
@@ -274,17 +267,14 @@ function calculateGIRStats(rounds: Round[]) {
       }))
     });
     
-    // Store this round's percentage for "best round" calculation if it has at least 9 holes
     if (roundPlayedHoles >= 9) {
       roundGIRPercentages.push(roundGIRPercentage);
     }
   });
   
-  // Calculate overall GIR percentage from all played holes
   const overallGIRPercentage = totalPlayedHoles > 0 ? 
     Math.round((totalGIRHits / totalPlayedHoles) * 100) : 0;
   
-  // Determine best GIR round
   let bestGIRRound = 0;
   if (roundGIRPercentages.length > 0) {
     bestGIRRound = Math.max(...roundGIRPercentages);
@@ -311,6 +301,7 @@ function calculatePenaltyStats(rounds: Round[]) {
   let totalPenalties = 0;
   let roundsWithPenaltyData = 0;
   let roundsWithoutPenalties = 0;
+  let totalTrackedRounds = 0;
   
   rounds.forEach(round => {
     let scores;
@@ -322,12 +313,11 @@ function calculatePenaltyStats(rounds: Round[]) {
       return;
     }
     
-    // Check if the round has at least one hole with penalty data
     const hasPenaltyData = scores.some((score: any) => score.penalties !== undefined);
     
-    // Only process rounds with penalty data
     if (!hasPenaltyData) return;
     
+    totalTrackedRounds++;
     roundsWithPenaltyData++;
     
     let roundPenalties = 0;
@@ -338,7 +328,6 @@ function calculatePenaltyStats(rounds: Round[]) {
       }
     });
     
-    // Count this as a round without penalties if total is 0
     if (roundPenalties === 0) {
       roundsWithoutPenalties++;
     }
@@ -347,6 +336,7 @@ function calculatePenaltyStats(rounds: Round[]) {
   });
   
   console.log("Penalty stats calculation:", {
+    totalTrackedRounds,
     roundsWithPenaltyData,
     roundsWithoutPenalties,
     totalPenalties,

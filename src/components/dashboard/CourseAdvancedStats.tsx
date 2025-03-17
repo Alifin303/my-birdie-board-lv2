@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   Collapsible,
@@ -309,6 +310,7 @@ function calculatePenaltyStats(rounds: Round[]) {
   let totalPenalties = 0;
   let roundsWithPenaltyData = 0;
   let roundsWithoutPenalties = 0;
+  let totalTrackedRounds = 0;
   
   rounds.forEach(round => {
     let scores;
@@ -323,9 +325,11 @@ function calculatePenaltyStats(rounds: Round[]) {
     // Check if the round has at least one hole with penalty data
     const hasPenaltyData = scores.some((score: any) => score.penalties !== undefined);
     
-    // Only process rounds with penalty data
+    // Only count rounds with penalty data in our stats
     if (!hasPenaltyData) return;
     
+    // Increment number of rounds tracked
+    totalTrackedRounds++;
     roundsWithPenaltyData++;
     
     let roundPenalties = 0;
@@ -345,6 +349,7 @@ function calculatePenaltyStats(rounds: Round[]) {
   });
   
   console.log("Course penalty stats calculation:", {
+    totalTrackedRounds,
     roundsWithPenaltyData,
     roundsWithoutPenalties,
     totalPenalties,
