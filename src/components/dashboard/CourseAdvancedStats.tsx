@@ -322,13 +322,15 @@ function calculatePenaltyStats(rounds: Round[]) {
       return;
     }
     
-    // Check if the round has at least one hole with penalty data
+    // Check for rounds with explicitly tracked penalties (penalties field exists)
     const hasPenaltyData = scores.some((score: any) => score.penalties !== undefined);
     
-    // Only count rounds with penalty data in our stats
-    if (!hasPenaltyData) return;
+    if (!hasPenaltyData) {
+      // If penalties aren't being tracked at all for this round, consider it a round without penalties
+      roundsWithoutPenalties++;
+      return;
+    }
     
-    // Increment number of rounds tracked
     totalTrackedRounds++;
     roundsWithPenaltyData++;
     
@@ -340,7 +342,6 @@ function calculatePenaltyStats(rounds: Round[]) {
       }
     });
     
-    // Count this as a round without penalties if total is 0
     if (roundPenalties === 0) {
       roundsWithoutPenalties++;
     }
@@ -357,7 +358,7 @@ function calculatePenaltyStats(rounds: Round[]) {
   });
   
   return {
-    tracked: roundsWithPenaltyData > 0,
+    tracked: roundsWithPenaltyData > 0 || roundsWithoutPenalties > 0,
     totalPenalties,
     avgPenaltiesPerRound: roundsWithPenaltyData > 0 ? totalPenalties / roundsWithPenaltyData : 0,
     roundsWithoutPenalties,

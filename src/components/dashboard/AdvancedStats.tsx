@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   Collapsible,
@@ -313,9 +314,14 @@ function calculatePenaltyStats(rounds: Round[]) {
       return;
     }
     
+    // Check for rounds with explicitly tracked penalties (penalties field exists)
     const hasPenaltyData = scores.some((score: any) => score.penalties !== undefined);
     
-    if (!hasPenaltyData) return;
+    if (!hasPenaltyData) {
+      // If penalties aren't being tracked at all for this round, consider it a round without penalties
+      roundsWithoutPenalties++;
+      return;
+    }
     
     totalTrackedRounds++;
     roundsWithPenaltyData++;
