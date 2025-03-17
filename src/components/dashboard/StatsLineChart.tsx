@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { format } from "date-fns";
@@ -143,7 +144,7 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
   if (isLoading) {
     return (
       <Card className="p-4 mt-4">
-        <div className="flex items-center justify-center h-[256px]">
+        <div className="flex items-center justify-center h-[300px]">
           <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
         </div>
       </Card>
@@ -169,7 +170,7 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
             </ToggleGroupItem>
           </ToggleGroup>
           
-          <div className="flex items-center justify-center h-[200px] bg-muted/30 rounded-lg">
+          <div className="flex items-center justify-center h-[260px] bg-muted/30 rounded-lg">
             <p className="text-muted-foreground text-center p-4">
               {chartData.length === 0 
                 ? chartProps.emptyMessage
@@ -199,9 +200,9 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
           </ToggleGroupItem>
         </ToggleGroup>
         
-        <div className="h-64">
+        <div className="h-80">
           <h3 className="text-sm font-medium mb-1">{chartProps.label} Over Time</h3>
-          <div className="h-[180px]">
+          <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={chartData}
