@@ -65,37 +65,40 @@ const ScoreProgressChart = ({ rounds, scoreType, handicapIndex = 0 }: ScoreProgr
     <div className="w-full mt-4">
       <h3 className="text-lg font-medium mb-2">Score Progression Over Time</h3>
       <div className="h-64 mb-2">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={chartData}
-            margin={{ top: 5, right: 20, left: 10, bottom: 15 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-            <XAxis 
-              dataKey="date" 
-              tick={{ fontSize: 12 }}
-              interval="preserveStartEnd"
-              height={50}
-              padding={{ left: 10, right: 10 }}
-            />
-            <YAxis 
-              domain={['dataMin - 3', 'dataMax + 3']}
-              allowDecimals={false}
-            />
-            <Tooltip 
-              formatter={(value) => [`${value} strokes`, 'Score']}
-              labelFormatter={(label) => `Date: ${label}`}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="score" 
-              stroke="#6366F1" 
-              strokeWidth={2} 
-              activeDot={{ r: 6 }} 
-              dot={{ r: 4 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <div className="h-[180px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={chartData}
+              margin={{ top: 5, right: 20, left: 10, bottom: 25 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+              <XAxis 
+                dataKey="date" 
+                tick={{ fontSize: 11 }}
+                interval="preserveStartEnd"
+                height={35}
+                padding={{ left: 10, right: 10 }}
+              />
+              <YAxis 
+                domain={['dataMin - 3', 'dataMax + 3']}
+                allowDecimals={false}
+                tick={{ fontSize: 11 }}
+              />
+              <Tooltip 
+                formatter={(value) => [`${value} strokes`, 'Score']}
+                labelFormatter={(label) => `Date: ${label}`}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="score" 
+                stroke="#6366F1" 
+                strokeWidth={2} 
+                activeDot={{ r: 5 }} 
+                dot={{ r: 3 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );
