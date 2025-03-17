@@ -129,13 +129,13 @@ const CourseGIRChart = ({ rounds, isLoading }: CourseGIRChartProps) => {
   }
 
   return (
-    <Card className="p-4">
+    <Card className="p-4 overflow-hidden">
       <div className="flex items-center gap-2 mb-4">
         <Target className="h-5 w-5 text-primary" />
         <h3 className="text-lg font-medium">Course GIR Percentage Over Time</h3>
       </div>
       
-      <div className="h-80 w-full">
+      <div className="h-[300px] w-full">
         <ChartContainer config={config}>
           <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 30 }}>
             <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
