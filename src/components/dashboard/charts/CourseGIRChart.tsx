@@ -135,11 +135,11 @@ const CourseGIRChart = ({ rounds, isLoading }: CourseGIRChartProps) => {
         <h3 className="text-lg font-medium">Course GIR Percentage Over Time</h3>
       </div>
       
-      <div className="h-[400px] w-full">
+      <div className="h-[450px] w-full">
         <ChartContainer config={config}>
           <LineChart 
             data={chartData} 
-            margin={{ top: 20, right: 30, left: 10, bottom: 60 }}
+            margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
           >
             <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
             <XAxis 
@@ -158,12 +158,22 @@ const CourseGIRChart = ({ rounds, isLoading }: CourseGIRChartProps) => {
               tickCount={6} 
               tick={{ fontSize: 12 }}
               tickFormatter={(value) => `${value}%`}
+              padding={{ bottom: 15 }}
             />
-            <ReferenceLine y={36} stroke="#9333ea" strokeDasharray="3 3" strokeWidth={1.5}>
-              <text x={5} y={34} fill="#9333ea" fontSize={12} textAnchor="start">
-                PGA Tour Avg
-              </text>
-            </ReferenceLine>
+            <ReferenceLine 
+              y={36} 
+              stroke="#9333ea" 
+              strokeDasharray="3 3" 
+              strokeWidth={1.5}
+              label={{
+                value: "PGA Tour Avg",
+                position: "insideBottomLeft",
+                fill: "#9333ea",
+                fontSize: 12,
+                dy: -5,
+                dx: 5,
+              }}
+            />
             <ChartTooltip
               content={
                 <ChartTooltipContent 
