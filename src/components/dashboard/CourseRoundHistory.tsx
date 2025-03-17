@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ArrowLeft, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,7 +39,6 @@ export const CourseRoundHistory = ({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
-  const [deletingRoundId, setDeletingRoundId] = useState<number | null>(null);
   const [viewingRound, setViewingRound] = useState<Round | null>(null);
   const [scorecardOpen, setScorecardOpen] = useState(false);
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
@@ -88,18 +86,16 @@ export const CourseRoundHistory = ({
     }
   }, [periodType, availableMonths]);
   
-  const handleDeleteRound = async () => {
-    if (!deletingRoundId) return;
-    
+  const handleDeleteRound = async (roundId: number) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
-      console.log(`Deleting round with ID ${deletingRoundId} from Supabase database`);
+      console.log(`Deleting round with ID ${roundId} from Supabase database`);
       
       const { error } = await supabase
         .from('rounds')
         .delete()
-        .eq('id', deletingRoundId);
+        .eq('id', roundId);
         
       if (error) {
         console.error("Database error when deleting round:", error);
@@ -147,8 +143,6 @@ export const CourseRoundHistory = ({
         description: error.message || "Failed to delete round. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setDeletingRoundId(null);
     }
   };
   

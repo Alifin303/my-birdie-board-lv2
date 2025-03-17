@@ -99,10 +99,44 @@ export function useRounds() {
     }
   };
 
+  // Delete a round
+  const deleteRound = async (roundId: number): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      console.log(`Deleting round with ID: ${roundId}`);
+      
+      const { error } = await supabase
+        .from('rounds')
+        .delete()
+        .eq('id', roundId);
+        
+      if (error) {
+        console.error("Error deleting round:", error);
+        throw error;
+      }
+
+      logSupabaseOperation('deleteRound', { id: roundId });
+      
+      // Invalidate the rounds query to refresh data
+      queryClient.invalidateQueries({ queryKey: ['userRounds'] });
+      
+      return true;
+    } catch (err) {
+      console.error('Error deleting round:', err);
+      setError(err instanceof Error ? err : new Error('Unknown error deleting round'));
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     error,
     addRound,
-    getRoundsForCourse
+    getRoundsForCourse,
+    deleteRound
   };
 }

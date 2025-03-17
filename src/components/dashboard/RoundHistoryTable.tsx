@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { ChevronUp, ChevronDown, Trash, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -30,9 +30,8 @@ export const RoundHistoryTable = ({
   onViewScorecard, 
   onDeleteRound 
 }: RoundHistoryTableProps) => {
-  const [sortField, setSortField] = useState<'date' | 'gross_score' | 'to_par_gross'>('date');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [deletingRoundId, setDeletingRoundId] = useState<number | null>(null);
+  const [sortField, setSortField] = React.useState<'date' | 'gross_score' | 'to_par_gross'>('date');
+  const [sortDirection, setSortDirection] = React.useState<'asc' | 'desc'>('desc');
 
   const handleSort = (field: 'date' | 'gross_score' | 'to_par_gross') => {
     if (sortField === field) {
@@ -157,7 +156,6 @@ export const RoundHistoryTable = ({
                         <Button 
                           variant="ghost" 
                           size="sm"
-                          onClick={() => setDeletingRoundId(round.id)}
                           className="h-8 px-2 text-destructive hover:text-destructive/90 hover:bg-destructive/10"
                           title="Delete round"
                         >
@@ -174,14 +172,9 @@ export const RoundHistoryTable = ({
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel onClick={() => setDeletingRoundId(null)}>Cancel</AlertDialogCancel>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction 
-                            onClick={() => {
-                              if (deletingRoundId) {
-                                onDeleteRound(deletingRoundId);
-                              }
-                              setDeletingRoundId(null);
-                            }} 
+                            onClick={() => onDeleteRound(round.id)}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           >
                             Delete
