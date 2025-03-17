@@ -397,7 +397,7 @@ export const CourseRoundHistory = ({
         </div>
       )}
       
-      <div className="pb-8">
+      <div className="pb-2">
         <ScoreProgressChart 
           rounds={courseRounds}
           scoreType={scoreType}
@@ -405,7 +405,7 @@ export const CourseRoundHistory = ({
         />
       </div>
       
-      <div className="space-y-4 mb-6">
+      <div className="space-y-4">
         <div className="flex items-center gap-2">
           <PieChart className="h-5 w-5 text-primary" />
           <h3 className="text-lg font-medium">Course Performance</h3>
@@ -748,3 +748,4 @@ const StatsCard = ({ type, count }: StatsCardProps) => {
     </div>
   );
 };
+
