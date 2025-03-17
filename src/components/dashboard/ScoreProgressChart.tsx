@@ -64,23 +64,30 @@ const ScoreProgressChart = ({ rounds, scoreType, handicapIndex = 0 }: ScoreProgr
   return (
     <div className="w-full mt-4">
       <h3 className="text-lg font-medium mb-2">Score Progression Over Time</h3>
-      <div className="h-64 mb-2">
+      <div className="h-60 mb-2">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={chartData}
-            margin={{ top: 5, right: 20, left: 10, bottom: 15 }}
+            margin={{ top: 5, right: 20, left: 10, bottom: 20 }}
           >
             <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
             <XAxis 
               dataKey="date" 
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 11 }}
               interval="preserveStartEnd"
-              height={50}
+              height={40}
               padding={{ left: 10, right: 10 }}
+              tickFormatter={(value, index) => {
+                // If there are many rounds, only show some dates
+                return chartData.length > 8 && index % Math.ceil(chartData.length / 8) !== 0 
+                  ? '' 
+                  : value;
+              }}
             />
             <YAxis 
               domain={['dataMin - 3', 'dataMax + 3']}
               allowDecimals={false}
+              tick={{ fontSize: 11 }}
             />
             <Tooltip 
               formatter={(value) => [`${value} strokes`, 'Score']}
@@ -91,8 +98,8 @@ const ScoreProgressChart = ({ rounds, scoreType, handicapIndex = 0 }: ScoreProgr
               dataKey="score" 
               stroke="#6366F1" 
               strokeWidth={2} 
-              activeDot={{ r: 6 }} 
-              dot={{ r: 4 }}
+              activeDot={{ r: 5 }} 
+              dot={{ r: 3 }}
             />
           </LineChart>
         </ResponsiveContainer>

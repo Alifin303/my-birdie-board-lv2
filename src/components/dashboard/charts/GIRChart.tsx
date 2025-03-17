@@ -126,22 +126,22 @@ const GIRChart = ({ rounds, isLoading }: GIRChartProps) => {
   }
 
   return (
-    <Card className="p-4 overflow-hidden">
+    <Card className="p-4 pb-6 overflow-hidden h-64">
       <div className="flex items-center gap-2 mb-2">
         <Target className="h-5 w-5 text-primary" />
         <h3 className="text-lg font-medium">GIR Percentage Over Time</h3>
       </div>
       
-      <div className="h-[220px] w-full">
+      <div className="h-[180px] w-full">
         <ChartContainer config={config}>
           <LineChart 
             data={chartData} 
-            margin={{ top: 5, right: 20, left: 20, bottom: 25 }}
+            margin={{ top: 5, right: 20, left: 10, bottom: 20 }}
           >
             <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
             <XAxis 
               dataKey="date" 
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 10 }}
               tickMargin={5}
               tickFormatter={(value, index) => {
                 // If there are many rounds, only show some dates
@@ -153,7 +153,7 @@ const GIRChart = ({ rounds, isLoading }: GIRChartProps) => {
             <YAxis 
               domain={[0, 100]} 
               tickCount={5}
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 10 }}
               tickFormatter={(value) => `${value}%`}
             />
             <ChartTooltip
@@ -169,8 +169,8 @@ const GIRChart = ({ rounds, isLoading }: GIRChartProps) => {
               name="roundGIR"
               stroke="var(--color-roundGIR)"
               strokeWidth={2}
-              dot={{ r: 3, strokeWidth: 1 }}
-              activeDot={{ r: 5, strokeWidth: 2 }}
+              dot={{ r: 2, strokeWidth: 1 }}
+              activeDot={{ r: 4, strokeWidth: 1 }}
             />
             <Line
               type="monotone"
@@ -179,7 +179,7 @@ const GIRChart = ({ rounds, isLoading }: GIRChartProps) => {
               stroke="var(--color-cumulativeGIR)"
               strokeWidth={2}
               dot={{ r: 0 }}
-              activeDot={{ r: 5, strokeWidth: 2 }}
+              activeDot={{ r: 4, strokeWidth: 1 }}
             />
             <ChartLegend content={<ChartLegendContent />} />
           </LineChart>
