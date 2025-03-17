@@ -135,9 +135,12 @@ const GIRChart = ({ rounds, isLoading }: GIRChartProps) => {
         <h3 className="text-lg font-medium">GIR Percentage Over Time</h3>
       </div>
       
-      <div className="h-[320px] w-full">
+      <div className="h-[400px] w-full">
         <ChartContainer config={config}>
-          <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 40 }}>
+          <LineChart 
+            data={chartData} 
+            margin={{ top: 20, right: 30, left: 10, bottom: 60 }}
+          >
             <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
             <XAxis 
               dataKey="date" 
