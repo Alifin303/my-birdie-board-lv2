@@ -1,4 +1,3 @@
-
 import { useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Target } from "lucide-react";
@@ -108,7 +107,7 @@ const GIRChart = ({ rounds, isLoading }: GIRChartProps) => {
   
   if (isLoading || !rounds) {
     return (
-      <Card className="p-4 h-80 flex items-center justify-center">
+      <Card className="p-4 h-64 flex items-center justify-center">
         <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
       </Card>
     );
@@ -116,7 +115,7 @@ const GIRChart = ({ rounds, isLoading }: GIRChartProps) => {
   
   if (chartData.length === 0) {
     return (
-      <Card className="p-4 h-80 flex flex-col items-center justify-center text-center">
+      <Card className="p-4 h-64 flex flex-col items-center justify-center text-center">
         <Target className="h-12 w-12 text-muted-foreground mb-2" />
         <h3 className="text-lg font-medium">No GIR Data Available</h3>
         <p className="text-sm text-muted-foreground">
@@ -127,23 +126,23 @@ const GIRChart = ({ rounds, isLoading }: GIRChartProps) => {
   }
 
   return (
-    <Card className="p-4 pb-6 overflow-hidden">
+    <Card className="p-4 overflow-hidden">
       <div className="flex items-center gap-2 mb-2">
         <Target className="h-5 w-5 text-primary" />
         <h3 className="text-lg font-medium">GIR Percentage Over Time</h3>
       </div>
       
-      <div className="h-[280px] w-full">
+      <div className="h-[220px] w-full">
         <ChartContainer config={config}>
           <LineChart 
             data={chartData} 
-            margin={{ top: 20, right: 30, left: 20, bottom: 10 }}
+            margin={{ top: 5, right: 20, left: 20, bottom: 25 }}
           >
             <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
             <XAxis 
               dataKey="date" 
-              tick={{ fontSize: 12 }}
-              tickMargin={10}
+              tick={{ fontSize: 11 }}
+              tickMargin={5}
               tickFormatter={(value, index) => {
                 // If there are many rounds, only show some dates
                 return chartData.length > 10 && index % Math.ceil(chartData.length / 10) !== 0 
@@ -153,8 +152,8 @@ const GIRChart = ({ rounds, isLoading }: GIRChartProps) => {
             />
             <YAxis 
               domain={[0, 100]} 
-              tickCount={6} 
-              tick={{ fontSize: 12 }}
+              tickCount={5}
+              tick={{ fontSize: 11 }}
               tickFormatter={(value) => `${value}%`}
             />
             <ChartTooltip
@@ -170,17 +169,17 @@ const GIRChart = ({ rounds, isLoading }: GIRChartProps) => {
               name="roundGIR"
               stroke="var(--color-roundGIR)"
               strokeWidth={2}
-              dot={{ r: 4, strokeWidth: 2 }}
-              activeDot={{ r: 6, strokeWidth: 2 }}
+              dot={{ r: 3, strokeWidth: 1 }}
+              activeDot={{ r: 5, strokeWidth: 2 }}
             />
             <Line
               type="monotone"
               dataKey="cumulativeGIRPercentage"
               name="cumulativeGIR"
               stroke="var(--color-cumulativeGIR)"
-              strokeWidth={2.5}
+              strokeWidth={2}
               dot={{ r: 0 }}
-              activeDot={{ r: 6, strokeWidth: 2 }}
+              activeDot={{ r: 5, strokeWidth: 2 }}
             />
             <ChartLegend content={<ChartLegendContent />} />
           </LineChart>
