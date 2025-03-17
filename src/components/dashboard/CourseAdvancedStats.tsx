@@ -224,7 +224,7 @@ function calculatePuttingStats(rounds: Round[]) {
 
 function calculateGIRStats(rounds: Round[]) {
   let totalGIRHits = 0;
-  let totalHolesWithGIRData = 0;
+  let totalPlayedHoles = 0;
   let roundsWithGIRData = 0;
   let roundGIRPercentages: number[] = [];
 
@@ -243,41 +243,45 @@ function calculateGIRStats(rounds: Round[]) {
     
     roundsWithGIRData++;
     
-    // Calculate this round's GIR stats
-    let girHits = 0;
-    let girHoles = 0;
+    // Only count holes that have been played (have a strokes value)
+    const playedHoles = scores.filter((score: any) => 
+      score.strokes !== undefined && score.strokes > 0
+    );
     
-    scores.forEach((score: any) => {
-      if (score.gir !== undefined) {
-        girHits += score.gir ? 1 : 0;
-        girHoles++;
-      }
-    });
+    // Count GIR hits from played holes
+    const roundGIRHits = playedHoles.filter((score: any) => score.gir === true).length;
+    const roundPlayedHoles = playedHoles.length;
     
     // Add to totals for overall percentage
-    totalGIRHits += girHits;
-    totalHolesWithGIRData += girHoles;
+    totalGIRHits += roundGIRHits;
+    totalPlayedHoles += roundPlayedHoles;
     
     // Calculate percentage for this round
-    const roundGIRPercentage = girHoles > 0 ? Math.round((girHits / girHoles) * 100) : 0;
+    const roundGIRPercentage = roundPlayedHoles > 0 ? 
+      Math.round((roundGIRHits / roundPlayedHoles) * 100) : 0;
     
     // Log for debugging
     console.log(`Course round ${round.id} GIR calculation:`, {
       date: new Date(round.date).toLocaleDateString(),
-      girHits,
-      girHoles,
-      roundGIRPercentage
+      roundGIRHits,
+      roundPlayedHoles,
+      roundGIRPercentage,
+      holes: playedHoles.map((s: any) => ({
+        hole: s.hole,
+        gir: s.gir,
+        strokes: s.strokes
+      }))
     });
     
     // Store this round's percentage for "best round" calculation if it has at least 9 holes
-    if (girHoles >= 9) {
+    if (roundPlayedHoles >= 9) {
       roundGIRPercentages.push(roundGIRPercentage);
     }
   });
   
-  // Calculate overall GIR percentage from all holes across all rounds
-  const overallGIRPercentage = totalHolesWithGIRData > 0 ? 
-    Math.round((totalGIRHits / totalHolesWithGIRData) * 100) : 0;
+  // Calculate overall GIR percentage from all played holes across all rounds
+  const overallGIRPercentage = totalPlayedHoles > 0 ? 
+    Math.round((totalGIRHits / totalPlayedHoles) * 100) : 0;
   
   // Determine best GIR round
   let bestGIRRound = 0;
@@ -287,7 +291,7 @@ function calculateGIRStats(rounds: Round[]) {
   
   console.log("Course GIR Stats calculation:", {
     totalGIRHits,
-    totalHolesWithGIRData,
+    totalPlayedHoles,
     overallGIRPercentage,
     bestGIRRound,
     roundsWithGIRData,

@@ -1,3 +1,4 @@
+
 import { Score } from "../types";
 
 export const calculateScoreSummary = (scores: Score[]) => {
@@ -173,14 +174,14 @@ export const createShareData = (
 
 // Helper function to calculate GIR percentage consistently across the app
 export const calculateGIRPercentage = (scores: any[]): { girPercentage: number, totalGIR: number, totalHoles: number } => {
-  // Filter scores to only include those with GIR data
-  const scoresWithGIRData = scores.filter(score => score.gir !== undefined);
+  // Only count holes that have a valid strokes value (played holes)
+  const playedHoles = scores.filter(score => score.strokes !== undefined && score.strokes > 0);
   
-  // Count how many GIRs are true
-  const totalGIR = scoresWithGIRData.filter(score => score.gir).length;
+  // Count total number of played holes
+  const totalHoles = playedHoles.length;
   
-  // Count total number of holes with GIR data
-  const totalHoles = scoresWithGIRData.length;
+  // Count how many played holes have GIR marked as true
+  const totalGIR = playedHoles.filter(score => score.gir === true).length;
   
   // Calculate percentage - ensure we don't divide by zero
   const girPercentage = totalHoles > 0 ? Math.round((totalGIR / totalHoles) * 100) : 0;
@@ -189,7 +190,7 @@ export const calculateGIRPercentage = (scores: any[]): { girPercentage: number, 
     totalGIR,
     totalHoles,
     girPercentage,
-    scores: scoresWithGIRData.map(s => ({ hole: s.hole, gir: s.gir }))
+    scores: playedHoles.map(s => ({ hole: s.hole, gir: s.gir, strokes: s.strokes }))
   });
   
   return { girPercentage, totalGIR, totalHoles };

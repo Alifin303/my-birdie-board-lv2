@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { format } from "date-fns";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Card } from "@/components/ui/card";
 import { Circle, Target, AlertCircle } from "lucide-react";
+import { calculateGIRPercentage } from "@/components/add-round/utils/scoreUtils";
 
 interface DataPoint {
   date: string;
@@ -46,22 +46,20 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
       
       let puttsValue = 0;
       let puttHoles = 0;
-      let girHits = 0;
-      let girHoles = 0;
       let penaltiesValue = 0;
       
+      // For GIR calculation, use the utility function that calculates consistently
+      const { girPercentage } = calculateGIRPercentage(scores);
+      
+      // Only count putts and penalties from played holes
       scores.forEach((score: any) => {
+        // Only include if the hole was actually played
+        if (score.strokes === undefined || score.strokes <= 0) return;
+        
         // Count putts
         if (score.putts !== undefined) {
           puttsValue += score.putts;
           puttHoles++;
-        }
-        
-        // Count GIR
-        if (score.gir !== undefined) {
-          // Only add to girHits if gir is true
-          girHits += score.gir ? 1 : 0;
-          girHoles++;
         }
         
         // Count penalties
@@ -70,29 +68,20 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
         }
       });
       
-      // Calculate GIR percentage only if we have valid data
-      let girPercentage = 0;
-      if (girHoles > 0) {
-        girPercentage = Math.round((girHits / girHoles) * 100);
-        
-        // Log for debugging
-        console.log(`Round ${round.id} GIR calculation:`, {
-          date: formatDate(round.date),
-          girHits, // Number of successful GIRs
-          girHoles, // Total holes with GIR data
-          girPercentage, // Calculated percentage
-          scores: scores.filter((s: any) => s.gir !== undefined).map((s: any) => ({ 
-            hole: s.hole, 
-            gir: s.gir 
-          }))
-        });
-      }
+      // Log the processed data for debugging
+      console.log(`Chart data for round ${round.id}:`, {
+        date: formatDate(round.date),
+        girPercentage,
+        puttsValue,
+        puttHoles,
+        penaltiesValue
+      });
       
       return {
         date: formatDate(round.date),
         rawDate: round.date,
         putts: puttHoles > 0 ? puttsValue : null,
-        gir: girHoles > 0 ? girPercentage : null,
+        gir: girPercentage,
         penalties: penaltiesValue,
         id: round.id
       };

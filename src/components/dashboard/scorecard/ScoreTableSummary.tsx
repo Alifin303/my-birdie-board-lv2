@@ -1,6 +1,6 @@
 
 import { ScoreTableSummaryProps } from "./types";
-import { formatToPar } from "@/components/add-round/utils/scoreUtils";
+import { formatToPar, calculateGIRPercentage } from "@/components/add-round/utils/scoreUtils";
 
 export const ScoreTableSummary = ({ 
   scores, 
@@ -22,8 +22,8 @@ export const ScoreTableSummary = ({
   const totalPutts = scores.reduce((sum, score) => sum + (score.putts || 0), 0);
   const puttingAverage = totalPutts > 0 ? (totalPutts / scores.filter(s => (s.putts || 0) > 0).length).toFixed(1) : '-';
   
-  const girCount = scores.filter(score => score.gir).length;
-  const girPercentage = scores.length > 0 ? Math.round((girCount / scores.length) * 100) : 0;
+  // Use the consistent GIR calculation function
+  const { girPercentage, totalGIR } = calculateGIRPercentage(scores);
   
   const totalPenalties = scores.reduce((sum, score) => sum + (score.penalties || 0), 0);
   
@@ -77,7 +77,7 @@ export const ScoreTableSummary = ({
           {hasGIRData && (
             <div className="flex justify-between">
               <span className="font-medium">Greens in Regulation:</span>
-              <span>{girCount}/{scores.length} ({girPercentage}%)</span>
+              <span>{totalGIR}/{scores.filter(s => s.strokes && s.strokes > 0).length} ({girPercentage}%)</span>
             </div>
           )}
           
