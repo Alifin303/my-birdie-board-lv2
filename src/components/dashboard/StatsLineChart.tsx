@@ -70,6 +70,7 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
       });
       
       // Calculate GIR percentage if data available
+      // Only calculate GIR percentage if we have data for at least one hole
       const girPercentage = girHoles > 0 ? Math.round((girValue / girHoles) * 100) : 0;
       
       return {
@@ -218,6 +219,7 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
                     position: 'insideLeft',
                     style: { textAnchor: 'middle', fontSize: 11 }
                   }}
+                  domain={selectedStat === "gir" ? [0, 100] : ['auto', 'auto']}
                 />
                 <Tooltip 
                   formatter={(value) => [chartProps.valueFormatter(value as number), chartProps.label]}
