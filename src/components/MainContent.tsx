@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle, UserPlus } from 'lucide-react';
@@ -140,11 +139,8 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
             Stop guessing and start improving! MyBirdieBoard is your all-in-one golf tracking platform, designed to help you log every round, track your handicap, and see your progress over time. Whether you're a weekend golfer or determined to break 80, MyBirdieBoard provides detailed stats, course leaderboards, and insights to help you play smarter and improve faster.
           </p>
           
-          <p className="text-sm sm:text-base md:text-lg text-white/90 font-bold mb-2 max-w-3xl mx-auto">
-            Track. Improve. Play Your Best.
-          </p>
           <p className="text-sm sm:text-base md:text-lg text-white/90 font-bold mb-6 max-w-3xl mx-auto">
-            Ready to take your game to the next level? START YOUR FREE TRIAL TODAY!
+            Track. Improve. Play Your Best.
           </p>
           
           <div className="flex justify-center mt-4">
@@ -155,7 +151,7 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
               aria-label="Sign up for MyBirdieBoard"
             >
               <UserPlus className="mr-2 h-5 w-5" aria-hidden="true" />
-              Sign up
+              START YOUR FREE TRIAL TODAY!
             </Button>
           </div>
         </div>
