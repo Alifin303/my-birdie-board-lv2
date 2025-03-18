@@ -19,10 +19,14 @@ Allow: /privacy
 Allow: /courses
 Allow: /courses/
 
+# Explicitly allow logo image
+Allow: /lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png
+
 Sitemap: https://mybirdieboard.com/sitemap.xml
 
-# Prevent media crawling for bandwidth
+# Prevent media crawling for bandwidth (except the logo)
 User-agent: Googlebot-Image
+Allow: /lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png
 Disallow: /lovable-uploads/
 
 # Prevent archive crawling
