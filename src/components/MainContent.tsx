@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle, UserPlus } from 'lucide-react';
@@ -144,7 +143,7 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
             Track. Improve. Play Your Best.
           </p>
           <p className="text-sm sm:text-base md:text-lg text-white/90 font-bold mb-6 max-w-3xl mx-auto">
-            Ready to take your game to the next level? Start your free trial today!
+            Ready to take your game to the next level? Start your FREE trial today!
           </p>
           
           <div className="flex justify-center mt-4">
