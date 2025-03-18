@@ -1,7 +1,7 @@
 
 import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check, ChevronRight } from "lucide-react";
+import { ArrowRight, Check, ChevronRight, UserPlus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { cn } from "@/lib/utils";
@@ -91,8 +91,8 @@ export function QuizIntro({ isOpen, onClose, onStart, onSkipToSignup }: QuizIntr
               size={isMobile ? "default" : "lg"}
               className="bg-accent hover:bg-accent/90 text-accent-foreground text-sm sm:text-base"
             >
-              <span className="mr-1 sm:mr-2" aria-hidden="true">👉</span> Start the Quiz Now
-              <ArrowRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
+              <ArrowRight className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
+              Start the Quiz Now
             </Button>
           </div>
 
@@ -106,7 +106,8 @@ export function QuizIntro({ isOpen, onClose, onStart, onSkipToSignup }: QuizIntr
               size={isMobile ? "sm" : "default"}
               className="text-primary hover:text-primary/90 hover:bg-primary/5 text-xs sm:text-sm w-full sm:w-auto"
             >
-              <span className="mr-1" aria-hidden="true">👉</span> Skip the quiz — Sign up now!
+              <UserPlus className="mr-1 h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
+              Sign up now!
               <ChevronRight className="ml-1 h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
             </Button>
           </div>

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { SignUpDialog } from "@/components/SignUpDialog";
 import { LoginDialog } from "@/components/LoginDialog";
+import { UserPlus } from "lucide-react";
 
 const About = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
@@ -90,8 +91,8 @@ const About = () => {
               onClick={handleGetStarted}
               aria-label="Sign up for MyBirdieBoard"
             >
-              <span className="mr-2" aria-hidden="true">🏌️‍♂️</span>
-              Get Started
+              <UserPlus className="mr-2 h-5 w-5" aria-hidden="true" />
+              Sign up
             </Button>
           </div>
         </article>

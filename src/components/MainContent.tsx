@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from './ui/button';
-import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle } from 'lucide-react';
+import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle, UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from './ui/card';
 import { FeatureInfoModal, FeatureInfo } from './FeatureInfoModal';
@@ -149,10 +149,10 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
               size="lg"
               className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300"
               onClick={onStartSignup}
-              aria-label="Get started with MyBirdieBoard"
+              aria-label="Sign up for MyBirdieBoard"
             >
-              <span className="mr-2" aria-hidden="true">🏌️‍♂️</span>
-              Get started
+              <UserPlus className="mr-2 h-5 w-5" aria-hidden="true" />
+              Sign up
             </Button>
           </div>
         </div>
@@ -254,10 +254,10 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
               size="lg"
               className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300"
               onClick={onStartSignup}
-              aria-label="Get started with MyBirdieBoard"
+              aria-label="Sign up for MyBirdieBoard"
             >
-              <span className="mr-2" aria-hidden="true">🏌️‍♂️</span>
-              Get started
+              <UserPlus className="mr-2 h-5 w-5" aria-hidden="true" />
+              Sign up
             </Button>
             <Link to="/faq">
               <Button 
