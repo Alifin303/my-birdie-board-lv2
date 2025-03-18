@@ -1,11 +1,10 @@
+
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle, UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from './ui/card';
 import { FeatureInfoModal, FeatureInfo } from './FeatureInfoModal';
-import { ScoreCard } from './ScoreCard';
-import { CourseBasicStats } from './dashboard/CourseBasicStats';
 
 interface MainContentProps {
   onStartSignup: () => void;
@@ -155,55 +154,6 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
               <UserPlus className="mr-2 h-5 w-5" aria-hidden="true" />
               Sign up
             </Button>
-          </div>
-        </div>
-      </section>
-      
-      {/* Screenshot Showcase Section */}
-      <section aria-labelledby="screenshots-heading" className="w-full max-w-5xl mx-auto px-4 py-8 bg-black/30 backdrop-blur-sm">
-        <h2 id="screenshots-heading" className="text-xl sm:text-2xl font-bold text-white text-center mb-6">See MyBirdieBoard in Action</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Scorecard Tracking */}
-          <div className="flex flex-col">
-            <div className="bg-white/10 backdrop-blur-md p-1 sm:p-2 rounded-lg shadow-xl mb-3 transform hover:scale-102 transition-all duration-300">
-              <img 
-                src="/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" 
-                alt="Scorecard Tracking Interface" 
-                className="w-full h-auto rounded-md"
-              />
-            </div>
-            <h3 className="text-sm sm:text-base font-semibold text-white text-center">Track Every Round</h3>
-            <p className="text-xs sm:text-sm text-white/80 text-center">Record scores, track stats, and never lose a scorecard again.</p>
-          </div>
-          
-          {/* Analytics */}
-          <div className="flex flex-col">
-            <div className="bg-white/10 backdrop-blur-md p-1 sm:p-2 rounded-lg shadow-xl mb-3 transform hover:scale-102 transition-all duration-300">
-              <div className="rounded-md bg-white/5 p-4 h-full flex items-center justify-center">
-                <ScoreCard />
-              </div>
-            </div>
-            <h3 className="text-sm sm:text-base font-semibold text-white text-center">Detailed Analytics</h3>
-            <p className="text-xs sm:text-sm text-white/80 text-center">Visualize your progress and identify areas for improvement.</p>
-          </div>
-          
-          {/* Leaderboards */}
-          <div className="flex flex-col">
-            <div className="bg-white/10 backdrop-blur-md p-1 sm:p-2 rounded-lg shadow-xl mb-3 transform hover:scale-102 transition-all duration-300">
-              <div className="rounded-md bg-white/5 p-4 h-full flex items-center justify-center">
-                <CourseBasicStats 
-                  roundsPlayed={12}
-                  bestGrossScore={76}
-                  bestNetScore={70}
-                  bestToPar={4}
-                  bestToParNet={-2}
-                  scoreType="gross"
-                />
-              </div>
-            </div>
-            <h3 className="text-sm sm:text-base font-semibold text-white text-center">Course Leaderboards</h3>
-            <p className="text-xs sm:text-sm text-white/80 text-center">Compete with friends and climb the rankings at your favorite courses.</p>
           </div>
         </div>
       </section>
