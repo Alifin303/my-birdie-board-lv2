@@ -14,7 +14,6 @@ import Admin from "@/pages/Admin";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import Course from "@/pages/Course";
 import Courses from "@/pages/Courses";
-import HowItWorks from "@/pages/HowItWorks";
 import { Toaster } from "@/components/ui/toaster";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ResetPassword from "@/pages/ResetPassword";
@@ -81,11 +80,6 @@ function App() {
                     </Helmet>
                     <FAQ />
                   </>
-                } />
-                
-                {/* How It Works page */}
-                <Route path="/howitworks" element={
-                  <HowItWorks />
                 } />
                 
                 {/* Redirect /quiz to root */}
