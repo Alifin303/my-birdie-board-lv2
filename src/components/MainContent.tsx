@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle, UserPlus } from 'lucide-react';
@@ -133,10 +134,10 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center mt-4 sm:mt-0">
         <div className="max-w-5xl mx-auto animate-fade-in mb-4">
           <h1 id="hero-heading" className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight mb-4 drop-shadow-md">
-            Welcome to MyBirdieBoard – <br className="hidden sm:block" />Your Ultimate Golf Tracking Hub!
+            Track Your Rounds. Lower Your Scores. Play Smarter.
           </h1>
           <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium mb-6 max-w-3xl mx-auto">
-            Stop guessing and start improving! MyBirdieBoard is your all-in-one golf tracking platform, designed to help you log every round, track your handicap, and see your progress over time. Whether you're a weekend golfer or determined to break 80, MyBirdieBoard provides detailed stats, course leaderboards, and insights to help you play smarter and improve faster.
+            Welcome to MyBirdieBoard – the ultimate golf tracking platform to help you improve every round
           </p>
           
           <p className="text-sm sm:text-base md:text-lg text-white/90 font-bold mb-6 max-w-3xl mx-auto">
