@@ -141,7 +141,7 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
           </p>
           
           <p className="text-sm sm:text-base md:text-lg text-white/90 font-bold mb-6 max-w-3xl mx-auto">
-            Track. Improve. Play Your Best.
+            Take control of your game with MyBirdieBoard! Track your scores, monitor your handicap, and analyze your progress—all in one place. Whether you're looking to break 100, 90, or 80, our tools help you identify trends, improve your game, and even compete with friends on course leaderboards.
           </p>
           
           <div className="flex justify-center mt-4">
