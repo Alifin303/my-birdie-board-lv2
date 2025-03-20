@@ -26,6 +26,8 @@ export function CourseRoundHistory({
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("rounds");
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
+  const [selectedRound, setSelectedRound] = useState<any>(null);
+  const [isScorecardOpen, setIsScorecardOpen] = useState(false);
 
   // Filter and sort rounds for the selected course
   useEffect(() => {
@@ -64,6 +66,11 @@ export function CourseRoundHistory({
   const handleCourseCreated = (courseId: number, name: string) => {
     console.log("Course updated:", courseId, name);
     // The dashboard will refresh the data when this dialog is closed
+  };
+
+  const handleRoundClick = (round: any) => {
+    setSelectedRound(round);
+    setIsScorecardOpen(true);
   };
 
   if (!courseRounds.length || !courseInfo) {
@@ -117,7 +124,22 @@ export function CourseRoundHistory({
         <TabsContent value="rounds" className="space-y-4 pt-4">
           <div className="space-y-6">
             {courseRounds.map((round) => (
-              <RoundScorecard key={round.id} round={round} />
+              <div
+                key={round.id}
+                onClick={() => handleRoundClick(round)}
+                className="cursor-pointer"
+              >
+                <RoundScorecard 
+                  key={round.id} 
+                  round={round} 
+                  isOpen={selectedRound?.id === round.id && isScorecardOpen}
+                  onOpenChange={(open) => {
+                    setIsScorecardOpen(open);
+                    if (!open) setSelectedRound(null);
+                  }}
+                  handicapIndex={handicapIndex}
+                />
+              </div>
             ))}
           </div>
         </TabsContent>
