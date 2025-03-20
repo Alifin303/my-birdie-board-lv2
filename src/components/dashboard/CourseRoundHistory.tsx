@@ -1,285 +1,149 @@
-import { useState, useEffect } from "react";
-import { ArrowLeft, Trophy } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
-import ScoreProgressChart from "./ScoreProgressChart";
-import { RoundScorecard } from "./scorecard/RoundScorecard";
-import { CourseLeaderboard } from "./CourseLeaderboard";
-import { PotentialBestScore } from "./PotentialBestScore";
+import { PenLine, ChevronLeft } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RoundScorecard } from "./scorecard";
 import { CourseAdvancedStats } from "./CourseAdvancedStats";
-import { Round } from "./types";
-import { calculateHoleStats } from "@/utils/statsCalculator";
-import { CourseBasicStats } from "./CourseBasicStats";
-import { CoursePerformance } from "./CoursePerformance";
-import { RoundHistoryTable } from "./RoundHistoryTable";
-import { 
-  calculateCourseSpecificStats, 
-  getAvailableYears, 
-  getAvailableMonths, 
-  getFilteredRounds 
-} from "./CourseStatsHelper";
+import { ManualCourseForm } from "@/components/ManualCourseForm";
+import ScoreProgressionChart from "./ScoreProgressionChart";
 
 interface CourseRoundHistoryProps {
-  userRounds: Round[] | undefined; 
-  selectedCourseId: number | null;
+  userRounds: any[];
+  selectedCourseId: number;
   onBackClick: () => void;
-  handicapIndex?: number;
+  handicapIndex: number;
 }
 
-type PeriodType = 'month' | 'year' | 'all';
-
-export const CourseRoundHistory = ({ 
-  userRounds, 
-  selectedCourseId, 
+export function CourseRoundHistory({
+  userRounds,
+  selectedCourseId,
   onBackClick,
-  handicapIndex = 0
-}: CourseRoundHistoryProps) => {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+  handicapIndex
+}: CourseRoundHistoryProps) {
+  const [courseRounds, setCourseRounds] = useState<any[]>([]);
+  const [courseInfo, setCourseInfo] = useState<any>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("rounds");
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
-  const [viewingRound, setViewingRound] = useState<Round | null>(null);
-  const [scorecardOpen, setScorecardOpen] = useState(false);
-  const [leaderboardOpen, setLeaderboardOpen] = useState(false);
-  const [periodType, setPeriodType] = useState<PeriodType>('all');
-  const [currentDate, setCurrentDate] = useState(new Date());
-  
+
+  // Filter and sort rounds for the selected course
   useEffect(() => {
-    if (selectedCourseId) {
-      console.log("Course ID changed, resetting round history state");
-      setViewingRound(null);
-      setScorecardOpen(false);
+    if (!userRounds || !userRounds.length) {
+      setCourseRounds([]);
+      setCourseInfo(null);
+      return;
     }
-  }, [selectedCourseId]);
-  
-  if (!userRounds || !selectedCourseId) return null;
-  
-  const courseRounds = userRounds.filter(
-    round => round.courses && round.courses.id === selectedCourseId
-  );
-  
-  if (courseRounds.length === 0) return null;
-  
-  let courseName = "Course";
-  let clubName = "Unknown Club";
-  
-  if (courseRounds[0].courses) {
-    courseName = courseRounds[0].courses.courseName || "Course";
-    clubName = courseRounds[0].courses.clubName || "Unknown Club";
-  }
-  
-  const displayName = clubName !== courseName 
-    ? `${clubName} - ${courseName}`
-    : courseName;
-  
-  const availableYears = getAvailableYears(courseRounds);
-  const availableMonths = getAvailableMonths(courseRounds, periodType, currentDate);
-  
-  useEffect(() => {
-    if (periodType === 'month' && availableMonths.length > 0) {
-      if (!availableMonths.includes(currentDate.getMonth())) {
-        const newDate = new Date(currentDate);
-        newDate.setMonth(availableMonths[0]);
-        setCurrentDate(newDate);
-      }
-    }
-  }, [periodType, availableMonths]);
-  
-  const handleDeleteRound = async (roundId: number) => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      console.log(`Deleting round with ID ${roundId} from Supabase database`);
-      
-      const { error } = await supabase
-        .from('rounds')
-        .delete()
-        .eq('id', roundId);
-        
-      if (error) {
-        console.error("Database error when deleting round:", error);
-        throw error;
-      }
-      
-      if (session) {
-        console.log("Recalculating handicap after round deletion");
-        
-        const { data: userRounds, error: userRoundsError } = await supabase
-          .from('rounds')
-          .select('gross_score')
-          .eq('user_id', session.user.id)
-          .order('date', { ascending: false });
-          
-        if (userRoundsError) {
-          console.error("Error fetching user rounds for handicap update after deletion:", userRoundsError);
-        } else if (userRounds) {
-          const grossScores = userRounds.map(r => r.gross_score);
-          console.log("Updating handicap based on remaining rounds:", grossScores);
-          
-          const { updateUserHandicap } = await import('@/integrations/supabase');
-          
-          const newHandicap = await updateUserHandicap(session.user.id, grossScores);
-          console.log("Updated handicap after round deletion to:", newHandicap);
-          
-          toast({
-            title: "Handicap Updated",
-            description: `Your handicap index is now ${newHandicap}`,
-          });
-        }
-      }
-      
-      toast({
-        title: "Round deleted",
-        description: "The round has been permanently removed.",
-      });
-      
-      queryClient.invalidateQueries({ queryKey: ['userRounds'] });
-      
-    } catch (error: any) {
-      console.error("Error deleting round:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete round. Please try again.",
-        variant: "destructive",
+
+    const filteredRounds = userRounds
+      .filter(round => round.course_id === selectedCourseId)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    if (filteredRounds.length) {
+      const firstRound = filteredRounds[0];
+      setCourseInfo({
+        id: selectedCourseId,
+        name: firstRound.courses?.name || "Unknown Course",
+        clubName: firstRound.courses?.clubName || "Unknown Club",
+        courseName: firstRound.courses?.courseName || "Unknown Course",
+        city: firstRound.courses?.city || "",
+        state: firstRound.courses?.state || "",
+        location: firstRound.courses?.city && firstRound.courses?.state 
+          ? `${firstRound.courses.city}, ${firstRound.courses.state}` 
+          : firstRound.courses?.city || firstRound.courses?.state || "",
       });
     }
-  };
-  
-  const handleViewScorecard = (round: Round) => {
-    console.log("IMPORTANT - VIEWING ROUND SCORECARD:", {
-      id: round.id,
-      teeName: round.tee_name,
-      teeNameType: typeof round.tee_name,
-      teeId: round.tee_id
-    });
-    
-    if (scorecardOpen) {
-      setScorecardOpen(false);
-      setTimeout(() => {
-        setViewingRound(round);
-        setScorecardOpen(true);
-      }, 50);
-    } else {
-      setViewingRound(round);
-      setScorecardOpen(true);
-    }
+
+    setCourseRounds(filteredRounds);
+  }, [userRounds, selectedCourseId]);
+
+  const handleEditCourse = () => {
+    setIsFormOpen(true);
   };
 
-  const filteredRounds = getFilteredRounds(courseRounds, periodType, currentDate);
-  const filteredRoundsCount = filteredRounds.length;
-  
-  const stats = calculateCourseSpecificStats(courseRounds, handicapIndex);
-  const courseHoleStats = calculateHoleStats(filteredRounds);
+  const handleCourseCreated = (courseId: number, name: string) => {
+    console.log("Course updated:", courseId, name);
+    // The dashboard will refresh the data when this dialog is closed
+  };
+
+  if (!courseRounds.length || !courseInfo) {
+    return (
+      <div className="text-center">
+        <Button variant="ghost" onClick={onBackClick} className="mb-4">
+          <ChevronLeft className="mr-2 h-4 w-4" /> Back to All Courses
+        </Button>
+        <div className="py-6 text-muted-foreground">
+          No rounds found for this course.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold flex items-center">
-          <Button 
-            variant="outline"
-            className="mr-3 gap-2"
-            onClick={onBackClick}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
-          </Button>
-          {displayName}
-        </h2>
-      </div>
-      
-      {stats && <CourseBasicStats {...stats} scoreType={scoreType} />}
-      
-      <div className="pb-2">
-        <ScoreProgressChart 
-          rounds={courseRounds}
-          scoreType={scoreType}
-          handicapIndex={handicapIndex}
-        />
-      </div>
-      
-      <CoursePerformance 
-        courseHoleStats={courseHoleStats}
-        availableYears={availableYears}
-        availableMonths={availableMonths}
-        currentDate={currentDate}
-        periodType={periodType}
-        setPeriodType={setPeriodType}
-        setCurrentDate={setCurrentDate}
-        filteredRoundsCount={filteredRoundsCount}
-      />
-      
-      <CourseAdvancedStats 
-        rounds={courseRounds}
-        isLoading={false}
-      />
-      
-      <PotentialBestScore rounds={courseRounds} />
-      
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 bg-muted/30 rounded-lg border mt-16">
-        <p className="text-sm sm:text-base">
-          Want to see how your score compares to other golfers at this course?
-        </p>
+        <Button variant="ghost" onClick={onBackClick}>
+          <ChevronLeft className="mr-2 h-4 w-4" /> Back to All Courses
+        </Button>
         <Button 
-          onClick={() => setLeaderboardOpen(true)}
-          className="whitespace-nowrap"
+          variant="outline" 
+          size="sm" 
+          onClick={handleEditCourse}
+          className="ml-auto"
         >
-          <Trophy className="h-4 w-4 mr-2" />
-          View Course Leaderboards
+          <PenLine className="mr-2 h-4 w-4" /> Edit Course
         </Button>
       </div>
-      
-      <div className="space-y-4 mt-6">
-        <h3 className="text-lg font-medium">Round History</h3>
-        <div className="flex justify-end space-x-2 mb-2">
-          <Button 
-            variant={scoreType === 'gross' ? 'default' : 'outline'} 
-            size="sm"
-            onClick={() => setScoreType('gross')}
-            className="text-xs"
-          >
-            Gross Score
-          </Button>
-          <Button 
-            variant={scoreType === 'net' ? 'default' : 'outline'} 
-            size="sm"
-            onClick={() => setScoreType('net')}
-            className="text-xs"
-          >
-            Net Score
-          </Button>
+
+      <div>
+        <h2 className="text-xl sm:text-2xl font-semibold text-primary">
+          {courseInfo.clubName}
+        </h2>
+        <div className="text-muted-foreground">
+          {courseInfo.courseName !== courseInfo.clubName && (
+            <div>{courseInfo.courseName}</div>
+          )}
+          {courseInfo.location && <div>{courseInfo.location}</div>}
         </div>
-        
-        <RoundHistoryTable 
-          courseRounds={courseRounds}
-          scoreType={scoreType}
-          handicapIndex={handicapIndex}
-          onViewScorecard={handleViewScorecard}
-          onDeleteRound={handleDeleteRound}
-        />
       </div>
-      
-      {viewingRound && (
-        <RoundScorecard 
-          round={viewingRound}
-          isOpen={scorecardOpen}
-          onOpenChange={(open) => {
-            setScorecardOpen(open);
-            if (!open) {
-              setTimeout(() => setViewingRound(null), 100);
-            }
-          }}
-          handicapIndex={handicapIndex}
-        />
-      )}
-      
-      <CourseLeaderboard
-        courseId={selectedCourseId}
-        courseName={displayName}
-        open={leaderboardOpen}
-        onOpenChange={setLeaderboardOpen}
-        handicapIndex={handicapIndex}
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-3">
+          <TabsTrigger value="rounds">Rounds</TabsTrigger>
+          <TabsTrigger value="stats">Stats</TabsTrigger>
+          <TabsTrigger value="progression">Progression</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="rounds" className="space-y-4 pt-4">
+          <div className="space-y-6">
+            {courseRounds.map((round) => (
+              <RoundScorecard key={round.id} round={round} />
+            ))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="stats" className="pt-4">
+          <CourseAdvancedStats 
+            rounds={courseRounds} 
+            isLoading={false}
+          />
+        </TabsContent>
+
+        <TabsContent value="progression" className="pt-4">
+          <ScoreProgressionChart 
+            rounds={courseRounds}
+            scoreType={scoreType}
+            handicapIndex={handicapIndex}
+          />
+        </TabsContent>
+      </Tabs>
+
+      <ManualCourseForm
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        onCourseCreated={handleCourseCreated}
+        existingCourse={courseInfo}
       />
     </div>
   );
-};
+}

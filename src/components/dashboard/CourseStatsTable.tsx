@@ -1,214 +1,142 @@
 
-import { useState, useEffect } from "react";
-import { ChevronUp, ChevronDown, Flag } from "lucide-react";
-import { CourseStats, Round } from "./types";
+import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { PenLine } from "lucide-react";
+import { ManualCourseForm } from "@/components/ManualCourseForm";
 
 interface CourseStatsTableProps {
-  userRounds: Round[] | undefined;
+  userRounds: any[];
   scoreType: 'gross' | 'net';
-  calculateCourseStats: (rounds: Round[], handicapIndex?: number) => CourseStats[];
+  calculateCourseStats: (rounds: any[], courseId: number, handicapIndex: number, scoreType: 'gross' | 'net') => any;
   onCourseClick: (courseId: number) => void;
   handicapIndex: number;
 }
 
-export const CourseStatsTable = ({ 
-  userRounds, 
-  scoreType, 
-  calculateCourseStats, 
+export function CourseStatsTable({
+  userRounds,
+  scoreType,
+  calculateCourseStats,
   onCourseClick,
   handicapIndex
-}: CourseStatsTableProps) => {
-  const [sortField, setSortField] = useState<keyof CourseStats>('courseName');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [sortedStats, setSortedStats] = useState<CourseStats[]>([]);
+}: CourseStatsTableProps) {
+  const [courseStats, setCourseStats] = useState<any[]>([]);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<any>(null);
 
+  // Calculate stats for each course
   useEffect(() => {
-    if (!userRounds || userRounds.length === 0) return;
-    
-    // Pass the handicap index to ensure consistency with other components
-    const courseStats = calculateCourseStats(userRounds, handicapIndex);
-    
-    // Log courses with their scores for debugging
-    console.log("[CourseStatsTable] Courses with scores before sorting:", courseStats.map(course => ({
-      id: course.courseId,
-      name: course.courseName,
-      club: course.clubName,
-      bestGross: course.bestGrossScore,
-      bestToPar: course.bestToPar,
-      bestNetScore: course.bestNetScore,
-      bestToParNet: course.bestToParNet,
-      handicapUsed: handicapIndex
-    })));
-    
-    // Sort based on the field and using the appropriate scores
-    const sorted = [...courseStats].sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
-      
-      // Use the correct field based on score type
-      if (sortField === 'bestGrossScore' && scoreType === 'net') {
-        aValue = a.bestNetScore !== null ? a.bestNetScore : Number.MAX_SAFE_INTEGER;
-        bValue = b.bestNetScore !== null ? b.bestNetScore : Number.MAX_SAFE_INTEGER;
-      } 
-      else if (sortField === 'bestToPar' && scoreType === 'net') {
-        aValue = a.bestToParNet !== null ? a.bestToParNet : Number.MAX_SAFE_INTEGER;
-        bValue = b.bestToParNet !== null ? b.bestToParNet : Number.MAX_SAFE_INTEGER;
-      }
-      else {
-        aValue = a[sortField];
-        bValue = b[sortField];
-      }
-      
-      // Handle null values
-      if (aValue === null) return 1;
-      if (bValue === null) return -1;
-      
-      // Sort strings and numbers accordingly
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortDirection === 'asc' 
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-      
-      // For numerical values (including to par scores)
-      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
-    });
-    
-    // Log the sorted results
-    console.log("[CourseStatsTable] Courses after sorting:", sorted.map(course => ({
-      name: course.courseName,
-      club: course.clubName,
-      field: sortField,
-      direction: sortDirection,
-      value: sortField === 'bestToPar' && scoreType === 'net' 
-        ? course.bestToParNet 
-        : (sortField === 'bestGrossScore' && scoreType === 'net'
-            ? course.bestNetScore
-            : course[sortField])
-    })));
-    
-    setSortedStats(sorted);
-  }, [userRounds, sortField, sortDirection, scoreType, handicapIndex, calculateCourseStats]);
+    if (!userRounds || !userRounds.length) {
+      setCourseStats([]);
+      return;
+    }
 
-  if (!userRounds || userRounds.length === 0) {
+    const courseIds = [...new Set(userRounds.map(round => round.course_id))];
+    const stats = courseIds.map(courseId => {
+      const courseRounds = userRounds.filter(round => round.course_id === courseId);
+      const courseName = courseRounds[0]?.courses?.name || "Unknown Course";
+      const courseLocation = courseRounds[0]?.courses?.city && courseRounds[0]?.courses?.state 
+        ? `${courseRounds[0].courses.city}, ${courseRounds[0].courses.state}` 
+        : courseRounds[0]?.courses?.city || courseRounds[0]?.courses?.state || "";
+      
+      const stats = calculateCourseStats(courseRounds, courseId, handicapIndex, scoreType);
+      
+      return {
+        id: courseId,
+        name: courseName,
+        location: courseLocation,
+        clubName: courseRounds[0]?.courses?.clubName || "Unknown Club",
+        courseName: courseRounds[0]?.courses?.courseName || "Unknown Course",
+        roundsPlayed: stats.roundsPlayed,
+        averageScore: stats.averageScore,
+        bestScore: stats.bestScore,
+        toPar: stats.toPar,
+        lastRound: stats.lastRound,
+        trending: stats.trending
+      };
+    });
+
+    setCourseStats(stats);
+  }, [userRounds, scoreType, calculateCourseStats, handicapIndex]);
+
+  if (!courseStats.length) {
     return (
-      <div className="text-center p-6 bg-secondary/20 rounded-lg border border-secondary/40 shadow-sm">
-        <p className="text-lg font-medium text-accent">You haven't added any rounds yet.</p>
-        <p className="text-muted-foreground mt-2">Click "Add a New Round" to get started!</p>
+      <div className="text-center py-6 text-muted-foreground">
+        No rounds recorded yet. Add your first round to see course statistics.
       </div>
     );
   }
 
-  const handleSort = (field: keyof CourseStats) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
+  const handleEditCourse = (e: React.MouseEvent, course: any) => {
+    e.stopPropagation();
+    setSelectedCourse({
+      id: course.id,
+      name: course.name,
+      city: course.location.split(', ')[0] || '',
+      state: course.location.split(', ')[1] || '',
+    });
+    setIsFormOpen(true);
   };
 
-  // Helper function to render sort indicator
-  const renderSortIndicator = (field: keyof CourseStats) => {
-    if (sortField !== field) {
-      return <span className="text-muted-foreground opacity-50 ml-1">↕️</span>;
-    }
-    return sortDirection === 'asc' 
-      ? <ChevronUp className="inline-block h-4 w-4 ml-1" /> 
-      : <ChevronDown className="inline-block h-4 w-4 ml-1" />;
+  const handleCourseCreated = (courseId: number, name: string) => {
+    console.log("Course updated:", courseId, name);
+    // The user rounds will be refreshed when the dashboard component data is invalidated
   };
 
   return (
-    <div className="overflow-x-auto rounded-lg border shadow-md bg-white">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b bg-secondary/20">
-            <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-primary">
-              <button
-                onClick={() => handleSort('courseName')}
-                className="flex items-center cursor-pointer hover:text-accent transition-colors"
-              >
-                <span>Course</span>
-                {renderSortIndicator('courseName')}
-              </button>
-            </th>
-            <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-primary">
-              <button
-                onClick={() => handleSort('roundsPlayed')}
-                className="flex items-center cursor-pointer hover:text-accent transition-colors"
-              >
-                <span>Rounds</span>
-                {renderSortIndicator('roundsPlayed')}
-              </button>
-            </th>
-            <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-primary">
-              <button
-                onClick={() => handleSort('bestGrossScore')}
-                className="flex items-center cursor-pointer hover:text-accent transition-colors"
-              >
-                <span>Best</span>
-                {renderSortIndicator('bestGrossScore')}
-              </button>
-            </th>
-            <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-primary">
-              <button
-                onClick={() => handleSort('bestToPar')}
-                className="flex items-center cursor-pointer hover:text-accent transition-colors"
-              >
-                <span>Par</span>
-                {renderSortIndicator('bestToPar')}
-              </button>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {sortedStats.map((courseStat) => (
-            <tr key={courseStat.courseId} className="border-b last:border-0 hover:bg-secondary/5 transition-colors">
-              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium">
-                <button 
-                  className="hover:underline text-primary flex items-center gap-1"
-                  onClick={() => onCourseClick(courseStat.courseId)}
-                >
-                  <Flag className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
-                  <span className="truncate">
-                    {courseStat.clubName !== courseStat.courseName 
-                      ? `${courseStat.clubName} - ${courseStat.courseName}`
-                      : courseStat.courseName}
-                  </span>
-                </button>
-                <p className="text-xs text-muted-foreground mt-0.5 pl-4 truncate">
-                  {courseStat.city}{courseStat.state ? `, ${courseStat.state}` : ''}
-                </p>
-              </td>
-              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">
-                <div className="bg-secondary/20 rounded-full w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center font-medium text-primary">
-                  {courseStat.roundsPlayed}
-                </div>
-              </td>
-              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium">
-                <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded bg-accent/10 inline-block min-w-[2.5rem] text-center">
-                  {scoreType === 'gross' 
-                    ? courseStat.bestGrossScore 
-                    : courseStat.bestNetScore}
-                </div>
-              </td>
-              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium">
-                <div className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded ${
-                  (scoreType === 'gross' ? courseStat.bestToPar : courseStat.bestToParNet) <= 0 
-                  ? 'bg-success/20 text-success' 
-                  : 'bg-destructive/10 text-destructive'
-                } inline-block min-w-[2.5rem] text-center`}>
-                  {scoreType === 'gross' 
-                    ? (courseStat.bestToPar > 0 ? '+' : '') + courseStat.bestToPar
-                    : courseStat.bestToParNet !== null 
-                      ? (courseStat.bestToParNet > 0 ? '+' : '') + courseStat.bestToParNet
-                      : ''}
-                </div>
-              </td>
+    <>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-left border-b">
+              <th className="pb-2 font-medium">Course</th>
+              <th className="pb-2 font-medium text-center">Rounds</th>
+              <th className="pb-2 font-medium text-center">Avg. Score</th>
+              <th className="pb-2 font-medium text-center">Best</th>
+              <th className="pb-2 font-medium text-center">Last</th>
+              <th className="pb-2 font-medium text-center">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {courseStats.map((course) => (
+              <tr 
+                key={course.id} 
+                className="hover:bg-muted/50 cursor-pointer border-b"
+                onClick={() => onCourseClick(course.id)}
+              >
+                <td className="py-3">
+                  <div className="font-medium">{course.clubName}</div>
+                  <div className="text-muted-foreground text-xs">{course.courseName}</div>
+                  {course.location && (
+                    <div className="text-muted-foreground text-xs">{course.location}</div>
+                  )}
+                </td>
+                <td className="py-3 text-center">{course.roundsPlayed}</td>
+                <td className="py-3 text-center">{course.averageScore}</td>
+                <td className="py-3 text-center">{course.bestScore}</td>
+                <td className="py-3 text-center">{course.lastRound}</td>
+                <td className="py-3 text-center">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 w-8 p-0"
+                    onClick={(e) => handleEditCourse(e, course)}
+                  >
+                    <PenLine className="h-4 w-4" />
+                    <span className="sr-only">Edit Course</span>
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <ManualCourseForm
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        onCourseCreated={handleCourseCreated}
+        existingCourse={selectedCourse}
+      />
+    </>
   );
-};
+}
