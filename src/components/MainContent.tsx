@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle, UserPlus } from 'lucide-react';
@@ -133,14 +132,14 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
       {/* Hero Section */}
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center mt-4 sm:mt-0">
         <div className="max-w-5xl mx-auto animate-fade-in mb-4">
-          <h1 id="hero-heading" className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight mb-4 drop-shadow-md">
+          <h1 id="hero-heading" className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-4 drop-shadow-md">
             Track Your Rounds. Lower Your Scores. Play Smarter.
           </h1>
-          <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium mb-6 max-w-3xl mx-auto">
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 font-medium mb-4 max-w-3xl mx-auto">
             Welcome to MyBirdieBoard – the ultimate golf tracking platform to help you improve every round
           </p>
           
-          <p className="text-sm sm:text-base md:text-lg text-white/90 font-bold mb-6 max-w-3xl mx-auto">
+          <p className="text-xs sm:text-sm md:text-base text-white/90 font-bold mb-6 max-w-3xl mx-auto">
             Take control of your game with MyBirdieBoard! Track your scores, monitor your handicap, and analyze your progress—all in one place. Whether you're looking to break 100, 90, or 80, our tools help you identify trends, improve your game, and even compete with friends on course leaderboards.
           </p>
           
