@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams, Link } from "react-router-dom";
@@ -9,7 +8,6 @@ import { MainStats, HandicapCircle } from "@/components/dashboard/StatsDisplay";
 import { CourseStatsTable, CourseRoundHistory } from "@/components/dashboard/CourseStats";
 import { DetailedStats } from "@/components/dashboard/DetailedStats";
 import { AdvancedStats } from "@/components/dashboard/AdvancedStats";
-import ScoreProgressionChart from "@/components/dashboard/ScoreProgressionChart";
 import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
 import { useToast } from "@/hooks/use-toast";
 import { clearSubscriptionCache } from "@/integrations/supabase/subscription/subscription-utils";
@@ -279,15 +277,6 @@ export default function Dashboard() {
                   profileHandicap={handicapFromProfile}
                 />
               </div>
-            </div>
-            
-            {/* New Score Progression Chart */}
-            <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
-              <ScoreProgressionChart 
-                rounds={userRounds || []}
-                scoreType={scoreType}
-                handicapIndex={handicapFromProfile}
-              />
             </div>
             
             <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
