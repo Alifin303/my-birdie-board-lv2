@@ -1,4 +1,3 @@
-
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -77,26 +76,5 @@
     padding: 0.75rem 1rem;
     margin-bottom: 0.75rem;
     width: calc(100% - 0.5rem);
-  }
-}
-
-/* Ensure background images are always visible and properly displayed */
-[style*="background-image"] {
-  background-repeat: no-repeat !important;
-  background-size: cover !important;
-  background-position: center !important;
-}
-
-/* Force full visibility of background containers */
-div[style*="background-image"] {
-  min-height: 100vh;
-  position: relative;
-  z-index: 0;
-}
-
-/* Fix for mobile views */
-@media (max-width: 640px) {
-  div[style*="background-image"] {
-    background-attachment: scroll !important;
   }
 }

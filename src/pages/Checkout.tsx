@@ -142,14 +142,13 @@ export default function Checkout() {
 
   return (
     <div 
-      className="min-h-screen flex flex-col overflow-hidden"
+      className="min-h-screen flex flex-col bg-cover bg-center bg-no-repeat"
       style={{
-        backgroundImage: `url(/lovable-uploads/84974738-245c-456a-9a3b-c14741e82372.png)`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat"
+        backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
+        backgroundColor: "#2C4A3B", // Fallback color if image fails to load
       }}
     >
+      {/* Dark overlay div */}
       <div className="absolute inset-0 bg-black opacity-20 z-0"></div>
       
       <div className="container mx-auto px-4 py-8 flex justify-center relative z-10">

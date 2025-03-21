@@ -26,12 +26,10 @@ const Index = () => {
       
       <div className="min-h-screen flex flex-col">
         <div 
-          className="relative flex-1 overflow-hidden"
+          className="relative flex-1 bg-cover bg-center bg-no-repeat overflow-hidden"
           style={{
-            backgroundImage: `url(/lovable-uploads/84974738-245c-456a-9a3b-c14741e82372.png)`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat"
+            backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
+            backgroundColor: "#2C4A3B", // Fallback color if image fails to load
           }}
         >
           {/* Dark overlay div */}
