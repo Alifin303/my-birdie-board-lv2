@@ -49,6 +49,34 @@ export const UserReviews = () => {
     },
   ];
 
+  // Create JSON-LD structured data for reviews
+  const reviewStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "MyBirdieBoard",
+    "description": "Golf score tracking and performance analytics application",
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "5.0",
+      "reviewCount": reviews.length.toString(),
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "review": reviews.map(review => ({
+      "@type": "Review",
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": review.rating.toString(),
+        "bestRating": "5"
+      },
+      "author": {
+        "@type": "Person",
+        "name": review.author
+      },
+      "reviewBody": review.text
+    }))
+  };
+
   return (
     <div className="py-12 bg-white/90 backdrop-blur-sm">
       <div className="container mx-auto px-4">
@@ -90,6 +118,14 @@ export const UserReviews = () => {
           </Carousel>
         </div>
       </div>
+      
+      {/* Add JSON-LD structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(reviewStructuredData)
+        }}
+      />
     </div>
   );
 };
