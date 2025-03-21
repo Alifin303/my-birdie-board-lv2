@@ -26,9 +26,17 @@ const Index = () => {
       
       <div className="min-h-screen flex flex-col">
         <div 
-          className="relative flex-1 bg-cover bg-center bg-no-repeat overflow-hidden"
+          className="relative flex-1"
           style={{
             backgroundImage: `url('/lovable-uploads/d59e66a6-7b85-4a51-9f8d-566417380636.png')`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            width: "100%",
+            height: "100vh",
+            position: "absolute",
+            top: 0,
+            left: 0
           }}
         >
           {/* Dark overlay div */}
@@ -56,7 +64,7 @@ const Index = () => {
               </nav>
             </div>
           </header>
-          <main className="relative z-[1] pt-32 sm:pt-0"> {/* Added padding-top for mobile only */}
+          <main className="relative z-[1] pt-32 sm:pt-0"> 
             <MainContent onStartSignup={handleStartSignup} />
           </main>
         </div>
