@@ -144,13 +144,12 @@ export default function Checkout() {
     <div 
       className="min-h-screen flex flex-col overflow-hidden"
       style={{
-        backgroundImage: "url(/lovable-uploads/84974738-245c-456a-9a3b-c14741e82372.png)",
+        backgroundImage: `url(/lovable-uploads/84974738-245c-456a-9a3b-c14741e82372.png)`,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
+        backgroundRepeat: "no-repeat"
       }}
     >
-      {/* Dark overlay div */}
       <div className="absolute inset-0 bg-black opacity-20 z-0"></div>
       
       <div className="container mx-auto px-4 py-8 flex justify-center relative z-10">
