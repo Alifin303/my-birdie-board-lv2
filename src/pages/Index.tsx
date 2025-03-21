@@ -28,11 +28,10 @@ const Index = () => {
         <div 
           className="relative flex-1 overflow-hidden"
           style={{
-            backgroundImage: "url(/lovable-uploads/e0dc34c2-5f14-40b7-bcf1-f9c5e827b330.png)",
+            backgroundImage: "url(/lovable-uploads/84974738-245c-456a-9a3b-c14741e82372.png)",
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
-            backgroundColor: "#2C4A3B", // Fallback color if image fails to load
           }}
         >
           {/* Dark overlay div */}
