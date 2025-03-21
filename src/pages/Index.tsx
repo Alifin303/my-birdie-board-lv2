@@ -58,7 +58,7 @@ const Index = () => {
               </nav>
             </div>
           </header>
-          <main className="relative z-[1] pt-32 sm:pt-0"> {/* Added padding-top for mobile only */}
+          <main className="relative z-[1] pt-32 sm:pt-0 w-full text-center sm:text-left"> {/* Added text-center for mobile, text-left for larger screens */}
             <MainContent onStartSignup={handleStartSignup} />
             
             {/* Add the UserReviews component */}
