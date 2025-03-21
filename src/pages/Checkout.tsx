@@ -145,7 +145,7 @@ export default function Checkout() {
     <div 
       className="min-h-screen flex flex-col overflow-hidden"
       style={{
-        backgroundImage: "url('/lovable-uploads/e0dc34c2-5f14-40b7-bcf1-f9c5e827b330.png')",
+        backgroundImage: "url(/lovable-uploads/e0dc34c2-5f14-40b7-bcf1-f9c5e827b330.png)",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",

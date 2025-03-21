@@ -86,3 +86,9 @@
   background-size: cover !important;
   background-position: center !important;
 }
+
+/* Ensure background images are always visible */
+div[style*="background-image"] {
+  position: relative;
+  z-index: 0;
+}
