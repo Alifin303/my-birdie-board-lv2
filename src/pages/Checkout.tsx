@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -144,8 +145,7 @@ export default function Checkout() {
     <div 
       className="min-h-screen flex flex-col bg-cover bg-center bg-no-repeat"
       style={{
-        backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
-        backgroundColor: "#2C4A3B", // Fallback color if image fails to load
+        backgroundImage: `url('/lovable-uploads/d59e66a6-7b85-4a51-9f8d-566417380636.png')`,
       }}
     >
       {/* Dark overlay div */}
