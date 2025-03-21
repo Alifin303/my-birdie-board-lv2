@@ -3,11 +3,12 @@ import { useState } from "react";
 import { MainContent } from "@/components/MainContent";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
-import { User, UserPlus } from "lucide-react";
+import { User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { SocialFooter } from "@/components/SocialFooter";
 import { SignUpDialog } from "@/components/SignUpDialog";
+import { UserReviews } from "@/components/UserReviews";
 
 const Index = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
@@ -59,6 +60,9 @@ const Index = () => {
           </header>
           <main className="relative z-[1] pt-32 sm:pt-0"> {/* Added padding-top for mobile only */}
             <MainContent onStartSignup={handleStartSignup} />
+            
+            {/* Add the UserReviews component */}
+            <UserReviews />
           </main>
         </div>
         <SocialFooter />

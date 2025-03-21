@@ -78,3 +78,27 @@
     width: calc(100% - 0.5rem);
   }
 }
+
+/* Review carousel styling */
+.review-card {
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.review-card:hover {
+  transform: translateY(-5px);
+}
+
+.review-stars {
+  color: #FFD700;
+}
+
+@media (max-width: 640px) {
+  .reviews-container {
+    padding: 1rem 0.5rem;
+  }
+  
+  .review-card {
+    min-width: 280px;
+  }
+}
