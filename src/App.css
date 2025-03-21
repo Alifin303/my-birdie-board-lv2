@@ -1,4 +1,3 @@
-
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -78,21 +77,4 @@
     margin-bottom: 0.75rem;
     width: calc(100% - 0.5rem);
   }
-}
-
-/* Ensure background images are properly displayed */
-[style*="background-image"] {
-  background-size: cover !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
-}
-
-/* Fix for background image container height */
-.min-h-screen [style*="background-image"] {
-  min-height: 100vh;
-}
-
-/* Ensure the relative container has full height */
-.min-h-screen .relative.flex-1 {
-  min-height: 100vh;
 }
