@@ -143,9 +143,12 @@ export default function Checkout() {
 
   return (
     <div 
-      className="min-h-screen flex flex-col bg-cover bg-center bg-no-repeat"
+      className="min-h-screen flex flex-col"
       style={{
         backgroundImage: `url('/lovable-uploads/d59e66a6-7b85-4a51-9f8d-566417380636.png')`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat"
       }}
     >
       {/* Dark overlay div */}
