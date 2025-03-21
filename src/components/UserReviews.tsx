@@ -1,7 +1,13 @@
 
 import React from "react";
-import { Star } from "lucide-react";
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import { Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem, 
+  CarouselPrevious, 
+  CarouselNext 
+} from "@/components/ui/carousel";
 
 interface Review {
   rating: number;
@@ -48,29 +54,41 @@ export const UserReviews = () => {
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center text-primary mb-8">What Our Users Say</h2>
         
-        <Carousel className="w-full overflow-hidden">
-          <CarouselContent className="-ml-4">
-            {reviews.map((review, index) => (
-              <CarouselItem key={index} className="pl-4 md:basis-1/2 lg:basis-1/3">
-                <div className="bg-white rounded-lg shadow-md p-6 h-full flex flex-col border border-secondary/30">
-                  <div className="flex items-center mb-4">
-                    {Array.from({ length: review.rating }).map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                    ))}
+        <div className="relative">
+          <Carousel className="w-full overflow-hidden">
+            <CarouselContent className="-ml-4">
+              {reviews.map((review, index) => (
+                <CarouselItem key={index} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                  <div className="bg-white rounded-lg shadow-md p-6 h-full flex flex-col border border-secondary/30">
+                    <div className="flex items-center mb-4">
+                      {Array.from({ length: review.rating }).map((_, i) => (
+                        <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                    
+                    <blockquote className="italic text-gray-700 mb-4 flex-grow">
+                      "{review.text}"
+                    </blockquote>
+                    
+                    <footer className="text-right font-medium text-primary">
+                      {review.author}
+                    </footer>
                   </div>
-                  
-                  <blockquote className="italic text-gray-700 mb-4 flex-grow">
-                    "{review.text}"
-                  </blockquote>
-                  
-                  <footer className="text-right font-medium text-primary">
-                    {review.author}
-                  </footer>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            
+            {/* Adding navigation arrows */}
+            <CarouselPrevious 
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 md:-translate-x-0 bg-white/80 border-primary hover:bg-primary hover:text-white" 
+              variant="outline" 
+            />
+            <CarouselNext 
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 md:translate-x-0 bg-white/80 border-primary hover:bg-primary hover:text-white" 
+              variant="outline" 
+            />
+          </Carousel>
+        </div>
       </div>
     </div>
   );
