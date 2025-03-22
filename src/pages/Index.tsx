@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { MainContent } from "@/components/MainContent";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
@@ -9,13 +8,131 @@ import { Helmet } from "react-helmet-async";
 import { SocialFooter } from "@/components/SocialFooter";
 import { SignUpDialog } from "@/components/SignUpDialog";
 import { UserReviews } from "@/components/UserReviews";
+import { FeatureInfoModal, FeatureInfo } from "@/components/FeatureInfoModal";
+import { Upload, BarChart2, Award, Trophy } from "lucide-react";
 
 const Index = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showSignupDialog, setShowSignupDialog] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState<FeatureInfo | null>(null);
 
   const handleStartSignup = () => {
     setShowSignupDialog(true);
+  };
+
+  const featureInfo: Record<string, FeatureInfo> = {
+    scorecards: {
+      title: "Upload & Store Your Scorecards",
+      icon: <Upload className="h-4 w-4 text-white" />,
+      description: (
+        <div className="space-y-4 pt-2">
+          <p>Never lose track of your rounds again! With MyBirdieBoard, you can upload your scorecards effortlessly and keep a complete history of every round you play. Whether you're tracking personal bests or looking for trends in your game, your entire golf journey is stored in one place.</p>
+          
+          <ul className="space-y-2">
+            <li className="flex items-start">
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">Log every round played</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">View past performances anytime</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">Keep all your scores safe and organized</span>
+            </li>
+          </ul>
+          
+          <p className="font-medium">Start tracking today and take control of your game!</p>
+        </div>
+      )
+    },
+    progress: {
+      title: "Visual Progress Tracking",
+      icon: <BarChart2 className="h-4 w-4 text-white" />,
+      description: (
+        <div className="space-y-4 pt-2">
+          <p>See your improvement in real-time! MyBirdieBoard gives you in-depth insights into your game with easy-to-read charts and graphs. Spot trends, analyze your strengths, and identify areas to improve so you can play smarter, not harder.</p>
+          
+          <ul className="space-y-2">
+            <li className="flex items-start">
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">Track scoring trends over time</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">Identify your strongest and weakest holes</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">Set goals and measure your progress</span>
+            </li>
+          </ul>
+          
+          <p className="font-medium">Know your game. Improve your game.</p>
+        </div>
+      )
+    },
+    handicap: {
+      title: "Handicap Generator",
+      icon: <Award className="h-4 w-4 text-white" />,
+      description: (
+        <div className="space-y-4 pt-2">
+          <p>Get a reliable, data-driven handicap that reflects your true skill level. MyBirdieBoard calculates your handicap using official methods, so you always have an accurate measure of your performance—perfect for friendly competition or self-improvement.</p>
+          
+          <ul className="space-y-2">
+            <li className="flex items-start">
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">Automatically updated after each round</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">See how your handicap improves over time</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">Play on a level field with golfers of all skill levels</span>
+            </li>
+          </ul>
+          
+          <p className="font-medium">Start tracking your handicap today!</p>
+        </div>
+      )
+    },
+    leaderboards: {
+      title: "Course Leaderboards",
+      icon: <Trophy className="h-4 w-4 text-white" />,
+      description: (
+        <div className="space-y-4 pt-2">
+          <p>Golf is better with a little competition! MyBirdieBoard's Course Leaderboards let you compare your scores with other golfers at the same course—whether you play together or not. Climb the rankings, challenge your friends, and set new personal bests.</p>
+          
+          <ul className="space-y-2">
+            <li className="flex items-start">
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">View leaderboard rankings by course</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">Compare gross and net scores</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
+              <span className="flex-1">Challenge friends, even if you're not playing together</span>
+            </li>
+          </ul>
+          
+          <p className="font-medium">Who will top the leaderboard? Join today and find out!</p>
+        </div>
+      )
+    }
+  };
+
+  const handleOpenFeatureInfo = (feature: FeatureInfo) => {
+    setSelectedFeature(feature);
+  };
+
+  const handleCloseFeatureInfo = () => {
+    setSelectedFeature(null);
   };
 
   return (
@@ -109,6 +226,14 @@ const Index = () => {
                         </div>
                         <h3 className="text-lg font-bold text-white mb-2">Upload & Store Your Scorecards</h3>
                         <p className="text-white/80 mb-2 text-sm">Keep a history of your rounds and track stats effortlessly.</p>
+                        <Button 
+                          variant="link" 
+                          className="text-white p-0 hover:text-white/80 text-sm"
+                          onClick={() => handleOpenFeatureInfo(featureInfo.scorecards)}
+                          aria-label="Learn more about scorecard uploads"
+                        >
+                          Learn More
+                        </Button>
                       </div>
                       
                       {/* Feature 2 */}
@@ -120,6 +245,14 @@ const Index = () => {
                         </div>
                         <h3 className="text-lg font-bold text-white mb-2">Visual Progress Tracking</h3>
                         <p className="text-white/80 mb-2 text-sm">Charts and graphs give you insights into your strengths and areas to improve.</p>
+                        <Button 
+                          variant="link" 
+                          className="text-white p-0 hover:text-white/80 text-sm"
+                          onClick={() => handleOpenFeatureInfo(featureInfo.progress)}
+                          aria-label="Learn more about progress tracking"
+                        >
+                          Learn More
+                        </Button>
                       </div>
                       
                       {/* Feature 3 */}
@@ -131,6 +264,14 @@ const Index = () => {
                         </div>
                         <h3 className="text-lg font-bold text-white mb-2">Handicap Generator</h3>
                         <p className="text-white/80 mb-2 text-sm">Get an accurate handicap calculation based on your rounds.</p>
+                        <Button 
+                          variant="link" 
+                          className="text-white p-0 hover:text-white/80 text-sm"
+                          onClick={() => handleOpenFeatureInfo(featureInfo.handicap)}
+                          aria-label="Learn more about handicap calculation"
+                        >
+                          Learn More
+                        </Button>
                       </div>
                       
                       {/* Feature 4 */}
@@ -142,6 +283,14 @@ const Index = () => {
                         </div>
                         <h3 className="text-lg font-bold text-white mb-2">Course Leaderboards</h3>
                         <p className="text-white/80 mb-2 text-sm">Compete with friends and other golfers at your favorite courses.</p>
+                        <Button 
+                          variant="link" 
+                          className="text-white p-0 hover:text-white/80 text-sm"
+                          onClick={() => handleOpenFeatureInfo(featureInfo.leaderboards)}
+                          aria-label="Learn more about course leaderboards"
+                        >
+                          Learn More
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -176,6 +325,11 @@ const Index = () => {
         <SignUpDialog 
           open={showSignupDialog} 
           onOpenChange={setShowSignupDialog}
+        />
+        <FeatureInfoModal 
+          isOpen={!!selectedFeature}
+          onClose={handleCloseFeatureInfo}
+          feature={selectedFeature}
         />
       </div>
     </>
