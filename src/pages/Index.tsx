@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
@@ -150,8 +149,7 @@ const Index = () => {
             backgroundColor: "#2C4A3B", // Fallback color if image fails to load
           }}
         >
-          {/* Dark overlay for better text readability */}
-          <div className="absolute inset-0 bg-black opacity-10 z-0" aria-hidden="true"></div>
+          <div className="absolute inset-0 bg-black opacity-60 z-0" aria-hidden="true"></div>
           
           <header className="absolute top-0 left-0 right-0 z-10">
             <div className="container mx-auto px-4 py-2">
@@ -176,10 +174,8 @@ const Index = () => {
             </div>
           </header>
           
-          {/* Main hero and feature section */}
           <main className="relative z-[1] pt-32 sm:pt-16 w-full text-center">
             <div className="container mx-auto px-4">
-              {/* Hero section */}
               <div className="max-w-5xl mx-auto mb-12 animate-fade-in">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-8 drop-shadow-md">
                   Track Your Rounds. Lower Your Scores. Play Smarter.
@@ -201,10 +197,8 @@ const Index = () => {
                 </div>
               </div>
               
-              {/* Features with device screens section */}
               <div className="max-w-7xl mx-auto bg-white/10 backdrop-blur-md p-6 sm:p-8 rounded-xl">
                 <div className="flex flex-col lg:flex-row items-center gap-8">
-                  {/* Device screens image - removed shadow-2xl class */}
                   <div className="lg:w-1/2 flex justify-center mb-8 lg:mb-0">
                     <img 
                       src="/lovable-uploads/a5adf299-888e-4978-b68a-627952aafd47.png" 
@@ -213,11 +207,9 @@ const Index = () => {
                     />
                   </div>
                   
-                  {/* 2x2 Feature boxes */}
                   <div className="lg:w-1/2">
                     <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6 text-center lg:text-left">Key Features</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                      {/* Feature 1 */}
                       <div className="bg-white/20 backdrop-blur-sm p-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
                         <div className="bg-accent/20 rounded-full p-2 w-fit mb-3">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -236,11 +228,10 @@ const Index = () => {
                         </Button>
                       </div>
                       
-                      {/* Feature 2 */}
                       <div className="bg-white/20 backdrop-blur-sm p-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
                         <div className="bg-accent/20 rounded-full p-2 w-fit mb-3">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                           </svg>
                         </div>
                         <h3 className="text-lg font-bold text-white mb-2">Visual Progress Tracking</h3>
@@ -255,7 +246,6 @@ const Index = () => {
                         </Button>
                       </div>
                       
-                      {/* Feature 3 */}
                       <div className="bg-white/20 backdrop-blur-sm p-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
                         <div className="bg-accent/20 rounded-full p-2 w-fit mb-3">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -274,7 +264,6 @@ const Index = () => {
                         </Button>
                       </div>
                       
-                      {/* Feature 4 */}
                       <div className="bg-white/20 backdrop-blur-sm p-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
                         <div className="bg-accent/20 rounded-full p-2 w-fit mb-3">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -299,7 +288,6 @@ const Index = () => {
             </div>
           </main>
           
-          {/* Call to action - Secondary Banner */}
           <section aria-labelledby="cta-heading" className="w-full py-8 sm:py-12 bg-black/30 backdrop-blur-sm mt-12">
             <div className="max-w-5xl mx-auto text-center px-4">
               <h2 id="cta-heading" className="text-xl sm:text-2xl font-bold text-white mb-4">Ready to take your game to the next level?</h2>
@@ -317,7 +305,6 @@ const Index = () => {
             </div>
           </section>
           
-          {/* Add the UserReviews component */}
           <UserReviews />
         </div>
         <SocialFooter />
@@ -337,3 +324,4 @@ const Index = () => {
 };
 
 export default Index;
+
