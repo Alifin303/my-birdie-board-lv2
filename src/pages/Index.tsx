@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
@@ -142,14 +143,18 @@ const Index = () => {
       </Helmet>
       
       <div className="min-h-screen flex flex-col">
+        {/* Background image container with improved visibility */}
         <div 
-          className="relative flex-1 bg-cover bg-center bg-no-repeat overflow-hidden"
+          className="relative flex-1 overflow-hidden"
           style={{
             backgroundImage: `url('/lovable-uploads/1c2fceba-4dfb-4bc2-827e-3ac79748f0a3.png')`,
-            backgroundColor: "#2C4A3B", // Fallback color if image fails to load
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
           }}
         >
-          <div className="absolute inset-0 bg-black opacity-60 z-0" aria-hidden="true"></div>
+          {/* Overlay with decreased opacity for better background visibility */}
+          <div className="absolute inset-0 bg-black opacity-40 z-0" aria-hidden="true"></div>
           
           <header className="absolute top-0 left-0 right-0 z-10">
             <div className="container mx-auto px-4 py-2">
@@ -324,4 +329,3 @@ const Index = () => {
 };
 
 export default Index;
-
