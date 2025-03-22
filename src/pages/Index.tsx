@@ -186,7 +186,7 @@ const Index = () => {
                 </h1>
                 <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 font-medium mb-8 max-w-3xl mx-auto 
                   bg-black/20 backdrop-blur-sm px-4 py-2 rounded-lg">
-                  Your post-round golf tracker. Play first, track later.
+                  Welcome to MyBirdieBoard – Your post-round golf tracker. Play first, track later.
                 </p>
                 
                 <div className="flex justify-center mt-6 mb-12">
