@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -53,22 +54,12 @@
   color: #888;
 }
 
-/* Fixed background styling */
-.full-background {
+/* New styles for dashboard with background image */
+.dashboard-container {
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
-  width: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: -1;
-}
-
-.content-overlay {
-  position: relative;
-  z-index: 1;
-  width: 100%;
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
 .white-box {
@@ -113,7 +104,7 @@
   }
 }
 
-/* Homepage styles */
+/* New homepage styles */
 .feature-card {
   transition: all 0.3s ease;
 }
@@ -136,32 +127,4 @@
   .features-section {
     grid-template-columns: 1fr;
   }
-}
-
-/* Add animation for page elements */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
-}
-
-/* Text readability enhancements */
-.text-with-shadow {
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.75);
-}
-
-.content-box {
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(5px);
-  border-radius: 8px;
-  padding: 1rem;
 }
