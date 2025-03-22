@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
@@ -143,19 +142,16 @@ const Index = () => {
       </Helmet>
       
       <div className="min-h-screen flex flex-col">
-        {/* Background image container with full visibility */}
         <div 
           className="relative flex-1 overflow-hidden"
           style={{
-            backgroundImage: `url('/lovable-uploads/1c2fceba-4dfb-4bc2-827e-3ac79748f0a3.png')`,
+            backgroundImage: `url('/lovable-uploads/a524f028-271b-49ba-89b5-925a03c3320c.png')`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             zIndex: 0
           }}
         >
-          {/* No overlay div - removed to show full background image */}
-          
           <header className="absolute top-0 left-0 right-0 z-10">
             <div className="container mx-auto px-4 py-2">
               <nav className="flex items-center justify-between">
