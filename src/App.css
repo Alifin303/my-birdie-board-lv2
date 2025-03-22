@@ -54,7 +54,7 @@
   color: #888;
 }
 
-/* New styles for dashboard with background image */
+/* Background styling */
 .dashboard-container {
   background-size: cover;
   background-position: center;
@@ -62,12 +62,14 @@
   min-height: 100vh;
 }
 
-/* Clean background container without overlay */
-.bg-image-container {
+/* Added for consistent background images */
+.full-background {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  min-height: 100vh;
   position: relative;
+  width: 100%;
 }
 
 .white-box {
@@ -135,4 +137,20 @@
   .features-section {
     grid-template-columns: 1fr;
   }
+}
+
+/* Add animation for page elements */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
 }
