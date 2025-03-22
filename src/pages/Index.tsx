@@ -146,7 +146,7 @@ const Index = () => {
         <div 
           className="relative flex-1 bg-cover bg-center bg-no-repeat overflow-hidden"
           style={{
-            backgroundImage: `url('/lovable-uploads/a97d328d-b4a2-4af3-b073-8d4b085c4dda.png')`,
+            backgroundImage: `url('/lovable-uploads/1c2fceba-4dfb-4bc2-827e-3ac79748f0a3.png')`,
             backgroundColor: "#2C4A3B", // Fallback color if image fails to load
           }}
         >
