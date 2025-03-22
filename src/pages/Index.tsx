@@ -186,7 +186,7 @@ const Index = () => {
                 </h1>
                 <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 font-medium mb-8 max-w-3xl mx-auto 
                   bg-black/20 backdrop-blur-sm px-4 py-2 rounded-lg">
-                  Welcome to MyBirdieBoard – the ultimate golf tracking platform to help you improve every round.
+                  Your post-round golf tracker. Play first, track later.
                 </p>
                 
                 <div className="flex justify-center mt-6 mb-12">
@@ -204,12 +204,12 @@ const Index = () => {
               {/* Features with device screens section */}
               <div className="max-w-7xl mx-auto bg-white/10 backdrop-blur-md p-6 sm:p-8 rounded-xl">
                 <div className="flex flex-col lg:flex-row items-center gap-8">
-                  {/* Device screens image */}
+                  {/* Device screens image - removed shadow-2xl class */}
                   <div className="lg:w-1/2 flex justify-center mb-8 lg:mb-0">
                     <img 
                       src="/lovable-uploads/a5adf299-888e-4978-b68a-627952aafd47.png" 
                       alt="MyBirdieBoard on laptop and mobile" 
-                      className="w-full max-w-md lg:max-w-lg object-contain rounded-lg shadow-2xl"
+                      className="w-full max-w-md lg:max-w-lg object-contain rounded-lg"
                     />
                   </div>
                   
