@@ -172,7 +172,7 @@ const Index = () => {
                 </p>
                 
                 <div className="flex justify-center mt-6 mb-12">
-                  <Button size="lg" onClick={handleStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-lg px-8 h-12 shadow-lg transition-all duration-300 bg-[#bac9b5] text-accent-DEFAULT">
+                  <Button size="lg" onClick={handleStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-lg px-8 h-12 shadow-lg transition-all duration-300 bg-[#bac9b5] text-zinc-900">
                     START YOUR FREE TRIAL TODAY!
                   </Button>
                 </div>
