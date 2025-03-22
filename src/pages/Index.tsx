@@ -142,13 +142,17 @@ const Index = () => {
         <meta name="description" content="Track your golf scores, challenge friends on course leaderboards, and improve your game with detailed performance analytics on MyBirdieBoard" />
       </Helmet>
       
+      {/* Fixed background image */}
       <div 
-        className="min-h-screen bg-cover bg-center bg-no-repeat flex flex-col"
+        className="full-background"
         style={{
           backgroundImage: `url('/lovable-uploads/f0be2e03-1a24-4b7a-bc1d-bd9550d6191e.png')`,
         }}
-      >
-        <header className="relative z-10">
+      ></div>
+      
+      {/* Content overlay */}
+      <div className="content-overlay">
+        <header>
           <div className="container mx-auto px-4 py-2">
             <nav className="flex items-center justify-between">
               <Link to="/" className="flex items-center" aria-label="MyBirdieBoard Home">
@@ -171,14 +175,13 @@ const Index = () => {
           </div>
         </header>
         
-        <main className="relative z-10 pt-32 sm:pt-16 w-full text-center flex-1">
+        <main className="pt-32 sm:pt-16 w-full text-center flex-1">
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto mb-12 animate-fade-in">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-8 drop-shadow-md">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-8 text-with-shadow">
                 Track Your Rounds. Lower Your Scores. Play Smarter.
               </h1>
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white font-medium mb-8 max-w-3xl mx-auto 
-                bg-black/40 backdrop-blur-sm px-4 py-2 rounded-lg">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white font-medium mb-8 max-w-3xl mx-auto content-box">
                 Welcome to MyBirdieBoard – Your post-round golf tracker. Play first, track later.
               </p>
               
@@ -194,7 +197,7 @@ const Index = () => {
               </div>
             </div>
             
-            <div className="max-w-7xl mx-auto bg-white/20 backdrop-blur-md p-6 sm:p-8 rounded-xl">
+            <div className="max-w-7xl mx-auto bg-black/40 backdrop-blur-md p-6 sm:p-8 rounded-xl">
               <div className="flex flex-col lg:flex-row items-center gap-8">
                 <div className="lg:w-1/2 flex justify-center mb-8 lg:mb-0">
                   <img 
@@ -285,7 +288,7 @@ const Index = () => {
           </div>
         </main>
         
-        <section aria-labelledby="cta-heading" className="w-full py-8 sm:py-12 bg-white/10 backdrop-blur-sm mt-12 relative z-10">
+        <section aria-labelledby="cta-heading" className="w-full py-8 sm:py-12 bg-black/30 backdrop-blur-sm mt-12">
           <div className="max-w-5xl mx-auto text-center px-4">
             <h2 id="cta-heading" className="text-xl sm:text-2xl font-bold text-white mb-4">Ready to take your game to the next level?</h2>
             <p className="text-base sm:text-lg text-white/90 mb-6">Find out how MyBirdieBoard can help improve your golf game!</p>
