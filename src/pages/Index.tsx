@@ -143,7 +143,7 @@ const Index = () => {
       </Helmet>
       
       <div className="min-h-screen flex flex-col">
-        {/* Background image container with improved visibility */}
+        {/* Background image container with full visibility */}
         <div 
           className="relative flex-1 overflow-hidden"
           style={{
@@ -151,10 +151,10 @@ const Index = () => {
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
+            zIndex: 0
           }}
         >
-          {/* Overlay with decreased opacity for better background visibility */}
-          <div className="absolute inset-0 bg-black opacity-40 z-0" aria-hidden="true"></div>
+          {/* No overlay div - removed to show full background image */}
           
           <header className="absolute top-0 left-0 right-0 z-10">
             <div className="container mx-auto px-4 py-2">
@@ -169,7 +169,7 @@ const Index = () => {
                 <Button 
                   onClick={() => setShowLoginDialog(true)}
                   variant="ghost" 
-                  className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all text-xs sm:text-sm py-1"
+                  className="bg-white/30 backdrop-blur-sm text-white hover:bg-white/40 transition-all text-xs sm:text-sm py-1"
                   aria-label="Log in to your account"
                 >
                   <User className="mr-1 h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
@@ -186,7 +186,7 @@ const Index = () => {
                   Track Your Rounds. Lower Your Scores. Play Smarter.
                 </h1>
                 <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 font-medium mb-8 max-w-3xl mx-auto 
-                  bg-black/20 backdrop-blur-sm px-4 py-2 rounded-lg">
+                  bg-black/40 backdrop-blur-sm px-4 py-2 rounded-lg">
                   Welcome to MyBirdieBoard – Your post-round golf tracker. Play first, track later.
                 </p>
                 
@@ -202,7 +202,7 @@ const Index = () => {
                 </div>
               </div>
               
-              <div className="max-w-7xl mx-auto bg-white/10 backdrop-blur-md p-6 sm:p-8 rounded-xl">
+              <div className="max-w-7xl mx-auto bg-white/20 backdrop-blur-md p-6 sm:p-8 rounded-xl">
                 <div className="flex flex-col lg:flex-row items-center gap-8">
                   <div className="lg:w-1/2 flex justify-center mb-8 lg:mb-0">
                     <img 
@@ -215,14 +215,14 @@ const Index = () => {
                   <div className="lg:w-1/2">
                     <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6 text-center lg:text-left">Key Features</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                      <div className="bg-white/20 backdrop-blur-sm p-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+                      <div className="bg-white/30 backdrop-blur-sm p-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
                         <div className="bg-accent/20 rounded-full p-2 w-fit mb-3">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                           </svg>
                         </div>
                         <h3 className="text-lg font-bold text-white mb-2">Upload & Store Your Scorecards</h3>
-                        <p className="text-white/80 mb-2 text-sm">Keep a history of your rounds and track stats effortlessly.</p>
+                        <p className="text-white/90 mb-2 text-sm">Keep a history of your rounds and track stats effortlessly.</p>
                         <Button 
                           variant="link" 
                           className="text-white p-0 hover:text-white/80 text-sm"
@@ -233,14 +233,14 @@ const Index = () => {
                         </Button>
                       </div>
                       
-                      <div className="bg-white/20 backdrop-blur-sm p-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+                      <div className="bg-white/30 backdrop-blur-sm p-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
                         <div className="bg-accent/20 rounded-full p-2 w-fit mb-3">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                           </svg>
                         </div>
                         <h3 className="text-lg font-bold text-white mb-2">Visual Progress Tracking</h3>
-                        <p className="text-white/80 mb-2 text-sm">Charts and graphs give you insights into your strengths and areas to improve.</p>
+                        <p className="text-white/90 mb-2 text-sm">Charts and graphs give you insights into your strengths and areas to improve.</p>
                         <Button 
                           variant="link" 
                           className="text-white p-0 hover:text-white/80 text-sm"
@@ -251,14 +251,14 @@ const Index = () => {
                         </Button>
                       </div>
                       
-                      <div className="bg-white/20 backdrop-blur-sm p-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+                      <div className="bg-white/30 backdrop-blur-sm p-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
                         <div className="bg-accent/20 rounded-full p-2 w-fit mb-3">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                           </svg>
                         </div>
                         <h3 className="text-lg font-bold text-white mb-2">Handicap Generator</h3>
-                        <p className="text-white/80 mb-2 text-sm">Get an accurate handicap calculation based on your rounds.</p>
+                        <p className="text-white/90 mb-2 text-sm">Get an accurate handicap calculation based on your rounds.</p>
                         <Button 
                           variant="link" 
                           className="text-white p-0 hover:text-white/80 text-sm"
@@ -269,14 +269,14 @@ const Index = () => {
                         </Button>
                       </div>
                       
-                      <div className="bg-white/20 backdrop-blur-sm p-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+                      <div className="bg-white/30 backdrop-blur-sm p-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
                         <div className="bg-accent/20 rounded-full p-2 w-fit mb-3">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
                         </div>
                         <h3 className="text-lg font-bold text-white mb-2">Course Leaderboards</h3>
-                        <p className="text-white/80 mb-2 text-sm">Compete with friends and other golfers at your favorite courses.</p>
+                        <p className="text-white/90 mb-2 text-sm">Compete with friends and other golfers at your favorite courses.</p>
                         <Button 
                           variant="link" 
                           className="text-white p-0 hover:text-white/80 text-sm"
@@ -293,7 +293,7 @@ const Index = () => {
             </div>
           </main>
           
-          <section aria-labelledby="cta-heading" className="w-full py-8 sm:py-12 bg-black/30 backdrop-blur-sm mt-12">
+          <section aria-labelledby="cta-heading" className="w-full py-8 sm:py-12 bg-white/10 backdrop-blur-sm mt-12">
             <div className="max-w-5xl mx-auto text-center px-4">
               <h2 id="cta-heading" className="text-xl sm:text-2xl font-bold text-white mb-4">Ready to take your game to the next level?</h2>
               <p className="text-base sm:text-lg text-white/90 mb-6">Find out how MyBirdieBoard can help improve your golf game!</p>

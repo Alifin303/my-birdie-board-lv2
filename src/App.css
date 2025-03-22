@@ -62,22 +62,15 @@
   min-height: 100vh;
 }
 
-/* Enhanced styling for background images */
+/* Remove the overlay styling */
 .bg-image-container {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
-  isolation: isolate;
 }
 
-.bg-image-container::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: -1;
-}
+/* Removed the ::after pseudo-element that was creating the overlay */
 
 .white-box {
   background-color: rgba(255, 255, 255, 0.9);
