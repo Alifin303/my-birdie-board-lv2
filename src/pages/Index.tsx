@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
@@ -143,30 +142,14 @@ const Index = () => {
       </Helmet>
       
       <div className="min-h-screen flex flex-col">
-        {/* Background color/fallback */}
         <div 
-          className="fixed top-0 left-0 right-0 bottom-0 z-[1]"
+          className="relative flex-1 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundColor: "#2C4A3B",
+            backgroundImage: `url('/lovable-uploads/0ca19acd-df93-49b3-87e7-ee24c8c5f075.png')`,
+            backgroundColor: "#2C4A3B", // Fallback color if image fails to load
           }}
-        />
-        
-        {/* Overlay image - positioned ABOVE the background but BELOW content */}
-        <div 
-          className="fixed top-0 left-0 right-0 z-[2]"
-          style={{
-            backgroundImage: `url('/lovable-uploads/6d2e3fbf-b1fd-4a8c-b987-2c30c6371a2d.png')`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            height: 'calc(100vh - 300px)', // Adjust to end before UserReviews
-            pointerEvents: 'none', // Allow clicks to pass through to elements below
-          }}
-        />
-        
-        {/* Main content area - positioned ABOVE the overlay image */}
-        <div className="relative flex-1 z-[3]">
-          <header className="relative z-[4]">
+        >
+          <header className="absolute top-0 left-0 right-0 z-10">
             <div 
               className="container mx-auto px-4 py-2"
               style={{
@@ -197,7 +180,7 @@ const Index = () => {
             </div>
           </header>
           
-          <main className="relative z-[4] pt-32 sm:pt-16 w-full text-center">
+          <main className="relative z-[1] pt-32 sm:pt-16 w-full text-center">
             <div className="container mx-auto px-4">
               <div className="max-w-5xl mx-auto mb-12 animate-fade-in">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-8 drop-shadow-lg">
