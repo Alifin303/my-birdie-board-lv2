@@ -9,22 +9,18 @@ import { SignUpDialog } from "@/components/SignUpDialog";
 import { UserReviews } from "@/components/UserReviews";
 import { FeatureInfoModal, FeatureInfo } from "@/components/FeatureInfoModal";
 import { Upload, BarChart2, Award, Trophy } from "lucide-react";
-
 const Index = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showSignupDialog, setShowSignupDialog] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState<FeatureInfo | null>(null);
-
   const handleStartSignup = () => {
     setShowSignupDialog(true);
   };
-
   const featureInfo: Record<string, FeatureInfo> = {
     scorecards: {
       title: "Upload & Store Your Scorecards",
       icon: <Upload className="h-4 w-4 text-white" />,
-      description: (
-        <div className="space-y-4 pt-2">
+      description: <div className="space-y-4 pt-2">
           <p>Never lose track of your rounds again! With MyBirdieBoard, you can upload your scorecards effortlessly and keep a complete history of every round you play. Whether you're tracking personal bests or looking for trends in your game, your entire golf journey is stored in one place.</p>
           
           <ul className="space-y-2">
@@ -44,13 +40,11 @@ const Index = () => {
           
           <p className="font-medium">Start tracking today and take control of your game!</p>
         </div>
-      )
     },
     progress: {
       title: "Visual Progress Tracking",
       icon: <BarChart2 className="h-4 w-4 text-white" />,
-      description: (
-        <div className="space-y-4 pt-2">
+      description: <div className="space-y-4 pt-2">
           <p>See your improvement in real-time! MyBirdieBoard gives you in-depth insights into your game with easy-to-read charts and graphs. Spot trends, analyze your strengths, and identify areas to improve so you can play smarter, not harder.</p>
           
           <ul className="space-y-2">
@@ -70,13 +64,11 @@ const Index = () => {
           
           <p className="font-medium">Know your game. Improve your game.</p>
         </div>
-      )
     },
     handicap: {
       title: "Handicap Generator",
       icon: <Award className="h-4 w-4 text-white" />,
-      description: (
-        <div className="space-y-4 pt-2">
+      description: <div className="space-y-4 pt-2">
           <p>Get a reliable, data-driven handicap that reflects your true skill level. MyBirdieBoard calculates your handicap using official methods, so you always have an accurate measure of your performance—perfect for friendly competition or self-improvement.</p>
           
           <ul className="space-y-2">
@@ -96,13 +88,11 @@ const Index = () => {
           
           <p className="font-medium">Start tracking your handicap today!</p>
         </div>
-      )
     },
     leaderboards: {
       title: "Course Leaderboards",
       icon: <Trophy className="h-4 w-4 text-white" />,
-      description: (
-        <div className="space-y-4 pt-2">
+      description: <div className="space-y-4 pt-2">
           <p>Golf is better with a little competition! MyBirdieBoard's Course Leaderboards let you compare your scores with other golfers at the same course—whether you play together or not. Climb the rankings, challenge your friends, and set new personal bests.</p>
           
           <ul className="space-y-2">
@@ -122,63 +112,40 @@ const Index = () => {
           
           <p className="font-medium">Who will top the leaderboard? Join today and find out!</p>
         </div>
-      )
     }
   };
-
   const handleOpenFeatureInfo = (feature: FeatureInfo) => {
     setSelectedFeature(feature);
   };
-
   const handleCloseFeatureInfo = () => {
     setSelectedFeature(null);
   };
-
-  return (
-    <>
+  return <>
       <Helmet>
         <title>MyBirdieBoard - Golf Score Tracking & Performance Analytics</title>
         <meta name="description" content="Track your golf scores, challenge friends on course leaderboards, and improve your game with detailed performance analytics on MyBirdieBoard" />
       </Helmet>
       
       <div className="min-h-screen flex flex-col">
-        <div 
-          className="relative flex-1"
-          style={{
-            backgroundColor: "#2C4A3B", // Fallback color if image fails to load
-          }}
-        >
-          <div 
-            className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
-            style={{
-              backgroundImage: `url('/lovable-uploads/3a09f357-adb5-4ee9-b09f-22be68793ccb.png')`,
-            }}
-          />
+        <div className="relative flex-1" style={{
+        backgroundColor: "#2C4A3B" // Fallback color if image fails to load
+      }}>
+          <div className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0" style={{
+          backgroundImage: `url('/lovable-uploads/3a09f357-adb5-4ee9-b09f-22be68793ccb.png')`
+        }} />
           
           <header className="relative z-10">
-            <div 
-              className="container mx-auto px-4 py-2"
-              style={{
-                backgroundImage: `url('/lovable-uploads/53bde77b-9533-4a55-9fe2-a6617ddc8216.png')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat'
-              }}
-            >
+            <div className="container mx-auto px-4 py-2" style={{
+            backgroundImage: `url('/lovable-uploads/53bde77b-9533-4a55-9fe2-a6617ddc8216.png')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}>
               <nav className="flex items-center justify-between">
                 <Link to="/" className="flex items-center" aria-label="MyBirdieBoard Home">
-                  <img 
-                    src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" 
-                    alt="MyBirdieBoard Logo" 
-                    className="h-32 w-auto object-contain" 
-                  />
+                  <img src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" alt="MyBirdieBoard Logo" className="h-32 w-auto object-contain" />
                 </Link>
-                <Button 
-                  onClick={() => setShowLoginDialog(true)}
-                  variant="ghost" 
-                  className="bg-white/70 backdrop-blur-sm text-accent hover:bg-white/80 transition-all text-xs sm:text-sm py-1"
-                  aria-label="Log in to your account"
-                >
+                <Button onClick={() => setShowLoginDialog(true)} variant="ghost" className="bg-white/70 backdrop-blur-sm text-accent hover:bg-white/80 transition-all text-xs sm:text-sm py-1" aria-label="Log in to your account">
                   <User className="mr-1 h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
                   Log In
                 </Button>
@@ -198,12 +165,7 @@ const Index = () => {
                 </p>
                 
                 <div className="flex justify-center mt-6 mb-12">
-                  <Button 
-                    size="lg"
-                    className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300"
-                    onClick={handleStartSignup}
-                    aria-label="Sign up for MyBirdieBoard"
-                  >
+                  <Button size="lg" onClick={handleStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300 bg-[#39682f]">
                     START YOUR FREE TRIAL TODAY!
                   </Button>
                 </div>
@@ -212,11 +174,7 @@ const Index = () => {
               <div className="max-w-7xl mx-auto bg-white/50 backdrop-blur-md p-6 sm:p-8 rounded-xl">
                 <div className="flex flex-col lg:flex-row items-center gap-8">
                   <div className="lg:w-1/2 flex justify-center mb-8 lg:mb-0">
-                    <img 
-                      src="/lovable-uploads/a5adf299-888e-4978-b68a-627952aafd47.png" 
-                      alt="MyBirdieBoard on laptop and mobile" 
-                      className="w-full max-w-md lg:max-w-lg object-contain rounded-lg"
-                    />
+                    <img src="/lovable-uploads/a5adf299-888e-4978-b68a-627952aafd47.png" alt="MyBirdieBoard on laptop and mobile" className="w-full max-w-md lg:max-w-lg object-contain rounded-lg" />
                   </div>
                   
                   <div className="lg:w-1/2">
@@ -230,12 +188,7 @@ const Index = () => {
                         </div>
                         <h3 className="text-lg font-bold text-accent mb-2">Upload & Store Your Scorecards</h3>
                         <p className="text-accent/90 mb-2 text-sm">Keep a history of your rounds and track stats effortlessly.</p>
-                        <Button 
-                          variant="link" 
-                          className="text-accent p-0 hover:text-accent/80 text-sm"
-                          onClick={() => handleOpenFeatureInfo(featureInfo.scorecards)}
-                          aria-label="Learn more about scorecard uploads"
-                        >
+                        <Button variant="link" className="text-accent p-0 hover:text-accent/80 text-sm" onClick={() => handleOpenFeatureInfo(featureInfo.scorecards)} aria-label="Learn more about scorecard uploads">
                           Learn More
                         </Button>
                       </div>
@@ -248,12 +201,7 @@ const Index = () => {
                         </div>
                         <h3 className="text-lg font-bold text-accent mb-2">Visual Progress Tracking</h3>
                         <p className="text-accent/90 mb-2 text-sm">Charts and graphs give you insights into your strengths and areas to improve.</p>
-                        <Button 
-                          variant="link" 
-                          className="text-accent p-0 hover:text-accent/80 text-sm"
-                          onClick={() => handleOpenFeatureInfo(featureInfo.progress)}
-                          aria-label="Learn more about progress tracking"
-                        >
+                        <Button variant="link" className="text-accent p-0 hover:text-accent/80 text-sm" onClick={() => handleOpenFeatureInfo(featureInfo.progress)} aria-label="Learn more about progress tracking">
                           Learn More
                         </Button>
                       </div>
@@ -266,12 +214,7 @@ const Index = () => {
                         </div>
                         <h3 className="text-lg font-bold text-accent mb-2">Handicap Generator</h3>
                         <p className="text-accent/90 mb-2 text-sm">Get an accurate handicap calculation based on your rounds.</p>
-                        <Button 
-                          variant="link" 
-                          className="text-accent p-0 hover:text-accent/80 text-sm"
-                          onClick={() => handleOpenFeatureInfo(featureInfo.handicap)}
-                          aria-label="Learn more about handicap calculation"
-                        >
+                        <Button variant="link" className="text-accent p-0 hover:text-accent/80 text-sm" onClick={() => handleOpenFeatureInfo(featureInfo.handicap)} aria-label="Learn more about handicap calculation">
                           Learn More
                         </Button>
                       </div>
@@ -284,12 +227,7 @@ const Index = () => {
                         </div>
                         <h3 className="text-lg font-bold text-accent mb-2">Course Leaderboards</h3>
                         <p className="text-accent/90 mb-2 text-sm">Compete with friends and other golfers at your favorite courses.</p>
-                        <Button 
-                          variant="link" 
-                          className="text-accent p-0 hover:text-accent/80 text-sm"
-                          onClick={() => handleOpenFeatureInfo(featureInfo.leaderboards)}
-                          aria-label="Learn more about course leaderboards"
-                        >
+                        <Button variant="link" className="text-accent p-0 hover:text-accent/80 text-sm" onClick={() => handleOpenFeatureInfo(featureInfo.leaderboards)} aria-label="Learn more about course leaderboards">
                           Learn More
                         </Button>
                       </div>
@@ -305,12 +243,7 @@ const Index = () => {
               <h2 id="cta-heading" className="text-xl sm:text-2xl font-bold text-accent mb-4">Ready to take your game to the next level?</h2>
               <p className="text-base sm:text-lg text-accent mb-6">Find out how MyBirdieBoard can help improve your golf game!</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Button 
-                  size="lg"
-                  className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300"
-                  onClick={handleStartSignup}
-                  aria-label="Sign up for MyBirdieBoard"
-                >
+                <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300" onClick={handleStartSignup} aria-label="Sign up for MyBirdieBoard">
                   START YOUR FREE TRIAL
                 </Button>
               </div>
@@ -320,18 +253,9 @@ const Index = () => {
         <UserReviews />
         <SocialFooter />
         <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
-        <SignUpDialog 
-          open={showSignupDialog} 
-          onOpenChange={setShowSignupDialog}
-        />
-        <FeatureInfoModal 
-          isOpen={!!selectedFeature}
-          onClose={handleCloseFeatureInfo}
-          feature={selectedFeature}
-        />
+        <SignUpDialog open={showSignupDialog} onOpenChange={setShowSignupDialog} />
+        <FeatureInfoModal isOpen={!!selectedFeature} onClose={handleCloseFeatureInfo} feature={selectedFeature} />
       </div>
-    </>
-  );
+    </>;
 };
-
 export default Index;
