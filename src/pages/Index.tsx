@@ -143,13 +143,19 @@ const Index = () => {
       
       <div className="min-h-screen flex flex-col">
         <div 
-          className="relative flex-1 bg-cover bg-center bg-no-repeat"
+          className="relative flex-1"
           style={{
-            backgroundImage: `url('/lovable-uploads/0ca19acd-df93-49b3-87e7-ee24c8c5f075.png')`,
             backgroundColor: "#2C4A3B", // Fallback color if image fails to load
           }}
         >
-          <header className="absolute top-0 left-0 right-0 z-10">
+          <div 
+            className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+            style={{
+              backgroundImage: `url('/lovable-uploads/3a09f357-adb5-4ee9-b09f-22be68793ccb.png')`,
+            }}
+          />
+          
+          <header className="relative z-10">
             <div 
               className="container mx-auto px-4 py-2"
               style={{
@@ -180,7 +186,7 @@ const Index = () => {
             </div>
           </header>
           
-          <main className="relative z-[1] pt-32 sm:pt-16 w-full text-center">
+          <main className="relative z-[5] pt-32 sm:pt-16 w-full text-center">
             <div className="container mx-auto px-4">
               <div className="max-w-5xl mx-auto mb-12 animate-fade-in">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-8 drop-shadow-lg">
@@ -294,7 +300,7 @@ const Index = () => {
             </div>
           </main>
           
-          <section aria-labelledby="cta-heading" className="w-full py-8 sm:py-12 bg-white/40 backdrop-blur-sm mt-12">
+          <section aria-labelledby="cta-heading" className="relative z-[5] w-full py-8 sm:py-12 bg-white/40 backdrop-blur-sm mt-12">
             <div className="max-w-5xl mx-auto text-center px-4">
               <h2 id="cta-heading" className="text-xl sm:text-2xl font-bold text-accent mb-4">Ready to take your game to the next level?</h2>
               <p className="text-base sm:text-lg text-accent mb-6">Find out how MyBirdieBoard can help improve your golf game!</p>
