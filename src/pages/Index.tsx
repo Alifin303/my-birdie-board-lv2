@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
@@ -142,9 +143,9 @@ const Index = () => {
       </Helmet>
       
       <div 
-        className="min-h-screen bg-cover bg-center bg-no-repeat flex flex-col relative"
+        className="min-h-screen bg-cover bg-center bg-no-repeat flex flex-col"
         style={{
-          backgroundImage: `url('/lovable-uploads/a524f028-271b-49ba-89b5-925a03c3320c.png')`,
+          backgroundImage: `url('/lovable-uploads/f0be2e03-1a24-4b7a-bc1d-bd9550d6191e.png')`,
         }}
       >
         <header className="relative z-10">
@@ -176,7 +177,7 @@ const Index = () => {
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-8 drop-shadow-md">
                 Track Your Rounds. Lower Your Scores. Play Smarter.
               </h1>
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 font-medium mb-8 max-w-3xl mx-auto 
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white font-medium mb-8 max-w-3xl mx-auto 
                 bg-black/40 backdrop-blur-sm px-4 py-2 rounded-lg">
                 Welcome to MyBirdieBoard – Your post-round golf tracker. Play first, track later.
               </p>
