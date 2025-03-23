@@ -175,14 +175,14 @@ export const MainContent = ({
                 </Card>
                 
                 <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
-                  <CardContent className="p-3 flex flex-col h-full">
-                    <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
+                  <CardContent className="p-3 flex flex-col h-full bg-stone-200 rounded-2xl">
+                    <div className="rounded-full p-2 w-fit mb-2 bg-[s] bg-[#2f4c3d]">
                       <Award className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
-                    <h3 className="text-sm font-bold text-white mb-2">Handicap Generator</h3>
-                    <p className="text-white/80 mb-2 text-xs">Get an accurate handicap calculation based on your rounds.</p>
-                    <div className="mt-auto pt-1">
-                      <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs" onClick={() => handleOpenFeatureInfo(featureInfo.handicap)} aria-label="Learn more about handicap calculation">
+                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Handicap Generator</h3>
+                    <p className="mb-2 text-xs text-secondary-foreground">Get an accurate handicap calculation based on your rounds.</p>
+                    <div className="mt-auto pt-1 bg-transparent">
+                      <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.handicap)} aria-label="Learn more about handicap calculation" className="p-0 text-xs text-secondary-foreground">
                         Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
                       </Button>
                     </div>
@@ -190,14 +190,14 @@ export const MainContent = ({
                 </Card>
                 
                 <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
-                  <CardContent className="p-3 flex flex-col h-full">
-                    <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
+                  <CardContent className="p-3 flex flex-col h-full bg-stone-200 rounded-2xl">
+                    <div className="rounded-full p-2 w-fit mb-2 bg-[2f4c3d] bg-[#2f4c3d]">
                       <Trophy className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
-                    <h3 className="text-sm font-bold text-white mb-2">Course Leaderboards</h3>
-                    <p className="text-white/80 mb-2 text-xs">Compete with friends and other golfers at your favorite courses.</p>
+                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Course Leaderboards</h3>
+                    <p className="mb-2 text-xs text-secondary-foreground">Compete with friends and other golfers at your favorite courses.</p>
                     <div className="mt-auto pt-1">
-                      <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs" onClick={() => handleOpenFeatureInfo(featureInfo.leaderboards)} aria-label="Learn more about course leaderboards">
+                      <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.leaderboards)} aria-label="Learn more about course leaderboards" className="p-0 text-xs text-secondary-foreground">
                         Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
                       </Button>
                     </div>
