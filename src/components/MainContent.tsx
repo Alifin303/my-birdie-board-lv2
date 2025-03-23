@@ -125,7 +125,7 @@ export const MainContent = ({
             bg-black/30 backdrop-blur-sm px-4 py-2 rounded-lg">Welcome to MyBirdieBoard – Your post-round golf tracker. Play first, track later.</p>
           
           <div className="flex justify-center mt-6">
-            <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard">
+            <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300 bg-secondary-foreground">
               <UserPlus className="mr-2 h-5 w-5" aria-hidden="true" />
               START YOUR FREE TRIAL TODAY!
             </Button>
