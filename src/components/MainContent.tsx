@@ -121,8 +121,7 @@ export const MainContent = ({
           <h1 id="hero-heading" className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-8 drop-shadow-md">
             Track Your Rounds. Lower Your Scores. Play Smarter.
           </h1>
-          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 font-medium mb-8 max-w-3xl mx-auto 
-            bg-black/30 backdrop-blur-sm px-4 py-2 rounded-lg">Welcome to MyBirdieBoard – Your post-round golf tracker. Play first, track later.</p>
+          <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium mb-8 max-w-3xl mx-auto bg-black/35 backdrop-blur-sm px-4 py-2 rounded-lg lg:text-lg">Welcome to MyBirdieBoard – Your post-round golf tracker. Play first, track later.</p>
           
           <div className="flex justify-center mt-6">
             <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300 bg-secondary-foreground">
