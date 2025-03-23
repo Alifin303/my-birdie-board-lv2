@@ -4,13 +4,16 @@ import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle, UserPlus } fr
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from './ui/card';
 import { FeatureInfoModal, FeatureInfo } from './FeatureInfoModal';
+
 interface MainContentProps {
   onStartSignup: () => void;
 }
+
 export const MainContent = ({
   onStartSignup
 }: MainContentProps) => {
   const [selectedFeature, setSelectedFeature] = useState<FeatureInfo | null>(null);
+
   const featureInfo: Record<string, FeatureInfo> = {
     scorecards: {
       title: "Upload & Store Your Scorecards",
@@ -109,14 +112,27 @@ export const MainContent = ({
         </div>
     }
   };
+
   const handleOpenFeatureInfo = (feature: FeatureInfo) => {
     setSelectedFeature(feature);
   };
+
   const handleCloseFeatureInfo = () => {
     setSelectedFeature(null);
   };
-  return <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
-      <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center mt-4 sm:mt-0">
+
+  return <div 
+    className="w-full mx-auto flex flex-col justify-between min-h-screen relative"
+    style={{
+      backgroundImage: `url('/lovable-uploads/a1590a72-c775-42c2-90f5-4157229b32c6.png')`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat'
+    }}
+  >
+      <div className="absolute inset-0 bg-black/30 z-0"></div>
+      
+      <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center mt-4 sm:mt-0 relative z-10">
         <div className="max-w-5xl mx-auto animate-fade-in mb-4">
           <h1 id="hero-heading" className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-8 drop-shadow-md">
             Track Your Rounds. Lower Your Scores. Play Smarter.
@@ -133,10 +149,10 @@ export const MainContent = ({
         </div>
       </section>
       
-      <section aria-labelledby="features-heading" className="w-full max-w-5xl mx-auto px-4 pb-8">
+      <section aria-labelledby="features-heading" className="w-full max-w-5xl mx-auto px-4 pb-8 relative z-10">
         <h2 id="features-heading" className="sr-only">MyBirdieBoard Features</h2>
         
-        <div className="bg-black/20 backdrop-blur-sm rounded-xl p-4 shadow-lg">
+        <div className="bg-black/50 backdrop-blur-sm rounded-xl p-4">
           <div className="flex flex-col lg:flex-row gap-6 justify-between">
             <div className="flex justify-center order-1 lg:justify-start lg:w-1/2 lg:order-1 mb-6 lg:mb-0">
               <img src="/lovable-uploads/cab862e7-c7cc-4446-9f24-b1c57c6531a0.png" alt="MyBirdieBoard App Screenshots" className="max-w-full h-auto object-contain rounded-lg" />
@@ -144,7 +160,7 @@ export const MainContent = ({
             
             <div className="lg:w-1/2 order-2 lg:order-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
+                <Card className="bg-white/10 backdrop-blur-md border-white/10 transition-all duration-300 h-full flex flex-col">
                   <CardContent className="p-3 flex flex-col h-full bg-stone-200 rounded-2xl">
                     <div className="rounded-full p-2 w-fit mb-2 bg-[2f4c3d] bg-secondary-foreground">
                       <Upload className="h-4 w-4 text-white" aria-hidden="true" />
@@ -159,7 +175,7 @@ export const MainContent = ({
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
+                <Card className="bg-white/10 backdrop-blur-md border-white/10 transition-all duration-300 h-full flex flex-col">
                   <CardContent className="p-3 flex flex-col h-full bg-stone-200 rounded-2xl">
                     <div className="rounded-full p-2 w-fit mb-2 bg-secondary-foreground bg-[2f4c3d]">
                       <BarChart2 className="h-4 w-4 text-white" aria-hidden="true" />
@@ -174,7 +190,7 @@ export const MainContent = ({
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
+                <Card className="bg-white/10 backdrop-blur-md border-white/10 transition-all duration-300 h-full flex flex-col">
                   <CardContent className="p-3 flex flex-col h-full bg-stone-200 rounded-2xl">
                     <div className="rounded-full p-2 w-fit mb-2 bg-[s] bg-secondary-foreground">
                       <Award className="h-4 w-4 text-white" aria-hidden="true" />
@@ -189,7 +205,7 @@ export const MainContent = ({
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
+                <Card className="bg-white/10 backdrop-blur-md border-white/10 transition-all duration-300 h-full flex flex-col">
                   <CardContent className="p-3 flex flex-col h-full bg-stone-200 rounded-2xl">
                     <div className="rounded-full p-2 w-fit mb-2 bg-[2f4c3d] bg-secondary-foreground">
                       <Trophy className="h-4 w-4 text-white" aria-hidden="true" />
@@ -209,7 +225,7 @@ export const MainContent = ({
         </div>
       </section>
       
-      <section aria-labelledby="cta-heading" className="w-full py-4 sm:py-6 bg-black/30 backdrop-blur-sm mt-2 sm:mt-3">
+      <section aria-labelledby="cta-heading" className="w-full py-4 sm:py-6 bg-black/50 backdrop-blur-sm mt-2 sm:mt-3 relative z-10">
         <div className="max-w-5xl mx-auto text-center px-4">
           <h2 id="cta-heading" className="text-lg sm:text-xl font-bold text-white mb-2">Ready to take your game to the next level?</h2>
           <p className="text-sm sm:text-base text-white/90 mb-3">Find out how MyBirdieBoard can help improve your golf game!</p>
