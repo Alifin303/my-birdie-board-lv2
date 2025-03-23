@@ -160,14 +160,14 @@ export const MainContent = ({
                 </Card>
                 
                 <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
-                  <CardContent className="p-3 flex flex-col h-full">
-                    <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
+                  <CardContent className="p-3 flex flex-col h-full bg-stone-200 rounded-2xl">
+                    <div className="rounded-full p-2 w-fit mb-2 bg-secondary-foreground bg-[2f4c3d]">
                       <BarChart2 className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
-                    <h3 className="text-sm font-bold text-white mb-2">Visual Progress Tracking</h3>
-                    <p className="text-white/80 mb-2 text-xs">Charts and graphs give you insights into your strengths and areas to improve.</p>
+                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Visual Progress Tracking</h3>
+                    <p className="mb-2 text-xs text-secondary-foreground">Charts and graphs give you insights into your strengths and areas to improve.</p>
                     <div className="mt-auto pt-1">
-                      <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs" onClick={() => handleOpenFeatureInfo(featureInfo.progress)} aria-label="Learn more about progress tracking">
+                      <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.progress)} aria-label="Learn more about progress tracking" className="p-0 text-xs text-secondary-foreground">
                         Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
                       </Button>
                     </div>
