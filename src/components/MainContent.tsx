@@ -117,12 +117,11 @@ export const MainContent = ({
   };
   return <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center mt-4 sm:mt-0">
-        <div className="max-w-5xl mx-auto animate-fade-in mb-4">
+        <div className="max-w-5xl animate-fade-in mb-4 px-0 mx-0">
           <h1 id="hero-heading" className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-8 drop-shadow-md">
             Track Your Rounds. Lower Your Scores. Play Smarter.
           </h1>
-          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 font-medium mb-8 max-w-3xl mx-auto 
-            bg-black/30 backdrop-blur-sm px-4 py-2 rounded-lg">Welcome to MyBirdieBoard – Your post-round golf tracker. Play first, track later.</p>
+          <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium mb-8 max-w-3xl mx-auto bg-black/35 backdrop-blur-sm px-4 py-2 rounded-lg lg:text-lg">Welcome to MyBirdieBoard – Your post-round golf tracker. Play first, track later.</p>
           
           <div className="flex justify-center mt-6">
             <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300 bg-secondary-foreground">
@@ -136,7 +135,7 @@ export const MainContent = ({
       <section aria-labelledby="features-heading" className="w-full max-w-5xl mx-auto px-4 pb-8">
         <h2 id="features-heading" className="sr-only">MyBirdieBoard Features</h2>
         
-        <div className="bg-black/20 backdrop-blur-sm rounded-xl p-4 shadow-lg">
+        <div className="backdrop-blur-sm rounded-xl p-4 shadow-lg bg-black/35">
           <div className="flex flex-col lg:flex-row gap-6 justify-between">
             <div className="flex justify-center order-1 lg:justify-start lg:w-1/2 lg:order-1 mb-6 lg:mb-0">
               <img src="/lovable-uploads/cab862e7-c7cc-4446-9f24-b1c57c6531a0.png" alt="MyBirdieBoard App Screenshots" className="max-w-full h-auto object-contain rounded-lg" />
