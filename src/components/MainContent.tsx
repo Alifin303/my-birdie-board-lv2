@@ -1,24 +1,21 @@
-
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle, UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from './ui/card';
 import { FeatureInfoModal, FeatureInfo } from './FeatureInfoModal';
-
 interface MainContentProps {
   onStartSignup: () => void;
 }
-
-export const MainContent = ({ onStartSignup }: MainContentProps) => {
+export const MainContent = ({
+  onStartSignup
+}: MainContentProps) => {
   const [selectedFeature, setSelectedFeature] = useState<FeatureInfo | null>(null);
-  
   const featureInfo: Record<string, FeatureInfo> = {
     scorecards: {
       title: "Upload & Store Your Scorecards",
       icon: <Upload className="h-3 w-3 sm:h-4 sm:w-4 text-white" aria-hidden="true" />,
-      description: (
-        <div className="space-y-4 pt-2">
+      description: <div className="space-y-4 pt-2">
           <p>Never lose track of your rounds again! With MyBirdieBoard, you can upload your scorecards effortlessly and keep a complete history of every round you play. Whether you're tracking personal bests or looking for trends in your game, your entire golf journey is stored in one place.</p>
           
           <ul className="space-y-2">
@@ -38,13 +35,11 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
           
           <p className="font-medium">Start tracking today and take control of your game!</p>
         </div>
-      )
     },
     progress: {
       title: "Visual Progress Tracking",
       icon: <BarChart2 className="h-3 w-3 sm:h-4 sm:w-4 text-white" aria-hidden="true" />,
-      description: (
-        <div className="space-y-4 pt-2">
+      description: <div className="space-y-4 pt-2">
           <p>See your improvement in real-time! MyBirdieBoard gives you in-depth insights into your game with easy-to-read charts and graphs. Spot trends, analyze your strengths, and identify areas to improve so you can play smarter, not harder.</p>
           
           <ul className="space-y-2">
@@ -64,13 +59,11 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
           
           <p className="font-medium">Know your game. Improve your game.</p>
         </div>
-      )
     },
     handicap: {
       title: "Handicap Generator",
       icon: <Award className="h-3 w-3 sm:h-4 sm:w-4 text-white" aria-hidden="true" />,
-      description: (
-        <div className="space-y-4 pt-2">
+      description: <div className="space-y-4 pt-2">
           <p>Get a reliable, data-driven handicap that reflects your true skill level. MyBirdieBoard calculates your handicap using official methods, so you always have an accurate measure of your performance—perfect for friendly competition or self-improvement.</p>
           
           <ul className="space-y-2">
@@ -90,13 +83,11 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
           
           <p className="font-medium">Start tracking your handicap today!</p>
         </div>
-      )
     },
     leaderboards: {
       title: "Course Leaderboards",
       icon: <Trophy className="h-3 w-3 sm:h-4 sm:w-4 text-white" aria-hidden="true" />,
-      description: (
-        <div className="space-y-4 pt-2">
+      description: <div className="space-y-4 pt-2">
           <p>Golf is better with a little competition! MyBirdieBoard's Course Leaderboards let you compare your scores with other golfers at the same course—whether you play together or not. Climb the rankings, challenge your friends, and set new personal bests.</p>
           
           <ul className="space-y-2">
@@ -116,20 +107,15 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
           
           <p className="font-medium">Who will top the leaderboard? Join today and find out!</p>
         </div>
-      )
     }
   };
-
   const handleOpenFeatureInfo = (feature: FeatureInfo) => {
     setSelectedFeature(feature);
   };
-
   const handleCloseFeatureInfo = () => {
     setSelectedFeature(null);
   };
-
-  return (
-    <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
+  return <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
       {/* Hero Section */}
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center mt-4 sm:mt-0">
         <div className="max-w-5xl mx-auto animate-fade-in mb-4">
@@ -137,17 +123,10 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
             Track Your Rounds. Lower Your Scores. Play Smarter.
           </h1>
           <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 font-medium mb-8 max-w-3xl mx-auto 
-            bg-black/30 backdrop-blur-sm px-4 py-2 rounded-lg">
-            Welcome to MyBirdieBoard – the ultimate golf tracking platform to help you improve every round.
-          </p>
+            bg-black/30 backdrop-blur-sm px-4 py-2 rounded-lg">Welcome to MyBirdieBoard – Your post-round golf tracker. Play first, track later.</p>
           
           <div className="flex justify-center mt-6">
-            <Button 
-              size="lg"
-              className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300"
-              onClick={onStartSignup}
-              aria-label="Sign up for MyBirdieBoard"
-            >
+            <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard">
               <UserPlus className="mr-2 h-5 w-5" aria-hidden="true" />
               START YOUR FREE TRIAL TODAY!
             </Button>
@@ -162,11 +141,7 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
         <div className="flex flex-col lg:flex-row gap-6 justify-between">
           {/* App Screenshots - Left side on desktop */}
           <div className="flex justify-center lg:justify-start lg:w-1/2 order-2 lg:order-1">
-            <img 
-              src="/lovable-uploads/cab862e7-c7cc-4446-9f24-b1c57c6531a0.png" 
-              alt="MyBirdieBoard App Screenshots" 
-              className="max-w-full h-auto object-contain rounded-lg shadow-lg"
-            />
+            <img src="/lovable-uploads/cab862e7-c7cc-4446-9f24-b1c57c6531a0.png" alt="MyBirdieBoard App Screenshots" className="max-w-full h-auto object-contain rounded-lg shadow-lg" />
           </div>
           
           {/* Features Grid - Right side on desktop */}
@@ -181,12 +156,7 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
                   <h3 className="text-sm font-bold text-white mb-2">Upload & Store Your Scorecards</h3>
                   <p className="text-white/80 mb-2 text-xs">Keep a history of your rounds and track stats effortlessly.</p>
                   <div className="mt-auto pt-1">
-                    <Button 
-                      variant="link" 
-                      className="text-white p-0 hover:text-white/80 text-xs"
-                      onClick={() => handleOpenFeatureInfo(featureInfo.scorecards)}
-                      aria-label="Learn more about scorecard uploads"
-                    >
+                    <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs" onClick={() => handleOpenFeatureInfo(featureInfo.scorecards)} aria-label="Learn more about scorecard uploads">
                       Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
                     </Button>
                   </div>
@@ -202,12 +172,7 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
                   <h3 className="text-sm font-bold text-white mb-2">Visual Progress Tracking</h3>
                   <p className="text-white/80 mb-2 text-xs">Charts and graphs give you insights into your strengths and areas to improve.</p>
                   <div className="mt-auto pt-1">
-                    <Button 
-                      variant="link" 
-                      className="text-white p-0 hover:text-white/80 text-xs"
-                      onClick={() => handleOpenFeatureInfo(featureInfo.progress)}
-                      aria-label="Learn more about progress tracking"
-                    >
+                    <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs" onClick={() => handleOpenFeatureInfo(featureInfo.progress)} aria-label="Learn more about progress tracking">
                       Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
                     </Button>
                   </div>
@@ -223,12 +188,7 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
                   <h3 className="text-sm font-bold text-white mb-2">Handicap Generator</h3>
                   <p className="text-white/80 mb-2 text-xs">Get an accurate handicap calculation based on your rounds.</p>
                   <div className="mt-auto pt-1">
-                    <Button 
-                      variant="link" 
-                      className="text-white p-0 hover:text-white/80 text-xs"
-                      onClick={() => handleOpenFeatureInfo(featureInfo.handicap)}
-                      aria-label="Learn more about handicap calculation"
-                    >
+                    <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs" onClick={() => handleOpenFeatureInfo(featureInfo.handicap)} aria-label="Learn more about handicap calculation">
                       Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
                     </Button>
                   </div>
@@ -244,12 +204,7 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
                   <h3 className="text-sm font-bold text-white mb-2">Course Leaderboards</h3>
                   <p className="text-white/80 mb-2 text-xs">Compete with friends and other golfers at your favorite courses.</p>
                   <div className="mt-auto pt-1">
-                    <Button 
-                      variant="link" 
-                      className="text-white p-0 hover:text-white/80 text-xs"
-                      onClick={() => handleOpenFeatureInfo(featureInfo.leaderboards)}
-                      aria-label="Learn more about course leaderboards"
-                    >
+                    <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs" onClick={() => handleOpenFeatureInfo(featureInfo.leaderboards)} aria-label="Learn more about course leaderboards">
                       Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
                     </Button>
                   </div>
@@ -266,22 +221,12 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
           <h2 id="cta-heading" className="text-lg sm:text-xl font-bold text-white mb-2">Ready to take your game to the next level?</h2>
           <p className="text-sm sm:text-base text-white/90 mb-3">Find out how MyBirdieBoard can help improve your golf game!</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button 
-              size="lg"
-              className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300"
-              onClick={onStartSignup}
-              aria-label="Sign up for MyBirdieBoard"
-            >
+            <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard">
               <UserPlus className="mr-2 h-5 w-5" aria-hidden="true" />
               Sign up
             </Button>
             <Link to="/faq">
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="bg-white/10 hover:bg-white/20 text-white px-8 h-12 shadow-lg transition-all duration-300"
-                aria-label="View frequently asked questions"
-              >
+              <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white px-8 h-12 shadow-lg transition-all duration-300" aria-label="View frequently asked questions">
                 <HelpCircle className="mr-2 h-4 w-4" />
                 Read FAQ
               </Button>
@@ -291,11 +236,6 @@ export const MainContent = ({ onStartSignup }: MainContentProps) => {
       </section>
 
       {/* Feature Info Modal */}
-      <FeatureInfoModal 
-        isOpen={!!selectedFeature}
-        onClose={handleCloseFeatureInfo}
-        feature={selectedFeature}
-      />
-    </div>
-  );
+      <FeatureInfoModal isOpen={!!selectedFeature} onClose={handleCloseFeatureInfo} feature={selectedFeature} />
+    </div>;
 };
