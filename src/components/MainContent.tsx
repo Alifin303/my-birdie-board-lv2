@@ -136,7 +136,7 @@ export const MainContent = ({
       <section aria-labelledby="features-heading" className="w-full max-w-5xl mx-auto px-4 pb-8">
         <h2 id="features-heading" className="sr-only">MyBirdieBoard Features</h2>
         
-        <div className="bg-black/20 backdrop-blur-sm rounded-xl p-4 shadow-lg">
+        <div className="backdrop-blur-sm rounded-xl p-4 shadow-lg bg-black/35">
           <div className="flex flex-col lg:flex-row gap-6 justify-between">
             <div className="flex justify-center order-1 lg:justify-start lg:w-1/2 lg:order-1 mb-6 lg:mb-0">
               <img src="/lovable-uploads/cab862e7-c7cc-4446-9f24-b1c57c6531a0.png" alt="MyBirdieBoard App Screenshots" className="max-w-full h-auto object-contain rounded-lg" />
