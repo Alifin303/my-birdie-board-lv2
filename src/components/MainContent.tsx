@@ -115,7 +115,7 @@ export const MainContent = ({
   const handleCloseFeatureInfo = () => {
     setSelectedFeature(null);
   };
-  return <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
+  return <div className="w-full mx-auto flex flex-col justify-between min-h-screen bg-black/45">
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center mt-4 sm:mt-0">
         <div className="max-w-5xl mx-auto animate-fade-in mb-4">
           <h1 id="hero-heading" className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-8 drop-shadow-md">
