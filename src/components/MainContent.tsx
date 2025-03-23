@@ -1,20 +1,16 @@
-
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle, UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from './ui/card';
 import { FeatureInfoModal, FeatureInfo } from './FeatureInfoModal';
-
 interface MainContentProps {
   onStartSignup: () => void;
 }
-
 export const MainContent = ({
   onStartSignup
 }: MainContentProps) => {
   const [selectedFeature, setSelectedFeature] = useState<FeatureInfo | null>(null);
-  
   const featureInfo: Record<string, FeatureInfo> = {
     scorecards: {
       title: "Upload & Store Your Scorecards",
@@ -113,15 +109,12 @@ export const MainContent = ({
         </div>
     }
   };
-
   const handleOpenFeatureInfo = (feature: FeatureInfo) => {
     setSelectedFeature(feature);
   };
-
   const handleCloseFeatureInfo = () => {
     setSelectedFeature(null);
   };
-
   return <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center mt-4 sm:mt-0">
         <div className="max-w-5xl mx-auto animate-fade-in mb-4">
@@ -146,24 +139,20 @@ export const MainContent = ({
         <div className="bg-black/20 backdrop-blur-sm rounded-xl p-4 shadow-lg">
           <div className="flex flex-col lg:flex-row gap-6 justify-between">
             <div className="flex justify-center order-1 lg:justify-start lg:w-1/2 lg:order-1 mb-6 lg:mb-0">
-              <img 
-                src="/lovable-uploads/cab862e7-c7cc-4446-9f24-b1c57c6531a0.png" 
-                alt="MyBirdieBoard App Screenshots" 
-                className="max-w-full h-auto object-contain rounded-lg" 
-              />
+              <img src="/lovable-uploads/cab862e7-c7cc-4446-9f24-b1c57c6531a0.png" alt="MyBirdieBoard App Screenshots" className="max-w-full h-auto object-contain rounded-lg" />
             </div>
             
             <div className="lg:w-1/2 order-2 lg:order-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
-                  <CardContent className="p-3 flex flex-col h-full">
-                    <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
+                  <CardContent className="p-3 flex flex-col h-full bg-stone-200 rounded-2xl">
+                    <div className="rounded-full p-2 w-fit mb-2 bg-[2f4c3d] bg-[#2f4c3d]">
                       <Upload className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
-                    <h3 className="text-sm font-bold text-white mb-2">Upload & Store Your Scorecards</h3>
-                    <p className="text-white/80 mb-2 text-xs">Keep a history of your rounds and track stats effortlessly.</p>
+                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Upload & Store Your Scorecards</h3>
+                    <p className="mb-2 text-xs text-secondary-foreground">Keep a history of your rounds and track stats effortlessly.</p>
                     <div className="mt-auto pt-1">
-                      <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs" onClick={() => handleOpenFeatureInfo(featureInfo.scorecards)} aria-label="Learn more about scorecard uploads">
+                      <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.scorecards)} aria-label="Learn more about scorecard uploads" className="p-0 text-xs text-secondary-foreground">
                         Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
                       </Button>
                     </div>
