@@ -146,74 +146,74 @@ export const MainContent = ({
         <div className="bg-black/20 backdrop-blur-sm rounded-xl p-4 shadow-lg">
           <div className="flex flex-col lg:flex-row gap-6 justify-between">
             <div className="flex justify-center order-1 lg:justify-start lg:w-1/2 lg:order-1 mb-6 lg:mb-0">
-              <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 shadow-md">
-                <img src="/lovable-uploads/cab862e7-c7cc-4446-9f24-b1c57c6531a0.png" alt="MyBirdieBoard App Screenshots" className="max-w-full h-auto object-contain rounded-lg shadow-lg" />
-              </div>
+              <img 
+                src="/lovable-uploads/cab862e7-c7cc-4446-9f24-b1c57c6531a0.png" 
+                alt="MyBirdieBoard App Screenshots" 
+                className="max-w-full h-auto object-contain rounded-lg" 
+              />
             </div>
             
             <div className="lg:w-1/2 order-2 lg:order-2">
-              <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 shadow-md">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
-                    <CardContent className="p-3 flex flex-col h-full">
-                      <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
-                        <Upload className="h-4 w-4 text-white" aria-hidden="true" />
-                      </div>
-                      <h3 className="text-sm font-bold text-white mb-2">Upload & Store Your Scorecards</h3>
-                      <p className="text-white/80 mb-2 text-xs">Keep a history of your rounds and track stats effortlessly.</p>
-                      <div className="mt-auto pt-1">
-                        <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs" onClick={() => handleOpenFeatureInfo(featureInfo.scorecards)} aria-label="Learn more about scorecard uploads">
-                          Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
-                    <CardContent className="p-3 flex flex-col h-full">
-                      <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
-                        <BarChart2 className="h-4 w-4 text-white" aria-hidden="true" />
-                      </div>
-                      <h3 className="text-sm font-bold text-white mb-2">Visual Progress Tracking</h3>
-                      <p className="text-white/80 mb-2 text-xs">Charts and graphs give you insights into your strengths and areas to improve.</p>
-                      <div className="mt-auto pt-1">
-                        <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs" onClick={() => handleOpenFeatureInfo(featureInfo.progress)} aria-label="Learn more about progress tracking">
-                          Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
-                    <CardContent className="p-3 flex flex-col h-full">
-                      <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
-                        <Award className="h-4 w-4 text-white" aria-hidden="true" />
-                      </div>
-                      <h3 className="text-sm font-bold text-white mb-2">Handicap Generator</h3>
-                      <p className="text-white/80 mb-2 text-xs">Get an accurate handicap calculation based on your rounds.</p>
-                      <div className="mt-auto pt-1">
-                        <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs" onClick={() => handleOpenFeatureInfo(featureInfo.handicap)} aria-label="Learn more about handicap calculation">
-                          Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
-                    <CardContent className="p-3 flex flex-col h-full">
-                      <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
-                        <Trophy className="h-4 w-4 text-white" aria-hidden="true" />
-                      </div>
-                      <h3 className="text-sm font-bold text-white mb-2">Course Leaderboards</h3>
-                      <p className="text-white/80 mb-2 text-xs">Compete with friends and other golfers at your favorite courses.</p>
-                      <div className="mt-auto pt-1">
-                        <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs" onClick={() => handleOpenFeatureInfo(featureInfo.leaderboards)} aria-label="Learn more about course leaderboards">
-                          Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
+                  <CardContent className="p-3 flex flex-col h-full">
+                    <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
+                      <Upload className="h-4 w-4 text-white" aria-hidden="true" />
+                    </div>
+                    <h3 className="text-sm font-bold text-white mb-2">Upload & Store Your Scorecards</h3>
+                    <p className="text-white/80 mb-2 text-xs">Keep a history of your rounds and track stats effortlessly.</p>
+                    <div className="mt-auto pt-1">
+                      <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs" onClick={() => handleOpenFeatureInfo(featureInfo.scorecards)} aria-label="Learn more about scorecard uploads">
+                        Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
+                  <CardContent className="p-3 flex flex-col h-full">
+                    <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
+                      <BarChart2 className="h-4 w-4 text-white" aria-hidden="true" />
+                    </div>
+                    <h3 className="text-sm font-bold text-white mb-2">Visual Progress Tracking</h3>
+                    <p className="text-white/80 mb-2 text-xs">Charts and graphs give you insights into your strengths and areas to improve.</p>
+                    <div className="mt-auto pt-1">
+                      <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs" onClick={() => handleOpenFeatureInfo(featureInfo.progress)} aria-label="Learn more about progress tracking">
+                        Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
+                  <CardContent className="p-3 flex flex-col h-full">
+                    <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
+                      <Award className="h-4 w-4 text-white" aria-hidden="true" />
+                    </div>
+                    <h3 className="text-sm font-bold text-white mb-2">Handicap Generator</h3>
+                    <p className="text-white/80 mb-2 text-xs">Get an accurate handicap calculation based on your rounds.</p>
+                    <div className="mt-auto pt-1">
+                      <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs" onClick={() => handleOpenFeatureInfo(featureInfo.handicap)} aria-label="Learn more about handicap calculation">
+                        Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
+                  <CardContent className="p-3 flex flex-col h-full">
+                    <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
+                      <Trophy className="h-4 w-4 text-white" aria-hidden="true" />
+                    </div>
+                    <h3 className="text-sm font-bold text-white mb-2">Course Leaderboards</h3>
+                    <p className="text-white/80 mb-2 text-xs">Compete with friends and other golfers at your favorite courses.</p>
+                    <div className="mt-auto pt-1">
+                      <Button variant="link" className="text-white p-0 hover:text-white/80 text-xs" onClick={() => handleOpenFeatureInfo(featureInfo.leaderboards)} aria-label="Learn more about course leaderboards">
+                        Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </div>
