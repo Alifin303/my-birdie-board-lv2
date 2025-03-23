@@ -146,7 +146,7 @@ export const MainContent = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
                   <CardContent className="p-3 flex flex-col h-full bg-stone-200 rounded-2xl">
-                    <div className="rounded-full p-2 w-fit mb-2 bg-[2f4c3d] bg-[#2f4c3d]">
+                    <div className="rounded-full p-2 w-fit mb-2 bg-[2f4c3d] bg-secondary-foreground">
                       <Upload className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
                     <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Upload & Store Your Scorecards</h3>
@@ -176,7 +176,7 @@ export const MainContent = ({
                 
                 <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
                   <CardContent className="p-3 flex flex-col h-full bg-stone-200 rounded-2xl">
-                    <div className="rounded-full p-2 w-fit mb-2 bg-[s] bg-[#2f4c3d]">
+                    <div className="rounded-full p-2 w-fit mb-2 bg-[s] bg-secondary-foreground">
                       <Award className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
                     <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Handicap Generator</h3>
@@ -191,7 +191,7 @@ export const MainContent = ({
                 
                 <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
                   <CardContent className="p-3 flex flex-col h-full bg-stone-200 rounded-2xl">
-                    <div className="rounded-full p-2 w-fit mb-2 bg-[2f4c3d] bg-[#2f4c3d]">
+                    <div className="rounded-full p-2 w-fit mb-2 bg-[2f4c3d] bg-secondary-foreground">
                       <Trophy className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
                     <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Course Leaderboards</h3>
@@ -214,7 +214,7 @@ export const MainContent = ({
           <h2 id="cta-heading" className="text-lg sm:text-xl font-bold text-white mb-2">Ready to take your game to the next level?</h2>
           <p className="text-sm sm:text-base text-white/90 mb-3">Find out how MyBirdieBoard can help improve your golf game!</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard">
+            <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300 bg-secondary-foreground">
               <UserPlus className="mr-2 h-5 w-5" aria-hidden="true" />
               Sign up
             </Button>
