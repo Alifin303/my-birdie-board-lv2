@@ -4,13 +4,16 @@ import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle, UserPlus } fr
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from './ui/card';
 import { FeatureInfoModal, FeatureInfo } from './FeatureInfoModal';
+
 interface MainContentProps {
   onStartSignup: () => void;
 }
+
 export const MainContent = ({
   onStartSignup
 }: MainContentProps) => {
   const [selectedFeature, setSelectedFeature] = useState<FeatureInfo | null>(null);
+  
   const featureInfo: Record<string, FeatureInfo> = {
     scorecards: {
       title: "Upload & Store Your Scorecards",
@@ -109,14 +112,16 @@ export const MainContent = ({
         </div>
     }
   };
+
   const handleOpenFeatureInfo = (feature: FeatureInfo) => {
     setSelectedFeature(feature);
   };
+
   const handleCloseFeatureInfo = () => {
     setSelectedFeature(null);
   };
+
   return <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
-      {/* Hero Section */}
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center mt-4 sm:mt-0">
         <div className="max-w-5xl mx-auto animate-fade-in mb-4">
           <h1 id="hero-heading" className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-8 drop-shadow-md">
@@ -134,20 +139,16 @@ export const MainContent = ({
         </div>
       </section>
       
-      {/* Features Section - Updated layout with image on left, features 2x2 on right */}
       <section aria-labelledby="features-heading" className="w-full max-w-5xl mx-auto px-4 pb-8">
         <h2 id="features-heading" className="sr-only">MyBirdieBoard Features</h2>
         
         <div className="flex flex-col lg:flex-row gap-6 justify-between">
-          {/* App Screenshots - Left side on desktop */}
-          <div className="flex justify-center lg:justify-start lg:w-1/2 order-2 lg:order-1">
+          <div className="flex justify-center order-1 lg:justify-start lg:w-1/2 lg:order-1 mb-6 lg:mb-0">
             <img src="/lovable-uploads/cab862e7-c7cc-4446-9f24-b1c57c6531a0.png" alt="MyBirdieBoard App Screenshots" className="max-w-full h-auto object-contain rounded-lg shadow-lg" />
           </div>
           
-          {/* Features Grid - Right side on desktop */}
-          <div className="lg:w-1/2 order-1 lg:order-2">
+          <div className="lg:w-1/2 order-2 lg:order-2">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* Feature 1 */}
               <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
                 <CardContent className="p-3 flex flex-col h-full">
                   <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
@@ -163,7 +164,6 @@ export const MainContent = ({
                 </CardContent>
               </Card>
               
-              {/* Feature 2 */}
               <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
                 <CardContent className="p-3 flex flex-col h-full">
                   <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
@@ -179,7 +179,6 @@ export const MainContent = ({
                 </CardContent>
               </Card>
               
-              {/* Feature 3 */}
               <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
                 <CardContent className="p-3 flex flex-col h-full">
                   <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
@@ -195,7 +194,6 @@ export const MainContent = ({
                 </CardContent>
               </Card>
               
-              {/* Feature 4 */}
               <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
                 <CardContent className="p-3 flex flex-col h-full">
                   <div className="bg-accent/20 rounded-full p-2 w-fit mb-2">
@@ -215,7 +213,6 @@ export const MainContent = ({
         </div>
       </section>
       
-      {/* Call to action - Secondary Banner */}
       <section aria-labelledby="cta-heading" className="w-full py-4 sm:py-6 bg-black/30 backdrop-blur-sm mt-2 sm:mt-3">
         <div className="max-w-5xl mx-auto text-center px-4">
           <h2 id="cta-heading" className="text-lg sm:text-xl font-bold text-white mb-2">Ready to take your game to the next level?</h2>
@@ -235,7 +232,6 @@ export const MainContent = ({
         </div>
       </section>
 
-      {/* Feature Info Modal */}
       <FeatureInfoModal isOpen={!!selectedFeature} onClose={handleCloseFeatureInfo} feature={selectedFeature} />
     </div>;
 };
