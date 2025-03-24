@@ -32,7 +32,14 @@ const Index = () => {
             backgroundColor: "#2C4A3B", // Fallback color if image fails to load
           }}
         >
-          {/* Dark overlay div */}
+          <img 
+            src="/lovable-uploads/997e24ca-24e2-4970-b610-227abf092928.png" 
+            alt="Background Check" 
+            style={{ display: 'none' }} 
+            onLoad={() => console.log("Background image loaded successfully")} 
+            onError={(e) => console.error("Background image failed to load:", e)}
+          />
+          
           <div className="absolute inset-0 bg-black opacity-20 z-0" aria-hidden="true"></div>
           
           <header className="absolute top-0 left-0 right-0 z-10">
@@ -60,7 +67,6 @@ const Index = () => {
           <main className="relative z-[1] pt-32 sm:pt-0 w-full text-center sm:text-left"> {/* Added text-center for mobile, text-left for larger screens */}
             <MainContent onStartSignup={handleStartSignup} />
             
-            {/* Add the UserReviews component */}
             <UserReviews />
           </main>
         </div>
