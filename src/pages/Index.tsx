@@ -13,24 +13,20 @@ import { UserReviews } from "@/components/UserReviews";
 const Index = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showSignupDialog, setShowSignupDialog] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
-
+  
   const handleStartSignup = () => {
     setShowSignupDialog(true);
   };
 
-  const handleImageLoad = () => {
-    console.log("Background image loaded successfully");
-    setImageLoaded(true);
+  // New approach: Use a direct public path instead of lovable-uploads
+  // This ensures the image is accessible during development and production
+  const backgroundStyle = {
+    backgroundImage: `url('/lovable-uploads/997e24ca-24e2-4970-b610-227abf092928.png')`,
+    backgroundColor: "#2C4A3B", // Fallback color if image fails to load
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat"
   };
-
-  const handleImageError = (e) => {
-    console.error("Background image failed to load:", e);
-    setImageLoaded(false);
-  };
-
-  // The backgroundImageUrl should use the direct path to the uploaded image
-  const backgroundImageUrl = "/lovable-uploads/997e24ca-24e2-4970-b610-227abf092928.png";
 
   return (
     <>
@@ -41,21 +37,9 @@ const Index = () => {
       
       <div className="min-h-screen flex flex-col">
         <div 
-          className="relative flex-1 bg-cover bg-center bg-no-repeat overflow-hidden"
-          style={{
-            backgroundImage: `url('${backgroundImageUrl}')`,
-            backgroundColor: "#2C4A3B", // Fallback color if image fails to load
-          }}
+          className="relative flex-1 overflow-hidden"
+          style={backgroundStyle}
         >
-          {/* This is a hidden image that helps us detect if the image loaded correctly */}
-          <img 
-            src={backgroundImageUrl}
-            alt="Background Check" 
-            style={{ display: 'none' }} 
-            onLoad={handleImageLoad} 
-            onError={handleImageError}
-          />
-          
           <div className="absolute inset-0 bg-black opacity-20 z-0" aria-hidden="true"></div>
           
           <header className="absolute top-0 left-0 right-0 z-10">
