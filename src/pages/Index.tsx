@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { MainContent } from "@/components/MainContent";
 import { LoginDialog } from "@/components/LoginDialog";
@@ -29,7 +28,7 @@ const Index = () => {
         <div 
           className="relative flex-1 bg-cover bg-center bg-no-repeat overflow-hidden"
           style={{
-            backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
+            backgroundImage: `url('/lovable-uploads/997e24ca-24e2-4970-b610-227abf092928.png')`,
             backgroundColor: "#2C4A3B", // Fallback color if image fails to load
           }}
         >
