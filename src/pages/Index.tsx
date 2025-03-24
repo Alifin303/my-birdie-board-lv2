@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { MainContent } from "@/components/MainContent";
 import { LoginDialog } from "@/components/LoginDialog";
@@ -12,10 +13,24 @@ import { UserReviews } from "@/components/UserReviews";
 const Index = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showSignupDialog, setShowSignupDialog] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handleStartSignup = () => {
     setShowSignupDialog(true);
   };
+
+  const handleImageLoad = () => {
+    console.log("Background image loaded successfully");
+    setImageLoaded(true);
+  };
+
+  const handleImageError = (e) => {
+    console.error("Background image failed to load:", e);
+    setImageLoaded(false);
+  };
+
+  // The backgroundImageUrl should use the direct path to the uploaded image
+  const backgroundImageUrl = "/lovable-uploads/997e24ca-24e2-4970-b610-227abf092928.png";
 
   return (
     <>
@@ -28,16 +43,17 @@ const Index = () => {
         <div 
           className="relative flex-1 bg-cover bg-center bg-no-repeat overflow-hidden"
           style={{
-            backgroundImage: `url('/lovable-uploads/997e24ca-24e2-4970-b610-227abf092928.png')`,
+            backgroundImage: `url('${backgroundImageUrl}')`,
             backgroundColor: "#2C4A3B", // Fallback color if image fails to load
           }}
         >
+          {/* This is a hidden image that helps us detect if the image loaded correctly */}
           <img 
-            src="/lovable-uploads/997e24ca-24e2-4970-b610-227abf092928.png" 
+            src={backgroundImageUrl}
             alt="Background Check" 
             style={{ display: 'none' }} 
-            onLoad={() => console.log("Background image loaded successfully")} 
-            onError={(e) => console.error("Background image failed to load:", e)}
+            onLoad={handleImageLoad} 
+            onError={handleImageError}
           />
           
           <div className="absolute inset-0 bg-black opacity-20 z-0" aria-hidden="true"></div>
@@ -64,7 +80,7 @@ const Index = () => {
               </nav>
             </div>
           </header>
-          <main className="relative z-[1] pt-32 sm:pt-0 w-full text-center sm:text-left"> {/* Added text-center for mobile, text-left for larger screens */}
+          <main className="relative z-[1] pt-32 sm:pt-0 w-full text-center sm:text-left"> 
             <MainContent onStartSignup={handleStartSignup} />
             
             <UserReviews />
