@@ -13,19 +13,9 @@ import { UserReviews } from "@/components/UserReviews";
 const Index = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showSignupDialog, setShowSignupDialog] = useState(false);
-  
+
   const handleStartSignup = () => {
     setShowSignupDialog(true);
-  };
-
-  // New approach: Use a direct public path instead of lovable-uploads
-  // This ensures the image is accessible during development and production
-  const backgroundStyle = {
-    backgroundImage: `url('/lovable-uploads/997e24ca-24e2-4970-b610-227abf092928.png')`,
-    backgroundColor: "#2C4A3B", // Fallback color if image fails to load
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat"
   };
 
   return (
@@ -37,9 +27,13 @@ const Index = () => {
       
       <div className="min-h-screen flex flex-col">
         <div 
-          className="relative flex-1 overflow-hidden"
-          style={backgroundStyle}
+          className="relative flex-1 bg-cover bg-center bg-no-repeat overflow-hidden"
+          style={{
+            backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
+            backgroundColor: "#2C4A3B", // Fallback color if image fails to load
+          }}
         >
+          {/* Dark overlay div */}
           <div className="absolute inset-0 bg-black opacity-20 z-0" aria-hidden="true"></div>
           
           <header className="absolute top-0 left-0 right-0 z-10">
@@ -64,9 +58,10 @@ const Index = () => {
               </nav>
             </div>
           </header>
-          <main className="relative z-[1] pt-32 sm:pt-0 w-full text-center sm:text-left"> 
+          <main className="relative z-[1] pt-32 sm:pt-0 w-full text-center sm:text-left"> {/* Added text-center for mobile, text-left for larger screens */}
             <MainContent onStartSignup={handleStartSignup} />
             
+            {/* Add the UserReviews component */}
             <UserReviews />
           </main>
         </div>
