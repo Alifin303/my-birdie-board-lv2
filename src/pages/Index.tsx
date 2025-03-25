@@ -20,7 +20,7 @@ const Index = () => {
     setShowSignupDialog(true);
   };
 
-  // High-quality golf course image - full resolution from the provided URL
+  // High-quality golf course image - showing a man in black t-shirt and white shorts playing golf
   const backgroundImageUrl = "https://images.unsplash.com/photo-1591491633081-c2b7b1462e35?q=80&w=2070&auto=format&fit=crop";
   
   // Mobile optimization: still using high-quality but optimized for mobile
