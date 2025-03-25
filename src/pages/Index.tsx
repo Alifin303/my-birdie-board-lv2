@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { MainContent } from "@/components/MainContent";
 import { LoginDialog } from "@/components/LoginDialog";
@@ -19,11 +20,11 @@ const Index = () => {
     setShowSignupDialog(true);
   };
 
-  // High-quality golf course image
-  const backgroundImageUrl = "https://images.unsplash.com/photo-1600112356915-089a395af9d7?q=80&w=2070&auto=format&fit=crop";
+  // High-quality golf course image - full resolution from the provided URL
+  const backgroundImageUrl = "https://images.unsplash.com/photo-1591491633081-c2b7b1462e35?q=80&w=2070&auto=format&fit=crop";
   
-  // Mobile optimization: load a smaller but still high-quality image for mobile
-  const mobileBackgroundImageUrl = "https://images.unsplash.com/photo-1600112356915-089a395af9d7?q=80&w=1080&auto=format&fit=crop";
+  // Mobile optimization: still using high-quality but optimized for mobile
+  const mobileBackgroundImageUrl = "https://images.unsplash.com/photo-1591491633081-c2b7b1462e35?q=80&w=1080&auto=format&fit=crop";
 
   // Determine which image to use based on device
   const currentBackgroundImage = isMobile ? mobileBackgroundImageUrl : backgroundImageUrl;
@@ -96,4 +97,3 @@ const Index = () => {
 };
 
 export default Index;
-
