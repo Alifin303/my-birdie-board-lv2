@@ -144,7 +144,7 @@ export const MainContent = ({
             <div className="lg:w-1/2 order-2 lg:order-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
-                  <CardContent className="p-3 flex flex-col h-full bg-stone-200 rounded-2xl">
+                  <CardContent className="p-3 flex flex-col h-full bg-stone-200 rounded-xl">
                     <div className="rounded-full p-2 w-fit mb-2 bg-[2f4c3d] bg-secondary-foreground">
                       <Upload className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
