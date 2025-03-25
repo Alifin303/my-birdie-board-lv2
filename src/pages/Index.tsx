@@ -20,11 +20,11 @@ const Index = () => {
     setShowSignupDialog(true);
   };
 
-  // High-quality golf course image - showing a man in black t-shirt and white shorts playing golf
-  const backgroundImageUrl = "https://images.unsplash.com/photo-1591491633081-c2b7b1462e35?q=80&w=2070&auto=format&fit=crop";
+  // High-quality golf course image
+  const backgroundImageUrl = "https://images.unsplash.com/photo-1611374243463-cc5b113d5f20?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
   
   // Mobile optimization: still using high-quality but optimized for mobile
-  const mobileBackgroundImageUrl = "https://images.unsplash.com/photo-1591491633081-c2b7b1462e35?q=80&w=1080&auto=format&fit=crop";
+  const mobileBackgroundImageUrl = "https://images.unsplash.com/photo-1611374243463-cc5b113d5f20?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
 
   // Determine which image to use based on device
   const currentBackgroundImage = isMobile ? mobileBackgroundImageUrl : backgroundImageUrl;
