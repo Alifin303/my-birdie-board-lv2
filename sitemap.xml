@@ -2,6 +2,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:geo="http://www.google.com/geo/schemas/sitemap/1.0"
       xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
@@ -52,6 +53,10 @@
   <lastmod>2024-08-04T10:00:00+00:00</lastmod>
   <priority>0.8</priority>
   <changefreq>daily</changefreq>
+  <!-- This page contains a directory of golf courses -->
+  <geo:geo>
+    <geo:format>kml</geo:format>
+  </geo:geo>
 </url>
 
 <!-- Dynamic course pages will need to be generated programmatically based on your database -->
@@ -62,6 +67,9 @@
   <lastmod>2024-08-04T10:00:00+00:00</lastmod>
   <priority>0.7</priority>
   <changefreq>weekly</changefreq>
+  <geo:geo>
+    <geo:format>kml</geo:format>
+  </geo:geo>
 </url>
 -->
 

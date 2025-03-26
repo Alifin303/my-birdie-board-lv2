@@ -10,6 +10,9 @@ interface CourseDetails {
   name: string;
   city?: string;
   state?: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
   tees?: any[];
   userRounds?: number;
   bestScore?: number;
@@ -181,6 +184,29 @@ const Course = () => {
   const courseName = course.name || `Golf Course #${courseId}`;
   const courseLocation = [course.city, course.state].filter(Boolean).join(", ");
   
+  const generateGeoStructuredData = () => {
+    if (!course.latitude || !course.longitude) return null;
+    
+    return JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "GolfCourse",
+      "name": courseName,
+      "description": `Golf course statistics and leaderboard for ${courseName}${courseLocation ? ` in ${courseLocation}` : ''}.`,
+      "url": `https://mybirdieboard.com/courses/${courseId}`,
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": course.latitude,
+        "longitude": course.longitude
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": course.city || "",
+        "addressRegion": course.state || "",
+        "addressCountry": course.country || ""
+      }
+    });
+  };
+  
   return (
     <>
       <Helmet>
@@ -220,6 +246,12 @@ const Course = () => {
             "description": `Golf course statistics and leaderboard for ${courseName}${courseLocation ? ` in ${courseLocation}` : ''}.`
           })}
         </script>
+        
+        {course.latitude && course.longitude && (
+          <script type="application/ld+json">
+            {generateGeoStructuredData()}
+          </script>
+        )}
       </Helmet>
       
       <div className="min-h-screen bg-background">

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -9,6 +8,7 @@ interface Course {
   name: string;
   city?: string;
   state?: string;
+  country?: string;
   roundsCount?: number;
 }
 
@@ -18,15 +18,12 @@ const Courses = () => {
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [isBot, setIsBot] = useState(false);
   
-  // Check if the visitor is a bot/crawler
   useEffect(() => {
     const botPattern = /bot|googlebot|crawler|spider|robot|crawling/i;
     const isSearchEngine = botPattern.test(navigator.userAgent);
     setIsBot(isSearchEngine);
     
-    // Only set redirect for real users, not search engines
     if (!isSearchEngine) {
-      // Short delay to allow the page to be indexed
       const timer = setTimeout(() => {
         setShouldRedirect(true);
       }, 100);
@@ -40,20 +37,17 @@ const Courses = () => {
       try {
         setLoading(true);
         
-        // Get courses from the database with rounds count
         const { data, error } = await supabase
           .from('courses')
-          .select('id, name, city, state')
+          .select('id, name, city, state, country')
           .order('name');
           
         if (error) throw error;
         
         if (data) {
-          // Get the round counts for each course
           const courseIds = data.map(course => course.id);
           
           if (courseIds.length > 0) {
-            // Use individual queries for each course to get count
             const coursesWithCounts = await Promise.all(
               data.map(async (course) => {
                 const { count, error: countError } = await supabase
@@ -81,13 +75,11 @@ const Courses = () => {
       }
     };
     
-    // Only fetch the data if it's a bot or we haven't loaded yet
     if (isBot || !shouldRedirect) {
       fetchCourses();
     }
   }, [isBot, shouldRedirect]);
   
-  // Redirect real users to the homepage
   if (shouldRedirect && !isBot) {
     return <Navigate to="/" replace />;
   }
@@ -102,7 +94,15 @@ const Courses = () => {
         />
         <link rel="canonical" href="https://mybirdieboard.com/courses" />
         
-        {/* Open Graph / Facebook */}
+        <link rel="alternate" hreflang="en" href="https://mybirdieboard.com/courses" />
+        <link rel="alternate" hreflang="en-us" href="https://mybirdieboard.com/courses" />
+        <link rel="alternate" hreflang="en-gb" href="https://mybirdieboard.com/courses" />
+        <link rel="alternate" hreflang="x-default" href="https://mybirdieboard.com/courses" />
+        
+        <meta name="geo.region" content="US, GB, AU, CA" /> 
+        <meta name="geo.position" content="39.8283;-98.5795" />
+        <meta name="ICBM" content="39.8283, -98.5795" />
+        
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Golf Courses | MyBirdieBoard" />
         <meta 
@@ -111,7 +111,6 @@ const Courses = () => {
         />
         <meta property="og:url" content="https://mybirdieboard.com/courses" />
         
-        {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Golf Courses | MyBirdieBoard" />
         <meta 
@@ -146,9 +145,9 @@ const Courses = () => {
                   <Link to={`/courses/${course.id}`} className="block p-6">
                     <h2 className="text-xl font-semibold mb-2 line-clamp-2">{course.name}</h2>
                     
-                    {(course.city || course.state) && (
+                    {(course.city || course.state || course.country) && (
                       <p className="text-muted-foreground mb-4">
-                        {[course.city, course.state].filter(Boolean).join(", ")}
+                        {[course.city, course.state, course.country].filter(Boolean).join(", ")}
                       </p>
                     )}
                     
