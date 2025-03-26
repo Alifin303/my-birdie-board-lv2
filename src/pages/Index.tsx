@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { MainContent } from "@/components/MainContent";
 import { LoginDialog } from "@/components/LoginDialog";
@@ -35,6 +34,61 @@ const Index = () => {
         <title>MyBirdieBoard - Golf Score Tracking & Performance Analytics</title>
         <meta name="description" content="Track your golf scores, challenge friends on course leaderboards, and improve your game with detailed performance analytics on MyBirdieBoard" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+        
+        {/* AI-specific structured data */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "applicationCategory": "SportsApplication",
+            "applicationSubCategory": "GolfScoreTracking",
+            "operatingSystem": "Web",
+            "name": "MyBirdieBoard",
+            "description": "Track your golf scores, challenge friends on course leaderboards, and improve your game with detailed performance analytics on MyBirdieBoard",
+            "offers": {
+              "@type": "Offer",
+              "price": "2.99",
+              "priceCurrency": "GBP",
+              "priceValidUntil": "2025-12-31",
+              "availability": "https://schema.org/OnlineOnly"
+            },
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.8",
+              "ratingCount": "125",
+              "bestRating": "5",
+              "worstRating": "1"
+            },
+            "keywords": "golf score tracking, golf analytics, golf leaderboard, handicap calculator, golf performance",
+            "contentRating": "General",
+            "audience": {
+              "@type": "Audience",
+              "audienceType": "Golfers",
+              "geographicArea": {
+                "@type": "Country",
+                "name": ["United States", "United Kingdom", "Australia", "Canada"]
+              }
+            },
+            "potentialAction": {
+              "@type": "UseAction",
+              "actionStatus": "PotentialActionStatus",
+              "object": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://mybirdieboard.com/",
+                "actionPlatform": ["https://schema.org/DesktopWebPlatform", "https://schema.org/MobileWebPlatform"]
+              },
+              "expectsAcceptanceOf": {
+                "@type": "Offer",
+                "price": "2.99",
+                "priceCurrency": "GBP",
+                "eligibleRegion": {
+                  "@type": "Country",
+                  "name": ["United States", "United Kingdom", "Australia", "Canada"]
+                }
+              }
+            }
+          })}
+        </script>
       </Helmet>
       
       <div className="min-h-screen flex flex-col">

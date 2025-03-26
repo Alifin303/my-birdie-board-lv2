@@ -60,7 +60,18 @@ Disallow: /auth/
 Disallow: /checkout
 Disallow: /admin
 
+# Bard/Gemini AI Bot
+User-agent: Google-Extended
+Allow: /
+Allow: /faq
+Allow: /about
+Allow: /courses
+Disallow: /auth/
+Disallow: /checkout
+Disallow: /admin
+
 Sitemap: https://mybirdieboard.com/sitemap.xml
+Sitemap: https://mybirdieboard.com/ai-sitemap.xml
 
 # Prevent media crawling for bandwidth (except the logo)
 User-agent: Googlebot-Image
@@ -70,3 +81,4 @@ Disallow: /lovable-uploads/
 # Prevent archive crawling
 User-agent: ia_archiver
 Disallow: /
+

@@ -1,0 +1,64 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:ai="http://www.ai-sitemaps.org/schemas/sitemap/0.9"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+<!-- AI-optimized sitemap for improved AI crawler understanding -->
+<url>
+  <loc>https://mybirdieboard.com/</loc>
+  <lastmod>2024-07-31T10:54:36+00:00</lastmod>
+  <priority>1.0</priority>
+  <changefreq>weekly</changefreq>
+  <ai:content>
+    <ai:type>WebApplication</ai:type>
+    <ai:title>MyBirdieBoard - Golf Score Tracking &amp; Performance Analytics</ai:title>
+    <ai:description>Track your golf scores, challenge friends on course leaderboards, improve with performance analytics, and calculate your handicap accurately with MyBirdieBoard.</ai:description>
+    <ai:keywords>golf score tracking, golf analytics, golf leaderboard, handicap calculator</ai:keywords>
+    <ai:primaryTopic>Golf Performance Tracking</ai:primaryTopic>
+  </ai:content>
+</url>
+
+<url>
+  <loc>https://mybirdieboard.com/about</loc>
+  <lastmod>2024-07-31T10:54:36+00:00</lastmod>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <ai:content>
+    <ai:type>AboutPage</ai:type>
+    <ai:title>About MyBirdieBoard - Your Ultimate Golf Tracking Solution</ai:title>
+    <ai:description>Learn how MyBirdieBoard helps golfers track scores, analyze performance, and compete on leaderboards to improve their game.</ai:description>
+    <ai:primaryTopic>Golf Score Tracking Application</ai:primaryTopic>
+  </ai:content>
+</url>
+
+<url>
+  <loc>https://mybirdieboard.com/faq</loc>
+  <lastmod>2024-08-15T10:00:00+00:00</lastmod>
+  <priority>0.9</priority>
+  <changefreq>weekly</changefreq>
+  <ai:content>
+    <ai:type>FAQPage</ai:type>
+    <ai:title>Frequently Asked Questions | MyBirdieBoard Golf Tracking</ai:title>
+    <ai:description>Find answers to common questions about MyBirdieBoard's golf score tracking, handicap calculations, and performance analytics.</ai:description>
+    <ai:primaryTopic>Golf Score Tracking FAQ</ai:primaryTopic>
+  </ai:content>
+</url>
+
+<url>
+  <loc>https://mybirdieboard.com/courses</loc>
+  <lastmod>2024-08-04T10:00:00+00:00</lastmod>
+  <priority>0.8</priority>
+  <changefreq>daily</changefreq>
+  <ai:content>
+    <ai:type>CollectionPage</ai:type>
+    <ai:title>Golf Courses Directory | MyBirdieBoard</ai:title>
+    <ai:description>Browse golf courses where players have tracked rounds on MyBirdieBoard. Find detailed statistics, historical scores, and course information.</ai:description>
+    <ai:primaryTopic>Golf Courses Directory</ai:primaryTopic>
+    <ai:entities>Golf Courses</ai:entities>
+  </ai:content>
+</url>
+
+</urlset>
