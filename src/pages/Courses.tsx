@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -8,7 +9,6 @@ interface Course {
   name: string;
   city?: string;
   state?: string;
-  country?: string;
   roundsCount?: number;
 }
 
@@ -39,7 +39,7 @@ const Courses = () => {
         
         const { data, error } = await supabase
           .from('courses')
-          .select('id, name, city, state, country')
+          .select('id, name, city, state')
           .order('name');
           
         if (error) throw error;
@@ -94,10 +94,10 @@ const Courses = () => {
         />
         <link rel="canonical" href="https://mybirdieboard.com/courses" />
         
-        <link rel="alternate" hreflang="en" href="https://mybirdieboard.com/courses" />
-        <link rel="alternate" hreflang="en-us" href="https://mybirdieboard.com/courses" />
-        <link rel="alternate" hreflang="en-gb" href="https://mybirdieboard.com/courses" />
-        <link rel="alternate" hreflang="x-default" href="https://mybirdieboard.com/courses" />
+        <link rel="alternate" hrefLang="en" href="https://mybirdieboard.com/courses" />
+        <link rel="alternate" hrefLang="en-us" href="https://mybirdieboard.com/courses" />
+        <link rel="alternate" hrefLang="en-gb" href="https://mybirdieboard.com/courses" />
+        <link rel="alternate" hrefLang="x-default" href="https://mybirdieboard.com/courses" />
         
         <meta name="geo.region" content="US, GB, AU, CA" /> 
         <meta name="geo.position" content="39.8283;-98.5795" />
@@ -145,9 +145,9 @@ const Courses = () => {
                   <Link to={`/courses/${course.id}`} className="block p-6">
                     <h2 className="text-xl font-semibold mb-2 line-clamp-2">{course.name}</h2>
                     
-                    {(course.city || course.state || course.country) && (
+                    {(course.city || course.state) && (
                       <p className="text-muted-foreground mb-4">
-                        {[course.city, course.state, course.country].filter(Boolean).join(", ")}
+                        {[course.city, course.state].filter(Boolean).join(", ")}
                       </p>
                     )}
                     
