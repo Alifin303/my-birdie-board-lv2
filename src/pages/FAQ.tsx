@@ -1,23 +1,16 @@
-
 import React, { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-
 export default function FAQ() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
-  return (
-    <>
+  return <>
       <Helmet>
         <title>Frequently Asked Questions | MyBirdieBoard Golf Tracking</title>
-        <meta 
-          name="description" 
-          content="Find answers to common questions about MyBirdieBoard's golf score tracking, handicap calculations, and performance analytics."
-        />
+        <meta name="description" content="Find answers to common questions about MyBirdieBoard's golf score tracking, handicap calculations, and performance analytics." />
         <link rel="canonical" href="https://mybirdieboard.com/faq" />
         <script type="application/ld+json">
           {`
@@ -125,7 +118,7 @@ export default function FAQ() {
           <div className="max-w-3xl mx-auto">
             <Accordion type="single" collapsible className="mb-12">
               <AccordionItem value="item-1">
-                <AccordionTrigger className="text-lg font-medium">
+                <AccordionTrigger className="text-lg font-medium text-left">
                   What is MyBirdieBoard?
                 </AccordionTrigger>
                 <AccordionContent>
@@ -136,7 +129,7 @@ export default function FAQ() {
               </AccordionItem>
 
               <AccordionItem value="item-2">
-                <AccordionTrigger className="text-lg font-medium">
+                <AccordionTrigger className="text-lg font-medium text-left">
                   How does the course leaderboard work?
                 </AccordionTrigger>
                 <AccordionContent>
@@ -147,7 +140,7 @@ export default function FAQ() {
               </AccordionItem>
 
               <AccordionItem value="item-3">
-                <AccordionTrigger className="text-lg font-medium">
+                <AccordionTrigger className="text-lg font-medium text-left">
                   Can I track my past rounds?
                 </AccordionTrigger>
                 <AccordionContent>
@@ -158,7 +151,7 @@ export default function FAQ() {
               </AccordionItem>
 
               <AccordionItem value="item-4">
-                <AccordionTrigger className="text-lg font-medium">
+                <AccordionTrigger className="text-lg font-medium text-left">
                   Does MyBirdieBoard track my handicap?
                 </AccordionTrigger>
                 <AccordionContent>
@@ -169,7 +162,7 @@ export default function FAQ() {
               </AccordionItem>
 
               <AccordionItem value="item-5">
-                <AccordionTrigger className="text-lg font-medium">
+                <AccordionTrigger className="text-lg font-medium text-left">
                   How much does MyBirdieBoard cost?
                 </AccordionTrigger>
                 <AccordionContent>
@@ -180,7 +173,7 @@ export default function FAQ() {
               </AccordionItem>
 
               <AccordionItem value="item-6">
-                <AccordionTrigger className="text-lg font-medium">
+                <AccordionTrigger className="text-lg font-medium text-left">
                   Why should I use MyBirdieBoard instead of a notebook or spreadsheet?
                 </AccordionTrigger>
                 <AccordionContent>
@@ -191,7 +184,7 @@ export default function FAQ() {
               </AccordionItem>
 
               <AccordionItem value="item-7">
-                <AccordionTrigger className="text-lg font-medium">
+                <AccordionTrigger className="text-lg font-medium text-left">
                   Is MyBirdieBoard only available in certain countries?
                 </AccordionTrigger>
                 <AccordionContent>
@@ -202,7 +195,7 @@ export default function FAQ() {
               </AccordionItem>
 
               <AccordionItem value="item-8">
-                <AccordionTrigger className="text-lg font-medium">
+                <AccordionTrigger className="text-lg font-medium text-left">
                   How do I subscribe?
                 </AccordionTrigger>
                 <AccordionContent>
@@ -213,7 +206,7 @@ export default function FAQ() {
               </AccordionItem>
 
               <AccordionItem value="item-9">
-                <AccordionTrigger className="text-lg font-medium">
+                <AccordionTrigger className="text-lg font-medium text-left">
                   Can I cancel my subscription?
                 </AccordionTrigger>
                 <AccordionContent>
@@ -224,7 +217,7 @@ export default function FAQ() {
               </AccordionItem>
 
               <AccordionItem value="item-10">
-                <AccordionTrigger className="text-lg font-medium">
+                <AccordionTrigger className="text-lg font-medium text-left">
                   How do I add a new golf course that isn't listed?
                 </AccordionTrigger>
                 <AccordionContent>
@@ -243,6 +236,5 @@ export default function FAQ() {
           </div>
         </main>
       </div>
-    </>
-  );
+    </>;
 }
