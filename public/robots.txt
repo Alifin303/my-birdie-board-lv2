@@ -22,6 +22,44 @@ Allow: /courses/
 # Explicitly allow logo image
 Allow: /lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png
 
+# Specific instructions for AI crawlers
+User-agent: GPTBot
+Allow: /
+Allow: /faq
+Allow: /about
+Allow: /courses
+Disallow: /auth/
+Disallow: /checkout
+Disallow: /admin
+
+User-agent: Anthropic-AI
+Allow: /
+Allow: /faq
+Allow: /about 
+Allow: /courses
+Disallow: /auth/
+Disallow: /checkout
+Disallow: /admin
+
+User-agent: Claude-Web
+Allow: /
+Allow: /faq
+Allow: /about
+Allow: /courses
+Disallow: /auth/
+Disallow: /checkout
+Disallow: /admin
+
+# Perplexity AI Bot
+User-agent: Perplexity
+Allow: /
+Allow: /faq
+Allow: /about
+Allow: /courses
+Disallow: /auth/
+Disallow: /checkout
+Disallow: /admin
+
 Sitemap: https://mybirdieboard.com/sitemap.xml
 
 # Prevent media crawling for bandwidth (except the logo)

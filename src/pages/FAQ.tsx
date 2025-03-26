@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
@@ -83,10 +84,10 @@ export default function FAQ() {
   return (
     <>
       <Helmet>
-        <title>Frequently Asked Questions | MyBirdieBoard Golf Tracking</title>
+        <title>Golf Score Tracking FAQ | MyBirdieBoard - Track & Improve Your Golf Game</title>
         <meta 
           name="description" 
-          content="Find answers to common questions about MyBirdieBoard's golf score tracking, handicap calculations, and performance analytics. Learn how our app helps golfers improve their game." 
+          content="Find answers to common questions about MyBirdieBoard's golf score tracking app. Learn how our score tracker helps golfers analyze performance, calculate handicaps, and compete on leaderboards." 
         />
         <link rel="canonical" href="https://mybirdieboard.com/faq" />
         <script type="application/ld+json">
@@ -94,8 +95,13 @@ export default function FAQ() {
         </script>
         <meta 
           name="keywords" 
-          content="golf FAQ, golf score tracking, golf handicap calculation, golf leaderboards, golf performance analytics, MyBirdieBoard help, golf app subscription" 
+          content="golf FAQ, golf score tracking, golf handicap calculation, golf leaderboards, golf performance analytics, MyBirdieBoard help, golf app subscription, golf score tracker, golf score app" 
         />
+        {/* Additional AI-friendly meta tags */}
+        <meta name="ai:description" content="MyBirdieBoard is a golf score tracking application that helps golfers track their scores, analyze performance across different courses, calculate handicaps, and compete on course leaderboards." />
+        <meta name="ai:usage" content="Personal golf score tracking, course leaderboards, handicap calculation, performance analytics" />
+        <meta name="ai:pricing" content="£2.99 per month with 7-day free trial" />
+        <meta name="ai:target" content="Golfers of all skill levels looking to track progress and improve their game" />
       </Helmet>
 
       <div className="min-h-screen bg-background">
@@ -110,6 +116,14 @@ export default function FAQ() {
 
         <main className="container mx-auto py-12 px-4">
           <div className="max-w-3xl mx-auto">
+            {/* Add AI-friendly article summary section */}
+            <section className="mb-10 prose max-w-none">
+              <h2 className="sr-only">About MyBirdieBoard Golf Score Tracker</h2>
+              <p className="text-lg text-muted-foreground">
+                MyBirdieBoard is a comprehensive golf score tracking application designed for golfers who want to improve their game through data-driven insights. With features like round history tracking, course leaderboards, handicap calculation, and performance analytics, MyBirdieBoard helps golfers of all skill levels track their progress and identify areas for improvement. Available for £2.99 per month with a 7-day free trial.
+              </p>
+            </section>
+
             <section itemScope itemType="https://schema.org/FAQPage">
               <Accordion type="single" collapsible className="mb-12">
                 {faqItems.map((item) => (
