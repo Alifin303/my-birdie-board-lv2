@@ -11,22 +11,16 @@ export const calculateCourseSpecificStats = (courseRounds: Round[], handicapInde
   const bestGrossScore = Math.min(...courseRounds.map(r => r.gross_score));
   const bestToPar = Math.min(...courseRounds.map(r => r.to_par_gross));
   
-  // Calculate net scores for each round using the handicap that was stored with the round if available
+  // Calculate net scores for each round using the provided handicap index
   const roundsWithNetScore = courseRounds.map(r => {
-    // Use the handicap stored with the round if available, otherwise use the current handicap
-    const handicapToUse = r.handicap_at_posting !== undefined && r.handicap_at_posting !== null
-      ? r.handicap_at_posting
-      : handicapIndex;
-      
     // Always use Math.round to ensure whole numbers for scores
-    const calculatedNetScore = Math.max(0, Math.round(r.gross_score - handicapToUse));
-    const calculatedToParNet = Math.round(r.to_par_gross - handicapToUse);
+    const calculatedNetScore = Math.max(0, Math.round(r.gross_score - handicapIndex));
+    const calculatedToParNet = Math.round(r.to_par_gross - handicapIndex);
     
     return {
       ...r,
       calculatedNetScore,
-      calculatedToParNet,
-      handicapUsed: handicapToUse
+      calculatedToParNet
     };
   });
   
@@ -37,8 +31,7 @@ export const calculateCourseSpecificStats = (courseRounds: Round[], handicapInde
       gross: r.gross_score,
       net: r.calculatedNetScore,
       toPar: r.to_par_gross,
-      toParNet: r.calculatedToParNet,
-      handicapUsed: r.handicapUsed
+      toParNet: r.calculatedToParNet
     }))
   );
   

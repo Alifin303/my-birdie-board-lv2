@@ -151,8 +151,7 @@ export const CourseRoundHistory = ({
       id: round.id,
       teeName: round.tee_name,
       teeNameType: typeof round.tee_name,
-      teeId: round.tee_id,
-      handicapAtPosting: round.handicap_at_posting
+      teeId: round.tee_id
     });
     
     if (scorecardOpen) {

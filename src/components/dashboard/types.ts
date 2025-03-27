@@ -8,8 +8,14 @@ export interface Round {
   net_score?: number;
   to_par_gross: number;
   to_par_net?: number;
-  hole_scores?: any;
-  handicap_at_posting?: number; // Add this field to store the handicap at posting time
+  hole_scores?: {
+    [holeNumber: string]: {
+      hole: number;
+      par: number;
+      strokes: number;
+      putts?: number;
+    }
+  };
   courses?: {
     id: number;
     name: string;
@@ -20,11 +26,33 @@ export interface Round {
   };
 }
 
+export interface CourseStats {
+  courseId: number;
+  courseName: string;
+  clubName: string;
+  city?: string;
+  state?: string;
+  roundsPlayed: number;
+  bestGrossScore: number;
+  bestNetScore: number | null;
+  bestToPar: number;
+  bestToParNet: number | null;
+}
+
+export interface Stats {
+  totalRounds: number;
+  bestGrossScore: number;
+  bestNetScore: number | null;
+  bestToPar: number;
+  bestToParNet: number | null;
+  averageScore: number;
+  handicapIndex: number;
+  roundsNeededForHandicap: number;
+}
+
 export interface HoleScore {
   hole: number;
   par: number;
-  strokes: number;
+  strokes?: number;
   putts?: number;
-  penalties?: number;
-  gir?: boolean;
 }
