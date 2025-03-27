@@ -22,6 +22,7 @@ interface Round {
     clubName?: string;
     courseName?: string;
   };
+  handicap_at_posting?: number;
 }
 
 interface Stats {
@@ -83,7 +84,8 @@ export const calculateStats = (rounds: Round[]): Stats => {
       gross: r.gross_score,
       net: r.net_score,
       toPar: r.to_par_gross,
-      toParNet: r.to_par_net
+      toParNet: r.to_par_net,
+      handicapAtPosting: r.handicap_at_posting
     }))
   );
   
@@ -92,14 +94,21 @@ export const calculateStats = (rounds: Round[]): Stats => {
 
   const averageScore = rounds.reduce((sum, r) => sum + r.gross_score, 0) / totalRounds;
   
+  // Add the handicap that was used for each round to the calculations
   const roundsWithCalculatedScores = rounds.map(r => {
-    const netScore = Math.round(r.gross_score - handicapIndex);
-    const toParNet = Math.round(r.to_par_gross - handicapIndex);
+    // Use the handicap stored with the round if available, otherwise use calculated handicap
+    const handicapToUse = r.handicap_at_posting !== undefined && r.handicap_at_posting !== null
+      ? r.handicap_at_posting
+      : handicapIndex;
+    
+    const netScore = Math.round(r.gross_score - handicapToUse);
+    const toParNet = Math.round(r.to_par_gross - handicapToUse);
     
     return {
       ...r,
       calculatedNetScore: netScore,
-      calculatedToParNet: toParNet
+      calculatedToParNet: toParNet,
+      handicapUsed: handicapToUse
     };
   });
   
@@ -109,7 +118,8 @@ export const calculateStats = (rounds: Round[]): Stats => {
       gross: r.gross_score,
       netScore: r.calculatedNetScore,
       toPar: r.to_par_gross,
-      toParNet: r.calculatedToParNet
+      toParNet: r.calculatedToParNet,
+      handicapUsed: r.handicapUsed
     }))
   );
   
@@ -130,7 +140,7 @@ export const calculateStats = (rounds: Round[]): Stats => {
     gross: bestNetRound.gross_score,
     net: bestNetRound.calculatedNetScore,
     toParNet: bestNetRound.calculatedToParNet,
-    handicapUsed: handicapIndex
+    handicapUsed: bestNetRound.handicapUsed
   } : "No rounds found");
   
   console.log("Best to par net round:", bestToParNetRound ? {
@@ -139,9 +149,9 @@ export const calculateStats = (rounds: Round[]): Stats => {
     course: bestToParNetRound.courses?.courseName,
     club: bestToParNetRound.courses?.clubName,
     gross: bestToParNetRound.gross_score,
-    net: bestToParNetRound.calculatedNetScore,
+    net: bestNetRound.calculatedNetScore,
     toParNet: bestToParNetRound.calculatedToParNet,
-    handicapUsed: handicapIndex
+    handicapUsed: bestToParNetRound.handicapUsed
   } : "No rounds found");
   
   const validRoundsCount = validRoundsForHandicap.length;
@@ -216,23 +226,32 @@ export const calculateCourseStats = (rounds: Round[], handicapIndex?: number): C
     const bestGrossScore = Math.min(...courseRounds.map(r => r.gross_score));
     const bestToPar = Math.min(...courseRounds.map(r => r.to_par_gross));
     
+    // Use the handicap that was stored with each round when available
     const roundsWithCalculatedScores = courseRounds.map(r => {
-      const netScore = Math.round(r.gross_score - currentHandicapIndex);
-      const toParNet = Math.round(r.to_par_gross - currentHandicapIndex);
+      // Use the handicap stored with the round if available, otherwise use current handicap
+      const handicapToUse = r.handicap_at_posting !== undefined && r.handicap_at_posting !== null
+        ? r.handicap_at_posting 
+        : currentHandicapIndex;
+        
+      const netScore = Math.round(r.gross_score - handicapToUse);
+      const toParNet = Math.round(r.to_par_gross - handicapToUse);
       
       console.log(`Round ${r.id} at ${courseName} calculation:`, {
         gross: r.gross_score,
         netScore,
         toPar: r.to_par_gross,
         toParNet,
-        handicapUsed: currentHandicapIndex,
+        handicapUsed: handicapToUse,
+        handicapAtPosting: r.handicap_at_posting,
+        currentHandicap: currentHandicapIndex,
         date: new Date(r.date).toLocaleDateString()
       });
       
       return {
         ...r,
         calculatedNetScore: netScore,
-        calculatedToParNet: toParNet
+        calculatedToParNet: toParNet,
+        handicapUsed: handicapToUse
       };
     });
     
@@ -250,7 +269,7 @@ export const calculateCourseStats = (rounds: Round[], handicapIndex?: number): C
         net: r.calculatedNetScore,
         toPar: r.to_par_gross,
         toParNet: r.calculatedToParNet,
-        handicapUsed: currentHandicapIndex
+        handicapUsed: r.handicapUsed
       }))
     );
     
@@ -269,7 +288,7 @@ export const calculateCourseStats = (rounds: Round[], handicapIndex?: number): C
       id: bestToParNetRound.id,
       date: new Date(bestToParNetRound.date).toLocaleDateString(),
       gross: bestToParNetRound.gross_score,
-      net: bestToParNetRound.calculatedNetScore,
+      net: bestNetRound.calculatedNetScore,
       toParNet: bestToParNetRound.calculatedToParNet
     } : "No rounds found");
 
