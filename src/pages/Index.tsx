@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { MainContent } from "@/components/MainContent";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,13 @@ const Index = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showSignupDialog, setShowSignupDialog] = useState(false);
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    // Track page view in Meta Pixel when component mounts
+    if (window.fbq) {
+      window.fbq('track', 'PageView');
+    }
+  }, []);
 
   const handleStartSignup = () => {
     setShowSignupDialog(true);
