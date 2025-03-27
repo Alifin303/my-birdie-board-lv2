@@ -1,3 +1,4 @@
+
 /**
  * Calculates a handicap index based on a set of scores
  * This follows a simplified version of the World Handicap System
@@ -8,6 +9,9 @@ export const calculateHandicapIndex = (scores: number[]): number => {
 
   // Sort scores from best to worst (lowest to highest)
   const sortedScores = [...scores].sort((a, b) => a - b);
+  
+  // Log for debugging
+  console.log("Calculating handicap with scores:", sortedScores);
   
   // Determine how many scores to use based on available rounds
   // Following a simplified version of the World Handicap System
@@ -21,16 +25,25 @@ export const calculateHandicapIndex = (scores: number[]): number => {
   
   // Take the best scores based on the number we determined
   const bestScores = sortedScores.slice(0, scoresToUse);
+  console.log(`Using best ${scoresToUse} scores:`, bestScores);
   
   // Calculate the average of best scores
   const averageScore = bestScores.reduce((sum, score) => sum + score, 0) / bestScores.length;
+  console.log("Average of best scores:", averageScore);
   
-  // Apply a simplified handicap formula (0.96 multiplier as per WHS)
-  // In a real implementation, this would consider course rating and slope
-  const calculatedHandicap = Math.max(0, (averageScore - 72) * 0.96);
-
+  // In real WHS, this would use course rating and slope
+  // For our simplified version, we're assuming par 72 course with standard difficulty
+  // The standard calculation is (Average Score - Course Rating) * 113 / Slope Rating * 0.96
+  // Since we're using a simplified model, we'll use (Average Score - 72) * 0.96
+  const calculatedHandicap = (averageScore - 72) * 0.96;
+  console.log("Raw calculated handicap:", calculatedHandicap);
+  
+  // Ensure handicap is non-negative (minimum 0)
+  const nonNegativeHandicap = Math.max(0, calculatedHandicap);
+  
   // Cap the handicap at 54, which is the maximum allowed in the World Handicap System
-  const cappedHandicap = Math.min(54, calculatedHandicap);
+  const cappedHandicap = Math.min(54, nonNegativeHandicap);
+  console.log("Final handicap after cap:", cappedHandicap);
 
   // Return the exact calculated value (don't round) to match Supabase's decimal storage
   return cappedHandicap;

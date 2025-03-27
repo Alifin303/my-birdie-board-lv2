@@ -4,12 +4,17 @@ import { Round } from "./types";
 export const calculateCourseSpecificStats = (courseRounds: Round[], handicapIndex: number = 0) => {
   if (courseRounds.length === 0) return null;
   
+  // Log for debugging
+  console.log("Calculating course stats with handicap:", handicapIndex);
+  
   const roundsPlayed = courseRounds.length;
   const bestGrossScore = Math.min(...courseRounds.map(r => r.gross_score));
   const bestToPar = Math.min(...courseRounds.map(r => r.to_par_gross));
   
+  // Calculate net scores for each round using the provided handicap index
   const roundsWithNetScore = courseRounds.map(r => {
-    const calculatedNetScore = Math.round(r.gross_score - handicapIndex);
+    // Always use Math.round to ensure whole numbers for scores
+    const calculatedNetScore = Math.max(0, Math.round(r.gross_score - handicapIndex));
     const calculatedToParNet = Math.round(r.to_par_gross - handicapIndex);
     
     return {
@@ -18,6 +23,17 @@ export const calculateCourseSpecificStats = (courseRounds: Round[], handicapInde
       calculatedToParNet
     };
   });
+  
+  // Log for debugging
+  console.log("Rounds with calculated net scores:", 
+    roundsWithNetScore.map(r => ({
+      id: r.id,
+      gross: r.gross_score,
+      net: r.calculatedNetScore,
+      toPar: r.to_par_gross,
+      toParNet: r.calculatedToParNet
+    }))
+  );
   
   const bestNetScore = Math.min(...roundsWithNetScore.map(r => r.calculatedNetScore));
   const bestToParNet = Math.min(...roundsWithNetScore.map(r => r.calculatedToParNet));

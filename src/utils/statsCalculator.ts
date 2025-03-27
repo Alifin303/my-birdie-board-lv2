@@ -181,7 +181,10 @@ export const calculateStats = (rounds: Round[]): Stats => {
 import { calculateHandicapIndex as whsCalculateHandicapIndex } from "@/integrations/supabase/handicap/handicap-calculator";
 
 const calculateHandicapIndex = (scores: number[]): number => {
-  return whsCalculateHandicapIndex(scores);
+  console.log("StatCalculator: Calculating handicap from scores:", scores);
+  const handicap = whsCalculateHandicapIndex(scores);
+  console.log("StatCalculator: Calculated handicap:", handicap);
+  return handicap;
 };
 
 export const calculateCourseStats = (rounds: Round[], handicapIndex?: number): CourseStats[] => {
