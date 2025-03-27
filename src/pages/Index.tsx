@@ -11,6 +11,14 @@ import { SignUpDialog } from "@/components/SignUpDialog";
 import { UserReviews } from "@/components/UserReviews";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+// Declare fbq for TypeScript
+declare global {
+  interface Window {
+    fbq: (method: string, eventName: string, ...args: any[]) => void;
+    _fbq: any;
+  }
+}
+
 const Index = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showSignupDialog, setShowSignupDialog] = useState(false);
