@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { MainContent } from "@/components/MainContent";
 import { LoginDialog } from "@/components/LoginDialog";
@@ -10,14 +9,6 @@ import { SocialFooter } from "@/components/SocialFooter";
 import { SignUpDialog } from "@/components/SignUpDialog";
 import { UserReviews } from "@/components/UserReviews";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-// Declare fbq for TypeScript
-declare global {
-  interface Window {
-    fbq: (method: string, eventName: string, ...args: any[]) => void;
-    _fbq: any;
-  }
-}
 
 const Index = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);

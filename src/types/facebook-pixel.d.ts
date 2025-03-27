@@ -1,5 +1,5 @@
 
 interface Window {
-  fbq: Function;
+  fbq: (method: string, eventName: string, ...args: any[]) => void;
   _fbq: any;
 }
