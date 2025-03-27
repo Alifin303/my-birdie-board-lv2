@@ -4,13 +4,16 @@ import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle, UserPlus } fr
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from './ui/card';
 import { FeatureInfoModal, FeatureInfo } from './FeatureInfoModal';
+
 interface MainContentProps {
   onStartSignup: () => void;
 }
+
 export const MainContent = ({
   onStartSignup
 }: MainContentProps) => {
   const [selectedFeature, setSelectedFeature] = useState<FeatureInfo | null>(null);
+  
   const featureInfo: Record<string, FeatureInfo> = {
     scorecards: {
       title: "Upload & Store Your Scorecards",
@@ -109,12 +112,15 @@ export const MainContent = ({
         </div>
     }
   };
+
   const handleOpenFeatureInfo = (feature: FeatureInfo) => {
     setSelectedFeature(feature);
   };
+
   const handleCloseFeatureInfo = () => {
     setSelectedFeature(null);
   };
+
   return <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center mt-4 sm:mt-0">
         <div className="max-w-5xl animate-fade-in mb-4 px-0 mx-0">
@@ -126,7 +132,7 @@ export const MainContent = ({
           <div className="flex justify-center mt-6">
             <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300 bg-secondary-foreground">
               <UserPlus className="mr-2 h-5 w-5" aria-hidden="true" />
-              START YOUR FREE TRIAL TODAY!
+              START YOUR 7-DAY FREE TRIAL – THEN JUST £2.99/MONTH!
             </Button>
           </div>
         </div>
