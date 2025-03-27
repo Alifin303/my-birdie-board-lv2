@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle, UserPlus } from 'lucide-react';
@@ -130,9 +131,9 @@ export const MainContent = ({
           <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium mb-8 max-w-3xl mx-auto bg-black/35 backdrop-blur-sm px-4 py-2 rounded-lg lg:text-lg">Welcome to MyBirdieBoard – Your post-round golf tracker. Play first, track later.</p>
           
           <div className="flex justify-center mt-6">
-            <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300 bg-secondary-foreground">
-              <UserPlus className="mr-2 h-5 w-5" aria-hidden="true" />
-              START YOUR 7-DAY FREE TRIAL – THEN JUST £2.99/MONTH!
+            <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-lg px-2 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground max-w-[90vw] whitespace-normal">
+              <UserPlus className="mr-2 h-5 w-5 flex-shrink-0" aria-hidden="true" />
+              <span className="text-xs sm:text-base md:text-lg">START YOUR 7-DAY FREE TRIAL – THEN JUST £2.99/MONTH!</span>
             </Button>
           </div>
         </div>
@@ -219,14 +220,14 @@ export const MainContent = ({
           <h2 id="cta-heading" className="text-lg sm:text-xl font-bold text-white mb-2">Ready to take your game to the next level?</h2>
           <p className="text-sm sm:text-base text-white/90 mb-3">Find out how MyBirdieBoard can help improve your golf game!</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-lg px-8 h-12 shadow-lg transition-all duration-300 bg-secondary-foreground">
-              <UserPlus className="mr-2 h-5 w-5" aria-hidden="true" />
-              Sign up
+            <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-base px-4 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground max-w-[90vw] whitespace-normal">
+              <UserPlus className="mr-2 h-5 w-5 flex-shrink-0" aria-hidden="true" />
+              <span className="text-xs sm:text-base">Sign up</span>
             </Button>
             <Link to="/faq">
-              <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white px-8 h-12 shadow-lg transition-all duration-300" aria-label="View frequently asked questions">
-                <HelpCircle className="mr-2 h-4 w-4" />
-                Read FAQ
+              <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white px-4 h-auto py-3 shadow-lg transition-all duration-300 max-w-[90vw]" aria-label="View frequently asked questions">
+                <HelpCircle className="mr-2 h-4 w-4 flex-shrink-0" />
+                <span className="text-xs sm:text-base">Read FAQ</span>
               </Button>
             </Link>
           </div>
