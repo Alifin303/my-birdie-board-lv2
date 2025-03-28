@@ -28,3 +28,26 @@ export interface HoleScore {
   penalties?: number;
   gir?: boolean;
 }
+
+export interface CourseStats {
+  courseId: number;
+  courseName: string;
+  clubName: string;
+  city?: string;
+  state?: string;
+  roundsPlayed: number;
+  bestGrossScore: number;
+  bestNetScore: number | null;
+  bestToPar: number;
+  bestToParNet: number | null;
+}
+
+export interface Stats {
+  totalRounds: number;
+  bestGrossScore: number;
+  bestNetScore: number | null;
+  bestToPar: number;
+  bestToParNet: number | null;
+  handicapIndex: number;
+  roundsNeededForHandicap: number;
+}
