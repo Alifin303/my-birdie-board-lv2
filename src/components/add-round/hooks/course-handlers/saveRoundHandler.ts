@@ -140,6 +140,7 @@ export function createSaveRoundHandler({
       console.log(`- tee_name: "${teeName}" (${typeof teeName})`);
       console.log(`- tee_id: "${teeId}" (${typeof teeId})`);
       
+      // Important: Store the current handicap with the round for future net score calculations
       const roundData = {
         user_id: session.user.id,
         course_id: dbCourseId,
@@ -150,7 +151,8 @@ export function createSaveRoundHandler({
         to_par_gross: toParGross,
         net_score: netScore,
         to_par_net: toParNet,
-        hole_scores: JSON.stringify(scores)
+        hole_scores: JSON.stringify(scores),
+        handicap_at_posting: handicapIndex  // Store the handicap at time of posting
       };
       
       console.log("Saving round data:", roundData);

@@ -58,6 +58,17 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
 
   if (!round) return null;
 
+  const roundHandicap = round.handicap_at_posting !== undefined && round.handicap_at_posting !== null
+    ? round.handicap_at_posting
+    : handicapIndex;
+
+  console.log("Using round-specific handicap:", {
+    roundId: round.id,
+    handicapAtPosting: round.handicap_at_posting,
+    currentHandicap: handicapIndex,
+    usingHandicap: roundHandicap
+  });
+
   const handleDateSelect = (date: Date | undefined) => {
     setRoundDate(date);
     setCalendarOpen(false);
@@ -107,7 +118,13 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         teeId: round.tee_id
       });
       
-      const netScore = Math.round(totalStrokes - handicapIndex);
+      const handicapToUse = round.handicap_at_posting !== undefined && round.handicap_at_posting !== null
+        ? round.handicap_at_posting
+        : roundHandicap;
+      
+      console.log("Using handicap for net score calculation:", handicapToUse);
+      
+      const netScore = Math.round(totalStrokes - handicapToUse);
       const toParNet = netScore - totalPar;
       
       console.log("Calculated scores for update:", {
@@ -115,7 +132,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         netScore: netScore,
         toPar: toPar,
         toParNet: toParNet,
-        handicapUsed: handicapIndex
+        handicapUsed: handicapToUse
       });
       
       const { error } = await supabase
@@ -191,10 +208,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
     try {
       setIsGeneratingImage(true);
       
-      // Create a deep clone of the scorecard DOM
       const scorecardClone = scorecardRef.current.cloneNode(true) as HTMLElement;
       
-      // Remove UI controls from clone
       const uiControls = scorecardClone.querySelectorAll('button');
       uiControls.forEach(button => {
         if (!button.closest('table')) {
@@ -202,10 +217,9 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         }
       });
       
-      // Configure main container for the image - INCREASED HEIGHT FOR MOBILE
       const canvasContainer = document.createElement('div');
       (canvasContainer as HTMLElement).style.width = '1080px';
-      (canvasContainer as HTMLElement).style.height = '1400px'; // Increased from 1200px to 1400px
+      (canvasContainer as HTMLElement).style.height = '1400px';
       (canvasContainer as HTMLElement).style.position = 'fixed';
       (canvasContainer as HTMLElement).style.backgroundColor = '#ffffff';
       (canvasContainer as HTMLElement).style.display = 'flex';
@@ -216,7 +230,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       (canvasContainer as HTMLElement).style.padding = '20px';
       (canvasContainer as HTMLElement).style.fontFamily = 'Arial, sans-serif';
       
-      // Create logo container
       const logoContainer = document.createElement('div');
       (logoContainer as HTMLElement).style.position = 'absolute';
       (logoContainer as HTMLElement).style.top = '20px';
@@ -225,14 +238,12 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       (logoContainer as HTMLElement).style.height = 'auto';
       (logoContainer as HTMLElement).style.zIndex = '10';
       
-      // Add logo image
       const logoImg = document.createElement('img');
       logoImg.src = '/logo.png';
       (logoImg as HTMLElement).style.width = '100%';
       (logoImg as HTMLElement).style.height = 'auto';
       (logoImg as HTMLElement).style.objectFit = 'contain';
       
-      // Force logo to load before generating canvas
       await new Promise((resolve) => {
         logoImg.onload = resolve;
         logoImg.onerror = () => {
@@ -240,14 +251,12 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
           resolve(null);
         };
         
-        // Set a timeout in case the image never loads
         setTimeout(resolve, 1000);
       });
       
       logoContainer.appendChild(logoImg);
       canvasContainer.appendChild(logoContainer);
       
-      // Style scorecard for better display and INCREASED BOTTOM PADDING
       (scorecardClone as HTMLElement).style.width = '90%';
       (scorecardClone as HTMLElement).style.maxWidth = '980px';
       (scorecardClone as HTMLElement).style.borderRadius = '12px';
@@ -255,9 +264,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       (scorecardClone as HTMLElement).style.overflow = 'hidden';
       (scorecardClone as HTMLElement).style.marginTop = '80px';
       (scorecardClone as HTMLElement).style.padding = '20px';
-      (scorecardClone as HTMLElement).style.paddingBottom = '120px'; // Increased from 60px to 120px
+      (scorecardClone as HTMLElement).style.paddingBottom = '120px';
       
-      // Increase heading and text size
       const headings = scorecardClone.querySelectorAll('h3');
       headings.forEach(heading => {
         (heading as HTMLElement).style.fontSize = '32px';
@@ -272,7 +280,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         (p as HTMLElement).style.lineHeight = '1.4';
       });
       
-      // Style table content and cells
       const tables = scorecardClone.querySelectorAll('table');
       tables.forEach(table => {
         (table as HTMLElement).style.fontSize = '22px';
@@ -282,7 +289,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         (table as HTMLElement).style.marginBottom = '20px';
       });
       
-      // Fix table headers
       const tableHeaders = scorecardClone.querySelectorAll('th');
       tableHeaders.forEach(th => {
         (th as HTMLElement).style.padding = '12px 8px';
@@ -291,7 +297,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         (th as HTMLElement).style.fontSize = '22px';
       });
       
-      // Fix table cells alignment and padding
       const tableCells = scorecardClone.querySelectorAll('td');
       tableCells.forEach(cell => {
         (cell as HTMLElement).style.padding = '12px 8px';
@@ -300,7 +305,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         (cell as HTMLElement).style.fontSize = '22px';
       });
       
-      // Fix score numbers alignment - make sure they're centered in their boxes
       const scoreContainers = scorecardClone.querySelectorAll('td > div');
       scoreContainers.forEach(container => {
         if (container.parentElement?.tagName === 'TD') {
@@ -315,7 +319,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         }
       });
       
-      // Style section titles (Front 9, Back 9)
       const sectionTitles = scorecardClone.querySelectorAll('h4');
       sectionTitles.forEach(title => {
         (title as HTMLElement).style.fontSize = '28px';
@@ -324,51 +327,43 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         (title as HTMLElement).style.marginBottom = '10px';
       });
       
-      // Create a dedicated summary section with more spacing to prevent overlap
       const summarySection = scorecardClone.querySelector('.pt-2.border-t.space-y-3');
       if (summarySection) {
-        (summarySection as HTMLElement).style.marginTop = '40px'; // Increased from 20px
-        (summarySection as HTMLElement).style.paddingTop = '30px'; // Increased from 20px
-        (summarySection as HTMLElement).style.marginBottom = '120px'; // Increased from 60px
+        (summarySection as HTMLElement).style.marginTop = '40px';
+        (summarySection as HTMLElement).style.paddingTop = '30px';
+        (summarySection as HTMLElement).style.marginBottom = '120px';
       }
       
-      // Fix the summary section layout to prevent overlap with watermark
       const summaryRows = scorecardClone.querySelectorAll('.flex.justify-between');
       summaryRows.forEach(row => {
         (row as HTMLElement).style.fontSize = '24px';
         (row as HTMLElement).style.padding = '8px 0';
-        (row as HTMLElement).style.marginBottom = '20px'; // Increased from 12px
+        (row as HTMLElement).style.marginBottom = '20px';
         
-        // Adjust display of the scores to prevent watermark overlap
         const label = row.querySelector('span:first-child');
         const value = row.querySelector('span:last-child');
         
         if (label && value) {
-          // Change the layout to keep the score closer to the label
           (row as HTMLElement).style.display = 'flex';
           (row as HTMLElement).style.flexDirection = 'row';
           (row as HTMLElement).style.justifyContent = 'flex-start';
           (row as HTMLElement).style.gap = '12px';
           
-          // Style the label
           (label as HTMLElement).style.fontWeight = 'bold';
-          (label as HTMLElement).style.minWidth = '150px'; // Increased from 120px
+          (label as HTMLElement).style.minWidth = '150px';
           
-          // Make value more prominent
           (value as HTMLElement).style.fontWeight = '500';
           
-          // Remove trailing colon from label if present
           if (label.textContent?.endsWith(':')) {
             label.textContent = label.textContent.slice(0, -1);
           }
         }
       });
       
-      // Add watermark (positioned higher to avoid overlapping with scores)
       const watermark = document.createElement('div');
       (watermark as HTMLElement).style.position = 'absolute';
-      (watermark as HTMLElement).style.bottom = '40px'; // Increased from 20px
-      (watermark as HTMLElement).style.right = '40px'; // Increased from 30px
+      (watermark as HTMLElement).style.bottom = '40px';
+      (watermark as HTMLElement).style.right = '40px';
       (watermark as HTMLElement).style.fontSize = '20px';
       (watermark as HTMLElement).style.color = '#666';
       (watermark as HTMLElement).style.fontWeight = 'bold';
@@ -376,14 +371,11 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       watermark.innerText = 'MyBirdieBoard.com';
       canvasContainer.appendChild(watermark);
       
-      // Add scorecard to container
       canvasContainer.appendChild(scorecardClone);
       
-      // Temporarily append to body for html2canvas
       (canvasContainer as HTMLElement).style.left = '-9999px';
       document.body.appendChild(canvasContainer);
       
-      // Generate canvas with higher scale for better quality
       const canvas = await html2canvas(canvasContainer, {
         backgroundColor: '#ffffff',
         scale: 2,
@@ -391,15 +383,13 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         allowTaint: true,
         useCORS: true,
         width: 1080,
-        height: 1400, // Increased from 1200px to 1400px
+        height: 1400,
         imageTimeout: 5000,
         onclone: (clonedDoc) => {
-          // Ensure logo is loaded in cloned document
           const logoInClone = clonedDoc.querySelector('img');
           if (logoInClone) {
             logoInClone.crossOrigin = 'anonymous';
             
-            // Try to force load the logo
             const baseUrl = window.location.origin;
             logoInClone.src = `${baseUrl}/logo.png?t=${new Date().getTime()}`;
             
@@ -409,10 +399,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         }
       });
       
-      // Clean up
       document.body.removeChild(canvasContainer);
       
-      // Return as blob
       return new Promise(resolve => {
         canvas.toBlob(blob => {
           resolve(blob);
@@ -510,10 +498,18 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
                 setShowDetailedStats={setShowDetailedStats}
               />
 
-              {handicapIndex > 0 && !isEditing && (
+              {roundHandicap > 0 && (
+                <div className="mt-2 mb-4 px-1">
+                  <p className="text-sm text-muted-foreground">
+                    Handicap at time of posting: <span className="font-semibold">{roundHandicap}</span>
+                  </p>
+                </div>
+              )}
+
+              {roundHandicap > 0 && !isEditing && (
                 <div className="mt-4 mb-2 flex justify-end">
                   <button 
-                    onClick={toggleNetScores}
+                    onClick={() => setShowNet(!showNet)}
                     className={`px-3 py-1 text-sm rounded-full flex items-center gap-1.5 transition-colors ${showNet ? 'bg-primary text-primary-foreground' : 'bg-secondary hover:bg-secondary/80'}`}
                   >
                     <Calendar className="h-3.5 w-3.5" />
@@ -550,7 +546,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
                 
                 <ScoreTableSummary 
                   scores={scores} 
-                  handicapIndex={handicapIndex}
+                  handicapIndex={roundHandicap}
                   showNet={showNet}
                   showDetailedStats={showDetailedStats}
                 />
@@ -560,7 +556,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={toggleNetScores}
+                  onClick={() => setShowNet(!showNet)}
                   className="text-xs"
                 >
                   {showNet ? "Hide Net Scores" : "Show Net Scores"}
