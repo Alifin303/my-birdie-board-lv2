@@ -208,6 +208,7 @@ export type Database = {
           created_at: string
           date: string
           gross_score: number
+          handicap_at_posting: number | null
           hole_scores: Json | null
           id: number
           net_score: number | null
@@ -223,6 +224,7 @@ export type Database = {
           created_at?: string
           date?: string
           gross_score: number
+          handicap_at_posting?: number | null
           hole_scores?: Json | null
           id?: number
           net_score?: number | null
@@ -238,6 +240,7 @@ export type Database = {
           created_at?: string
           date?: string
           gross_score?: number
+          handicap_at_posting?: number | null
           hole_scores?: Json | null
           id?: number
           net_score?: number | null
