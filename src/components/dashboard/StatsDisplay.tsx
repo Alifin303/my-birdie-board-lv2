@@ -1,3 +1,4 @@
+
 import { CalendarDays, Trophy, Flag } from "lucide-react";
 import { Stats, Round } from "./types";
 import React, { useEffect } from "react";
@@ -22,7 +23,82 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
     });
   }, [userRounds, handicapIndex]);
   
-  if (roundsLoading || !userRounds) {
+  // Initialize stats with default values
+  let stats: Stats = {
+    totalRounds: 0,
+    bestGrossScore: 0,
+    bestNetScore: null,
+    bestToPar: 0,
+    bestToParNet: null,
+    handicapIndex: 0,
+    roundsNeededForHandicap: 0
+  };
+
+  // Only calculate stats if we have rounds data
+  if (!roundsLoading && userRounds) {
+    stats = calculateStats(userRounds);
+    
+    console.log("[MainStats] Calculating scores with:", {
+      roundsKey,
+      roundsCount: userRounds.length,
+      bestGrossScore: stats.bestGrossScore,
+      bestNetScore: stats.bestNetScore,
+      bestToPar: stats.bestToPar,
+      bestToParNet: stats.bestToParNet,
+      handicapIndex: handicapIndex
+    });
+    
+    if (scoreType === 'net' && userRounds.length > 0) {
+      const calculatedRounds = userRounds.map(round => {
+        const netScore = Math.round(round.gross_score - handicapIndex);
+        const netToPar = Math.round(round.to_par_gross - handicapIndex);
+        return { 
+          id: round.id, 
+          date: round.date, 
+          gross: round.gross_score, 
+          net: netScore, 
+          toPar: round.to_par_gross,
+          toParNet: netToPar,
+          courseName: round.courses?.courseName,
+          clubName: round.courses?.clubName
+        };
+      });
+      
+      const sortedByNetScore = [...calculatedRounds].sort((a, b) => a.net - b.net);
+      const sortedByToParNet = [...calculatedRounds].sort((a, b) => a.toParNet - b.toParNet);
+      
+      console.log("[MainStats] All rounds with net scores:", calculatedRounds.map(r => ({
+        id: r.id,
+        date: new Date(r.date).toLocaleDateString(),
+        course: r.courseName,
+        club: r.clubName,
+        gross: r.gross,
+        net: r.net,
+        toPar: r.toPar,
+        toParNet: r.toParNet
+      })));
+      
+      console.log("[MainStats] Best rounds by net score:", sortedByNetScore.slice(0, 3).map(r => ({
+        id: r.id,
+        course: r.courseName,
+        score: r.net,
+        date: new Date(r.date).toLocaleDateString()
+      })));
+      
+      console.log("[MainStats] Best rounds by net to par:", sortedByToParNet.slice(0, 3).map(r => ({
+        id: r.id,
+        course: r.courseName,
+        toPar: r.toParNet,
+        date: new Date(r.date).toLocaleDateString()
+      })));
+
+      stats.bestNetScore = sortedByNetScore[0]?.net || null;
+      stats.bestToParNet = sortedByToParNet[0]?.toParNet || null;
+    }
+  }
+  
+  // Render a loading skeleton if data is loading
+  if (roundsLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 p-4 sm:p-6">
         {[1, 2, 3].map((i) => (
@@ -31,67 +107,8 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
       </div>
     );
   }
-
-  const stats = calculateStats(userRounds);
   
-  console.log("[MainStats] Calculating scores with:", {
-    roundsKey,
-    roundsCount: userRounds.length,
-    bestGrossScore: stats.bestGrossScore,
-    bestNetScore: stats.bestNetScore,
-    bestToPar: stats.bestToPar,
-    bestToParNet: stats.bestToParNet,
-    handicapIndex: handicapIndex
-  });
-  
-  if (scoreType === 'net' && userRounds.length > 0) {
-    const calculatedRounds = userRounds.map(round => {
-      const netScore = Math.round(round.gross_score - handicapIndex);
-      const netToPar = Math.round(round.to_par_gross - handicapIndex);
-      return { 
-        id: round.id, 
-        date: round.date, 
-        gross: round.gross_score, 
-        net: netScore, 
-        toPar: round.to_par_gross,
-        toParNet: netToPar,
-        courseName: round.courses?.courseName,
-        clubName: round.courses?.clubName
-      };
-    });
-    
-    const sortedByNetScore = [...calculatedRounds].sort((a, b) => a.net - b.net);
-    const sortedByToParNet = [...calculatedRounds].sort((a, b) => a.toParNet - b.toParNet);
-    
-    console.log("[MainStats] All rounds with net scores:", calculatedRounds.map(r => ({
-      id: r.id,
-      date: new Date(r.date).toLocaleDateString(),
-      course: r.courseName,
-      club: r.clubName,
-      gross: r.gross,
-      net: r.net,
-      toPar: r.toPar,
-      toParNet: r.toParNet
-    })));
-    
-    console.log("[MainStats] Best rounds by net score:", sortedByNetScore.slice(0, 3).map(r => ({
-      id: r.id,
-      course: r.courseName,
-      score: r.net,
-      date: new Date(r.date).toLocaleDateString()
-    })));
-    
-    console.log("[MainStats] Best rounds by net to par:", sortedByToParNet.slice(0, 3).map(r => ({
-      id: r.id,
-      course: r.courseName,
-      toPar: r.toParNet,
-      date: new Date(r.date).toLocaleDateString()
-    })));
-
-    stats.bestNetScore = sortedByNetScore[0]?.net || null;
-    stats.bestToParNet = sortedByToParNet[0]?.toParNet || null;
-  }
-  
+  // Render the actual stats
   return (
     <div key={roundsKey} className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 p-4 sm:p-6">
       <div className="bg-background rounded-lg p-4 border">
@@ -150,7 +167,39 @@ export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTy
     });
   }, [userRounds, handicapIndex, profileHandicap]);
   
-  if (roundsLoading || !userRounds) {
+  // Initialize stats with default values
+  let stats: Stats = {
+    totalRounds: 0,
+    bestGrossScore: 0,
+    bestNetScore: null,
+    bestToPar: 0,
+    bestToParNet: null,
+    handicapIndex: 0,
+    roundsNeededForHandicap: 5
+  };
+  
+  let hasHandicap = false;
+  let displayHandicap = 0;
+
+  // Only calculate stats if we have rounds data
+  if (!roundsLoading && userRounds) {
+    stats = calculateStats(userRounds);
+    displayHandicap = profileHandicap !== undefined ? profileHandicap : stats.handicapIndex;
+    hasHandicap = stats.roundsNeededForHandicap === 0;
+    
+    console.log("[HandicapCircle] Rendering with handicap:", {
+      roundsKey,
+      roundsCount: userRounds.length,
+      calculatedHandicapIndex: stats.handicapIndex,
+      profileHandicap: profileHandicap,
+      displayHandicap: displayHandicap,
+      hasHandicap,
+      roundsNeededForHandicap: stats.roundsNeededForHandicap
+    });
+  }
+  
+  // Render a loading skeleton if data is loading
+  if (roundsLoading) {
     return (
       <div className="flex justify-center mb-8">
         <div className="w-60 h-60 rounded-full border-8 border-muted animate-pulse flex items-center justify-center">
@@ -159,20 +208,7 @@ export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTy
     );
   }
   
-  const stats = calculateStats(userRounds);
-  const displayHandicap = profileHandicap !== undefined ? profileHandicap : stats.handicapIndex;
-  const hasHandicap = stats.roundsNeededForHandicap === 0;
-  
-  console.log("[HandicapCircle] Rendering with handicap:", {
-    roundsKey,
-    roundsCount: userRounds.length,
-    calculatedHandicapIndex: stats.handicapIndex,
-    profileHandicap: profileHandicap,
-    displayHandicap: displayHandicap,
-    hasHandicap,
-    roundsNeededForHandicap: stats.roundsNeededForHandicap
-  });
-  
+  // Render the actual handicap circle
   return (
     <div key={roundsKey} className="flex flex-col items-center justify-center mb-8">
       <div className="relative mb-3">

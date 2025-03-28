@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { ArrowLeft, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,13 +54,18 @@ export const CourseRoundHistory = ({
     }
   }, [selectedCourseId]);
   
-  if (!userRounds || !selectedCourseId) return null;
+  // Early return if we don't have the necessary data
+  if (!userRounds || !selectedCourseId) {
+    return null;
+  }
   
   const courseRounds = userRounds.filter(
     round => round.courses && round.courses.id === selectedCourseId
   );
   
-  if (courseRounds.length === 0) return null;
+  if (courseRounds.length === 0) {
+    return null;
+  }
   
   let courseName = "Course";
   let clubName = "Unknown Club";
@@ -75,16 +81,6 @@ export const CourseRoundHistory = ({
   
   const availableYears = getAvailableYears(courseRounds);
   const availableMonths = getAvailableMonths(courseRounds, periodType, currentDate);
-  
-  useEffect(() => {
-    if (periodType === 'month' && availableMonths.length > 0) {
-      if (!availableMonths.includes(currentDate.getMonth())) {
-        const newDate = new Date(currentDate);
-        newDate.setMonth(availableMonths[0]);
-        setCurrentDate(newDate);
-      }
-    }
-  }, [periodType, availableMonths]);
   
   const handleDeleteRound = async (roundId: number) => {
     try {
