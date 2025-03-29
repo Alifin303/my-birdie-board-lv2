@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -210,6 +211,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       
       const scorecardClone = scorecardRef.current.cloneNode(true) as HTMLElement;
       
+      // Remove UI controls from the clone
       const uiControls = scorecardClone.querySelectorAll('button');
       uiControls.forEach(button => {
         if (!button.closest('table')) {
@@ -217,6 +219,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
         }
       });
       
+      // Create container for the image
       const canvasContainer = document.createElement('div');
       (canvasContainer as HTMLElement).style.width = '1080px';
       (canvasContainer as HTMLElement).style.height = '1400px';
@@ -230,6 +233,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       (canvasContainer as HTMLElement).style.padding = '20px';
       (canvasContainer as HTMLElement).style.fontFamily = 'Arial, sans-serif';
       
+      // Add logo
       const logoContainer = document.createElement('div');
       (logoContainer as HTMLElement).style.position = 'absolute';
       (logoContainer as HTMLElement).style.top = '20px';
@@ -257,6 +261,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       logoContainer.appendChild(logoImg);
       canvasContainer.appendChild(logoContainer);
       
+      // Style the scorecard for the download
       (scorecardClone as HTMLElement).style.width = '90%';
       (scorecardClone as HTMLElement).style.maxWidth = '980px';
       (scorecardClone as HTMLElement).style.borderRadius = '12px';
@@ -266,6 +271,21 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       (scorecardClone as HTMLElement).style.padding = '20px';
       (scorecardClone as HTMLElement).style.paddingBottom = '120px';
       
+      // Force desktop layout for the downloaded image
+      const mobileLayouts = scorecardClone.querySelectorAll('.sm\\:hidden, .md\\:hidden');
+      mobileLayouts.forEach(element => {
+        (element as HTMLElement).style.display = 'none';
+      });
+      
+      const desktopLayouts = scorecardClone.querySelectorAll('.hidden.sm\\:grid, .hidden.sm\\:block, .hidden.md\\:grid, .hidden.md\\:block');
+      desktopLayouts.forEach(element => {
+        (element as HTMLElement).style.display = 'grid';
+        if ((element as HTMLElement).classList.contains('sm:block') || (element as HTMLElement).classList.contains('md:block')) {
+          (element as HTMLElement).style.display = 'block';
+        }
+      });
+      
+      // Style elements for a consistent look
       const headings = scorecardClone.querySelectorAll('h3');
       headings.forEach(heading => {
         (heading as HTMLElement).style.fontSize = '32px';
