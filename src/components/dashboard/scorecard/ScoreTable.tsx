@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScoreTableProps } from "./types";
@@ -68,7 +69,7 @@ export const ScoreTable = ({
                         max="20"
                         value={score.strokes || ''}
                         onChange={(e) => handleScoreChange(actualIndex, 'strokes', e.target.value)}
-                        className="w-9 h-7 text-center mx-auto px-1"
+                        className="w-9 h-7 text-center mx-auto px-1 score-input"
                         inputMode="numeric"
                       />
                     ) : (
@@ -100,7 +101,7 @@ export const ScoreTable = ({
                             max="10"
                             value={score.putts || ''}
                             onChange={(e) => handleScoreChange(actualIndex, 'putts', e.target.value)}
-                            className="w-9 h-7 text-center mx-auto px-1"
+                            className="w-9 h-7 text-center mx-auto px-1 score-input"
                             inputMode="numeric"
                           />
                         ) : (
@@ -148,7 +149,7 @@ export const ScoreTable = ({
                             max="10"
                             value={score.penalties || ''}
                             onChange={(e) => handleScoreChange(actualIndex, 'penalties', e.target.value)}
-                            className="w-9 h-7 text-center mx-auto px-1"
+                            className="w-9 h-7 text-center mx-auto px-1 score-input"
                             inputMode="numeric"
                           />
                         ) : (
@@ -204,7 +205,7 @@ export const ScoreTable = ({
                         max="20"
                         value={score.strokes || ''}
                         onChange={(e) => handleScoreChange(actualIndex, 'strokes', e.target.value)}
-                        className="w-full h-7 text-center mx-auto px-1"
+                        className="w-full h-7 text-center mx-auto px-1 score-input"
                         inputMode="numeric"
                       />
                     ) : (
@@ -237,7 +238,7 @@ export const ScoreTable = ({
                             max="10"
                             value={score.putts || ''}
                             onChange={(e) => handleScoreChange(actualIndex, 'putts', e.target.value)}
-                            className="w-full h-7 text-center mx-auto px-1"
+                            className="w-full h-7 text-center mx-auto px-1 score-input"
                             inputMode="numeric"
                           />
                         ) : (
@@ -288,7 +289,7 @@ export const ScoreTable = ({
                             max="10"
                             value={score.penalties || ''}
                             onChange={(e) => handleScoreChange(actualIndex, 'penalties', e.target.value)}
-                            className="w-full h-7 text-center mx-auto px-1"
+                            className="w-full h-7 text-center mx-auto px-1 score-input"
                             inputMode="numeric"
                           />
                         ) : (

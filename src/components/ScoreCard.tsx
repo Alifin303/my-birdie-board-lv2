@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card } from './ui/card';
 import { Input } from './ui/input';
@@ -142,8 +143,9 @@ export const ScoreCard = () => {
               max="20"
               value={hole.score || ''}
               onChange={(e) => handleScoreChange(hole.number, e.target.value)}
-              className="w-full text-center bg-white/80 border-accent/20 focus:border-accent/40"
+              className="w-full text-center bg-white/80 border-accent/20 focus:border-accent/40 score-input"
               placeholder="0"
+              inputMode="numeric"
             />
             <span className="text-xs text-accent/60 mt-1 block">
               Par {hole.par}
@@ -169,8 +171,9 @@ export const ScoreCard = () => {
                     max="20"
                     value={hole.score || ''}
                     onChange={(e) => handleScoreChange(hole.number, e.target.value)}
-                    className="w-full text-center bg-white/80 border-accent/20 focus:border-accent/40"
+                    className="w-full text-center bg-white/80 border-accent/20 focus:border-accent/40 score-input"
                     placeholder="0"
+                    inputMode="numeric"
                   />
                   <span className="text-xs text-accent/60 mt-1 block">
                     Par {hole.par}
@@ -196,8 +199,9 @@ export const ScoreCard = () => {
                     max="20"
                     value={hole.score || ''}
                     onChange={(e) => handleScoreChange(hole.number, e.target.value)}
-                    className="w-full text-center bg-white/80 border-accent/20 focus:border-accent/40"
+                    className="w-full text-center bg-white/80 border-accent/20 focus:border-accent/40 score-input"
                     placeholder="0"
+                    inputMode="numeric"
                   />
                   <span className="text-xs text-accent/60 mt-1 block">
                     Par {hole.par}
