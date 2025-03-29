@@ -15,9 +15,9 @@ export interface TeeData {
 // Interface for hole data
 export interface HoleData {
   number: number;
-  par?: number;
-  yards?: number;
-  handicap?: number;
+  par?: number | null;
+  yards?: number | null;
+  handicap?: number | null;
 }
 
 // Define interface for manual course data

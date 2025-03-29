@@ -236,7 +236,7 @@ export const loadUserAddedCourseDetails = async (courseId: number): Promise<Simp
         // Convert HoleData to SimplifiedHole with guaranteed par values
         const simplifiedHoles: SimplifiedHole[] = tee.holes.map(hole => ({
           number: hole.number,
-          par: hole.par || 4, // Ensure par is always defined (default to 4)
+          par: hole.par ?? 4, // Only use default when par is null or undefined
           yards: hole.yards,
           handicap: hole.handicap
         }));
@@ -257,7 +257,7 @@ export const loadUserAddedCourseDetails = async (courseId: number): Promise<Simp
       // Get holes from the first tee - ensure they have par values
       const holes: SimplifiedHole[] = tees[0]?.holes ? tees[0].holes.map(hole => ({
         number: hole.number,
-        par: hole.par || 4, // Ensure par is always defined (default to 4)
+        par: hole.par ?? 4, // Only use default when par is null or undefined
         yards: hole.yards,
         handicap: hole.handicap
       })) : [];

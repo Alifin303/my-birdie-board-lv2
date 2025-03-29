@@ -34,7 +34,7 @@ export function HoleInputs({
                   type="number"
                   min="2"
                   max="6"
-                  value={hole.par || ""}
+                  value={hole.par === null || hole.par === undefined ? "" : hole.par}
                   onChange={(e) => handleHoleChange(idx, 'par', e.target.value)}
                   className="w-8 sm:w-12 h-7 sm:h-8 text-center text-xs sm:text-sm"
                   required
@@ -59,7 +59,7 @@ export function HoleInputs({
                   type="number"
                   min="0"
                   max="999"
-                  value={hole.yards || ""}
+                  value={hole.yards === null || hole.yards === undefined ? "" : hole.yards}
                   onChange={(e) => handleHoleChange(idx, 'yards', e.target.value)}
                   className="w-8 sm:w-12 h-7 sm:h-8 text-center text-xs sm:text-sm"
                   required
@@ -84,7 +84,7 @@ export function HoleInputs({
                   type="number"
                   min="1"
                   max="18"
-                  value={hole.handicap || ""}
+                  value={hole.handicap === null || hole.handicap === undefined ? "" : hole.handicap}
                   onChange={(e) => handleHoleChange(idx, 'handicap', e.target.value)}
                   className="w-8 sm:w-12 h-7 sm:h-8 text-center text-xs sm:text-sm"
                   required

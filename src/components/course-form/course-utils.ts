@@ -13,9 +13,9 @@ export function createDefaultTee(): TeeData {
     par: 72,
     holes: Array(18).fill(null).map((_, idx) => ({
       number: idx + 1,
-      par: undefined,
-      yards: undefined,
-      handicap: undefined
+      par: null,
+      yards: null,
+      handicap: null
     }))
   };
 }
