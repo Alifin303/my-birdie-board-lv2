@@ -184,15 +184,10 @@ export default function Checkout() {
                   </p>
                 </div>
                 
-                <p className="text-center text-lg font-semibold mb-2">Only £2.99/month after your free trial</p>
                 
-                <div className="flex items-center justify-center mt-2 text-sm text-muted-foreground bg-primary/5 p-2 rounded-md">
-                  <Info className="h-4 w-4 mr-2 text-primary/70" />
-                  <p>Prices are shown in GBP. Your local currency price will be calculated at checkout.</p>
-                </div>
-                <p className="text-center text-sm mt-3">
-                  No long-term commitment. Cancel anytime.
-                </p>
+                
+                
+                
               </div>
               
               <div className="mb-6">
@@ -209,9 +204,8 @@ export default function Checkout() {
                   </>}
               </Button>
               
-              <p className="text-center text-sm text-muted-foreground mt-3">
-                Secure payment via Stripe. You won't be charged until your free trial ends.
-              </p>
+              <p className="text-center text-sm text-muted-foreground mt-3">Secure payment via Stripe. You won't be charged until your free trial ends, cancel anytime.
+Prices are shown in GBP. Your local currency price will be calculated at checkout.</p>
             </div>
           </div>
         </div>
