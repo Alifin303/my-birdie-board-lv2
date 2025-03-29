@@ -12,7 +12,7 @@ export interface SimplifiedGolfCourse {
 
 export interface SimplifiedHole {
   number: number;
-  par: number;
+  par: number; // Note: This needs to remain required for backward compatibility
   yards?: number;
   handicap?: number;
 }

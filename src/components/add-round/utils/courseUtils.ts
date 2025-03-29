@@ -2,7 +2,7 @@ import { CourseDetail, TeeBox } from "@/services/golfCourseApi";
 import { SimplifiedCourseDetail, SimplifiedGolfCourse, SimplifiedHole, SimplifiedTee } from "../types";
 import { supabase, formatCourseName, parseCourseName, getCourseMetadataFromLocalStorage, isUserAddedCourse } from "@/integrations/supabase";
 import { getCourseTeesByIdFromDatabase } from "@/integrations/supabase/course/course-db-operations";
-import { TeeData } from "@/components/course-form/types";
+import { TeeData, HoleData } from "@/components/course-form/types";
 
 export const extractHolesForTee = (courseDetail: CourseDetail, teeId: string): SimplifiedHole[] => {
   console.log("Extracting holes for tee:", teeId, "from course detail:", courseDetail);
@@ -231,21 +231,36 @@ export const loadUserAddedCourseDetails = async (courseId: number): Promise<Simp
       
       const { clubName, courseName } = parseCourseName(courseData.name);
       
-      // Convert TeeData to SimplifiedTee
-      const simplifiedTees: SimplifiedTee[] = tees.map((tee, index) => ({
-        id: tee.id,
-        name: tee.name,
-        rating: tee.rating || 72.0,
-        slope: tee.slope || 113,
-        par: tee.par || 72,
-        gender: tee.gender,
-        originalIndex: index,
-        yards: tee.yards,
-        holes: tee.holes
-      }));
+      // Convert TeeData to SimplifiedTee - ensure proper type conversion for holes
+      const simplifiedTees: SimplifiedTee[] = tees.map((tee, index) => {
+        // Convert HoleData to SimplifiedHole with guaranteed par values
+        const simplifiedHoles: SimplifiedHole[] = tee.holes.map(hole => ({
+          number: hole.number,
+          par: hole.par || 4, // Ensure par is always defined (default to 4)
+          yards: hole.yards,
+          handicap: hole.handicap
+        }));
+        
+        return {
+          id: tee.id,
+          name: tee.name,
+          rating: tee.rating || 72.0,
+          slope: tee.slope || 113,
+          par: tee.par || 72,
+          gender: tee.gender,
+          originalIndex: index,
+          yards: tee.yards,
+          holes: simplifiedHoles
+        };
+      });
       
-      // Get holes from the first tee
-      const holes = tees[0]?.holes || [];
+      // Get holes from the first tee - ensure they have par values
+      const holes: SimplifiedHole[] = tees[0]?.holes ? tees[0].holes.map(hole => ({
+        number: hole.number,
+        par: hole.par || 4, // Ensure par is always defined (default to 4)
+        yards: hole.yards,
+        handicap: hole.handicap
+      })) : [];
       
       // Create the course detail
       const courseDetail: SimplifiedCourseDetail = {
