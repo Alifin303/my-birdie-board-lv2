@@ -139,9 +139,7 @@ export default function Checkout() {
         <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-xl p-6 sm:p-8 max-w-2xl w-full">
           <div className="text-center mb-6">
             <h1 className="text-3xl font-bold text-primary mb-3">Join MyBirdieBoard</h1>
-            <p className="text-muted-foreground">
-              Stop guessing your way to better golf — track your progress and lower your scores with MyBirdieBoard.
-            </p>
+            <p className="text-muted-foreground">Join thousands of golfers who trust MyBirdieBoard to sharpen their game.</p>
           </div>
           
           {error && <Alert variant="destructive" className="mb-6">
