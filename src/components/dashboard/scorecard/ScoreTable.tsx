@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScoreTableProps } from "./types";
@@ -21,10 +20,16 @@ export const ScoreTable = ({
   const girCount = scores.filter(score => score.gir).length;
   const girPercentage = scores.length > 0 ? Math.round((girCount / scores.length) * 100) : 0;
 
+  const scoreChunks = [];
+  for (let i = 0; i < scores.length; i += 3) {
+    scoreChunks.push(scores.slice(i, i + 3));
+  }
+
   return (
     <div>
       <h4 className="font-medium mb-2 text-primary">{title}</h4>
-      <div className="border rounded-md overflow-x-auto shadow-sm">
+      
+      <div className="hidden sm:block border rounded-md overflow-x-auto shadow-sm">
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b bg-secondary/20">
@@ -158,6 +163,166 @@ export const ScoreTable = ({
             )}
           </tbody>
         </table>
+      </div>
+      
+      <div className="sm:hidden space-y-4">
+        {scoreChunks.map((chunk, chunkIndex) => (
+          <div key={`chunk-${chunkIndex}`} className="border rounded-md overflow-hidden shadow-sm">
+            <div className="grid grid-cols-3 bg-secondary/20 border-b">
+              {chunk.map(score => (
+                <div key={`mobile-header-${score.hole}`} className="px-2 py-2 text-center">
+                  <span className="text-sm font-medium text-primary">Hole {score.hole}</span>
+                </div>
+              ))}
+            </div>
+            
+            <div className="grid grid-cols-3 border-b">
+              {chunk.map(score => (
+                <div key={`mobile-par-${score.hole}`} className="p-2 text-center border-r last:border-r-0">
+                  <span className="text-xs text-muted-foreground block mb-1">Par</span>
+                  <div className="bg-secondary/40 border border-secondary/60 rounded-md w-7 h-7 flex items-center justify-center font-medium mx-auto text-primary">
+                    {score.par}
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="grid grid-cols-3 border-b">
+              {chunk.map((score, index) => {
+                const chunkStartIndex = chunkIndex * 3;
+                const actualIndex = chunkStartIndex + index + startIndex;
+                const isOverPar = (score.strokes || 0) > score.par;
+                const isUnderPar = (score.strokes || 0) < score.par && (score.strokes || 0) > 0;
+                
+                return (
+                  <div key={`mobile-score-${score.hole}`} className="p-2 text-center border-r last:border-r-0">
+                    <span className="text-xs text-muted-foreground block mb-1">Score</span>
+                    {isEditing ? (
+                      <Input
+                        type="number"
+                        min="1"
+                        max="20"
+                        value={score.strokes || ''}
+                        onChange={(e) => handleScoreChange(actualIndex, 'strokes', e.target.value)}
+                        className="w-full h-7 text-center mx-auto px-1"
+                        inputMode="numeric"
+                      />
+                    ) : (
+                      <div className={`w-7 h-7 flex items-center justify-center mx-auto rounded-full ${
+                        isOverPar ? 'bg-destructive/10 text-destructive' : 
+                        isUnderPar ? 'bg-success/20 text-success' : ''
+                      }`}>
+                        {score.strokes || '-'}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            
+            {showDetailedStats && (
+              <>
+                <div className="grid grid-cols-3 border-b">
+                  {chunk.map((score, index) => {
+                    const chunkStartIndex = chunkIndex * 3;
+                    const actualIndex = chunkStartIndex + index + startIndex;
+                    
+                    return (
+                      <div key={`mobile-putts-${score.hole}`} className="p-2 text-center border-r last:border-r-0">
+                        <span className="text-xs text-muted-foreground block mb-1">Putts</span>
+                        {isEditing ? (
+                          <Input
+                            type="number"
+                            min="0"
+                            max="10"
+                            value={score.putts || ''}
+                            onChange={(e) => handleScoreChange(actualIndex, 'putts', e.target.value)}
+                            className="w-full h-7 text-center mx-auto px-1"
+                            inputMode="numeric"
+                          />
+                        ) : (
+                          <span className="text-sm">{score.putts || '-'}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                <div className="grid grid-cols-3 border-b">
+                  {chunk.map((score, index) => {
+                    const chunkStartIndex = chunkIndex * 3;
+                    const actualIndex = chunkStartIndex + index + startIndex;
+                    
+                    return (
+                      <div key={`mobile-gir-${score.hole}`} className="p-2 text-center border-r last:border-r-0">
+                        <span className="text-xs text-muted-foreground block mb-1">GIR</span>
+                        {isEditing && handleGIRChange ? (
+                          <div className="flex justify-center">
+                            <Checkbox
+                              checked={score.gir || false}
+                              onCheckedChange={(checked) => 
+                                handleGIRChange(actualIndex, checked === true)
+                              }
+                            />
+                          </div>
+                        ) : (
+                          <span>{score.gir ? '✓' : '-'}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                <div className="grid grid-cols-3">
+                  {chunk.map((score, index) => {
+                    const chunkStartIndex = chunkIndex * 3;
+                    const actualIndex = chunkStartIndex + index + startIndex;
+                    
+                    return (
+                      <div key={`mobile-penalties-${score.hole}`} className="p-2 text-center border-r last:border-r-0">
+                        <span className="text-xs text-muted-foreground block mb-1">Penalties</span>
+                        {isEditing ? (
+                          <Input
+                            type="number"
+                            min="0"
+                            max="10"
+                            value={score.penalties || ''}
+                            onChange={(e) => handleScoreChange(actualIndex, 'penalties', e.target.value)}
+                            className="w-full h-7 text-center mx-auto px-1"
+                            inputMode="numeric"
+                          />
+                        ) : (
+                          <span className="text-sm">{score.penalties || '-'}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
+        ))}
+        
+        <div className="mt-2 border rounded-md p-3 grid grid-cols-2 gap-y-1">
+          <div className="text-sm font-medium">Total Par:</div>
+          <div className="text-sm text-right">{totalPar}</div>
+          
+          <div className="text-sm font-medium">Total Score:</div>
+          <div className="text-sm text-right">{totalStrokes}</div>
+          
+          {showDetailedStats && (
+            <>
+              <div className="text-sm font-medium">Total Putts:</div>
+              <div className="text-sm text-right">{totalPutts || '-'}</div>
+              
+              <div className="text-sm font-medium">GIR %:</div>
+              <div className="text-sm text-right">{girPercentage}%</div>
+              
+              <div className="text-sm font-medium">Penalties:</div>
+              <div className="text-sm text-right">{totalPenalties || '-'}</div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from './ui/card';
 import { Input } from './ui/input';
@@ -107,6 +106,19 @@ export const ScoreCard = () => {
     }
   };
 
+  // Group holes into chunks of 3 for mobile display
+  const frontNineChunks = [
+    holes.slice(0, 3),
+    holes.slice(3, 6),
+    holes.slice(6, 9)
+  ];
+  
+  const backNineChunks = [
+    holes.slice(9, 12),
+    holes.slice(12, 15),
+    holes.slice(15, 18)
+  ];
+
   return (
     <Card className="p-6 animate-fade-in backdrop-blur-sm bg-white/90 border-0 shadow-lg">
       <div className="text-center mb-6">
@@ -117,9 +129,10 @@ export const ScoreCard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+      {/* Desktop layout (unchanged) - hidden on small screens */}
+      <div className="hidden sm:grid sm:grid-cols-3 md:grid-cols-6 gap-4">
         {holes.map((hole) => (
-          <div key={hole.number} className="text-center">
+          <div key={`desktop-${hole.number}`} className="text-center">
             <label className="block text-sm font-medium text-accent/80 mb-1">
               Hole {hole.number}
             </label>
@@ -137,6 +150,63 @@ export const ScoreCard = () => {
             </span>
           </div>
         ))}
+      </div>
+
+      {/* Mobile layout - visible only on small screens */}
+      <div className="sm:hidden space-y-6">
+        <div className="space-y-4">
+          <h3 className="text-md font-medium text-primary">Front Nine</h3>
+          {frontNineChunks.map((chunk, chunkIndex) => (
+            <div key={`front-chunk-${chunkIndex}`} className="grid grid-cols-3 gap-2">
+              {chunk.map((hole) => (
+                <div key={`mobile-${hole.number}`} className="text-center">
+                  <label className="block text-sm font-medium text-accent/80 mb-1">
+                    #{hole.number}
+                  </label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="20"
+                    value={hole.score || ''}
+                    onChange={(e) => handleScoreChange(hole.number, e.target.value)}
+                    className="w-full text-center bg-white/80 border-accent/20 focus:border-accent/40"
+                    placeholder="0"
+                  />
+                  <span className="text-xs text-accent/60 mt-1 block">
+                    Par {hole.par}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+        
+        <div className="space-y-4">
+          <h3 className="text-md font-medium text-primary">Back Nine</h3>
+          {backNineChunks.map((chunk, chunkIndex) => (
+            <div key={`back-chunk-${chunkIndex}`} className="grid grid-cols-3 gap-2">
+              {chunk.map((hole) => (
+                <div key={`mobile-${hole.number}`} className="text-center">
+                  <label className="block text-sm font-medium text-accent/80 mb-1">
+                    #{hole.number}
+                  </label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="20"
+                    value={hole.score || ''}
+                    onChange={(e) => handleScoreChange(hole.number, e.target.value)}
+                    className="w-full text-center bg-white/80 border-accent/20 focus:border-accent/40"
+                    placeholder="0"
+                  />
+                  <span className="text-xs text-accent/60 mt-1 block">
+                    Par {hole.par}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="mt-6 flex justify-center gap-4">
