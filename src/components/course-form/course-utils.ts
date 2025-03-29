@@ -13,9 +13,9 @@ export function createDefaultTee(): TeeData {
     par: 72,
     holes: Array(18).fill(null).map((_, idx) => ({
       number: idx + 1,
-      par: 4,
-      yards: 350,
-      handicap: idx + 1
+      par: undefined,
+      yards: undefined,
+      handicap: undefined
     }))
   };
 }
@@ -28,8 +28,8 @@ export const calculateRatings = (tee: TeeData) => {
   }
   
   // This is a simplified algorithm - in reality, course ratings are much more complex
-  const totalYards = tee.holes.reduce((sum, hole) => sum + (hole.yards || 0), 0);
-  const totalPar = tee.holes.reduce((sum, hole) => sum + (hole.par || 0), 0);
+  const totalYards = tee.holes.reduce((sum, hole) => sum + (Number(hole.yards) || 0), 0);
+  const totalPar = tee.holes.reduce((sum, hole) => sum + (Number(hole.par) || 0), 0);
   
   // Simulated rating based on total yards and par
   const rating = parseFloat(((totalYards / 100) * 0.56 + totalPar * 0.24).toFixed(1));
