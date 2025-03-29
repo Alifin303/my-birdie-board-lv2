@@ -1,16 +1,10 @@
-
 import React, { useState, KeyboardEvent } from "react";
-import { 
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, PlusCircle, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SimplifiedGolfCourse } from "../types";
-
 interface SearchStepProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -24,7 +18,6 @@ interface SearchStepProps {
   noResults: boolean;
   setManualCourseOpen: (open: boolean) => void;
 }
-
 export const SearchStep: React.FC<SearchStepProps> = ({
   searchQuery,
   setSearchQuery,
@@ -45,9 +38,7 @@ export const SearchStep: React.FC<SearchStepProps> = ({
       handleSearch(searchQuery);
     }
   };
-  
-  return (
-    <>
+  return <>
       <DialogHeader className="space-y-2 sm:space-y-4">
         <DialogTitle>Add a New Round</DialogTitle>
         <DialogDescription>
@@ -60,14 +51,7 @@ export const SearchStep: React.FC<SearchStepProps> = ({
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
               <Search className="h-4 w-4 text-muted-foreground" />
             </div>
-            <Input
-              type="text"
-              placeholder="Search for a course..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={handleKeyPress}
-              className="pl-10"
-            />
+            <Input type="text" placeholder="Search for a course..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} onKeyDown={handleKeyPress} className="pl-10" />
           </div>
           <p className="text-xs text-muted-foreground mt-1.5">
             Enter a course name or location and press Enter to search
@@ -75,70 +59,40 @@ export const SearchStep: React.FC<SearchStepProps> = ({
         </div>
         
         <div className="flex justify-center">
-          <Button
-            onClick={() => handleSearch(searchQuery)}
-            disabled={isLoading || searchQuery.length < 3}
-            className="w-full"
-          >
-            {isLoading ? (
-              <>
+          <Button onClick={() => handleSearch(searchQuery)} disabled={isLoading || searchQuery.length < 3} className="w-full">
+            {isLoading ? <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Searching...
-              </>
-            ) : (
-              "Search"
-            )}
+              </> : "Search"}
           </Button>
         </div>
         
         <div className="mt-2 mb-4 text-center">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleOpenManualCourseForm}
-            className="w-full text-xs sm:text-sm"
-          >
+          <Button variant="outline" size="sm" onClick={handleOpenManualCourseForm} className="w-full text-xs sm:text-sm">
             <PlusCircle className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
             Can&apos;t find your course? Add it now
           </Button>
         </div>
         
-        {searchError && (
-          <div className="bg-destructive/10 border border-destructive/30 rounded-md p-3 text-center">
+        {searchError && <div className="bg-destructive/10 border border-destructive/30 rounded-md p-3 text-center">
             <p className="text-xs sm:text-sm text-destructive">{searchError}</p>
-          </div>
-        )}
+          </div>}
         
-        {noResults && (
-          <div className="bg-muted/50 rounded-md p-4 text-center">
-            <p className="text-xs sm:text-sm text-muted-foreground">No courses found matching your search.</p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleOpenManualCourseForm}
-              className="mt-2 text-xs sm:text-sm"
-            >
+        {noResults && <div className="bg-muted/50 rounded-md p-4 text-center">
+            <p className="text-xs sm:text-sm text-muted-foreground">No courses found matching your search. Add it now or message us on Instagram and we'll add it for you!</p>
+            <Button variant="outline" size="sm" onClick={handleOpenManualCourseForm} className="mt-2 text-xs sm:text-sm">
               <PlusCircle className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
               Add Your Course
             </Button>
-          </div>
-        )}
+          </div>}
         
-        {searchResults.length > 0 && (
-          <div>
+        {searchResults.length > 0 && <div>
             <h3 className="text-base sm:text-lg font-medium mb-2">Search Results</h3>
             <div className="border rounded-md divide-y">
-              {searchResults.map((course) => (
-                <div 
-                  key={course.id.toString()}
-                  className="flex justify-between items-center px-2 sm:px-4 py-2 sm:py-3 hover:bg-muted cursor-pointer"
-                  onClick={() => handleCourseSelect(course)}
-                >
+              {searchResults.map(course => <div key={course.id.toString()} className="flex justify-between items-center px-2 sm:px-4 py-2 sm:py-3 hover:bg-muted cursor-pointer" onClick={() => handleCourseSelect(course)}>
                   <div>
                     <p className="font-medium text-sm sm:text-base">
-                      {course.clubName !== course.name 
-                        ? `${course.clubName} - ${course.name}`
-                        : course.name}
+                      {course.clubName !== course.name ? `${course.clubName} - ${course.name}` : course.name}
                     </p>
                     <p className="text-xs sm:text-sm text-muted-foreground">
                       {course.city}{course.state ? `, ${course.state}` : ''}
@@ -146,43 +100,34 @@ export const SearchStep: React.FC<SearchStepProps> = ({
                     </p>
                   </div>
                   
-                  {course.isUserAdded && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setManualCourseOpen(true);
-                        
-                        // Pass the existing course data to the manual course form
-                        const existingCourse = {
-                          id: course.id,
-                          name: course.name,
-                          city: course.city || '',
-                          state: course.state || ''
-                        };
-                        
-                        // Set a timeout to ensure the form is fully mounted
-                        setTimeout(() => {
-                          setManualCourseOpen(true);
-                          // Pass the existing course data to the form ref
-                          if (manualCourseFormRef.current) {
-                            manualCourseFormRef.current.setExistingCourse(existingCourse);
-                          } else {
-                            console.error("Manual course form ref not available");
-                          }
-                        }, 10);
-                      }}
-                    >
+                  {course.isUserAdded && <Button variant="ghost" size="icon" onClick={e => {
+              e.stopPropagation();
+              setManualCourseOpen(true);
+
+              // Pass the existing course data to the manual course form
+              const existingCourse = {
+                id: course.id,
+                name: course.name,
+                city: course.city || '',
+                state: course.state || ''
+              };
+
+              // Set a timeout to ensure the form is fully mounted
+              setTimeout(() => {
+                setManualCourseOpen(true);
+                // Pass the existing course data to the form ref
+                if (manualCourseFormRef.current) {
+                  manualCourseFormRef.current.setExistingCourse(existingCourse);
+                } else {
+                  console.error("Manual course form ref not available");
+                }
+              }, 10);
+            }}>
                       <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
-                    </Button>
-                  )}
-                </div>
-              ))}
+                    </Button>}
+                </div>)}
             </div>
-          </div>
-        )}
+          </div>}
       </div>
-    </>
-  );
+    </>;
 };
