@@ -151,7 +151,7 @@ export default function Checkout() {
           <div className="grid gap-6">
             <div className="bg-accent/10 rounded-lg p-6 py-0 px-[10px]">
               <div className="mb-6 py-[10px]">
-                <h2 className="text-xl font-bold text-accent mb-4 text-center">Your Golf Game, Tracked and Transformed</h2>
+                <h2 className="text-xl font-bold text-accent mb-4 text-center">Cheaper than a bucket of range balls - invest in your game and start improving today!</h2>
                 <ul className="space-y-3">
                   <li className="flex items-center">
                     <CheckCircle className="h-5 w-5 text-accent mr-2" />
