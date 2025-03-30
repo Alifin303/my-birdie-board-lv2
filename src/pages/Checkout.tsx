@@ -6,6 +6,7 @@ import { Loader2, CheckCircle, XCircle, CreditCard, Info } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+
 export default function Checkout() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +17,9 @@ export default function Checkout() {
   const {
     toast
   } = useToast();
+
   const canceled = new URLSearchParams(location.search).get("canceled");
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -56,6 +59,7 @@ export default function Checkout() {
     };
     checkAuth();
   }, [navigate]);
+
   useEffect(() => {
     if (canceled) {
       toast({
@@ -65,6 +69,7 @@ export default function Checkout() {
       });
     }
   }, [canceled, toast]);
+
   const handleCreateCheckout = async () => {
     if (!user) {
       setError("You must be logged in to subscribe.");
@@ -122,6 +127,7 @@ export default function Checkout() {
       setIsLoading(false);
     }
   };
+
   return <div className="min-h-screen flex flex-col bg-cover bg-center bg-no-repeat" style={{
     backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
     backgroundColor: "#2C4A3B" // Fallback color if image fails to load
@@ -151,24 +157,24 @@ export default function Checkout() {
               <div className="mb-6 py-[10px]">
                 <h2 className="text-xl font-bold text-accent mb-4 text-center">Cheaper than a bucket of range balls - invest in your game and start improving today!</h2>
                 <ul className="space-y-3">
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-accent mr-2" />
+                  <li className="flex items-center text-base">
+                    <CheckCircle className="h-5 w-5 text-accent mr-2 flex-shrink-0" />
                     <span>Track unlimited rounds</span>
                   </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-accent mr-2" />
+                  <li className="flex items-center text-base">
+                    <CheckCircle className="h-5 w-5 text-accent mr-2 flex-shrink-0" />
                     <span>Access detailed analytics to spot trends and patterns</span>
                   </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-accent mr-2" />
+                  <li className="flex items-center text-base">
+                    <CheckCircle className="h-5 w-5 text-accent mr-2 flex-shrink-0" />
                     <span>Course leaderboards — see how you rank at every course you play</span>
                   </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-accent mr-2" />
+                  <li className="flex items-center text-base">
+                    <CheckCircle className="h-5 w-5 text-accent mr-2 flex-shrink-0" />
                     <span>Advanced progress tracking — monitor your best rounds and personal records</span>
                   </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-accent mr-2" />
+                  <li className="flex items-center text-base">
+                    <CheckCircle className="h-5 w-5 text-accent mr-2 flex-shrink-0" />
                     <span>Track your handicap</span>
                   </li>
                 </ul>
