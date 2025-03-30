@@ -26,7 +26,7 @@ export function useCourseHandlers(props: UseCourseHandlersProps): CourseHandlers
     handleCourseCreated: courseCreatedHandler
   } = createCourseSelectionHandlers(props);
   
-  const { handleSaveRound } = createSaveRoundHandler(props);
+  const { handleSaveRound: saveRoundHandler } = createSaveRoundHandler(props);
 
   // Wrap handlers to match the expected interface types
   const handleSearch = async (): Promise<void> => {
@@ -42,6 +42,12 @@ export function useCourseHandlers(props: UseCourseHandlersProps): CourseHandlers
       // For backward compatibility, assume courseData is the courseId
       return await courseCreatedHandler(courseData, '');
     }
+  };
+
+  // Modify this function to return void instead of boolean
+  const handleSaveRound = async (): Promise<void> => {
+    await saveRoundHandler();
+    // Don't return the boolean value
   };
 
   return {
