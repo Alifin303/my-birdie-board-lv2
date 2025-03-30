@@ -6,6 +6,7 @@ import { Loader2, CheckCircle, XCircle, CreditCard, Info } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+
 export default function Checkout() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +17,9 @@ export default function Checkout() {
   const {
     toast
   } = useToast();
+
   const canceled = new URLSearchParams(location.search).get("canceled");
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -56,6 +59,7 @@ export default function Checkout() {
     };
     checkAuth();
   }, [navigate]);
+
   useEffect(() => {
     if (canceled) {
       toast({
@@ -65,6 +69,7 @@ export default function Checkout() {
       });
     }
   }, [canceled, toast]);
+
   const handleCreateCheckout = async () => {
     if (!user) {
       setError("You must be logged in to subscribe.");
@@ -122,6 +127,7 @@ export default function Checkout() {
       setIsLoading(false);
     }
   };
+
   return <div className="min-h-screen flex flex-col bg-cover bg-center bg-no-repeat" style={{
     backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
     backgroundColor: "#2C4A3B" // Fallback color if image fails to load
@@ -198,7 +204,7 @@ export default function Checkout() {
                     {processingStatus === "redirecting" ? "Redirecting to Stripe..." : "Processing..."}
                   </> : <>
                     <CreditCard className="mr-2 h-5 w-5" />
-                    👉 Start 7-Day Free Trial
+                    Subscribe now
                   </>}
               </Button>
               
