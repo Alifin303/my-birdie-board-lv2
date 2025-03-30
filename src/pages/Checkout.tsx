@@ -138,7 +138,7 @@ export default function Checkout() {
       <div className="flex-1 flex justify-center items-center relative z-10 py-0 px-[15px]">
         <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-xl p-6 sm:p-8 max-w-2xl w-full">
           <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-primary mb-3">Join thousands of golfers who trust MyBirdieBoard to sharpen their game.</h1>
+            <h1 className="font-bold text-primary mb-3 text-2xl">Join thousands of golfers using MyBirdieBoard to track, improve, and lower their scores</h1>
             <p className="text-muted-foreground"></p>
           </div>
           
