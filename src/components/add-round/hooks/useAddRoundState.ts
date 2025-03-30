@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { 
   SimplifiedGolfCourse, 
   SimplifiedCourseDetail,
@@ -100,6 +100,38 @@ export const useAddRoundState = () => {
     }
   }, [selectedCourse, selectedTeeId]);
 
+  // Function to update scorecard for a specific tee
+  const updateScorecardForTee = useCallback((teeId: string, selection: HoleSelection) => {
+    if (selectedCourse) {
+      console.log("Updating scorecard for tee:", teeId, "with selection:", selection);
+      setSelectedTeeId(teeId);
+      setHoleSelection(selection);
+    }
+  }, [selectedCourse]);
+
+  // Function to reset all state values
+  const resetAddRoundState = useCallback(() => {
+    console.log("Resetting add round state");
+    setCurrentStep('search');
+    setSearchQuery('');
+    setSearchResults([]);
+    setSelectedCourse(null);
+    setSelectedTeeId(null);
+    setScores([]);
+    setIsLoading(false);
+    setSearchError(null);
+    setDataLoadingError(null);
+    setRoundDate(new Date());
+    setCalendarOpen(false);
+    setHoleSelection('all');
+    setActiveScoreTab("front9");
+    setOriginalCourseDetail(null);
+    setNoResults(false);
+    setManualCourseOpen(false);
+    setCourseAndTeeReady(false);
+    setCourseLoadFailure(false);
+  }, []);
+
   return {
     currentStep,
     setCurrentStep,
@@ -135,6 +167,9 @@ export const useAddRoundState = () => {
     setManualCourseOpen,
     courseAndTeeReady,
     courseLoadFailure,
-    setCourseLoadFailure
+    setCourseLoadFailure,
+    // Include the new functions in the return object
+    updateScorecardForTee,
+    resetAddRoundState
   };
 };

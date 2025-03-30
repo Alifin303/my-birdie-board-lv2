@@ -17,7 +17,7 @@ interface AddRoundModalProps {
 
 export const AddRoundModal = ({ open, onOpenChange }: AddRoundModalProps) => {
   const { toast } = useToast();
-  const manualCourseFormRef = React.useRef(null);
+  const manualCourseFormRef = React.useRef<any>(null);
   
   const {
     currentStep,
@@ -33,6 +33,11 @@ export const AddRoundModal = ({ open, onOpenChange }: AddRoundModalProps) => {
     courseLoadFailure,
     manualCourseOpen,
     originalCourseDetail,
+    roundDate,
+    calendarOpen,
+    holeSelection,
+    activeScoreTab,
+    courseAndTeeReady,
     
     setCurrentStep,
     setSelectedCourse,
@@ -47,6 +52,10 @@ export const AddRoundModal = ({ open, onOpenChange }: AddRoundModalProps) => {
     setCourseLoadFailure,
     setManualCourseOpen,
     setOriginalCourseDetail,
+    setRoundDate,
+    setCalendarOpen,
+    setHoleSelection,
+    setActiveScoreTab,
     
     updateScorecardForTee,
     resetAddRoundState
@@ -72,6 +81,11 @@ export const AddRoundModal = ({ open, onOpenChange }: AddRoundModalProps) => {
     courseLoadFailure,
     manualCourseOpen,
     originalCourseDetail,
+    roundDate,
+    calendarOpen,
+    holeSelection,
+    activeScoreTab,
+    courseAndTeeReady,
     
     setCurrentStep,
     setSelectedCourse,
@@ -86,6 +100,10 @@ export const AddRoundModal = ({ open, onOpenChange }: AddRoundModalProps) => {
     setCourseLoadFailure,
     setManualCourseOpen,
     setOriginalCourseDetail,
+    setRoundDate,
+    setCalendarOpen,
+    setHoleSelection,
+    setActiveScoreTab,
     
     updateScorecardForTee,
     resetAddRoundState,
@@ -100,6 +118,11 @@ export const AddRoundModal = ({ open, onOpenChange }: AddRoundModalProps) => {
       resetAddRoundState();
     }
   }, [open, resetAddRoundState]);
+
+  const handleSaveRoundWrapper = async () => {
+    await handleSaveRound();
+    return;
+  };
 
   return (
     <>
@@ -134,7 +157,7 @@ export const AddRoundModal = ({ open, onOpenChange }: AddRoundModalProps) => {
               setSelectedTeeId={setSelectedTeeId}
               scores={scores}
               setScores={setScores}
-              handleSaveRound={handleSaveRound}
+              handleSaveRound={handleSaveRoundWrapper}
               onBackToSearch={() => setCurrentStep('search')}
               isLoading={isLoading}
               updateScorecardForTee={updateScorecardForTee}
@@ -148,7 +171,6 @@ export const AddRoundModal = ({ open, onOpenChange }: AddRoundModalProps) => {
         open={manualCourseOpen}
         onOpenChange={setManualCourseOpen}
         onCourseCreated={handleCourseCreated}
-        ref={manualCourseFormRef}
       />
     </>
   );

@@ -29,7 +29,7 @@ export interface UseCourseHandlersProps {
   setSearchError: Dispatch<SetStateAction<string | null>>;
   dataLoadingError: string | null;
   setDataLoadingError: Dispatch<SetStateAction<string | null>>;
-  roundDate: Date | undefined;
+  roundDate?: Date | undefined;
   setRoundDate: Dispatch<SetStateAction<Date | undefined>>;
   calendarOpen: boolean;
   setCalendarOpen: Dispatch<SetStateAction<boolean>>;
@@ -43,12 +43,14 @@ export interface UseCourseHandlersProps {
   setNoResults: Dispatch<SetStateAction<boolean>>;
   manualCourseOpen: boolean;
   setManualCourseOpen: Dispatch<SetStateAction<boolean>>;
-  courseAndTeeReady: boolean;
+  courseAndTeeReady?: boolean;
   updateScorecardForTee: (teeId: string, selection: HoleSelection) => void;
+  resetAddRoundState: () => void;
   courseLoadFailure: boolean;
   setCourseLoadFailure: Dispatch<SetStateAction<boolean>>;
   toast: ToastApi;
-  queryClient: QueryClient;
+  onClose: () => void;
+  queryClient?: QueryClient;
 }
 
 export interface CourseHandlers {
@@ -56,5 +58,5 @@ export interface CourseHandlers {
   handleCourseSelect: (course: SimplifiedGolfCourse) => Promise<void>;
   handleOpenManualCourseForm: () => void;
   handleCourseCreated: (courseData: any) => Promise<void>;
-  handleSaveRound: () => Promise<boolean>;
+  handleSaveRound: () => Promise<void>;
 }
