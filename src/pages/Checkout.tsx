@@ -6,7 +6,6 @@ import { Loader2, CheckCircle, XCircle, CreditCard, Info } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-
 export default function Checkout() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,9 +16,7 @@ export default function Checkout() {
   const {
     toast
   } = useToast();
-
   const canceled = new URLSearchParams(location.search).get("canceled");
-
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -59,7 +56,6 @@ export default function Checkout() {
     };
     checkAuth();
   }, [navigate]);
-
   useEffect(() => {
     if (canceled) {
       toast({
@@ -69,7 +65,6 @@ export default function Checkout() {
       });
     }
   }, [canceled, toast]);
-
   const handleCreateCheckout = async () => {
     if (!user) {
       setError("You must be logged in to subscribe.");
@@ -127,7 +122,6 @@ export default function Checkout() {
       setIsLoading(false);
     }
   };
-
   return <div className="min-h-screen flex flex-col bg-cover bg-center bg-no-repeat" style={{
     backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
     backgroundColor: "#2C4A3B" // Fallback color if image fails to load
@@ -144,8 +138,8 @@ export default function Checkout() {
       <div className="flex-1 flex justify-center items-center relative z-10 py-0 px-[15px]">
         <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-xl p-6 sm:p-8 max-w-2xl w-full">
           <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-primary mb-3">Join MyBirdieBoard</h1>
-            <p className="text-muted-foreground">Join thousands of golfers who trust MyBirdieBoard to sharpen their game.</p>
+            <h1 className="text-3xl font-bold text-primary mb-3">Join thousands of golfers who trust MyBirdieBoard to sharpen their game.</h1>
+            <p className="text-muted-foreground"></p>
           </div>
           
           {error && <Alert variant="destructive" className="mb-6">
