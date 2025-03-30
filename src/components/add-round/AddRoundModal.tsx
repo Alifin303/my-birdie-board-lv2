@@ -108,7 +108,7 @@ export const AddRoundModal = ({ open, onOpenChange }: AddRoundModalProps) => {
     updateScorecardForTee,
     resetAddRoundState,
     
-    toast,
+    toast: { toast, dismiss: (toastId?: string) => useToast().dismiss(toastId) }, // Fix the toast type
     onClose: () => onOpenChange(false)
   });
 

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +40,9 @@ interface ScorecardStepProps {
   isLoading: boolean;
   dataLoadingError: string | null;
   today: Date;
+  activeScoreTab: "front9" | "back9";
+  setActiveScoreTab: (tab: "front9" | "back9") => void;
+  originalCourseDetail: any | null;
 }
 
 export const ScorecardStep: React.FC<ScorecardStepProps> = ({
