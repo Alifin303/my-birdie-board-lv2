@@ -1,152 +1,208 @@
 
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { X } from "lucide-react";
-import { useAddRoundState } from "./hooks/useAddRoundState";
-import { useCourseHandlers } from "./hooks/course-handlers";
+import { useQueryClient } from "@tanstack/react-query";
+import { 
+  Score, 
+  HoleSelection, 
+  SimplifiedGolfCourse, 
+  SimplifiedCourseDetail, 
+  AddRoundModalProps 
+} from "./types";
+import { ManualCourseForm } from "@/components/ManualCourseForm";
 import { SearchStep } from "./components/SearchStep";
 import { ScorecardStep } from "./components/ScorecardStep";
-import { ManualCourseForm } from "@/components/ManualCourseForm";
+import { useAddRoundState } from "./hooks/useAddRoundState";
+import { useScoreHandlers } from "./hooks/useScoreHandlers";
+import { useCourseHandlers } from "./hooks/useCourseHandlers";
+import { calculateScoreSummary } from "./utils/scoreUtils";
 
-interface AddRoundModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export const AddRoundModal = ({ open, onOpenChange }: AddRoundModalProps) => {
-  const { toast } = useToast();
-  const manualCourseFormRef = React.useRef<any>(null);
-  
+export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   const {
     currentStep,
-    selectedCourse,
-    selectedTeeId,
-    searchQuery,
-    searchResults,
-    isLoading,
-    searchError,
-    noResults,
-    scores,
-    dataLoadingError,
-    courseLoadFailure,
-    manualCourseOpen,
-    originalCourseDetail,
-    roundDate,
-    calendarOpen,
-    holeSelection,
-    activeScoreTab,
-    courseAndTeeReady,
-    
     setCurrentStep,
-    setSelectedCourse,
-    setSelectedTeeId,
+    searchQuery,
     setSearchQuery,
+    searchResults,
     setSearchResults,
-    setIsLoading,
-    setSearchError,
-    setNoResults,
+    selectedCourse,
+    setSelectedCourse,
+    selectedTeeId,
+    setSelectedTeeId,
+    scores,
     setScores,
+    isLoading,
+    setIsLoading,
+    searchError,
+    setSearchError,
+    dataLoadingError,
     setDataLoadingError,
-    setCourseLoadFailure,
-    setManualCourseOpen,
-    setOriginalCourseDetail,
+    roundDate,
     setRoundDate,
+    calendarOpen,
     setCalendarOpen,
+    holeSelection,
     setHoleSelection,
+    activeScoreTab,
     setActiveScoreTab,
-    
-    updateScorecardForTee,
-    resetAddRoundState
+    originalCourseDetail,
+    setOriginalCourseDetail,
+    noResults,
+    setNoResults,
+    manualCourseOpen,
+    setManualCourseOpen,
+    courseAndTeeReady,
+    courseLoadFailure,
+    setCourseLoadFailure
   } = useAddRoundState();
-
-  const {
-    handleSearch,
+  
+  const toast = useToast();
+  const queryClient = useQueryClient();
+  const manualCourseFormRef = useRef<any>(null);
+  const today = new Date();
+  
+  useEffect(() => {
+    if (selectedTeeId) {
+      console.log("AddRoundModal - Current selectedTeeId:", selectedTeeId);
+      if (selectedCourse) {
+        const selectedTee = selectedCourse.tees.find(tee => tee.id === selectedTeeId);
+        console.log("Selected tee:", selectedTee ? { id: selectedTee.id, name: selectedTee.name } : "Not found");
+      }
+    }
+  }, [selectedTeeId, selectedCourse]);
+  
+  useEffect(() => {
+    if (!open) {
+      resetForm();
+    }
+  }, [open]);
+  
+  const resetForm = () => {
+    setCurrentStep('search');
+    setSearchQuery('');
+    setSearchResults([]);
+    setSelectedCourse(null);
+    setSelectedTeeId(null);
+    setScores([]);
+    setSearchError(null);
+    setDataLoadingError(null);
+    setRoundDate(new Date());
+    setHoleSelection('all');
+    setActiveScoreTab("front9");
+    setManualCourseOpen(false);
+  };
+  
+  const { 
+    handleScoreChange,
+    handleGIRChange,
+    handleHoleSelectionChange,
+    updateScorecardForTee,
+    handleTeeChange
+  } = useScoreHandlers({
+    selectedCourse,
+    scores,
+    setScores,
+    setActiveScoreTab,
+    setHoleSelection
+  });
+  
+  const handleTeeChangeWithLogging = (teeId: string) => {
+    console.log(`AddRoundModal - handleTeeChange called with: ${teeId}`);
+    console.log("Before change - selectedTeeId:", selectedTeeId);
+    handleTeeChange(teeId);
+    console.log("After handler call - selectedTeeId:", selectedTeeId);
+    setSelectedTeeId(teeId);
+  };
+  
+  const { 
+    handleSearch, 
     handleCourseSelect,
     handleOpenManualCourseForm,
     handleCourseCreated,
     handleSaveRound
   } = useCourseHandlers({
     currentStep,
-    selectedCourse,
-    selectedTeeId,
-    searchQuery,
-    searchResults,
-    isLoading,
-    searchError,
-    noResults,
-    scores,
-    dataLoadingError,
-    courseLoadFailure,
-    manualCourseOpen,
-    originalCourseDetail,
-    roundDate,
-    calendarOpen,
-    holeSelection,
-    activeScoreTab,
-    courseAndTeeReady,
-    
     setCurrentStep,
-    setSelectedCourse,
-    setSelectedTeeId,
+    searchQuery,
     setSearchQuery,
+    searchResults,
     setSearchResults,
-    setIsLoading,
-    setSearchError,
-    setNoResults,
+    selectedCourse,
+    setSelectedCourse,
+    selectedTeeId,
+    setSelectedTeeId,
+    scores,
     setScores,
+    isLoading, 
+    setIsLoading,
+    searchError,
+    setSearchError,
+    dataLoadingError,
     setDataLoadingError,
-    setCourseLoadFailure,
-    setManualCourseOpen,
-    setOriginalCourseDetail,
+    roundDate,
     setRoundDate,
+    calendarOpen,
     setCalendarOpen,
+    holeSelection,
     setHoleSelection,
+    activeScoreTab,
     setActiveScoreTab,
-    
+    originalCourseDetail,
+    setOriginalCourseDetail,
+    noResults,
+    setNoResults,
+    manualCourseOpen,
+    setManualCourseOpen,
+    courseAndTeeReady,
     updateScorecardForTee,
-    resetAddRoundState,
-    
-    toast: { toast, dismiss: (toastId?: string) => useToast().dismiss(toastId) }, // Fix the toast type
-    onClose: () => onOpenChange(false)
+    courseLoadFailure,
+    setCourseLoadFailure,
+    toast,
+    queryClient
   });
 
-  // Reset state when modal closes
-  React.useEffect(() => {
-    if (!open) {
-      resetAddRoundState();
-    }
-  }, [open, resetAddRoundState]);
-
-  const handleSaveRoundWrapper = async () => {
-    await handleSaveRound();
+  const handleBackToSearch = () => {
+    setCurrentStep('search');
+    setSelectedCourse(null);
+    setSelectedTeeId(null);
+    setScores([]);
+    setSearchQuery('');
+    setHoleSelection('all');
+    setActiveScoreTab("front9");
   };
 
-  // Create a handler for tee changes that updates state
-  const handleTeeChange = (teeId: string) => {
-    console.log("Handling tee change in AddRoundModal:", teeId);
-    setSelectedTeeId(teeId);
-  };
-
-  // Create a handler for date selection
   const handleDateSelect = (date: Date | undefined) => {
     setRoundDate(date);
     setCalendarOpen(false);
   };
 
+  const handleCloseModal = () => {
+    onOpenChange(false);
+    resetForm();
+  };
+  
+  const handleSaveRoundAndClose = async () => {
+    console.log("Save and close - current teeId:", selectedTeeId);
+    if (selectedCourse && selectedTeeId) {
+      const tee = selectedCourse.tees.find(t => t.id === selectedTeeId);
+      console.log("Saving with tee:", tee ? { id: tee.id, name: tee.name } : "No tee found");
+    }
+    
+    const success = await handleSaveRound();
+    if (success) {
+      handleCloseModal();
+    }
+  };
+  
+  const scoreSummary = calculateScoreSummary(scores);
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
-          <div className="absolute right-4 top-4">
-            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-6 w-6">
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          
-          {currentStep === 'search' && (
-            <SearchStep
+        <DialogContent className="sm:max-w-[1000px] p-6 max-h-[90vh] overflow-y-auto">
+          {currentStep === 'search' ? (
+            <SearchStep 
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               handleSearch={handleSearch}
@@ -159,55 +215,27 @@ export const AddRoundModal = ({ open, onOpenChange }: AddRoundModalProps) => {
               noResults={noResults}
               setManualCourseOpen={setManualCourseOpen}
             />
-          )}
-          
-          {currentStep === 'scorecard' && selectedCourse && (
-            <ScorecardStep
+          ) : (
+            <ScorecardStep 
               selectedCourse={selectedCourse}
               selectedTeeId={selectedTeeId}
               roundDate={roundDate}
-              handleTeeChange={handleTeeChange}
+              handleTeeChange={handleTeeChangeWithLogging}
               handleDateSelect={handleDateSelect}
-              handleHoleSelectionChange={setHoleSelection}
-              handleScoreChange={(index, field, value) => {
-                const updatedScores = [...scores];
-                // @ts-ignore - We know the field exists on the score
-                updatedScores[index][field] = field === 'strokes' || field === 'putts' || field === 'penalties' 
-                  ? (value === '' ? undefined : parseInt(value, 10)) 
-                  : value;
-                setScores(updatedScores);
-              }}
-              handleGIRChange={(index, value) => {
-                const updatedScores = [...scores];
-                updatedScores[index].gir = value;
-                setScores(updatedScores);
-              }}
-              handleBackToSearch={() => setCurrentStep('search')}
-              handleSaveRound={handleSaveRoundWrapper}
-              handleCloseModal={() => onOpenChange(false)}
+              handleHoleSelectionChange={handleHoleSelectionChange}
+              handleScoreChange={handleScoreChange}
+              handleGIRChange={handleGIRChange}
+              handleBackToSearch={handleBackToSearch}
+              handleSaveRound={handleSaveRoundAndClose}
+              handleCloseModal={handleCloseModal}
               scores={scores}
-              scoreSummary={{
-                totalStrokes: scores.reduce((sum, s) => sum + (s.strokes || 0), 0),
-                totalPar: scores.reduce((sum, s) => sum + s.par, 0),
-                totalPutts: scores.reduce((sum, s) => sum + (s.putts || 0), 0),
-                toPar: scores.reduce((sum, s) => sum + (s.strokes || 0), 0) - scores.reduce((sum, s) => sum + s.par, 0),
-                puttsRecorded: scores.some(s => s.putts !== undefined),
-                front9Strokes: scores.filter(s => s.hole <= 9).reduce((sum, s) => sum + (s.strokes || 0), 0),
-                front9Par: scores.filter(s => s.hole <= 9).reduce((sum, s) => sum + s.par, 0),
-                front9ToPar: scores.filter(s => s.hole <= 9).reduce((sum, s) => sum + (s.strokes || 0), 0) - scores.filter(s => s.hole <= 9).reduce((sum, s) => sum + s.par, 0),
-                back9Strokes: scores.filter(s => s.hole > 9).reduce((sum, s) => sum + (s.strokes || 0), 0),
-                back9Par: scores.filter(s => s.hole > 9).reduce((sum, s) => sum + s.par, 0),
-                back9ToPar: scores.filter(s => s.hole > 9).reduce((sum, s) => sum + (s.strokes || 0), 0) - scores.filter(s => s.hole > 9).reduce((sum, s) => sum + s.par, 0),
-              }}
+              scoreSummary={scoreSummary}
               holeSelection={holeSelection}
               calendarOpen={calendarOpen}
               setCalendarOpen={setCalendarOpen}
               isLoading={isLoading}
               dataLoadingError={dataLoadingError}
-              today={new Date()}
-              activeScoreTab={activeScoreTab}
-              setActiveScoreTab={setActiveScoreTab}
-              originalCourseDetail={originalCourseDetail}
+              today={today}
             />
           )}
         </DialogContent>
@@ -220,4 +248,4 @@ export const AddRoundModal = ({ open, onOpenChange }: AddRoundModalProps) => {
       />
     </>
   );
-};
+}

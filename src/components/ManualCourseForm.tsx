@@ -524,7 +524,7 @@ export function ManualCourseForm({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="sm:max-w-5xl max-h-[90vh] overflow-y-auto p-3 sm:p-6"
+        className="sm:max-w-5xl max-h-[90vh] overflow-y-auto"
         onKeyDown={handleKeyDown}
       >
         <DialogHeader>
@@ -565,58 +565,34 @@ export function ManualCourseForm({
                 handleTeeChange={handleTeeChange}
               />
               
-              <div className="md:block hidden">
-                <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-                  <TabsList className="grid grid-cols-2">
-                    <TabsTrigger value="front9" type="button">Front Nine</TabsTrigger>
-                    <TabsTrigger value="back9" type="button">Back Nine</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="front9">
-                    <HoleInputs 
-                      holes={formData.tees[currentTeeIndex].holes.slice(0, 9)}
-                      handleHoleChange={(holeIndex, field, value) => 
-                        handleHoleChange(holeIndex, field, value)
-                      }
-                    />
-                  </TabsContent>
-                  <TabsContent value="back9">
-                    <HoleInputs 
-                      holes={formData.tees[currentTeeIndex].holes.slice(9, 18)}
-                      handleHoleChange={(holeIndex, field, value) => 
-                        handleHoleChange(holeIndex, field, value)
-                      }
-                    />
-                  </TabsContent>
-                </Tabs>
-              </div>
-              
-              <div className="md:hidden block">
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Front Nine</h3>
+              <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
+                <TabsList className="grid grid-cols-2">
+                  <TabsTrigger value="front9" type="button">Front Nine</TabsTrigger>
+                  <TabsTrigger value="back9" type="button">Back Nine</TabsTrigger>
+                </TabsList>
+                <TabsContent value="front9">
                   <HoleInputs 
                     holes={formData.tees[currentTeeIndex].holes.slice(0, 9)}
                     handleHoleChange={(holeIndex, field, value) => 
                       handleHoleChange(holeIndex, field, value)
                     }
                   />
-                </div>
-                
-                <div className="space-y-2 mt-6">
-                  <h3 className="text-sm font-medium">Back Nine</h3>
+                </TabsContent>
+                <TabsContent value="back9">
                   <HoleInputs 
                     holes={formData.tees[currentTeeIndex].holes.slice(9, 18)}
                     handleHoleChange={(holeIndex, field, value) => 
-                      handleHoleChange(holeIndex + 9, field, value)
+                      handleHoleChange(holeIndex, field, value)
                     }
                   />
-                </div>
-              </div>
+                </TabsContent>
+              </Tabs>
               
               <TeeSummary currentTee={formData.tees[currentTeeIndex]} />
             </div>
           )}
         
-          <DialogFooter className="pt-2 sm:pt-0">
+          <DialogFooter>
             <Button variant="outline" onClick={() => onOpenChange(false)} type="button">
               Cancel
             </Button>
