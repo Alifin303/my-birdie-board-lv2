@@ -53,9 +53,7 @@ export const SearchStep: React.FC<SearchStepProps> = ({
             </div>
             <Input type="text" placeholder="Search for a course..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} onKeyDown={handleKeyPress} className="pl-10" />
           </div>
-          <p className="text-xs text-muted-foreground mt-1.5">
-            Enter a course name or location and press Enter to search
-          </p>
+          <p className="text-xs text-muted-foreground mt-1.5">Enter a course name and press Enter to search</p>
         </div>
         
         <div className="flex justify-center">
