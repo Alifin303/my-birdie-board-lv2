@@ -51,16 +51,19 @@ export const CourseSelector = ({
     try {
       let selectedCourse;
       
+      // Normalize course ID to ensure consistent type handling 
+      // between mobile and desktop platforms
+      const courseId = typeof course.id === 'string' ? parseInt(course.id, 10) : course.id;
+      
       if (course.isUserAdded) {
-        // This is a user-added course, get the tees from localStorage
-        // Convert the id to a number if it's a string
-        const courseId = typeof course.id === 'string' ? parseInt(course.id, 10) : course.id;
+        // This is a user-added course, get the tees from database or localStorage
+        console.log("Selected user-added course:", { id: courseId, name: course.name });
         selectedCourse = await getUserCourseTees(courseId);
-        console.log("Selected course:", selectedCourse);
+        console.log("Selected course with tees:", selectedCourse);
       } else {
         // This is an API course, format it properly
         selectedCourse = {
-          id: course.id,
+          id: courseId,
           name: course.club_name + " - " + course.course_name,
           clubName: course.club_name,
           courseName: course.course_name,
@@ -73,6 +76,12 @@ export const CourseSelector = ({
       }
       
       if (selectedCourse) {
+        // Ensure the course ID is normalized before passing to parent
+        if (selectedCourse.id && typeof selectedCourse.id === 'string') {
+          selectedCourse.id = parseInt(selectedCourse.id, 10);
+        }
+        
+        console.log("Selecting course with data:", selectedCourse);
         onSelectCourse(selectedCourse);
         setSearchQuery(selectedCourse.name);
       }
@@ -130,15 +139,31 @@ export const CourseSelector = ({
   useEffect(() => {
     const selectCourseById = async () => {
       if (selectedCourseId && userCourses.length > 0) {
-        const course = userCourses.find(c => c.id === selectedCourseId);
+        // Normalize courseId to number for consistent comparison
+        const normalizedSelectedId = typeof selectedCourseId === 'string' 
+          ? parseInt(selectedCourseId, 10) 
+          : selectedCourseId;
+          
+        // Find the course by normalized ID
+        const course = userCourses.find(c => {
+          const courseId = typeof c.id === 'string' ? parseInt(c.id, 10) : c.id;
+          return courseId === normalizedSelectedId;
+        });
+        
         if (course) {
           // Convert to number if it's a string
           const courseId = typeof course.id === 'string' ? parseInt(course.id, 10) : course.id;
-          const courseWithTees = await getUserCourseTees(courseId);
-          if (courseWithTees) {
-            console.log("Setting selected course:", courseWithTees);
-            setSearchQuery(courseWithTees.name);
-            onSelectCourse(courseWithTees);
+          console.log("Found course by ID:", { courseId, course });
+          
+          try {
+            const courseWithTees = await getUserCourseTees(courseId);
+            if (courseWithTees) {
+              console.log("Setting selected course:", courseWithTees);
+              setSearchQuery(courseWithTees.name);
+              onSelectCourse(courseWithTees);
+            }
+          } catch (err) {
+            console.error("Error loading course tees:", err);
           }
         }
       }
