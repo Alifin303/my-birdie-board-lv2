@@ -1,20 +1,16 @@
-
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle, UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from './ui/card';
 import { FeatureInfoModal, FeatureInfo } from './FeatureInfoModal';
-
 interface MainContentProps {
   onStartSignup: () => void;
 }
-
 export const MainContent = ({
   onStartSignup
 }: MainContentProps) => {
   const [selectedFeature, setSelectedFeature] = useState<FeatureInfo | null>(null);
-  
   const featureInfo: Record<string, FeatureInfo> = {
     scorecards: {
       title: "Upload & Store Your Scorecards",
@@ -113,15 +109,12 @@ export const MainContent = ({
         </div>
     }
   };
-
   const handleOpenFeatureInfo = (feature: FeatureInfo) => {
     setSelectedFeature(feature);
   };
-
   const handleCloseFeatureInfo = () => {
     setSelectedFeature(null);
   };
-
   return <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center mt-4 sm:mt-0">
         <div className="max-w-5xl animate-fade-in mb-4 px-0 mx-0">
@@ -218,7 +211,7 @@ export const MainContent = ({
       <section aria-labelledby="cta-heading" className="w-full py-4 sm:py-6 bg-black/30 backdrop-blur-sm mt-2 sm:mt-3">
         <div className="max-w-5xl mx-auto text-center px-4">
           <h2 id="cta-heading" className="text-lg sm:text-xl font-bold text-white mb-2">Ready to take your game to the next level?</h2>
-          <p className="text-sm sm:text-base text-white/90 mb-3">Find out how MyBirdieBoard can help improve your golf game!</p>
+          <p className="text-sm sm:text-base text-white/90 mb-3">Join MyBirdieBoard and see your improvement!</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-base px-4 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground max-w-[90vw] whitespace-normal">
               <UserPlus className="mr-2 h-5 w-5 flex-shrink-0" aria-hidden="true" />
