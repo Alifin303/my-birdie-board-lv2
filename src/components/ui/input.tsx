@@ -8,6 +8,24 @@ export interface InputProps
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, ...props }, ref) => {
+    // Handle focus/blur for mobile to prevent scroll jumps
+    const handleFocus = React.useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+      if (props.onFocus) {
+        props.onFocus(e);
+      }
+      
+      // For mobile devices
+      if (window.innerWidth <= 640) {
+        // Prevent immediate scroll jump
+        e.preventDefault();
+        
+        // After a small delay, focus the input again smoothly
+        setTimeout(() => {
+          e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 50);
+      }
+    }, [props.onFocus]);
+    
     return (
       <input
         type={type}
@@ -16,6 +34,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className
         )}
         ref={ref}
+        onFocus={handleFocus}
         {...props}
       />
     )

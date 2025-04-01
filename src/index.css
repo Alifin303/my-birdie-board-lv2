@@ -46,6 +46,7 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
+    overflow-x: hidden;
   }
 
   input,
@@ -54,6 +55,36 @@
   button {
     font-size: 16px;
     max-height: 100%;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+
+  @media (max-width: 640px) {
+    html {
+      scroll-behavior: smooth;
+      height: 100%;
+    }
+    
+    body {
+      min-height: 100%;
+      position: relative;
+    }
+    
+    input, select, textarea, button {
+      padding: 8px;
+      margin-bottom: 8px;
+    }
+    
+    .score-input {
+      scroll-margin-top: 60px;
+      scroll-margin-bottom: 60px;
+    }
+    
+    table {
+      display: block;
+      width: 100%;
+      -webkit-overflow-scrolling: touch;
+    }
   }
 
   input[type="number"]::-webkit-inner-spin-button,
@@ -167,7 +198,6 @@
   }
 }
 
-/* Mobile-specific styles */
 @media (max-width: 640px) {
   .rdp-caption {
     @apply text-sm !important;
@@ -186,21 +216,17 @@
     @apply p-0 !important;
   }
   
-  /* Ensure dialog content is properly sized for mobile */
   [role="dialog"] {
     @apply p-3 !important;
     max-height: 90vh !important;
     overflow-y: auto !important;
   }
   
-  /* Fix for round scorecard dialog on mobile */
-  
   .round-scorecard-content {
     max-height: 100% !important;
     overflow-y: auto !important;
   }
   
-  /* Improve table readability on mobile */
   table {
     @apply text-sm !important;
   }

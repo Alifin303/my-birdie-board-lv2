@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { HoleData } from "./types";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -14,10 +14,38 @@ export function HoleInputs({
   handleHoleChange 
 }: HoleInputsProps) {
   const isMobile = useIsMobile();
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Set up smooth focus handling on mobile
+  useEffect(() => {
+    if (isMobile) {
+      const handleFocus = (event: FocusEvent) => {
+        const target = event.target as HTMLElement;
+        // Add small delay to ensure smooth scroll
+        setTimeout(() => {
+          // Scroll the target element into view with smooth behavior
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      };
+
+      // Add the focus event listener to all input elements
+      const inputs = document.querySelectorAll('input[type="number"]');
+      inputs.forEach(input => {
+        input.addEventListener('focus', handleFocus);
+      });
+
+      // Clean up event listeners on unmount
+      return () => {
+        inputs.forEach(input => {
+          input.removeEventListener('focus', handleFocus);
+        });
+      };
+    }
+  }, [isMobile]);
 
   if (isMobile) {
     return (
-      <div className="border rounded-md p-2 sm:p-3 mt-4 space-y-4">
+      <div className="border rounded-md p-2 sm:p-3 mt-4 space-y-4 hole-inputs-container">
         {holes.map((hole, idx) => (
           <div key={`hole-${hole.number}`} className="border-b pb-3 last:border-b-0 last:pb-0">
             <div className="font-medium text-base mb-2">Hole {hole.number}</div>
@@ -33,6 +61,7 @@ export function HoleInputs({
                   className="w-full h-9 text-center"
                   required
                   placeholder=""
+                  ref={el => inputRefs.current[idx * 3] = el}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
@@ -53,6 +82,7 @@ export function HoleInputs({
                   className="w-full h-9 text-center"
                   required
                   placeholder=""
+                  ref={el => inputRefs.current[idx * 3 + 1] = el}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
@@ -73,6 +103,7 @@ export function HoleInputs({
                   className="w-full h-9 text-center"
                   required
                   placeholder=""
+                  ref={el => inputRefs.current[idx * 3 + 2] = el}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();

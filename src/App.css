@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -62,6 +63,19 @@
     -webkit-appearance: none;
     margin: 0;
     -moz-appearance: textfield;
+    /* Add some breathing room and smooth scroll behavior */
+    padding: 8px;
+    scroll-behavior: smooth;
+    /* Prevent screen from jumping with this technique */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+  
+  /* Prevent scroll jumping when inputs are focused */
+  .scroll-container {
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
   }
   
   /* Ensure touchable areas are large enough */
@@ -80,6 +94,21 @@
   /* Fixes for dropdown components */
   .select-container {
     font-size: 16px !important;
+  }
+  
+  /* Prevent "position sticky" elements from causing jumps */
+  .sticky-element {
+    position: sticky;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  
+  /* Stabilize the layout during input focus */
+  .score-table-container,
+  .hole-inputs-container {
+    transform: translateZ(0);
+    will-change: transform;
+    z-index: 1;
   }
 }
 

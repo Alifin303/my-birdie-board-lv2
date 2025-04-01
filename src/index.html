@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>My Birdie Board</title>
+    <meta name="description" content="Track your golf scores, analyze stats, and improve your game with My Birdie Board.">
+    <link rel="manifest" href="/manifest.json">
+    <style>
+      /* Prevent scroll jump on input focus */
+      html, body {
+        height: 100%;
+        overflow-x: hidden;
+        position: relative;
+      }
+      
+      body.input-focused {
+        overflow: hidden;
+      }
+      
+      /* Hide focus outlines for inputs while maintaining accessibility */
+      input:focus, select:focus, textarea:focus {
+        outline: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Script to help stabilize mobile input behavior
+      document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+          input.addEventListener('focus', function() {
+            // Add small delay to allow natural scrolling
+            setTimeout(() => {
+              // Prevent scroll jumping by locking position
+              document.body.classList.add('input-focused');
+            }, 10);
+          });
+          input.addEventListener('blur', function() {
+            document.body.classList.remove('input-focused');
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
