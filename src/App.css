@@ -1,4 +1,3 @@
-
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -50,22 +49,37 @@
   }
   
   /* Improve mobile input interactions */
-  input[type="number"] {
+  input[type="number"],
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="search"],
+  input[type="url"],
+  textarea,
+  select {
+    font-size: 16px !important; /* Prevents zoom on focus in iOS */
     -webkit-appearance: none;
     margin: 0;
     -moz-appearance: textfield;
-    font-size: 16px !important; /* Prevents zoom on focus in iOS */
-  }
-  
-  /* Prevent zoom on input focus */
-  input, select, textarea {
-    font-size: 16px !important; /* Minimum font size to prevent zoom in iOS */
   }
   
   /* Ensure touchable areas are large enough */
-  .score-input {
+  .score-input,
+  button,
+  .interactive-element {
     min-height: 44px;
     min-width: 44px;
+  }
+  
+  /* Additional improvements for form elements */
+  .form-control {
+    font-size: 16px !important;
+  }
+  
+  /* Fixes for dropdown components */
+  .select-container {
+    font-size: 16px !important;
   }
 }
 
