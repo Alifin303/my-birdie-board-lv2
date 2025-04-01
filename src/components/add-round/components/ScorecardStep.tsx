@@ -18,7 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { HoleSelection, Score, SimplifiedCourseDetail, ScoreSummary, SimplifiedTee } from "../types";
 import { ScoreTable } from "@/components/dashboard/scorecard/ScoreTable";
-import { useIsMobile } from "@/hooks/useIsMobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ScorecardStepProps {
   selectedCourse: SimplifiedCourseDetail | null;
