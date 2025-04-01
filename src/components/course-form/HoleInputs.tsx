@@ -2,6 +2,7 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { HoleData } from "./types";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface HoleInputsProps {
   holes: HoleData[];
@@ -12,6 +13,83 @@ export function HoleInputs({
   holes, 
   handleHoleChange 
 }: HoleInputsProps) {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <div className="border rounded-md p-2 sm:p-3 mt-4 space-y-4">
+        {holes.map((hole, idx) => (
+          <div key={`hole-${hole.number}`} className="border-b pb-3 last:border-b-0 last:pb-0">
+            <div className="font-medium text-base mb-2">Hole {hole.number}</div>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <div className="text-xs text-muted-foreground mb-1">Par</div>
+                <Input
+                  type="number"
+                  min="2"
+                  max="6"
+                  value={hole.par === null || hole.par === undefined ? "" : hole.par}
+                  onChange={(e) => handleHoleChange(idx, 'par', e.target.value)}
+                  className="w-full h-9 text-center"
+                  required
+                  placeholder=""
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      return false;
+                    }
+                    return true;
+                  }}
+                />
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground mb-1">Yards</div>
+                <Input
+                  type="number"
+                  min="0"
+                  max="999"
+                  value={hole.yards === null || hole.yards === undefined ? "" : hole.yards}
+                  onChange={(e) => handleHoleChange(idx, 'yards', e.target.value)}
+                  className="w-full h-9 text-center"
+                  required
+                  placeholder=""
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      return false;
+                    }
+                    return true;
+                  }}
+                />
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground mb-1">Handicap</div>
+                <Input
+                  type="number"
+                  min="1"
+                  max="18"
+                  value={hole.handicap === null || hole.handicap === undefined ? "" : hole.handicap}
+                  onChange={(e) => handleHoleChange(idx, 'handicap', e.target.value)}
+                  className="w-full h-9 text-center"
+                  required
+                  placeholder=""
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      return false;
+                    }
+                    return true;
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // Original desktop version
   return (
     <div className="border rounded-md overflow-x-auto mt-4">
       <table className="w-full">

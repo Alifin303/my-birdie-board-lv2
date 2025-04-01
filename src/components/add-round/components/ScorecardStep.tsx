@@ -18,6 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { HoleSelection, Score, SimplifiedCourseDetail, ScoreSummary, SimplifiedTee } from "../types";
 import { ScoreTable } from "@/components/dashboard/scorecard/ScoreTable";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface ScorecardStepProps {
   selectedCourse: SimplifiedCourseDetail | null;
@@ -64,6 +65,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
 }) => {
   const [localSelectedTeeId, setLocalSelectedTeeId] = useState<string | null>(selectedTeeId);
   const [showDetailedStats, setShowDetailedStats] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (selectedTeeId !== localSelectedTeeId) {
@@ -182,7 +184,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </Alert>
       )}
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+      <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-1 md:grid-cols-3 gap-4'} mb-4`}>
         <div className="space-y-1">
           <label className="text-sm font-medium">Date Played</label>
           <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>

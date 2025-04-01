@@ -1,3 +1,4 @@
+
 import React, { useState, KeyboardEvent } from "react";
 import { DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Loader2, Search, PlusCircle, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SimplifiedGolfCourse } from "../types";
+import { useIsMobile } from "@/hooks/use-mobile";
+
 interface SearchStepProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -18,6 +21,7 @@ interface SearchStepProps {
   noResults: boolean;
   setManualCourseOpen: (open: boolean) => void;
 }
+
 export const SearchStep: React.FC<SearchStepProps> = ({
   searchQuery,
   setSearchQuery,
@@ -31,6 +35,8 @@ export const SearchStep: React.FC<SearchStepProps> = ({
   noResults,
   setManualCourseOpen
 }) => {
+  const isMobile = useIsMobile();
+  
   // Handle key press event for the search input
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.length >= 3 && !isLoading) {
@@ -38,6 +44,7 @@ export const SearchStep: React.FC<SearchStepProps> = ({
       handleSearch(searchQuery);
     }
   };
+  
   return <>
       <DialogHeader className="space-y-2 sm:space-y-4">
         <DialogTitle>Add a New Round</DialogTitle>
