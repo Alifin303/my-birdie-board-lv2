@@ -94,9 +94,7 @@ export const calculateStats = (rounds: Round[]): Stats => {
 
   const averageScore = rounds.reduce((sum, r) => sum + r.gross_score, 0) / totalRounds;
   
-  // Add the handicap that was used for each round to the calculations
   const roundsWithCalculatedScores = rounds.map(r => {
-    // Use the handicap stored with the round if available, otherwise use calculated handicap
     const handicapToUse = r.handicap_at_posting !== undefined && r.handicap_at_posting !== null
       ? r.handicap_at_posting
       : handicapIndex;
@@ -171,7 +169,7 @@ export const calculateStats = (rounds: Round[]): Stats => {
     bestDifferentials.reduce((sum, diff) => sum + diff, 0) / bestDifferentials.length : 0;
   
   const calculatedHandicapIndex = scoresToUse > 0 ? 
-    Math.min(54, Math.max(0, Math.round(averageDifferential * 0.96 * 10) / 10)) : 0;
+    Math.min(54, Math.round(averageDifferential * 0.96 * 10) / 10) : 0;
   
   const roundsNeededForHandicap = validRoundsCount >= ROUNDS_NEEDED_FOR_HANDICAP ? 
     0 : ROUNDS_NEEDED_FOR_HANDICAP - validRoundsCount;
@@ -226,9 +224,7 @@ export const calculateCourseStats = (rounds: Round[], handicapIndex?: number): C
     const bestGrossScore = Math.min(...courseRounds.map(r => r.gross_score));
     const bestToPar = Math.min(...courseRounds.map(r => r.to_par_gross));
     
-    // Use the handicap that was stored with each round when available
     const roundsWithCalculatedScores = courseRounds.map(r => {
-      // Use the handicap stored with the round if available, otherwise use current handicap
       const handicapToUse = r.handicap_at_posting !== undefined && r.handicap_at_posting !== null
         ? r.handicap_at_posting 
         : currentHandicapIndex;

@@ -2,7 +2,7 @@
 /**
  * Calculates a handicap index based on a set of scores
  * This follows a simplified version of the World Handicap System
- * with a maximum handicap index of 54
+ * with a maximum handicap index of 54 and allowing for negative handicaps for exceptional players
  */
 export const calculateHandicapIndex = (scores: number[]): number => {
   if (!scores || scores.length === 0) return 0;
@@ -38,11 +38,12 @@ export const calculateHandicapIndex = (scores: number[]): number => {
   const calculatedHandicap = (averageScore - 72) * 0.96;
   console.log("Raw calculated handicap:", calculatedHandicap);
   
-  // Ensure handicap is non-negative (minimum 0)
-  const nonNegativeHandicap = Math.max(0, calculatedHandicap);
+  // CHANGED: Allow for negative handicaps (plus handicaps) for exceptional players
+  // A negative handicap means a player is expected to score below par
   
   // Cap the handicap at 54, which is the maximum allowed in the World Handicap System
-  const cappedHandicap = Math.min(54, nonNegativeHandicap);
+  // But allow for negative handicaps with no lower limit
+  const cappedHandicap = Math.min(54, calculatedHandicap);
   console.log("Final handicap after cap:", cappedHandicap);
 
   // Return the exact calculated value (don't round) to match Supabase's decimal storage
@@ -70,6 +71,7 @@ export const calculateNetScore = (grossScore: number, handicap: number | string 
   console.log(`Calculating net score: gross=${grossScore}, handicap=${numericHandicap} (original: ${handicap}, type: ${typeof handicap})`);
   
   // Calculate the raw net score
+  // For negative handicaps (plus handicaps), this will add strokes to the gross score
   const rawNetScore = grossScore - numericHandicap;
   
   // Round to the nearest integer as per user requirement
@@ -93,6 +95,7 @@ export const calculateNetToPar = (toPar: number, handicap: number | string | nul
   }
   
   // Subtract handicap from to par value and round to nearest integer
+  // For negative handicaps (plus handicaps), this will increase the to par value
   const netToPar = Math.round(toPar - numericHandicap);
   
   console.log(`Calculating net to par: toPar=${toPar}, handicap=${numericHandicap}, netToPar=${netToPar}`);

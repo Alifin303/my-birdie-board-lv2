@@ -1,4 +1,3 @@
-
 import { CalendarDays, Trophy, Flag } from "lucide-react";
 import { Stats, Round } from "./types";
 import React, { useEffect } from "react";
@@ -208,6 +207,12 @@ export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTy
     );
   }
   
+  // Format the handicap with a + sign for negative handicaps (plus handicaps in golf terms)
+  // In golf, a handicap of -2 is displayed as "+2"
+  const formattedHandicap = displayHandicap < 0 
+    ? `+${Math.abs(displayHandicap).toFixed(1)}` 
+    : displayHandicap.toFixed(1);
+  
   // Render the actual handicap circle
   return (
     <div key={roundsKey} className="flex flex-col items-center justify-center mb-8">
@@ -233,7 +238,7 @@ export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTy
           {hasHandicap ? (
             <>
               <p className="text-sm font-medium text-muted-foreground">Handicap Index</p>
-              <p className="text-5xl font-bold my-2">{displayHandicap}</p>
+              <p className="text-5xl font-bold my-2">{formattedHandicap}</p>
             </>
           ) : (
             <>
