@@ -14,9 +14,9 @@ export function createCourseSelectionHandlers({
   setDataLoadingError,
   setOriginalCourseDetail,
   setCourseLoadFailure,
-  updateScorecardForTee,
   manualCourseOpen,
   setManualCourseOpen,
+  updateScorecardForTee,
   toast
 }: Pick<UseCourseHandlersProps, 
   'currentStep' | 
@@ -41,8 +41,8 @@ export function createCourseSelectionHandlers({
     console.log("Selected course:", course);
     
     try {
-      // Handle user-added course
-      if (course.isUserAdded) {
+      // Handle user-added course (manually added, not from API)
+      if (course.isUserAdded && !course.isApiCourse && !course.apiCourseId) {
         console.log("Loading user-added course:", course.id);
         
         const courseDetail = await loadUserAddedCourseDetails(course.id);
@@ -57,11 +57,12 @@ export function createCourseSelectionHandlers({
         setSelectedCourse(courseDetail);
         setOriginalCourseDetail(null);
       } 
-      // Handle API course
-      else if (course.apiCourseId) {
-        console.log("Loading API course:", course.apiCourseId);
+      // Handle API course or database-stored API course
+      else if (course.isApiCourse || course.apiCourseId) {
+        const apiId = course.apiCourseId || course.id.toString();
+        console.log("Loading API course:", apiId);
         
-        const courseDetail = await getCourseDetails(course.apiCourseId);
+        const courseDetail = await getCourseDetails(apiId);
         console.log("API course details:", courseDetail);
         
         setOriginalCourseDetail(courseDetail);
@@ -69,8 +70,8 @@ export function createCourseSelectionHandlers({
         const simplifiedCourseDetail = convertToSimplifiedCourseDetail(courseDetail);
         console.log("Simplified API course detail:", simplifiedCourseDetail);
         
-        // Add additional properties from the search result that might not be in the API response
-        simplifiedCourseDetail.apiCourseId = course.apiCourseId;
+        // Add additional properties from the search result
+        simplifiedCourseDetail.apiCourseId = apiId;
         
         if (simplifiedCourseDetail.tees.length === 0) {
           setDataLoadingError("This course doesn't have any tee data available. Please try a different course or add a new one.");
@@ -80,7 +81,7 @@ export function createCourseSelectionHandlers({
         
         setSelectedCourse(simplifiedCourseDetail);
       } 
-      // Fallback for any other course type
+      // Fallback for any course without clear origin
       else {
         console.log("Loading course by ID:", course.id);
         
@@ -130,7 +131,8 @@ export function createCourseSelectionHandlers({
         clubName: courseName.replace(' [User added course]', ''),
         city: '',
         state: '',
-        isUserAdded: true
+        isUserAdded: true,
+        isApiCourse: false
       };
       
       // Now use the existing handleCourseSelect function to load the course

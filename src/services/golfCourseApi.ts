@@ -1,3 +1,4 @@
+
 // Type definitions
 export interface GolfCourse {
   id: number | string;
@@ -13,8 +14,10 @@ export interface GolfCourse {
     longitude?: number;
     address?: string;
   };
-  // Add these properties for user-added courses
+  // Properties for courses from different sources
   isUserAdded?: boolean;
+  isApiCourse?: boolean;
+  apiCourseId?: string;
   name?: string;
   city?: string;
   state?: string;

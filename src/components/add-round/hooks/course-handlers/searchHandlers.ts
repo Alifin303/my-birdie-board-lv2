@@ -34,16 +34,26 @@ export function createSearchHandlers({
         city: course.city || '',
         state: course.state || '',
         country: 'United States',
-        isUserAdded: true,
+        isUserAdded: !course.api_course_id, // Only true for manually added courses
+        isApiCourse: !!course.api_course_id, // New flag to identify API courses in DB
+        apiCourseId: course.api_course_id || undefined, // Make sure we keep track of the API ID
       }));
       
-      // Then search the API
+      // Then search the API for additional courses
       const apiResponse = await searchCourses(query);
       const apiResults = Array.isArray(apiResponse.results) ? apiResponse.results : [];
       
+      // Remove API courses that are already in our database to avoid duplicates
+      const dbApiCourseIds = new Set(dbResults
+        .filter(course => course.api_course_id)
+        .map(course => course.api_course_id));
+      
+      const filteredApiResults = apiResults.filter(course => 
+        !dbApiCourseIds.has(course.id?.toString()));
+      
       const combinedResults = [
         ...userAddedCourses, 
-        ...apiResults.map(course => ({
+        ...filteredApiResults.map(course => ({
           id: typeof course.id === 'string' ? parseInt(course.id) : course.id,
           name: course.course_name || (course as any).name || '',
           clubName: course.club_name || (course as any).name || '',
@@ -51,6 +61,7 @@ export function createSearchHandlers({
           state: course.location?.state || '',
           country: course.location?.country || 'United States',
           isUserAdded: false,
+          isApiCourse: true,
           apiCourseId: course.id?.toString()
         }))
       ];
@@ -73,7 +84,9 @@ export function createSearchHandlers({
           city: course.city || '',
           state: course.state || '',
           country: 'United States',
-          isUserAdded: true,
+          isUserAdded: !course.api_course_id,
+          isApiCourse: !!course.api_course_id,
+          apiCourseId: course.api_course_id || undefined,
         }));
         
         if (userAddedCourses.length > 0) {

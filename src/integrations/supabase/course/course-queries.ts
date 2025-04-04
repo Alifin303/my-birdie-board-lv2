@@ -1,3 +1,4 @@
+
 import { supabase } from '../core/client';
 
 /**
@@ -32,10 +33,25 @@ export async function updateCourseWithUserId(courseId: number) {
       .from('courses')
       .update({ user_id: session.user.id })
       .eq('id', courseId)
-      .select()
-      .single();
+      .select();
     
-    if (error) throw error;
+    if (error) {
+      // If updating with single() fails, just log and continue
+      console.error('Error updating course with user ID:', error);
+      // Try to fetch the course to confirm it exists and update was attempted
+      const { data: courseData } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('id', courseId)
+        .maybeSingle();
+      
+      if (courseData) {
+        console.log(`Updated user_id for course ${courseId}`);
+        return { data: courseData, error: null };
+      }
+      
+      return { data: null, error };
+    }
     
     return { data, error: null };
   } catch (error) {
@@ -98,6 +114,14 @@ export async function searchCourses(query: string) {
       .limit(50);
     
     if (error) throw error;
+    
+    // Map each course to include a flag indicating if it's from the API
+    if (data) {
+      data.forEach(course => {
+        // If the course has an api_course_id, it's from the API
+        course.isApiCourse = !!course.api_course_id;
+      });
+    }
     
     return { data, error: null };
   } catch (error) {

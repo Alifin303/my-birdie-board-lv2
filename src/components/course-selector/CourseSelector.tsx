@@ -55,13 +55,22 @@ export const CourseSelector = ({
       // between mobile and desktop platforms
       const courseId = typeof course.id === 'string' ? parseInt(course.id, 10) : course.id;
       
-      if (course.isUserAdded) {
-        // This is a user-added course, get the tees from database or localStorage
-        console.log("Selected user-added course:", { id: courseId, name: course.name });
+      // Check if this is a user-added course (not from API)
+      if (course.isUserAdded && !course.isApiCourse) {
+        // This is a manually added course, get the tees from database or localStorage
+        console.log("Selected manually-added course:", { id: courseId, name: course.name });
         selectedCourse = await getUserCourseTees(courseId);
         console.log("Selected course with tees:", selectedCourse);
-      } else {
-        // This is an API course, format it properly
+      } 
+      // Check if this is an API course that exists in our database
+      else if (course.isApiCourse && !course.isUserAdded) {
+        // This is an API course, get data from API
+        console.log("Selected API course:", { 
+          id: courseId, 
+          apiId: course.apiCourseId || course.id.toString() 
+        });
+        
+        // Format as API course
         selectedCourse = {
           id: courseId,
           name: course.club_name + " - " + course.course_name,
@@ -70,9 +79,30 @@ export const CourseSelector = ({
           city: course.location?.city,
           state: course.location?.state,
           country: course.location?.country || 'United States',
-          apiCourseId: course.id,
-          isUserAdded: false
+          apiCourseId: course.apiCourseId || course.id.toString(),
+          isApiCourse: true
         };
+      } 
+      else {
+        // Fallback for other course types
+        console.log("Selected course with unknown source:", { id: courseId, name: course.name });
+        selectedCourse = await getUserCourseTees(courseId);
+        
+        if (!selectedCourse) {
+          console.log("Course not found in database, treating as API course");
+          // Try to handle as API course if it has an apiCourseId
+          selectedCourse = {
+            id: courseId,
+            name: course.name,
+            clubName: course.clubName || course.name,
+            courseName: course.name,
+            city: course.city,
+            state: course.state,
+            country: course.country || 'United States',
+            apiCourseId: course.apiCourseId || course.id.toString(),
+            isApiCourse: true
+          };
+        }
       }
       
       if (selectedCourse) {

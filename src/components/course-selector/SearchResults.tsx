@@ -30,11 +30,18 @@ export const SearchResults = ({
     return (
       <div className="max-h-60 overflow-y-auto border rounded-md bg-white shadow-sm">
         {searchResults.map((course, index) => {
+          // Get source info for logging
+          const courseSource = course.isApiCourse 
+            ? "API course" 
+            : (course.isUserAdded ? "User-added course" : "Unknown source");
+          
           // Ensure course ID is properly logged before attempting to select
-          console.log(`Course ${index}:`, { 
+          console.log(`Course ${index} (${courseSource}):`, { 
             id: course.id, 
             name: course.name, 
-            isUserAdded: course.isUserAdded 
+            isUserAdded: course.isUserAdded,
+            isApiCourse: course.isApiCourse,
+            apiCourseId: course.apiCourseId
           });
           
           return (
@@ -45,7 +52,10 @@ export const SearchResults = ({
                 console.log("Clicking on course:", { 
                   id: course.id, 
                   type: typeof course.id,
-                  name: course.name
+                  name: course.name,
+                  isUserAdded: course.isUserAdded,
+                  isApiCourse: course.isApiCourse,
+                  apiCourseId: course.apiCourseId
                 });
                 handleSelectCourse(course);
               }}
@@ -59,9 +69,14 @@ export const SearchResults = ({
                   ? `${course.city || ''} ${course.state || ''}`
                   : `${course.location?.city || ''} ${course.location?.state || ''}, ${course.location?.country || 'USA'}`}
               </div>
-              {course.isUserAdded && (
+              {course.isUserAdded && !course.isApiCourse && (
                 <div className="text-xs mt-1 text-accent italic">
                   Your course
+                </div>
+              )}
+              {course.isApiCourse && (
+                <div className="text-xs mt-1 text-blue-600 italic">
+                  Golf course database
                 </div>
               )}
             </div>
