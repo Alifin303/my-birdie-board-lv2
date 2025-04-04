@@ -27,6 +27,8 @@ export function createSearchHandlers({
       // Search local database first (now includes name, city, state)
       const dbResponse = await searchDatabaseCourses(query);
       const dbResults = dbResponse.data || [];
+      console.log("Database search results:", dbResults);
+      
       const userAddedCourses = dbResults.map(course => ({
         id: typeof course.id === 'string' ? parseInt(course.id) : course.id,
         name: course.name || '',
@@ -35,25 +37,29 @@ export function createSearchHandlers({
         state: course.state || '',
         country: 'United States',
         isUserAdded: true,
+        api_course_id: course.api_course_id || null
       }));
       
       // Then search the API
       const apiResponse = await searchCourses(query);
-      const apiResults = Array.isArray(apiResponse.results) ? apiResponse.results : [];
+      console.log("API search response:", apiResponse);
       
-      const combinedResults = [
-        ...userAddedCourses, 
-        ...apiResults.map(course => ({
-          id: typeof course.id === 'string' ? parseInt(course.id) : course.id,
-          name: course.course_name || (course as any).name || '',
-          clubName: course.club_name || (course as any).name || '',
-          city: course.location?.city || '',
-          state: course.location?.state || '',
-          country: course.location?.country || 'United States',
-          isUserAdded: false,
-          apiCourseId: course.id?.toString()
-        }))
-      ];
+      const apiResults = Array.isArray(apiResponse.results) ? apiResponse.results : [];
+      console.log("API search results:", apiResults);
+      
+      const apiCourses = apiResults.map(course => ({
+        id: typeof course.id === 'string' ? parseInt(course.id) : course.id,
+        name: course.course_name || (course as any).name || '',
+        clubName: course.club_name || (course as any).name || '',
+        city: course.location?.city || '',
+        state: course.location?.state || '',
+        country: course.location?.country || 'United States',
+        isUserAdded: false,
+        apiCourseId: course.id?.toString()
+      }));
+      
+      const combinedResults = [...userAddedCourses, ...apiCourses];
+      console.log("Combined search results:", combinedResults);
       
       const enhancedResults = enhanceCourseResults(combinedResults);
       
@@ -66,6 +72,8 @@ export function createSearchHandlers({
       try {
         // Fallback to just local database search
         const { data } = await searchDatabaseCourses(query);
+        console.log("Fallback database search results:", data);
+        
         const userAddedCourses = (data || []).map(course => ({
           id: typeof course.id === 'string' ? parseInt(course.id) : course.id,
           name: course.name || '',
@@ -74,6 +82,7 @@ export function createSearchHandlers({
           state: course.state || '',
           country: 'United States',
           isUserAdded: true,
+          api_course_id: course.api_course_id || null
         }));
         
         if (userAddedCourses.length > 0) {

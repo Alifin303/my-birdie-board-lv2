@@ -35,6 +35,7 @@ export const CourseSelector = ({
   const loadUserCourses = useCallback(async () => {
     try {
       const courses = await fetchUserCourses();
+      console.log("Loaded user courses:", courses);
       setUserCourses(courses);
     } catch (error) {
       console.error("Error fetching user courses:", error);
@@ -49,6 +50,7 @@ export const CourseSelector = ({
   // Handle course selection
   const handleSelectCourse = async (course: GolfCourse) => {
     try {
+      console.log("Selecting course:", course);
       let selectedCourse;
       
       // Normalize course ID to ensure consistent type handling 
@@ -60,8 +62,10 @@ export const CourseSelector = ({
         console.log("Selected user-added course:", { id: courseId, name: course.name });
         selectedCourse = await getUserCourseTees(courseId);
         console.log("Selected course with tees:", selectedCourse);
-      } else {
+      } else if (course.apiCourseId || course.api_course_id) {
         // This is an API course, format it properly
+        const apiCourseId = course.apiCourseId || course.api_course_id;
+        console.log("Selected API course:", { apiCourseId, name: course.name });
         selectedCourse = {
           id: courseId,
           name: course.club_name + " - " + course.course_name,
@@ -70,9 +74,14 @@ export const CourseSelector = ({
           city: course.location?.city,
           state: course.location?.state,
           country: course.location?.country || 'United States',
-          apiCourseId: course.id,
+          apiCourseId: apiCourseId,
           isUserAdded: false
         };
+      } else {
+        // Fallback for any other course type
+        console.log("Loading course by ID:", courseId);
+        selectedCourse = await getUserCourseTees(courseId);
+        console.log("Selected course with tees:", selectedCourse);
       }
       
       if (selectedCourse) {
@@ -83,7 +92,14 @@ export const CourseSelector = ({
         
         console.log("Selecting course with data:", selectedCourse);
         onSelectCourse(selectedCourse);
-        setSearchQuery(selectedCourse.name);
+        setSearchQuery(selectedCourse.name || '');
+      } else {
+        console.error("Failed to get course details");
+        toast({
+          title: "Error",
+          description: "Failed to load course details. Please try again or search for another course.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Error selecting course:', error);
@@ -110,8 +126,8 @@ export const CourseSelector = ({
     setIsSearching(true);
     
     try {
-      // Remove the second parameter that's causing the error
       const results = await searchForCourses(query);
+      console.log("Search results:", results);
       setSearchResults(results);
     } catch (error) {
       console.error('Error searching for courses:', error);
@@ -144,6 +160,8 @@ export const CourseSelector = ({
           ? parseInt(selectedCourseId, 10) 
           : selectedCourseId;
           
+        console.log("Looking for course ID:", normalizedSelectedId);
+        
         // Find the course by normalized ID
         const course = userCourses.find(c => {
           const courseId = typeof c.id === 'string' ? parseInt(c.id, 10) : c.id;
@@ -165,6 +183,8 @@ export const CourseSelector = ({
           } catch (err) {
             console.error("Error loading course tees:", err);
           }
+        } else {
+          console.log("Course not found by ID in user courses.");
         }
       }
     };
