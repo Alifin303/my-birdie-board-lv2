@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -88,7 +87,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setSearchError(null);
     setDataLoadingError(null);
     setRoundDate(new Date());
-    setHoleSelection('all');
+    setHoleSelection({ type: 'all' });
     setActiveScoreTab("front9");
     setManualCourseOpen(false);
   };
@@ -168,7 +167,7 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setSelectedTeeId(null);
     setScores([]);
     setSearchQuery('');
-    setHoleSelection('all');
+    setHoleSelection({ type: 'all' });
     setActiveScoreTab("front9");
   };
 

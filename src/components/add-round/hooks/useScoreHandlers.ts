@@ -116,7 +116,7 @@ export function useScoreHandlers({
     return defaultHoles;
   };
 
-  const updateScorecardForTee = (teeId: string, selection: HoleSelection = 'all') => {
+  const updateScorecardForTee = (teeId: string, selection: HoleSelection | string = { type: 'all' }) => {
     console.log("🚀 Updating scorecard for tee", teeId, "with selection", selection);
     console.log("🔍 Course present:", !!selectedCourse);
     console.log("🔍 Course and tee ready:", courseAndTeeReady);
@@ -125,6 +125,10 @@ export function useScoreHandlers({
       console.error("❌ Cannot update scorecard: No course selected");
       return;
     }
+    
+    const holeSelection: HoleSelection = typeof selection === 'string' 
+      ? { type: selection as 'front9' | 'back9' | 'all' | 'custom' } 
+      : selection;
     
     console.log("✅ Using course for scorecard update:", selectedCourse.name, selectedCourse.id);
     
@@ -161,10 +165,10 @@ export function useScoreHandlers({
     
     let filteredHoles = [];
     
-    if (selection === 'front9') {
+    if (holeSelection.type === 'front9') {
       filteredHoles = allHolesData.filter(hole => hole.number <= 9);
       console.log("📊 Filtered for front 9:", filteredHoles);
-    } else if (selection === 'back9') {
+    } else if (holeSelection.type === 'back9') {
       filteredHoles = allHolesData.filter(hole => hole.number > 9);
       console.log("📊 Filtered for back 9:", filteredHoles);
     } else {
@@ -174,14 +178,14 @@ export function useScoreHandlers({
     
     if (!filteredHoles.length) {
       console.log("⚠️ No filtered holes, creating defaults");
-      if (selection === 'front9') {
+      if (holeSelection.type === 'front9') {
         filteredHoles = Array(9).fill(null).map((_, idx) => ({
           number: idx + 1,
           par: 4,
           yards: 400,
           handicap: idx + 1
         }));
-      } else if (selection === 'back9') {
+      } else if (holeSelection.type === 'back9') {
         filteredHoles = Array(9).fill(null).map((_, idx) => ({
           number: idx + 10,
           par: 4,
@@ -214,8 +218,8 @@ export function useScoreHandlers({
     console.log("✅ New scores array with proper par data:", newScores);
     setScores(newScores);
     
-    if (selection !== 'all') {
-      setActiveScoreTab(selection === 'front9' ? "front9" : "back9");
+    if (holeSelection.type !== 'all') {
+      setActiveScoreTab(holeSelection.type === 'front9' ? "front9" : "back9");
     }
   };
 
@@ -251,7 +255,7 @@ export function useScoreHandlers({
       return;
     }
     
-    updateScorecardForTee(teeId, 'all');
+    updateScorecardForTee(teeId, { type: 'all' });
   };
 
   const handleHoleSelectionChange = (selection: HoleSelection) => {

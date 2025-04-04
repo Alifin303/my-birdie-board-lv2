@@ -1,7 +1,7 @@
 
-import { Score } from "../types";
+import { Score, ScoreSummary } from "../types";
 
-export const calculateScoreSummary = (scores: Score[]) => {
+export const calculateScoreSummary = (scores: Score[]): ScoreSummary => {
   const front9 = scores.filter(score => score.hole <= 9);
   const back9 = scores.filter(score => score.hole > 9);
   

@@ -17,6 +17,7 @@ import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { HoleSelection, Score, SimplifiedCourseDetail, ScoreSummary, SimplifiedTee } from "../types";
+import { HoleScore } from "@/components/dashboard/scorecard/types";
 import { ScoreTable } from "@/components/dashboard/scorecard/ScoreTable";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -149,8 +150,22 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
     return '#777';
   };
 
+  const convertToHoleScores = (scores: Score[]): HoleScore[] => {
+    return scores.map(score => ({
+      hole: score.hole,
+      par: score.par,
+      strokes: score.strokes || 0,
+      putts: score.putts,
+      gir: score.gir,
+      penalties: score.penalties
+    }));
+  };
+
   const frontNineScores = scores.filter(score => score.hole <= 9);
   const backNineScores = scores.filter(score => score.hole > 9);
+  
+  const frontNineHoleScores = convertToHoleScores(frontNineScores);
+  const backNineHoleScores = convertToHoleScores(backNineScores);
 
   return (
     <div>
@@ -268,25 +283,25 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
           <label className="text-sm font-medium">Holes Played</label>
           <div className="flex space-x-1">
             <Button 
-              variant={holeSelection === 'all' ? "default" : "outline"}
+              variant={holeSelection.type === 'all' ? "default" : "outline"}
               size="sm"
-              onClick={() => handleHoleSelectionChange('all')}
+              onClick={() => handleHoleSelectionChange({ type: 'all' })}
               className="flex-1 h-9 px-2"
             >
               All 18
             </Button>
             <Button 
-              variant={holeSelection === 'front9' ? "default" : "outline"} 
+              variant={holeSelection.type === 'front9' ? "default" : "outline"} 
               size="sm"
-              onClick={() => handleHoleSelectionChange('front9')}
+              onClick={() => handleHoleSelectionChange({ type: 'front9' })}
               className="flex-1 h-9 px-2"
             >
               Front 9
             </Button>
             <Button 
-              variant={holeSelection === 'back9' ? "default" : "outline"} 
+              variant={holeSelection.type === 'back9' ? "default" : "outline"} 
               size="sm"
-              onClick={() => handleHoleSelectionChange('back9')}
+              onClick={() => handleHoleSelectionChange({ type: 'back9' })}
               className="flex-1 h-9 px-2"
             >
               Back 9
@@ -310,7 +325,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
       {frontNineScores.length > 0 && (
         <div className="mb-4">
           <ScoreTable
-            scores={frontNineScores}
+            scores={frontNineHoleScores}
             isEditing={true}
             handleScoreChange={handleScoreChange}
             handleGIRChange={handleGIRChange}
@@ -324,7 +339,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
       {backNineScores.length > 0 && (
         <div className="mb-4">
           <ScoreTable
-            scores={backNineScores}
+            scores={backNineHoleScores}
             isEditing={true}
             handleScoreChange={handleScoreChange}
             handleGIRChange={handleGIRChange}

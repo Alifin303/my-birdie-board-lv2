@@ -20,7 +20,7 @@ export const useAddRoundState = () => {
   const [dataLoadingError, setDataLoadingError] = useState<string | null>(null);
   const [roundDate, setRoundDate] = useState<Date | undefined>(new Date());
   const [calendarOpen, setCalendarOpen] = useState<boolean>(false);
-  const [holeSelection, setHoleSelection] = useState<HoleSelection>('all');
+  const [holeSelection, setHoleSelection] = useState<HoleSelection>({ type: 'all' });
   const [activeScoreTab, setActiveScoreTab] = useState<"front9" | "back9">("front9");
   const [originalCourseDetail, setOriginalCourseDetail] = useState<CourseDetail | null>(null);
   const [noResults, setNoResults] = useState<boolean>(false);

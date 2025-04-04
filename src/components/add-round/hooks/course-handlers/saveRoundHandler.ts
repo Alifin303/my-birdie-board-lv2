@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
 import { ensureCourseExists, findOrCreateCourseByApiId, updateUserHandicap } from "@/integrations/supabase";
@@ -39,7 +38,6 @@ export function createSaveRoundHandler({
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session found');
       
-      // Find the selected tee using the current selectedTeeId from props
       console.log("Looking for tee with ID:", selectedTeeId);
       console.log("Available tees:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
       
@@ -62,7 +60,6 @@ export function createSaveRoundHandler({
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
       const toParGross = totalStrokes - totalPar;
       
-      // Get the user's handicap to calculate net score
       const { data: userData, error: userError } = await supabase
         .from('profiles')
         .select('handicap')
@@ -76,7 +73,6 @@ export function createSaveRoundHandler({
       const handicapIndex = userData?.handicap || 0;
       console.log("User handicap for net score calculation:", handicapIndex, typeof handicapIndex);
       
-      // Calculate net score and to par net, ensuring we get integers
       const netScore = calculateNetScore(totalStrokes, handicapIndex);
       const toParNet = netScore - totalPar;
       
@@ -104,7 +100,7 @@ export function createSaveRoundHandler({
           normalizedClubName,
           selectedCourse.city,
           selectedCourse.state,
-          false // No special handling
+          false
         );
         
         if (!courseId) {
@@ -123,16 +119,14 @@ export function createSaveRoundHandler({
           normalizedClubName,
           selectedCourse.city,
           selectedCourse.state,
-          false // No special handling
+          false
         );
         
         console.log("Using course_id for user-added course:", dbCourseId);
       }
       
-      // Ensure we're using the correct tee
       console.log("Final selected tee for saving:", selectedTee);
       
-      // Store the tee name and ID in constants to make debugging easier
       const teeName = String(selectedTee.name);
       const teeId = selectedTeeId;
       
@@ -140,7 +134,6 @@ export function createSaveRoundHandler({
       console.log(`- tee_name: "${teeName}" (${typeof teeName})`);
       console.log(`- tee_id: "${teeId}" (${typeof teeId})`);
       
-      // Important: Store the current handicap with the round for future net score calculations
       const roundData = {
         user_id: session.user.id,
         course_id: dbCourseId,
@@ -152,7 +145,7 @@ export function createSaveRoundHandler({
         net_score: netScore,
         to_par_net: toParNet,
         hole_scores: JSON.stringify(scores),
-        handicap_at_posting: handicapIndex  // Store the handicap at time of posting
+        handicap_at_posting: handicapIndex
       };
       
       console.log("Saving round data:", roundData);
@@ -175,7 +168,6 @@ export function createSaveRoundHandler({
       console.log("Round saved successfully:", round);
       console.log(`Saved tee_name: "${round.tee_name}" and tee_id: "${round.tee_id}"`);
       
-      // After successful round save, fetch all user rounds to update handicap
       const { data: userRounds, error: userRoundsError } = await supabase
         .from('rounds')
         .select('gross_score')
@@ -185,15 +177,12 @@ export function createSaveRoundHandler({
       if (userRoundsError) {
         console.error("Error fetching user rounds for handicap update:", userRoundsError);
       } else if (userRounds && userRounds.length > 0) {
-        // Extract gross scores for handicap calculation
         const grossScores = userRounds.map(r => r.gross_score);
         console.log("Updating handicap based on rounds:", grossScores);
         
-        // Update the user's handicap
         const newHandicap = await updateUserHandicap(session.user.id, grossScores);
         console.log("Updated handicap to:", newHandicap);
         
-        // Show handicap update in toast
         toast.toast({
           title: "Handicap Updated",
           description: `Your handicap index is now ${newHandicap}`,

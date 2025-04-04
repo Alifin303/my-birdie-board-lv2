@@ -52,10 +52,14 @@ export type SimplifiedCourseDetail = {
 
 export type Score = {
   hole: number;
-  score: number | null;
+  strokes: number | null;
+  par: number;
   putts?: number | null;
   gir?: boolean;
   fairway?: 'hit' | 'left' | 'right' | 'miss' | null;
+  penalties?: number | null;
+  yards?: number;
+  handicap?: number;
 };
 
 export interface RoundScore {
@@ -68,12 +72,25 @@ export interface RoundScore {
   gir?: number;
 }
 
-export interface HoleSelection {
-  startHole: number;
-  endHole: number;
-}
-
 export interface AddRoundModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+// Define ScoreSummary type needed by ScorecardStep.tsx
+export interface ScoreSummary {
+  totalStrokes: number;
+  totalPar: number;
+  totalPutts: number;
+  toPar: number;
+  puttsRecorded: boolean;
+  front9Strokes: number;
+  front9Par: number;
+  front9ToPar: number;
+  back9Strokes: number;
+  back9Par: number;
+  back9ToPar: number;
+}
+
+// Add CourseDetail type needed by handlers
+export type CourseDetail = SimplifiedCourseDetail;
