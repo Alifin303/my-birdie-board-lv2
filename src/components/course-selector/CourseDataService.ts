@@ -113,20 +113,16 @@ export async function getUserCourseTees(courseId: number) {
 
 export async function searchForCourses(query: string) {
   try {
-    // Normalize the search query
-    const normalizedQuery = query.trim().toLowerCase();
-    
-    // Search across name, city, and state fields
     const { data, error } = await supabase
       .from('courses')
       .select('*')
-      .or(`name.ilike.%${normalizedQuery}%,city.ilike.%${normalizedQuery}%,state.ilike.%${normalizedQuery}%`)
+      .ilike('name', `%${query}%`)
       .limit(50);
     
     if (error) throw error;
     
     // Ensure all retrieved courses have consistent ID format and isUserAdded flag
-    const userAddedCourses = (data || []).map(course => ({
+    return (data || []).map(course => ({
       ...course,
       id: typeof course.id === 'string' ? parseInt(course.id, 10) : course.id,
       isUserAdded: true,
@@ -138,14 +134,6 @@ export async function searchForCourses(query: string) {
         country: 'United States'
       }
     }));
-    
-    // Add debug logging for courses with API IDs
-    const coursesWithApiIds = userAddedCourses.filter(course => course.api_course_id);
-    if (coursesWithApiIds.length > 0) {
-      console.log("Found courses with API IDs:", coursesWithApiIds);
-    }
-    
-    return userAddedCourses;
   } catch (error) {
     console.error('Error searching for courses:', error);
     return [];

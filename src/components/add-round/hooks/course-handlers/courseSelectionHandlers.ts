@@ -58,17 +58,10 @@ export function createCourseSelectionHandlers({
         setOriginalCourseDetail(null);
       } 
       // Handle API course
-      else if (course.apiCourseId || course.api_course_id) {
-        const apiCourseId = course.apiCourseId || course.api_course_id;
-        console.log("Loading API course:", apiCourseId);
+      else if (course.apiCourseId) {
+        console.log("Loading API course:", course.apiCourseId);
         
-        if (!apiCourseId) {
-          setDataLoadingError("Missing API course ID. Please try a different course.");
-          setCourseLoadFailure(true);
-          return;
-        }
-        
-        const courseDetail = await getCourseDetails(apiCourseId);
+        const courseDetail = await getCourseDetails(course.apiCourseId);
         console.log("API course details:", courseDetail);
         
         setOriginalCourseDetail(courseDetail);
@@ -77,7 +70,7 @@ export function createCourseSelectionHandlers({
         console.log("Simplified API course detail:", simplifiedCourseDetail);
         
         // Add additional properties from the search result that might not be in the API response
-        simplifiedCourseDetail.apiCourseId = apiCourseId;
+        simplifiedCourseDetail.apiCourseId = course.apiCourseId;
         
         if (simplifiedCourseDetail.tees.length === 0) {
           setDataLoadingError("This course doesn't have any tee data available. Please try a different course or add a new one.");

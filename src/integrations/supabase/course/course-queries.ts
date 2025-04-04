@@ -1,3 +1,4 @@
+
 import { supabase } from '../core/client';
 
 /**
@@ -81,28 +82,6 @@ export async function findCourseByName(name: string) {
   } catch (error) {
     console.error('Error finding course by name:', error);
     return null;
-  }
-}
-
-/**
- * Searches for courses by name, city, or state
- */
-export async function searchCourses(query: string) {
-  try {
-    const normalizedQuery = query.trim().toLowerCase();
-    
-    const { data, error } = await supabase
-      .from('courses')
-      .select('*')
-      .or(`name.ilike.%${normalizedQuery}%,city.ilike.%${normalizedQuery}%,state.ilike.%${normalizedQuery}%`)
-      .limit(50);
-    
-    if (error) throw error;
-    
-    return { data, error: null };
-  } catch (error) {
-    console.error('Error searching for courses:', error);
-    return { data: null, error };
   }
 }
 

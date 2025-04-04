@@ -2,7 +2,6 @@
 import { searchCourses } from "@/services/golfCourseApi";
 import { fetchUserAddedCourses, enhanceCourseResults } from "../../utils/courseUtils";
 import { UseCourseHandlersProps } from "./types";
-import { searchCourses as searchDatabaseCourses } from "@/integrations/supabase/course/course-queries";
 
 export function createSearchHandlers({
   setIsLoading,
@@ -24,42 +23,24 @@ export function createSearchHandlers({
     setNoResults(false);
     
     try {
-      // Search local database first (now includes name, city, state)
-      const dbResponse = await searchDatabaseCourses(query);
-      const dbResults = dbResponse.data || [];
-      console.log("Database search results:", dbResults);
-      
-      const userAddedCourses = dbResults.map(course => ({
-        id: typeof course.id === 'string' ? parseInt(course.id) : course.id,
-        name: course.name || '',
-        clubName: course.name?.split(' - ')[0] || course.name || '',
-        city: course.city || '',
-        state: course.state || '',
-        country: 'United States',
-        isUserAdded: true,
-        api_course_id: course.api_course_id || null
-      }));
-      
-      // Then search the API
       const apiResponse = await searchCourses(query);
-      console.log("API search response:", apiResponse);
-      
       const apiResults = Array.isArray(apiResponse.results) ? apiResponse.results : [];
-      console.log("API search results:", apiResults);
       
-      const apiCourses = apiResults.map(course => ({
-        id: typeof course.id === 'string' ? parseInt(course.id) : course.id,
-        name: course.course_name || (course as any).name || '',
-        clubName: course.club_name || (course as any).name || '',
-        city: course.location?.city || '',
-        state: course.location?.state || '',
-        country: course.location?.country || 'United States',
-        isUserAdded: false,
-        apiCourseId: course.id?.toString()
-      }));
+      const userAddedCourses = await fetchUserAddedCourses(query);
       
-      const combinedResults = [...userAddedCourses, ...apiCourses];
-      console.log("Combined search results:", combinedResults);
+      const combinedResults = [
+        ...userAddedCourses, 
+        ...apiResults.map(course => ({
+          id: typeof course.id === 'string' ? parseInt(course.id) : course.id,
+          name: course.course_name || (course as any).name || '',
+          clubName: course.club_name || (course as any).name || '',
+          city: course.location?.city || '',
+          state: course.location?.state || '',
+          country: course.location?.country || 'United States',
+          isUserAdded: false,
+          apiCourseId: course.id?.toString()
+        }))
+      ];
       
       const enhancedResults = enhanceCourseResults(combinedResults);
       
@@ -70,21 +51,7 @@ export function createSearchHandlers({
       setSearchError(error.message || "Failed to fetch courses. Please try again.");
       
       try {
-        // Fallback to just local database search
-        const { data } = await searchDatabaseCourses(query);
-        console.log("Fallback database search results:", data);
-        
-        const userAddedCourses = (data || []).map(course => ({
-          id: typeof course.id === 'string' ? parseInt(course.id) : course.id,
-          name: course.name || '',
-          clubName: course.name?.split(' - ')[0] || course.name || '',
-          city: course.city || '',
-          state: course.state || '',
-          country: 'United States',
-          isUserAdded: true,
-          api_course_id: course.api_course_id || null
-        }));
-        
+        const userAddedCourses = await fetchUserAddedCourses(query);
         if (userAddedCourses.length > 0) {
           setSearchResults(userAddedCourses);
           setNoResults(false);

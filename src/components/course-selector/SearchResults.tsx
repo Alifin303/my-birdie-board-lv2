@@ -33,7 +33,6 @@ export const SearchResults = ({
           // Ensure course ID is properly logged before attempting to select
           console.log(`Course ${index}:`, { 
             id: course.id, 
-            apiCourseId: course.apiCourseId || course.api_course_id,
             name: course.name, 
             isUserAdded: course.isUserAdded 
           });
@@ -46,7 +45,6 @@ export const SearchResults = ({
                 console.log("Clicking on course:", { 
                   id: course.id, 
                   type: typeof course.id,
-                  apiCourseId: course.apiCourseId || course.api_course_id,
                   name: course.name
                 });
                 handleSelectCourse(course);
@@ -64,11 +62,6 @@ export const SearchResults = ({
               {course.isUserAdded && (
                 <div className="text-xs mt-1 text-accent italic">
                   Your course
-                </div>
-              )}
-              {(course.apiCourseId || course.api_course_id) && (
-                <div className="text-xs mt-1 text-blue-500">
-                  API ID: {course.apiCourseId || course.api_course_id}
                 </div>
               )}
             </div>
