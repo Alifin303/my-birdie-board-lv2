@@ -2,6 +2,7 @@
 import { searchCourses } from "@/services/golfCourseApi";
 import { fetchUserAddedCourses, enhanceCourseResults } from "../../utils/courseUtils";
 import { UseCourseHandlersProps } from "./types";
+import { searchCourses as searchDatabaseCourses } from "@/integrations/supabase/course/course-queries";
 
 export function createSearchHandlers({
   setIsLoading,
@@ -23,10 +24,22 @@ export function createSearchHandlers({
     setNoResults(false);
     
     try {
+      // Search local database first (now includes name, city, state)
+      const dbResponse = await searchDatabaseCourses(query);
+      const dbResults = dbResponse.data || [];
+      const userAddedCourses = dbResults.map(course => ({
+        id: typeof course.id === 'string' ? parseInt(course.id) : course.id,
+        name: course.name || '',
+        clubName: course.name?.split(' - ')[0] || course.name || '',
+        city: course.city || '',
+        state: course.state || '',
+        country: 'United States',
+        isUserAdded: true,
+      }));
+      
+      // Then search the API
       const apiResponse = await searchCourses(query);
       const apiResults = Array.isArray(apiResponse.results) ? apiResponse.results : [];
-      
-      const userAddedCourses = await fetchUserAddedCourses(query);
       
       const combinedResults = [
         ...userAddedCourses, 
@@ -51,7 +64,18 @@ export function createSearchHandlers({
       setSearchError(error.message || "Failed to fetch courses. Please try again.");
       
       try {
-        const userAddedCourses = await fetchUserAddedCourses(query);
+        // Fallback to just local database search
+        const { data } = await searchDatabaseCourses(query);
+        const userAddedCourses = (data || []).map(course => ({
+          id: typeof course.id === 'string' ? parseInt(course.id) : course.id,
+          name: course.name || '',
+          clubName: course.name?.split(' - ')[0] || course.name || '',
+          city: course.city || '',
+          state: course.state || '',
+          country: 'United States',
+          isUserAdded: true,
+        }));
+        
         if (userAddedCourses.length > 0) {
           setSearchResults(userAddedCourses);
           setNoResults(false);

@@ -113,10 +113,14 @@ export async function getUserCourseTees(courseId: number) {
 
 export async function searchForCourses(query: string) {
   try {
+    // Normalize the search query
+    const normalizedQuery = query.trim().toLowerCase();
+    
+    // Search across name, city, and state fields
     const { data, error } = await supabase
       .from('courses')
       .select('*')
-      .ilike('name', `%${query}%`)
+      .or(`name.ilike.%${normalizedQuery}%,city.ilike.%${normalizedQuery}%,state.ilike.%${normalizedQuery}%`)
       .limit(50);
     
     if (error) throw error;
