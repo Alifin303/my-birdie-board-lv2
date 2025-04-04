@@ -92,5 +92,5 @@ export interface ScoreSummary {
   back9ToPar: number;
 }
 
-// Add CourseDetail type needed by handlers
+// Add CourseDetail type needed by handlers - now properly defined as an alias to SimplifiedCourseDetail
 export type CourseDetail = SimplifiedCourseDetail;

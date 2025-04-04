@@ -62,12 +62,14 @@ export function createCourseSelectionHandlers({
         const apiId = course.apiCourseId || course.id.toString();
         console.log("Loading API course:", apiId);
         
-        const courseDetail = await getCourseDetails(apiId);
-        console.log("API course details:", courseDetail);
+        const apiCourseDetail = await getCourseDetails(apiId);
+        console.log("API course details:", apiCourseDetail);
         
-        setOriginalCourseDetail(courseDetail);
+        // Store the original API response
+        setOriginalCourseDetail(apiCourseDetail);
         
-        const simplifiedCourseDetail = convertToSimplifiedCourseDetail(courseDetail);
+        // Convert to our simplified format
+        const simplifiedCourseDetail = convertToSimplifiedCourseDetail(apiCourseDetail);
         console.log("Simplified API course detail:", simplifiedCourseDetail);
         
         // Add additional properties from the search result

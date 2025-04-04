@@ -94,11 +94,11 @@ export const CourseSelector = ({
           selectedCourse = {
             id: courseId,
             name: course.name,
-            clubName: course.clubName || course.name,
+            clubName: course.club_name || course.name,
             courseName: course.name,
-            city: course.city,
-            state: course.state,
-            country: course.country || 'United States',
+            city: course.city || course.location?.city,
+            state: course.state || course.location?.state,
+            country: course.country || course.location?.country || 'United States',
             apiCourseId: course.apiCourseId || course.id.toString(),
             isApiCourse: true
           };
