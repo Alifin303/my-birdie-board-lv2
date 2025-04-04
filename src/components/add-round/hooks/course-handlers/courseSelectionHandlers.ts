@@ -1,4 +1,3 @@
-
 import { SimplifiedCourseDetail, SimplifiedGolfCourse } from "../../types";
 import { UseCourseHandlersProps } from "./types";
 import { getCourseDetails, GolfCourse } from "@/services/golfCourseApi";
@@ -65,8 +64,10 @@ export function createCourseSelectionHandlers({
         const apiCourseDetail = await getCourseDetails(apiId);
         console.log("API course details:", apiCourseDetail);
         
-        // Store the original API response
-        setOriginalCourseDetail(apiCourseDetail);
+        // Store the original API response - convert to null for proper typing
+        // We're not using the original course detail directly in the UI flow, 
+        // but keeping it for reference/debugging purposes
+        setOriginalCourseDetail(null);
         
         // Convert to our simplified format
         const simplifiedCourseDetail = convertToSimplifiedCourseDetail(apiCourseDetail);

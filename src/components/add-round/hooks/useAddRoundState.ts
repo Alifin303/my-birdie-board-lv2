@@ -4,8 +4,7 @@ import {
   SimplifiedGolfCourse, 
   SimplifiedCourseDetail,
   Score,
-  HoleSelection,
-  CourseDetail
+  HoleSelection
 } from "../types";
 
 export const useAddRoundState = () => {
@@ -22,7 +21,7 @@ export const useAddRoundState = () => {
   const [calendarOpen, setCalendarOpen] = useState<boolean>(false);
   const [holeSelection, setHoleSelection] = useState<HoleSelection>({ type: 'all' });
   const [activeScoreTab, setActiveScoreTab] = useState<"front9" | "back9">("front9");
-  const [originalCourseDetail, setOriginalCourseDetail] = useState<CourseDetail | null>(null);
+  const [originalCourseDetail, setOriginalCourseDetail] = useState<SimplifiedCourseDetail | null>(null);
   const [noResults, setNoResults] = useState<boolean>(false);
   const [manualCourseOpen, setManualCourseOpen] = useState<boolean>(false);
   const [courseAndTeeReady, setCourseAndTeeReady] = useState<boolean>(false);

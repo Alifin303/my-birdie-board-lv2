@@ -37,8 +37,8 @@ export interface UseCourseHandlersProps {
   setHoleSelection: Dispatch<SetStateAction<HoleSelection>>;
   activeScoreTab: "front9" | "back9";
   setActiveScoreTab: Dispatch<SetStateAction<"front9" | "back9">>;
-  originalCourseDetail: CourseDetail | null;
-  setOriginalCourseDetail: Dispatch<SetStateAction<CourseDetail | null>>;
+  originalCourseDetail: SimplifiedCourseDetail | null;
+  setOriginalCourseDetail: Dispatch<SetStateAction<SimplifiedCourseDetail | null>>;
   noResults: boolean;
   setNoResults: Dispatch<SetStateAction<boolean>>;
   manualCourseOpen: boolean;
