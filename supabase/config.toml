@@ -1,9 +1,5 @@
 
 project_id = "rbhzesocmhazynkfyhst"
 
-[api]
-# No custom API configuration needed
-
-[functions]
-[functions.stripe-webhook]
+[functions.update-handicaps]
 verify_jwt = false

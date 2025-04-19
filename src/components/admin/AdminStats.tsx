@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -64,8 +63,12 @@ export function AdminStats() {
   }
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Platform Overview</h2>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold">System Statistics</h2>
+        <UpdateHandicapsButton />
+      </div>
+      
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard 
           title="Total Users" 
