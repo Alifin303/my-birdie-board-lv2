@@ -4,28 +4,14 @@
  * This follows a simplified version of the World Handicap System
  * with a maximum handicap index of 54 and allowing for negative handicaps for exceptional players
  */
-export const calculateHandicapIndex = (scores: number[], holes: number[] = []): number => {
+export const calculateHandicapIndex = (scores: number[]): number => {
   if (!scores || scores.length === 0) return 0;
 
-  // Convert 9-hole scores to 18-hole equivalent scores
-  // In WHS, 9-hole scores are doubled and then adjusted by adding a value
-  // We'll use a simplified approach: double the 9-hole score and add 1 stroke
-  const adjustedScores = scores.map((score, index) => {
-    const holeCount = holes[index] || 18;
-    if (holeCount === 9) {
-      return score * 2 + 1; // Double the 9-hole score and add 1 stroke adjustment
-    }
-    return score; // Keep 18-hole scores as is
-  });
-
   // Sort scores from best to worst (lowest to highest)
-  const sortedScores = [...adjustedScores].sort((a, b) => a - b);
+  const sortedScores = [...scores].sort((a, b) => a - b);
   
   // Log for debugging
   console.log("Calculating handicap with scores:", sortedScores);
-  console.log("Original scores:", scores);
-  console.log("Hole counts:", holes);
-  console.log("Adjusted scores (9-hole rounds converted to 18):", adjustedScores);
   
   // Determine how many scores to use based on available rounds
   // Following a simplified version of the World Handicap System
@@ -52,7 +38,7 @@ export const calculateHandicapIndex = (scores: number[], holes: number[] = []): 
   const calculatedHandicap = (averageScore - 72) * 0.96;
   console.log("Raw calculated handicap:", calculatedHandicap);
   
-  // Allow for negative handicaps (plus handicaps) for exceptional players
+  // CHANGED: Allow for negative handicaps (plus handicaps) for exceptional players
   // A negative handicap means a player is expected to score below par
   
   // Cap the handicap at 54, which is the maximum allowed in the World Handicap System
@@ -122,14 +108,9 @@ export const calculateNetToPar = (toPar: number, handicap: number | string | nul
  * Updates a user's handicap in the database based on their recent rounds
  * @param userId The user's ID
  * @param rounds An array of round gross scores
- * @param holeCountsArray An array indicating how many holes were played in each round (9 or 18)
  * @returns The new handicap index
  */
-export const updateUserHandicap = async (
-  userId: string, 
-  rounds: number[], 
-  holeCountsArray: number[] = []
-): Promise<number> => {
+export const updateUserHandicap = async (userId: string, rounds: number[]): Promise<number> => {
   try {
     if (!userId) {
       console.error("Cannot update handicap: No user ID provided");
@@ -141,7 +122,7 @@ export const updateUserHandicap = async (
     
     // Calculate the new handicap index - DO NOT round, store exact value in database
     // The maximum handicap index is capped at 54 in the calculateHandicapIndex function
-    const newHandicap = calculateHandicapIndex(rounds, holeCountsArray);
+    const newHandicap = calculateHandicapIndex(rounds);
     console.log(`Updating handicap for user ${userId}: New handicap=${newHandicap} based on ${rounds.length} rounds`);
     
     // Update the user's profile with the new handicap - storing as decimal

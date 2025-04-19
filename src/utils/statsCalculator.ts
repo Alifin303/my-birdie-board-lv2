@@ -1,4 +1,3 @@
-
 interface Round {
   id: number;
   date: string;
@@ -24,7 +23,6 @@ interface Round {
     courseName?: string;
   };
   handicap_at_posting?: number;
-  holes_played?: number; // New field to track 9 vs 18 hole rounds
 }
 
 interface Stats {
@@ -67,33 +65,13 @@ export const calculateStats = (rounds: Round[]): Stats => {
     };
   }
 
-  // Prepare rounds for handicap calculation
-  // Adjust 9-hole scores for handicap calculation
-  const normalizedRounds = rounds.map(round => {
-    const holesPlayed = round.holes_played || 18;
-    let normalizedScore = round.gross_score;
-    
-    // For 9-hole rounds, double the score and add 1 (simplified approach)
-    if (holesPlayed === 9) {
-      normalizedScore = round.gross_score * 2 + 1;
-      console.log(`Normalizing 9-hole round: original=${round.gross_score}, normalized=${normalizedScore}`);
-    }
-    
-    return {
-      ...round,
-      normalizedScore
-    };
-  });
-
-  const validRoundsForHandicap = normalizedRounds.filter(round => {
+  const validRoundsForHandicap = rounds.filter(round => {
     const isComplete = round.gross_score > 0;
     const isPar3OnlyCourse = false;
     return isComplete && !isPar3OnlyCourse;
   });
 
   const totalRounds = rounds.length;
-  
-  // For display stats, we'll show the actual best scores (not normalized)
   const bestGrossScore = Math.min(...rounds.map(r => r.gross_score));
   const bestToPar = Math.min(...rounds.map(r => r.to_par_gross));
   
@@ -107,19 +85,13 @@ export const calculateStats = (rounds: Round[]): Stats => {
       net: r.net_score,
       toPar: r.to_par_gross,
       toParNet: r.to_par_net,
-      handicapAtPosting: r.handicap_at_posting,
-      holesPlayed: r.holes_played || 18
+      handicapAtPosting: r.handicap_at_posting
     }))
   );
   
-  // For handicap calculation, use the normalized scores
   const handicapIndex = validRoundsForHandicap.length >= ROUNDS_NEEDED_FOR_HANDICAP ? 
-    calculateHandicapIndex(
-      validRoundsForHandicap.map(r => r.normalizedScore), 
-      validRoundsForHandicap.map(r => r.holes_played || 18)
-    ) : 0;
+    calculateHandicapIndex(validRoundsForHandicap.map(r => r.gross_score)) : 0;
 
-  // For average score, consider the actual played rounds
   const averageScore = rounds.reduce((sum, r) => sum + r.gross_score, 0) / totalRounds;
   
   const roundsWithCalculatedScores = rounds.map(r => {
@@ -127,18 +99,14 @@ export const calculateStats = (rounds: Round[]): Stats => {
       ? r.handicap_at_posting
       : handicapIndex;
     
-    // Scale the handicap for 9-hole rounds (half the handicap)
-    const scaledHandicap = (r.holes_played === 9) ? handicapToUse / 2 : handicapToUse;
-    
-    const netScore = Math.round(r.gross_score - scaledHandicap);
-    const toParNet = Math.round(r.to_par_gross - scaledHandicap);
+    const netScore = Math.round(r.gross_score - handicapToUse);
+    const toParNet = Math.round(r.to_par_gross - handicapToUse);
     
     return {
       ...r,
       calculatedNetScore: netScore,
       calculatedToParNet: toParNet,
-      handicapUsed: handicapToUse,
-      scaledHandicap
+      handicapUsed: handicapToUse
     };
   });
   
@@ -149,9 +117,7 @@ export const calculateStats = (rounds: Round[]): Stats => {
       netScore: r.calculatedNetScore,
       toPar: r.to_par_gross,
       toParNet: r.calculatedToParNet,
-      handicapUsed: r.handicapUsed,
-      scaledHandicap: r.scaledHandicap,
-      holesPlayed: r.holes_played || 18
+      handicapUsed: r.handicapUsed
     }))
   );
   
@@ -172,8 +138,7 @@ export const calculateStats = (rounds: Round[]): Stats => {
     gross: bestNetRound.gross_score,
     net: bestNetRound.calculatedNetScore,
     toParNet: bestNetRound.calculatedToParNet,
-    handicapUsed: bestNetRound.handicapUsed,
-    holesPlayed: bestNetRound.holes_played || 18
+    handicapUsed: bestNetRound.handicapUsed
   } : "No rounds found");
   
   console.log("Best to par net round:", bestToParNetRound ? {
@@ -184,8 +149,7 @@ export const calculateStats = (rounds: Round[]): Stats => {
     gross: bestToParNetRound.gross_score,
     net: bestNetRound.calculatedNetScore,
     toParNet: bestToParNetRound.calculatedToParNet,
-    handicapUsed: bestToParNetRound.handicapUsed,
-    holesPlayed: bestToParNetRound.holes_played || 18
+    handicapUsed: bestToParNetRound.handicapUsed
   } : "No rounds found");
   
   const validRoundsCount = validRoundsForHandicap.length;
@@ -224,10 +188,9 @@ export const calculateStats = (rounds: Round[]): Stats => {
 
 import { calculateHandicapIndex as whsCalculateHandicapIndex } from "@/integrations/supabase/handicap/handicap-calculator";
 
-const calculateHandicapIndex = (scores: number[], holes: number[] = []): number => {
+const calculateHandicapIndex = (scores: number[]): number => {
   console.log("StatCalculator: Calculating handicap from scores:", scores);
-  console.log("StatCalculator: With hole counts:", holes);
-  const handicap = whsCalculateHandicapIndex(scores, holes);
+  const handicap = whsCalculateHandicapIndex(scores);
   console.log("StatCalculator: Calculated handicap:", handicap);
   return handicap;
 };

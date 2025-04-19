@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
 import { ensureCourseExists, findOrCreateCourseByApiId, updateUserHandicap } from "@/integrations/supabase";
@@ -12,8 +11,7 @@ export function createSaveRoundHandler({
   scores,
   setIsLoading,
   toast,
-  queryClient,
-  holeSelection
+  queryClient
 }: Pick<UseCourseHandlersProps, 
   'selectedCourse' | 
   'roundDate' | 
@@ -21,8 +19,7 @@ export function createSaveRoundHandler({
   'scores' | 
   'setIsLoading' | 
   'toast' | 
-  'queryClient' |
-  'holeSelection'
+  'queryClient'
 >) {
   
   const handleSaveRound = async (): Promise<boolean> => {
@@ -59,18 +56,6 @@ export function createSaveRoundHandler({
       console.log("Selected tee name:", selectedTee.name);
       console.log("Tee name type:", typeof selectedTee.name);
       
-      // Determine how many holes were played (9 or 18)
-      let holesPlayed = 18; // Default to 18 holes
-      if (holeSelection.type === 'front9' || holeSelection.type === 'back9') {
-        holesPlayed = 9;
-      } else if (holeSelection.type === 'custom' && holeSelection.startHole && holeSelection.endHole) {
-        holesPlayed = (holeSelection.endHole - holeSelection.startHole + 1);
-        // Cap at 18 holes for custom selections that might exceed 18
-        holesPlayed = Math.min(holesPlayed, 18);
-      }
-      
-      console.log(`Saving a ${holesPlayed}-hole round`, holeSelection);
-      
       const totalStrokes = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
       const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
       const toParGross = totalStrokes - totalPar;
@@ -95,8 +80,7 @@ export function createSaveRoundHandler({
         grossScore: totalStrokes,
         netScore: netScore,
         toParGross: toParGross,
-        toParNet: toParNet,
-        holesPlayed: holesPlayed
+        toParNet: toParNet
       });
       
       console.log("Ensuring course exists in database:", selectedCourse);
@@ -161,8 +145,7 @@ export function createSaveRoundHandler({
         net_score: netScore,
         to_par_net: toParNet,
         hole_scores: JSON.stringify(scores),
-        handicap_at_posting: handicapIndex,
-        holes_played: holesPlayed // Add holes_played field
+        handicap_at_posting: handicapIndex
       };
       
       console.log("Saving round data:", roundData);
@@ -170,7 +153,7 @@ export function createSaveRoundHandler({
       const { data: round, error: roundError } = await supabase
         .from('rounds')
         .insert([roundData])
-        .select('id, tee_name, tee_id, holes_played')
+        .select('id, tee_name, tee_id')
         .single();
         
       if (roundError) {
@@ -187,7 +170,7 @@ export function createSaveRoundHandler({
       
       const { data: userRounds, error: userRoundsError } = await supabase
         .from('rounds')
-        .select('gross_score, holes_played')
+        .select('gross_score')
         .eq('user_id', session.user.id)
         .order('date', { ascending: false });
         
@@ -195,19 +178,14 @@ export function createSaveRoundHandler({
         console.error("Error fetching user rounds for handicap update:", userRoundsError);
       } else if (userRounds && userRounds.length > 0) {
         const grossScores = userRounds.map(r => r.gross_score);
-        // Get the hole counts for each round (defaulting to 18 if not specified)
-        const holeCounts = userRounds.map(r => r.holes_played || 18);
-        
         console.log("Updating handicap based on rounds:", grossScores);
-        console.log("Hole counts for rounds:", holeCounts);
         
-        // Pass both scores and hole counts to updateUserHandicap
-        const newHandicap = await updateUserHandicap(session.user.id, grossScores, holeCounts);
+        const newHandicap = await updateUserHandicap(session.user.id, grossScores);
         console.log("Updated handicap to:", newHandicap);
         
         toast.toast({
           title: "Handicap Updated",
-          description: `Your handicap index is now ${newHandicap.toFixed(1)}`,
+          description: `Your handicap index is now ${newHandicap}`,
         });
       }
       
