@@ -37,8 +37,19 @@ export function createSaveRoundHandler({
     setIsLoading(true);
     
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('No session found');
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error("Session error:", sessionError);
+        throw new Error(`Authentication error: ${sessionError.message}`);
+      }
+      
+      if (!sessionData.session) {
+        console.error("No active session found");
+        throw new Error("You need to be logged in to save rounds. Please log in and try again.");
+      }
+      
+      const session = sessionData.session;
       
       console.log("Looking for tee with ID:", selectedTeeId);
       console.log("Available tees:", selectedCourse.tees.map(t => ({ id: t.id, name: t.name })));
@@ -51,12 +62,6 @@ export function createSaveRoundHandler({
         });
         throw new Error('Selected tee not found - this is a critical error');
       }
-      
-      console.log("SAVING ROUND - CRITICAL TEE INFO:");
-      console.log("Selected tee ID:", selectedTeeId);
-      console.log("Selected tee object:", selectedTee);
-      console.log("Selected tee name:", selectedTee.name);
-      console.log("Tee name type:", typeof selectedTee.name);
       
       let holesPlayed = 18; // Default to 18 holes
       if (holeSelection.type === 'front9' || holeSelection.type === 'back9') {

@@ -1,7 +1,8 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase, logSupabaseOperation, fetchCourseById } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
 
 interface Round {
   id?: number;
@@ -20,7 +21,38 @@ interface Round {
 export function useRounds() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [sessionChecked, setSessionChecked] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  // Check authentication state on mount
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setAuthenticated(!!session);
+        setSessionChecked(true);
+      } catch (err) {
+        console.error('Error checking authentication status:', err);
+        setAuthenticated(false);
+        setSessionChecked(true);
+      }
+    };
+
+    checkSession();
+
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setAuthenticated(!!session);
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   // Add a new round
   const addRound = async (round: Round): Promise<number | null> => {
@@ -28,6 +60,20 @@ export function useRounds() {
     setError(null);
     
     try {
+      // Check for session first 
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        const errorMessage = 'No active session found. Please log in to add rounds.';
+        console.error(errorMessage);
+        toast({
+          title: "Authentication Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        throw new Error(errorMessage);
+      }
+      
       console.log("Adding new round with data:", round);
       
       // Log the course details for this round
@@ -70,7 +116,14 @@ export function useRounds() {
       
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        throw new Error('No session found');
+        const errorMessage = 'No session found. Please log in to view rounds.';
+        console.error(errorMessage);
+        toast({
+          title: "Authentication Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        throw new Error(errorMessage);
       }
       
       const { data, error } = await supabase
@@ -107,6 +160,19 @@ export function useRounds() {
     try {
       console.log(`Deleting round with ID: ${roundId}`);
       
+      // Check for session first
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        const errorMessage = 'No session found. Please log in to delete rounds.';
+        console.error(errorMessage);
+        toast({
+          title: "Authentication Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        throw new Error(errorMessage);
+      }
+      
       const { error } = await supabase
         .from('rounds')
         .delete()
@@ -135,6 +201,8 @@ export function useRounds() {
   return {
     loading,
     error,
+    authenticated,
+    sessionChecked,
     addRound,
     getRoundsForCourse,
     deleteRound
