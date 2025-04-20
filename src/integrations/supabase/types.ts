@@ -294,6 +294,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      recalculate_all_handicaps: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"

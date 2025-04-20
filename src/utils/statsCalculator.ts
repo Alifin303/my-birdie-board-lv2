@@ -1,4 +1,3 @@
-
 interface Round {
   id: number;
   date: string;
@@ -73,10 +72,20 @@ export const calculateStats = (rounds: Round[]): Stats => {
     const holesPlayed = round.holes_played || 18;
     let normalizedScore = round.gross_score;
     
-    // For 9-hole rounds, double the score and add 1 (simplified approach)
+    // For 9-hole rounds, check for potential outliers
     if (holesPlayed === 9) {
-      normalizedScore = round.gross_score * 2 + 1;
-      console.log(`Normalizing 9-hole round: original=${round.gross_score}, normalized=${normalizedScore}`);
+      const estimatedPar = 36; // Estimated par for 9 holes
+      const isLikelyOutlier = round.gross_score > (estimatedPar + 20);
+      
+      if (isLikelyOutlier) {
+        // Use a more conservative adjustment for outlier scores
+        normalizedScore = round.gross_score + estimatedPar;
+        console.log(`Normalizing outlier 9-hole round: original=${round.gross_score}, normalized=${normalizedScore}`);
+      } else {
+        // Standard adjustment: double the score and add 1
+        normalizedScore = round.gross_score * 2 + 1;
+        console.log(`Normalizing 9-hole round: original=${round.gross_score}, normalized=${normalizedScore}`);
+      }
     }
     
     return {

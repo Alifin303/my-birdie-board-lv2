@@ -1,4 +1,3 @@
-
 /**
  * Calculates a handicap index based on a set of scores
  * This follows a simplified version of the World Handicap System
@@ -13,7 +12,25 @@ export const calculateHandicapIndex = (scores: number[], holes: number[] = []): 
   const adjustedScores = scores.map((score, index) => {
     const holeCount = holes[index] || 18;
     if (holeCount === 9) {
-      return score * 2 + 1; // Double the 9-hole score and add 1 stroke adjustment
+      // Add sanity check for exceptionally high 9-hole scores
+      // For scores that are extremely high over par, cap the adjustment
+      // This prevents unrealistic handicaps in edge cases
+      const adjustedScore = score * 2 + 1;
+      
+      // If score is more than 20 over par for 9 holes, we'll consider it an outlier
+      // Assuming par is around 36 for 9 holes, anything over 56 is likely an outlier
+      const estimatedPar = 36; // Estimated par for 9 holes
+      const isLikelyOutlier = score > (estimatedPar + 20);
+      
+      // For outliers, use a more conservative approach
+      if (isLikelyOutlier) {
+        // Use a more reasonable adjustment for handicap calculation
+        // This prevents extremely negative handicaps from a single unusual round
+        console.log(`Adjusting outlier 9-hole score: ${score} (adjusted from ${adjustedScore} to ${score + estimatedPar})`);
+        return score + estimatedPar; // Add estimated par instead of doubling
+      }
+      
+      return adjustedScore; // Double the 9-hole score and add 1 stroke adjustment
     }
     return score; // Keep 18-hole scores as is
   });
