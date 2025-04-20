@@ -275,8 +275,11 @@ export const calculateCourseStats = (rounds: Round[], handicapIndex?: number): C
         ? r.handicap_at_posting 
         : currentHandicapIndex;
         
-      const netScore = Math.round(r.gross_score - handicapToUse);
-      const toParNet = Math.round(r.to_par_gross - handicapToUse);
+      // Scale the handicap for 9-hole rounds
+      const scaledHandicap = (r.holes_played === 9) ? handicapToUse / 2 : handicapToUse;
+      
+      const netScore = Math.round(r.gross_score - scaledHandicap);
+      const toParNet = Math.round(r.to_par_gross - scaledHandicap);
       
       console.log(`Round ${r.id} at ${courseName} calculation:`, {
         gross: r.gross_score,
@@ -284,6 +287,8 @@ export const calculateCourseStats = (rounds: Round[], handicapIndex?: number): C
         toPar: r.to_par_gross,
         toParNet,
         handicapUsed: handicapToUse,
+        scaledHandicap,
+        holesPlayed: r.holes_played || 18,
         handicapAtPosting: r.handicap_at_posting,
         currentHandicap: currentHandicapIndex,
         date: new Date(r.date).toLocaleDateString()

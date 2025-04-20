@@ -1,3 +1,4 @@
+
 import { Round } from "./types";
 
 export const calculateCourseSpecificStats = (courseRounds: Round[], handicapIndex: number = 0) => {
@@ -17,10 +18,13 @@ export const calculateCourseSpecificStats = (courseRounds: Round[], handicapInde
       ? r.handicap_at_posting
       : handicapIndex;
       
+    // Scale the handicap for 9-hole rounds
+    const scaledHandicap = (r.holes_played === 9) ? handicapToUse / 2 : handicapToUse;
+      
     // Note: For negative handicaps, this will ADD strokes to the gross score
     // For example: gross_score=70, handicap=-2 => net_score=72
-    const calculatedNetScore = Math.max(0, Math.round(r.gross_score - handicapToUse));
-    const calculatedToParNet = Math.round(r.to_par_gross - handicapToUse);
+    const calculatedNetScore = Math.max(0, Math.round(r.gross_score - scaledHandicap));
+    const calculatedToParNet = Math.round(r.to_par_gross - scaledHandicap);
     
     return {
       ...r,
@@ -38,7 +42,8 @@ export const calculateCourseSpecificStats = (courseRounds: Round[], handicapInde
       net: r.calculatedNetScore,
       toPar: r.to_par_gross,
       toParNet: r.calculatedToParNet,
-      handicapUsed: r.handicapUsed
+      handicapUsed: r.handicapUsed,
+      holesPlayed: r.holes_played || 18
     }))
   );
   

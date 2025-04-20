@@ -1,3 +1,4 @@
+
 /**
  * Calculates a handicap index based on a set of scores
  * This follows a simplified version of the World Handicap System
