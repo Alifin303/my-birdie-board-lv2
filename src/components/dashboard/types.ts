@@ -10,6 +10,7 @@ export interface Round {
   to_par_net?: number;
   hole_scores?: any;
   handicap_at_posting?: number; // Add this field to store the handicap at posting time
+  holes_played?: number; // Add the missing property for 9 vs 18 hole rounds
   courses?: {
     id: number;
     name: string;
