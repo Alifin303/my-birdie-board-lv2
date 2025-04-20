@@ -63,18 +63,47 @@ export const calculateHandicapIndex = (scores: number[], holes: number[] = []): 
   const averageScore = bestScores.reduce((sum, score) => sum + score, 0) / bestScores.length;
   console.log("Average of best scores:", averageScore);
   
-  // In real WHS, this would use course rating and slope
-  // For our simplified version, we're assuming par 72 course with standard difficulty
-  // The standard calculation is (Average Score - Course Rating) * 113 / Slope Rating * 0.96
-  // Since we're using a simplified model, we'll use (Average Score - 72) * 0.96
-  const calculatedHandicap = (averageScore - 72) * 0.96;
+  // Fixed: Make sure we're not getting unrealistic handicaps for players with mostly high scores
+  // If the average score is very high (more than 36 over par), we should apply additional logic
+  const parBaseline = 72; // Standard 18-hole par
+  const scoreDifferential = averageScore - parBaseline;
+  
+  // Detect unrealistic handicap calculations
+  if (scoreDifferential < -10 && scores.filter(s => s <= parBaseline).length < 2) {
+    console.log("UNREALISTIC HANDICAP DETECTED - Adjusting calculation");
+    console.log(`Most scores are high but calculation would result in very low handicap (${scoreDifferential})`);
+    
+    // If a player has mostly high scores but one extremely low outlier, 
+    // don't let that one score give them a very low handicap
+    const medianScore = sortedScores[Math.floor(sortedScores.length / 2)];
+    const medianDifferential = (medianScore - parBaseline) * 0.5; // Use a modified median approach
+    
+    console.log(`Using median-based approach: median score ${medianScore}, adjusted differential ${medianDifferential}`);
+    
+    // Use the median-based approach, but ensure it doesn't go negative unless truly warranted
+    const adjustedHandicap = medianDifferential > -5 ? medianDifferential : -5;
+    console.log(`Final adjusted handicap: ${adjustedHandicap}`);
+    return adjustedHandicap;
+  }
+  
+  // Standard calculation for normal score distributions
+  const calculatedHandicap = (averageScore - parBaseline) * 0.96;
   console.log("Raw calculated handicap:", calculatedHandicap);
   
   // Allow for negative handicaps (plus handicaps) for exceptional players
   // A negative handicap means a player is expected to score below par
   
+  // Additional check: Only allow negative handicaps if player has multiple rounds below par
+  if (calculatedHandicap < 0) {
+    const roundsBelowPar = scores.filter(s => s < parBaseline).length;
+    if (roundsBelowPar < 2) {
+      console.log(`Capping handicap at 0 - player has only ${roundsBelowPar} rounds below par`);
+      return 0; // Don't give a plus handicap unless they've proven it with multiple good rounds
+    }
+  }
+  
   // Cap the handicap at 54, which is the maximum allowed in the World Handicap System
-  // But allow for negative handicaps with no lower limit
+  // But allow for negative handicaps with this additional check
   const cappedHandicap = Math.min(54, calculatedHandicap);
   console.log("Final handicap after cap:", cappedHandicap);
 

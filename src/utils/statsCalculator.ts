@@ -23,7 +23,7 @@ interface Round {
     courseName?: string;
   };
   handicap_at_posting?: number;
-  holes_played?: number; // New field to track 9 vs 18 hole rounds
+  holes_played?: number;
 }
 
 interface Stats {
