@@ -210,6 +210,7 @@ export type Database = {
           gross_score: number
           handicap_at_posting: number | null
           hole_scores: Json | null
+          holes_played: number | null
           id: number
           net_score: number | null
           tee_id: string | null
@@ -226,6 +227,7 @@ export type Database = {
           gross_score: number
           handicap_at_posting?: number | null
           hole_scores?: Json | null
+          holes_played?: number | null
           id?: number
           net_score?: number | null
           tee_id?: string | null
@@ -242,6 +244,7 @@ export type Database = {
           gross_score?: number
           handicap_at_posting?: number | null
           hole_scores?: Json | null
+          holes_played?: number | null
           id?: number
           net_score?: number | null
           tee_id?: string | null
