@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -245,9 +244,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
   };
 
   const renderHolesSelector = () => {
-    // Always show the hole selector when editing
-    if (!isEditing) return null;
-    
     return (
       <div className="mb-4">
         <label className="block text-sm font-medium mb-1">Holes Played</label>
@@ -433,7 +429,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
 
         <Card>
           <CardContent className="pt-6">
-            {renderHolesSelector()}
+            {isEditing && renderHolesSelector()}
             <ScorecardHeader
               round={round}
               isEditing={isEditing}
