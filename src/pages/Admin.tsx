@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { AdminStats } from "@/components/admin/AdminStats";
 import { UsersList } from "@/components/admin/UsersList";
 import { UserDetail } from "@/components/admin/UserDetail";
+import { AdminActions } from "@/components/admin/AdminActions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -92,21 +93,16 @@ export default function Admin() {
           </div>
           
           {selectedUserId ? (
-            <div className="space-y-4">
-              <Button 
-                variant="outline" 
-                onClick={() => setSelectedUserId(null)}
-                className="mb-4"
-              >
-                ← Back to Users List
-              </Button>
-              <UserDetail userId={selectedUserId} />
-            </div>
+            <UserDetail 
+              userId={selectedUserId} 
+              onBack={() => setSelectedUserId(null)} 
+            />
           ) : (
             <Tabs defaultValue="overview" className="w-full">
               <TabsList className="mb-6">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="users">Users</TabsTrigger>
+                <TabsTrigger value="actions">Admin Actions</TabsTrigger>
               </TabsList>
               
               <TabsContent value="overview" className="space-y-6">
@@ -115,6 +111,10 @@ export default function Admin() {
               
               <TabsContent value="users">
                 <UsersList onUserSelect={setSelectedUserId} />
+              </TabsContent>
+              
+              <TabsContent value="actions">
+                <AdminActions />
               </TabsContent>
             </Tabs>
           )}
