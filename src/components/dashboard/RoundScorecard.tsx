@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -54,6 +55,27 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       setSelectedTee(round.tee_name || '');
       console.log("Setting selected tee to round's tee_name:", round.tee_name);
       
+      // Determine the hole selection based on holes_played if available
+      if (round.holes_played) {
+        if (round.holes_played === 9) {
+          // Check if it's front 9 or back 9 based on the scores
+          const front9Scores = parsedScores.filter((score: any) => score.hole <= 9 && (score.strokes ?? 0) > 0);
+          const back9Scores = parsedScores.filter((score: any) => score.hole > 9 && (score.strokes ?? 0) > 0);
+          
+          if (front9Scores.length > back9Scores.length) {
+            setHoleSelection("front9");
+          } else if (back9Scores.length > front9Scores.length) {
+            setHoleSelection("back9");
+          } else {
+            setHoleSelection("all");
+          }
+        } else {
+          setHoleSelection("all");
+        }
+      } else {
+        setHoleSelection("all");
+      }
+      
       try {
         const courseDetailsKey = `course_details_${round.course_id}`;
         const storedDetails = localStorage.getItem(courseDetailsKey);
@@ -80,7 +102,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
         tee: round.tee_name,
         teeId: round.tee_id,
         date: roundDate ? format(roundDate, 'PP') : 'unknown',
-        scoresCount: parsedScores.length
+        scoresCount: parsedScores.length,
+        holesPlayed: round.holes_played || 18
       });
     }
     
@@ -90,6 +113,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       setIsEditing(false);
       setSelectedTee(undefined);
       setAvailableTees([]);
+      setHoleSelection("all");
     }
   }, [round, isOpen]);
 
@@ -137,6 +161,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
     try {
       let filteredScores = scores;
       let holesPlayed = 18;
+      
       if (holeSelection === "front9") {
         filteredScores = scores.filter(score => score.hole >= 1 && score.hole <= 9 && (score.strokes ?? 0) > 0);
         holesPlayed = 9;
@@ -144,9 +169,17 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
         filteredScores = scores.filter(score => score.hole > 9 && score.hole <= 18 && (score.strokes ?? 0) > 0);
         holesPlayed = 9;
       } else {
-        const nonBlank = scores.filter(score => (score.strokes ?? 0) > 0);
-        if (nonBlank.length === 9) {
-          filteredScores = nonBlank;
+        // For "all" selection, check if only one set of 9 holes has scores
+        const nonBlankFront = scores.filter(score => score.hole <= 9 && (score.strokes ?? 0) > 0);
+        const nonBlankBack = scores.filter(score => score.hole > 9 && (score.strokes ?? 0) > 0);
+        
+        if (nonBlankFront.length > 0 && nonBlankBack.length === 0) {
+          // Only front 9 has scores
+          filteredScores = nonBlankFront;
+          holesPlayed = 9;
+        } else if (nonBlankFront.length === 0 && nonBlankBack.length > 0) {
+          // Only back 9 has scores
+          filteredScores = nonBlankBack;
           holesPlayed = 9;
         }
       }
@@ -168,6 +201,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       }
       
       console.log("Saving round with tee:", selectedTee, "tee_id:", teeId);
+      console.log("Saving round with holes_played:", holesPlayed);
       
       const { error } = await supabase
         .from('rounds')
@@ -178,7 +212,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
           tee_name: selectedTee,
           tee_id: teeId,
           hole_scores: JSON.stringify(filteredScores),
-          holes_played: holesPlayed
+          holes_played: holesPlayed // Explicitly save the number of holes played
         })
         .eq('id', round.id);
         
@@ -211,7 +245,9 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
   };
 
   const renderHolesSelector = () => {
+    // Always show the hole selector when editing
     if (!isEditing) return null;
+    
     return (
       <div className="mb-4">
         <label className="block text-sm font-medium mb-1">Holes Played</label>
