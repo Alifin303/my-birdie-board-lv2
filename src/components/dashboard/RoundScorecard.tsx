@@ -28,16 +28,15 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
   const [isSaving, setIsSaving] = useState(false);
   const [selectedTee, setSelectedTee] = useState<string | undefined>(undefined);
   const [availableTees, setAvailableTees] = useState<Array<{id: string, name: string}>>([]);
-  
+  const [holeSelection, setHoleSelection] = useState<"all" | "front9" | "back9">("all");
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Reset state when round changes or dialog opens/closes
   useEffect(() => {
     if (round && isOpen) {
       console.log("Loading round data for scorecard:", round.id, "tee:", round.tee_name, "tee_id:", round.tee_id);
       
-      // Parse hole scores from JSON
       let parsedScores = [];
       try {
         parsedScores = typeof round.hole_scores === 'string' 
@@ -50,13 +49,11 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       
       setScores(parsedScores);
       setRoundDate(round.date ? new Date(round.date) : undefined);
-      setIsEditing(false); // Reset edit mode when opening a new round
+      setIsEditing(false);
       
-      // Always use the exact tee_name from the round data
       setSelectedTee(round.tee_name || '');
       console.log("Setting selected tee to round's tee_name:", round.tee_name);
       
-      // Get available tees for this course from localStorage
       try {
         const courseDetailsKey = `course_details_${round.course_id}`;
         const storedDetails = localStorage.getItem(courseDetailsKey);
@@ -75,7 +72,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
         }
       } catch (error) {
         console.error("Error loading tees from localStorage:", error);
-        // If we can't get tees from localStorage, just use the current tee
         setAvailableTees([{ id: round.tee_id || 'default', name: round.tee_name || 'Default' }]);
       }
       
@@ -88,7 +84,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       });
     }
     
-    // Clear state when dialog closes
     if (!isOpen) {
       setScores([]);
       setRoundDate(undefined);
@@ -100,7 +95,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
 
   if (!round) return null;
 
-  // Format date for display
   const formattedDate = roundDate 
     ? format(roundDate, 'MMMM d, yyyy')
     : format(new Date(round.date), 'MMMM d, yyyy');
@@ -141,12 +135,30 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
     setIsSaving(true);
     
     try {
-      // Calculate new totals
-      const totalStrokes = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
-      const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
+      let filteredScores = scores;
+      let holesPlayed = 18;
+      if (holeSelection === "front9") {
+        filteredScores = scores.filter(score => score.hole >= 1 && score.hole <= 9 && (score.strokes ?? 0) > 0);
+        holesPlayed = 9;
+      } else if (holeSelection === "back9") {
+        filteredScores = scores.filter(score => score.hole > 9 && score.hole <= 18 && (score.strokes ?? 0) > 0);
+        holesPlayed = 9;
+      } else {
+        const nonBlank = scores.filter(score => (score.strokes ?? 0) > 0);
+        if (nonBlank.length === 9) {
+          filteredScores = nonBlank;
+          holesPlayed = 9;
+        }
+      }
+
+      if (filteredScores.length < 3) {
+        throw new Error("Please enter at least 3 hole scores");
+      }
+
+      const totalStrokes = filteredScores.reduce((sum, score) => sum + (score.strokes || 0), 0);
+      const totalPar = filteredScores.reduce((sum, score) => sum + score.par, 0);
       const toPar = totalStrokes - totalPar;
       
-      // Get the tee ID that matches the selected tee name
       let teeId = round.tee_id;
       if (selectedTee !== round.tee_name) {
         const selectedTeeObj = availableTees.find(tee => tee.name === selectedTee);
@@ -157,7 +169,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       
       console.log("Saving round with tee:", selectedTee, "tee_id:", teeId);
       
-      // Update the round in the database
       const { error } = await supabase
         .from('rounds')
         .update({
@@ -166,7 +177,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
           to_par_gross: toPar,
           tee_name: selectedTee,
           tee_id: teeId,
-          hole_scores: JSON.stringify(scores)
+          hole_scores: JSON.stringify(filteredScores),
+          holes_played: holesPlayed
         })
         .eq('id', round.id);
         
@@ -179,10 +191,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
         description: "Round updated successfully!",
       });
       
-      // Invalidate the rounds query to refresh the data
       queryClient.invalidateQueries({ queryKey: ['userRounds'] });
       
-      // Exit edit mode
       setIsEditing(false);
     } catch (error: any) {
       console.error("Error updating round:", error);
@@ -196,7 +206,24 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
     }
   };
 
-  // Handle hole scores display
+  const handleHoleSelection = (type: "all" | "front9" | "back9") => {
+    setHoleSelection(type);
+  };
+
+  const renderHolesSelector = () => {
+    if (!isEditing) return null;
+    return (
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-1">Holes Played</label>
+        <div className="flex space-x-1">
+          <Button variant={holeSelection === "all" ? "default" : "outline"} size="sm" onClick={() => handleHoleSelection("all")} className="flex-1 h-9 px-2">All 18</Button>
+          <Button variant={holeSelection === "front9" ? "default" : "outline"} size="sm" onClick={() => handleHoleSelection("front9")} className="flex-1 h-9 px-2">Front 9</Button>
+          <Button variant={holeSelection === "back9" ? "default" : "outline"} size="sm" onClick={() => handleHoleSelection("back9")} className="flex-1 h-9 px-2">Back 9</Button>
+        </div>
+      </div>
+    );
+  };
+
   const renderHoleScores = () => {
     if (!scores || scores.length === 0) {
       return (
@@ -206,7 +233,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       );
     }
 
-    // Split holes into front 9 and back 9
     const front9 = scores.filter(score => score.hole <= 9);
     const back9 = scores.filter(score => score.hole > 9);
 
@@ -217,7 +243,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
 
     return (
       <div className="mt-4 space-y-6">
-        {/* Front 9 */}
         {front9.length > 0 && (
           <div>
             <h4 className="font-medium mb-2">Front 9</h4>
@@ -273,7 +298,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
           </div>
         )}
 
-        {/* Back 9 */}
         {back9.length > 0 && (
           <div>
             <h4 className="font-medium mb-2">Back 9</h4>
@@ -332,7 +356,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
           </div>
         )}
 
-        {/* Total */}
         <div className="pt-2 border-t">
           <div className="flex justify-between">
             <span className="font-medium">Total Score:</span>
@@ -374,6 +397,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
 
         <Card>
           <CardContent className="pt-6">
+            {renderHolesSelector()}
             <ScorecardHeader
               round={round}
               isEditing={isEditing}
