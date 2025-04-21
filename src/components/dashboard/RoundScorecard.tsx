@@ -1,43 +1,47 @@
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useState, useEffect, useRef } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { format } from "date-fns";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Edit, Save, X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Flag, Calendar, X, Download, Edit as EditIcon, Save as SaveIcon } from "lucide-react";
+import { supabase } from "@/integrations/supabase";
+import { updateUserHandicap } from "@/integrations/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ScorecardHeader } from "./scorecard/ScorecardHeader";
+import { RoundScorecardProps, HoleScore } from "./types";
+import { ScoreTable } from "./ScoreTable";
+import { ScoreTableSummary } from "./ScoreTableSummary";
+import { ScorecardHeader } from "./ScorecardHeader";
+import { detectAchievements } from "@/components/add-round/utils/scoreUtils";
+import { Button } from "@/components/ui/button";
+import html2canvas from "html2canvas";
 
-interface RoundScorecardProps {
-  round: any;
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardProps) => {
+export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 }: RoundScorecardProps) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [scores, setScores] = useState<any[]>([]);
+  const [scores, setScores] = useState<HoleScore[]>([]);
   const [roundDate, setRoundDate] = useState<Date | undefined>(undefined);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [selectedTee, setSelectedTee] = useState<string | undefined>(undefined);
-  const [availableTees, setAvailableTees] = useState<Array<{id: string, name: string}>>([]);
-  const [holeSelection, setHoleSelection] = useState<"all" | "front9" | "back9">("all");
-
+  const [showNet, setShowNet] = useState(false);
+  const [showDetailedStats, setShowDetailedStats] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const scorecardRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   useEffect(() => {
     if (round && isOpen) {
-      console.log("Loading round data for scorecard:", round.id, "tee:", round.tee_name, "tee_id:", round.tee_id);
+      console.log("============ ROUND SCORECARD OPENED ============");
+      console.log("Round ID:", round.id);
+      console.log("ULTIMATE TEE NAME DEBUG:", {
+        teeName: round.tee_name,
+        teeNameType: typeof round.tee_name,
+        teeNameStringified: JSON.stringify(round.tee_name),
+        teeId: round.tee_id
+      });
       
-      let parsedScores = [];
+      let parsedScores: HoleScore[] = [];
       try {
         parsedScores = typeof round.hole_scores === 'string' 
           ? JSON.parse(round.hole_scores) 
@@ -49,100 +53,64 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       
       setScores(parsedScores);
       setRoundDate(round.date ? new Date(round.date) : undefined);
+
+      // Reset editing state on open
       setIsEditing(false);
-      
-      setSelectedTee(round.tee_name || '');
-      console.log("Setting selected tee to round's tee_name:", round.tee_name);
-      
-      // Determine the hole selection based on holes_played if available
-      if (round.holes_played) {
-        if (round.holes_played === 9) {
-          // Check if it's front 9 or back 9 based on the scores
-          const front9Scores = parsedScores.filter((score: any) => score.hole <= 9 && (score.strokes ?? 0) > 0);
-          const back9Scores = parsedScores.filter((score: any) => score.hole > 9 && (score.strokes ?? 0) > 0);
-          
-          if (front9Scores.length > back9Scores.length) {
-            setHoleSelection("front9");
-          } else if (back9Scores.length > front9Scores.length) {
-            setHoleSelection("back9");
-          } else {
-            setHoleSelection("all");
-          }
-        } else {
-          setHoleSelection("all");
-        }
-      } else {
-        setHoleSelection("all");
-      }
-      
-      try {
-        const courseDetailsKey = `course_details_${round.course_id}`;
-        const storedDetails = localStorage.getItem(courseDetailsKey);
-        
-        if (storedDetails) {
-          const courseDetails = JSON.parse(storedDetails);
-          
-          if (courseDetails.tees && courseDetails.tees.length > 0) {
-            const availableTeesList = courseDetails.tees.map((tee: any) => ({
-              id: tee.id,
-              name: tee.name
-            }));
-            setAvailableTees(availableTeesList);
-            console.log("Loaded available tees from localStorage:", availableTeesList);
-          }
-        }
-      } catch (error) {
-        console.error("Error loading tees from localStorage:", error);
-        setAvailableTees([{ id: round.tee_id || 'default', name: round.tee_name || 'Default' }]);
-      }
-      
-      console.log("Loaded scorecard data:", {
-        roundId: round.id,
-        tee: round.tee_name,
-        teeId: round.tee_id,
-        date: roundDate ? format(roundDate, 'PP') : 'unknown',
-        scoresCount: parsedScores.length,
-        holesPlayed: round.holes_played || 18
-      });
-    }
-    
-    if (!isOpen) {
-      setScores([]);
-      setRoundDate(undefined);
-      setIsEditing(false);
-      setSelectedTee(undefined);
-      setAvailableTees([]);
-      setHoleSelection("all");
+      setShowDetailedStats(false);
+      setShowNet(false);
     }
   }, [round, isOpen]);
 
   if (!round) return null;
 
-  const formattedDate = roundDate 
-    ? format(roundDate, 'MMMM d, yyyy')
-    : format(new Date(round.date), 'MMMM d, yyyy');
+  const roundHandicap = round.handicap_at_posting !== undefined && round.handicap_at_posting !== null
+    ? round.handicap_at_posting
+    : handicapIndex;
+
+  const renderHolesSelector = () => {
+    return (
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-1">Holes Played</label>
+        <div className="flex space-x-1">
+          <Button variant={showNet ? "outline" : "default"} size="sm" onClick={() => handleHoleSelection("all")} className="flex-1 h-9 px-2">All 18</Button>
+          <Button variant={showNet ? "outline" : "default"} size="sm" onClick={() => handleHoleSelection("front9")} className="flex-1 h-9 px-2">Front 9</Button>
+          <Button variant={showNet ? "outline" : "default"} size="sm" onClick={() => handleHoleSelection("back9")} className="flex-1 h-9 px-2">Back 9</Button>
+        </div>
+      </div>
+    );
+  };
+
+  const handleHoleSelection = (type: "all" | "front9" | "back9") => {
+    // Implement logic to update hole scores view
+    // For now just log
+    console.log("Hole selection changed to:", type);
+  };
 
   const handleDateSelect = (date: Date | undefined) => {
     setRoundDate(date);
     setCalendarOpen(false);
   };
 
-  const handleTeeChange = (teeName: string) => {
-    setSelectedTee(teeName);
-    console.log("Selected tee changed to:", teeName);
-  };
-
-  const handleScoreChange = (index: number, value: string) => {
+  const handleScoreChange = (index: number, field: 'strokes' | 'putts' | 'penalties', value: string) => {
     const newScores = [...scores];
     const parsedValue = value === '' ? 0 : parseInt(value, 10);
     
     if (!isNaN(parsedValue)) {
       newScores[index] = {
         ...newScores[index],
-        strokes: parsedValue,
+        [field]: parsedValue,
       };
       setScores(newScores);
     }
+  };
+
+  const handleGIRChange = (index: number, value: boolean) => {
+    const newScores = [...scores];
+    newScores[index] = {
+      ...newScores[index],
+      gir: value,
+    };
+    setScores(newScores);
   };
 
   const handleSaveChanges = async () => {
@@ -158,49 +126,21 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
     setIsSaving(true);
     
     try {
-      let filteredScores = scores;
-      let holesPlayed = 18;
-      
-      if (holeSelection === "front9") {
-        filteredScores = scores.filter(score => score.hole >= 1 && score.hole <= 9 && (score.strokes ?? 0) > 0);
-        holesPlayed = 9;
-      } else if (holeSelection === "back9") {
-        filteredScores = scores.filter(score => score.hole > 9 && score.hole <= 18 && (score.strokes ?? 0) > 0);
-        holesPlayed = 9;
-      } else {
-        // For "all" selection, check if only one set of 9 holes has scores
-        const nonBlankFront = scores.filter(score => score.hole <= 9 && (score.strokes ?? 0) > 0);
-        const nonBlankBack = scores.filter(score => score.hole > 9 && (score.strokes ?? 0) > 0);
-        
-        if (nonBlankFront.length > 0 && nonBlankBack.length === 0) {
-          // Only front 9 has scores
-          filteredScores = nonBlankFront;
-          holesPlayed = 9;
-        } else if (nonBlankFront.length === 0 && nonBlankBack.length > 0) {
-          // Only back 9 has scores
-          filteredScores = nonBlankBack;
-          holesPlayed = 9;
-        }
-      }
-
-      if (filteredScores.length < 3) {
-        throw new Error("Please enter at least 3 hole scores");
-      }
-
-      const totalStrokes = filteredScores.reduce((sum, score) => sum + (score.strokes || 0), 0);
-      const totalPar = filteredScores.reduce((sum, score) => sum + score.par, 0);
+      const totalStrokes = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
+      const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
       const toPar = totalStrokes - totalPar;
       
-      let teeId = round.tee_id;
-      if (selectedTee !== round.tee_name) {
-        const selectedTeeObj = availableTees.find(tee => tee.name === selectedTee);
-        if (selectedTeeObj) {
-          teeId = selectedTeeObj.id;
-        }
-      }
+      console.log("Saving round with tee data:", {
+        teeName: round.tee_name,
+        teeId: round.tee_id
+      });
       
-      console.log("Saving round with tee:", selectedTee, "tee_id:", teeId);
-      console.log("Saving round with holes_played:", holesPlayed);
+      const handicapToUse = round.handicap_at_posting !== undefined && round.handicap_at_posting !== null
+        ? round.handicap_at_posting
+        : roundHandicap;
+      
+      const netScore = Math.round(totalStrokes - handicapToUse);
+      const toParNet = netScore - totalPar;
       
       const { error } = await supabase
         .from('rounds')
@@ -208,15 +148,35 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
           date: roundDate?.toISOString() || round.date,
           gross_score: totalStrokes,
           to_par_gross: toPar,
-          tee_name: selectedTee,
-          tee_id: teeId,
-          hole_scores: JSON.stringify(filteredScores),
-          holes_played: holesPlayed // Explicitly save the number of holes played
+          net_score: netScore,
+          to_par_net: toParNet,
+          hole_scores: JSON.stringify(scores),
+          tee_name: round.tee_name,
+          tee_id: round.tee_id
         })
         .eq('id', round.id);
         
       if (error) {
         throw error;
+      }
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        const { data: userRounds, error: userRoundsError } = await supabase
+          .from('rounds')
+          .select('gross_score')
+          .eq('user_id', session.user.id)
+          .order('date', { ascending: false });
+          
+        if (!userRoundsError && userRounds && userRounds.length > 0) {
+          const grossScores = userRounds.map(r => r.gross_score);
+          const newHandicap = await updateUserHandicap(session.user.id, grossScores);
+          toast({
+            title: "Handicap Updated",
+            description: `Your handicap index is now ${newHandicap}`,
+          });
+        }
       }
       
       toast({
@@ -228,7 +188,6 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
       
       setIsEditing(false);
     } catch (error: any) {
-      console.error("Error updating round:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to update round. Please try again.",
@@ -239,214 +198,434 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange }: RoundScorecardPr
     }
   };
 
-  const handleHoleSelection = (type: "all" | "front9" | "back9") => {
-    setHoleSelection(type);
+  const toggleNetScores = () => {
+    setShowNet(prev => !prev);
   };
-
-  const renderHolesSelector = () => {
-    return (
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Holes Played</label>
-        <div className="flex space-x-1">
-          <Button variant={holeSelection === "all" ? "default" : "outline"} size="sm" onClick={() => handleHoleSelection("all")} className="flex-1 h-9 px-2">All 18</Button>
-          <Button variant={holeSelection === "front9" ? "default" : "outline"} size="sm" onClick={() => handleHoleSelection("front9")} className="flex-1 h-9 px-2">Front 9</Button>
-          <Button variant={holeSelection === "back9" ? "default" : "outline"} size="sm" onClick={() => handleHoleSelection("back9")} className="flex-1 h-9 px-2">Back 9</Button>
-        </div>
-      </div>
-    );
-  };
-
-  const renderHoleScores = () => {
-    if (!scores || scores.length === 0) {
-      return (
-        <div className="mt-4 text-center p-4 bg-muted/20 rounded-md">
-          <p className="text-muted-foreground">No hole-by-hole data available for this round.</p>
-        </div>
-      );
+  
+  const generateScorecardImage = async (): Promise<Blob | null> => {
+    if (!scorecardRef.current) return null;
+    
+    try {
+      setIsGeneratingImage(true);
+      
+      const scorecardClone = scorecardRef.current.cloneNode(true) as HTMLElement;
+      
+      // Remove UI controls from the clone
+      const uiControls = scorecardClone.querySelectorAll('button');
+      uiControls.forEach(button => {
+        if (!button.closest('table')) {
+          (button as HTMLElement).remove();
+        }
+      });
+      
+      // Create container for the image
+      const canvasContainer = document.createElement('div');
+      (canvasContainer as HTMLElement).style.width = '1080px';
+      (canvasContainer as HTMLElement).style.height = '1400px';
+      (canvasContainer as HTMLElement).style.position = 'fixed';
+      (canvasContainer as HTMLElement).style.backgroundColor = '#ffffff';
+      (canvasContainer as HTMLElement).style.display = 'flex';
+      (canvasContainer as HTMLElement).style.flexDirection = 'column';
+      (canvasContainer as HTMLElement).style.justifyContent = 'flex-start';
+      (canvasContainer as HTMLElement).style.alignItems = 'center';
+      (canvasContainer as HTMLElement).style.overflow = 'hidden';
+      (canvasContainer as HTMLElement).style.padding = '20px';
+      (canvasContainer as HTMLElement).style.fontFamily = 'Arial, sans-serif';
+      
+      // Add logo
+      const logoContainer = document.createElement('div');
+      (logoContainer as HTMLElement).style.position = 'absolute';
+      (logoContainer as HTMLElement).style.top = '20px';
+      (logoContainer as HTMLElement).style.left = '20px';
+      (logoContainer as HTMLElement).style.width = '180px';
+      (logoContainer as HTMLElement).style.height = 'auto';
+      (logoContainer as HTMLElement).style.zIndex = '10';
+      
+      const logoImg = document.createElement('img');
+      logoImg.src = '/logo.png';
+      (logoImg as HTMLElement).style.width = '100%';
+      (logoImg as HTMLElement).style.height = 'auto';
+      (logoImg as HTMLElement).style.objectFit = 'contain';
+      
+      await new Promise((resolve) => {
+        logoImg.onload = resolve;
+        logoImg.onerror = () => {
+          console.error('Failed to load logo');
+          resolve(null);
+        };
+        
+        setTimeout(resolve, 1000);
+      });
+      
+      logoContainer.appendChild(logoImg);
+      canvasContainer.appendChild(logoContainer);
+      
+      // Style the scorecard for the download
+      (scorecardClone as HTMLElement).style.width = '90%';
+      (scorecardClone as HTMLElement).style.maxWidth = '980px';
+      (scorecardClone as HTMLElement).style.borderRadius = '12px';
+      (scorecardClone as HTMLElement).style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
+      (scorecardClone as HTMLElement).style.overflow = 'hidden';
+      (scorecardClone as HTMLElement).style.marginTop = '80px';
+      (scorecardClone as HTMLElement).style.padding = '20px';
+      (scorecardClone as HTMLElement).style.paddingBottom = '120px';
+      
+      // Force desktop layout for the downloaded image
+      const mobileLayouts = scorecardClone.querySelectorAll('.sm\\:hidden, .md\\:hidden');
+      mobileLayouts.forEach(element => {
+        (element as HTMLElement).style.display = 'none';
+      });
+      
+      const desktopLayouts = scorecardClone.querySelectorAll('.hidden.sm\\:grid, .hidden.sm\\:block, .hidden.md\\:grid, .hidden.md\\:block');
+      desktopLayouts.forEach(element => {
+        (element as HTMLElement).style.display = 'grid';
+        if ((element as HTMLElement).classList.contains('sm:block') || (element as HTMLElement).classList.contains('md:block')) {
+          (element as HTMLElement).style.display = 'block';
+        }
+      });
+      
+      // Style elements for a consistent look
+      const headings = scorecardClone.querySelectorAll('h3');
+      headings.forEach(heading => {
+        (heading as HTMLElement).style.fontSize = '32px';
+        (heading as HTMLElement).style.fontWeight = '700';
+        (heading as HTMLElement).style.marginBottom = '15px';
+      });
+      
+      const courseInfo = scorecardClone.querySelectorAll('p');
+      courseInfo.forEach(p => {
+        (p as HTMLElement).style.fontSize = '24px';
+        (p as HTMLElement).style.marginBottom = '10px';
+        (p as HTMLElement).style.lineHeight = '1.4';
+      });
+      
+      const tables = scorecardClone.querySelectorAll('table');
+      tables.forEach(table => {
+        (table as HTMLElement).style.fontSize = '22px';
+        (table as HTMLElement).style.width = '100%';
+        (table as HTMLElement).style.borderCollapse = 'separate';
+        (table as HTMLElement).style.borderSpacing = '2px';
+        (table as HTMLElement).style.marginBottom = '20px';
+      });
+      
+      const tableHeaders = scorecardClone.querySelectorAll('th');
+      tableHeaders.forEach(th => {
+        (th as HTMLElement).style.padding = '12px 8px';
+        (th as HTMLElement).style.textAlign = 'center';
+        (th as HTMLElement).style.fontWeight = '600';
+        (th as HTMLElement).style.fontSize = '22px';
+      });
+      
+      const tableCells = scorecardClone.querySelectorAll('td');
+      tableCells.forEach(cell => {
+        (cell as HTMLElement).style.padding = '12px 8px';
+        (cell as HTMLElement).style.verticalAlign = 'middle';
+        (cell as HTMLElement).style.textAlign = 'center';
+        (cell as HTMLElement).style.fontSize = '22px';
+      });
+      
+      const scoreContainers = scorecardClone.querySelectorAll('td > div');
+      scoreContainers.forEach(container => {
+        if (container.parentElement?.tagName === 'TD') {
+          (container as HTMLElement).style.display = 'flex';
+          (container as HTMLElement).style.alignItems = 'center';
+          (container as HTMLElement).style.justifyContent = 'center';
+          (container as HTMLElement).style.height = '40px';
+          (container as HTMLElement).style.width = '40px';
+          (container as HTMLElement).style.margin = '0 auto';
+          (container as HTMLElement).style.fontSize = '22px';
+          (container as HTMLElement).style.fontWeight = '500';
+        }
+      });
+      
+      const sectionTitles = scorecardClone.querySelectorAll('h4');
+      sectionTitles.forEach(title => {
+        (title as HTMLElement).style.fontSize = '28px';
+        (title as HTMLElement).style.fontWeight = '600';
+        (title as HTMLElement).style.marginTop = '15px';
+        (title as HTMLElement).style.marginBottom = '10px';
+      });
+      
+      const summarySection = scorecardClone.querySelector('.pt-2.border-t.space-y-3');
+      if (summarySection) {
+        (summarySection as HTMLElement).style.marginTop = '40px';
+        (summarySection as HTMLElement).style.paddingTop = '30px';
+        (summarySection as HTMLElement).style.marginBottom = '120px';
+      }
+      
+      const summaryRows = scorecardClone.querySelectorAll('.flex.justify-between');
+      summaryRows.forEach(row => {
+        (row as HTMLElement).style.fontSize = '24px';
+        (row as HTMLElement).style.padding = '8px 0';
+        (row as HTMLElement).style.marginBottom = '20px';
+        
+        const label = row.querySelector('span:first-child');
+        const value = row.querySelector('span:last-child');
+        
+        if (label && value) {
+          (row as HTMLElement).style.display = 'flex';
+          (row as HTMLElement).style.flexDirection = 'row';
+          (row as HTMLElement).style.justifyContent = 'flex-start';
+          (row as HTMLElement).style.gap = '12px';
+          
+          (label as HTMLElement).style.fontWeight = 'bold';
+          (label as HTMLElement).style.minWidth = '150px';
+          
+          (value as HTMLElement).style.fontWeight = '500';
+          
+          if (label.textContent?.endsWith(':')) {
+            label.textContent = label.textContent.slice(0, -1);
+          }
+        }
+      });
+      
+      const watermark = document.createElement('div');
+      (watermark as HTMLElement).style.position = 'absolute';
+      (watermark as HTMLElement).style.bottom = '40px';
+      (watermark as HTMLElement).style.right = '40px';
+      (watermark as HTMLElement).style.fontSize = '20px';
+      (watermark as HTMLElement).style.color = '#666';
+      (watermark as HTMLElement).style.fontWeight = 'bold';
+      (watermark as HTMLElement).style.zIndex = '5';
+      watermark.innerText = 'MyBirdieBoard.com';
+      canvasContainer.appendChild(watermark);
+      
+      canvasContainer.appendChild(scorecardClone);
+      
+      (canvasContainer as HTMLElement).style.left = '-9999px';
+      document.body.appendChild(canvasContainer);
+      
+      const canvas = await html2canvas(canvasContainer, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
+        allowTaint: true,
+        useCORS: true,
+        width: 1080,
+        height: 1400,
+        imageTimeout: 5000,
+        onclone: (clonedDoc) => {
+          const logoInClone = clonedDoc.querySelector('img');
+          if (logoInClone) {
+            logoInClone.crossOrigin = 'anonymous';
+            
+            const baseUrl = window.location.origin;
+            logoInClone.src = `${baseUrl}/logo.png?t=${new Date().getTime()}`;
+            
+            logoInClone.onload = () => console.log('Logo loaded in clone');
+            logoInClone.onerror = () => console.error('Logo failed to load in clone');
+          }
+        }
+      });
+      
+      document.body.removeChild(canvasContainer);
+      
+      return new Promise(resolve => {
+        canvas.toBlob(blob => {
+          resolve(blob);
+        }, 'image/png', 0.95);
+      });
+    } catch (error) {
+      console.error('Error generating scorecard image:', error);
+      return null;
+    } finally {
+      setIsGeneratingImage(false);
     }
-
-    const front9 = scores.filter(score => score.hole <= 9);
-    const back9 = scores.filter(score => score.hole > 9);
-
-    const front9Total = front9.reduce((sum, score) => sum + (score.strokes || 0), 0);
-    const front9Par = front9.reduce((sum, score) => sum + score.par, 0);
-    const back9Total = back9.reduce((sum, score) => sum + (score.strokes || 0), 0);
-    const back9Par = back9.reduce((sum, score) => sum + score.par, 0);
-
-    return (
-      <div className="mt-4 space-y-6">
-        {front9.length > 0 && (
-          <div>
-            <h4 className="font-medium mb-2">Front 9</h4>
-            <div className="border rounded-md overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="px-2 py-2 text-left text-sm font-medium">Hole</th>
-                    {front9.map((score) => (
-                      <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
-                    ))}
-                    <th className="px-2 py-2 text-center text-sm font-medium">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b">
-                    <td className="px-2 py-2 text-sm font-medium">Par</td>
-                    {front9.map((score) => (
-                      <td key={`par-${score.hole}`} className="px-1 py-2 text-center">
-                        <div className="bg-muted/40 border border-muted rounded-md w-7 h-7 flex items-center justify-center font-medium mx-auto">
-                          {score.par}
-                        </div>
-                      </td>
-                    ))}
-                    <td className="px-2 py-2 text-center font-medium">{front9Par}</td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="px-2 py-2 text-sm font-medium">Score</td>
-                    {front9.map((score, index) => (
-                      <td key={`score-${score.hole}`} className="px-1 py-2 text-center">
-                        {isEditing ? (
-                          <Input
-                            type="number"
-                            min="1"
-                            max="20"
-                            value={score.strokes || ''}
-                            onChange={(e) => handleScoreChange(index, e.target.value)}
-                            className="w-9 h-7 text-center mx-auto px-1"
-                            inputMode="numeric"
-                          />
-                        ) : (
-                          <div className="w-7 h-7 flex items-center justify-center mx-auto">
-                            {score.strokes || '-'}
-                          </div>
-                        )}
-                      </td>
-                    ))}
-                    <td className="px-2 py-2 text-center font-medium">{front9Total}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {back9.length > 0 && (
-          <div>
-            <h4 className="font-medium mb-2">Back 9</h4>
-            <div className="border rounded-md overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="px-2 py-2 text-left text-sm font-medium">Hole</th>
-                    {back9.map((score) => (
-                      <th key={`hole-${score.hole}`} className="px-2 py-2 text-center text-sm font-medium">{score.hole}</th>
-                    ))}
-                    <th className="px-2 py-2 text-center text-sm font-medium">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b">
-                    <td className="px-2 py-2 text-sm font-medium">Par</td>
-                    {back9.map((score) => (
-                      <td key={`par-${score.hole}`} className="px-1 py-2 text-center">
-                        <div className="bg-muted/40 border border-muted rounded-md w-7 h-7 flex items-center justify-center font-medium mx-auto">
-                          {score.par}
-                        </div>
-                      </td>
-                    ))}
-                    <td className="px-2 py-2 text-center font-medium">{back9Par}</td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="px-2 py-2 text-sm font-medium">Score</td>
-                    {back9.map((score, index) => {
-                      const actualIndex = index + front9.length;
-                      return (
-                        <td key={`score-${score.hole}`} className="px-1 py-2 text-center">
-                          {isEditing ? (
-                            <Input
-                              type="number"
-                              min="1"
-                              max="20"
-                              value={score.strokes || ''}
-                              onChange={(e) => handleScoreChange(actualIndex, e.target.value)}
-                              className="w-9 h-7 text-center mx-auto px-1"
-                              inputMode="numeric"
-                            />
-                          ) : (
-                            <div className="w-7 h-7 flex items-center justify-center mx-auto">
-                              {score.strokes || '-'}
-                            </div>
-                          )}
-                        </td>
-                      );
-                    })}
-                    <td className="px-2 py-2 text-center font-medium">{back9Total}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        <div className="pt-2 border-t">
-          <div className="flex justify-between">
-            <span className="font-medium">Total Score:</span>
-            <span>{scores.reduce((sum, score) => sum + (score.strokes || 0), 0)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-medium">Total Par:</span>
-            <span>{scores.reduce((sum, score) => sum + score.par, 0)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-medium">To Par:</span>
-            <span>
-              {(() => {
-                const totalScore = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
-                const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
-                const toPar = totalScore - totalPar;
-                return toPar > 0 ? `+${toPar}` : toPar;
-              })()}
-            </span>
-          </div>
-        </div>
-      </div>
-    );
   };
+  
+  const handleDownloadScorecard = async () => {
+    try {
+      setIsGeneratingImage(true);
+      
+      const totalScore = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
+      const totalPar = scores.reduce((sum, score) => sum + score.par, 0);
+      const toPar = totalScore - totalPar;
+      const toParStr = toPar > 0 ? `plus${toPar}` : toPar < 0 ? `minus${Math.abs(toPar)}` : 'even';
+      
+      const courseName = (round.courses?.courseName || 'golf').replace(/\s+/g, '-').toLowerCase();
+      const scoreDate = roundDate ? roundDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+      const fileName = `${courseName}-${scoreDate}-${totalScore}-${toParStr}.png`;
+      
+      const scorecardBlob = await generateScorecardImage();
+      
+      if (!scorecardBlob) {
+        throw new Error('Failed to generate scorecard image');
+      }
+      
+      const url = URL.createObjectURL(scorecardBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Scorecard downloaded",
+        description: "Your scorecard image has been downloaded successfully.",
+      });
+    } catch (error) {
+      console.error("Error downloading scorecard:", error);
+      toast({
+        title: "Error downloading",
+        description: "There was an error creating your scorecard image.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
+  const front9 = scores.filter(score => score.hole <= 9);
+  const back9 = scores.filter(score => score.hole > 9);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>Round Scorecard</DialogTitle>
-          <DialogDescription>
-            {isEditing ? (
-              "Edit your round details"
-            ) : (
-              <>Details for your round at {round.courses?.clubName} - {round.courses?.courseName} on {formattedDate}</>
+      <DialogContent className="max-w-3xl bg-background round-scorecard-content overflow-y-auto sm:max-h-[90vh] p-0">
+        <DialogHeader className="golf-header rounded-t-lg p-6 sticky top-0 z-10 flex items-center justify-between">
+          <div>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <Flag className="h-5 w-5" /> Round Scorecard
+            </DialogTitle>
+            <DialogDescription className="text-white/90">
+              {isEditing ? (
+                "Edit your round details"
+              ) : (
+                <>Details for your round at {round.courses?.clubName} - {round.courses?.courseName} ({round.tee_name || "Standard"})</>
+              )}
+            </DialogDescription>
+          </div>
+          <div>
+            <DialogClose className="absolute right-4 top-4 rounded-sm opacity-80 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+              <X className="h-5 w-5 text-white" />
+              <span className="sr-only">Close</span>
+            </DialogClose>
+            {!isEditing && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-4"
+                onClick={() => setIsEditing(true)}
+              >
+                <EditIcon className="mr-1 h-4 w-4" />
+                Edit
+              </Button>
             )}
-          </DialogDescription>
+            {isEditing && (
+              <Button
+                variant="default"
+                size="sm"
+                className="ml-4"
+                onClick={handleSaveChanges}
+                disabled={isSaving}
+              >
+                <SaveIcon className="mr-1 h-4 w-4" />
+                {isSaving ? "Saving..." : "Save"}
+              </Button>
+            )}
+          </div>
         </DialogHeader>
 
-        <Card>
-          <CardContent className="pt-6">
-            {isEditing && renderHolesSelector()}
-            <ScorecardHeader
-              round={round}
-              isEditing={isEditing}
-              setIsEditing={setIsEditing}
-              roundDate={roundDate}
-              calendarOpen={calendarOpen}
-              setCalendarOpen={setCalendarOpen}
-              handleDateSelect={handleDateSelect}
-              isSaving={isSaving}
-              handleSaveChanges={handleSaveChanges}
-            />
+        <div className="overflow-y-auto p-6" ref={contentRef}>
+          <Card className="border-secondary/30 shadow-md">
+            <CardContent className="pt-6" ref={scorecardRef}>
+              {isEditing && renderHolesSelector()}
 
-            <Separator className="my-4" />
-            
-            {renderHoleScores()}
-          </CardContent>
-        </Card>
+              <ScorecardHeader
+                round={round}
+                isEditing={isEditing}
+                setIsEditing={setIsEditing}
+                roundDate={roundDate}
+                calendarOpen={calendarOpen}
+                setCalendarOpen={setCalendarOpen}
+                handleDateSelect={handleDateSelect}
+                isSaving={isSaving}
+                handleSaveChanges={handleSaveChanges}
+                showDetailedStats={showDetailedStats}
+                setShowDetailedStats={setShowDetailedStats}
+              />
+
+              {roundHandicap > 0 && (
+                <div className="mt-2 mb-4 px-1">
+                  <p className="text-sm text-muted-foreground">
+                    Handicap at time of posting: <span className="font-semibold">{roundHandicap}</span>
+                  </p>
+                </div>
+              )}
+
+              {roundHandicap > 0 && !isEditing && (
+                <div className="mt-4 mb-2 flex justify-end">
+                  <button 
+                    onClick={() => setShowNet(!showNet)}
+                    className={`px-3 py-1 text-sm rounded-full flex items-center gap-1.5 transition-colors ${showNet ? 'bg-primary text-primary-foreground' : 'bg-secondary hover:bg-secondary/80'}`}
+                  >
+                    <Calendar className="h-3.5 w-3.5" />
+                    {showNet ? 'Show Gross Score' : 'Show Net Score'}
+                  </button>
+                </div>
+              )}
+
+              <Separator className="my-4" />
+              
+              <div className="space-y-6">
+                {front9.length > 0 && (
+                  <ScoreTable
+                    scores={front9}
+                    isEditing={isEditing}
+                    handleScoreChange={handleScoreChange}
+                    handleGIRChange={handleGIRChange}
+                    title="Front Nine"
+                    showDetailedStats={showDetailedStats}
+                  />
+                )}
+                
+                {back9.length > 0 && (
+                  <ScoreTable
+                    scores={back9}
+                    isEditing={isEditing}
+                    handleScoreChange={handleScoreChange}
+                    handleGIRChange={handleGIRChange}
+                    title="Back Nine"
+                    startIndex={front9.length}
+                    showDetailedStats={showDetailedStats}
+                  />
+                )}
+                
+                <ScoreTableSummary 
+                  scores={scores} 
+                  handicapIndex={roundHandicap}
+                  showNet={showNet}
+                  showDetailedStats={showDetailedStats}
+                />
+              </div>
+              
+              <div className="flex justify-between mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowNet(!showNet)}
+                  className="text-xs"
+                >
+                  {showNet ? "Hide Net Scores" : "Show Net Scores"}
+                </Button>
+                
+                {!isEditing && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDownloadScorecard}
+                    disabled={isGeneratingImage}
+                    className="flex items-center gap-1 text-xs"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    {isGeneratingImage ? "Generating..." : "Download Scorecard"}
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </DialogContent>
     </Dialog>
   );
