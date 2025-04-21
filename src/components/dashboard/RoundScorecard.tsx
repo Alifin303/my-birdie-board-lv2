@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,10 +8,10 @@ import { supabase } from "@/integrations/supabase";
 import { updateUserHandicap } from "@/integrations/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { RoundScorecardProps, HoleScore } from "./types";
-import { ScoreTable } from "./ScoreTable";
-import { ScoreTableSummary } from "./ScoreTableSummary";
-import { ScorecardHeader } from "./ScorecardHeader";
+import { RoundScorecardProps, HoleScore } from "./scorecard/types";
+import { ScoreTable } from "./scorecard/ScoreTable";
+import { ScoreTableSummary } from "./scorecard/ScoreTableSummary";
+import { ScorecardHeader } from "./scorecard/ScorecardHeader";
 import { detectAchievements } from "@/components/add-round/utils/scoreUtils";
 import { Button } from "@/components/ui/button";
 import html2canvas from "html2canvas";
