@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -19,8 +18,12 @@ interface Round {
   holes_played: number;
   to_par_gross: number;
   date: string;
+  hole_scores?: string;
+  tee_name?: string;
   courses: {
     name: string;
+    clubName?: string;
+    courseName?: string;
   };
 }
 
@@ -47,7 +50,13 @@ export function UserRounds({ userId, onBack }: UserRoundsProps) {
             holes_played,
             to_par_gross,
             date,
-            courses:course_id(name)
+            hole_scores,
+            tee_name,
+            courses:course_id(
+              name,
+              clubName:name,
+              courseName:name
+            )
           `)
           .eq('user_id', userId)
           .order('date', { ascending: false });
@@ -74,7 +83,6 @@ export function UserRounds({ userId, onBack }: UserRoundsProps) {
   };
   
   const handleEditSuccess = () => {
-    // Refresh rounds after successful edit
     setLoading(true);
     supabase
       .from('rounds')
@@ -84,7 +92,13 @@ export function UserRounds({ userId, onBack }: UserRoundsProps) {
         holes_played,
         to_par_gross,
         date,
-        courses:course_id(name)
+        hole_scores,
+        tee_name,
+        courses:course_id(
+          name,
+          clubName:name,
+          courseName:name
+        )
       `)
       .eq('user_id', userId)
       .order('date', { ascending: false })
