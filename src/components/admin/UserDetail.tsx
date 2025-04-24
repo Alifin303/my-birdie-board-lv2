@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,13 +6,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserRounds } from "./UserRounds";
 import { ArrowLeft, Settings } from "lucide-react";
 
+interface UserProfile {
+  id: string;
+  username: string;
+  first_name: string;
+  last_name: string;
+  handicap: number | null;
+  email: string;
+  last_sign_in: string;
+  created_at: string;
+  roundsCount: number;
+  coursesCount: number;
+}
+
 interface UserDetailProps {
   userId: string;
   onBack?: () => void;
 }
 
 export function UserDetail({ userId, onBack }: UserDetailProps) {
-  const [userProfile, setUserProfile] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("profile");
   
@@ -31,12 +43,10 @@ export function UserDetail({ userId, onBack }: UserDetailProps) {
           console.error('Error fetching user profile:', profileError);
           return;
         }
-        
-        // Updated to remove the filters property which is not supported
-        const { data: authData, error: authError } = await supabase.auth.admin
-          .listUsers({ page: 1, perPage: 1 });
           
-        // Find the user matching our userId
+        const { data: authData, error: authError } = await supabase.auth.admin
+          .listUsers();
+          
         const authUser = authData?.users?.find(user => user.id === userId);
           
         if (authError) {
@@ -63,14 +73,20 @@ export function UserDetail({ userId, onBack }: UserDetailProps) {
         
         const uniqueCourseIds = new Set(coursesData?.map(r => r.course_id) || []);
         
-        setUserProfile({
-          ...profileData,
-          email: authUser?.email,
-          last_sign_in: authUser?.last_sign_in_at,
+        const userProfileData: UserProfile = {
+          id: profileData.id,
+          username: profileData.username,
+          first_name: profileData.first_name,
+          last_name: profileData.last_name,
+          handicap: profileData.handicap,
+          email: authUser?.email || '',
+          last_sign_in: authUser?.last_sign_in_at || '',
           created_at: profileData.created_at,
           roundsCount: roundsCount || 0,
           coursesCount: uniqueCourseIds.size
-        });
+        };
+
+        setUserProfile(userProfileData);
       } catch (error) {
         console.error('Error in fetchUserDetails:', error);
       } finally {
