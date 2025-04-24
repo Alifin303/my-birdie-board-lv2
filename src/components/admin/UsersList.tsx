@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -29,6 +28,9 @@ interface User {
   handicap: number;
   roundsCount: number;
   coursesCount: number;
+  email: string;
+  last_sign_in: string;
+  created_at: string;
 }
 
 interface UsersListProps {
@@ -48,16 +50,24 @@ export function UsersList({ onUserSelect }: UsersListProps) {
       try {
         setLoading(true);
         
-        // Fetch all users from profiles
+        // Fetch all users from profiles with created_at
         const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
-          .select('*');
+          .select('*, created_at');
           
         if (profilesError) throw profilesError;
+        
+        // Get all users from Auth
+        const { data: { users: authUsers }, error: authError } = await supabase.auth.admin
+          .listUsers();
+          
+        if (authError) throw authError;
         
         // For each user, count their rounds and unique courses
         const usersWithStats = await Promise.all(
           profiles.map(async (profile) => {
+            const authUser = authUsers.find(u => u.id === profile.id);
+            
             // Count rounds
             const { count: roundsCount, error: roundsError } = await supabase
               .from('rounds')
@@ -78,8 +88,11 @@ export function UsersList({ onUserSelect }: UsersListProps) {
             
             return {
               ...profile,
+              email: authUser?.email,
+              last_sign_in: authUser?.last_sign_in_at,
               roundsCount: roundsCount || 0,
-              coursesCount: uniqueCourseIds.size
+              coursesCount: uniqueCourseIds.size,
+              created_at: profile.created_at
             };
           })
         );
@@ -96,7 +109,6 @@ export function UsersList({ onUserSelect }: UsersListProps) {
     fetchUsers();
   }, []);
   
-  // Handle search filtering
   useEffect(() => {
     if (!searchTerm.trim()) {
       setFilteredUsers(users);
@@ -113,7 +125,6 @@ export function UsersList({ onUserSelect }: UsersListProps) {
     setFilteredUsers(filtered);
   }, [searchTerm, users]);
   
-  // Handle sorting
   useEffect(() => {
     const sorted = [...filteredUsers].sort((a, b) => {
       let comparison = 0;
@@ -126,6 +137,9 @@ export function UsersList({ onUserSelect }: UsersListProps) {
           const aName = `${a.first_name || ''} ${a.last_name || ''}`.trim();
           const bName = `${b.first_name || ''} ${b.last_name || ''}`.trim();
           comparison = aName.localeCompare(bName);
+          break;
+        case 'joined':
+          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
           break;
         case 'handicap':
           comparison = (a.handicap || 0) - (b.handicap || 0);
@@ -191,6 +205,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
             <SelectContent>
               <SelectItem value="username">Username</SelectItem>
               <SelectItem value="name">Full Name</SelectItem>
+              <SelectItem value="joined">Date Joined</SelectItem>
               <SelectItem value="handicap">Handicap</SelectItem>
               <SelectItem value="rounds">Rounds</SelectItem>
               <SelectItem value="courses">Courses</SelectItem>
@@ -227,6 +242,12 @@ export function UsersList({ onUserSelect }: UsersListProps) {
                 onClick={() => handleSort('name')}
               >
                 Name {renderSortIcon('name')}
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer text-right"
+                onClick={() => handleSort('joined')}
+              >
+                Date Joined {renderSortIcon('joined')}
               </TableHead>
               <TableHead 
                 className="cursor-pointer text-right"

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -21,10 +20,9 @@ export function UserDetail({ userId, onBack }: UserDetailProps) {
     const fetchUserDetails = async () => {
       setLoading(true);
       try {
-        // Fetch user profile data
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
-          .select('*')
+          .select('*, created_at')
           .eq('id', userId)
           .single();
           
@@ -33,15 +31,15 @@ export function UserDetail({ userId, onBack }: UserDetailProps) {
           return;
         }
         
-        // Get auth user data if needed
-        const { data: authData, error: authError } = await supabase.auth
-          .admin.getUserById(userId);
+        const { data: { users }, error: authError } = await supabase.auth.admin
+          .listUsers({ page: 1, perPage: 1, filters: { id: userId } });
+          
+        const authUser = users?.[0];
           
         if (authError) {
           console.error('Error fetching auth user data:', authError);
         }
         
-        // Count user's rounds
         const { count: roundsCount, error: roundsError } = await supabase
           .from('rounds')
           .select('*', { count: 'exact', head: true })
@@ -51,7 +49,6 @@ export function UserDetail({ userId, onBack }: UserDetailProps) {
           console.error('Error counting user rounds:', roundsError);
         }
         
-        // Count unique courses
         const { data: coursesData, error: coursesError } = await supabase
           .from('rounds')
           .select('course_id')
@@ -65,8 +62,9 @@ export function UserDetail({ userId, onBack }: UserDetailProps) {
         
         setUserProfile({
           ...profileData,
-          email: authData?.user?.email,
-          last_sign_in: authData?.user?.last_sign_in_at,
+          email: authUser?.email,
+          last_sign_in: authUser?.last_sign_in_at,
+          created_at: profileData.created_at,
           roundsCount: roundsCount || 0,
           coursesCount: uniqueCourseIds.size
         });
@@ -157,6 +155,10 @@ export function UserDetail({ userId, onBack }: UserDetailProps) {
                   <div className="flex justify-between">
                     <dt className="text-muted-foreground">Last Sign In:</dt>
                     <dd>{userProfile.last_sign_in ? new Date(userProfile.last_sign_in).toLocaleString() : 'N/A'}</dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Joined:</dt>
+                    <dd>{userProfile.created_at ? new Date(userProfile.created_at).toLocaleDateString() : 'N/A'}</dd>
                   </div>
                 </dl>
               </CardContent>

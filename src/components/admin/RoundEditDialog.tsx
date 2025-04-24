@@ -41,12 +41,12 @@ export function RoundEditDialog({
 
   const adaptedRound = roundData ? {
     id: roundData.id,
-    date: new Date(roundData.date),
+    date: roundData.date,
     gross_score: roundData.gross_score,
     holes_played: roundData.holes_played,
     to_par_gross: roundData.to_par_gross,
     hole_scores: roundData.hole_scores || '[]',
-    tee_name: roundData.tee_name,
+    tee_name: roundData.tee_name || '',
     courses: {
       clubName: roundData.courses?.clubName || 'Unknown Club',
       courseName: roundData.courses?.courseName || 'Unknown Course'
