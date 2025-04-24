@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -44,10 +45,14 @@ export function UserDetail({ userId, onBack }: UserDetailProps) {
           return;
         }
           
+        // Fix: Type the response data properly
         const { data: authData, error: authError } = await supabase.auth.admin
           .listUsers();
           
-        const authUser = authData?.users?.find(user => user.id === userId);
+        // Check if users exists before trying to find a specific user
+        const authUser = authData && authData.users ? 
+          authData.users.find(user => user.id === userId) : 
+          undefined;
           
         if (authError) {
           console.error('Error fetching auth user data:', authError);
