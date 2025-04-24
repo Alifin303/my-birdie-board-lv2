@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -55,7 +56,9 @@ export function UserDetail({ userId, onBack }: UserDetailProps) {
           
         let authUser: AdminUser | undefined;
         if (authData && 'users' in authData && Array.isArray(authData.users)) {
-          authUser = authData.users.find(user => user.id === userId) as AdminUser | undefined;
+          // Type assertion to ensure TypeScript recognizes each user in the array
+          const users = authData.users as unknown as AdminUser[];
+          authUser = users.find(user => user.id === userId);
         }
           
         if (authError) {
