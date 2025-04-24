@@ -14,16 +14,9 @@ interface UserProfile {
   last_name: string;
   handicap: number | null;
   email: string;
-  last_sign_in: string;
   created_at: string;
   roundsCount: number;
   coursesCount: number;
-}
-
-interface AdminUser {
-  id: string;
-  email?: string;
-  last_sign_in_at?: string;
 }
 
 interface UserDetailProps {
@@ -49,20 +42,6 @@ export function UserDetail({ userId, onBack }: UserDetailProps) {
         if (profileError) {
           console.error('Error fetching user profile:', profileError);
           return;
-        }
-          
-        const { data: authData, error: authError } = await supabase.auth.admin
-          .listUsers();
-          
-        let authUser: AdminUser | undefined;
-        if (authData && 'users' in authData && Array.isArray(authData.users)) {
-          // Type assertion to ensure TypeScript recognizes each user in the array
-          const users = authData.users as unknown as AdminUser[];
-          authUser = users.find(user => user.id === userId);
-        }
-          
-        if (authError) {
-          console.error('Error fetching auth user data:', authError);
         }
         
         const { count: roundsCount, error: roundsError } = await supabase
@@ -91,8 +70,7 @@ export function UserDetail({ userId, onBack }: UserDetailProps) {
           first_name: profileData.first_name,
           last_name: profileData.last_name,
           handicap: profileData.handicap,
-          email: authUser?.email || '',
-          last_sign_in: authUser?.last_sign_in_at || '',
+          email: '', // We can't access the email from the auth table now
           created_at: profileData.created_at,
           roundsCount: roundsCount || 0,
           coursesCount: uniqueCourseIds.size
@@ -180,12 +158,8 @@ export function UserDetail({ userId, onBack }: UserDetailProps) {
               <CardContent>
                 <dl className="grid grid-cols-1 gap-2 text-sm">
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Email:</dt>
-                    <dd>{userProfile.email || 'N/A'}</dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Last Sign In:</dt>
-                    <dd>{userProfile.last_sign_in ? new Date(userProfile.last_sign_in).toLocaleString() : 'N/A'}</dd>
+                    <dt className="text-muted-foreground">Username:</dt>
+                    <dd>{userProfile.username || 'N/A'}</dd>
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-muted-foreground">Joined:</dt>

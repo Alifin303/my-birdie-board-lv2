@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -30,7 +29,6 @@ interface User {
   roundsCount: number;
   coursesCount: number;
   email: string;
-  last_sign_in: string;
   created_at: string;
 }
 
@@ -58,19 +56,9 @@ export function UsersList({ onUserSelect }: UsersListProps) {
           
         if (profilesError) throw profilesError;
         
-        // Get all users from Auth
-        const { data: authData, error: authError } = await supabase.auth.admin
-          .listUsers();
-          
-        if (authError) throw authError;
-        
-        const authUsers = authData?.users || [];
-        
         // For each user, count their rounds and unique courses
         const usersWithStats = await Promise.all(
           profiles.map(async (profile: any) => {
-            const authUser = authUsers.find(u => u.id === profile.id);
-            
             // Count rounds
             const { count: roundsCount, error: roundsError } = await supabase
               .from('rounds')
@@ -91,11 +79,8 @@ export function UsersList({ onUserSelect }: UsersListProps) {
             
             return {
               ...profile,
-              email: authUser?.email,
-              last_sign_in: authUser?.last_sign_in_at,
               roundsCount: roundsCount || 0,
               coursesCount: uniqueCourseIds.size,
-              created_at: profile.created_at
             };
           })
         );
@@ -276,7 +261,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
           <TableBody>
             {filteredUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
+                <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
                   {searchTerm ? 'No users match your search.' : 'No users found.'}
                 </TableCell>
               </TableRow>
@@ -288,6 +273,9 @@ export function UsersList({ onUserSelect }: UsersListProps) {
                     {user.first_name && user.last_name 
                       ? `${user.first_name} ${user.last_name}` 
                       : (user.first_name || user.last_name || 'N/A')}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {new Date(user.created_at).toLocaleDateString()}
                   </TableCell>
                   <TableCell className="text-right">{user.handicap?.toFixed(1) || 'N/A'}</TableCell>
                   <TableCell className="text-right">{user.roundsCount}</TableCell>
