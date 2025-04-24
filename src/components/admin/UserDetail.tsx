@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,12 @@ interface UserProfile {
   created_at: string;
   roundsCount: number;
   coursesCount: number;
+}
+
+interface AdminUser {
+  id: string;
+  email?: string;
+  last_sign_in_at?: string;
 }
 
 interface UserDetailProps {
@@ -45,14 +50,13 @@ export function UserDetail({ userId, onBack }: UserDetailProps) {
           return;
         }
           
-        // Fix: Type the response data properly
         const { data: authData, error: authError } = await supabase.auth.admin
           .listUsers();
           
-        // Check if users exists before trying to find a specific user
-        const authUser = authData && authData.users ? 
-          authData.users.find(user => user.id === userId) : 
-          undefined;
+        let authUser: AdminUser | undefined;
+        if (authData && 'users' in authData && Array.isArray(authData.users)) {
+          authUser = authData.users.find(user => user.id === userId) as AdminUser | undefined;
+        }
           
         if (authError) {
           console.error('Error fetching auth user data:', authError);
