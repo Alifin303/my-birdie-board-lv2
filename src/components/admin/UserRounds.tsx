@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -206,8 +207,19 @@ export function UserRounds({ userId, onBack }: UserRoundsProps) {
           isOpen={isEditDialogOpen}
           roundId={selectedRound.id}
           roundData={{
-            ...selectedRound,
-            course_name: selectedRound.courses?.name
+            id: selectedRound.id,
+            gross_score: selectedRound.gross_score,
+            holes_played: selectedRound.holes_played,
+            to_par_gross: selectedRound.to_par_gross,
+            date: selectedRound.date,
+            course_name: selectedRound.courses?.name,
+            hole_scores: selectedRound.hole_scores,
+            tee_name: selectedRound.tee_name,
+            tee_id: selectedRound.tee_id,
+            courses: {
+              clubName: selectedRound.courses?.clubName,
+              courseName: selectedRound.courses?.courseName
+            }
           }}
           onClose={() => {
             setIsEditDialogOpen(false);

@@ -14,7 +14,7 @@ interface RoundEditDialogProps {
   roundData: {
     id: number;
     gross_score: number;
-    holes_played: number;
+    holes_played?: number; // Changed from required to optional
     to_par_gross: number;
     date: string;
     course_name?: string;
