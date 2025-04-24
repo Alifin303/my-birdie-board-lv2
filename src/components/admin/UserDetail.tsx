@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -31,10 +32,12 @@ export function UserDetail({ userId, onBack }: UserDetailProps) {
           return;
         }
         
-        const { data: { users }, error: authError } = await supabase.auth.admin
-          .listUsers({ page: 1, perPage: 1, filters: { id: userId } });
+        // Updated to remove the filters property which is not supported
+        const { data: authData, error: authError } = await supabase.auth.admin
+          .listUsers({ page: 1, perPage: 1 });
           
-        const authUser = users?.[0];
+        // Find the user matching our userId
+        const authUser = authData?.users?.find(user => user.id === userId);
           
         if (authError) {
           console.error('Error fetching auth user data:', authError);

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -58,14 +59,16 @@ export function UsersList({ onUserSelect }: UsersListProps) {
         if (profilesError) throw profilesError;
         
         // Get all users from Auth
-        const { data: { users: authUsers }, error: authError } = await supabase.auth.admin
+        const { data: authData, error: authError } = await supabase.auth.admin
           .listUsers();
           
         if (authError) throw authError;
         
+        const authUsers = authData?.users || [];
+        
         // For each user, count their rounds and unique courses
         const usersWithStats = await Promise.all(
-          profiles.map(async (profile) => {
+          profiles.map(async (profile: any) => {
             const authUser = authUsers.find(u => u.id === profile.id);
             
             // Count rounds
@@ -84,7 +87,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
               
             if (coursesError) throw coursesError;
             
-            const uniqueCourseIds = new Set(uniqueCourses.map(r => r.course_id));
+            const uniqueCourseIds = new Set((uniqueCourses || []).map(r => r.course_id));
             
             return {
               ...profile,

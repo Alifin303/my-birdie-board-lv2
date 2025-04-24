@@ -11,21 +11,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Edit, ArrowLeft } from "lucide-react";
-
-interface Round {
-  id: number;
-  gross_score: number;
-  holes_played: number;
-  to_par_gross: number;
-  date: string;
-  hole_scores?: string;
-  tee_name?: string;
-  courses: {
-    name: string;
-    clubName?: string;
-    courseName?: string;
-  };
-}
+import { Round } from "@/components/dashboard/types";
 
 interface UserRoundsProps {
   userId: string;
@@ -52,7 +38,9 @@ export function UserRounds({ userId, onBack }: UserRoundsProps) {
             date,
             hole_scores,
             tee_name,
+            tee_id,
             courses:course_id(
+              id,
               name,
               clubName:name,
               courseName:name
@@ -66,7 +54,26 @@ export function UserRounds({ userId, onBack }: UserRoundsProps) {
           return;
         }
         
-        setRounds(data || []);
+        const transformedRounds: Round[] = (data || []).map(round => ({
+          id: round.id,
+          date: round.date,
+          gross_score: round.gross_score,
+          holes_played: round.holes_played || 18,
+          to_par_gross: round.to_par_gross,
+          hole_scores: typeof round.hole_scores === 'string' 
+            ? round.hole_scores 
+            : JSON.stringify(round.hole_scores),
+          tee_name: round.tee_name || '',
+          tee_id: round.tee_id,
+          courses: {
+            id: round.courses?.id || 0,
+            name: round.courses?.name || 'Unknown Course',
+            clubName: round.courses?.clubName,
+            courseName: round.courses?.courseName
+          }
+        }));
+        
+        setRounds(transformedRounds);
       } catch (error) {
         console.error('Error fetching user rounds:', error);
       } finally {
@@ -94,7 +101,9 @@ export function UserRounds({ userId, onBack }: UserRoundsProps) {
         date,
         hole_scores,
         tee_name,
+        tee_id,
         courses:course_id(
+          id,
           name,
           clubName:name,
           courseName:name
@@ -108,7 +117,27 @@ export function UserRounds({ userId, onBack }: UserRoundsProps) {
           console.error('Error refreshing rounds:', error);
           return;
         }
-        setRounds(data || []);
+        
+        const transformedRounds: Round[] = (data || []).map(round => ({
+          id: round.id,
+          date: round.date,
+          gross_score: round.gross_score,
+          holes_played: round.holes_played || 18,
+          to_par_gross: round.to_par_gross,
+          hole_scores: typeof round.hole_scores === 'string' 
+            ? round.hole_scores 
+            : JSON.stringify(round.hole_scores),
+          tee_name: round.tee_name || '',
+          tee_id: round.tee_id,
+          courses: {
+            id: round.courses?.id || 0,
+            name: round.courses?.name || 'Unknown Course',
+            clubName: round.courses?.clubName,
+            courseName: round.courses?.courseName
+          }
+        }));
+        
+        setRounds(transformedRounds);
       });
   };
 
