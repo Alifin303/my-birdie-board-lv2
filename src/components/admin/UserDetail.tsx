@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,7 @@ interface UserProfile {
   handicap: number | null;
   email: string;
   created_at: string;
+  last_login: string | null;
   roundsCount: number;
   coursesCount: number;
 }
@@ -35,7 +35,7 @@ export function UserDetail({ userId, onBack }: UserDetailProps) {
       try {
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
-          .select('*, created_at')
+          .select('*, created_at, last_login')
           .eq('id', userId)
           .single();
           
@@ -70,8 +70,9 @@ export function UserDetail({ userId, onBack }: UserDetailProps) {
           first_name: profileData.first_name,
           last_name: profileData.last_name,
           handicap: profileData.handicap,
-          email: '', // We can't access the email from the auth table now
+          email: profileData.email,
           created_at: profileData.created_at,
+          last_login: profileData.last_login,
           roundsCount: roundsCount || 0,
           coursesCount: uniqueCourseIds.size
         };
@@ -162,8 +163,16 @@ export function UserDetail({ userId, onBack }: UserDetailProps) {
                     <dd>{userProfile.username || 'N/A'}</dd>
                   </div>
                   <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Email:</dt>
+                    <dd>{userProfile.email || 'N/A'}</dd>
+                  </div>
+                  <div className="flex justify-between">
                     <dt className="text-muted-foreground">Joined:</dt>
                     <dd>{userProfile.created_at ? new Date(userProfile.created_at).toLocaleDateString() : 'N/A'}</dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Last Login:</dt>
+                    <dd>{userProfile.last_login ? new Date(userProfile.last_login).toLocaleDateString() : 'N/A'}</dd>
                   </div>
                 </dl>
               </CardContent>
