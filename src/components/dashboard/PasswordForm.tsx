@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { DialogFooter } from "@/components/ui/dialog";
+import { Key } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -41,7 +42,6 @@ export function PasswordForm({ userEmail, onBack, onSuccess }: PasswordFormProps
   const handlePasswordChange = async (values: z.infer<typeof passwordFormSchema>) => {
     setLoading(true);
     try {
-      // First verify the current password is correct
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: userEmail,
         password: values.currentPassword
@@ -49,7 +49,6 @@ export function PasswordForm({ userEmail, onBack, onSuccess }: PasswordFormProps
 
       if (signInError) throw new Error("Current password is incorrect");
 
-      // Then update to the new password
       const { error: updateError } = await supabase.auth.updateUser({
         password: values.newPassword
       });
@@ -88,7 +87,6 @@ export function PasswordForm({ userEmail, onBack, onSuccess }: PasswordFormProps
                 <Input 
                   type="password"
                   placeholder="Enter your current password"
-                  autoComplete="current-password"
                   {...field}
                 />
               </FormControl>
@@ -107,7 +105,6 @@ export function PasswordForm({ userEmail, onBack, onSuccess }: PasswordFormProps
                 <Input 
                   type="password"
                   placeholder="Enter your new password"
-                  autoComplete="new-password"
                   {...field}
                 />
               </FormControl>
@@ -126,7 +123,6 @@ export function PasswordForm({ userEmail, onBack, onSuccess }: PasswordFormProps
                 <Input 
                   type="password"
                   placeholder="Confirm your new password"
-                  autoComplete="new-password"
                   {...field}
                 />
               </FormControl>
