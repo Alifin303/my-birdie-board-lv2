@@ -6,13 +6,13 @@ import { User, LogOut, CreditCard, Key, Loader2, AlertCircle, ExternalLink } fro
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PasswordForm } from "./PasswordForm";
+
 interface Subscription {
   id?: string;
   subscription_id?: string;
@@ -22,25 +22,20 @@ interface Subscription {
   current_period_end?: string;
   cancel_at_period_end?: boolean;
 }
+
 interface DashboardHeaderProps {
   profileData: any;
   onAddRound: () => void;
   subscription?: Subscription | null;
 }
+
 const profileFormSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
   username: z.string().min(1, "Username is required"),
   email: z.string().email("Invalid email address")
 });
-const passwordFormSchema = z.object({
-  currentPassword: z.string().min(6, "Current password is required"),
-  newPassword: z.string().min(8, "Password must be at least 8 characters"),
-  confirmPassword: z.string().min(8, "Please confirm your password")
-}).refine(data => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"]
-});
+
 export const DashboardHeader = ({
   profileData,
   onAddRound,
@@ -54,6 +49,7 @@ export const DashboardHeader = ({
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+
   const getSubscriptionState = () => {
     if (!subscription) {
       return "none";
@@ -71,8 +67,10 @@ export const DashboardHeader = ({
     }
     return "expired";
   };
+
   const subscriptionState = getSubscriptionState();
   console.log("Current subscription state:", subscriptionState, subscription);
+
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
@@ -82,6 +80,7 @@ export const DashboardHeader = ({
       email: ""
     }
   });
+
   const passwordForm = useForm<z.infer<typeof passwordFormSchema>>({
     resolver: zodResolver(passwordFormSchema),
     defaultValues: {
@@ -90,6 +89,7 @@ export const DashboardHeader = ({
       confirmPassword: ""
     }
   });
+
   React.useEffect(() => {
     if (profileData) {
       profileForm.reset({
@@ -109,6 +109,7 @@ export const DashboardHeader = ({
       getUserEmail();
     }
   }, [profileData, profileForm]);
+
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -122,6 +123,7 @@ export const DashboardHeader = ({
       });
     }
   };
+
   const handleProfileUpdate = async (values: z.infer<typeof profileFormSchema>) => {
     setLoading(true);
     try {
@@ -160,6 +162,7 @@ export const DashboardHeader = ({
       setLoading(false);
     }
   };
+
   const handlePasswordChange = async (values: z.infer<typeof passwordFormSchema>) => {
     setLoading(true);
     try {
@@ -196,6 +199,7 @@ export const DashboardHeader = ({
       setLoading(false);
     }
   };
+
   const handleSubscriptionAction = async (action: string) => {
     try {
       setCheckoutLoading(true);
@@ -281,6 +285,7 @@ export const DashboardHeader = ({
       setCheckoutLoading(false);
     }
   };
+
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -290,6 +295,7 @@ export const DashboardHeader = ({
       day: 'numeric'
     });
   };
+
   const renderSubscriptionManagement = () => {
     return <div className="pt-4 border-t">
         <h4 className="font-medium mb-3">Subscription Management</h4>
@@ -363,6 +369,7 @@ export const DashboardHeader = ({
           </>}
       </div>;
   };
+
   const renderProfileContent = () => {
     return <Form {...profileForm}>
         <form onSubmit={profileForm.handleSubmit(handleProfileUpdate)} className="space-y-4">
@@ -426,23 +433,31 @@ export const DashboardHeader = ({
         </form>
       </Form>;
   };
+
   const renderPasswordContent = () => {
-    return <div className="space-y-4">
+    return (
+      <div className="space-y-4">
         <DialogHeader>
           <DialogTitle>Change Password</DialogTitle>
           <DialogDescription>
             Enter your current password to set a new one
           </DialogDescription>
         </DialogHeader>
-        <PasswordForm userEmail={profileForm.getValues("email")} onBack={() => {
-        setPasswordDialogOpen(false);
-        setProfileDialogOpen(true);
-      }} onSuccess={() => {
-        setPasswordDialogOpen(false);
-        setProfileDialogOpen(true);
-      }} />
-      </div>;
+        <PasswordForm 
+          userEmail={profileForm.getValues("email")} 
+          onBack={() => {
+            setPasswordDialogOpen(false);
+            setProfileDialogOpen(true);
+          }} 
+          onSuccess={() => {
+            setPasswordDialogOpen(false);
+            setProfileDialogOpen(true);
+          }}
+        />
+      </div>
+    );
   };
+
   return <>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-4">
@@ -484,10 +499,6 @@ export const DashboardHeader = ({
               
               <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
                 <DialogContent className="sm:max-w-[500px]">
-                  <DialogHeader>
-                    
-                    
-                  </DialogHeader>
                   {renderPasswordContent()}
                 </DialogContent>
               </Dialog>
