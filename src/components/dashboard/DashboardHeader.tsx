@@ -12,6 +12,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { PasswordForm } from "./PasswordForm";
 
 interface Subscription {
   id?: string;
@@ -531,81 +532,25 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
 
   const renderPasswordContent = () => {
     return (
-      <Form {...passwordForm}>
-        <form onSubmit={passwordForm.handleSubmit(handlePasswordChange)} className="space-y-4">
-          <FormField
-            control={passwordForm.control}
-            name="currentPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Current Password</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="password" 
-                    placeholder="Enter your current password" 
-                    {...field} 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={passwordForm.control}
-            name="newPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>New Password</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="password" 
-                    placeholder="Enter your new password" 
-                    {...field} 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={passwordForm.control}
-            name="confirmPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Confirm New Password</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="password" 
-                    placeholder="Confirm your new password" 
-                    {...field} 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <DialogFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => {
-                passwordForm.reset();
-                setPasswordDialogOpen(false);
-                setProfileDialogOpen(true);
-              }}
-              className="mr-2"
-            >
-              Back to Profile
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Updating..." : "Update Password"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </Form>
+      <div className="space-y-4">
+        <DialogHeader>
+          <DialogTitle>Change Password</DialogTitle>
+          <DialogDescription>
+            Enter your current password to set a new one
+          </DialogDescription>
+        </DialogHeader>
+        <PasswordForm 
+          userEmail={profileForm.getValues("email")}
+          onBack={() => {
+            setPasswordDialogOpen(false);
+            setProfileDialogOpen(true);
+          }}
+          onSuccess={() => {
+            setPasswordDialogOpen(false);
+            setProfileDialogOpen(true);
+          }}
+        />
+      </div>
     );
   };
 
