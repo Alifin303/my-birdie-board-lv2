@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
@@ -541,7 +540,11 @@ export const DashboardHeader = ({ profileData, onAddRound, subscription }: Dashb
               <FormItem>
                 <FormLabel>Current Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="Enter your current password" {...field} />
+                  <Input 
+                    type="password" 
+                    placeholder="Enter your current password" 
+                    {...field} 
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
