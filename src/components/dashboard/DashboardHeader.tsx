@@ -430,9 +430,7 @@ export const DashboardHeader = ({
     return <div className="space-y-4">
         <DialogHeader>
           <DialogTitle>Change Password</DialogTitle>
-          <DialogDescription>
-            Enter your current password to set a new one
-          </DialogDescription>
+          <DialogDescription>Please complete all the fields below to change your password</DialogDescription>
         </DialogHeader>
         <PasswordForm userEmail={profileForm.getValues("email")} onBack={() => {
         setPasswordDialogOpen(false);
