@@ -406,15 +406,7 @@ export const DashboardHeader = ({
                 <FormMessage />
               </FormItem>} />
           
-          <div className="pt-4 border-t">
-            <Button type="button" variant="outline" onClick={() => {
-            setProfileDialogOpen(false);
-            setPasswordDialogOpen(true);
-          }} className="flex items-center gap-2">
-              <Key className="w-4 h-4" />
-              Change Password
-            </Button>
-          </div>
+          
           
           {renderSubscriptionManagement()}
           
@@ -434,20 +426,15 @@ export const DashboardHeader = ({
           <DialogTitle>Change Password</DialogTitle>
           <DialogDescription>Please complete all the fields below to change your password</DialogDescription>
         </DialogHeader>
-        <PasswordForm 
-          userEmail={profileForm.getValues("email")} 
-          onBack={() => {
-            setPasswordDialogOpen(false);
-            setProfileDialogOpen(true);
-          }} 
-          onSuccess={() => {
-            setPasswordDialogOpen(false);
-            setProfileDialogOpen(true);
-          }} 
-        />
+        <PasswordForm userEmail={profileForm.getValues("email")} onBack={() => {
+        setPasswordDialogOpen(false);
+        setProfileDialogOpen(true);
+      }} onSuccess={() => {
+        setPasswordDialogOpen(false);
+        setProfileDialogOpen(true);
+      }} />
       </div>;
   };
-
   return <>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-4">
@@ -469,9 +456,9 @@ export const DashboardHeader = ({
               <Dialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen}>
                 <DialogTrigger asChild>
                   <DropdownMenuItem onSelect={e => {
-                    e.preventDefault();
-                    setProfileDialogOpen(true);
-                  }}>
+                  e.preventDefault();
+                  setProfileDialogOpen(true);
+                }}>
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile Settings</span>
                   </DropdownMenuItem>
@@ -489,11 +476,11 @@ export const DashboardHeader = ({
               
               {/* Separated dialog to avoid focus issues */}
               <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
-                <DialogContent 
-                  className="sm:max-w-[500px]"
-                  // Force this dialog to have the highest z-index to ensure inputs work correctly
-                  style={{ zIndex: 9999 }}
-                >
+                <DialogContent className="sm:max-w-[500px]"
+              // Force this dialog to have the highest z-index to ensure inputs work correctly
+              style={{
+                zIndex: 9999
+              }}>
                   {renderPasswordContent()}
                 </DialogContent>
               </Dialog>
