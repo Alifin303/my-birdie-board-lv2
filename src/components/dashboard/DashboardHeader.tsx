@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User, LogOut, CreditCard, Key, Loader2, AlertCircle } from "lucide-react";
+import { User, LogOut, CreditCard, Key, Loader2, AlertCircle, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -13,7 +13,6 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PasswordForm } from "./PasswordForm";
-
 interface Subscription {
   id?: string;
   subscription_id?: string;
@@ -55,7 +54,6 @@ export const DashboardHeader = ({
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const getSubscriptionState = () => {
     if (!subscription) {
       return "none";
@@ -409,7 +407,10 @@ export const DashboardHeader = ({
               </FormItem>} />
           
           <div className="pt-4 border-t">
-            <Button type="button" variant="outline" onClick={handleOpenPasswordDialog} className="flex items-center gap-2">
+            <Button type="button" variant="outline" onClick={() => {
+            setProfileDialogOpen(false);
+            setPasswordDialogOpen(true);
+          }} className="flex items-center gap-2">
               <Key className="w-4 h-4" />
               Change Password
             </Button>
@@ -425,37 +426,26 @@ export const DashboardHeader = ({
         </form>
       </Form>;
   };
-  
-  // When opening password dialog, close the profile dialog and dropdown
-  const handleOpenPasswordDialog = () => {
-    setProfileDialogOpen(false);
-    setDropdownOpen(false);
-    // Add a small delay to ensure the profile dialog is closed before opening the password dialog
-    setTimeout(() => {
-      setPasswordDialogOpen(true);
-    }, 100);
-  };
-  
-  // When returning from password dialog to profile dialog
-  const handleBackToProfile = () => {
-    setPasswordDialogOpen(false);
-    // Add a small delay to ensure the password dialog is closed before reopening the profile dialog
-    setTimeout(() => {
-      setProfileDialogOpen(true);
-    }, 100);
-  };
-  
-  // When password change is successful
-  const handlePasswordSuccess = () => {
-    setPasswordDialogOpen(false);
-    toast({
-      title: "Password Updated",
-      description: "Your password has been successfully updated."
-    });
-    // Add a small delay to ensure the password dialog is closed before reopening the profile dialog
-    setTimeout(() => {
-      setProfileDialogOpen(true);
-    }, 100);
+  // The renderPasswordContent component has issues with dialog accessibility
+  // Let's update it to fix the password input focus problem
+  const renderPasswordContent = () => {
+    return <div className="space-y-4">
+        <DialogHeader>
+          <DialogTitle>Change Password</DialogTitle>
+          <DialogDescription>Please complete all the fields below to change your password</DialogDescription>
+        </DialogHeader>
+        <PasswordForm 
+          userEmail={profileForm.getValues("email")} 
+          onBack={() => {
+            setPasswordDialogOpen(false);
+            setProfileDialogOpen(true);
+          }} 
+          onSuccess={() => {
+            setPasswordDialogOpen(false);
+            setProfileDialogOpen(true);
+          }} 
+        />
+      </div>;
   };
 
   return <>
@@ -469,17 +459,14 @@ export const DashboardHeader = ({
             Add a New Round
           </Button>
           
-          <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon" className="rounded-full h-9 w-9 sm:h-10 sm:w-10 border border-primary text-primary hover:bg-primary hover:text-white">
                 <User className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <Dialog open={profileDialogOpen} onOpenChange={(open) => {
-                setProfileDialogOpen(open);
-                if (!open) setDropdownOpen(false);
-              }}>
+              <Dialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen}>
                 <DialogTrigger asChild>
                   <DropdownMenuItem onSelect={e => {
                     e.preventDefault();
@@ -500,21 +487,14 @@ export const DashboardHeader = ({
                 </DialogContent>
               </Dialog>
               
-              {/* Completely separate dialog for password management */}
+              {/* Separated dialog to avoid focus issues */}
               <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
                 <DialogContent 
                   className="sm:max-w-[500px]"
+                  // Force this dialog to have the highest z-index to ensure inputs work correctly
                   style={{ zIndex: 9999 }}
                 >
-                  <DialogHeader>
-                    <DialogTitle>Change Password</DialogTitle>
-                    <DialogDescription>Please complete all the fields below to change your password</DialogDescription>
-                  </DialogHeader>
-                  <PasswordForm 
-                    userEmail={profileForm.getValues("email")} 
-                    onBack={handleBackToProfile} 
-                    onSuccess={handlePasswordSuccess} 
-                  />
+                  {renderPasswordContent()}
                 </DialogContent>
               </Dialog>
               
