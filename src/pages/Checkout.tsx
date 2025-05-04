@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +7,7 @@ import { Loader2, CheckCircle, XCircle, CreditCard, Info } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { clearSubscriptionCache } from "@/integrations/supabase/subscription/subscription-utils";
 
 export default function Checkout() {
   const [isLoading, setIsLoading] = useState(false);
@@ -79,6 +81,10 @@ export default function Checkout() {
       setIsLoading(true);
       setProcessingStatus("redirecting");
       setError(null);
+      
+      // Always clear subscription cache before starting checkout
+      clearSubscriptionCache(user.id);
+      
       const {
         data: profile,
         error: profileError

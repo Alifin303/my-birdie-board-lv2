@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams, Link } from "react-router-dom";
@@ -52,16 +51,36 @@ export default function Dashboard() {
   const [processingStripeSession, setProcessingStripeSession] = useState(false);
   
   const sessionId = searchParams.get('session_id');
+  const subscriptionStatus = searchParams.get('subscription_status');
   
   useEffect(() => {
-    if (sessionId) {
-      console.log("Processing Stripe checkout session:", sessionId);
+    // Handle both session_id from Stripe and subscription_status from our success url
+    if (sessionId || subscriptionStatus === 'success') {
+      console.log("Processing Stripe checkout session or subscription status update");
       setProcessingStripeSession(true);
       
       const initSession = async () => {
         const { data } = await supabase.auth.getSession();
         if (data?.session?.user?.id) {
+          // Always clear cache when returning from payment flow
           clearSubscriptionCache(data.session.user.id);
+          
+          // Force refresh subscription data
+          try {
+            const { data: subscription, error } = await supabase
+              .from('customer_subscriptions')
+              .select('*')
+              .eq('user_id', data.session.user.id)
+              .maybeSingle();
+                
+            if (error) {
+              console.error("Error fetching subscription after checkout:", error);
+            } else {
+              console.log("Refreshed subscription data:", subscription);
+            }
+          } catch (err) {
+            console.error("Error refreshing subscription:", err);
+          }
         }
       };
       
@@ -82,7 +101,7 @@ export default function Dashboard() {
         setProcessingStripeSession(false);
       }, 3000);
     }
-  }, [sessionId, toast, queryClient]);
+  }, [sessionId, subscriptionStatus, toast, queryClient]);
   
   useEffect(() => {
     console.log("Modal state changed:", isModalOpen);
@@ -112,6 +131,9 @@ export default function Dashboard() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session found');
       
+      // Clear cached subscription data to force fresh fetch
+      clearSubscriptionCache(session.user.id);
+      
       const { data, error } = await supabase
         .from('customer_subscriptions')
         .select('*')
@@ -127,7 +149,8 @@ export default function Dashboard() {
       return data;
     },
     retry: 3,
-    retryDelay: 1000
+    retryDelay: 1000,
+    refetchOnWindowFocus: true
   });
 
   const { data: userRounds, isLoading: roundsLoading } = useQuery({

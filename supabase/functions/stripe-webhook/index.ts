@@ -157,8 +157,25 @@ async function handleSubscriptionChange(event, supabase) {
   const status = subscription.status;
   
   console.log(`Processing subscription: ${subscriptionId}, status: ${status}, for user: ${userId}`);
-  
+
   try {
+    if (!userId) {
+      console.warn('No user_id found in subscription metadata, attempting to find by customer ID');
+      
+      // Try to find the user ID by customer ID from existing subscriptions
+      const { data: existingCustomerSub, error: customerLookupError } = await supabase
+        .from('customer_subscriptions')
+        .select('user_id')
+        .eq('customer_id', customerId)
+        .maybeSingle();
+        
+      if (customerLookupError) {
+        console.error('Error looking up customer:', customerLookupError);
+      } else if (existingCustomerSub?.user_id) {
+        console.log(`Found user_id ${existingCustomerSub.user_id} for customer ${customerId}`);
+      }
+    }
+    
     // Check if we have an existing subscription record
     const { data: existingSubscription, error: queryError } = await supabase
       .from('customer_subscriptions')
@@ -171,12 +188,21 @@ async function handleSubscriptionChange(event, supabase) {
       throw queryError;
     }
     
+    // Get current period end from subscription
+    const currentPeriodEnd = subscription.current_period_end ? 
+      new Date(subscription.current_period_end * 1000).toISOString() : null;
+      
+    // Get cancel_at_period_end status
+    const cancelAtPeriodEnd = subscription.cancel_at_period_end || false;
+    
     if (existingSubscription) {
       // Update existing subscription
       const { error: updateError } = await supabase
         .from('customer_subscriptions')
         .update({
           status: status,
+          current_period_end: currentPeriodEnd,
+          cancel_at_period_end: cancelAtPeriodEnd,
           updated_at: new Date().toISOString()
         })
         .eq('subscription_id', subscriptionId);
@@ -188,26 +214,61 @@ async function handleSubscriptionChange(event, supabase) {
       
       console.log(`Successfully updated subscription: ${subscriptionId}`);
     } else if (userId) {
-      // Insert new subscription
-      const subscriptionData = {
-        subscription_id: subscriptionId,
-        customer_id: customerId,
-        status: status,
-        user_id: userId,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-      
-      const { error: insertError } = await supabase
+      // Check if there's an existing subscription for this user
+      const { data: existingUserSub, error: userSubError } = await supabase
         .from('customer_subscriptions')
-        .insert(subscriptionData);
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
         
-      if (insertError) {
-        console.error('Error inserting new subscription:', insertError);
-        throw insertError;
+      if (userSubError) {
+        console.error('Error checking for existing user subscription:', userSubError);
       }
       
-      console.log(`Successfully created new subscription for user: ${userId}`);
+      if (existingUserSub) {
+        // Update the existing user subscription with new subscription ID
+        const { error: updateUserSubError } = await supabase
+          .from('customer_subscriptions')
+          .update({
+            subscription_id: subscriptionId,
+            customer_id: customerId,
+            status: status,
+            current_period_end: currentPeriodEnd,
+            cancel_at_period_end: cancelAtPeriodEnd,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingUserSub.id);
+          
+        if (updateUserSubError) {
+          console.error('Error updating user subscription:', updateUserSubError);
+          throw updateUserSubError;
+        }
+        
+        console.log(`Successfully updated existing user subscription to new subscription ID: ${subscriptionId}`);
+      } else {
+        // Insert new subscription
+        const subscriptionData = {
+          subscription_id: subscriptionId,
+          customer_id: customerId,
+          status: status,
+          user_id: userId,
+          current_period_end: currentPeriodEnd,
+          cancel_at_period_end: cancelAtPeriodEnd,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        const { error: insertError } = await supabase
+          .from('customer_subscriptions')
+          .insert(subscriptionData);
+          
+        if (insertError) {
+          console.error('Error inserting new subscription:', insertError);
+          throw insertError;
+        }
+        
+        console.log(`Successfully created new subscription for user: ${userId}`);
+      }
     } else {
       console.error('Cannot create subscription record without user_id in metadata');
       throw new Error('Missing user_id in subscription metadata');
@@ -255,11 +316,16 @@ async function handlePaymentSuccess(event, supabase, stripe) {
       // Get the subscription from Stripe
       const stripeSubscription = await stripe.subscriptions.retrieve(invoiceObject.subscription);
       
+      // Get current period end from subscription
+      const currentPeriodEnd = stripeSubscription.current_period_end ? 
+        new Date(stripeSubscription.current_period_end * 1000).toISOString() : null;
+      
       // Update the subscription status in our database
       const { error: paymentUpdateError } = await supabase
         .from('customer_subscriptions')
         .update({ 
           status: stripeSubscription.status,
+          current_period_end: currentPeriodEnd,
           updated_at: new Date().toISOString()
         })
         .eq('subscription_id', stripeSubscription.id);

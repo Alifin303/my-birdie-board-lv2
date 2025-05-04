@@ -65,24 +65,8 @@ export const fetchUserSubscription = async (userId: string, supabaseClient: any)
   try {
     console.log(`Fetching subscription for user: ${userId}`);
     
-    // Check localStorage cache first for faster initial load
-    try {
-      const cachedSubscription = localStorage.getItem(`subscription_${userId}`);
-      const cacheTimestamp = localStorage.getItem(`subscription_${userId}_timestamp`);
-      
-      // Only use cache if it's recent (less than 1 minute old for new subscriptions)
-      if (cachedSubscription && cacheTimestamp) {
-        const cacheTime = new Date(cacheTimestamp);
-        const oneMinuteAgo = new Date(Date.now() - 60 * 1000); // 1 minute cache for new subscriptions
-        
-        if (cacheTime > oneMinuteAgo) {
-          console.log("Using cached subscription data");
-          return JSON.parse(cachedSubscription);
-        }
-      }
-    } catch (cacheError) {
-      console.error("Error reading subscription cache:", cacheError);
-    }
+    // Always clear the cache when explicitly requesting a subscription
+    clearSubscriptionCache(userId);
     
     // Fetch fresh data from Supabase
     const { data: subscription, error } = await supabaseClient
@@ -136,6 +120,7 @@ export const clearSubscriptionCache = (userId?: string) => {
     if (userId) {
       localStorage.removeItem(`subscription_${userId}`);
       localStorage.removeItem(`subscription_${userId}_timestamp`);
+      console.log(`Cleared subscription cache for user: ${userId}`);
     }
     
     // Clear the general subscription status cache
