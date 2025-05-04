@@ -10,6 +10,7 @@ import { DialogFooter } from "@/components/ui/dialog";
 import { Key } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 const passwordFormSchema = z.object({
   currentPassword: z.string().min(6, "Current password is required"),
@@ -30,6 +31,7 @@ export function PasswordForm({ userEmail, onBack, onSuccess }: PasswordFormProps
   const { toast } = useToast();
   const [loading, setLoading] = React.useState(false);
 
+  // Initialize form with React Hook Form
   const form = useForm<z.infer<typeof passwordFormSchema>>({
     resolver: zodResolver(passwordFormSchema),
     defaultValues: {
@@ -38,10 +40,23 @@ export function PasswordForm({ userEmail, onBack, onSuccess }: PasswordFormProps
       confirmPassword: ""
     }
   });
+  
+  // Focus the first input field when the component mounts
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      const firstInput = document.querySelector('input[name="currentPassword"]') as HTMLInputElement;
+      if (firstInput) {
+        firstInput.focus();
+      }
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   const handlePasswordChange = async (values: z.infer<typeof passwordFormSchema>) => {
     setLoading(true);
     try {
+      // First verify the current password is correct
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: userEmail,
         password: values.currentPassword
@@ -49,6 +64,7 @@ export function PasswordForm({ userEmail, onBack, onSuccess }: PasswordFormProps
 
       if (signInError) throw new Error("Current password is incorrect");
 
+      // If current password is correct, update to the new password
       const { error: updateError } = await supabase.auth.updateUser({
         password: values.newPassword
       });
@@ -75,76 +91,88 @@ export function PasswordForm({ userEmail, onBack, onSuccess }: PasswordFormProps
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handlePasswordChange)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="currentPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Current Password</FormLabel>
-              <FormControl>
-                <Input 
-                  type="password"
-                  placeholder="Enter your current password"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="newPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>New Password</FormLabel>
-              <FormControl>
-                <Input 
-                  type="password"
-                  placeholder="Enter your new password"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="confirmPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Confirm New Password</FormLabel>
-              <FormControl>
-                <Input 
-                  type="password"
-                  placeholder="Confirm your new password"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <DialogFooter>
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={onBack}
-            className="mr-2"
-          >
-            Back to Profile
-          </Button>
-          <Button type="submit" disabled={loading}>
-            {loading ? "Updating..." : "Update Password"}
-          </Button>
-        </DialogFooter>
-      </form>
-    </Form>
+    <TooltipProvider>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handlePasswordChange)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="currentPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Current Password</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="password"
+                    placeholder="Enter your current password"
+                    autoComplete="current-password"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="newPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>New Password</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="password"
+                    placeholder="Enter your new password"
+                    autoComplete="new-password"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm New Password</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="password"
+                        placeholder="Confirm your new password"
+                        autoComplete="new-password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <p>Make sure passwords match</p>
+            </TooltipContent>
+          </Tooltip>
+          
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onBack}
+              className="mr-2"
+            >
+              Back to Profile
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? "Updating..." : "Update Password"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </Form>
+    </TooltipProvider>
   );
 }
