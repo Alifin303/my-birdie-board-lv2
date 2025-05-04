@@ -9,8 +9,6 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "
 import { DialogFooter } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Popover, PopoverContent } from "@/components/ui/popover";
 
 const passwordFormSchema = z.object({
   currentPassword: z.string().min(6, "Current password is required"),
@@ -41,21 +39,15 @@ export function PasswordForm({ userEmail, onBack, onSuccess }: PasswordFormProps
     }
   });
   
-  // Using manual focus management without automatic focus to avoid aria-hidden conflicts
   const currentPasswordRef = React.useRef<HTMLInputElement>(null);
   
   React.useEffect(() => {
-    // Short delay to ensure the dialog is fully rendered
+    // Short delay to ensure the dialog is fully rendered and focused
     const timer = setTimeout(() => {
       if (currentPasswordRef.current) {
-        try {
-          // Try to focus without causing a conflict with Radix UI's aria-hidden
-          currentPasswordRef.current.focus();
-        } catch (e) {
-          console.error("Could not focus the password field:", e);
-        }
+        currentPasswordRef.current.focus();
       }
-    }, 200);
+    }, 100);
     
     return () => clearTimeout(timer);
   }, []);
@@ -117,9 +109,7 @@ export function PasswordForm({ userEmail, onBack, onSuccess }: PasswordFormProps
                     currentPasswordRef.current = e;
                   }}
                   {...field}
-                  // Ensure the input is directly controllable
-                  value={field.value}
-                  onChange={(e) => field.onChange(e.target.value)}
+                  className="bg-background"
                 />
               </FormControl>
               <FormMessage />
@@ -138,9 +128,7 @@ export function PasswordForm({ userEmail, onBack, onSuccess }: PasswordFormProps
                   type="password"
                   placeholder="Enter your new password"
                   autoComplete="new-password"
-                  // Ensure the input is directly controllable
-                  value={field.value}
-                  onChange={(e) => field.onChange(e.target.value)}
+                  className="bg-background"
                   {...field}
                 />
               </FormControl>
@@ -155,19 +143,15 @@ export function PasswordForm({ userEmail, onBack, onSuccess }: PasswordFormProps
           render={({ field }) => (
             <FormItem>
               <FormLabel>Confirm New Password</FormLabel>
-              <div className="relative">
-                <FormControl>
-                  <Input 
-                    type="password"
-                    placeholder="Confirm your new password"
-                    autoComplete="new-password"
-                    // Ensure the input is directly controllable
-                    value={field.value}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    {...field}
-                  />
-                </FormControl>
-              </div>
+              <FormControl>
+                <Input 
+                  type="password"
+                  placeholder="Confirm your new password"
+                  autoComplete="new-password"
+                  className="bg-background"
+                  {...field}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
