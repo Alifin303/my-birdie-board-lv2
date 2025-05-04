@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { DialogFooter } from "@/components/ui/dialog";
-import { Key } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { Popover, PopoverContent } from "@/components/ui/popover";
 
 const passwordFormSchema = z.object({
   currentPassword: z.string().min(6, "Current password is required"),
@@ -41,14 +41,21 @@ export function PasswordForm({ userEmail, onBack, onSuccess }: PasswordFormProps
     }
   });
   
-  // Focus the first input field when the component mounts
+  // Using manual focus management without automatic focus to avoid aria-hidden conflicts
+  const currentPasswordRef = React.useRef<HTMLInputElement>(null);
+  
   React.useEffect(() => {
+    // Short delay to ensure the dialog is fully rendered
     const timer = setTimeout(() => {
-      const firstInput = document.querySelector('input[name="currentPassword"]') as HTMLInputElement;
-      if (firstInput) {
-        firstInput.focus();
+      if (currentPasswordRef.current) {
+        try {
+          // Try to focus without causing a conflict with Radix UI's aria-hidden
+          currentPasswordRef.current.focus();
+        } catch (e) {
+          console.error("Could not focus the password field:", e);
+        }
       }
-    }, 100);
+    }, 200);
     
     return () => clearTimeout(timer);
   }, []);
@@ -91,88 +98,95 @@ export function PasswordForm({ userEmail, onBack, onSuccess }: PasswordFormProps
   };
 
   return (
-    <TooltipProvider>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handlePasswordChange)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="currentPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Current Password</FormLabel>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handlePasswordChange)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="currentPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Current Password</FormLabel>
+              <FormControl>
+                <Input 
+                  type="password"
+                  placeholder="Enter your current password"
+                  autoComplete="current-password"
+                  ref={(e) => {
+                    field.ref(e);
+                    // @ts-ignore - we're attaching our ref in addition to the field ref
+                    currentPasswordRef.current = e;
+                  }}
+                  {...field}
+                  // Ensure the input is directly controllable
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="newPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>New Password</FormLabel>
+              <FormControl>
+                <Input 
+                  type="password"
+                  placeholder="Enter your new password"
+                  autoComplete="new-password"
+                  // Ensure the input is directly controllable
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirm New Password</FormLabel>
+              <div className="relative">
                 <FormControl>
                   <Input 
                     type="password"
-                    placeholder="Enter your current password"
-                    autoComplete="current-password"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="newPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>New Password</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="password"
-                    placeholder="Enter your new password"
+                    placeholder="Confirm your new password"
                     autoComplete="new-password"
+                    // Ensure the input is directly controllable
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.target.value)}
                     {...field}
                   />
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm New Password</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="password"
-                        placeholder="Confirm your new password"
-                        autoComplete="new-password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <p>Make sure passwords match</p>
-            </TooltipContent>
-          </Tooltip>
-          
-          <DialogFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={onBack}
-              className="mr-2"
-            >
-              Back to Profile
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Updating..." : "Update Password"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </Form>
-    </TooltipProvider>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <DialogFooter>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onBack}
+            className="mr-2"
+          >
+            Back to Profile
+          </Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? "Updating..." : "Update Password"}
+          </Button>
+        </DialogFooter>
+      </form>
+    </Form>
   );
 }
