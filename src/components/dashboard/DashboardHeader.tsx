@@ -466,7 +466,9 @@ export const DashboardHeader = ({
                 <DialogContent className="sm:max-w-[500px]">
                   <DialogHeader>
                     <DialogTitle>Profile Settings</DialogTitle>
-                    
+                    <DialogDescription>
+                      Update your profile information and manage your account
+                    </DialogDescription>
                   </DialogHeader>
                   {renderProfileContent()}
                 </DialogContent>
