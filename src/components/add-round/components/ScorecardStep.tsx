@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -204,8 +203,8 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
       const holeNumbers = missingScores.map(s => s.hole).join(', ');
       let errorMessage = `Please enter scores for hole${missingScores.length > 1 ? 's' : ''}: ${holeNumbers}`;
       
-      // Add guidance about 9-hole selection
-      if (holeSelection.type === 'all' && missingScores.length > 9) {
+      // Always add guidance about 9-hole selection regardless of how many holes are missing
+      if (holeSelection.type === 'all') {
         errorMessage += ". If you only played 9 holes, select 'Front 9' or 'Back 9' to save a 9-hole round.";
       }
       
@@ -254,11 +253,26 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
           </AlertDescription>
         </Alert>}
       
-      {validationError && <Alert variant="destructive" className="mb-4 sticky top-0 z-40 shadow-lg">
+      {validationError && 
+        <Alert variant="destructive" className="mb-4 sticky top-0 z-40 shadow-lg">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="ml-2">
             {validationError}
           </AlertDescription>
+          <button 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setValidationError(null);
+            }}
+            className="absolute right-2 top-2 rounded-full p-1 hover:bg-destructive/20"
+            aria-label="Close error message"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </Alert>}
       
       <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-1 md:grid-cols-3 gap-4'} mb-4`}>
@@ -280,9 +294,9 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         <div className="space-y-1">
           <label className="text-sm font-medium">Tee Played<span className="text-red-500">*</span></label>
           <Select value={localSelectedTeeId || undefined} onValueChange={value => {
-          console.log("Tee selection changed to:", value);
-          handleTeeChangeWithLocalState(value);
-        }}>
+            console.log("Tee selection changed to:", value);
+            handleTeeChangeWithLocalState(value);
+          }}>
             <SelectTrigger className="h-9">
               <SelectValue placeholder="Select a tee box">
                 {selectedTee && <div className="flex items-center">
@@ -316,7 +330,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </div>
         
         <div className="space-y-1">
-          <label className="text-sm font-medium">Holes Played<span className="text-red-500">*</span> (If you played only 9 holes, select which 9)</label>
+          <label className="text-sm font-medium">Holes Played<span className="text-red-500">*</span> <span className="text-xs text-muted-foreground">(Select 'Front 9' or 'Back 9' if you only played 9 holes)</span></label>
           <div className="flex space-x-1">
             <Button variant={holeSelection.type === 'all' ? "default" : "outline"} size="sm" onClick={() => handleHoleSelectionChange({
             type: 'all'

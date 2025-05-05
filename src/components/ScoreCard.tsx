@@ -101,8 +101,8 @@ export const ScoreCard = () => {
       const holeNumbers = missingScores.map(h => h.number).join(', ');
       let errorMessage = `Please enter scores for hole${missingScores.length > 1 ? 's' : ''}: ${holeNumbers}`;
       
-      // Add guidance about 9-hole selection
-      if (holeSelection === 'all' && missingScores.length > 9) {
+      // Always add guidance about 9-hole selection regardless of how many holes are missing
+      if (holeSelection === 'all') {
         errorMessage += ". If you only played 9 holes, select 'Front 9' or 'Back 9'.";
       }
       
@@ -213,7 +213,7 @@ export const ScoreCard = () => {
       </div>
       
       <div className="mb-6 space-y-2">
-        <label className="block text-sm font-medium mb-1">Holes Played (If you played only 9 holes, select which 9)</label>
+        <label className="block text-sm font-medium mb-1">Holes Played <span className="text-xs text-muted-foreground">(Select 'Front 9' or 'Back 9' if you only played 9 holes)</span></label>
         <div className="flex space-x-2">
           <Button 
             variant={holeSelection === 'all' ? "default" : "outline"} 
@@ -248,6 +248,20 @@ export const ScoreCard = () => {
           <AlertDescription className="ml-2">
             {validationError}
           </AlertDescription>
+          <button 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setValidationError(null);
+            }}
+            className="absolute right-2 top-2 rounded-full p-1 hover:bg-destructive/20"
+            aria-label="Close error message"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </Alert>
       )}
 
