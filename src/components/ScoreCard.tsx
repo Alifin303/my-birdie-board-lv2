@@ -55,6 +55,7 @@ export const ScoreCard = () => {
   };
 
   const handleHoleSelectionChange = (selection: 'all' | 'front9' | 'back9') => {
+    // We don't need to reset scores when changing hole selection - they should be preserved
     setHoleSelection(selection);
     // Clear validation error when changing hole selection
     setValidationError(null);
@@ -263,7 +264,7 @@ export const ScoreCard = () => {
 
       {/* Mobile layout - visible only on small screens */}
       <div className="sm:hidden space-y-6">
-        {holeSelection !== 'back9' && (
+        {(holeSelection === 'all' || holeSelection === 'front9') && (
           <div className="space-y-4">
             <h3 className="text-md font-medium text-primary">Front Nine</h3>
             {frontNineChunks.map((chunk, chunkIndex) => (
@@ -271,7 +272,7 @@ export const ScoreCard = () => {
                 {chunk.map((hole) => (
                   <div key={`mobile-${hole.number}`} className="text-center">
                     <label className="block text-sm font-medium text-accent/80 mb-1">
-                      #{hole.number}{holeSelection !== 'back9' && <span className="text-red-500 ml-0.5">*</span>}
+                      #{hole.number}{(holeSelection === 'all' || holeSelection === 'front9') && <span className="text-red-500 ml-0.5">*</span>}
                     </label>
                     <Input
                       type="number"
@@ -280,11 +281,11 @@ export const ScoreCard = () => {
                       value={hole.score || ''}
                       onChange={(e) => handleScoreChange(hole.number, e.target.value)}
                       className={`w-full text-center bg-white/80 border-accent/20 focus:border-accent/40 score-input ${
-                        holeSelection !== 'back9' && !hole.score ? 'border-red-300 focus:border-red-500' : ''
+                        (holeSelection === 'all' || holeSelection === 'front9') && !hole.score ? 'border-red-300 focus:border-red-500' : ''
                       }`}
                       placeholder="0"
                       inputMode="numeric"
-                      required={holeSelection !== 'back9'}
+                      required={(holeSelection === 'all' || holeSelection === 'front9')}
                     />
                     <span className="text-xs text-accent/60 mt-1 block">
                       Par {hole.par}
@@ -296,7 +297,7 @@ export const ScoreCard = () => {
           </div>
         )}
         
-        {holeSelection !== 'front9' && (
+        {(holeSelection === 'all' || holeSelection === 'back9') && (
           <div className="space-y-4">
             <h3 className="text-md font-medium text-primary">Back Nine</h3>
             {backNineChunks.map((chunk, chunkIndex) => (
@@ -304,7 +305,7 @@ export const ScoreCard = () => {
                 {chunk.map((hole) => (
                   <div key={`mobile-${hole.number}`} className="text-center">
                     <label className="block text-sm font-medium text-accent/80 mb-1">
-                      #{hole.number}{holeSelection !== 'front9' && <span className="text-red-500 ml-0.5">*</span>}
+                      #{hole.number}{(holeSelection === 'all' || holeSelection === 'back9') && <span className="text-red-500 ml-0.5">*</span>}
                     </label>
                     <Input
                       type="number"
@@ -313,11 +314,11 @@ export const ScoreCard = () => {
                       value={hole.score || ''}
                       onChange={(e) => handleScoreChange(hole.number, e.target.value)}
                       className={`w-full text-center bg-white/80 border-accent/20 focus:border-accent/40 score-input ${
-                        holeSelection !== 'front9' && !hole.score ? 'border-red-300 focus:border-red-500' : ''
+                        (holeSelection === 'all' || holeSelection === 'back9') && !hole.score ? 'border-red-300 focus:border-red-500' : ''
                       }`}
                       placeholder="0"
                       inputMode="numeric"
-                      required={holeSelection !== 'front9'}
+                      required={(holeSelection === 'all' || holeSelection === 'back9')}
                     />
                     <span className="text-xs text-accent/60 mt-1 block">
                       Par {hole.par}

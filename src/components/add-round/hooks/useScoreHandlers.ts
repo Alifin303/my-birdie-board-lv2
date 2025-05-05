@@ -1,3 +1,4 @@
+
 import { 
   Score, 
   HoleSelection, 
@@ -204,19 +205,60 @@ export function useScoreHandlers({
     
     console.log("📊 Par values for filtered holes:", filteredHoles.map(h => ({ number: h.number, par: h.par })));
     
-    const newScores = filteredHoles.map(hole => ({
-      hole: hole.number,
-      par: hole.par || 4,
-      strokes: 0, // Set default to 0 to mark as filled
-      putts: undefined,
-      penalties: undefined,
-      gir: undefined,
-      yards: hole.yards,
-      handicap: hole.handicap
-    }));
-    
-    console.log("✅ New scores array with proper par data:", newScores);
-    setScores(newScores);
+    // Check if we have existing scores to preserve
+    if (scores.length > 0) {
+      console.log("✅ Preserving existing scores when updating scorecard");
+      
+      // Create a map of existing scores by hole number for faster lookups
+      const existingScoresMap = new Map(
+        scores.map(score => [score.hole, score])
+      );
+      
+      const newScores = filteredHoles.map(hole => {
+        // Check if we have an existing score for this hole
+        const existingScore = existingScoresMap.get(hole.number);
+        
+        if (existingScore) {
+          // Preserve existing scores and data
+          return {
+            ...existingScore,
+            par: hole.par || 4, // Update par in case it changed
+            yards: hole.yards,
+            handicap: hole.handicap
+          };
+        }
+        
+        // Create new score entry for holes that don't have scores yet
+        return {
+          hole: hole.number,
+          par: hole.par || 4,
+          strokes: 0, // Set default to 0 to mark as filled
+          putts: undefined,
+          penalties: undefined,
+          gir: undefined,
+          yards: hole.yards,
+          handicap: hole.handicap
+        };
+      });
+      
+      console.log("✅ New scores array with preserved existing scores:", newScores);
+      setScores(newScores);
+    } else {
+      // No existing scores, create fresh entries
+      const newScores = filteredHoles.map(hole => ({
+        hole: hole.number,
+        par: hole.par || 4,
+        strokes: 0, // Set default to 0 to mark as filled
+        putts: undefined,
+        penalties: undefined,
+        gir: undefined,
+        yards: hole.yards,
+        handicap: hole.handicap
+      }));
+      
+      console.log("✅ New scores array with proper par data:", newScores);
+      setScores(newScores);
+    }
     
     if (holeSelection.type !== 'all') {
       setActiveScoreTab(holeSelection.type === 'front9' ? "front9" : "back9");
