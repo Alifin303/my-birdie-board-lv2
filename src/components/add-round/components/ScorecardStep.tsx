@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -201,7 +202,13 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
     
     if (missingScores.length > 0) {
       const holeNumbers = missingScores.map(s => s.hole).join(', ');
-      const errorMessage = `Please enter scores for hole${missingScores.length > 1 ? 's' : ''}: ${holeNumbers}`;
+      let errorMessage = `Please enter scores for hole${missingScores.length > 1 ? 's' : ''}: ${holeNumbers}`;
+      
+      // Add guidance about 9-hole selection
+      if (holeSelection.type === 'all' && missingScores.length > 9) {
+        errorMessage += ". If you only played 9 holes, select 'Front 9' or 'Back 9' to save a 9-hole round.";
+      }
+      
       setValidationError(errorMessage);
       setShowErrorToast(true);
       return false;
@@ -247,7 +254,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
           </AlertDescription>
         </Alert>}
       
-      {validationError && <Alert variant="destructive" className="mb-4 sticky top-0 z-40 shadow-lg animate-pulse">
+      {validationError && <Alert variant="destructive" className="mb-4 sticky top-0 z-40 shadow-lg">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="ml-2">
             {validationError}
@@ -309,7 +316,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </div>
         
         <div className="space-y-1">
-          <label className="text-sm font-medium">Holes Played<span className="text-red-500">*</span> (Played 9? Select which 9 to ensure accurate handicap.)</label>
+          <label className="text-sm font-medium">Holes Played<span className="text-red-500">*</span> (If you played only 9 holes, select which 9)</label>
           <div className="flex space-x-1">
             <Button variant={holeSelection.type === 'all' ? "default" : "outline"} size="sm" onClick={() => handleHoleSelectionChange({
             type: 'all'
@@ -467,17 +474,5 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
             </> : "Save Round"}
         </Button>
       </div>
-      
-      {/* Fixed bottom error display for mobile */}
-      {validationError && isMobile && (
-        <div className="fixed bottom-4 left-0 right-0 mx-4 z-50 animate-bounce-slow">
-          <Alert variant="destructive" className="shadow-lg">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="ml-2">
-              {validationError}
-            </AlertDescription>
-          </Alert>
-        </div>
-      )}
     </div>;
 };

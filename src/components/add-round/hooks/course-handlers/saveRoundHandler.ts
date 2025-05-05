@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
 import { ensureCourseExists, findOrCreateCourseByApiId, updateUserHandicap } from "@/integrations/supabase";
@@ -54,9 +53,16 @@ export function createSaveRoundHandler({
     
     if (missingScores.length > 0) {
       const holeNumbers = missingScores.map(s => s.hole).join(', ');
+      let errorMessage = `Please enter scores for hole${missingScores.length > 1 ? 's' : ''}: ${holeNumbers}`;
+      
+      // Add guidance about 9-hole selection
+      if (holeSelection.type === 'all' && missingScores.length > 9) {
+        errorMessage += ". If you only played 9 holes, select 'Front 9' or 'Back 9'.";
+      }
+      
       toast.toast({
         title: "Missing scores",
-        description: `Please enter scores for hole${missingScores.length > 1 ? 's' : ''}: ${holeNumbers}`,
+        description: errorMessage,
         variant: "destructive",
       });
       

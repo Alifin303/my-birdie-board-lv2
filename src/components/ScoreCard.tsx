@@ -44,10 +44,8 @@ export const ScoreCard = () => {
       });
       setShowErrorToast(false);
       
-      // Scroll to the error message if on mobile
-      const isMobile = window.innerWidth < 640;
-      if (isMobile && saveButtonRef.current) {
-        // Add visual feedback to the save button
+      // Add visual feedback to the save button
+      if (saveButtonRef.current) {
         saveButtonRef.current.classList.add('animate-shake');
         setTimeout(() => {
           if (saveButtonRef.current) {
@@ -101,7 +99,13 @@ export const ScoreCard = () => {
     
     if (missingScores.length > 0) {
       const holeNumbers = missingScores.map(h => h.number).join(', ');
-      const errorMessage = `Please enter scores for hole${missingScores.length > 1 ? 's' : ''}: ${holeNumbers}`;
+      let errorMessage = `Please enter scores for hole${missingScores.length > 1 ? 's' : ''}: ${holeNumbers}`;
+      
+      // Add guidance about 9-hole selection
+      if (holeSelection === 'all' && missingScores.length > 9) {
+        errorMessage += ". If you only played 9 holes, select 'Front 9' or 'Back 9'.";
+      }
+      
       setValidationError(errorMessage);
       setShowErrorToast(true);
       return false;
@@ -209,7 +213,7 @@ export const ScoreCard = () => {
       </div>
       
       <div className="mb-6 space-y-2">
-        <label className="block text-sm font-medium mb-1">Holes Played</label>
+        <label className="block text-sm font-medium mb-1">Holes Played (If you played only 9 holes, select which 9)</label>
         <div className="flex space-x-2">
           <Button 
             variant={holeSelection === 'all' ? "default" : "outline"} 
@@ -239,7 +243,7 @@ export const ScoreCard = () => {
       </div>
       
       {validationError && (
-        <Alert variant="destructive" className="mb-4 sticky top-0 z-40 shadow-lg animate-pulse">
+        <Alert variant="destructive" className="mb-4 sticky top-0 z-40 shadow-lg">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="ml-2">
             {validationError}
@@ -378,18 +382,6 @@ export const ScoreCard = () => {
           </Button>
         )}
       </div>
-      
-      {/* Fixed bottom error display for mobile */}
-      {validationError && (
-        <div className="sm:hidden fixed bottom-4 left-0 right-0 mx-4 z-50 animate-bounce-slow">
-          <Alert variant="destructive" className="shadow-lg">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="ml-2">
-              {validationError}
-            </AlertDescription>
-          </Alert>
-        </div>
-      )}
     </Card>
   );
 };
