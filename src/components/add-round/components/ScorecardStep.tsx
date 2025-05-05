@@ -14,6 +14,7 @@ import { HoleSelection, Score, SimplifiedCourseDetail, ScoreSummary, SimplifiedT
 import { HoleScore } from "@/components/dashboard/scorecard/types";
 import { ScoreTable } from "@/components/dashboard/scorecard/ScoreTable";
 import { useIsMobile } from "@/hooks/use-mobile";
+
 interface ScorecardStepProps {
   selectedCourse: SimplifiedCourseDetail | null;
   selectedTeeId: string | null;
@@ -35,6 +36,7 @@ interface ScorecardStepProps {
   dataLoadingError: string | null;
   today: Date;
 }
+
 export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   selectedCourse,
   selectedTeeId,
@@ -58,19 +60,23 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
 }) => {
   const [localSelectedTeeId, setLocalSelectedTeeId] = useState<string | null>(selectedTeeId);
   const [showDetailedStats, setShowDetailedStats] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const isMobile = useIsMobile();
+  
   useEffect(() => {
     if (selectedTeeId !== localSelectedTeeId) {
       console.log("Updating local tee ID from prop:", selectedTeeId);
       setLocalSelectedTeeId(selectedTeeId);
     }
   }, [selectedTeeId]);
+  
   useEffect(() => {
     if (localSelectedTeeId && localSelectedTeeId !== selectedTeeId) {
       console.log("Updating parent tee ID from local state:", localSelectedTeeId);
       handleTeeChange(localSelectedTeeId);
     }
   }, [localSelectedTeeId]);
+  
   useEffect(() => {
     if (selectedCourse) {
       console.log("Scorecard Step - Selected Course:", {
@@ -90,8 +96,11 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
       }
     }
   }, [selectedCourse]);
+  
   if (!selectedCourse) return null;
+  
   const selectedTee = selectedCourse.tees.find(tee => tee.id === localSelectedTeeId);
+  
   console.log("========== SCORECARD STEP TEE SELECTION ==========");
   console.log("selectedTeeId (prop):", selectedTeeId);
   console.log("localSelectedTeeId (state):", localSelectedTeeId);
@@ -103,6 +112,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
     slope: t.slope
   })));
   console.log("selectedTee object:", selectedTee);
+  
   if (selectedTee) {
     console.log("Selected tee name:", selectedTee.name);
     console.log("Selected tee par:", selectedTee.par);
@@ -114,12 +124,15 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
       setLocalSelectedTeeId(selectedCourse.tees[0].id);
     }
   }
+  
   console.log("=================================================");
+  
   const handleTeeChangeWithLocalState = (teeId: string) => {
     console.log("Local tee change handler called with ID:", teeId);
     setLocalSelectedTeeId(teeId);
     handleTeeChange(teeId);
   };
+  
   const getTeeColor = (teeName: string) => {
     const lowerName = teeName.toLowerCase();
     if (lowerName.includes('black')) return '#000';
@@ -132,6 +145,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
     if (lowerName.includes('silver')) return '#C0C0C0';
     return '#777';
   };
+  
   const convertToHoleScores = (scores: Score[]): HoleScore[] => {
     return scores.map(score => ({
       hole: score.hole,
@@ -142,10 +156,47 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
       penalties: score.penalties
     }));
   };
+  
+  const validateScores = (): boolean => {
+    let requiredHoles = [];
+    
+    if (holeSelection.type === 'front9') {
+      requiredHoles = scores.filter(score => score.hole <= 9);
+    } else if (holeSelection.type === 'back9') {
+      requiredHoles = scores.filter(score => score.hole > 9);
+    } else {
+      requiredHoles = scores;
+    }
+    
+    const missingScores = requiredHoles.filter(score => 
+      score.strokes === null || 
+      score.strokes === undefined || 
+      score.strokes === 0
+    );
+    
+    if (missingScores.length > 0) {
+      const holeNumbers = missingScores.map(s => s.hole).join(', ');
+      setValidationError(`Please enter scores for hole${missingScores.length > 1 ? 's' : ''}: ${holeNumbers}`);
+      return false;
+    }
+    
+    setValidationError(null);
+    return true;
+  };
+  
   const frontNineScores = scores.filter(score => score.hole <= 9);
   const backNineScores = scores.filter(score => score.hole > 9);
   const frontNineHoleScores = convertToHoleScores(frontNineScores);
   const backNineHoleScores = convertToHoleScores(backNineScores);
+  
+  // Add required field flag based on hole selection
+  const isHoleRequired = (holeNumber: number): boolean => {
+    if (holeSelection.type === 'all') return true;
+    if (holeSelection.type === 'front9') return holeNumber <= 9;
+    if (holeSelection.type === 'back9') return holeNumber > 9;
+    return false;
+  };
+  
   return <div>
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -169,9 +220,16 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
           </AlertDescription>
         </Alert>}
       
+      {validationError && <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="ml-2">
+            {validationError}
+          </AlertDescription>
+        </Alert>}
+      
       <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-1 md:grid-cols-3 gap-4'} mb-4`}>
         <div className="space-y-1">
-          <label className="text-sm font-medium">Date Played</label>
+          <label className="text-sm font-medium">Date Played<span className="text-red-500">*</span></label>
           <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className="w-full justify-start text-left font-normal">
@@ -186,7 +244,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </div>
         
         <div className="space-y-1">
-          <label className="text-sm font-medium">Tee Played</label>
+          <label className="text-sm font-medium">Tee Played<span className="text-red-500">*</span></label>
           <Select value={localSelectedTeeId || undefined} onValueChange={value => {
           console.log("Tee selection changed to:", value);
           handleTeeChangeWithLocalState(value);
@@ -224,7 +282,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </div>
         
         <div className="space-y-1">
-          <label className="text-sm font-medium">Holes Played (Played 9? Select which 9 to ensure accurate handicap.)</label>
+          <label className="text-sm font-medium">Holes Played<span className="text-red-500">*</span> (Played 9? Select which 9 to ensure accurate handicap.)</label>
           <div className="flex space-x-1">
             <Button variant={holeSelection.type === 'all' ? "default" : "outline"} size="sm" onClick={() => handleHoleSelectionChange({
             type: 'all'
@@ -253,12 +311,36 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </Label>
       </div>
       
-      {frontNineScores.length > 0 && <div className="mb-4">
-          <ScoreTable scores={frontNineHoleScores} isEditing={true} handleScoreChange={handleScoreChange} handleGIRChange={handleGIRChange} title="Front Nine" startIndex={0} showDetailedStats={showDetailedStats} />
+      {frontNineScores.length > 0 && (holeSelection.type === 'all' || holeSelection.type === 'front9') && <div className="mb-4">
+          <h3 className="text-sm font-medium mb-2">
+            Front Nine 
+            {(holeSelection.type === 'all' || holeSelection.type === 'front9') && <span className="text-red-500 ml-1">*</span>}
+          </h3>
+          <ScoreTable 
+            scores={frontNineHoleScores} 
+            isEditing={true} 
+            handleScoreChange={handleScoreChange} 
+            handleGIRChange={handleGIRChange} 
+            title="Front Nine" 
+            startIndex={0} 
+            showDetailedStats={showDetailedStats} 
+          />
         </div>}
       
-      {backNineScores.length > 0 && <div className="mb-4">
-          <ScoreTable scores={backNineHoleScores} isEditing={true} handleScoreChange={handleScoreChange} handleGIRChange={handleGIRChange} title="Back Nine" startIndex={frontNineScores.length} showDetailedStats={showDetailedStats} />
+      {backNineScores.length > 0 && (holeSelection.type === 'all' || holeSelection.type === 'back9') && <div className="mb-4">
+          <h3 className="text-sm font-medium mb-2">
+            Back Nine
+            {(holeSelection.type === 'all' || holeSelection.type === 'back9') && <span className="text-red-500 ml-1">*</span>}
+          </h3>
+          <ScoreTable 
+            scores={backNineHoleScores} 
+            isEditing={true} 
+            handleScoreChange={handleScoreChange} 
+            handleGIRChange={handleGIRChange} 
+            title="Back Nine" 
+            startIndex={frontNineScores.length} 
+            showDetailedStats={showDetailedStats} 
+          />
         </div>}
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 items-start">
@@ -341,16 +423,11 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
           console.log(`Local tee ID: ${localSelectedTeeId}, Parent tee ID: ${selectedTeeId}`);
           handleTeeChange(localSelectedTeeId || "");
         }
-        const actualSelectedTee = selectedCourse.tees.find(tee => tee.id === localSelectedTeeId);
-        console.log("Save button clicked with teeId:", localSelectedTeeId);
-        console.log("Selected tee at save time:", actualSelectedTee);
-        if (actualSelectedTee) {
-          console.log("Selected tee name at save time:", actualSelectedTee.name);
-          console.log("Saving round with tee:", localSelectedTeeId, actualSelectedTee.name);
-        } else {
-          console.error("No selected tee found at save time for ID:", localSelectedTeeId);
+        
+        // Validate scores before saving
+        if (validateScores()) {
+          handleSaveRound();
         }
-        handleSaveRound();
       }} disabled={isLoading} className="flex-1">
           {isLoading ? <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

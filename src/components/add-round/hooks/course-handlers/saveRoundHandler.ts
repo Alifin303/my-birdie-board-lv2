@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
 import { ensureCourseExists, findOrCreateCourseByApiId, updateUserHandicap } from "@/integrations/supabase";
@@ -29,6 +30,33 @@ export function createSaveRoundHandler({
       toast.toast({
         title: "Error",
         description: "Required course or tee information is missing.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    // Validate required scores based on hole selection
+    let requiredHoles = [];
+    
+    if (holeSelection.type === 'front9') {
+      requiredHoles = scores.filter(score => score.hole <= 9);
+    } else if (holeSelection.type === 'back9') {
+      requiredHoles = scores.filter(score => score.hole > 9);
+    } else {
+      requiredHoles = scores;
+    }
+    
+    const missingScores = requiredHoles.filter(score => 
+      score.strokes === null || 
+      score.strokes === undefined || 
+      score.strokes === 0
+    );
+    
+    if (missingScores.length > 0) {
+      const holeNumbers = missingScores.map(s => s.hole).join(', ');
+      toast.toast({
+        title: "Missing scores",
+        description: `Please enter scores for hole${missingScores.length > 1 ? 's' : ''}: ${holeNumbers}`,
         variant: "destructive",
       });
       return false;

@@ -207,7 +207,7 @@ export function useScoreHandlers({
     const newScores = filteredHoles.map(hole => ({
       hole: hole.number,
       par: hole.par || 4,
-      strokes: 0,
+      strokes: 0, // Set default to 0 to mark as filled
       putts: undefined,
       penalties: undefined,
       gir: undefined,
@@ -281,7 +281,7 @@ export function useScoreHandlers({
 
   const handleScoreChange = (index: number, field: 'strokes' | 'putts' | 'penalties', value: string) => {
     const newScores = [...scores];
-    const parsedValue = value === '' ? undefined : parseInt(value, 10);
+    const parsedValue = value === '' ? null : parseInt(value, 10);
     
     if (!isNaN(parsedValue as number) || value === '') {
       newScores[index] = {
@@ -301,12 +301,29 @@ export function useScoreHandlers({
     setScores(newScores);
   };
 
+  // Add validation function
+  const validateScores = (holeSelectionType: HoleSelection['type']): boolean => {
+    let requiredHoles = [];
+    
+    if (holeSelectionType === 'front9') {
+      requiredHoles = scores.filter(score => score.hole <= 9);
+    } else if (holeSelectionType === 'back9') {
+      requiredHoles = scores.filter(score => score.hole > 9);
+    } else {
+      requiredHoles = scores;
+    }
+    
+    const missingScores = requiredHoles.filter(score => score.strokes === null || score.strokes === undefined);
+    return missingScores.length === 0;
+  };
+
   return {
     handleScoreChange,
     handleGIRChange,
     handleHoleSelectionChange,
     updateScorecardForTee,
     handleTeeChange,
-    getHolesForTee
+    getHolesForTee,
+    validateScores
   };
 }
