@@ -59,6 +59,13 @@ export function createSaveRoundHandler({
         description: `Please enter scores for hole${missingScores.length > 1 ? 's' : ''}: ${holeNumbers}`,
         variant: "destructive",
       });
+      
+      // Try to scroll to the error message on mobile
+      const isMobile = window.innerWidth < 640;
+      if (isMobile) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      
       return false;
     }
     

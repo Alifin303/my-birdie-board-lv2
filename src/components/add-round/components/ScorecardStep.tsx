@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, CalendarIcon, AlertCircle, BarChart } from "lucide-react";
@@ -14,6 +14,7 @@ import { HoleSelection, Score, SimplifiedCourseDetail, ScoreSummary, SimplifiedT
 import { HoleScore } from "@/components/dashboard/scorecard/types";
 import { ScoreTable } from "@/components/dashboard/scorecard/ScoreTable";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { toast } from "@/components/ui/toast";
 
 interface ScorecardStepProps {
   selectedCourse: SimplifiedCourseDetail | null;
@@ -61,6 +62,8 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   const [localSelectedTeeId, setLocalSelectedTeeId] = useState<string | null>(selectedTeeId);
   const [showDetailedStats, setShowDetailedStats] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const saveButtonRef = useRef<HTMLButtonElement>(null);
   const isMobile = useIsMobile();
   
   useEffect(() => {
@@ -76,6 +79,27 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
       handleTeeChange(localSelectedTeeId);
     }
   }, [localSelectedTeeId]);
+  
+  useEffect(() => {
+    if (validationError && showErrorToast) {
+      toast.toast({
+        title: "Missing Scores",
+        description: validationError,
+        variant: "destructive",
+      });
+      setShowErrorToast(false);
+      
+      // Add visual feedback to the save button on mobile
+      if (isMobile && saveButtonRef.current) {
+        saveButtonRef.current.classList.add('animate-shake');
+        setTimeout(() => {
+          if (saveButtonRef.current) {
+            saveButtonRef.current.classList.remove('animate-shake');
+          }
+        }, 500);
+      }
+    }
+  }, [validationError, showErrorToast, toast]);
   
   useEffect(() => {
     if (selectedCourse) {
@@ -176,7 +200,9 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
     
     if (missingScores.length > 0) {
       const holeNumbers = missingScores.map(s => s.hole).join(', ');
-      setValidationError(`Please enter scores for hole${missingScores.length > 1 ? 's' : ''}: ${holeNumbers}`);
+      const errorMessage = `Please enter scores for hole${missingScores.length > 1 ? 's' : ''}: ${holeNumbers}`;
+      setValidationError(errorMessage);
+      setShowErrorToast(true);
       return false;
     }
     
@@ -220,7 +246,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
           </AlertDescription>
         </Alert>}
       
-      {validationError && <Alert variant="destructive" className="mb-4">
+      {validationError && <Alert variant="destructive" className="mb-4 sticky top-0 z-40 shadow-lg animate-pulse">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="ml-2">
             {validationError}
@@ -417,23 +443,40 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         <Button variant="outline" onClick={handleCloseModal} className="flex-1">
           Cancel
         </Button>
-        <Button onClick={() => {
-        if (localSelectedTeeId !== selectedTeeId) {
-          console.log("CRITICAL: Fixing tee ID mismatch before save");
-          console.log(`Local tee ID: ${localSelectedTeeId}, Parent tee ID: ${selectedTeeId}`);
-          handleTeeChange(localSelectedTeeId || "");
-        }
-        
-        // Validate scores before saving
-        if (validateScores()) {
-          handleSaveRound();
-        }
-      }} disabled={isLoading} className="flex-1">
+        <Button 
+          onClick={() => {
+            if (localSelectedTeeId !== selectedTeeId) {
+              console.log("CRITICAL: Fixing tee ID mismatch before save");
+              console.log(`Local tee ID: ${localSelectedTeeId}, Parent tee ID: ${selectedTeeId}`);
+              handleTeeChange(localSelectedTeeId || "");
+            }
+            
+            // Validate scores before saving
+            if (validateScores()) {
+              handleSaveRound();
+            }
+          }} 
+          disabled={isLoading} 
+          className="flex-1"
+          ref={saveButtonRef}
+        >
           {isLoading ? <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Saving...
             </> : "Save Round"}
         </Button>
       </div>
+      
+      {/* Fixed bottom error display for mobile */}
+      {validationError && isMobile && (
+        <div className="fixed bottom-4 left-0 right-0 mx-4 z-50 animate-bounce-slow">
+          <Alert variant="destructive" className="shadow-lg">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="ml-2">
+              {validationError}
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
     </div>;
 };

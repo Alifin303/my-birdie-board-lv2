@@ -26,12 +26,37 @@ export const ScoreCard = () => {
   const [shareSupported, setShareSupported] = React.useState(false);
   const [validationError, setValidationError] = React.useState<string | null>(null);
   const [holeSelection, setHoleSelection] = React.useState<'all' | 'front9' | 'back9'>('all');
+  const [showErrorToast, setShowErrorToast] = React.useState(false);
   const { toast } = useToast();
+  const saveButtonRef = React.useRef<HTMLButtonElement>(null);
 
   // Check if Web Share API is supported
   React.useEffect(() => {
     setShareSupported(!!navigator.share);
   }, []);
+
+  React.useEffect(() => {
+    if (validationError && showErrorToast) {
+      toast({
+        title: "Missing Scores",
+        description: validationError,
+        variant: "destructive",
+      });
+      setShowErrorToast(false);
+      
+      // Scroll to the error message if on mobile
+      const isMobile = window.innerWidth < 640;
+      if (isMobile && saveButtonRef.current) {
+        // Add visual feedback to the save button
+        saveButtonRef.current.classList.add('animate-shake');
+        setTimeout(() => {
+          if (saveButtonRef.current) {
+            saveButtonRef.current.classList.remove('animate-shake');
+          }
+        }, 500);
+      }
+    }
+  }, [validationError, showErrorToast, toast]);
 
   const handleScoreChange = (holeNumber: number, score: string) => {
     const newScore = parseInt(score) || 0;
@@ -76,7 +101,9 @@ export const ScoreCard = () => {
     
     if (missingScores.length > 0) {
       const holeNumbers = missingScores.map(h => h.number).join(', ');
-      setValidationError(`Please enter scores for hole${missingScores.length > 1 ? 's' : ''}: ${holeNumbers}`);
+      const errorMessage = `Please enter scores for hole${missingScores.length > 1 ? 's' : ''}: ${holeNumbers}`;
+      setValidationError(errorMessage);
+      setShowErrorToast(true);
       return false;
     }
     
@@ -212,7 +239,7 @@ export const ScoreCard = () => {
       </div>
       
       {validationError && (
-        <Alert variant="destructive" className="mb-4">
+        <Alert variant="destructive" className="mb-4 sticky top-0 z-40 shadow-lg animate-pulse">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="ml-2">
             {validationError}
@@ -248,7 +275,7 @@ export const ScoreCard = () => {
                 value={hole.score || ''}
                 onChange={(e) => handleScoreChange(hole.number, e.target.value)}
                 className={`w-full text-center bg-white/80 border-accent/20 focus:border-accent/40 score-input ${
-                  isRequired && !hole.score ? 'border-red-300 focus:border-red-500' : ''
+                  isRequired && !hole.score ? 'border-red-300 focus:border-red-500 ring-1 ring-red-300' : ''
                 }`}
                 placeholder="0"
                 inputMode="numeric"
@@ -281,7 +308,7 @@ export const ScoreCard = () => {
                       value={hole.score || ''}
                       onChange={(e) => handleScoreChange(hole.number, e.target.value)}
                       className={`w-full text-center bg-white/80 border-accent/20 focus:border-accent/40 score-input ${
-                        (holeSelection === 'all' || holeSelection === 'front9') && !hole.score ? 'border-red-300 focus:border-red-500' : ''
+                        (holeSelection === 'all' || holeSelection === 'front9') && !hole.score ? 'border-red-300 focus:border-red-500 ring-1 ring-red-300' : ''
                       }`}
                       placeholder="0"
                       inputMode="numeric"
@@ -314,7 +341,7 @@ export const ScoreCard = () => {
                       value={hole.score || ''}
                       onChange={(e) => handleScoreChange(hole.number, e.target.value)}
                       className={`w-full text-center bg-white/80 border-accent/20 focus:border-accent/40 score-input ${
-                        (holeSelection === 'all' || holeSelection === 'back9') && !hole.score ? 'border-red-300 focus:border-red-500' : ''
+                        (holeSelection === 'all' || holeSelection === 'back9') && !hole.score ? 'border-red-300 focus:border-red-500 ring-1 ring-red-300' : ''
                       }`}
                       placeholder="0"
                       inputMode="numeric"
@@ -335,6 +362,7 @@ export const ScoreCard = () => {
         <Button 
           className="bg-accent hover:bg-accent/90 text-white shadow-md hover:shadow-lg transition-all duration-300"
           onClick={handleSaveRound}
+          ref={saveButtonRef}
         >
           Save Round
         </Button>
@@ -350,6 +378,18 @@ export const ScoreCard = () => {
           </Button>
         )}
       </div>
+      
+      {/* Fixed bottom error display for mobile */}
+      {validationError && (
+        <div className="sm:hidden fixed bottom-4 left-0 right-0 mx-4 z-50 animate-bounce-slow">
+          <Alert variant="destructive" className="shadow-lg">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="ml-2">
+              {validationError}
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
     </Card>
   );
 };
