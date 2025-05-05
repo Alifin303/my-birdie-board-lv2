@@ -14,7 +14,7 @@ import { HoleSelection, Score, SimplifiedCourseDetail, ScoreSummary, SimplifiedT
 import { HoleScore } from "@/components/dashboard/scorecard/types";
 import { ScoreTable } from "@/components/dashboard/scorecard/ScoreTable";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { toast } from "@/components/ui/toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface ScorecardStepProps {
   selectedCourse: SimplifiedCourseDetail | null;
@@ -65,6 +65,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   const [showErrorToast, setShowErrorToast] = useState(false);
   const saveButtonRef = useRef<HTMLButtonElement>(null);
   const isMobile = useIsMobile();
+  const { toast } = useToast();
   
   useEffect(() => {
     if (selectedTeeId !== localSelectedTeeId) {
@@ -82,7 +83,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   
   useEffect(() => {
     if (validationError && showErrorToast) {
-      toast.toast({
+      toast({
         title: "Missing Scores",
         description: validationError,
         variant: "destructive",
