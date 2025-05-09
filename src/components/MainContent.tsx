@@ -209,8 +209,8 @@ Use any scorecard or app on the course, then log it all at MyBirdieBoard.com.</p
       
       <section aria-labelledby="cta-heading" className="w-full py-4 sm:py-6 bg-black/30 backdrop-blur-sm mt-2 sm:mt-3">
         <div className="max-w-5xl mx-auto text-center px-4">
-          <h2 id="cta-heading" className="text-lg sm:text-xl font-bold text-white mb-2">Ready to take your game to the next level?</h2>
-          <p className="text-sm sm:text-base text-white/90 mb-3">Join MyBirdieBoard and remember every round!</p>
+          <h2 id="cta-heading" className="text-lg sm:text-xl font-bold text-white mb-2">Turn every round into part of your journey.</h2>
+          <p className="text-sm sm:text-base text-white/90 mb-3">Start your digital golf journal today.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-base px-4 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground max-w-[90vw] whitespace-normal">
               <UserPlus className="mr-2 h-5 w-5 flex-shrink-0" aria-hidden="true" />
