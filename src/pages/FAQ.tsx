@@ -1,68 +1,53 @@
-
 import React, { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-
-const faqItems = [
-  {
-    id: "item-1",
-    question: "What is MyBirdieBoard?",
-    answer: "MyBirdieBoard is your personal golf score tracker. It lets you log every round you play, view your score history at each course, and compare your performance against other golfers on course leaderboards. It's the perfect tool to track your progress and aim for lower scores!"
-  },
-  {
-    id: "item-2",
-    question: "How does the course leaderboard work?",
-    answer: "The course leaderboards show how your scores compare to other golfers at the same course. You can filter the leaderboards by date (monthly, yearly, or all-time) and choose to display either gross or net scores. Your best round's position is highlighted so you always know where you stand!"
-  },
-  {
-    id: "item-3",
-    question: "Can I track my past rounds?",
-    answer: "Yes! MyBirdieBoard allows you to store and review all your previous rounds. Whether you played the course last week or last year, you'll have a full record of your scores, helping you see your progress over time."
-  },
-  {
-    id: "item-4",
-    question: "Does MyBirdieBoard track my handicap?",
-    answer: "Yes! MyBirdieBoard calculates your handicap using official methods. However, please note that while this gives you a clear and accurate reflection of your playing ability, some golf clubs may not recognize it as an official club handicap."
-  },
-  {
-    id: "item-5",
-    question: "How much does MyBirdieBoard cost?",
-    answer: "MyBirdieBoard costs £2.99 per month — cancel anytime. The price is shown in GBP but will be converted to your local currency at checkout. Plus, all new subscribers get a 7-day free trial — cancel before the trial ends if it's not for you, and you won't be charged."
-  },
-  {
-    id: "item-6",
-    question: "Why should I use MyBirdieBoard instead of a notebook or spreadsheet?",
-    answer: "With MyBirdieBoard, your scores are stored safely online and accessible from any device. Plus, you get dynamic leaderboards, round comparisons, and visual progress tracking — something a notebook just can't do!"
-  },
-  {
-    id: "item-7",
-    question: "Is MyBirdieBoard only available in certain countries?",
-    answer: "Not at all! MyBirdieBoard has a database of over 30,000 golf courses worldwide. Plus, if a course isn't already listed, you can easily add it yourself. So no matter where you are or where you travel to play golf, MyBirdieBoard is ready to track your rounds and keep you connected to your game."
-  },
-  {
-    id: "item-8",
-    question: "How do I subscribe?",
-    answer: "It's simple! Click the Get Started button on the homepage of our website, create your account, and you'll be on your way to better tracking and better scores in no time."
-  },
-  {
-    id: "item-9",
-    question: "Can I cancel my subscription?",
-    answer: "Yes! You can cancel anytime. If you cancel mid-billing cycle, you'll still have access until your next billing date."
-  },
-  {
-    id: "item-10",
-    question: "How do I add a new golf course that isn't listed?",
-    answer: "If you don't find your course in our database, you can easily add it by navigating to 'Add Round' and selecting 'Add New Course'. You'll need to provide the course name, location, and hole information including par and distances."
-  }
-];
-
+const faqItems = [{
+  id: "item-1",
+  question: "What is MyBirdieBoard?",
+  answer: "MyBirdieBoard is your personal golf score tracker. It lets you log every round you play, view your score history at each course, and compare your performance against other golfers on course leaderboards. It's the perfect tool to track your progress and aim for lower scores!"
+}, {
+  id: "item-2",
+  question: "How does the course leaderboard work?",
+  answer: "The course leaderboards show how your scores compare to other golfers at the same course. You can filter the leaderboards by date (monthly, yearly, or all-time) and choose to display either gross or net scores. Your best round's position is highlighted so you always know where you stand!"
+}, {
+  id: "item-3",
+  question: "Can I track my past rounds?",
+  answer: "Yes! MyBirdieBoard allows you to store and review all your previous rounds. Whether you played the course last week or last year, you'll have a full record of your scores, helping you see your progress over time."
+}, {
+  id: "item-4",
+  question: "Does MyBirdieBoard track my handicap?",
+  answer: "Yes! MyBirdieBoard calculates your handicap using official methods. However, please note that while this gives you a clear and accurate reflection of your playing ability, some golf clubs may not recognize it as an official club handicap."
+}, {
+  id: "item-5",
+  question: "How much does MyBirdieBoard cost?",
+  answer: "MyBirdieBoard costs £2.99 per month — cancel anytime. The price is shown in GBP but will be converted to your local currency at checkout. Plus, all new subscribers get a 7-day free trial — cancel before the trial ends if it's not for you, and you won't be charged."
+}, {
+  id: "item-6",
+  question: "Why should I use MyBirdieBoard instead of a notebook or spreadsheet?",
+  answer: "With MyBirdieBoard, your scores are stored safely online and accessible from any device. Plus, you get dynamic leaderboards, round comparisons, and visual progress tracking — something a notebook just can't do!"
+}, {
+  id: "item-7",
+  question: "Is MyBirdieBoard only available in certain countries?",
+  answer: "Not at all! MyBirdieBoard has a database of over 30,000 golf courses worldwide. Plus, if a course isn't already listed, you can easily add it yourself. So no matter where you are or where you travel to play golf, MyBirdieBoard is ready to track your rounds and keep you connected to your game."
+}, {
+  id: "item-8",
+  question: "How do I subscribe?",
+  answer: "It's simple! Click the Get Started button on the homepage of our website, create your account, and you'll be on your way to better tracking and better scores in no time."
+}, {
+  id: "item-9",
+  question: "Can I cancel my subscription?",
+  answer: "Yes! You can cancel anytime. If you cancel mid-billing cycle, you'll still have access until your next billing date."
+}, {
+  id: "item-10",
+  question: "How do I add a new golf course that isn't listed?",
+  answer: "If you don't find your course in our database, you can easily add it by navigating to 'Add Round' and selecting 'Add New Course'. You'll need to provide the course name, location, and hole information including par and distances."
+}];
 export default function FAQ() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
   const generateStructuredData = () => {
     const structuredData = {
       "@context": "https://schema.org",
@@ -77,26 +62,17 @@ export default function FAQ() {
         "position": parseInt(item.id.split('-')[1])
       }))
     };
-    
     return JSON.stringify(structuredData);
   };
-
-  return (
-    <>
+  return <>
       <Helmet>
         <title>Golf Score Tracking FAQ | MyBirdieBoard - Track & Improve Your Golf Game</title>
-        <meta 
-          name="description" 
-          content="Find answers to common questions about MyBirdieBoard's golf score tracking app. Learn how our score tracker helps golfers analyze performance, calculate handicaps, and compete on leaderboards." 
-        />
+        <meta name="description" content="Find answers to common questions about MyBirdieBoard's golf score tracking app. Learn how our score tracker helps golfers analyze performance, calculate handicaps, and compete on leaderboards." />
         <link rel="canonical" href="https://mybirdieboard.com/faq" />
         <script type="application/ld+json">
           {generateStructuredData()}
         </script>
-        <meta 
-          name="keywords" 
-          content="golf FAQ, golf score tracking, golf handicap calculation, golf leaderboards, golf performance analytics, MyBirdieBoard help, golf app subscription, golf score tracker, golf score app" 
-        />
+        <meta name="keywords" content="golf FAQ, golf score tracking, golf handicap calculation, golf leaderboards, golf performance analytics, MyBirdieBoard help, golf app subscription, golf score tracker, golf score app" />
         {/* Additional AI-friendly meta tags */}
         <meta name="ai:description" content="MyBirdieBoard is a golf score tracking application that helps golfers track their scores, analyze performance across different courses, calculate handicaps, and compete on course leaderboards." />
         <meta name="ai:usage" content="Personal golf score tracking, course leaderboards, handicap calculation, performance analytics" />
@@ -119,15 +95,14 @@ export default function FAQ() {
             {/* Add AI-friendly article summary section */}
             <section className="mb-10 prose max-w-none">
               <h2 className="sr-only">About MyBirdieBoard Golf Score Tracker</h2>
-              <p className="text-lg text-muted-foreground">
-                MyBirdieBoard is a comprehensive golf score tracking application designed for golfers who want to improve their game through data-driven insights. With features like round history tracking, course leaderboards, handicap calculation, and performance analytics, MyBirdieBoard helps golfers of all skill levels track their progress and identify areas for improvement. Available for £2.99 per month with a 7-day free trial.
-              </p>
+              <p className="text-lg text-muted-foreground text-center">MyBirdieBoard is your digital golf journal — built for golfers who want more than just a score.
+Track your rounds, stats, and story in one place. With features like detailed round history, course leaderboards, handicap tracking, and post-round performance insights, MyBirdieBoard helps you reflect, improve, and celebrate your journey — no matter your skill level.
+Start your 7-day free trial, then just £2.99/month.</p>
             </section>
 
             <section itemScope itemType="https://schema.org/FAQPage">
               <Accordion type="single" collapsible className="mb-12">
-                {faqItems.map((item) => (
-                  <AccordionItem key={item.id} value={item.id} itemScope itemProp="mainEntity" itemType="https://schema.org/Question">
+                {faqItems.map(item => <AccordionItem key={item.id} value={item.id} itemScope itemProp="mainEntity" itemType="https://schema.org/Question">
                     <AccordionTrigger className="text-lg font-medium text-left" itemProp="name">
                       {item.question}
                     </AccordionTrigger>
@@ -136,8 +111,7 @@ export default function FAQ() {
                         {item.answer}
                       </p>
                     </AccordionContent>
-                  </AccordionItem>
-                ))}
+                  </AccordionItem>)}
               </Accordion>
             </section>
 
@@ -149,6 +123,5 @@ export default function FAQ() {
           </div>
         </main>
       </div>
-    </>
-  );
+    </>;
 }
