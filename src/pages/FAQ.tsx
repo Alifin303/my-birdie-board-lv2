@@ -84,9 +84,8 @@ export default function FAQ() {
         <header className="bg-primary text-white py-12">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h1>
-            <p className="text-lg max-w-2xl mx-auto">
-              Find answers to common questions about using MyBirdieBoard to track your golf performance
-            </p>
+            <p className="text-lg max-w-2xl mx-auto text-center">Got questions? We’ve got answers.
+Explore how MyBirdieBoard — your digital golf journal — helps you track performance, reflect on rounds, and understand your game better.</p>
           </div>
         </header>
 
