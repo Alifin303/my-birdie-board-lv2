@@ -70,6 +70,10 @@ Disallow: /auth/
 Disallow: /checkout
 Disallow: /admin
 
+# Site descriptor for search engines & crawlers
+# MyBirdieBoard - Digital Golf Journal & Score Tracker
+# Track your golf scores, analyze performance, and compete on course leaderboards
+
 Sitemap: https://mybirdieboard.com/sitemap.xml
 Sitemap: https://mybirdieboard.com/ai-sitemap.xml
 

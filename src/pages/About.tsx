@@ -13,16 +13,18 @@ const About = () => {
   };
   return <>
       <Helmet>
-        <title>About MyBirdieBoard - Your Ultimate Golf Tracking Solution</title>
-        <meta name="description" content="Learn how MyBirdieBoard helps golfers track scores, analyze performance, and compete on leaderboards to improve their game." />
+        <title>About MyBirdieBoard - Your Digital Golf Journal & Score Tracking Solution</title>
+        <meta name="description" content="Learn how MyBirdieBoard, your digital golf journal, helps golfers track scores, analyze performance, and compete on leaderboards to improve their game." />
         <link rel="canonical" href="https://mybirdieboard.com/about" />
         <meta property="og:image" content="/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://mybirdieboard.com/about" />
-        <meta property="og:title" content="About MyBirdieBoard - Your Ultimate Golf Tracking Solution" />
-        <meta property="og:description" content="Learn how MyBirdieBoard helps golfers track scores, analyze performance, and compete on leaderboards to improve their game." />
+        <meta property="og:title" content="About MyBirdieBoard - Your Digital Golf Journal & Score Tracking Solution" />
+        <meta property="og:description" content="Learn how MyBirdieBoard, your digital golf journal, helps golfers track scores, analyze performance, and compete on leaderboards to improve their game." />
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:image" content="/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" />
+        <meta name="keywords" content="digital golf journal, golf score tracking, golf performance analytics, golf leaderboards, golf handicap calculator" />
+        <meta name="ai:description" content="MyBirdieBoard is a digital golf journal that helps golfers track rounds, analyze performance, and understand their game better." />
       </Helmet>
       <div className="min-h-screen bg-cover bg-center bg-fixed bg-no-repeat relative" style={{
       backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,

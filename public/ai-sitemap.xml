@@ -14,10 +14,10 @@
   <changefreq>weekly</changefreq>
   <ai:content>
     <ai:type>WebApplication</ai:type>
-    <ai:title>MyBirdieBoard - Golf Score Tracking &amp; Performance Analytics</ai:title>
-    <ai:description>Track your golf scores, challenge friends on course leaderboards, improve with performance analytics, and calculate your handicap accurately with MyBirdieBoard.</ai:description>
-    <ai:keywords>golf score tracking, golf analytics, golf leaderboard, handicap calculator</ai:keywords>
-    <ai:primaryTopic>Golf Performance Tracking</ai:primaryTopic>
+    <ai:title>MyBirdieBoard - Digital Golf Journal &amp; Performance Analytics</ai:title>
+    <ai:description>Track your golf scores with your digital golf journal, challenge friends on course leaderboards, improve with performance analytics, and calculate your handicap accurately with MyBirdieBoard.</ai:description>
+    <ai:keywords>digital golf journal, golf score tracking, golf analytics, golf leaderboard, handicap calculator</ai:keywords>
+    <ai:primaryTopic>Digital Golf Journal</ai:primaryTopic>
   </ai:content>
 </url>
 
@@ -28,9 +28,9 @@
   <changefreq>monthly</changefreq>
   <ai:content>
     <ai:type>AboutPage</ai:type>
-    <ai:title>About MyBirdieBoard - Your Ultimate Golf Tracking Solution</ai:title>
-    <ai:description>Learn how MyBirdieBoard helps golfers track scores, analyze performance, and compete on leaderboards to improve their game.</ai:description>
-    <ai:primaryTopic>Golf Score Tracking Application</ai:primaryTopic>
+    <ai:title>About MyBirdieBoard - Your Digital Golf Journal</ai:title>
+    <ai:description>Learn how MyBirdieBoard, your digital golf journal, helps golfers track scores, analyze performance, and compete on leaderboards to improve their game.</ai:description>
+    <ai:primaryTopic>Digital Golf Journal</ai:primaryTopic>
   </ai:content>
 </url>
 
@@ -41,9 +41,9 @@
   <changefreq>weekly</changefreq>
   <ai:content>
     <ai:type>FAQPage</ai:type>
-    <ai:title>Frequently Asked Questions | MyBirdieBoard Golf Tracking</ai:title>
-    <ai:description>Find answers to common questions about MyBirdieBoard's golf score tracking, handicap calculations, and performance analytics.</ai:description>
-    <ai:primaryTopic>Golf Score Tracking FAQ</ai:primaryTopic>
+    <ai:title>Frequently Asked Questions | MyBirdieBoard Digital Golf Journal</ai:title>
+    <ai:description>Find answers to common questions about MyBirdieBoard's digital golf journal, score tracking, handicap calculations, and performance analytics.</ai:description>
+    <ai:primaryTopic>Digital Golf Journal FAQ</ai:primaryTopic>
   </ai:content>
 </url>
 
@@ -54,9 +54,9 @@
   <changefreq>daily</changefreq>
   <ai:content>
     <ai:type>CollectionPage</ai:type>
-    <ai:title>Golf Courses Directory | MyBirdieBoard</ai:title>
-    <ai:description>Browse golf courses where players have tracked rounds on MyBirdieBoard. Find detailed statistics, historical scores, and course information.</ai:description>
-    <ai:primaryTopic>Golf Courses Directory</ai:primaryTopic>
+    <ai:title>Golf Courses Directory | MyBirdieBoard Digital Golf Journal</ai:title>
+    <ai:description>Browse golf courses where players have tracked rounds in their digital golf journal on MyBirdieBoard. Find detailed statistics, historical scores, and course information.</ai:description>
+    <ai:primaryTopic>Golf Courses for Digital Golf Journal</ai:primaryTopic>
     <ai:entities>Golf Courses</ai:entities>
   </ai:content>
 </url>

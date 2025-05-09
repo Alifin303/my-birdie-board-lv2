@@ -66,18 +66,19 @@ export default function FAQ() {
   };
   return <>
       <Helmet>
-        <title>Golf Score Tracking FAQ | MyBirdieBoard - Track & Improve Your Golf Game</title>
-        <meta name="description" content="Find answers to common questions about MyBirdieBoard's golf score tracking app. Learn how our score tracker helps golfers analyze performance, calculate handicaps, and compete on leaderboards." />
+        <title>Golf Score Tracking FAQ | MyBirdieBoard - Digital Golf Journal & Score Tracker</title>
+        <meta name="description" content="Find answers to common questions about MyBirdieBoard's digital golf journal and score tracking app. Learn how our digital golf journal helps golfers analyze performance, calculate handicaps, and compete on leaderboards." />
         <link rel="canonical" href="https://mybirdieboard.com/faq" />
         <script type="application/ld+json">
           {generateStructuredData()}
         </script>
-        <meta name="keywords" content="golf FAQ, golf score tracking, golf handicap calculation, golf leaderboards, golf performance analytics, MyBirdieBoard help, golf app subscription, golf score tracker, golf score app" />
+        <meta name="keywords" content="digital golf journal, golf FAQ, golf score tracking, golf handicap calculation, golf leaderboards, golf performance analytics, MyBirdieBoard help, golf app subscription, golf score tracker, golf score app" />
         {/* Additional AI-friendly meta tags */}
-        <meta name="ai:description" content="MyBirdieBoard is a golf score tracking application that helps golfers track their scores, analyze performance across different courses, calculate handicaps, and compete on course leaderboards." />
-        <meta name="ai:usage" content="Personal golf score tracking, course leaderboards, handicap calculation, performance analytics" />
+        <meta name="ai:description" content="MyBirdieBoard is a digital golf journal and score tracking application that helps golfers track their scores, analyze performance across different courses, calculate handicaps, and compete on course leaderboards." />
+        <meta name="ai:usage" content="Digital golf journal, personal golf score tracking, course leaderboards, handicap calculation, performance analytics" />
         <meta name="ai:pricing" content="£2.99 per month with 7-day free trial" />
         <meta name="ai:target" content="Golfers of all skill levels looking to track progress and improve their game" />
+        <meta name="ai:keywords" content="digital golf journal, golf score tracker, golf analytics" />
       </Helmet>
 
       <div className="min-h-screen bg-background">
