@@ -119,8 +119,7 @@ export const MainContent = ({
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center mt-4 sm:mt-0">
         <div className="max-w-5xl animate-fade-in mb-4 px-0 mx-0">
           <h1 id="hero-heading" className="sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-8 drop-shadow-md text-5xl lg:text-6xl">Your Digital Golf Journal</h1>
-          <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium mb-8 max-w-3xl mx-auto bg-black/35 backdrop-blur-sm px-4 py-2 rounded-lg lg:text-lg">Capture your full golf story — round by round, stat by stat — after you play.
-Use any scorecard or app on the course, then log it all at MyBirdieBoard.com.</p>
+          <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium mb-8 max-w-3xl mx-auto bg-black/35 backdrop-blur-sm px-4 py-2 rounded-lg lg:text-lg">Capture your full golf story, round by round, stat by stat — after you play. Use any scorecard or app on the course, then log it all at MyBirdieBoard.com.</p>
           
           <div className="flex justify-center mt-6">
             <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-lg px-2 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground max-w-[90vw] whitespace-normal">
