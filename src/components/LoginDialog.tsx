@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +15,7 @@ import {
 import { SignUpDialog } from "./SignUpDialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
 import { ForgotPasswordDialog } from "./ForgotPasswordDialog";
@@ -34,6 +35,10 @@ export function LoginDialog({
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get intended destination from location state, or default to dashboard
+  const from = location.state?.from?.pathname || "/dashboard";
 
   const checkSubscriptionStatus = async (userId: string) => {
     try {
@@ -101,11 +106,15 @@ export function LoginDialog({
       
       onOpenChange(false);
       
+      // Store login state to prevent redirects on page reload
+      sessionStorage.setItem('justLoggedIn', 'true');
+      
       const hasValidSubscription = await checkSubscriptionStatus(data.user.id);
       
-      if (hasValidSubscription) {
-        console.log("User has valid subscription, redirecting to dashboard");
-        navigate("/dashboard");
+      // Use the intended destination or redirect based on subscription
+      if (hasValidSubscription || from !== "/dashboard") {
+        console.log(`Redirecting to ${from}`);
+        navigate(from);
       } else {
         console.log("No valid subscription found, redirecting to checkout");
         navigate("/checkout");
