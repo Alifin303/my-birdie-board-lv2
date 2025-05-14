@@ -33,9 +33,6 @@ export const AuthConfirm = () => {
             description: "You are now logged in.",
           });
           
-          // Store login state to prevent redirects on page reload
-          sessionStorage.setItem('justLoggedIn', 'true');
-          
           // Redirect after a short delay
           setTimeout(() => {
             navigate("/dashboard");
@@ -63,9 +60,6 @@ export const AuthConfirm = () => {
           if (signInError) {
             throw signInError;
           }
-          
-          // Store login state to prevent redirects on page reload
-          sessionStorage.setItem('justLoggedIn', 'true');
 
           setStatus("success");
           setMessage("You are now logged in.");
@@ -81,9 +75,6 @@ export const AuthConfirm = () => {
           }, 2000);
         } else if (type === "recovery") {
           // Handle password recovery if needed
-          // Store login state to prevent redirects on page reload
-          sessionStorage.setItem('justLoggedIn', 'true');
-          
           setStatus("success");
           setMessage("Your password has been reset. You are now logged in.");
           

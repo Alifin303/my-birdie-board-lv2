@@ -40,20 +40,6 @@ function App() {
     };
     
     initializeAuth();
-    
-    // Listen for visibility changes to handle browser tab switching or minimizing
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        // When tab becomes visible again, refresh the auth session
-        initializeAuth();
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
   }, []);
 
   return (

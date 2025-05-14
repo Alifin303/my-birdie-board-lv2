@@ -23,9 +23,6 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
   const timeoutRef = useRef<number | null>(null);
   const sessionChecksAttempted = useRef(0);
   const location = useLocation();
-  
-  // Check if the user has just logged in
-  const justLoggedIn = sessionStorage.getItem('justLoggedIn') === 'true';
 
   // Function to clear timeout safely
   const clearTimeoutSafely = () => {
@@ -62,13 +59,6 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
   useEffect(() => {
     // Track if the component is mounted to prevent state updates after unmount
     let isMounted = true;
-    
-    // Once session check is complete, clear the "justLoggedIn" flag
-    const clearLoginFlag = () => {
-      if (justLoggedIn) {
-        sessionStorage.removeItem('justLoggedIn');
-      }
-    };
     
     const checkSession = async () => {
       if (authCheckCompleted.current && sessionChecksAttempted.current > 2) return; // Prevent excessive checks
@@ -159,15 +149,11 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
         
         // Clear any existing timeout since we've completed the check
         clearTimeoutSafely();
-        
-        // Clear login flag when all checks are complete
-        clearLoginFlag();
       } catch (error) {
         console.error("Error in checkSession:", error);
         if (!isMounted) return;
         setIsAuthenticated(false);
         setHasSubscription(false);
-        clearLoginFlag();
       } finally {
         if (!isMounted) return;
         setLoadingPhase("completed");
@@ -225,16 +211,14 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
         setIsLoaded(true);
         setIsLoading(false);
         setInitialCheckComplete(true);
-        clearLoginFlag();
       }
     }, 4000); // Reduced timeout for better UX
 
     return () => {
       isMounted = false;
       clearTimeoutSafely();
-      clearLoginFlag();
     };
-  }, [requireSubscription, isAuthenticated, justLoggedIn]);
+  }, [requireSubscription, isAuthenticated]);
 
   // This effect handles auth state changes
   useEffect(() => {
@@ -348,11 +332,6 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
     };
   }, [requireSubscription, isAuthenticated]);
 
-  // Don't redirect if the user has just logged in
-  if (justLoggedIn) {
-    return <>{children}</>;
-  }
-
   // Show loading state with more details
   if (!initialCheckComplete || isLoading) {
     return (
@@ -366,7 +345,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
   // Handle authentication check - avoid redirect loops using the initialCheckComplete flag
   if (initialCheckComplete && !isAuthenticated) {
     console.log("User is not authenticated, redirecting to login");
-    return <Navigate to="/" state={{ from: location }} replace />;
+    return <Navigate to="/" replace />;
   }
 
   // Handle subscription check - only redirect to checkout when we have confirmed both:
