@@ -15,7 +15,6 @@ import { HoleScore } from "@/components/dashboard/scorecard/types";
 import { ScoreTable } from "@/components/dashboard/scorecard/ScoreTable";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
-import { useMobile } from "@/hooks/use-mobile";
 
 interface ScorecardStepProps {
   selectedCourse: SimplifiedCourseDetail | null;

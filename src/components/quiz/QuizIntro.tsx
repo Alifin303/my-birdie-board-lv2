@@ -1,7 +1,8 @@
+
 import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Check, ChevronRight, UserPlus } from "lucide-react";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { cn } from "@/lib/utils";
 import * as React from "react";
@@ -35,7 +36,7 @@ interface QuizIntroProps {
 }
 
 export function QuizIntro({ isOpen, onClose, onStart, onSkipToSignup }: QuizIntroProps) {
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

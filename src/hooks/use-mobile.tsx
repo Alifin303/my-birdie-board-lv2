@@ -1,36 +1,19 @@
+import * as React from "react"
 
-import { useState, useEffect } from 'react';
+const MOBILE_BREAKPOINT = 768
 
-export function useMobile() {
-  const [isMobile, setIsMobile] = useState(false);
+export function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
 
-  useEffect(() => {
-    // Function to check if device is mobile
-    const checkMobile = () => {
-      const userAgent = 
-        typeof window.navigator === "undefined" ? "" : navigator.userAgent;
-      
-      const mobile = Boolean(
-        userAgent.match(
-          /Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i
-        )
-      );
-      
-      setIsMobile(mobile);
-    };
+  React.useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+    const onChange = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    }
+    mql.addEventListener("change", onChange)
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    return () => mql.removeEventListener("change", onChange)
+  }, [])
 
-    // Check on mount
-    checkMobile();
-
-    // Set up window resize listener
-    window.addEventListener("resize", checkMobile);
-    
-    // Clean up
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  return isMobile;
+  return !!isMobile
 }
-
-// Export an alias for better naming consistency across the codebase
-export const useIsMobile = useMobile;

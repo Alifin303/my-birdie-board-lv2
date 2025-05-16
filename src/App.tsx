@@ -14,7 +14,6 @@ import Admin from "@/pages/Admin";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import Course from "@/pages/Course";
 import Courses from "@/pages/Courses";
-import AddRound from "@/pages/AddRound";
 import { Toaster } from "@/components/ui/toaster";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ResetPassword from "@/pages/ResetPassword";
@@ -109,22 +108,6 @@ function App() {
                       </Helmet>
                       <ProtectedRoute>
                         <Dashboard />
-                      </ProtectedRoute>
-                    </>
-                  }
-                />
-                
-                {/* Add New Route for Mobile Add Round Page */}
-                <Route
-                  path="/add-round"
-                  element={
-                    <>
-                      <Helmet>
-                        <title>Add New Round | MyBirdieBoard</title>
-                        <meta name="description" content="Add a new golf round to your MyBirdieBoard digital golf journal." />
-                      </Helmet>
-                      <ProtectedRoute>
-                        <AddRound />
                       </ProtectedRoute>
                     </>
                   }

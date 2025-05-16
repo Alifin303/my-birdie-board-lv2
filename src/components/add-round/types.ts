@@ -1,3 +1,4 @@
+
 export interface HoleSelection {
   type: 'front9' | 'back9' | 'all' | 'custom';
   startHole?: number;
@@ -74,7 +75,6 @@ export interface RoundScore {
 export interface AddRoundModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  isFullPage?: boolean;
 }
 
 // Define ScoreSummary type needed by ScorecardStep.tsx

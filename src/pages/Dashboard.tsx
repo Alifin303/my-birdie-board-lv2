@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSearchParams, Link, useLocation, useNavigate } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { supabase, parseCourseName, updateCourseWithUserId } from "@/integrations/supabase/client";
 import { AddRoundModal } from "@/components/add-round/AddRoundModal";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
@@ -12,7 +12,6 @@ import ScoreProgressionChart from "@/components/dashboard/ScoreProgressionChart"
 import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
 import { useToast } from "@/hooks/use-toast";
 import { clearSubscriptionCache } from "@/integrations/supabase/subscription/subscription-utils";
-import { useMobile } from "@/hooks/use-mobile";
 
 interface Round {
   id: number;
@@ -50,21 +49,9 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
   const [processingStripeSession, setProcessingStripeSession] = useState(false);
-  const isMobile = useMobile();
-  const navigate = useNavigate();
-  const location = useLocation();
   
   const sessionId = searchParams.get('session_id');
   const subscriptionStatus = searchParams.get('subscription_status');
-  
-  // Check if we should open the add round modal from a redirect
-  useEffect(() => {
-    if (location.state && location.state.openAddRound) {
-      setIsModalOpen(true);
-      // Clean up the state after using it
-      navigate(location.pathname, { replace: true });
-    }
-  }, [location, navigate]);
   
   useEffect(() => {
     // Handle both session_id from Stripe and subscription_status from our success url
@@ -224,13 +211,7 @@ export default function Dashboard() {
 
   const handleOpenModal = () => {
     console.log("Opening modal...");
-    if (isMobile) {
-      // For mobile users, navigate to dedicated add round page
-      navigate('/add-round');
-    } else {
-      // For desktop users, open the modal
-      setIsModalOpen(true);
-    }
+    setIsModalOpen(true);
   };
 
   const handleScoreTypeChange = (type: 'gross' | 'net') => {
@@ -380,12 +361,10 @@ export default function Dashboard() {
         {renderDashboard()}
       </div>
 
-      {!isMobile && (
-        <AddRoundModal 
-          open={isModalOpen} 
-          onOpenChange={setIsModalOpen}
-        />
-      )}
+      <AddRoundModal 
+        open={isModalOpen} 
+        onOpenChange={setIsModalOpen}
+      />
     </div>
   );
 }

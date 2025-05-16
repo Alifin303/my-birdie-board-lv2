@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -18,7 +17,7 @@ import { useScoreHandlers } from "./hooks/useScoreHandlers";
 import { useCourseHandlers } from "./hooks/useCourseHandlers";
 import { calculateScoreSummary } from "./utils/scoreUtils";
 
-export function AddRoundModal({ open, onOpenChange, isFullPage = false }: AddRoundModalProps) {
+export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
   const {
     currentStep,
     setCurrentStep,
@@ -197,60 +196,6 @@ export function AddRoundModal({ open, onOpenChange, isFullPage = false }: AddRou
   
   const scoreSummary = calculateScoreSummary(scores);
 
-  // For full-page mode (mobile), render content directly without Dialog
-  if (isFullPage) {
-    return (
-      <div className="bg-background h-full overflow-y-auto">
-        <div className="p-4 pt-6 sm:p-6 max-h-[90vh] overflow-y-auto">
-          {currentStep === 'search' ? (
-            <SearchStep 
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              handleSearch={handleSearch}
-              handleCourseSelect={handleCourseSelect}
-              handleOpenManualCourseForm={handleOpenManualCourseForm}
-              manualCourseFormRef={manualCourseFormRef}
-              searchResults={searchResults}
-              isLoading={isLoading}
-              searchError={searchError}
-              noResults={noResults}
-              setManualCourseOpen={setManualCourseOpen}
-            />
-          ) : (
-            <ScorecardStep 
-              selectedCourse={selectedCourse}
-              selectedTeeId={selectedTeeId}
-              roundDate={roundDate}
-              handleTeeChange={handleTeeChangeWithLogging}
-              handleDateSelect={handleDateSelect}
-              handleHoleSelectionChange={handleHoleSelectionChange}
-              handleScoreChange={handleScoreChange}
-              handleGIRChange={handleGIRChange}
-              handleBackToSearch={handleBackToSearch}
-              handleSaveRound={handleSaveRoundAndClose}
-              handleCloseModal={handleCloseModal}
-              scores={scores}
-              scoreSummary={scoreSummary}
-              holeSelection={holeSelection}
-              calendarOpen={calendarOpen}
-              setCalendarOpen={setCalendarOpen}
-              isLoading={isLoading}
-              dataLoadingError={dataLoadingError}
-              today={today}
-            />
-          )}
-        </div>
-        
-        <ManualCourseForm
-          open={manualCourseOpen}
-          onOpenChange={setManualCourseOpen}
-          onCourseCreated={handleCourseCreated}
-        />
-      </div>
-    );
-  }
-
-  // Desktop dialog mode
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>

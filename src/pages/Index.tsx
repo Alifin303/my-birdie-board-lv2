@@ -8,12 +8,12 @@ import { Helmet } from "react-helmet-async";
 import { SocialFooter } from "@/components/SocialFooter";
 import { SignUpDialog } from "@/components/SignUpDialog";
 import { UserReviews } from "@/components/UserReviews";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showSignupDialog, setShowSignupDialog] = useState(false);
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     // Track page view in Meta Pixel when component mounts
