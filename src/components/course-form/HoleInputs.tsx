@@ -1,8 +1,7 @@
-
 import React, { useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { HoleData } from "./types";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useMobile } from "@/hooks/use-mobile";
 
 interface HoleInputsProps {
   holes: HoleData[];
@@ -13,7 +12,7 @@ export function HoleInputs({
   holes, 
   handleHoleChange 
 }: HoleInputsProps) {
-  const isMobile = useIsMobile();
+  const isMobile = useMobile();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Set up smooth focus handling on mobile

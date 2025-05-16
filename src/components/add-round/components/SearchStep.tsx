@@ -1,4 +1,3 @@
-
 import React, { useState, KeyboardEvent } from "react";
 import { DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, Search, PlusCircle, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SimplifiedGolfCourse } from "../types";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useMobile } from "@/hooks/use-mobile";
 
 interface SearchStepProps {
   searchQuery: string;
@@ -35,7 +34,7 @@ export const SearchStep: React.FC<SearchStepProps> = ({
   noResults,
   setManualCourseOpen
 }) => {
-  const isMobile = useIsMobile();
+  const isMobile = useMobile();
   
   // Handle key press event for the search input
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {

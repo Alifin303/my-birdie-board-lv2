@@ -31,3 +31,6 @@ export function useMobile() {
 
   return isMobile;
 }
+
+// Export an alias for better naming consistency across the codebase
+export const useIsMobile = useMobile;
