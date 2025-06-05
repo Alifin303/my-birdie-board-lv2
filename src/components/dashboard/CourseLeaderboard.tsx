@@ -24,6 +24,7 @@ interface LeaderboardEntry {
   gross_score?: number;
   net_score?: number;
   holes_played?: number;
+  round_type?: string;
 }
 
 interface CourseLeaderboardProps {
@@ -115,6 +116,37 @@ export const CourseLeaderboard = ({
     }
   };
   
+  const calculateRoundScore = (holeScores: any[], roundType: string, holes_played: number) => {
+    if (!holeScores || !Array.isArray(holeScores)) {
+      return { gross: 0, par: 0 };
+    }
+    
+    let relevantHoles = holeScores;
+    
+    if (roundType === 'front9') {
+      if (holes_played === 9) {
+        // For actual 9-hole rounds, use all holes
+        relevantHoles = holeScores;
+      } else {
+        // For 18-hole rounds, use front 9 (holes 1-9)
+        relevantHoles = holeScores.filter(hole => hole.hole <= 9);
+      }
+    } else if (roundType === 'back9') {
+      if (holes_played === 9) {
+        // For actual 9-hole rounds, use all holes
+        relevantHoles = holeScores;
+      } else {
+        // For 18-hole rounds, use back 9 (holes 10-18)
+        relevantHoles = holeScores.filter(hole => hole.hole > 9);
+      }
+    }
+    
+    const totalStrokes = relevantHoles.reduce((sum, hole) => sum + (hole.strokes || 0), 0);
+    const totalPar = relevantHoles.reduce((sum, hole) => sum + (hole.par || 0), 0);
+    
+    return { gross: totalStrokes, par: totalPar };
+  };
+  
   const fetchLeaderboard = async () => {
     setIsLoading(true);
     
@@ -163,7 +195,8 @@ export const CourseLeaderboard = ({
           to_par_net,
           user_id,
           tee_name,
-          holes_played
+          holes_played,
+          hole_scores
         `)
         .eq('course_id', courseId);
         
@@ -171,11 +204,12 @@ export const CourseLeaderboard = ({
         query = query.eq('tee_name', selectedTee);
       }
       
-      if (roundType === 'front9' || roundType === 'back9') {
-        query = query.eq('holes_played', 9);
-      } else if (roundType === '18holes') {
+      // Apply round type filtering at database level for actual round types
+      if (roundType === '18holes') {
         query = query.eq('holes_played', 18);
       }
+      // For front9 and back9, we'll handle filtering after we get the data
+      // since we need to include both 9-hole rounds and portions of 18-hole rounds
       
       if (dateRange !== 'all-time') {
         query = query.filter('date', 'gte', (dateFilter as any).gte)
@@ -265,49 +299,154 @@ export const CourseLeaderboard = ({
       console.log("User map created:", Array.from(userMap.entries()));
       console.log("Handicap map created:", Array.from(handicapMap.entries()));
       
-      let processedData = roundsData.map(round => {
+      let processedData: LeaderboardEntry[] = [];
+      
+      roundsData.forEach(round => {
         const username = userMap.get(round.user_id) || 'Unknown Player';
-        const playerHandicap = handicapMap.get(round.user_id);
+        const playerHandicap = handicapMap.get(round.user_id) || 0;
         
-        console.log(`Round ID ${round.id} - User: ${username}, gross: ${round.gross_score}, handicap: ${playerHandicap}`);
+        console.log(`Round ID ${round.id} - User: ${username}, holes_played: ${round.holes_played}`);
         
-        const grossScore = round.gross_score;
-        const playerHandicapValue = playerHandicap !== undefined ? playerHandicap : 0;
-        
-        let netScore;
-        if (round.net_score !== null && round.net_score !== undefined) {
-          netScore = round.net_score;
-          console.log(`Using existing net score for round ${round.id}: ${netScore}`);
-        } else {
-          // For 9-hole rounds, calculate net score using half the handicap
-          const adjustedHandicap = round.holes_played === 9 ? playerHandicapValue / 2 : playerHandicapValue;
-          netScore = calculateNetScore(grossScore, adjustedHandicap);
-          console.log(`Calculated new net score for round ${round.id}: gross=${grossScore}, handicap=${adjustedHandicap}, net=${netScore}`);
+        // Parse hole scores
+        let holeScores = [];
+        try {
+          holeScores = round.hole_scores ? JSON.parse(round.hole_scores) : [];
+        } catch (e) {
+          console.error(`Error parsing hole scores for round ${round.id}:`, e);
+          holeScores = [];
         }
         
-        return {
-          id: round.id,
-          date: round.date,
-          username: username,
-          gross_score: grossScore,
-          net_score: netScore,
-          score: 0,
-          isCurrentUser: round.user_id === currentUserId,
-          tee_name: round.tee_name,
-          user_id: round.user_id,
-          player_handicap: playerHandicapValue,
-          holes_played: round.holes_played || 18
-        };
+        if (roundType === 'front9') {
+          // Include 9-hole rounds and front 9 of 18-hole rounds
+          if (round.holes_played === 9) {
+            // Actual 9-hole round - use the full round score
+            const grossScore = round.gross_score;
+            const adjustedHandicap = playerHandicap / 2; // 9-hole handicap
+            const netScore = round.net_score !== null ? round.net_score : calculateNetScore(grossScore, adjustedHandicap);
+            
+            processedData.push({
+              id: round.id,
+              date: round.date,
+              username: username,
+              gross_score: grossScore,
+              net_score: netScore,
+              score: scoreType === 'gross' ? grossScore : netScore,
+              isCurrentUser: round.user_id === currentUserId,
+              tee_name: round.tee_name,
+              user_id: round.user_id,
+              player_handicap: playerHandicap,
+              holes_played: 9,
+              round_type: "Front 9 Only"
+            });
+          } else if (round.holes_played === 18 && holeScores.length > 0) {
+            // 18-hole round - calculate front 9 score
+            const { gross: front9Gross, par: front9Par } = calculateRoundScore(holeScores, 'front9', 18);
+            if (front9Gross > 0) {
+              const adjustedHandicap = playerHandicap / 2; // 9-hole handicap
+              const front9NetScore = calculateNetScore(front9Gross, adjustedHandicap);
+              
+              processedData.push({
+                id: round.id,
+                date: round.date,
+                username: username,
+                gross_score: front9Gross,
+                net_score: front9NetScore,
+                score: scoreType === 'gross' ? front9Gross : front9NetScore,
+                isCurrentUser: round.user_id === currentUserId,
+                tee_name: round.tee_name,
+                user_id: round.user_id,
+                player_handicap: playerHandicap,
+                holes_played: 9,
+                round_type: "Front 9 (from 18)"
+              });
+            }
+          }
+        } else if (roundType === 'back9') {
+          // Include 9-hole rounds and back 9 of 18-hole rounds
+          if (round.holes_played === 9) {
+            // Actual 9-hole round - use the full round score
+            const grossScore = round.gross_score;
+            const adjustedHandicap = playerHandicap / 2; // 9-hole handicap
+            const netScore = round.net_score !== null ? round.net_score : calculateNetScore(grossScore, adjustedHandicap);
+            
+            processedData.push({
+              id: round.id,
+              date: round.date,
+              username: username,
+              gross_score: grossScore,
+              net_score: netScore,
+              score: scoreType === 'gross' ? grossScore : netScore,
+              isCurrentUser: round.user_id === currentUserId,
+              tee_name: round.tee_name,
+              user_id: round.user_id,
+              player_handicap: playerHandicap,
+              holes_played: 9,
+              round_type: "Back 9 Only"
+            });
+          } else if (round.holes_played === 18 && holeScores.length > 0) {
+            // 18-hole round - calculate back 9 score
+            const { gross: back9Gross, par: back9Par } = calculateRoundScore(holeScores, 'back9', 18);
+            if (back9Gross > 0) {
+              const adjustedHandicap = playerHandicap / 2; // 9-hole handicap
+              const back9NetScore = calculateNetScore(back9Gross, adjustedHandicap);
+              
+              processedData.push({
+                id: round.id,
+                date: round.date,
+                username: username,
+                gross_score: back9Gross,
+                net_score: back9NetScore,
+                score: scoreType === 'gross' ? back9Gross : back9NetScore,
+                isCurrentUser: round.user_id === currentUserId,
+                tee_name: round.tee_name,
+                user_id: round.user_id,
+                player_handicap: playerHandicap,
+                holes_played: 9,
+                round_type: "Back 9 (from 18)"
+              });
+            }
+          }
+        } else {
+          // All rounds or 18-hole only
+          const grossScore = round.gross_score;
+          const playerHandicapValue = playerHandicap !== undefined ? playerHandicap : 0;
+          
+          let netScore;
+          if (round.net_score !== null && round.net_score !== undefined) {
+            netScore = round.net_score;
+            console.log(`Using existing net score for round ${round.id}: ${netScore}`);
+          } else {
+            // For 9-hole rounds, calculate net score using half the handicap
+            const adjustedHandicap = round.holes_played === 9 ? playerHandicapValue / 2 : playerHandicapValue;
+            netScore = calculateNetScore(grossScore, adjustedHandicap);
+            console.log(`Calculated new net score for round ${round.id}: gross=${grossScore}, handicap=${adjustedHandicap}, net=${netScore}`);
+          }
+          
+          let roundTypeDisplay = "18 Holes";
+          if (round.holes_played === 9) {
+            roundTypeDisplay = "9 Holes";
+          }
+          
+          processedData.push({
+            id: round.id,
+            date: round.date,
+            username: username,
+            gross_score: grossScore,
+            net_score: netScore,
+            score: scoreType === 'gross' ? grossScore : netScore,
+            isCurrentUser: round.user_id === currentUserId,
+            tee_name: round.tee_name,
+            user_id: round.user_id,
+            player_handicap: playerHandicapValue,
+            holes_played: round.holes_played || 18,
+            round_type: roundTypeDisplay
+          });
+        }
       });
       
       console.log("Score type selected:", scoreType);
       
       setDisplayedScoreType(scoreType);
-      
-      processedData = processedData.map(entry => ({
-        ...entry,
-        score: scoreType === 'gross' ? entry.gross_score! : entry.net_score!
-      }));
       
       console.log("Processed data with score type applied:", 
         processedData.slice(0, 3).map(d => ({
@@ -318,7 +457,8 @@ export const CourseLeaderboard = ({
           displayed: d.score,
           scoreType,
           handicap: d.player_handicap,
-          holes: d.holes_played
+          holes: d.holes_played,
+          round_type: d.round_type
         }))
       );
       
@@ -383,11 +523,8 @@ export const CourseLeaderboard = ({
     onOpenChange(isOpen);
   };
   
-  const getRoundTypeLabel = (holes: number) => {
-    if (holes === 9) {
-      return "9 Holes";
-    }
-    return "18 Holes";
+  const getRoundTypeLabel = (entry: LeaderboardEntry) => {
+    return entry.round_type || (entry.holes_played === 9 ? "9 Holes" : "18 Holes");
   };
   
   return (
@@ -539,7 +676,7 @@ export const CourseLeaderboard = ({
                   <p className="text-sm">
                     Score: {displayedScoreType === 'gross' ? userBestScore.gross_score : userBestScore.net_score}
                   </p>
-                  <p className="text-sm">Round: {getRoundTypeLabel(userBestScore.holes_played || 18)}</p>
+                  <p className="text-sm">Round: {getRoundTypeLabel(userBestScore)}</p>
                   {userBestScore.tee_name && <p className="text-sm">Tee: {userBestScore.tee_name}</p>}
                 </div>
                 <div className="text-right">
@@ -580,7 +717,7 @@ export const CourseLeaderboard = ({
                 ) : (
                   getCurrentPageItems().map((entry) => (
                     <tr 
-                      key={`${entry.id}-${entry.username}`} 
+                      key={`${entry.id}-${entry.username}-${entry.round_type}`} 
                       className={`border-b last:border-0 ${entry.isCurrentUser ? 'bg-primary/5' : ''}`}
                     >
                       <td className="p-3 text-sm">{entry.rank}</td>
@@ -589,7 +726,7 @@ export const CourseLeaderboard = ({
                         {entry.username}
                         {entry.isCurrentUser && <span className="ml-2 text-xs text-primary">(You)</span>}
                       </td>
-                      <td className="p-3 text-sm">{getRoundTypeLabel(entry.holes_played || 18)}</td>
+                      <td className="p-3 text-sm">{getRoundTypeLabel(entry)}</td>
                       {availableTees.length > 0 && <td className="p-3 text-sm">{entry.tee_name || 'N/A'}</td>}
                       <td className="p-3 text-sm text-right">
                         {displayedScoreType === 'gross' ? entry.gross_score : entry.net_score}
