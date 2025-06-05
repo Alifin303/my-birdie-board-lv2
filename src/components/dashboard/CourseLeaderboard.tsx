@@ -23,6 +23,7 @@ interface LeaderboardEntry {
   player_handicap?: number;
   gross_score?: number;
   net_score?: number;
+  holes_played?: number;
 }
 
 interface CourseLeaderboardProps {
@@ -58,6 +59,7 @@ export const CourseLeaderboard = ({
   const [availableTees, setAvailableTees] = useState<string[]>([]);
   const [selectedTee, setSelectedTee] = useState<string | null>(null);
   const [originalLeaderboardData, setOriginalLeaderboardData] = useState<LeaderboardEntry[]>([]);
+  const [roundType, setRoundType] = useState<'all' | 'front9' | 'back9' | '18holes'>('all');
   
   const itemsPerPage = 10;
   
@@ -160,12 +162,19 @@ export const CourseLeaderboard = ({
           to_par_gross,
           to_par_net,
           user_id,
-          tee_name
+          tee_name,
+          holes_played
         `)
         .eq('course_id', courseId);
         
       if (selectedTee) {
         query = query.eq('tee_name', selectedTee);
+      }
+      
+      if (roundType === 'front9' || roundType === 'back9') {
+        query = query.eq('holes_played', 9);
+      } else if (roundType === '18holes') {
+        query = query.eq('holes_played', 18);
       }
       
       if (dateRange !== 'all-time') {
@@ -270,8 +279,10 @@ export const CourseLeaderboard = ({
           netScore = round.net_score;
           console.log(`Using existing net score for round ${round.id}: ${netScore}`);
         } else {
-          netScore = calculateNetScore(grossScore, playerHandicapValue);
-          console.log(`Calculated new net score for round ${round.id}: gross=${grossScore}, handicap=${playerHandicapValue}, net=${netScore}`);
+          // For 9-hole rounds, calculate net score using half the handicap
+          const adjustedHandicap = round.holes_played === 9 ? playerHandicapValue / 2 : playerHandicapValue;
+          netScore = calculateNetScore(grossScore, adjustedHandicap);
+          console.log(`Calculated new net score for round ${round.id}: gross=${grossScore}, handicap=${adjustedHandicap}, net=${netScore}`);
         }
         
         return {
@@ -284,7 +295,8 @@ export const CourseLeaderboard = ({
           isCurrentUser: round.user_id === currentUserId,
           tee_name: round.tee_name,
           user_id: round.user_id,
-          player_handicap: playerHandicapValue
+          player_handicap: playerHandicapValue,
+          holes_played: round.holes_played || 18
         };
       });
       
@@ -305,7 +317,8 @@ export const CourseLeaderboard = ({
           net: d.net_score,
           displayed: d.score,
           scoreType,
-          handicap: d.player_handicap
+          handicap: d.player_handicap,
+          holes: d.holes_played
         }))
       );
       
@@ -368,6 +381,13 @@ export const CourseLeaderboard = ({
   
   const handleDialogOpen = (isOpen: boolean) => {
     onOpenChange(isOpen);
+  };
+  
+  const getRoundTypeLabel = (holes: number) => {
+    if (holes === 9) {
+      return "9 Holes";
+    }
+    return "18 Holes";
   };
   
   return (
@@ -447,6 +467,24 @@ export const CourseLeaderboard = ({
             )}
             
             <div className="space-y-2">
+              <label className="text-sm font-medium">Round Type</label>
+              <Select 
+                value={roundType} 
+                onValueChange={(value) => setRoundType(value as 'all' | 'front9' | 'back9' | '18holes')}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Round Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Round Types</SelectItem>
+                  <SelectItem value="front9">Front 9</SelectItem>
+                  <SelectItem value="back9">Back 9</SelectItem>
+                  <SelectItem value="18holes">18 Holes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
               <label className="text-sm font-medium">Tee</label>
               <Select 
                 value={selectedTee || "all"} 
@@ -501,6 +539,7 @@ export const CourseLeaderboard = ({
                   <p className="text-sm">
                     Score: {displayedScoreType === 'gross' ? userBestScore.gross_score : userBestScore.net_score}
                   </p>
+                  <p className="text-sm">Round: {getRoundTypeLabel(userBestScore.holes_played || 18)}</p>
                   {userBestScore.tee_name && <p className="text-sm">Tee: {userBestScore.tee_name}</p>}
                 </div>
                 <div className="text-right">
@@ -518,6 +557,7 @@ export const CourseLeaderboard = ({
                   <th className="text-left p-3 text-sm font-medium text-muted-foreground">Rank</th>
                   <th className="text-left p-3 text-sm font-medium text-muted-foreground">Date</th>
                   <th className="text-left p-3 text-sm font-medium text-muted-foreground">Player</th>
+                  <th className="text-left p-3 text-sm font-medium text-muted-foreground">Round</th>
                   {availableTees.length > 0 && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Tee</th>}
                   <th className="text-right p-3 text-sm font-medium text-muted-foreground">
                     {displayedScoreType === 'gross' ? 'Gross Score' : 'Net Score'}
@@ -527,13 +567,13 @@ export const CourseLeaderboard = ({
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan={availableTees.length > 0 ? 5 : 4} className="text-center p-8">
+                    <td colSpan={availableTees.length > 0 ? 6 : 5} className="text-center p-8">
                       <p className="text-muted-foreground">Loading leaderboard data...</p>
                     </td>
                   </tr>
                 ) : leaderboard.length === 0 ? (
                   <tr>
-                    <td colSpan={availableTees.length > 0 ? 5 : 4} className="text-center p-8">
+                    <td colSpan={availableTees.length > 0 ? 6 : 5} className="text-center p-8">
                       <p className="text-muted-foreground">No leaderboard data available. Try different filters or search again.</p>
                     </td>
                   </tr>
@@ -549,6 +589,7 @@ export const CourseLeaderboard = ({
                         {entry.username}
                         {entry.isCurrentUser && <span className="ml-2 text-xs text-primary">(You)</span>}
                       </td>
+                      <td className="p-3 text-sm">{getRoundTypeLabel(entry.holes_played || 18)}</td>
                       {availableTees.length > 0 && <td className="p-3 text-sm">{entry.tee_name || 'N/A'}</td>}
                       <td className="p-3 text-sm text-right">
                         {displayedScoreType === 'gross' ? entry.gross_score : entry.net_score}
