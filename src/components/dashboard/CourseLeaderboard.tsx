@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { Calendar, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/core/client";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,6 +10,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { calculateNetScore } from "@/integrations/supabase";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface LeaderboardEntry {
   id: number;
@@ -43,6 +44,7 @@ export const CourseLeaderboard = ({
   handicapIndex = 0 
 }: CourseLeaderboardProps) => {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [dateRange, setDateRange] = useState<'monthly' | 'yearly' | 'all-time'>('monthly');
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
   const [displayedScoreType, setDisplayedScoreType] = useState<'gross' | 'net'>('gross');
@@ -531,10 +533,22 @@ export const CourseLeaderboard = ({
     <Dialog open={open} onOpenChange={handleDialogOpen}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl">{courseName} Leaderboards</DialogTitle>
-          <DialogDescription>
-            Compare your scores with other players on this course.
-          </DialogDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <DialogTitle className="text-xl">{courseName} Leaderboards</DialogTitle>
+              <DialogDescription>
+                Compare your scores with other players on this course.
+              </DialogDescription>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleDialogOpen(false)}
+              className="h-6 w-6"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </DialogHeader>
         
         <div className="space-y-4 mt-4">
@@ -688,54 +702,64 @@ export const CourseLeaderboard = ({
           )}
           
           <div className="rounded-lg border overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-muted/50 border-b">
-                  <th className="text-left p-3 text-sm font-medium text-muted-foreground">Rank</th>
-                  <th className="text-left p-3 text-sm font-medium text-muted-foreground">Date</th>
-                  <th className="text-left p-3 text-sm font-medium text-muted-foreground">Player</th>
-                  <th className="text-left p-3 text-sm font-medium text-muted-foreground">Round</th>
-                  {availableTees.length > 0 && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Tee</th>}
-                  <th className="text-right p-3 text-sm font-medium text-muted-foreground">
-                    {displayedScoreType === 'gross' ? 'Gross Score' : 'Net Score'}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={availableTees.length > 0 ? 6 : 5} className="text-center p-8">
-                      <p className="text-muted-foreground">Loading leaderboard data...</p>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-muted/50 border-b">
+                    <th className="text-left p-3 text-sm font-medium text-muted-foreground">Rank</th>
+                    {!isMobile && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Date</th>}
+                    <th className="text-left p-3 text-sm font-medium text-muted-foreground">Player</th>
+                    {!isMobile && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Round</th>}
+                    {!isMobile && availableTees.length > 0 && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Tee</th>}
+                    <th className="text-right p-3 text-sm font-medium text-muted-foreground">
+                      {displayedScoreType === 'gross' ? 'Gross' : 'Net'}
+                    </th>
                   </tr>
-                ) : leaderboard.length === 0 ? (
-                  <tr>
-                    <td colSpan={availableTees.length > 0 ? 6 : 5} className="text-center p-8">
-                      <p className="text-muted-foreground">No leaderboard data available. Try different filters or search again.</p>
-                    </td>
-                  </tr>
-                ) : (
-                  getCurrentPageItems().map((entry) => (
-                    <tr 
-                      key={`${entry.id}-${entry.username}-${entry.round_type}`} 
-                      className={`border-b last:border-0 ${entry.isCurrentUser ? 'bg-primary/5' : ''}`}
-                    >
-                      <td className="p-3 text-sm">{entry.rank}</td>
-                      <td className="p-3 text-sm">{format(new Date(entry.date), 'MMM d, yyyy')}</td>
-                      <td className="p-3 text-sm font-medium">
-                        {entry.username}
-                        {entry.isCurrentUser && <span className="ml-2 text-xs text-primary">(You)</span>}
-                      </td>
-                      <td className="p-3 text-sm">{getRoundTypeLabel(entry)}</td>
-                      {availableTees.length > 0 && <td className="p-3 text-sm">{entry.tee_name || 'N/A'}</td>}
-                      <td className="p-3 text-sm text-right">
-                        {displayedScoreType === 'gross' ? entry.gross_score : entry.net_score}
+                </thead>
+                <tbody>
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={isMobile ? 3 : (availableTees.length > 0 ? 6 : 5)} className="text-center p-8">
+                        <p className="text-muted-foreground">Loading leaderboard data...</p>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : leaderboard.length === 0 ? (
+                    <tr>
+                      <td colSpan={isMobile ? 3 : (availableTees.length > 0 ? 6 : 5)} className="text-center p-8">
+                        <p className="text-muted-foreground">No leaderboard data available. Try different filters or search again.</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    getCurrentPageItems().map((entry) => (
+                      <tr 
+                        key={`${entry.id}-${entry.username}-${entry.round_type}`} 
+                        className={`border-b last:border-0 ${entry.isCurrentUser ? 'bg-primary/5' : ''}`}
+                      >
+                        <td className="p-3 text-sm">{entry.rank}</td>
+                        {!isMobile && <td className="p-3 text-sm">{format(new Date(entry.date), 'MMM d, yyyy')}</td>}
+                        <td className="p-3 text-sm font-medium">
+                          <div>
+                            {entry.username}
+                            {entry.isCurrentUser && <span className="ml-2 text-xs text-primary">(You)</span>}
+                          </div>
+                          {isMobile && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {format(new Date(entry.date), 'MMM d')} • {getRoundTypeLabel(entry)}
+                              {entry.tee_name && ` • ${entry.tee_name}`}
+                            </div>
+                          )}
+                        </td>
+                        {!isMobile && <td className="p-3 text-sm">{getRoundTypeLabel(entry)}</td>}
+                        {!isMobile && availableTees.length > 0 && <td className="p-3 text-sm">{entry.tee_name || 'N/A'}</td>}
+                        <td className="p-3 text-sm text-right">
+                          {displayedScoreType === 'gross' ? entry.gross_score : entry.net_score}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
           
           {leaderboard.length > 0 && (
