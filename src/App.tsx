@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import { Helmet, HelmetProvider } from "react-helmet-async";
@@ -14,6 +13,11 @@ import Admin from "@/pages/Admin";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import Course from "@/pages/Course";
 import Courses from "@/pages/Courses";
+import HowToTrackGolfScores from "@/pages/guides/HowToTrackGolfScores";
+import GolfHandicapCalculator from "@/pages/guides/GolfHandicapCalculator";
+import BestGolfScoreApps from "@/pages/guides/BestGolfScoreApps";
+import GolfPerformanceAnalytics from "@/pages/guides/GolfPerformanceAnalytics";
+import GolfStatisticsTracker from "@/pages/guides/GolfStatisticsTracker";
 import { Toaster } from "@/components/ui/toaster";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ResetPassword from "@/pages/ResetPassword";
@@ -88,6 +92,27 @@ function App() {
                 {/* New routes for courses */}
                 <Route path="/courses" element={<Courses />} />
                 <Route path="/courses/:courseId" element={<Course />} />
+                
+                {/* New SEO-focused guide routes */}
+                <Route path="/guides/how-to-track-golf-scores" element={
+                  <HowToTrackGolfScores />
+                } />
+                
+                <Route path="/guides/golf-handicap-calculator" element={
+                  <GolfHandicapCalculator />
+                } />
+                
+                <Route path="/guides/best-golf-score-tracking-apps" element={
+                  <BestGolfScoreApps />
+                } />
+                
+                <Route path="/guides/golf-performance-analytics" element={
+                  <GolfPerformanceAnalytics />
+                } />
+                
+                <Route path="/guides/golf-statistics-tracker" element={
+                  <GolfStatisticsTracker />
+                } />
                 
                 <Route path="/auth/callback" element={<AuthRedirect />} />
                 <Route path="/auth/confirm" element={<AuthConfirm />} />

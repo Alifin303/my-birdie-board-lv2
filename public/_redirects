@@ -8,6 +8,9 @@
 /courses            /index.html        200
 /courses/*          /index.html        200
 
+# New SEO guide routes
+/guides/*           /index.html        200
+
 # Ensure sitemap.xml is served with correct content type
 /sitemap.xml        /sitemap.xml       200!   Content-Type=application/xml
 

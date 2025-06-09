@@ -6,7 +6,7 @@
       xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
-<!-- AI-optimized sitemap for improved AI crawler understanding -->
+<!-- Main application pages -->
 <url>
   <loc>https://mybirdieboard.com/</loc>
   <lastmod>2024-07-31T10:54:36+00:00</lastmod>
@@ -17,19 +17,6 @@
     <ai:title>MyBirdieBoard - Digital Golf Journal &amp; Performance Analytics</ai:title>
     <ai:description>Track your golf scores with your digital golf journal, challenge friends on course leaderboards, improve with performance analytics, and calculate your handicap accurately with MyBirdieBoard.</ai:description>
     <ai:keywords>digital golf journal, golf score tracking, golf analytics, golf leaderboard, handicap calculator</ai:keywords>
-    <ai:primaryTopic>Digital Golf Journal</ai:primaryTopic>
-  </ai:content>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/about</loc>
-  <lastmod>2024-07-31T10:54:36+00:00</lastmod>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <ai:content>
-    <ai:type>AboutPage</ai:type>
-    <ai:title>About MyBirdieBoard - Your Digital Golf Journal</ai:title>
-    <ai:description>Learn how MyBirdieBoard, your digital golf journal, helps golfers track scores, analyze performance, and compete on leaderboards to improve their game.</ai:description>
     <ai:primaryTopic>Digital Golf Journal</ai:primaryTopic>
   </ai:content>
 </url>
@@ -47,17 +34,74 @@
   </ai:content>
 </url>
 
+<!-- SEO-focused guide pages for broader golf keywords -->
 <url>
-  <loc>https://mybirdieboard.com/courses</loc>
-  <lastmod>2024-08-04T10:00:00+00:00</lastmod>
-  <priority>0.8</priority>
-  <changefreq>daily</changefreq>
+  <loc>https://mybirdieboard.com/guides/how-to-track-golf-scores</loc>
+  <lastmod>2024-12-09T10:00:00+00:00</lastmod>
+  <priority>0.9</priority>
+  <changefreq>monthly</changefreq>
   <ai:content>
-    <ai:type>CollectionPage</ai:type>
-    <ai:title>Golf Courses Directory | MyBirdieBoard Digital Golf Journal</ai:title>
-    <ai:description>Browse golf courses where players have tracked rounds in their digital golf journal on MyBirdieBoard. Find detailed statistics, historical scores, and course information.</ai:description>
-    <ai:primaryTopic>Golf Courses for Digital Golf Journal</ai:primaryTopic>
-    <ai:entities>Golf Courses</ai:entities>
+    <ai:type>Guide</ai:type>
+    <ai:title>How to Track Golf Scores: Complete Guide for Better Performance</ai:title>
+    <ai:description>Learn how to track golf scores effectively with digital tools, scorecards, and apps. Improve your golf game with proper score tracking methods and performance analysis.</ai:description>
+    <ai:keywords>how to track golf scores, golf score tracking, golf scorecard, digital golf scorecard, golf performance tracking</ai:keywords>
+    <ai:primaryTopic>Golf Score Tracking Methods</ai:primaryTopic>
+  </ai:content>
+</url>
+
+<url>
+  <loc>https://mybirdieboard.com/guides/golf-handicap-calculator</loc>
+  <lastmod>2024-12-09T10:00:00+00:00</lastmod>
+  <priority>0.9</priority>
+  <changefreq>monthly</changefreq>
+  <ai:content>
+    <ai:type>Guide</ai:type>
+    <ai:title>Golf Handicap Calculator: How to Calculate &amp; Track Your Handicap</ai:title>
+    <ai:description>Learn how to calculate your golf handicap with our complete guide. Understand WHS handicap calculations, track your progress, and improve your game with accurate handicap monitoring.</ai:description>
+    <ai:keywords>golf handicap calculator, how to calculate golf handicap, WHS handicap, golf handicap system, handicap index</ai:keywords>
+    <ai:primaryTopic>Golf Handicap Calculation</ai:primaryTopic>
+  </ai:content>
+</url>
+
+<url>
+  <loc>https://mybirdieboard.com/guides/best-golf-score-tracking-apps</loc>
+  <lastmod>2024-12-09T10:00:00+00:00</lastmod>
+  <priority>0.9</priority>
+  <changefreq>monthly</changefreq>
+  <ai:content>
+    <ai:type>Comparison</ai:type>
+    <ai:title>Best Golf Score Tracking Apps 2024: Complete App Comparison</ai:title>
+    <ai:description>Compare the best golf score tracking apps of 2024. Find the perfect golf app for score tracking, handicap calculation, and performance analysis to improve your game.</ai:description>
+    <ai:keywords>best golf score apps, golf score tracking apps, golf apps 2024, golf handicap apps, golf statistics apps</ai:keywords>
+    <ai:primaryTopic>Golf Score Tracking Apps</ai:primaryTopic>
+  </ai:content>
+</url>
+
+<url>
+  <loc>https://mybirdieboard.com/guides/golf-performance-analytics</loc>
+  <lastmod>2024-12-09T10:00:00+00:00</lastmod>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <ai:content>
+    <ai:type>Guide</ai:type>
+    <ai:title>Golf Performance Analytics: Track Stats to Improve Your Game</ai:title>
+    <ai:description>Master golf performance analytics to lower your scores. Learn which golf statistics matter most, how to track them, and use data-driven insights to improve your golf game.</ai:description>
+    <ai:keywords>golf performance analytics, golf statistics, golf data analysis, golf improvement, golf metrics, strokes gained</ai:keywords>
+    <ai:primaryTopic>Golf Performance Analytics</ai:primaryTopic>
+  </ai:content>
+</url>
+
+<url>
+  <loc>https://mybirdieboard.com/guides/golf-statistics-tracker</loc>
+  <lastmod>2024-12-09T10:00:00+00:00</lastmod>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <ai:content>
+    <ai:type>Guide</ai:type>
+    <ai:title>Golf Statistics Tracker: Essential Stats Every Golfer Should Monitor</ai:title>
+    <ai:description>Discover which golf statistics to track for maximum improvement. Learn about essential golf metrics, how to collect them, and use statistical analysis to lower your golf scores.</ai:description>
+    <ai:keywords>golf statistics tracker, golf stats, golf metrics, golf performance stats, golf data tracking, golf improvement statistics</ai:keywords>
+    <ai:primaryTopic>Golf Statistics Tracking</ai:primaryTopic>
   </ai:content>
 </url>
 
