@@ -11,20 +11,28 @@ const About = () => {
   const handleGetStarted = () => {
     setShowSignupDialog(true);
   };
-  return <>
+  return (
+    <>
       <Helmet>
-        <title>About MyBirdieBoard - Your Digital Golf Journal & Score Tracking Solution</title>
-        <meta name="description" content="Learn how MyBirdieBoard, your digital golf journal, helps golfers track scores, analyze performance, and compete on leaderboards to improve their game." />
+        <title>About MyBirdieBoard - Leading Golf Score Tracking & Analytics Platform</title>
+        <meta name="description" content="Learn about MyBirdieBoard's golf score tracking, performance analytics, handicap calculator, and course leaderboards. The comprehensive golf statistics platform for serious golfers." />
+        <meta name="keywords" content="golf score tracking platform, golf analytics software, golf performance tracking, golf handicap system, golf statistics tracker, course leaderboards technology" />
         <link rel="canonical" href="https://mybirdieboard.com/about" />
-        <meta property="og:image" content="/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://mybirdieboard.com/about" />
-        <meta property="og:title" content="About MyBirdieBoard - Your Digital Golf Journal & Score Tracking Solution" />
-        <meta property="og:description" content="Learn how MyBirdieBoard, your digital golf journal, helps golfers track scores, analyze performance, and compete on leaderboards to improve their game." />
-        <meta name="twitter:card" content="summary" />
-        <meta name="twitter:image" content="/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" />
-        <meta name="keywords" content="digital golf journal, golf score tracking, golf performance analytics, golf leaderboards, golf handicap calculator" />
-        <meta name="ai:description" content="MyBirdieBoard is a digital golf journal that helps golfers track rounds, analyze performance, and understand their game better." />
+        
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "AboutPage",
+            "name": "About MyBirdieBoard",
+            "description": "MyBirdieBoard is the leading golf score tracking and analytics platform, helping golfers improve through data-driven insights, accurate handicap calculations, and performance tracking.",
+            "keywords": "golf score tracking, golf analytics, golf performance tracking, golf handicap calculator, golf statistics tracker, course leaderboards",
+            "mainEntity": {
+              "@type": "Organization",
+              "name": "MyBirdieBoard",
+              "description": "Leading provider of golf score tracking, analytics, and performance improvement tools for golfers worldwide."
+            }
+          })}
+        </script>
       </Helmet>
       <div className="min-h-screen bg-cover bg-center bg-fixed bg-no-repeat relative" style={{
       backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
@@ -93,6 +101,7 @@ That’s where MyBirdieBoard comes in.
         </main>
         <SignUpDialog open={showSignupDialog} onOpenChange={setShowSignupDialog} />
       </div>
-    </>;
+    </>
+  );
 };
 export default About;

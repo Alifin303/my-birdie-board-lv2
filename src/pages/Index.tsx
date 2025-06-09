@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { MainContent } from "@/components/MainContent";
 import { LoginDialog } from "@/components/LoginDialog";
@@ -8,6 +9,7 @@ import { Helmet } from "react-helmet-async";
 import { SocialFooter } from "@/components/SocialFooter";
 import { SignUpDialog } from "@/components/SignUpDialog";
 import { UserReviews } from "@/components/UserReviews";
+import { GolfResourcesSection } from "@/components/GolfResourcesSection";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
@@ -38,11 +40,13 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>MyBirdieBoard - Golf Score Tracking & Performance Analytics</title>
-        <meta name="description" content="Track your golf scores, challenge friends on course leaderboards, and improve your game with detailed performance analytics on MyBirdieBoard" />
+        <title>MyBirdieBoard - Golf Score Tracking, Analytics & Performance Improvement</title>
+        <meta name="description" content="Track golf scores, analyze performance with golf analytics, calculate handicap, and compete on course leaderboards. The ultimate golf score tracking app for serious golfers." />
+        <meta name="keywords" content="golf score tracking, golf analytics, golf performance tracking, golf handicap calculator, golf statistics tracker, course leaderboards, digital golf scorecard, golf app" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+        <link rel="canonical" href="https://mybirdieboard.com/" />
         
-        {/* AI-specific structured data */}
+        {/* Enhanced structured data with broader keyword targeting */}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -51,7 +55,8 @@ const Index = () => {
             "applicationSubCategory": "GolfScoreTracking",
             "operatingSystem": "Web",
             "name": "MyBirdieBoard",
-            "description": "Track your golf scores, challenge friends on course leaderboards, and improve your game with detailed performance analytics on MyBirdieBoard",
+            "description": "Track golf scores, analyze performance with golf analytics, calculate handicap, and compete on course leaderboards. The ultimate golf score tracking app for serious golfers.",
+            "keywords": "golf score tracking, golf analytics, golf performance tracking, golf handicap calculator, golf statistics tracker, course leaderboards, digital golf scorecard",
             "offers": {
               "@type": "Offer",
               "price": "2.99",
@@ -66,7 +71,6 @@ const Index = () => {
               "bestRating": "5",
               "worstRating": "1"
             },
-            "keywords": "golf score tracking, golf analytics, golf leaderboard, handicap calculator, golf performance",
             "contentRating": "General",
             "audience": {
               "@type": "Audience",
@@ -76,6 +80,14 @@ const Index = () => {
                 "name": ["United States", "United Kingdom", "Australia", "Canada"]
               }
             },
+            "featureList": [
+              "Golf Score Tracking",
+              "Golf Performance Analytics", 
+              "Golf Handicap Calculator",
+              "Course Leaderboards",
+              "Golf Statistics Tracker",
+              "Digital Golf Scorecard"
+            ],
             "potentialAction": {
               "@type": "UseAction",
               "actionStatus": "PotentialActionStatus",
@@ -83,15 +95,6 @@ const Index = () => {
                 "@type": "EntryPoint",
                 "urlTemplate": "https://mybirdieboard.com/",
                 "actionPlatform": ["https://schema.org/DesktopWebPlatform", "https://schema.org/MobileWebPlatform"]
-              },
-              "expectsAcceptanceOf": {
-                "@type": "Offer",
-                "price": "2.99",
-                "priceCurrency": "GBP",
-                "eligibleRegion": {
-                  "@type": "Country",
-                  "name": ["United States", "United Kingdom", "Australia", "Canada"]
-                }
               }
             }
           })}
@@ -123,7 +126,7 @@ const Index = () => {
                 <Link to="/" className="flex items-center" aria-label="MyBirdieBoard Home">
                   <img 
                     src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" 
-                    alt="MyBirdieBoard Logo" 
+                    alt="MyBirdieBoard - Golf Score Tracking & Analytics" 
                     className="h-32 w-auto object-contain" 
                   />
                 </Link>
@@ -131,7 +134,7 @@ const Index = () => {
                   onClick={() => setShowLoginDialog(true)}
                   variant="ghost" 
                   className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all text-xs sm:text-sm py-1"
-                  aria-label="Log in to your account"
+                  aria-label="Log in to your golf tracking account"
                 >
                   <User className="mr-1 h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
                   Log In
@@ -146,6 +149,10 @@ const Index = () => {
             <UserReviews />
           </main>
         </div>
+        
+        {/* Add the new Golf Resources section */}
+        <GolfResourcesSection />
+        
         <SocialFooter />
         <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
         <SignUpDialog 

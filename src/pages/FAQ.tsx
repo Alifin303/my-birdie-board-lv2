@@ -64,23 +64,48 @@ export default function FAQ() {
     };
     return JSON.stringify(structuredData);
   };
-  return <>
+  return (
+    <>
       <Helmet>
-        <title>Golf Score Tracking FAQ | MyBirdieBoard - Digital Golf Journal & Score Tracker</title>
-        <meta name="description" content="Find answers to common questions about MyBirdieBoard's digital golf journal and score tracking app. Learn how our digital golf journal helps golfers analyze performance, calculate handicaps, and compete on leaderboards." />
+        <title>Golf Score Tracking FAQ | MyBirdieBoard Analytics & Handicap Calculator</title>
+        <meta name="description" content="Find answers about golf score tracking, golf analytics, handicap calculations, and performance statistics. Learn how to use MyBirdieBoard for better golf performance." />
+        <meta name="keywords" content="golf score tracking FAQ, golf analytics questions, golf handicap calculator help, golf statistics tracker guide, course leaderboards FAQ" />
         <link rel="canonical" href="https://mybirdieboard.com/faq" />
+        
         <script type="application/ld+json">
-          {generateStructuredData()}
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "How does golf score tracking work?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "MyBirdieBoard provides digital golf score tracking that automatically calculates your handicap, tracks performance analytics, and maintains course leaderboards."
+                }
+              },
+              {
+                "@type": "Question", 
+                "name": "What golf analytics does MyBirdieBoard provide?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "We provide comprehensive golf performance analytics including score trends, handicap progression, course-specific statistics, and detailed performance metrics."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How accurate is the golf handicap calculator?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Our golf handicap calculator follows WHS (World Handicap System) standards for accurate handicap calculations based on your golf score tracking data."
+                }
+              }
+            ]
+          })}
         </script>
-        <meta name="keywords" content="digital golf journal, golf FAQ, golf score tracking, golf handicap calculation, golf leaderboards, golf performance analytics, MyBirdieBoard help, golf app subscription, golf score tracker, golf score app" />
-        {/* Additional AI-friendly meta tags */}
-        <meta name="ai:description" content="MyBirdieBoard is a digital golf journal and score tracking application that helps golfers track their scores, analyze performance across different courses, calculate handicaps, and compete on course leaderboards." />
-        <meta name="ai:usage" content="Digital golf journal, personal golf score tracking, course leaderboards, handicap calculation, performance analytics" />
-        <meta name="ai:pricing" content="£2.99 per month with 7-day free trial" />
-        <meta name="ai:target" content="Golfers of all skill levels looking to track progress and improve their game" />
-        <meta name="ai:keywords" content="digital golf journal, golf score tracker, golf analytics" />
       </Helmet>
-
+      
       <div className="min-h-screen bg-background">
         <header className="bg-primary text-white py-12">
           <div className="container mx-auto px-4 text-center">
@@ -89,7 +114,7 @@ export default function FAQ() {
 Explore how MyBirdieBoard — your digital golf journal — helps you track performance, reflect on rounds, and understand your game better.</p>
           </div>
         </header>
-
+        
         <main className="container mx-auto py-12 px-4">
           <div className="max-w-3xl mx-auto">
             {/* Add AI-friendly article summary section */}
@@ -99,7 +124,7 @@ Explore how MyBirdieBoard — your digital golf journal — helps you track perf
 Track your rounds, stats, and story in one place. With features like detailed round history, course leaderboards, handicap tracking, and post-round performance insights, MyBirdieBoard helps you reflect, improve, and celebrate your journey — no matter your skill level.
 Start your 7-day free trial, then just £2.99/month.</p>
             </section>
-
+            
             <section itemScope itemType="https://schema.org/FAQPage">
               <Accordion type="single" collapsible className="mb-12">
                 {faqItems.map(item => <AccordionItem key={item.id} value={item.id} itemScope itemProp="mainEntity" itemType="https://schema.org/Question">
@@ -114,7 +139,7 @@ Start your 7-day free trial, then just £2.99/month.</p>
                   </AccordionItem>)}
               </Accordion>
             </section>
-
+            
             <div className="text-center mt-12">
               <Link to="/">
                 <Button variant="outline">Back to Home</Button>
@@ -123,5 +148,6 @@ Start your 7-day free trial, then just £2.99/month.</p>
           </div>
         </main>
       </div>
-    </>;
+    </>
+  );
 }
