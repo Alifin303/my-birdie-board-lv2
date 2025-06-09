@@ -49,7 +49,22 @@
   <changefreq>monthly</changefreq>
 </url>
 
-<!-- New SEO-focused guide pages -->
+<!-- New blog section for content marketing -->
+<url>
+  <loc>https://mybirdieboard.com/blog</loc>
+  <lastmod>2024-12-09T10:00:00+00:00</lastmod>
+  <priority>0.9</priority>
+  <changefreq>weekly</changefreq>
+</url>
+
+<url>
+  <loc>https://mybirdieboard.com/blog/golf-score-tracking-tips</loc>
+  <lastmod>2024-12-09T10:00:00+00:00</lastmod>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+
+<!-- SEO-focused guide pages -->
 <url>
   <loc>https://mybirdieboard.com/guides/how-to-track-golf-scores</loc>
   <lastmod>2024-12-09T10:00:00+00:00</lastmod>

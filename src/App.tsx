@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import { Helmet, HelmetProvider } from "react-helmet-async";
@@ -13,6 +14,8 @@ import Admin from "@/pages/Admin";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import Course from "@/pages/Course";
 import Courses from "@/pages/Courses";
+import Blog from "@/pages/Blog";
+import GolfScoreTrackingTips from "@/pages/blog/GolfScoreTrackingTips";
 import HowToTrackGolfScores from "@/pages/guides/HowToTrackGolfScores";
 import GolfHandicapCalculator from "@/pages/guides/GolfHandicapCalculator";
 import BestGolfScoreApps from "@/pages/guides/BestGolfScoreApps";

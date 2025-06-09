@@ -8,7 +8,11 @@
 /courses            /index.html        200
 /courses/*          /index.html        200
 
-# New SEO guide routes
+# New blog routes
+/blog               /index.html        200
+/blog/*             /index.html        200
+
+# SEO guide routes
 /guides/*           /index.html        200
 
 # Ensure sitemap.xml is served with correct content type
