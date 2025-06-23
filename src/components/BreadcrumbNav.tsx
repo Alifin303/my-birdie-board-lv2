@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from "react-router-dom";
 import {
   Breadcrumb,
@@ -25,51 +24,124 @@ export const BreadcrumbNav = () => {
       'golf-equipment': 'Golf Equipment',
       'golf-tips': 'Golf Tips',
       'golf-lessons': 'Golf Lessons',
-      'about': 'About',
-      'faq': 'FAQ',
-      'blog': 'Golf Blog',
-      'dashboard': 'Dashboard',
-      'courses': 'Golf Courses'
+      'about': 'About MyBirdieBoard',
+      'faq': 'Frequently Asked Questions',
+      'blog': 'Golf Blog & Articles',
+      'dashboard': 'Golf Dashboard',
+      'courses': 'Golf Courses Directory',
+      
+      // Enhanced SEO-focused titles for better internal linking
+      'privacy': 'Privacy Policy',
+      'checkout': 'Premium Subscription',
+      'admin': 'Admin Dashboard',
+      'golf-score-tracking-tips': 'Golf Score Tracking Tips',
+      
+      // Future-proofing for common golf terms
+      'handicap': 'Golf Handicap Information',
+      'scorecard': 'Golf Scorecard',
+      'leaderboard': 'Golf Leaderboard',
+      'performance': 'Golf Performance Tracking',
+      'analytics': 'Golf Analytics',
+      'statistics': 'Golf Statistics',
+      'training': 'Golf Training',
+      'practice': 'Golf Practice',
+      'improvement': 'Golf Improvement',
+      'beginner': 'Beginner Golf Guide',
+      'advanced': 'Advanced Golf Techniques',
+      'professional': 'Professional Golf',
+      'tournaments': 'Golf Tournaments',
+      'rules': 'Golf Rules & Regulations'
     };
-    return titles[path] || path.charAt(0).toUpperCase() + path.slice(1);
+    return titles[path] || path.charAt(0).toUpperCase() + path.slice(1).replace(/-/g, ' ');
+  };
+
+  const getBreadcrumbSchema = () => {
+    if (pathnames.length === 0) return null;
+    
+    const breadcrumbList = [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://mybirdieboard.com/"
+      }
+    ];
+
+    pathnames.forEach((name, index) => {
+      const routeTo = `/${pathnames.slice(0, index + 1).join('/')}`;
+      breadcrumbList.push({
+        "@type": "ListItem",
+        "position": index + 2,
+        "name": getPageTitle(name),
+        "item": `https://mybirdieboard.com${routeTo}`
+      });
+    });
+
+    return {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": breadcrumbList
+    };
   };
 
   if (pathnames.length === 0) return null;
 
+  const breadcrumbSchema = getBreadcrumbSchema();
+
   return (
-    <div className="container mx-auto px-4 py-2">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link to="/" className="flex items-center">
-                <Home className="h-4 w-4 mr-1" />
-                Home
-              </Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          
-          {pathnames.map((name, index) => {
-            const routeTo = `/${pathnames.slice(0, index + 1).join('/')}`;
-            const isLast = index === pathnames.length - 1;
+    <>
+      {breadcrumbSchema && (
+        <script type="application/ld+json">
+          {JSON.stringify(breadcrumbSchema)}
+        </script>
+      )}
+      <div className="container mx-auto px-4 py-3 border-b border-white/10">
+        <Breadcrumb>
+          <BreadcrumbList className="text-white/90">
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link 
+                  to="/" 
+                  className="flex items-center hover:text-white transition-colors duration-200 text-sm font-medium"
+                  title="MyBirdieBoard - Golf Score Tracking Home"
+                >
+                  <Home className="h-4 w-4 mr-2" />
+                  Home
+                </Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
             
-            return (
-              <div key={name} className="flex items-center">
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  {isLast ? (
-                    <BreadcrumbPage>{getPageTitle(name)}</BreadcrumbPage>
-                  ) : (
-                    <BreadcrumbLink asChild>
-                      <Link to={routeTo}>{getPageTitle(name)}</Link>
-                    </BreadcrumbLink>
-                  )}
-                </BreadcrumbItem>
-              </div>
-            );
-          })}
-        </BreadcrumbList>
-      </Breadcrumb>
-    </div>
+            {pathnames.map((name, index) => {
+              const routeTo = `/${pathnames.slice(0, index + 1).join('/')}`;
+              const isLast = index === pathnames.length - 1;
+              const pageTitle = getPageTitle(name);
+              
+              return (
+                <div key={name} className="flex items-center">
+                  <BreadcrumbSeparator className="text-white/60" />
+                  <BreadcrumbItem>
+                    {isLast ? (
+                      <BreadcrumbPage className="text-white font-medium text-sm">
+                        {pageTitle}
+                      </BreadcrumbPage>
+                    ) : (
+                      <BreadcrumbLink asChild>
+                        <Link 
+                          to={routeTo}
+                          className="hover:text-white transition-colors duration-200 text-sm font-medium"
+                          title={`${pageTitle} - MyBirdieBoard Golf`}
+                        >
+                          {pageTitle}
+                        </Link>
+                      </BreadcrumbLink>
+                    )}
+                  </BreadcrumbItem>
+                </div>
+              );
+            })}
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+    </>
   );
 };
