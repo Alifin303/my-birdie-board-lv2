@@ -21,6 +21,9 @@ import GolfHandicapCalculator from "@/pages/guides/GolfHandicapCalculator";
 import BestGolfScoreApps from "@/pages/guides/BestGolfScoreApps";
 import GolfPerformanceAnalytics from "@/pages/guides/GolfPerformanceAnalytics";
 import GolfStatisticsTracker from "@/pages/guides/GolfStatisticsTracker";
+import GolfEquipment from "@/pages/GolfEquipment";
+import GolfTips from "@/pages/GolfTips";
+import GolfLessons from "@/pages/GolfLessons";
 import { Toaster } from "@/components/ui/toaster";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ResetPassword from "@/pages/ResetPassword";
@@ -59,8 +62,9 @@ function App() {
                 <Route path="/" element={
                   <>
                     <Helmet>
-                      <title>MyBirdieBoard - Golf Score Tracking & Performance Analytics</title>
-                      <meta name="description" content="Track your golf scores, challenge friends on course leaderboards, and improve your game with detailed performance analytics on MyBirdieBoard" />
+                      <title>MyBirdieBoard - Golf Score Tracking, Analytics & Performance Improvement</title>
+                      <meta name="description" content="Track golf scores, analyze performance with golf analytics, calculate handicap, compete on course leaderboards. Golf equipment reviews, tips, lessons & more." />
+                      <meta name="keywords" content="golf, golf score tracking, golf analytics, golf equipment, golf tips, golf lessons, golf performance tracking, golf handicap calculator, course leaderboards" />
                       <link rel="canonical" href="https://mybirdieboard.com/" />
                     </Helmet>
                     <Index />
@@ -88,6 +92,15 @@ function App() {
                     <FAQ />
                   </>
                 } />
+                
+                {/* High-volume keyword landing pages */}
+                <Route path="/golf-equipment" element={<GolfEquipment />} />
+                <Route path="/golf-tips" element={<GolfTips />} />
+                <Route path="/golf-lessons" element={<GolfLessons />} />
+                
+                {/* Blog routes */}
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/golf-score-tracking-tips" element={<GolfScoreTrackingTips />} />
                 
                 {/* Redirect /quiz to root */}
                 <Route path="/quiz" element={<Navigate to="/" replace />} />

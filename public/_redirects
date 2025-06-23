@@ -8,6 +8,11 @@
 /courses            /index.html        200
 /courses/*          /index.html        200
 
+# High-volume keyword landing pages
+/golf-equipment     /index.html        200
+/golf-tips          /index.html        200
+/golf-lessons       /index.html        200
+
 # New blog routes
 /blog               /index.html        200
 /blog/*             /index.html        200
