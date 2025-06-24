@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { format } from "date-fns";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Switch } from "@/components/ui/switch";
 import { Hash, Target } from "lucide-react";
 
 interface Round {
@@ -23,6 +24,7 @@ interface ScoreProgressionChartProps {
 const ScoreProgressionChart = ({ rounds, scoreType, handicapIndex = 0 }: ScoreProgressionChartProps) => {
   const [chartData, setChartData] = useState<any[]>([]);
   const [displayMode, setDisplayMode] = useState<'strokes' | 'to_par'>('strokes');
+  const [showParLine, setShowParLine] = useState(false);
 
   useEffect(() => {
     if (!rounds || rounds.length === 0) return;
@@ -52,12 +54,13 @@ const ScoreProgressionChart = ({ rounds, scoreType, handicapIndex = 0 }: ScorePr
         date: format(new Date(round.date), 'MMM d, yyyy'),
         strokes: score,
         to_par: toPar,
+        par: displayMode === 'strokes' ? 72 : 0, // Par 72 for strokes mode, 0 for to_par mode
         id: round.id
       };
     });
 
     setChartData(data);
-  }, [rounds, scoreType, handicapIndex]);
+  }, [rounds, scoreType, handicapIndex, displayMode]);
 
   if (rounds.length < 2) {
     return (
@@ -86,21 +89,33 @@ const ScoreProgressionChart = ({ rounds, scoreType, handicapIndex = 0 }: ScorePr
     <div className="w-full">
       <div className="flex justify-between items-center mb-2">
         <h3 className="text-lg font-medium">Score Progression Over Time</h3>
-        <ToggleGroup 
-          type="single" 
-          value={displayMode} 
-          onValueChange={(value) => value && setDisplayMode(value as 'strokes' | 'to_par')}
-          className="ml-auto"
-        >
-          <ToggleGroupItem value="strokes" aria-label="Display strokes">
-            <Hash className="h-4 w-4 mr-2" />
-            Strokes
-          </ToggleGroupItem>
-          <ToggleGroupItem value="to_par" aria-label="Display to par">
-            <Target className="h-4 w-4 mr-2" />
-            To Par
-          </ToggleGroupItem>
-        </ToggleGroup>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="show-par"
+              checked={showParLine}
+              onCheckedChange={setShowParLine}
+            />
+            <label htmlFor="show-par" className="text-sm font-medium">
+              Show Par Line
+            </label>
+          </div>
+          <ToggleGroup 
+            type="single" 
+            value={displayMode} 
+            onValueChange={(value) => value && setDisplayMode(value as 'strokes' | 'to_par')}
+            className="ml-auto"
+          >
+            <ToggleGroupItem value="strokes" aria-label="Display strokes">
+              <Hash className="h-4 w-4 mr-2" />
+              Strokes
+            </ToggleGroupItem>
+            <ToggleGroupItem value="to_par" aria-label="Display to par">
+              <Target className="h-4 w-4 mr-2" />
+              To Par
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
       </div>
       <div className="h-80 mb-2">
         <ResponsiveContainer width="100%" height="100%">
@@ -122,7 +137,12 @@ const ScoreProgressionChart = ({ rounds, scoreType, handicapIndex = 0 }: ScorePr
               tick={{ fontSize: 11 }}
             />
             <Tooltip 
-              formatter={(value) => [tooltipFormat(value as number), tooltipLabel]}
+              formatter={(value, name) => {
+                if (name === 'par') {
+                  return [displayMode === 'strokes' ? 'Par 72' : 'Even Par', 'Par'];
+                }
+                return [tooltipFormat(value as number), tooltipLabel];
+              }}
               labelFormatter={(label) => `Date: ${label}`}
             />
             <Line 
@@ -132,7 +152,20 @@ const ScoreProgressionChart = ({ rounds, scoreType, handicapIndex = 0 }: ScorePr
               strokeWidth={2} 
               activeDot={{ r: 5 }} 
               dot={{ r: 3 }}
+              name="score"
             />
+            {showParLine && (
+              <Line 
+                type="monotone" 
+                dataKey="par" 
+                stroke="#94A3B8" 
+                strokeWidth={2} 
+                strokeDasharray="5 5"
+                dot={false}
+                activeDot={false}
+                name="par"
+              />
+            )}
           </LineChart>
         </ResponsiveContainer>
       </div>
