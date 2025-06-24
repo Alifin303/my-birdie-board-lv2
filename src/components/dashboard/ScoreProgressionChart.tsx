@@ -13,6 +13,7 @@ interface Round {
   net_score?: number;
   to_par_gross: number;
   to_par_net?: number;
+  hole_scores?: any;
 }
 
 interface ScoreProgressionChartProps {
@@ -50,11 +51,14 @@ const ScoreProgressionChart = ({ rounds, scoreType, handicapIndex = 0 }: ScorePr
         toPar = Math.max(-36, round.to_par_gross - handicapIndex);
       }
       
+      // Calculate actual par for this round based on the score and to_par
+      const actualPar = score ? score - toPar : 72; // fallback to 72 if we can't calculate
+      
       return {
         date: format(new Date(round.date), 'MMM d, yyyy'),
         strokes: score,
         to_par: toPar,
-        par: displayMode === 'strokes' ? 72 : 0, // Par 72 for strokes mode, 0 for to_par mode
+        par: displayMode === 'strokes' ? actualPar : 0, // Use actual par for strokes mode, 0 for to_par mode
         id: round.id
       };
     });
@@ -139,7 +143,7 @@ const ScoreProgressionChart = ({ rounds, scoreType, handicapIndex = 0 }: ScorePr
             <Tooltip 
               formatter={(value, name) => {
                 if (name === 'par') {
-                  return [displayMode === 'strokes' ? 'Par 72' : 'Even Par', 'Par'];
+                  return [displayMode === 'strokes' ? `Par ${value}` : 'Even Par', 'Par'];
                 }
                 return [tooltipFormat(value as number), tooltipLabel];
               }}
