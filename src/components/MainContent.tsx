@@ -117,8 +117,8 @@ export const MainContent = ({
   };
   return <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center mt-4 sm:mt-0">
-        <div className="max-w-5xl animate-fade-in mb-4 px-0 mx-0">
-          <h1 id="hero-heading" className="sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-8 drop-shadow-md text-5xl lg:text-6xl">Your Digital Golf Journal</h1>
+        <div className="max-w-5xl animate-fade-in mb-4 px-0 mx-0 my-0">
+          <h1 id="hero-heading" className="sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-8 drop-shadow-md text-5xl lg:text-5xl">Play smarter. Track better. Lower your score.</h1>
           <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium mb-8 max-w-3xl mx-auto bg-black/35 backdrop-blur-sm px-4 py-2 rounded-lg lg:text-lg">Log your full golf story — round by round, stat by stat — and see your progress over time. No special apps needed. Just play, then easily record at MyBirdieBoard.com.</p>
           
           <div className="flex justify-center mt-6">
