@@ -1,8 +1,10 @@
+
 import React, { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
 const faqItems = [{
   id: "item-1",
   question: "What is MyBirdieBoard?",
@@ -44,12 +46,14 @@ const faqItems = [{
   question: "How do I add a new golf course that isn't listed?",
   answer: "If you don't find your course in our database, you can easily add it by navigating to 'Add Round' and selecting 'Add New Course'. You'll need to provide the course name, location, and hole information including par and distances."
 }];
+
 export default function FAQ() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-  const generateStructuredData = () => {
-    const structuredData = {
+
+  const generateFAQStructuredData = () => {
+    return {
       "@context": "https://schema.org",
       "@type": "FAQPage",
       "mainEntity": faqItems.map(item => ({
@@ -58,48 +62,41 @@ export default function FAQ() {
         "acceptedAnswer": {
           "@type": "Answer",
           "text": item.answer
-        },
-        "position": parseInt(item.id.split('-')[1])
+        }
       }))
     };
-    return JSON.stringify(structuredData);
   };
+
   return (
     <>
       <Helmet>
-        <title>Golf Score Tracking FAQ | MyBirdieBoard Analytics & Handicap Calculator</title>
-        <meta name="description" content="Find answers about golf score tracking, golf analytics, handicap calculations, and performance statistics. Learn how to use MyBirdieBoard for better golf performance." />
-        <meta name="keywords" content="golf score tracking FAQ, golf analytics questions, golf handicap calculator help, golf statistics tracker guide, course leaderboards FAQ" />
+        <title>Golf Score Tracking FAQ - How to Calculate Golf Handicap Step by Step | MyBirdieBoard</title>
+        <meta name="description" content="Learn how to calculate golf handicap step by step, track golf scores effectively, and find the best golf score tracking app for beginners. Complete FAQ guide for golf performance analytics." />
+        <meta name="keywords" content="how to calculate golf handicap step by step, best golf score tracking app for beginners, golf score tracking FAQ, golf analytics questions, golf handicap calculator help, golf statistics tracker guide, course leaderboards FAQ" />
         <link rel="canonical" href="https://mybirdieboard.com/faq" />
         
+        {/* Enhanced FAQ Schema Markup */}
+        <script type="application/ld+json">
+          {JSON.stringify(generateFAQStructuredData())}
+        </script>
+
+        {/* Additional Breadcrumb Schema */}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
+            "@type": "BreadcrumbList",
+            "itemListElement": [
               {
-                "@type": "Question",
-                "name": "How does golf score tracking work?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "MyBirdieBoard provides digital golf score tracking that automatically calculates your handicap, tracks performance analytics, and maintains course leaderboards."
-                }
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://mybirdieboard.com/"
               },
               {
-                "@type": "Question", 
-                "name": "What golf analytics does MyBirdieBoard provide?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "We provide comprehensive golf performance analytics including score trends, handicap progression, course-specific statistics, and detailed performance metrics."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How accurate is the golf handicap calculator?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Our golf handicap calculator follows WHS (World Handicap System) standards for accurate handicap calculations based on your golf score tracking data."
-                }
+                "@type": "ListItem",
+                "position": 2,
+                "name": "FAQ",
+                "item": "https://mybirdieboard.com/faq"
               }
             ]
           })}
@@ -109,35 +106,122 @@ export default function FAQ() {
       <div className="min-h-screen bg-background">
         <header className="bg-primary text-white py-12">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h1>
-            <p className="text-lg max-w-2xl mx-auto text-center">Got questions? We’ve got answers.
-Explore how MyBirdieBoard — your digital golf journal — helps you track performance, reflect on rounds, and understand your game better.</p>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">Golf Score Tracking FAQ - How to Calculate Golf Handicap Step by Step</h1>
+            <p className="text-lg max-w-2xl mx-auto text-center">
+              Got questions about golf score tracking, handicap calculation, or performance analytics? We've got answers.
+              Learn how MyBirdieBoard — the best golf score tracking app for beginners and pros — helps you track performance, 
+              calculate handicaps step by step, and understand your game better.
+            </p>
           </div>
         </header>
         
         <main className="container mx-auto py-12 px-4">
           <div className="max-w-3xl mx-auto">
-            {/* Add AI-friendly article summary section */}
+            {/* Enhanced intro section with internal links */}
             <section className="mb-10 prose max-w-none">
               <h2 className="sr-only">About MyBirdieBoard Golf Score Tracker</h2>
-              <p className="text-lg text-muted-foreground text-center">MyBirdieBoard is your digital golf journal — built for golfers who want more than just a score.
-Track your rounds, stats, and story in one place. With features like detailed round history, course leaderboards, handicap tracking, and post-round performance insights, MyBirdieBoard helps you reflect, improve, and celebrate your journey — no matter your skill level.
-Start your 7-day free trial, then just £2.99/month.</p>
+              <p className="text-lg text-muted-foreground text-center mb-6">
+                MyBirdieBoard is your digital golf journal — built for golfers who want more than just a score.
+                Track your rounds, stats, and story in one place. With features like detailed round history, course leaderboards, 
+                <Link to="/guides/golf-handicap-calculator" className="text-primary hover:underline mx-1">
+                  handicap tracking
+                </Link>, 
+                and post-round performance insights, MyBirdieBoard helps you reflect, improve, and celebrate your journey — no matter your skill level.
+              </p>
+              <p className="text-center text-muted-foreground mb-6">
+                Learn more about 
+                <Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline mx-1">
+                  how to track golf scores effectively
+                </Link>
+                or explore our 
+                <Link to="/guides/golf-performance-analytics" className="text-primary hover:underline mx-1">
+                  golf performance analytics guide
+                </Link>.
+                Start your 7-day free trial, then just £2.99/month.
+              </p>
             </section>
             
             <section itemScope itemType="https://schema.org/FAQPage">
               <Accordion type="single" collapsible className="mb-12">
-                {faqItems.map(item => <AccordionItem key={item.id} value={item.id} itemScope itemProp="mainEntity" itemType="https://schema.org/Question">
+                {faqItems.map(item => 
+                  <AccordionItem 
+                    key={item.id} 
+                    value={item.id} 
+                    itemScope 
+                    itemProp="mainEntity" 
+                    itemType="https://schema.org/Question"
+                  >
                     <AccordionTrigger className="text-lg font-medium text-left" itemProp="name">
                       {item.question}
                     </AccordionTrigger>
-                    <AccordionContent itemScope itemProp="acceptedAnswer" itemType="https://schema.org/Answer">
-                      <p className="text-muted-foreground" itemProp="text">
+                    <AccordionContent 
+                      itemScope 
+                      itemProp="acceptedAnswer" 
+                      itemType="https://schema.org/Answer"
+                    >
+                      <div className="text-muted-foreground" itemProp="text">
                         {item.answer}
-                      </p>
+                        {item.id === "item-4" && (
+                          <p className="mt-2">
+                            <Link to="/guides/golf-handicap-calculator" className="text-primary hover:underline">
+                              Learn how to calculate your golf handicap step by step →
+                            </Link>
+                          </p>
+                        )}
+                        {item.id === "item-6" && (
+                          <p className="mt-2">
+                            <Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline">
+                              Discover the best methods for tracking golf scores →
+                            </Link>
+                          </p>
+                        )}
+                      </div>
                     </AccordionContent>
-                  </AccordionItem>)}
+                  </AccordionItem>
+                )}
               </Accordion>
+            </section>
+            
+            {/* Enhanced related links section */}
+            <section className="mb-8 p-6 bg-muted/30 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4">Related Golf Resources</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-medium mb-2">Golf Score Tracking Guides</h4>
+                  <ul className="space-y-1 text-sm">
+                    <li>
+                      <Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline">
+                        How to Track Golf Scores: Complete Guide
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/guides/golf-statistics-tracker" className="text-primary hover:underline">
+                        Golf Statistics Tracker Guide
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/guides/best-golf-score-apps" className="text-primary hover:underline">
+                        Best Golf Score Apps Comparison
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Golf Analytics & Performance</h4>
+                  <ul className="space-y-1 text-sm">
+                    <li>
+                      <Link to="/guides/golf-handicap-calculator" className="text-primary hover:underline">
+                        Golf Handicap Calculator Guide
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/guides/golf-performance-analytics" className="text-primary hover:underline">
+                        Golf Performance Analytics
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </section>
             
             <div className="text-center mt-12">

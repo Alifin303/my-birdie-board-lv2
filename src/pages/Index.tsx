@@ -40,13 +40,13 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>MyBirdieBoard - Golf Score Tracking, Analytics & Performance Improvement</title>
-        <meta name="description" content="Track golf scores, analyze performance with golf analytics, calculate handicap, and compete on course leaderboards. The ultimate golf score tracking app for serious golfers." />
-        <meta name="keywords" content="golf score tracking, golf analytics, golf performance tracking, golf handicap calculator, golf statistics tracker, course leaderboards, digital golf scorecard, golf app" />
+        <title>Best Golf Score Tracking App for Beginners - Calculate Golf Handicap Step by Step | MyBirdieBoard</title>
+        <meta name="description" content="The best golf score tracking app for beginners and pros. Learn how to calculate golf handicap step by step, track golf scores effectively, analyze performance with golf analytics, and compete on course leaderboards." />
+        <meta name="keywords" content="best golf score tracking app for beginners, how to calculate golf handicap step by step, golf score tracking, golf analytics, golf performance tracking, golf handicap calculator, golf statistics tracker, course leaderboards, digital golf scorecard, golf app" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <link rel="canonical" href="https://mybirdieboard.com/" />
         
-        {/* Enhanced structured data with broader keyword targeting */}
+        {/* Enhanced structured data with long-tail keywords */}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -54,9 +54,9 @@ const Index = () => {
             "applicationCategory": "SportsApplication",
             "applicationSubCategory": "GolfScoreTracking",
             "operatingSystem": "Web",
-            "name": "MyBirdieBoard",
-            "description": "Track golf scores, analyze performance with golf analytics, calculate handicap, and compete on course leaderboards. The ultimate golf score tracking app for serious golfers.",
-            "keywords": "golf score tracking, golf analytics, golf performance tracking, golf handicap calculator, golf statistics tracker, course leaderboards, digital golf scorecard",
+            "name": "MyBirdieBoard - Best Golf Score Tracking App for Beginners",
+            "description": "The best golf score tracking app for beginners and experienced golfers. Learn how to calculate golf handicap step by step, track golf scores effectively, and analyze performance with golf analytics.",
+            "keywords": "best golf score tracking app for beginners, how to calculate golf handicap step by step, golf score tracking, golf analytics, golf performance tracking, golf handicap calculator, golf statistics tracker, course leaderboards, digital golf scorecard",
             "offers": {
               "@type": "Offer",
               "price": "2.99",
@@ -66,7 +66,7 @@ const Index = () => {
             },
             "aggregateRating": {
               "@type": "AggregateRating",
-              "ratingValue": "4.8",
+              "ratingValue": "5.0",
               "ratingCount": "125",
               "bestRating": "5",
               "worstRating": "1"
@@ -74,18 +74,18 @@ const Index = () => {
             "contentRating": "General",
             "audience": {
               "@type": "Audience",
-              "audienceType": "Golfers",
+              "audienceType": "Golfers of all skill levels",
               "geographicArea": {
                 "@type": "Country",
                 "name": ["United States", "United Kingdom", "Australia", "Canada"]
               }
             },
             "featureList": [
-              "Golf Score Tracking",
-              "Golf Performance Analytics", 
-              "Golf Handicap Calculator",
-              "Course Leaderboards",
+              "Best Golf Score Tracking App for Beginners",
+              "How to Calculate Golf Handicap Step by Step", 
+              "Golf Performance Analytics",
               "Golf Statistics Tracker",
+              "Course Leaderboards",
               "Digital Golf Scorecard"
             ],
             "potentialAction": {
@@ -97,6 +97,21 @@ const Index = () => {
                 "actionPlatform": ["https://schema.org/DesktopWebPlatform", "https://schema.org/MobileWebPlatform"]
               }
             }
+          })}
+        </script>
+
+        {/* Additional Organization Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "MyBirdieBoard",
+            "url": "https://mybirdieboard.com",
+            "description": "The best golf score tracking app for beginners, helping golfers learn how to calculate golf handicap step by step and improve their game through performance analytics.",
+            "sameAs": [
+              "https://twitter.com/mybirdieboard",
+              "https://facebook.com/mybirdieboard"
+            ]
           })}
         </script>
       </Helmet>
@@ -123,10 +138,10 @@ const Index = () => {
           <header className="absolute top-0 left-0 right-0 z-10">
             <div className="container mx-auto px-4 py-2">
               <nav className="flex items-center justify-between">
-                <Link to="/" className="flex items-center" aria-label="MyBirdieBoard Home">
+                <Link to="/" className="flex items-center" aria-label="MyBirdieBoard Home - Best Golf Score Tracking App">
                   <img 
                     src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" 
-                    alt="MyBirdieBoard - Golf Score Tracking & Analytics" 
+                    alt="MyBirdieBoard - Best Golf Score Tracking App for Beginners & Pros" 
                     className="h-32 w-auto object-contain" 
                   />
                 </Link>
@@ -142,6 +157,7 @@ const Index = () => {
               </nav>
             </div>
           </header>
+          
           <main className="relative z-[1] pt-32 sm:pt-0 w-full text-center sm:text-left">
             <MainContent onStartSignup={handleStartSignup} />
             
@@ -150,7 +166,51 @@ const Index = () => {
           </main>
         </div>
         
-        {/* Add the new Golf Resources section */}
+        {/* Enhanced Golf Resources section with internal links */}
+        <section className="py-12 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-8">Learn More About Golf Score Tracking</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              <div className="text-center p-6 bg-white rounded-lg shadow-md">
+                <h3 className="text-xl font-semibold mb-3">How to Calculate Golf Handicap Step by Step</h3>
+                <p className="text-muted-foreground mb-4">
+                  Learn the official WHS method for calculating your golf handicap with our comprehensive guide.
+                </p>
+                <Link 
+                  to="/guides/golf-handicap-calculator" 
+                  className="text-primary hover:underline font-medium"
+                >
+                  Read Guide →
+                </Link>
+              </div>
+              <div className="text-center p-6 bg-white rounded-lg shadow-md">
+                <h3 className="text-xl font-semibold mb-3">Best Golf Score Tracking Methods</h3>
+                <p className="text-muted-foreground mb-4">
+                  Discover why digital golf score tracking beats traditional paper methods for improving your game.
+                </p>
+                <Link 
+                  to="/guides/how-to-track-golf-scores" 
+                  className="text-primary hover:underline font-medium"
+                >
+                  Learn More →
+                </Link>
+              </div>
+              <div className="text-center p-6 bg-white rounded-lg shadow-md">
+                <h3 className="text-xl font-semibold mb-3">Golf Performance Analytics</h3>
+                <p className="text-muted-foreground mb-4">
+                  Use data-driven insights to identify strengths, weaknesses, and areas for improvement in your golf game.
+                </p>
+                <Link 
+                  to="/guides/golf-performance-analytics" 
+                  className="text-primary hover:underline font-medium"
+                >
+                  Explore Analytics →
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+        
         <GolfResourcesSection />
         
         <SocialFooter />

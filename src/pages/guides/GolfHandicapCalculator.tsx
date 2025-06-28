@@ -1,13 +1,14 @@
 
 import { GuideLayout } from "@/components/guides/GuideLayout";
+import { Link } from "react-router-dom";
 
 const GolfHandicapCalculator = () => {
   return (
     <GuideLayout
-      title="Golf Handicap Calculator: How to Calculate & Track Your Handicap | MyBirdieBoard"
-      description="Learn how to calculate your golf handicap with our complete guide. Understand WHS handicap calculations, track your progress, and improve your game with accurate handicap monitoring."
+      title="How to Calculate Golf Handicap Step by Step - Official WHS Method | MyBirdieBoard"
+      description="Learn how to calculate your golf handicap step by step using the official WHS method. Complete guide to golf handicap calculation, tracking, and improvement for beginners and experienced golfers."
       canonicalUrl="https://mybirdieboard.com/guides/golf-handicap-calculator"
-      keywords="golf handicap calculator, how to calculate golf handicap, WHS handicap, golf handicap system, handicap index, golf scoring"
+      keywords="how to calculate golf handicap step by step, golf handicap calculator, WHS handicap calculation, golf handicap system, handicap index calculation, golf scoring system, official golf handicap method"
     >
       <div className="space-y-8">
         <section>
@@ -20,16 +21,26 @@ const GolfHandicapCalculator = () => {
             The lower your handicap, the better golfer you are. A scratch golfer has a handicap of 0, meaning 
             they typically shoot par. A 10 handicap golfer typically shoots 10 strokes over par.
           </p>
+          <p className="text-muted-foreground mb-4">
+            If you're new to golf score tracking, start with our 
+            <Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline mx-1">
+              complete guide on how to track golf scores
+            </Link>
+            before diving into handicap calculations.
+          </p>
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">World Handicap System (WHS)</h2>
+          <h2 className="text-2xl font-bold mb-4">World Handicap System (WHS) - The Official Method</h2>
           <p className="text-muted-foreground mb-4">
             The World Handicap System, implemented globally in 2020, standardized handicap calculations worldwide. 
+            Learning how to calculate golf handicap step by step using the WHS ensures your handicap is recognized internationally.
+          </p>
+          <p className="text-muted-foreground mb-4">
             The WHS uses your best 8 scores from your most recent 20 rounds to calculate your Handicap Index.
           </p>
           
-          <h3 className="text-xl font-semibold mb-3">Key WHS Components</h3>
+          <h3 className="text-xl font-semibold mb-3">Key WHS Components for Handicap Calculation</h3>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
             <li><strong>Handicap Index:</strong> Your official handicap calculated using WHS</li>
             <li><strong>Course Rating:</strong> Difficulty rating for a scratch golfer</li>
@@ -39,11 +50,12 @@ const GolfHandicapCalculator = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">How to Calculate Your Golf Handicap</h2>
+          <h2 className="text-2xl font-bold mb-4">How to Calculate Golf Handicap Step by Step</h2>
           
           <h3 className="text-xl font-semibold mb-3">Step 1: Calculate Score Differentials</h3>
           <p className="text-muted-foreground mb-4">
-            For each round, calculate your Score Differential using this formula:
+            For each round, calculate your Score Differential using this formula. This is the foundation of learning 
+            how to calculate golf handicap step by step:
           </p>
           <div className="bg-muted p-4 rounded-lg mb-4">
             <code className="text-sm">
@@ -51,12 +63,13 @@ const GolfHandicapCalculator = () => {
             </code>
           </div>
           
-          <h3 className="text-xl font-semibold mb-3">Step 2: Select Best Scores</h3>
+          <h3 className="text-xl font-semibold mb-3">Step 2: Select Your Best Scores</h3>
           <p className="text-muted-foreground mb-4">
-            From your most recent 20 rounds, select the 8 lowest Score Differentials.
+            From your most recent 20 rounds, select the 8 lowest Score Differentials. This step is crucial 
+            in the official WHS method for how to calculate golf handicap step by step.
           </p>
           
-          <h3 className="text-xl font-semibold mb-3">Step 3: Calculate Average</h3>
+          <h3 className="text-xl font-semibold mb-3">Step 3: Calculate Your Handicap Index</h3>
           <p className="text-muted-foreground mb-4">
             Average your 8 best Score Differentials and multiply by 0.96 to get your Handicap Index.
           </p>
@@ -65,7 +78,10 @@ const GolfHandicapCalculator = () => {
         <section>
           <h2 className="text-2xl font-bold mb-4">Handicap Calculation Requirements</h2>
           
-          <h3 className="text-xl font-semibold mb-3">Minimum Rounds Needed</h3>
+          <h3 className="text-xl font-semibold mb-3">Minimum Rounds Needed to Calculate Golf Handicap</h3>
+          <p className="text-muted-foreground mb-4">
+            Understanding how many rounds you need is essential when learning how to calculate golf handicap step by step:
+          </p>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground mb-6">
             <li>5 rounds: Initial handicap calculation possible</li>
             <li>6-8 rounds: Use lowest 1-2 differentials</li>
@@ -77,7 +93,7 @@ const GolfHandicapCalculator = () => {
             <li>20+ rounds: Use lowest 8 differentials</li>
           </ul>
           
-          <h3 className="text-xl font-semibold mb-3">Course Requirements</h3>
+          <h3 className="text-xl font-semibold mb-3">Course Requirements for Official Handicap</h3>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
             <li>Minimum 9 holes (can combine two 9-hole rounds)</li>
             <li>Course must have official rating and slope</li>
@@ -87,11 +103,17 @@ const GolfHandicapCalculator = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Using Digital Handicap Calculators</h2>
+          <h2 className="text-2xl font-bold mb-4">Using Digital Golf Handicap Calculators</h2>
           <p className="text-muted-foreground mb-4">
-            Modern golf apps make handicap calculation automatic and accurate. Benefits include:
+            While learning how to calculate golf handicap step by step manually is important, modern golf apps 
+            make handicap calculation automatic and accurate. The 
+            <Link to="/guides/best-golf-score-apps" className="text-primary hover:underline mx-1">
+              best golf score tracking apps
+            </Link>
+            include built-in handicap calculators.
           </p>
           
+          <h3 className="text-xl font-semibold mb-3">Benefits of Digital Handicap Calculators</h3>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground mb-6">
             <li>Automatic score differential calculations</li>
             <li>Real-time handicap updates after each round</li>
@@ -102,7 +124,8 @@ const GolfHandicapCalculator = () => {
 
           <h3 className="text-xl font-semibold mb-3">MyBirdieBoard Handicap Features</h3>
           <p className="text-muted-foreground mb-4">
-            MyBirdieBoard automatically calculates your handicap using official WHS methods:
+            MyBirdieBoard automatically calculates your handicap using official WHS methods, eliminating the need 
+            to manually calculate golf handicap step by step:
           </p>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
             <li>Automatic handicap calculation after each round</li>
@@ -113,9 +136,14 @@ const GolfHandicapCalculator = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Improving Your Handicap</h2>
+          <h2 className="text-2xl font-bold mb-4">Improving Your Golf Handicap</h2>
           <p className="text-muted-foreground mb-4">
-            Use your handicap data to identify areas for improvement:
+            Once you understand how to calculate golf handicap step by step, use your handicap data to improve your game. 
+            Learn more about 
+            <Link to="/guides/golf-performance-analytics" className="text-primary hover:underline mx-1">
+              golf performance analytics
+            </Link>
+            to identify areas for improvement:
           </p>
           
           <ol className="list-decimal pl-6 space-y-3 text-muted-foreground">
@@ -128,22 +156,65 @@ const GolfHandicapCalculator = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Common Handicap Questions</h2>
+          <h2 className="text-2xl font-bold mb-4">Common Golf Handicap Questions</h2>
           
           <h3 className="text-xl font-semibold mb-3">How often does my handicap update?</h3>
           <p className="text-muted-foreground mb-4">
-            Your handicap should update after each round you submit, typically within 24 hours.
+            Your handicap should update after each round you submit, typically within 24 hours when using 
+            digital golf score tracking systems.
           </p>
           
           <h3 className="text-xl font-semibold mb-3">Can I have different handicaps for different tees?</h3>
           <p className="text-muted-foreground mb-4">
-            You have one Handicap Index, but your Playing Handicap varies based on the tee you're playing.
+            You have one Handicap Index, but your Playing Handicap varies based on the tee you're playing. 
+            This is an important distinction when learning how to calculate golf handicap step by step.
           </p>
           
-          <h3 className="text-xl font-semibold mb-3">What's the maximum handicap?</h3>
+          <h3 className="text-xl font-semibold mb-3">What's the maximum golf handicap?</h3>
           <p className="text-muted-foreground mb-4">
             The maximum Handicap Index is 54.0 for both men and women under the WHS.
           </p>
+        </section>
+
+        <section className="bg-muted/30 p-6 rounded-lg">
+          <h2 className="text-2xl font-bold mb-4">Related Golf Resources</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="font-semibold mb-2">Score Tracking Guides</h3>
+              <ul className="space-y-1 text-sm text-muted-foreground">
+                <li>
+                  <Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline">
+                    How to Track Golf Scores: Complete Guide
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/guides/best-golf-score-apps" className="text-primary hover:underline">
+                    Best Golf Score Apps for Handicap Tracking
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/faq" className="text-primary hover:underline">
+                    Golf Score Tracking FAQ
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-2">Performance Analytics</h3>
+              <ul className="space-y-1 text-sm text-muted-foreground">
+                <li>
+                  <Link to="/guides/golf-performance-analytics" className="text-primary hover:underline">
+                    Golf Performance Analytics Guide
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/guides/golf-statistics-tracker" className="text-primary hover:underline">
+                    Golf Statistics Tracker Guide
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
         </section>
       </div>
     </GuideLayout>
