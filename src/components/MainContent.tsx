@@ -124,7 +124,7 @@ export const MainContent = ({
           <div className="flex justify-center mt-6">
             <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-lg px-2 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground max-w-[90vw] whitespace-normal">
               <UserPlus className="mr-2 h-5 w-5 flex-shrink-0" aria-hidden="true" />
-              <span className="text-xs sm:text-base md:text-lg">START YOUR 7-DAY FREE TRIAL – THEN JUST £2.99/MONTH!</span>
+              <span className="text-xs sm:text-base md:text-lg">Start your 7-day free trial — then just £2.99/month. No commitment. Cancel anytime.</span>
             </Button>
           </div>
         </div>
