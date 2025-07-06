@@ -12,7 +12,6 @@ import { CourseStats, Round } from "@/components/dashboard/types";
 const demoRounds: Round[] = [
   {
     id: 1,
-    user_id: "demo-user",
     course_id: 1,
     date: "2024-01-15",
     gross_score: 78,
@@ -35,7 +34,6 @@ const demoRounds: Round[] = [
   },
   {
     id: 2,
-    user_id: "demo-user",
     course_id: 2,
     date: "2024-01-10",
     gross_score: 82,
@@ -58,7 +56,6 @@ const demoRounds: Round[] = [
   },
   {
     id: 3,
-    user_id: "demo-user",
     course_id: 3,
     date: "2024-01-05",
     gross_score: 75,
