@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { MainContent } from "@/components/MainContent";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
-import { User, Play } from "lucide-react";
+import { User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { SocialFooter } from "@/components/SocialFooter";
@@ -160,26 +160,6 @@ const Index = () => {
           
           <main className="relative z-[1] pt-32 sm:pt-0 w-full text-center sm:text-left">
             <MainContent onStartSignup={handleStartSignup} />
-            
-            {/* Demo Dashboard CTA */}
-            <div className="container mx-auto px-4 py-8">
-              <div className="max-w-2xl mx-auto text-center">
-                <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-white/20">
-                  <h3 className="text-xl font-semibold text-primary mb-3">
-                    Want to see MyBirdieBoard in action?
-                  </h3>
-                  <p className="text-muted-foreground mb-4">
-                    Explore our full-featured demo dashboard with sample golf data to see exactly how MyBirdieBoard can help improve your game.
-                  </p>
-                  <Button asChild className="bg-accent hover:bg-accent/90 text-white">
-                    <Link to="/demo-dashboard" className="inline-flex items-center gap-2">
-                      <Play className="h-4 w-4" />
-                      Try the Demo Dashboard
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
             
             {/* Add the UserReviews component */}
             <UserReviews />

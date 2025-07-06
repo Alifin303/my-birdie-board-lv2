@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import { Helmet, HelmetProvider } from "react-helmet-async";
@@ -9,7 +10,6 @@ import AuthConfirm from "@/pages/AuthConfirm";
 import Checkout from "@/pages/Checkout";
 import NotFound from "@/pages/NotFound";
 import Dashboard from "@/pages/Dashboard";
-import DemoDashboard from "@/pages/DemoDashboard";
 import Admin from "@/pages/Admin";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import Course from "@/pages/Course";
@@ -137,18 +137,6 @@ function App() {
                 
                 <Route path="/verify" element={<Navigate to="/auth/callback" replace />} />
                 <Route path="/auth/v1/verify" element={<Navigate to="/auth/callback" replace />} />
-                
-                {/* Demo Dashboard Route */}
-                <Route path="/demo-dashboard" element={
-                  <>
-                    <Helmet>
-                      <title>Demo Dashboard - See MyBirdieBoard in Action | MyBirdieBoard</title>
-                      <meta name="description" content="Try MyBirdieBoard's full-featured demo dashboard with sample golf data. See how our golf score tracking and analytics can improve your game." />
-                      <link rel="canonical" href="https://mybirdieboard.com/demo-dashboard" />
-                    </Helmet>
-                    <DemoDashboard />
-                  </>
-                } />
                 
                 <Route
                   path="/dashboard"

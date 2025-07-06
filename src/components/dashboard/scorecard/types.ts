@@ -1,4 +1,3 @@
-
 import { Round } from "../types";
 
 export interface HoleScore {
@@ -16,7 +15,6 @@ export interface RoundScorecardProps {
   onOpenChange: (open: boolean) => void;
   handicapIndex?: number;
   isAdmin?: boolean;
-  isDemo?: boolean;
 }
 
 export interface ScoreTableProps {
