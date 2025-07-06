@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, BarChart2, Trophy, TrendingUp, Calendar } from "lucide-react";
@@ -12,15 +11,12 @@ import { CourseStats, Round } from "@/components/dashboard/types";
 const demoRounds: Round[] = [
   {
     id: 1,
-    course_id: 1,
     date: "2024-01-15",
     gross_score: 78,
     net_score: 72,
     to_par_gross: 6,
     to_par_net: 0,
     hole_scores: null,
-    created_at: "2024-01-15T10:00:00Z",
-    updated_at: "2024-01-15T10:00:00Z",
     handicap_at_posting: 6,
     holes_played: 18,
     tee_id: "blue-tees",
@@ -34,15 +30,12 @@ const demoRounds: Round[] = [
   },
   {
     id: 2,
-    course_id: 2,
     date: "2024-01-10",
     gross_score: 82,
     net_score: 76,
     to_par_gross: 10,
     to_par_net: 4,
     hole_scores: null,
-    created_at: "2024-01-10T14:00:00Z",
-    updated_at: "2024-01-10T14:00:00Z",
     handicap_at_posting: 6,
     holes_played: 18,
     tee_id: "white-tees",
@@ -56,15 +49,12 @@ const demoRounds: Round[] = [
   },
   {
     id: 3,
-    course_id: 3,
     date: "2024-01-05",
     gross_score: 75,
     net_score: 69,
     to_par_gross: 3,
     to_par_net: -3,
     hole_scores: null,
-    created_at: "2024-01-05T09:00:00Z",
-    updated_at: "2024-01-05T09:00:00Z",
     handicap_at_posting: 6,
     holes_played: 18,
     tee_id: "blue-tees",
@@ -89,7 +79,9 @@ const DemoDashboard = () => {
     const courseMap = new Map<number, CourseStats>();
     
     rounds.forEach(round => {
-      const courseId = round.course_id;
+      const courseId = round.courses?.id;
+      if (!courseId) return;
+      
       const existing = courseMap.get(courseId);
       
       if (!existing) {
