@@ -30,11 +30,7 @@ const demoRounds: Round[] = [
       id: 1,
       name: "Pebble Beach Golf Links",
       city: "Pebble Beach",
-      state: "CA",
-      api_course_id: null,
-      created_at: "2024-01-01T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z",
-      user_id: null
+      state: "CA"
     }
   },
   {
@@ -57,11 +53,7 @@ const demoRounds: Round[] = [
       id: 2,
       name: "St. Andrews Old Course",
       city: "St. Andrews",
-      state: "Scotland",
-      api_course_id: null,
-      created_at: "2024-01-01T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z",
-      user_id: null
+      state: "Scotland"
     }
   },
   {
@@ -84,11 +76,7 @@ const demoRounds: Round[] = [
       id: 3,
       name: "Augusta National Golf Club",
       city: "Augusta",
-      state: "GA",
-      api_course_id: null,
-      created_at: "2024-01-01T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z",
-      user_id: null
+      state: "GA"
     }
   }
 ];
@@ -196,30 +184,34 @@ const DemoDashboard = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <StatsCard
-            title="Total Rounds"
-            value={totalRounds.toString()}
-            icon={<Calendar className="h-4 w-4" />}
-            trend="neutral"
-          />
-          <StatsCard
-            title="Best Score"
-            value={bestScore.toString()}
-            icon={<Trophy className="h-4 w-4" />}
-            trend="positive"
-          />
-          <StatsCard
-            title="Average Score"
-            value={avgScore.toString()}
-            icon={<BarChart2 className="h-4 w-4" />}
-            trend="neutral"
-          />
-          <StatsCard
-            title="Handicap Index"
-            value={handicapIndex.toString()}
-            icon={<TrendingUp className="h-4 w-4" />}
-            trend="positive"
-          />
+          <div className="bg-card border rounded-lg p-4 text-center">
+            <div className="flex items-center justify-center mb-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <p className="text-2xl font-bold">{totalRounds}</p>
+            <p className="text-sm text-muted-foreground">Total Rounds</p>
+          </div>
+          <div className="bg-card border rounded-lg p-4 text-center">
+            <div className="flex items-center justify-center mb-2">
+              <Trophy className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <p className="text-2xl font-bold">{bestScore}</p>
+            <p className="text-sm text-muted-foreground">Best Score</p>
+          </div>
+          <div className="bg-card border rounded-lg p-4 text-center">
+            <div className="flex items-center justify-center mb-2">
+              <BarChart2 className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <p className="text-2xl font-bold">{avgScore}</p>
+            <p className="text-sm text-muted-foreground">Average Score</p>
+          </div>
+          <div className="bg-card border rounded-lg p-4 text-center">
+            <div className="flex items-center justify-center mb-2">
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <p className="text-2xl font-bold">{handicapIndex}</p>
+            <p className="text-sm text-muted-foreground">Handicap Index</p>
+          </div>
         </div>
 
         {/* Course Stats Table */}
