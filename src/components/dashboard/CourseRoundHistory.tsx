@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ArrowLeft, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +26,7 @@ interface CourseRoundHistoryProps {
   selectedCourseId: number | null;
   onBackClick: () => void;
   handicapIndex?: number;
+  isDemo?: boolean;
 }
 
 type PeriodType = 'month' | 'year' | 'all';
@@ -35,7 +35,8 @@ export const CourseRoundHistory = ({
   userRounds, 
   selectedCourseId, 
   onBackClick,
-  handicapIndex = 0
+  handicapIndex = 0,
+  isDemo = false
 }: CourseRoundHistoryProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -83,6 +84,8 @@ export const CourseRoundHistory = ({
   const availableMonths = getAvailableMonths(courseRounds, periodType, currentDate);
   
   const handleDeleteRound = async (roundId: number) => {
+    if (isDemo) return; // Prevent deletion in demo mode
+    
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -179,7 +182,7 @@ export const CourseRoundHistory = ({
             onClick={onBackClick}
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
+            {isDemo ? 'Back to Demo' : 'Back to Dashboard'}
           </Button>
           {displayName}
         </h2>
@@ -213,18 +216,20 @@ export const CourseRoundHistory = ({
       
       <PotentialBestScore rounds={courseRounds} />
       
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 bg-muted/30 rounded-lg border mt-16">
-        <p className="text-sm sm:text-base">
-          Want to see how your score compares to other golfers at this course?
-        </p>
-        <Button 
-          onClick={() => setLeaderboardOpen(true)}
-          className="whitespace-nowrap"
-        >
-          <Trophy className="h-4 w-4 mr-2" />
-          View Course Leaderboards
-        </Button>
-      </div>
+      {!isDemo && (
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 bg-muted/30 rounded-lg border mt-16">
+          <p className="text-sm sm:text-base">
+            Want to see how your score compares to other golfers at this course?
+          </p>
+          <Button 
+            onClick={() => setLeaderboardOpen(true)}
+            className="whitespace-nowrap"
+          >
+            <Trophy className="h-4 w-4 mr-2" />
+            View Course Leaderboards
+          </Button>
+        </div>
+      )}
       
       <div className="space-y-4 mt-6">
         <h3 className="text-lg font-medium">Round History</h3>
@@ -252,7 +257,8 @@ export const CourseRoundHistory = ({
           scoreType={scoreType}
           handicapIndex={handicapIndex}
           onViewScorecard={handleViewScorecard}
-          onDeleteRound={handleDeleteRound}
+          onDeleteRound={isDemo ? undefined : handleDeleteRound}
+          isDemo={isDemo}
         />
       </div>
       
@@ -267,16 +273,19 @@ export const CourseRoundHistory = ({
             }
           }}
           handicapIndex={handicapIndex}
+          isDemo={isDemo}
         />
       )}
       
-      <CourseLeaderboard
-        courseId={selectedCourseId}
-        courseName={displayName}
-        open={leaderboardOpen}
-        onOpenChange={setLeaderboardOpen}
-        handicapIndex={handicapIndex}
-      />
+      {!isDemo && (
+        <CourseLeaderboard
+          courseId={selectedCourseId}
+          courseName={displayName}
+          open={leaderboardOpen}
+          onOpenChange={setLeaderboardOpen}
+          handicapIndex={handicapIndex}
+        />
+      )}
     </div>
   );
 };
