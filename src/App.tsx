@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import { Helmet, HelmetProvider } from "react-helmet-async";
@@ -9,7 +10,6 @@ import AuthConfirm from "@/pages/AuthConfirm";
 import Checkout from "@/pages/Checkout";
 import NotFound from "@/pages/NotFound";
 import Dashboard from "@/pages/Dashboard";
-import DemoDashboard from "@/pages/DemoDashboard";
 import Admin from "@/pages/Admin";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import Course from "@/pages/Course";
@@ -68,18 +68,6 @@ function App() {
                       <link rel="canonical" href="https://mybirdieboard.com/" />
                     </Helmet>
                     <Index />
-                  </>
-                } />
-                
-                {/* Demo Dashboard route */}
-                <Route path="/demo-dashboard" element={
-                  <>
-                    <Helmet>
-                      <title>MyBirdieBoard Demo - See Golf Tracking in Action</title>
-                      <meta name="description" content="Experience MyBirdieBoard's golf score tracking, analytics, and performance features with our interactive demo dashboard." />
-                      <meta name="robots" content="noindex, nofollow" />
-                    </Helmet>
-                    <DemoDashboard />
                   </>
                 } />
                 

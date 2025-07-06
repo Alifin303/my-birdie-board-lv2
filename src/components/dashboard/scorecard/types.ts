@@ -1,4 +1,3 @@
-
 import { Round } from "../types";
 
 export interface HoleScore {
@@ -16,7 +15,6 @@ export interface RoundScorecardProps {
   onOpenChange: (open: boolean) => void;
   handicapIndex?: number;
   isAdmin?: boolean;
-  isDemo?: boolean;
 }
 
 export interface ScoreTableProps {
@@ -48,6 +46,4 @@ export interface ScorecardHeaderProps {
   handleSaveChanges: () => Promise<void>;
   showDetailedStats?: boolean;
   setShowDetailedStats?: (value: boolean) => void;
-  handicapIndex?: number;
-  isDemo?: boolean;
 }
