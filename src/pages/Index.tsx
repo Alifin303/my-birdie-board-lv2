@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { MainContent } from "@/components/MainContent";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
-import { User } from "lucide-react";
+import { User, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { SocialFooter } from "@/components/SocialFooter";
@@ -160,6 +160,23 @@ const Index = () => {
           
           <main className="relative z-[1] pt-32 sm:pt-0 w-full text-center sm:text-left">
             <MainContent onStartSignup={handleStartSignup} />
+            
+            {/* Add demo dashboard link after MainContent */}
+            <section className="w-full py-6 bg-black/20 backdrop-blur-sm">
+              <div className="max-w-5xl mx-auto text-center px-4">
+                <Link to="/demo-dashboard">
+                  <Button 
+                    size="lg" 
+                    variant="outline" 
+                    className="bg-white/10 hover:bg-white/20 text-white border-white/30 px-6 py-3 shadow-lg transition-all duration-300"
+                    aria-label="View MyBirdieBoard demo dashboard"
+                  >
+                    <Eye className="mr-2 h-5 w-5" />
+                    Want to see MyBirdieBoard in action? Click here to view our demo!
+                  </Button>
+                </Link>
+              </div>
+            </section>
             
             {/* Add the UserReviews component */}
             <UserReviews />
