@@ -79,7 +79,7 @@ const ScoreProgressChart = ({
         <div className="flex items-center gap-4">
           <div className="flex items-center space-x-2 bg-transparent">
             <Switch id="show-par" checked={showParLine} onCheckedChange={setShowParLine} />
-            <label htmlFor="show-par" className="text-sm font-medium bg-transparent">
+            <label htmlFor="show-par" className="text-sm font-medium bg-slate-50">
               Show Par Line
             </label>
           </div>
