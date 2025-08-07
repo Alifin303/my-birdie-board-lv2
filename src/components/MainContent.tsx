@@ -122,9 +122,9 @@ export const MainContent = ({
           <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium mb-8 max-w-3xl mx-auto bg-black/35 backdrop-blur-sm px-4 py-2 rounded-lg lg:text-lg">Log your full golf story — round by round, stat by stat — and see your progress over time. No special apps needed. Just play, then easily record at MyBirdieBoard.com.</p>
           
           <div className="flex justify-center mt-6">
-            <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-lg px-2 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground max-w-[90vw] whitespace-normal">
+            <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-lg px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground">
               <UserPlus className="mr-2 h-5 w-5 flex-shrink-0" aria-hidden="true" />
-              <span className="text-xs sm:text-base md:text-lg">Start your 7-day free trial — then just £2.99/month. No commitment. Cancel anytime.</span>
+              <span className="text-sm sm:text-base md:text-lg">Start Free Trial</span>
             </Button>
           </div>
         </div>
@@ -211,14 +211,20 @@ export const MainContent = ({
           <h2 id="cta-heading" className="text-lg sm:text-xl font-bold text-white mb-2">Turn every round into part of your journey.</h2>
           <p className="text-sm sm:text-base text-white/90 mb-3">Start your digital golf journal today.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-base px-4 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground max-w-[90vw] whitespace-normal">
+            <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-base px-6 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground">
               <UserPlus className="mr-2 h-5 w-5 flex-shrink-0" aria-hidden="true" />
-              <span className="text-xs sm:text-base">Sign up</span>
+              <span className="text-sm sm:text-base">Start Free Trial</span>
             </Button>
+            <Link to="/demo">
+              <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white px-6 h-auto py-3 shadow-lg transition-all duration-300" aria-label="View demo dashboard">
+                <BarChart2 className="mr-2 h-4 w-4 flex-shrink-0" />
+                <span className="text-sm sm:text-base">Try Demo</span>
+              </Button>
+            </Link>
             <Link to="/faq">
-              <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white px-4 h-auto py-3 shadow-lg transition-all duration-300 max-w-[90vw]" aria-label="View frequently asked questions">
+              <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white px-6 h-auto py-3 shadow-lg transition-all duration-300" aria-label="View frequently asked questions">
                 <HelpCircle className="mr-2 h-4 w-4 flex-shrink-0" />
-                <span className="text-xs sm:text-base">Read FAQ</span>
+                <span className="text-sm sm:text-base">FAQ</span>
               </Button>
             </Link>
           </div>

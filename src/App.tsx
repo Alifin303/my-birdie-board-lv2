@@ -24,6 +24,7 @@ import GolfStatisticsTracker from "@/pages/guides/GolfStatisticsTracker";
 import GolfEquipment from "@/pages/GolfEquipment";
 import GolfTips from "@/pages/GolfTips";
 import GolfLessons from "@/pages/GolfLessons";
+import Demo from "@/pages/Demo";
 import { Toaster } from "@/components/ui/toaster";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ResetPassword from "@/pages/ResetPassword";
@@ -101,6 +102,18 @@ function App() {
                 {/* Blog routes */}
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/golf-score-tracking-tips" element={<GolfScoreTrackingTips />} />
+                
+                {/* Demo route */}
+                <Route path="/demo" element={
+                  <>
+                    <Helmet>
+                      <title>Demo Dashboard - Experience MyBirdieBoard Golf Tracking</title>
+                      <meta name="description" content="Try MyBirdieBoard's golf tracking features with our interactive demo. See score tracking, analytics, and performance insights in action." />
+                      <link rel="canonical" href="https://mybirdieboard.com/demo" />
+                    </Helmet>
+                    <Demo />
+                  </>
+                } />
                 
                 {/* Redirect /quiz to root */}
                 <Route path="/quiz" element={<Navigate to="/" replace />} />
