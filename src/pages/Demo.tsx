@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { SignUpDialog } from '@/components/SignUpDialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { UserPlus, ArrowLeft, TrendingUp, Target, Trophy } from 'lucide-react';
 import ScoreProgressChart from '@/components/dashboard/ScoreProgressChart';
 
 const Demo = () => {
+  const [showSignupDialog, setShowSignupDialog] = useState(false);
+  
   // Demo data
   const demoStats = {
     averageScore: 85.2,
@@ -88,30 +91,28 @@ const Demo = () => {
           </div>
 
           {/* CTA Banner */}
-          <Card className="mb-8 bg-white/10 border-white/20 backdrop-blur-sm">
+          <Card className="mb-8 bg-white/20 border-white/30 backdrop-blur-md">
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="text-center md:text-left">
                   <h2 className="text-xl font-semibold text-white mb-2">Ready to track your real rounds?</h2>
-                  <p className="text-white/80">Start your free trial and begin improving your game today</p>
+                  <p className="text-white/90">Start your free trial and begin improving your game today</p>
                 </div>
-                <Link to="/">
-                  <Button size="lg" className="bg-secondary-foreground text-accent-foreground">
-                    <UserPlus className="h-5 w-5 mr-2" />
-                    Start Free Trial
-                  </Button>
-                </Link>
+                <Button size="lg" onClick={() => setShowSignupDialog(true)} className="bg-secondary-foreground text-accent-foreground">
+                  <UserPlus className="h-5 w-5 mr-2" />
+                  Start Free Trial
+                </Button>
               </div>
             </CardContent>
           </Card>
 
           {/* Stats Overview */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+            <Card className="bg-white/20 border-white/30 backdrop-blur-md">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-white/80">Average Score</p>
+                    <p className="text-sm font-medium text-white/90">Average Score</p>
                     <p className="text-2xl font-bold text-white">{demoStats.averageScore}</p>
                     <p className="text-xs text-green-400">-2.3 from last month</p>
                   </div>
@@ -119,11 +120,11 @@ const Demo = () => {
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+            <Card className="bg-white/20 border-white/30 backdrop-blur-md">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-white/80">Best Score</p>
+                    <p className="text-sm font-medium text-white/90">Best Score</p>
                     <p className="text-2xl font-bold text-white">{demoStats.bestScore}</p>
                     <p className="text-xs text-green-400">Personal best!</p>
                   </div>
@@ -131,11 +132,11 @@ const Demo = () => {
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+            <Card className="bg-white/20 border-white/30 backdrop-blur-md">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-white/80">Handicap</p>
+                    <p className="text-sm font-medium text-white/90">Handicap</p>
                     <p className="text-2xl font-bold text-white">{demoStats.handicap}</p>
                     <p className="text-xs text-green-400">-1.2 this quarter</p>
                   </div>
@@ -143,11 +144,11 @@ const Demo = () => {
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+            <Card className="bg-white/20 border-white/30 backdrop-blur-md">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-white/80">Rounds Played</p>
+                    <p className="text-sm font-medium text-white/90">Rounds Played</p>
                     <p className="text-2xl font-bold text-white">{demoStats.roundsPlayed}</p>
                     <p className="text-xs text-green-400">+8 this month</p>
                   </div>
@@ -159,7 +160,7 @@ const Demo = () => {
 
           {/* Charts and Tables */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+            <Card className="bg-white/20 border-white/30 backdrop-blur-md">
               <CardHeader>
                 <CardTitle className="text-white">Score Progression</CardTitle>
               </CardHeader>
@@ -179,7 +180,7 @@ const Demo = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+            <Card className="bg-white/20 border-white/30 backdrop-blur-md">
               <CardHeader>
                 <CardTitle className="text-white">Recent Rounds</CardTitle>
               </CardHeader>
@@ -205,20 +206,18 @@ const Demo = () => {
           </div>
 
           {/* Bottom CTA */}
-          <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+          <Card className="bg-white/20 border-white/30 backdrop-blur-md">
             <CardContent className="p-8 text-center">
               <h3 className="text-2xl font-bold text-white mb-4">Like what you see?</h3>
-              <p className="text-white/80 mb-6 max-w-2xl mx-auto">
+              <p className="text-white/90 mb-6 max-w-2xl mx-auto">
                 This is just a preview of what MyBirdieBoard can do for your game. Start tracking your real rounds 
                 and unlock detailed analytics, handicap calculations, and course leaderboards.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link to="/">
-                  <Button size="lg" className="bg-secondary-foreground text-accent-foreground">
-                    <UserPlus className="h-5 w-5 mr-2" />
-                    Start Your Free Trial
-                  </Button>
-                </Link>
+                <Button size="lg" onClick={() => setShowSignupDialog(true)} className="bg-secondary-foreground text-accent-foreground">
+                  <UserPlus className="h-5 w-5 mr-2" />
+                  Start Your Free Trial
+                </Button>
                 <Link to="/faq">
                   <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white border-white/20">
                     Learn More
@@ -229,6 +228,11 @@ const Demo = () => {
           </Card>
         </div>
       </div>
+      
+      <SignUpDialog 
+        open={showSignupDialog} 
+        onOpenChange={setShowSignupDialog}
+      />
     </>
   );
 };
