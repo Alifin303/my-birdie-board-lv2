@@ -7,10 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { UserPlus, ArrowLeft, TrendingUp, Target, Trophy } from 'lucide-react';
 import ScoreProgressChart from '@/components/dashboard/ScoreProgressChart';
-
 const Demo = () => {
   const [showSignupDialog, setShowSignupDialog] = useState(false);
-  
+
   // Demo data
   const demoStats = {
     averageScore: 85.2,
@@ -18,59 +17,70 @@ const Demo = () => {
     handicap: 12.4,
     roundsPlayed: 24
   };
-
-  const demoRounds = [
-    {
-      id: '1',
-      date: '2024-08-05',
-      course_name: 'Pine Valley Golf Club',
-      total_score: 82,
-      par: 72,
-      tee_played: 'White',
-      scores: [4, 3, 5, 4, 4, 3, 5, 4, 3, 4, 5, 4, 3, 4, 5, 4, 3, 4]
-    },
-    {
-      id: '2', 
-      date: '2024-08-01',
-      course_name: 'Augusta National',
-      total_score: 89,
-      par: 72,
-      tee_played: 'Blue',
-      scores: [5, 4, 6, 5, 4, 4, 6, 5, 4, 5, 6, 5, 4, 5, 6, 5, 4, 5]
-    },
-    {
-      id: '3',
-      date: '2024-07-28', 
-      course_name: 'Pebble Beach',
-      total_score: 78,
-      par: 72,
-      tee_played: 'White',
-      scores: [4, 3, 4, 4, 3, 3, 4, 4, 3, 4, 4, 4, 3, 4, 4, 4, 3, 4]
-    }
-  ];
-
-  const demoChartData = [
-    { round: 1, score: 92 },
-    { round: 2, score: 89 },
-    { round: 3, score: 87 },
-    { round: 4, score: 85 },
-    { round: 5, score: 82 },
-    { round: 6, score: 86 },
-    { round: 7, score: 83 },
-    { round: 8, score: 81 },
-    { round: 9, score: 78 },
-    { round: 10, score: 80 }
-  ];
-
-  return (
-    <>
+  const demoRounds = [{
+    id: '1',
+    date: '2024-08-05',
+    course_name: 'Pine Valley Golf Club',
+    total_score: 82,
+    par: 72,
+    tee_played: 'White',
+    scores: [4, 3, 5, 4, 4, 3, 5, 4, 3, 4, 5, 4, 3, 4, 5, 4, 3, 4]
+  }, {
+    id: '2',
+    date: '2024-08-01',
+    course_name: 'Augusta National',
+    total_score: 89,
+    par: 72,
+    tee_played: 'Blue',
+    scores: [5, 4, 6, 5, 4, 4, 6, 5, 4, 5, 6, 5, 4, 5, 6, 5, 4, 5]
+  }, {
+    id: '3',
+    date: '2024-07-28',
+    course_name: 'Pebble Beach',
+    total_score: 78,
+    par: 72,
+    tee_played: 'White',
+    scores: [4, 3, 4, 4, 3, 3, 4, 4, 3, 4, 4, 4, 3, 4, 4, 4, 3, 4]
+  }];
+  const demoChartData = [{
+    round: 1,
+    score: 92
+  }, {
+    round: 2,
+    score: 89
+  }, {
+    round: 3,
+    score: 87
+  }, {
+    round: 4,
+    score: 85
+  }, {
+    round: 5,
+    score: 82
+  }, {
+    round: 6,
+    score: 86
+  }, {
+    round: 7,
+    score: 83
+  }, {
+    round: 8,
+    score: 81
+  }, {
+    round: 9,
+    score: 78
+  }, {
+    round: 10,
+    score: 80
+  }];
+  return <>
       <Helmet>
         <title>Demo Dashboard - See MyBirdieBoard in Action</title>
         <meta name="description" content="Experience MyBirdieBoard's golf tracking features with our interactive demo. See how easy it is to track scores, analyze performance, and improve your game." />
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-br from-primary via-primary-variant to-secondary">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 bg-zinc-950">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
@@ -165,18 +175,15 @@ const Demo = () => {
                 <CardTitle className="text-white">Score Progression</CardTitle>
               </CardHeader>
               <CardContent>
-                <ScoreProgressChart 
-                  rounds={demoRounds.map((round, index) => ({
-                    id: parseInt(round.id),
-                    date: round.date,
-                    gross_score: round.total_score,
-                    net_score: round.total_score - 5, // Demo net score
-                    to_par_gross: round.total_score - round.par,
-                    to_par_net: (round.total_score - 5) - round.par
-                  }))}
-                  scoreType="gross"
-                  handicapIndex={12.4}
-                />
+                <ScoreProgressChart rounds={demoRounds.map((round, index) => ({
+                id: parseInt(round.id),
+                date: round.date,
+                gross_score: round.total_score,
+                net_score: round.total_score - 5,
+                // Demo net score
+                to_par_gross: round.total_score - round.par,
+                to_par_net: round.total_score - 5 - round.par
+              }))} scoreType="gross" handicapIndex={12.4} />
               </CardContent>
             </Card>
 
@@ -186,8 +193,7 @@ const Demo = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {demoRounds.map((round) => (
-                    <div key={round.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                  {demoRounds.map(round => <div key={round.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
                       <div>
                         <p className="font-medium text-white">{round.course_name}</p>
                         <p className="text-sm text-white/70">{new Date(round.date).toLocaleDateString()}</p>
@@ -198,8 +204,7 @@ const Demo = () => {
                           {round.total_score - round.par > 0 ? '+' : ''}{round.total_score - round.par}
                         </p>
                       </div>
-                    </div>
-                  ))}
+                    </div>)}
                 </div>
               </CardContent>
             </Card>
@@ -229,12 +234,7 @@ const Demo = () => {
         </div>
       </div>
       
-      <SignUpDialog 
-        open={showSignupDialog} 
-        onOpenChange={setShowSignupDialog}
-      />
-    </>
-  );
+      <SignUpDialog open={showSignupDialog} onOpenChange={setShowSignupDialog} />
+    </>;
 };
-
 export default Demo;
