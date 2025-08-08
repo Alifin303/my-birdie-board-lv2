@@ -47,6 +47,13 @@ export function SignUpDialog({
     }
   });
   const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      // Prevent scroll jump when closing dialog
+      const currentScrollY = window.scrollY;
+      setTimeout(() => {
+        window.scrollTo(0, currentScrollY);
+      }, 0);
+    }
     setIsOpen(newOpen);
     if (onOpenChange) {
       onOpenChange(newOpen);
