@@ -121,11 +121,17 @@ export const MainContent = ({
           <h1 id="hero-heading" className="sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-8 drop-shadow-md lg:text-5xl text-3xl">Your Game. Your Story. Your Digital Golf Journal.</h1>
           <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium mb-8 max-w-3xl mx-auto bg-black/35 backdrop-blur-sm px-4 py-2 rounded-lg lg:text-lg">See exactly where you're losing strokes and fix it. Join 1,000+ golfers already improving their game with our simple tracking system.</p>
           
-          <div className="flex justify-center mt-6">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-6">
             <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-lg px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground">
               <UserPlus className="mr-2 h-5 w-5 flex-shrink-0" aria-hidden="true" />
               <span className="text-sm sm:text-base md:text-lg">Start Free Trial</span>
             </Button>
+            <Link to="/demo">
+              <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300" aria-label="Try demo dashboard">
+                <BarChart2 className="mr-2 h-5 w-5 flex-shrink-0" />
+                <span className="text-sm sm:text-base md:text-lg">Try Demo</span>
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
