@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +7,6 @@ import { Logo } from "@/components/Logo";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { clearSubscriptionCache } from "@/integrations/supabase/subscription/subscription-utils";
-
 export default function Checkout() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,9 +17,7 @@ export default function Checkout() {
   const {
     toast
   } = useToast();
-
   const canceled = new URLSearchParams(location.search).get("canceled");
-
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -61,7 +57,6 @@ export default function Checkout() {
     };
     checkAuth();
   }, [navigate]);
-
   useEffect(() => {
     if (canceled) {
       toast({
@@ -71,7 +66,6 @@ export default function Checkout() {
       });
     }
   }, [canceled, toast]);
-
   const handleCreateCheckout = async () => {
     if (!user) {
       setError("You must be logged in to subscribe.");
@@ -81,10 +75,9 @@ export default function Checkout() {
       setIsLoading(true);
       setProcessingStatus("redirecting");
       setError(null);
-      
+
       // Always clear subscription cache before starting checkout
       clearSubscriptionCache(user.id);
-      
       const {
         data: profile,
         error: profileError
@@ -133,7 +126,6 @@ export default function Checkout() {
       setIsLoading(false);
     }
   };
-
   return <div className="min-h-screen flex flex-col bg-cover bg-center bg-no-repeat" style={{
     backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
     backgroundColor: "#2C4A3B" // Fallback color if image fails to load
@@ -189,9 +181,7 @@ export default function Checkout() {
               <div className="mb-6">
                 <div className="bg-primary/10 p-5 rounded-lg mb-5 text-center">
                   <p className="font-bold text-primary mb-2 text-xl">🎉 Start with a 7-day free trial 🎉</p>
-                  <p className="text-sm">
-                    Try MyBirdieBoard with no risk. Only £2.99/month after your trial ends.
-                  </p>
+                  <p className="text-sm">Try MyBirdieBoard with no risk, cancel before the trial ends and avoid being charged! Only £2.99/month after your trial ends.</p>
                 </div>
                 
                 
