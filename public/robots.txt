@@ -76,6 +76,7 @@ Disallow: /admin
 
 Sitemap: https://mybirdieboard.com/sitemap.xml
 Sitemap: https://mybirdieboard.com/ai-sitemap.xml
+Sitemap: https://mybirdieboard.com/sitemap-news.xml
 
 # Prevent media crawling for bandwidth (except the logo)
 User-agent: Googlebot-Image
