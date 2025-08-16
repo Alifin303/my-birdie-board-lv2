@@ -142,7 +142,8 @@ export default function Checkout() {
       <div className="flex-1 flex justify-center items-center relative z-10 py-0 px-[15px]">
         <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-xl p-6 sm:p-8 max-w-2xl w-full">
           <div className="text-center mb-6">
-            <h1 className="font-bold text-primary mb-3 text-2xl">Join thousands of golfers using MyBirdieBoard to track, improve, and lower their scores</h1>
+            <h1 className="font-bold text-primary mb-3 text-2xl">Join thousands of golfers using MyBirdieBoard to track, improve, and lower their scores.
+          </h1>
             <p className="text-muted-foreground"></p>
           </div>
           
@@ -153,7 +154,7 @@ export default function Checkout() {
           <div className="grid gap-6">
             <div className="bg-accent/10 rounded-lg p-6 py-0 px-[10px]">
               <div className="mb-6 py-[10px]">
-                <h2 className="text-xl font-bold text-accent mb-4 text-center">Cheaper than a bucket of range balls - invest in your game and start improving today!</h2>
+                <h2 className="text-xl font-bold text-accent mb-4 text-left">What you get:</h2>
                 <ul className="space-y-3">
                   <li className="flex items-center text-base">
                     <CheckCircle className="h-5 w-5 text-accent mr-2 flex-shrink-0" />
@@ -161,7 +162,7 @@ export default function Checkout() {
                   </li>
                   <li className="flex items-center text-base">
                     <CheckCircle className="h-5 w-5 text-accent mr-2 flex-shrink-0" />
-                    <span>Access detailed analytics to spot trends and patterns</span>
+                    <span>Detailed analytics to spot trends & patterns</span>
                   </li>
                   <li className="flex items-center text-base">
                     <CheckCircle className="h-5 w-5 text-accent mr-2 flex-shrink-0" />
@@ -169,19 +170,19 @@ export default function Checkout() {
                   </li>
                   <li className="flex items-center text-base">
                     <CheckCircle className="h-5 w-5 text-accent mr-2 flex-shrink-0" />
-                    <span>Advanced progress tracking — monitor your best rounds and personal records</span>
+                    <span>Advanced progress tracking for your best rounds & records</span>
                   </li>
                   <li className="flex items-center text-base">
                     <CheckCircle className="h-5 w-5 text-accent mr-2 flex-shrink-0" />
-                    <span>Track your handicap</span>
+                    <span>Handicap tracking</span>
                   </li>
                 </ul>
               </div>
               
               <div className="mb-6">
                 <div className="bg-primary/10 p-5 rounded-lg mb-5 text-center">
-                  <p className="font-bold text-primary mb-2 text-xl">🎉 Start with a 7-day free trial 🎉</p>
-                  <p className="text-sm">Try MyBirdieBoard with no risk, cancel before the trial ends and avoid being charged! Only £2.99/month after your trial ends.</p>
+                  <p className="font-bold text-primary mb-2 text-xl">🎉 Start your 7-day free trial today 🎉</p>
+                  <p className="text-sm">Try MyBirdieBoard with zero risk—cancel before the trial ends and pay nothing. Continue for only £2.99/month. Secure payment via Stripe</p>
                 </div>
                 
                 
@@ -204,8 +205,7 @@ export default function Checkout() {
                   </>}
               </Button>
               
-              <p className="text-center text-sm text-muted-foreground mt-3">Secure payment via Stripe. You won't be charged until your free trial ends, cancel anytime.
-Prices are shown in GBP. Your local currency price will be calculated at checkout.</p>
+              <p className="text-center text-sm text-muted-foreground mt-3"> You won’t be charged until your trial ends. Cancel anytime. Prices shown in GBP; local currency calculated at checkout.</p>
             </div>
           </div>
         </div>
