@@ -51,14 +51,18 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
       let puttsValue = 0;
       let puttHoles = 0;
       let penaltiesValue = 0;
+      let totalScore = 0;
       
       // For GIR calculation, use the utility function that calculates consistently
       const { girPercentage } = calculateGIRPercentage(scores);
       
-      // Only count putts and penalties from played holes
+      // Calculate total score and count putts/penalties from played holes
       scores.forEach((score: any) => {
         // Only include if the hole was actually played
         if (score.strokes === undefined || score.strokes <= 0) return;
+        
+        // Add to total score
+        totalScore += score.strokes;
         
         // Count putts
         if (score.putts !== undefined) {
@@ -78,7 +82,9 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
         girPercentage,
         puttsValue,
         puttHoles,
-        penaltiesValue
+        penaltiesValue,
+        totalScore,
+        roundTotalScore: round.total_score
       });
       
       return {
@@ -87,7 +93,7 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
         putts: puttHoles > 0 ? puttsValue : null,
         gir: girPercentage,
         penalties: penaltiesValue,
-        score: round.total_score || 0,
+        score: totalScore || round.total_score || 0,
         id: round.id
       };
     }).filter(item => {
