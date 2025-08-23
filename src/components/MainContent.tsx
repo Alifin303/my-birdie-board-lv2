@@ -118,8 +118,8 @@ export const MainContent = ({
   return <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center mt-16 sm:mt-20 md:mt-8 lg:mt-0">
         <div className="max-w-5xl animate-fade-in mb-4 px-0 mx-0 my-0">
-          <h1 id="hero-heading" className="sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-8 drop-shadow-md lg:text-5xl text-3xl">Best Golf Score Tracker App - Your Digital Golf Journal</h1>
-          <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium mb-8 max-w-3xl mx-auto bg-black/35 backdrop-blur-sm px-4 py-2 rounded-lg lg:text-lg">Track golf scores, analyze performance, and compete on course leaderboards. Join 1,000+ golfers already improving their game with our golf score tracker.</p>
+          <h1 id="hero-heading" className="sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-8 drop-shadow-md lg:text-5xl text-3xl">Your Game. Your Story. Your Digital Golf Journal.</h1>
+          <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium mb-8 max-w-3xl mx-auto bg-black/35 backdrop-blur-sm px-4 py-2 rounded-lg lg:text-lg">See exactly where you're losing strokes and fix it. Join 1,000+ golfers already improving their game with our simple tracking system.</p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-6">
             <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-lg px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground">
