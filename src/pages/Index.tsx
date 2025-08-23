@@ -40,9 +40,9 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>Best Golf Score Tracking App for Beginners - Calculate Golf Handicap Step by Step | MyBirdieBoard</title>
-        <meta name="description" content="The best golf score tracking app for beginners and pros. Learn how to calculate golf handicap step by step, track golf scores effectively, analyze performance with golf analytics, and compete on course leaderboards." />
-        <meta name="keywords" content="best golf score tracking app for beginners, how to calculate golf handicap step by step, golf score tracking, golf analytics, golf performance tracking, golf handicap calculator, golf statistics tracker, course leaderboards, digital golf scorecard, golf app" />
+        <title>Golf Score Tracker App - Course Leaderboards & Performance Analytics | MyBirdieBoard</title>
+        <meta name="description" content="The best golf score tracker app with course leaderboards. Track golf scores, calculate handicap, analyze performance, and compete with golfers at your favorite courses. Start free trial today." />
+        <meta name="keywords" content="golf score tracker, golf course leaderboards, golf score tracking app, golf performance analytics, golf handicap calculator, golf statistics tracker, digital golf scorecard, course leaderboard rankings" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <link rel="canonical" href="https://mybirdieboard.com/" />
         
@@ -54,9 +54,9 @@ const Index = () => {
             "applicationCategory": "SportsApplication",
             "applicationSubCategory": "GolfScoreTracking",
             "operatingSystem": "Web",
-            "name": "MyBirdieBoard - Best Golf Score Tracking App for Beginners",
-            "description": "The best golf score tracking app for beginners and experienced golfers. Learn how to calculate golf handicap step by step, track golf scores effectively, and analyze performance with golf analytics.",
-            "keywords": "best golf score tracking app for beginners, how to calculate golf handicap step by step, golf score tracking, golf analytics, golf performance tracking, golf handicap calculator, golf statistics tracker, course leaderboards, digital golf scorecard",
+            "name": "MyBirdieBoard - Golf Score Tracker with Course Leaderboards",
+            "description": "The best golf score tracker app with course leaderboards. Track golf scores, calculate handicap, analyze performance, and compete with golfers at your favorite courses.",
+            "keywords": "golf score tracker, golf course leaderboards, golf score tracking app, golf performance analytics, golf handicap calculator, golf statistics tracker, course leaderboard rankings",
             "offers": {
               "@type": "Offer",
               "price": "2.99",
@@ -81,12 +81,12 @@ const Index = () => {
               }
             },
             "featureList": [
-              "Best Golf Score Tracking App for Beginners",
-              "How to Calculate Golf Handicap Step by Step", 
-              "Golf Performance Analytics",
-              "Golf Statistics Tracker",
-              "Course Leaderboards",
-              "Digital Golf Scorecard"
+              "Golf Score Tracker with Real-time Updates",
+              "Golf Course Leaderboards & Rankings", 
+              "Golf Performance Analytics & Statistics",
+              "Handicap Calculator & Tracking",
+              "Digital Golf Scorecard Management",
+              "Course-specific Performance Insights"
             ],
             "potentialAction": {
               "@type": "UseAction",
