@@ -109,8 +109,9 @@ export async function getCourseTeesByIdFromDatabase(courseId: number): Promise<T
         handicap: hole.handicap || 0
       }));
       
-      // If we have less than 18 holes, fill in the missing ones
-      if (formattedHoles.length < 18) {
+      // Only fill missing holes if we expect 18 holes (holes numbered beyond 9)
+      const hasBackNine = formattedHoles.some(h => h.number > 9);
+      if (hasBackNine && formattedHoles.length < 18) {
         const existingHoleNumbers = formattedHoles.map(h => h.number);
         for (let i = 1; i <= 18; i++) {
           if (!existingHoleNumbers.includes(i)) {
@@ -123,6 +124,9 @@ export async function getCourseTeesByIdFromDatabase(courseId: number): Promise<T
           }
         }
         // Sort by hole number
+        formattedHoles.sort((a, b) => a.number - b.number);
+      } else {
+        // For 9-hole courses, just sort the existing holes
         formattedHoles.sort((a, b) => a.number - b.number);
       }
       
