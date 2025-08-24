@@ -225,6 +225,21 @@ export function ManualCourseForm({
       };
     });
   };
+
+  const handleRatingChange = (field: 'rating' | 'slope', value: number) => {
+    setFormData(prev => {
+      const updatedTees = [...prev.tees];
+      updatedTees[currentTeeIndex] = {
+        ...updatedTees[currentTeeIndex],
+        [field]: value,
+        useManualRatings: true
+      };
+      return {
+        ...prev,
+        tees: updatedTees
+      };
+    });
+  };
   
   const handleHoleChange = (
     holeIndex: number,
@@ -560,10 +575,11 @@ export function ManualCourseForm({
           
           {formData.tees.length > 0 && (
             <div className="space-y-4 border-t pt-4">
-              <TeeConfiguration 
-                currentTee={formData.tees[currentTeeIndex]} 
-                handleTeeChange={handleTeeChange}
-              />
+            <TeeConfiguration 
+              currentTee={formData.tees[currentTeeIndex]}
+              handleTeeChange={handleTeeChange}
+              onRatingChange={handleRatingChange}
+            />
               
               <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
                 <TabsList className="grid grid-cols-2">

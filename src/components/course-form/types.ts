@@ -10,6 +10,7 @@ export interface TeeData {
   par?: number;
   yards?: number;
   holes: HoleData[];
+  useManualRatings?: boolean; // Flag to indicate if manual ratings should be used
 }
 
 // Interface for hole data

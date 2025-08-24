@@ -27,15 +27,43 @@ export const calculateRatings = (tee: TeeData) => {
     return { rating: 72.0, slope: 113, par: 72, yards: 0 };
   }
   
-  // This is a simplified algorithm - in reality, course ratings are much more complex
   const totalYards = tee.holes.reduce((sum, hole) => sum + (Number(hole.yards) || 0), 0);
   const totalPar = tee.holes.reduce((sum, hole) => sum + (Number(hole.par) || 0), 0);
   
-  // Simulated rating based on total yards and par
-  const rating = parseFloat(((totalYards / 100) * 0.56 + totalPar * 0.24).toFixed(1));
+  // If manual ratings are being used, return the manual values
+  if (tee.useManualRatings && tee.rating !== undefined && tee.slope !== undefined) {
+    return { 
+      rating: tee.rating, 
+      slope: tee.slope, 
+      par: totalPar, 
+      yards: totalYards 
+    };
+  }
   
-  // Simulated slope based on total yards
-  const slope = Math.round(113 + (totalYards - 6000) * 0.05);
+  // Auto-calculate ratings if manual ratings are not set or are at default values
+  const shouldAutoCalculate = !tee.rating || !tee.slope || 
+    (tee.rating === 72.0 && tee.slope === 113);
   
-  return { rating, slope, par: totalPar, yards: totalYards };
+  if (shouldAutoCalculate) {
+    // Simulated rating based on total yards and par
+    const calculatedRating = parseFloat(((totalYards / 100) * 0.56 + totalPar * 0.24).toFixed(1));
+    
+    // Simulated slope based on total yards
+    const calculatedSlope = Math.round(113 + (totalYards - 6000) * 0.05);
+    
+    return { 
+      rating: calculatedRating, 
+      slope: calculatedSlope, 
+      par: totalPar, 
+      yards: totalYards 
+    };
+  }
+  
+  // Use the existing manual ratings
+  return { 
+    rating: tee.rating || 72.0, 
+    slope: tee.slope || 113, 
+    par: totalPar, 
+    yards: totalYards 
+  };
 };

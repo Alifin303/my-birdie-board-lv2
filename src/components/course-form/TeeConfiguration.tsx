@@ -7,16 +7,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { teeOptions, TeeData } from "./types";
 
 interface TeeConfigurationProps {
   currentTee: TeeData;
   handleTeeChange: (teeName: string) => void;
+  onRatingChange: (field: 'rating' | 'slope', value: number) => void;
 }
 
 export function TeeConfiguration({ 
   currentTee, 
-  handleTeeChange 
+  handleTeeChange,
+  onRatingChange
 }: TeeConfigurationProps) {
   return (
     <div className="space-y-2">
@@ -62,6 +66,43 @@ export function TeeConfiguration({
       
       <p className="text-xs text-muted-foreground mt-1">
         The community benefits from having all relevant tees added — feel free to add more!
+      </p>
+      
+      <div className="grid grid-cols-2 gap-4 mt-4">
+        <div className="space-y-2">
+          <Label htmlFor="course-rating" className="text-sm font-medium">
+            Course Rating
+          </Label>
+          <Input
+            id="course-rating"
+            type="number"
+            step="0.1"
+            min="60"
+            max="80"
+            value={currentTee.rating || 72.0}
+            onChange={(e) => onRatingChange('rating', parseFloat(e.target.value) || 72.0)}
+            placeholder="72.0"
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="slope-rating" className="text-sm font-medium">
+            Slope Rating
+          </Label>
+          <Input
+            id="slope-rating"
+            type="number"
+            min="55"
+            max="155"
+            value={currentTee.slope || 113}
+            onChange={(e) => onRatingChange('slope', parseInt(e.target.value) || 113)}
+            placeholder="113"
+          />
+        </div>
+      </div>
+      
+      <p className="text-xs text-muted-foreground mt-2">
+        Course and slope ratings will be auto-calculated if left at defaults, or you can enter official ratings.
       </p>
     </div>
   );
