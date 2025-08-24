@@ -1,17 +1,17 @@
 
 import { TeeData, HoleData } from './types';
 
-// Create a default tee with 18 holes
-export function createDefaultTee(): TeeData {
+// Create a default tee with specified number of holes
+export function createDefaultTee(holes: number = 18): TeeData {
   return {
     id: `tee-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     name: 'White',
     color: '#FFFFFF',
     gender: 'male',
-    rating: 72.0,
+    rating: holes === 9 ? 36.0 : 72.0,
     slope: 113,
-    par: 72,
-    holes: Array(18).fill(null).map((_, idx) => ({
+    par: holes === 9 ? 36 : 72,
+    holes: Array(holes).fill(null).map((_, idx) => ({
       number: idx + 1,
       par: null,
       yards: null,

@@ -77,11 +77,9 @@ export function TeeConfiguration({
             id="course-rating"
             type="number"
             step="0.1"
-            min="60"
-            max="80"
-            value={currentTee.rating || 72.0}
-            onChange={(e) => onRatingChange('rating', parseFloat(e.target.value) || 72.0)}
-            placeholder="72.0"
+            value={currentTee.rating || (currentTee.holes.length === 9 ? 36.0 : 72.0)}
+            onChange={(e) => onRatingChange('rating', parseFloat(e.target.value) || (currentTee.holes.length === 9 ? 36.0 : 72.0))}
+            placeholder={currentTee.holes.length === 9 ? "36.0" : "72.0"}
           />
         </div>
         

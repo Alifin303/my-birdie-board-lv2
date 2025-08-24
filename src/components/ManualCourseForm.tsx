@@ -267,7 +267,9 @@ export function ManualCourseForm({
       const updatedTees = [...prev.tees];
       const updatedHoles = [...updatedTees[currentTeeIndex].holes];
       
-      const actualHoleIndex = currentTab === 'back9' ? holeIndex + 9 : holeIndex;
+      const actualHoleIndex = formData.tees[currentTeeIndex].holes.length === 9 
+        ? holeIndex 
+        : (currentTab === 'back9' ? holeIndex + 9 : holeIndex);
       
       updatedHoles[actualHoleIndex] = {
         ...updatedHoles[actualHoleIndex],
@@ -287,9 +289,10 @@ export function ManualCourseForm({
   };
   
   const handleAddTee = () => {
+    const currentHoleCount = formData.tees[0]?.holes.length || 18;
     setFormData(prev => ({
       ...prev,
-      tees: [...prev.tees, createDefaultTee()]
+      tees: [...prev.tees, createDefaultTee(currentHoleCount)]
     }));
     
     setCurrentTeeIndex(formData.tees.length);
@@ -340,18 +343,36 @@ export function ManualCourseForm({
     for (let teeIndex = 0; teeIndex < formData.tees.length; teeIndex++) {
       const tee = formData.tees[teeIndex];
       
-      for (let holeIndex = 0; holeIndex < tee.holes.length; holeIndex++) {
-        const hole = tee.holes[holeIndex];
-        
-        if (hole.par < 2 || hole.par > 6) {
-          toast({
-            title: "Validation Error",
-            description: `Hole ${hole.number} par should be between 2 and 6.`,
-            variant: "destructive",
-          });
-          return false;
+        for (let holeIndex = 0; holeIndex < tee.holes.length; holeIndex++) {
+          const hole = tee.holes[holeIndex];
+          
+          if (hole.par === null || hole.par === undefined || hole.par < 2 || hole.par > 6) {
+            toast({
+              title: "Validation Error",
+              description: `Hole ${hole.number} par should be between 2 and 6.`,
+              variant: "destructive",
+            });
+            return false;
+          }
+          
+          if (hole.yards === null || hole.yards === undefined || hole.yards < 0) {
+            toast({
+              title: "Validation Error", 
+              description: `Hole ${hole.number} yards must be specified.`,
+              variant: "destructive",
+            });
+            return false;
+          }
+          
+          if (hole.handicap === null || hole.handicap === undefined || hole.handicap < 1 || hole.handicap > tee.holes.length) {
+            toast({
+              title: "Validation Error",
+              description: `Hole ${hole.number} handicap should be between 1 and ${tee.holes.length}.`,
+              variant: "destructive",
+            });
+            return false;
+          }
         }
-      }
     }
     
     return true;
@@ -565,6 +586,66 @@ export function ManualCourseForm({
             isEditMode={isEditMode}
           />
           
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Course Type</label>
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData(prev => ({
+                    ...prev,
+                    tees: prev.tees.map(tee => ({
+                      ...tee,
+                      holes: Array(9).fill(null).map((_, idx) => ({
+                        number: idx + 1,
+                        par: tee.holes[idx]?.par || null,
+                        yards: tee.holes[idx]?.yards || null,
+                        handicap: tee.holes[idx]?.handicap || null
+                      })),
+                      rating: 36.0,
+                      slope: 113,
+                      par: 36
+                    }))
+                  }));
+                }}
+                className={`px-4 py-2 border rounded-md ${
+                  formData.tees[0]?.holes.length === 9 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-background hover:bg-accent'
+                }`}
+              >
+                9 Holes
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData(prev => ({
+                    ...prev,
+                    tees: prev.tees.map(tee => ({
+                      ...tee,
+                      holes: Array(18).fill(null).map((_, idx) => ({
+                        number: idx + 1,
+                        par: tee.holes[idx]?.par || null,
+                        yards: tee.holes[idx]?.yards || null,
+                        handicap: tee.holes[idx]?.handicap || null
+                      })),
+                      rating: 72.0,
+                      slope: 113,
+                      par: 72
+                    }))
+                  }));
+                }}
+                className={`px-4 py-2 border rounded-md ${
+                  formData.tees[0]?.holes.length === 18 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-background hover:bg-accent'
+                }`}
+              >
+                18 Holes
+              </button>
+            </div>
+          </div>
+          
           <TeeSelection 
             tees={formData.tees}
             currentTeeIndex={currentTeeIndex}
@@ -581,28 +662,37 @@ export function ManualCourseForm({
               onRatingChange={handleRatingChange}
             />
               
-              <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-                <TabsList className="grid grid-cols-2">
-                  <TabsTrigger value="front9" type="button">Front Nine</TabsTrigger>
-                  <TabsTrigger value="back9" type="button">Back Nine</TabsTrigger>
-                </TabsList>
-                <TabsContent value="front9">
-                  <HoleInputs 
-                    holes={formData.tees[currentTeeIndex].holes.slice(0, 9)}
-                    handleHoleChange={(holeIndex, field, value) => 
-                      handleHoleChange(holeIndex, field, value)
-                    }
-                  />
-                </TabsContent>
-                <TabsContent value="back9">
-                  <HoleInputs 
-                    holes={formData.tees[currentTeeIndex].holes.slice(9, 18)}
-                    handleHoleChange={(holeIndex, field, value) => 
-                      handleHoleChange(holeIndex, field, value)
-                    }
-                  />
-                </TabsContent>
-              </Tabs>
+              {formData.tees[currentTeeIndex].holes.length === 9 ? (
+                <HoleInputs 
+                  holes={formData.tees[currentTeeIndex].holes}
+                  handleHoleChange={(holeIndex, field, value) => 
+                    handleHoleChange(holeIndex, field, value)
+                  }
+                />
+              ) : (
+                <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
+                  <TabsList className="grid grid-cols-2">
+                    <TabsTrigger value="front9" type="button">Front Nine</TabsTrigger>
+                    <TabsTrigger value="back9" type="button">Back Nine</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="front9">
+                    <HoleInputs 
+                      holes={formData.tees[currentTeeIndex].holes.slice(0, 9)}
+                      handleHoleChange={(holeIndex, field, value) => 
+                        handleHoleChange(holeIndex, field, value)
+                      }
+                    />
+                  </TabsContent>
+                  <TabsContent value="back9">
+                    <HoleInputs 
+                      holes={formData.tees[currentTeeIndex].holes.slice(9, 18)}
+                      handleHoleChange={(holeIndex, field, value) => 
+                        handleHoleChange(holeIndex, field, value)
+                      }
+                    />
+                  </TabsContent>
+                </Tabs>
+              )}
               
               <TeeSummary currentTee={formData.tees[currentTeeIndex]} />
             </div>

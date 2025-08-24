@@ -97,7 +97,7 @@ export function HoleInputs({
                 <Input
                   type="number"
                   min="1"
-                  max="18"
+                  max={holes.length}
                   value={hole.handicap === null || hole.handicap === undefined ? "" : hole.handicap}
                   onChange={(e) => handleHoleChange(idx, 'handicap', e.target.value)}
                   className="w-full h-9 text-center"
@@ -191,8 +191,8 @@ export function HoleInputs({
               <td key={`handicap-${hole.number}`} className="text-center px-1 sm:px-2 py-1 sm:py-2">
                 <Input
                   type="number"
-                  min="1"
-                  max="18"
+                   min="1"
+                   max={holes.length}
                   value={hole.handicap === null || hole.handicap === undefined ? "" : hole.handicap}
                   onChange={(e) => handleHoleChange(idx, 'handicap', e.target.value)}
                   className="w-8 sm:w-12 h-7 sm:h-8 text-center text-xs sm:text-sm"
