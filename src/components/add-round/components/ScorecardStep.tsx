@@ -203,8 +203,8 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
       const holeNumbers = missingScores.map(s => s.hole).join(', ');
       let errorMessage = `Please enter scores for hole${missingScores.length > 1 ? 's' : ''}: ${holeNumbers}`;
       
-      // Always add guidance about 9-hole selection regardless of how many holes are missing
-      if (holeSelection.type === 'all') {
+      // Only add guidance about 9-hole selection for 18-hole courses
+      if (holeSelection.type === 'all' && !is9HoleCourse) {
         errorMessage += ". If you only played 9 holes, select 'Front 9' or 'Back 9' to save a 9-hole round.";
       }
       
@@ -221,6 +221,9 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   const backNineScores = scores.filter(score => score.hole > 9);
   const frontNineHoleScores = convertToHoleScores(frontNineScores);
   const backNineHoleScores = convertToHoleScores(backNineScores);
+  
+  // Determine if this is a 9-hole course
+  const is9HoleCourse = backNineScores.length === 0 && frontNineScores.length === 9;
   
   // Add required field flag based on hole selection
   const isHoleRequired = (holeNumber: number): boolean => {
@@ -330,23 +333,33 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </div>
         
         <div className="space-y-1">
-          <label className="text-sm font-medium">Holes Played<span className="text-red-500">*</span> <span className="text-xs text-muted-foreground">(Select 'Front 9' or 'Back 9' if you only played 9 holes)</span></label>
+          <label className="text-sm font-medium">Holes Played<span className="text-red-500">*</span> 
+            {!is9HoleCourse && <span className="text-xs text-muted-foreground">(Select 'Front 9' or 'Back 9' if you only played 9 holes)</span>}
+          </label>
           <div className="flex space-x-1">
-            <Button variant={holeSelection.type === 'all' ? "default" : "outline"} size="sm" onClick={() => handleHoleSelectionChange({
-            type: 'all'
-          })} className="flex-1 h-9 px-2">
-              All 18
-            </Button>
-            <Button variant={holeSelection.type === 'front9' ? "default" : "outline"} size="sm" onClick={() => handleHoleSelectionChange({
-            type: 'front9'
-          })} className="flex-1 h-9 px-2">
-              Front 9
-            </Button>
-            <Button variant={holeSelection.type === 'back9' ? "default" : "outline"} size="sm" onClick={() => handleHoleSelectionChange({
-            type: 'back9'
-          })} className="flex-1 h-9 px-2">
-              Back 9
-            </Button>
+            {is9HoleCourse ? (
+              <Button variant="default" size="sm" className="flex-1 h-9 px-2" disabled>
+                9 Holes
+              </Button>
+            ) : (
+              <>
+                <Button variant={holeSelection.type === 'all' ? "default" : "outline"} size="sm" onClick={() => handleHoleSelectionChange({
+                type: 'all'
+              })} className="flex-1 h-9 px-2">
+                  All 18
+                </Button>
+                <Button variant={holeSelection.type === 'front9' ? "default" : "outline"} size="sm" onClick={() => handleHoleSelectionChange({
+                type: 'front9'
+              })} className="flex-1 h-9 px-2">
+                  Front 9
+                </Button>
+                <Button variant={holeSelection.type === 'back9' ? "default" : "outline"} size="sm" onClick={() => handleHoleSelectionChange({
+                type: 'back9'
+              })} className="flex-1 h-9 px-2">
+                  Back 9
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>

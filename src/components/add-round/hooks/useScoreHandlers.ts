@@ -297,7 +297,16 @@ export function useScoreHandlers({
       return;
     }
     
-    updateScorecardForTee(teeId, { type: 'all' });
+    // Get the holes for this tee to determine if it's a 9-hole course
+    const holes = getHolesForTee(teeId);
+    const is9HoleCourse = holes.length === 9 && holes.every(h => h.number <= 9);
+    
+    // For 9-hole courses, default to front9 selection
+    const defaultSelection = is9HoleCourse ? { type: 'front9' as const } : { type: 'all' as const };
+    console.log("🏌️ Course type detected:", is9HoleCourse ? "9-hole" : "18-hole", "Setting selection to:", defaultSelection.type);
+    
+    updateScorecardForTee(teeId, defaultSelection);
+    setHoleSelection(defaultSelection);
   };
 
   const handleHoleSelectionChange = (selection: HoleSelection) => {
