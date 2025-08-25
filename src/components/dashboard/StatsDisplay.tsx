@@ -1,6 +1,9 @@
 import { CalendarDays, Trophy, Flag } from "lucide-react";
 import { Stats, Round } from "./types";
 import React, { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+
+type RoundFilter = 'all' | '9hole' | '18hole';
 
 interface StatsDisplayProps {
   userRounds: Round[] | undefined;
@@ -10,9 +13,33 @@ interface StatsDisplayProps {
   calculateStats: (rounds: Round[]) => Stats;
   handicapIndex: number;
   profileHandicap?: number;
+  roundFilter?: RoundFilter;
+  onRoundFilterChange?: (filter: RoundFilter) => void;
 }
 
-export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats, handicapIndex }: Omit<StatsDisplayProps, 'onScoreTypeChange' | 'profileHandicap'>) => {
+const filterRoundsByType = (rounds: Round[], filter: RoundFilter): Round[] => {
+  if (!rounds) return [];
+  
+  switch (filter) {
+    case '9hole':
+      return rounds.filter(round => (round.holes_played || 18) === 9);
+    case '18hole':
+      return rounds.filter(round => (round.holes_played || 18) === 18);
+    case 'all':
+    default:
+      return rounds;
+  }
+};
+
+export const MainStats = ({ 
+  userRounds, 
+  roundsLoading, 
+  scoreType, 
+  calculateStats, 
+  handicapIndex, 
+  roundFilter = 'all',
+  onRoundFilterChange 
+}: Omit<StatsDisplayProps, 'onScoreTypeChange' | 'profileHandicap'>) => {
   const roundsKey = userRounds ? `rounds-${userRounds.length}` : 'no-rounds';
   
   useEffect(() => {
@@ -35,7 +62,9 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
 
   // Only calculate stats if we have rounds data
   if (!roundsLoading && userRounds) {
-    stats = calculateStats(userRounds);
+    // Filter rounds based on the selected filter
+    const filteredRounds = filterRoundsByType(userRounds, roundFilter);
+    stats = calculateStats(filteredRounds);
     
     console.log("[MainStats] Calculating scores with:", {
       roundsKey,
@@ -47,8 +76,8 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
       handicapIndex: handicapIndex
     });
     
-    if (scoreType === 'net' && userRounds.length > 0) {
-      const calculatedRounds = userRounds.map(round => {
+    if (scoreType === 'net' && filteredRounds.length > 0) {
+      const calculatedRounds = filteredRounds.map(round => {
         const netScore = Math.round(round.gross_score - handicapIndex);
         const netToPar = Math.round(round.to_par_gross - handicapIndex);
         return { 
@@ -109,7 +138,40 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
   
   // Render the actual stats
   return (
-    <div key={roundsKey} className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 p-4 sm:p-6">
+    <div key={roundsKey} className="space-y-4 p-4 sm:p-6">
+      {/* Round Filter Toggle */}
+      {onRoundFilterChange && (
+        <div className="flex justify-center">
+          <div className="flex space-x-1 bg-muted/50 rounded-lg p-1">
+            <Button
+              variant={roundFilter === 'all' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => onRoundFilterChange('all')}
+              className="h-8 px-3 text-xs"
+            >
+              All Rounds
+            </Button>
+            <Button
+              variant={roundFilter === '9hole' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => onRoundFilterChange('9hole')}
+              className="h-8 px-3 text-xs"
+            >
+              9 Hole
+            </Button>
+            <Button
+              variant={roundFilter === '18hole' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => onRoundFilterChange('18hole')}
+              className="h-8 px-3 text-xs"
+            >
+              18 Hole
+            </Button>
+          </div>
+        </div>
+      )}
+      
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
       <div className="bg-background rounded-lg p-4 border">
         <div className="flex items-center justify-between">
           <div className="space-y-1 pr-2">
@@ -149,6 +211,7 @@ export const MainStats = ({ userRounds, roundsLoading, scoreType, calculateStats
           <div className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 rounded-full flex items-center justify-center bg-primary/10">
             <Flag className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
           </div>
+        </div>
         </div>
       </div>
     </div>

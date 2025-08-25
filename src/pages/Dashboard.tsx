@@ -48,6 +48,7 @@ export default function Dashboard() {
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
+  const [roundFilter, setRoundFilter] = useState<'all' | '9hole' | '18hole'>('all');
   const [processingStripeSession, setProcessingStripeSession] = useState(false);
   
   const sessionId = searchParams.get('session_id');
@@ -280,6 +281,8 @@ export default function Dashboard() {
                 scoreType={scoreType}
                 calculateStats={calculateStats}
                 handicapIndex={handicapFromProfile}
+                roundFilter={roundFilter}
+                onRoundFilterChange={setRoundFilter}
               />
             </div>
             
