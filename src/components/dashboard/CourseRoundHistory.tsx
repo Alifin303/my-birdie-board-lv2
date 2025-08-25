@@ -63,8 +63,32 @@ export const CourseRoundHistory = ({
     round => round.courses && round.courses.id === selectedCourseId
   );
   
+  // Handle empty state - still show back button and course info
   if (courseRounds.length === 0) {
-    return null;
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-semibold flex items-center">
+            <Button 
+              variant="outline"
+              className="mr-3 gap-2"
+              onClick={onBackClick}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Button>
+            Course History
+          </h2>
+        </div>
+        
+        <div className="text-center py-12 space-y-4">
+          <h3 className="text-lg font-medium text-muted-foreground">No rounds found</h3>
+          <p className="text-muted-foreground">
+            All rounds for this course have been deleted. Add a new round to start tracking your progress.
+          </p>
+        </div>
+      </div>
+    );
   }
   
   let courseName = "Course";
