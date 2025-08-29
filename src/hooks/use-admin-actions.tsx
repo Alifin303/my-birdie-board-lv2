@@ -96,8 +96,12 @@ export function useAdminActions() {
         const scores = userRounds.map(round => round.gross_score);
         const holeCounts = userRounds.map(round => round.holes_played || 18);
         
-        const { updateUserHandicap } = await import('@/integrations/supabase');
-        await updateUserHandicap(roundData.user_id);
+        const { calculateHandicapIndex, updateUserHandicap } = await import('@/integrations/supabase');
+        await updateUserHandicap(
+          roundData.user_id,
+          scores,
+          holeCounts
+        );
       }
       
       toast({

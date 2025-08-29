@@ -139,7 +139,7 @@ export const CourseRoundHistory = ({
           
           const { updateUserHandicap } = await import('@/integrations/supabase');
           
-          const newHandicap = await updateUserHandicap(session.user.id);
+          const newHandicap = await updateUserHandicap(session.user.id, grossScores);
           console.log("Updated handicap after round deletion to:", newHandicap);
           
           toast({
