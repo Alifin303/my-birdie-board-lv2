@@ -234,19 +234,28 @@ export function createSaveRoundHandler({
       console.log("Round saved successfully:", round);
       console.log(`Saved tee_name: "${round.tee_name}" and tee_id: "${round.tee_id}"`);
       
-      // Update the user's handicap based on their recent round history using proper WHS calculation
-      console.log("Updating user handicap with course/tee data...");
-      try {
-        const newHandicap = await updateUserHandicap(session.user.id);
+      const { data: userRounds, error: userRoundsError } = await supabase
+        .from('rounds')
+        .select('gross_score, holes_played')
+        .eq('user_id', session.user.id)
+        .order('date', { ascending: false });
+        
+      if (userRoundsError) {
+        console.error("Error fetching user rounds for handicap update:", userRoundsError);
+      } else if (userRounds && userRounds.length > 0) {
+        const grossScores = userRounds.map(r => r.gross_score);
+        const holeCounts = userRounds.map(r => r.holes_played || 18);
+        
+        console.log("Updating handicap based on rounds:", grossScores);
+        console.log("Hole counts for rounds:", holeCounts);
+        
+        const newHandicap = await updateUserHandicap(session.user.id, grossScores, holeCounts);
         console.log("Updated handicap to:", newHandicap);
         
         toast.toast({
           title: "Handicap Updated",
           description: `Your handicap index is now ${newHandicap.toFixed(1)}`,
         });
-      } catch (handicapError) {
-        console.error("Error updating handicap:", handicapError);
-        // Don't fail the round save if handicap update fails
       }
       
       queryClient.invalidateQueries({ queryKey: ['userRounds'] });

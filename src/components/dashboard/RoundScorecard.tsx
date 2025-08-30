@@ -172,7 +172,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
           
         if (!userRoundsError && userRounds && userRounds.length > 0) {
           const grossScores = userRounds.map(r => r.gross_score);
-          const newHandicap = await updateUserHandicap(session.user.id);
+          const newHandicap = await updateUserHandicap(session.user.id, grossScores);
           toast({
             title: "Handicap Updated",
             description: `Your handicap index is now ${newHandicap}`,
