@@ -1,110 +1,45 @@
 
 /**
- * Calculates a handicap index based on a set of scores
- * This follows a simplified version of the World Handicap System
- * with a maximum handicap index of 54 and allowing for negative handicaps for exceptional players
+ * Calculates a handicap index based on score differentials using the World Handicap System
+ * @param scoreDifferentials Array of score differentials calculated as (Adjusted Gross Score - Course Rating) × (113 ÷ Slope Rating)
+ * @param scores Optional array of raw scores for logging purposes
+ * @param holes Optional array of holes played for logging purposes
  */
-export const calculateHandicapIndex = (scores: number[], holes: number[] = []): number => {
-  if (!scores || scores.length === 0) return 0;
-
-  // Convert 9-hole scores to 18-hole equivalent scores
-  // In WHS, 9-hole scores are doubled and then adjusted by adding a value
-  // We'll use a simplified approach: double the 9-hole score and add 1 stroke
-  const adjustedScores = scores.map((score, index) => {
-    const holeCount = holes[index] || 18;
-    if (holeCount === 9) {
-      // Add sanity check for exceptionally high 9-hole scores
-      // For scores that are extremely high over par, cap the adjustment
-      // This prevents unrealistic handicaps in edge cases
-      const adjustedScore = score * 2 + 1;
-      
-      // If score is more than 20 over par for 9 holes, we'll consider it an outlier
-      // Assuming par is around 36 for 9 holes, anything over 56 is likely an outlier
-      const estimatedPar = 36; // Estimated par for 9 holes
-      const isLikelyOutlier = score > (estimatedPar + 20);
-      
-      // For outliers, use a more conservative approach
-      if (isLikelyOutlier) {
-        // Use a more reasonable adjustment for handicap calculation
-        // This prevents extremely negative handicaps from a single unusual round
-        console.log(`Adjusting outlier 9-hole score: ${score} (adjusted from ${adjustedScore} to ${score + estimatedPar})`);
-        return score + estimatedPar; // Add estimated par instead of doubling
-      }
-      
-      return adjustedScore; // Double the 9-hole score and add 1 stroke adjustment
-    }
-    return score; // Keep 18-hole scores as is
-  });
-
-  // Sort scores from best to worst (lowest to highest)
-  const sortedScores = [...adjustedScores].sort((a, b) => a - b);
+export const calculateHandicapIndex = (scoreDifferentials: number[], scores: number[] = [], holes: number[] = []): number => {
+  if (!scoreDifferentials || scoreDifferentials.length === 0) return 0;
+  // Sort score differentials from best to worst (lowest to highest)
+  const sortedDifferentials = [...scoreDifferentials].sort((a, b) => a - b);
   
   // Log for debugging
-  console.log("Calculating handicap with scores:", sortedScores);
+  console.log("Calculating handicap with score differentials:", sortedDifferentials);
   console.log("Original scores:", scores);
   console.log("Hole counts:", holes);
-  console.log("Adjusted scores (9-hole rounds converted to 18):", adjustedScores);
   
-  // Determine how many scores to use based on available rounds
-  // Following a simplified version of the World Handicap System
-  let scoresToUse = 0;
-  if (scores.length >= 20) scoresToUse = 8;       // Use best 8 of 20
-  else if (scores.length >= 15) scoresToUse = 6;  // Use best 6 of 15-19
-  else if (scores.length >= 10) scoresToUse = 4;  // Use best 4 of 10-14
-  else if (scores.length >= 5) scoresToUse = 3;   // Use best 3 of 5-9
-  else if (scores.length >= 3) scoresToUse = 1;   // Use best score if fewer than 5 rounds
-  else scoresToUse = 1;                           // Use best score if fewer than 3 rounds
+  // Determine how many differentials to use based on available rounds
+  // Following the World Handicap System
+  let differentialsToUse = 0;
+  if (scoreDifferentials.length >= 20) differentialsToUse = 8;       // Use best 8 of 20
+  else if (scoreDifferentials.length >= 15) differentialsToUse = 6;  // Use best 6 of 15-19
+  else if (scoreDifferentials.length >= 10) differentialsToUse = 4;  // Use best 4 of 10-14
+  else if (scoreDifferentials.length >= 5) differentialsToUse = 3;   // Use best 3 of 5-9
+  else if (scoreDifferentials.length >= 3) differentialsToUse = 1;   // Use best differential if fewer than 5 rounds
+  else differentialsToUse = 1;                                       // Use best differential if fewer than 3 rounds
   
-  // Take the best scores based on the number we determined
-  const bestScores = sortedScores.slice(0, scoresToUse);
-  console.log(`Using best ${scoresToUse} scores:`, bestScores);
+  // Take the best differentials based on the number we determined
+  const bestDifferentials = sortedDifferentials.slice(0, differentialsToUse);
+  console.log(`Using best ${differentialsToUse} differentials:`, bestDifferentials);
   
-  // Calculate the average of best scores
-  const averageScore = bestScores.reduce((sum, score) => sum + score, 0) / bestScores.length;
-  console.log("Average of best scores:", averageScore);
+  // Calculate the average of best differentials
+  const averageDifferential = bestDifferentials.reduce((sum, diff) => sum + diff, 0) / bestDifferentials.length;
+  console.log("Average of best differentials:", averageDifferential);
   
-  // Fixed: Make sure we're not getting unrealistic handicaps for players with mostly high scores
-  // If the average score is very high (more than 36 over par), we should apply additional logic
-  const parBaseline = 72; // Standard 18-hole par
-  const scoreDifferential = averageScore - parBaseline;
-  
-  // Detect unrealistic handicap calculations
-  if (scoreDifferential < -10 && scores.filter(s => s <= parBaseline).length < 2) {
-    console.log("UNREALISTIC HANDICAP DETECTED - Adjusting calculation");
-    console.log(`Most scores are high but calculation would result in very low handicap (${scoreDifferential})`);
-    
-    // If a player has mostly high scores but one extremely low outlier, 
-    // don't let that one score give them a very low handicap
-    const medianScore = sortedScores[Math.floor(sortedScores.length / 2)];
-    const medianDifferential = (medianScore - parBaseline) * 0.5; // Use a modified median approach
-    
-    console.log(`Using median-based approach: median score ${medianScore}, adjusted differential ${medianDifferential}`);
-    
-    // Use the median-based approach, but ensure it doesn't go negative unless truly warranted
-    const adjustedHandicap = medianDifferential > -5 ? medianDifferential : -5;
-    console.log(`Final adjusted handicap: ${adjustedHandicap}`);
-    return adjustedHandicap;
-  }
-  
-  // Standard calculation for normal score distributions
-  const calculatedHandicap = (averageScore - parBaseline) * 0.96;
+  // Calculate handicap index as per WHS (average differential × 0.96)
+  const calculatedHandicap = averageDifferential * 0.96;
   console.log("Raw calculated handicap:", calculatedHandicap);
   
-  // Allow for negative handicaps (plus handicaps) for exceptional players
-  // A negative handicap means a player is expected to score below par
-  
-  // Additional check: Only allow negative handicaps if player has multiple rounds below par
-  if (calculatedHandicap < 0) {
-    const roundsBelowPar = scores.filter(s => s < parBaseline).length;
-    if (roundsBelowPar < 2) {
-      console.log(`Capping handicap at 0 - player has only ${roundsBelowPar} rounds below par`);
-      return 0; // Don't give a plus handicap unless they've proven it with multiple good rounds
-    }
-  }
-  
   // Cap the handicap at 54, which is the maximum allowed in the World Handicap System
-  // But allow for negative handicaps with this additional check
-  const cappedHandicap = Math.min(54, calculatedHandicap);
+  // Allow for negative handicaps (plus handicaps) for exceptional players
+  const cappedHandicap = Math.min(54, Math.max(-5, calculatedHandicap));
   console.log("Final handicap after cap:", cappedHandicap);
 
   // Return the exact calculated value (don't round) to match Supabase's decimal storage
@@ -166,17 +101,26 @@ export const calculateNetToPar = (toPar: number, handicap: number | string | nul
 };
 
 /**
- * Updates a user's handicap in the database based on their recent rounds
+ * Calculates a score differential using the World Handicap System formula
+ * @param adjustedGrossScore The adjusted gross score for the round
+ * @param courseRating The course rating for the tees played
+ * @param slopeRating The slope rating for the tees played
+ * @returns The score differential
+ */
+export const calculateScoreDifferential = (
+  adjustedGrossScore: number,
+  courseRating: number,
+  slopeRating: number
+): number => {
+  return (adjustedGrossScore - courseRating) * (113 / slopeRating);
+};
+
+/**
+ * Updates a user's handicap in the database based on their recent rounds with course/tee data
  * @param userId The user's ID
- * @param rounds An array of round gross scores
- * @param holeCountsArray An array indicating how many holes were played in each round (9 or 18)
  * @returns The new handicap index
  */
-export const updateUserHandicap = async (
-  userId: string, 
-  rounds: number[], 
-  holeCountsArray: number[] = []
-): Promise<number> => {
+export const updateUserHandicap = async (userId: string): Promise<number> => {
   try {
     if (!userId) {
       console.error("Cannot update handicap: No user ID provided");
@@ -186,12 +130,87 @@ export const updateUserHandicap = async (
     // Import supabase client directly
     const { supabase } = await import('@/integrations/supabase');
     
-    // Calculate the new handicap index - DO NOT round, store exact value in database
-    // The maximum handicap index is capped at 54 in the calculateHandicapIndex function
-    const newHandicap = calculateHandicapIndex(rounds, holeCountsArray);
-    console.log(`Updating handicap for user ${userId}: New handicap=${newHandicap} based on ${rounds.length} rounds`);
+    // Fetch user's rounds with course and tee information
+    const { data: roundsData, error: roundsError } = await supabase
+      .from('rounds')
+      .select(`
+        gross_score,
+        holes_played,
+        tee_id,
+        courses!inner(
+          course_tees!inner(
+            rating,
+            slope,
+            tee_id
+          )
+        )
+      `)
+      .eq('user_id', userId)
+      .order('date', { ascending: false });
+
+    if (roundsError) {
+      console.error("Error fetching rounds for handicap calculation:", roundsError);
+      return 0;
+    }
+
+    if (!roundsData || roundsData.length === 0) {
+      console.log("No rounds found for user, setting handicap to 0");
+      const { error } = await supabase
+        .from('profiles')
+        .update({ handicap: 0 })
+        .eq('id', userId);
+      
+      if (error) console.error("Error updating handicap to 0:", error);
+      return 0;
+    }
+
+    // Calculate score differentials using actual course/tee data
+    const scoreDifferentials: number[] = [];
+    const scores: number[] = [];
+    const holes: number[] = [];
+
+    for (const round of roundsData) {
+      const teeData = round.courses?.[0]?.course_tees?.find((tee: any) => tee.tee_id === round.tee_id);
+      
+      if (!teeData) {
+        console.warn(`No tee data found for round with tee_id: ${round.tee_id}, skipping`);
+        continue;
+      }
+
+      const courseRating = teeData.rating || 72;
+      const slopeRating = teeData.slope || 113;
+      const holesPlayed = round.holes_played || 18;
+      
+      // Adjust score for 9-hole rounds (WHS: double and add adjustment)
+      let adjustedScore = round.gross_score;
+      if (holesPlayed === 9) {
+        adjustedScore = round.gross_score * 2 + 1;
+        // Also adjust course rating for 9 holes
+        const adjustedCourseRating = courseRating; // Assume stored course rating is for 18 holes
+      }
+
+      const differential = calculateScoreDifferential(adjustedScore, courseRating, slopeRating);
+      scoreDifferentials.push(differential);
+      scores.push(round.gross_score);
+      holes.push(holesPlayed);
+    }
+
+    if (scoreDifferentials.length === 0) {
+      console.log("No valid rounds with tee data found, setting handicap to 0");
+      const { error } = await supabase
+        .from('profiles')
+        .update({ handicap: 0 })
+        .eq('id', userId);
+      
+      if (error) console.error("Error updating handicap to 0:", error);
+      return 0;
+    }
+
+    // Calculate the new handicap index using score differentials
+    const newHandicap = calculateHandicapIndex(scoreDifferentials, scores, holes);
+    console.log(`Updating handicap for user ${userId}: New handicap=${newHandicap} based on ${scoreDifferentials.length} rounds with course data`);
     
-    // Update the user's profile with the new handicap - storing as decimal
+    // Update the user's profile with the new handicap
     const { data, error } = await supabase
       .from('profiles')
       .update({ handicap: newHandicap })
