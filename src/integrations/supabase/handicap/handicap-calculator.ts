@@ -130,21 +130,10 @@ export const updateUserHandicap = async (userId: string): Promise<number> => {
     // Import supabase client directly
     const { supabase } = await import('@/integrations/supabase');
     
-    // Fetch user's rounds with course and tee information
+    // Fetch user's rounds first
     const { data: roundsData, error: roundsError } = await supabase
       .from('rounds')
-      .select(`
-        gross_score,
-        holes_played,
-        tee_id,
-        courses!inner(
-          course_tees!inner(
-            rating,
-            slope,
-            tee_id
-          )
-        )
-      `)
+      .select('gross_score, holes_played, tee_id, course_id')
       .eq('user_id', userId)
       .order('date', { ascending: false });
 
@@ -170,10 +159,30 @@ export const updateUserHandicap = async (userId: string): Promise<number> => {
     const holes: number[] = [];
 
     for (const round of roundsData) {
-      const teeData = round.courses?.[0]?.course_tees?.find((tee: any) => tee.tee_id === round.tee_id);
+      // Get tee data for this round
+      const { data: teeData, error: teeError } = await supabase
+        .from('course_tees')
+        .select('rating, slope')
+        .eq('course_id', round.course_id)
+        .eq('tee_id', round.tee_id)
+        .single();
       
-      if (!teeData) {
-        console.warn(`No tee data found for round with tee_id: ${round.tee_id}, skipping`);
+      if (teeError || !teeData) {
+        console.warn(`No tee data found for round with course_id: ${round.course_id}, tee_id: ${round.tee_id}, using defaults`);
+        // Use default values if no tee data found
+        const courseRating = 72;
+        const slopeRating = 113;
+        const holesPlayed = round.holes_played || 18;
+        
+        let adjustedScore = round.gross_score;
+        if (holesPlayed === 9) {
+          adjustedScore = round.gross_score * 2 + 1;
+        }
+
+        const differential = calculateScoreDifferential(adjustedScore, courseRating, slopeRating);
+        scoreDifferentials.push(differential);
+        scores.push(round.gross_score);
+        holes.push(holesPlayed);
         continue;
       }
 
@@ -185,8 +194,6 @@ export const updateUserHandicap = async (userId: string): Promise<number> => {
       let adjustedScore = round.gross_score;
       if (holesPlayed === 9) {
         adjustedScore = round.gross_score * 2 + 1;
-        // Also adjust course rating for 9 holes
-        const adjustedCourseRating = courseRating; // Assume stored course rating is for 18 holes
       }
 
       const differential = calculateScoreDifferential(adjustedScore, courseRating, slopeRating);
