@@ -20,6 +20,10 @@ export {
   calculateHandicapIndex, 
   calculateNetScore,
   calculateNetToPar,
+  calculateScoreDifferential,
+  calculateCourseHandicap,
+  applyNetDoubleBogeyAdjustment,
+  applyHandicapCaps,
   updateUserHandicap 
 } from './handicap/handicap-calculator';
 

@@ -1,9 +1,28 @@
 
 /**
- * Calculates a handicap index based on score differentials using the World Handicap System
- * @param scoreDifferentials Array of score differentials calculated as (Adjusted Gross Score - Course Rating) × (113 ÷ Slope Rating)
- * @param scores Optional array of raw scores for logging purposes
- * @param holes Optional array of holes played for logging purposes
+ * World Handicap System (WHS) Implementation
+ * 
+ * ✅ IMPLEMENTED CORRECTLY:
+ * - Score differentials: (Adjusted Gross Score - Course Rating - PCC) × (113 ÷ Slope Rating)
+ * - Handicap index: Average of best differentials × 0.96
+ * - Correct number of differentials based on rounds played (8 of 20, 6 of 15-19, etc.)
+ * - 9-hole score adjustment (double + 1)
+ * - Handicaps CAN GO UP when players post consistently bad rounds
+ * - Course handicap calculation
+ * - Basic handicap capping (-5 to +54)
+ * 
+ * ⚠️ PARTIALLY IMPLEMENTED:
+ * - Net Double Bogey adjustment (functions created but not applied to round scores)
+ * - Soft/Hard cap system (functions created but needs low handicap index tracking)
+ * 
+ * ❌ NOT YET IMPLEMENTED:
+ * - Playing Conditions Calculation (PCC) - always 0
+ * - Low Handicap Index tracking for cap calculations
+ * - Exceptional Score Reduction (ESR)
+ * - Maximum hole score enforcement in actual round posting
+ * 
+ * The current implementation provides accurate handicaps for most golfers but could be
+ * enhanced with the missing features for tournament-level accuracy.
  */
 export const calculateHandicapIndex = (scoreDifferentials: number[], scores: number[] = [], holes: number[] = []): number => {
   if (!scoreDifferentials || scoreDifferentials.length === 0) return 0;
@@ -34,8 +53,12 @@ export const calculateHandicapIndex = (scoreDifferentials: number[], scores: num
   console.log("Average of best differentials:", averageDifferential);
   
   // Calculate handicap index as per WHS (average differential × 0.96)
-  const calculatedHandicap = averageDifferential * 0.96;
+  let calculatedHandicap = averageDifferential * 0.96;
   console.log("Raw calculated handicap:", calculatedHandicap);
+  
+  // Apply soft cap and hard cap adjustments (requires low handicap index tracking)
+  // For now, we'll implement basic capping - in a full system, you'd track the low handicap index
+  // calculatedHandicap = applyHandicapCaps(calculatedHandicap, lowHandicapIndex);
   
   // Cap the handicap at 54, which is the maximum allowed in the World Handicap System
   // Allow for negative handicaps (plus handicaps) for exceptional players
@@ -101,18 +124,83 @@ export const calculateNetToPar = (toPar: number, handicap: number | string | nul
 };
 
 /**
+ * Applies Net Double Bogey adjustment to hole scores per WHS rules
+ * Maximum score per hole = Par + 2 + handicap strokes received on that hole
+ */
+export const applyNetDoubleBogeyAdjustment = (
+  holeScores: number[],
+  holePars: number[],
+  holeHandicaps: number[],
+  courseHandicap: number
+): number[] => {
+  if (!holeScores || holeScores.length === 0) return holeScores;
+  
+  return holeScores.map((score, index) => {
+    const par = holePars[index] || 4;
+    const holeHandicap = holeHandicaps[index] || 18;
+    
+    // Calculate strokes received on this hole
+    const strokesReceived = courseHandicap >= holeHandicap ? Math.floor(courseHandicap / 18) + 1 : Math.floor(courseHandicap / 18);
+    
+    // Net Double Bogey = Par + 2 + strokes received
+    const maxScore = par + 2 + strokesReceived;
+    
+    return Math.min(score, maxScore);
+  });
+};
+
+/**
+ * Calculates course handicap from handicap index
+ * Course Handicap = Handicap Index × (Slope Rating ÷ 113) + (Course Rating - Par)
+ */
+export const calculateCourseHandicap = (
+  handicapIndex: number,
+  slopeRating: number,
+  courseRating: number,
+  par: number
+): number => {
+  return Math.round(handicapIndex * (slopeRating / 113) + (courseRating - par));
+};
+
+/**
+ * Applies soft cap and hard cap adjustments per WHS
+ * Soft cap: +3.0 above low handicap index, reduce increases by 50%
+ * Hard cap: +5.0 above low handicap index, maximum increase
+ */
+export const applyHandicapCaps = (
+  calculatedHandicap: number,
+  lowHandicapIndex: number = 0
+): number => {
+  const softCapThreshold = lowHandicapIndex + 3.0;
+  const hardCapThreshold = lowHandicapIndex + 5.0;
+  
+  if (calculatedHandicap <= softCapThreshold) {
+    return calculatedHandicap;
+  } else if (calculatedHandicap <= hardCapThreshold) {
+    // Soft cap: reduce increase by 50%
+    const excess = calculatedHandicap - softCapThreshold;
+    return softCapThreshold + (excess * 0.5);
+  } else {
+    // Hard cap: maximum increase of 5.0
+    return hardCapThreshold;
+  }
+};
+
+/**
  * Calculates a score differential using the World Handicap System formula
- * @param adjustedGrossScore The adjusted gross score for the round
+ * @param adjustedGrossScore The adjusted gross score for the round (after Net Double Bogey)
  * @param courseRating The course rating for the tees played
  * @param slopeRating The slope rating for the tees played
+ * @param playingConditionsCalculation Optional PCC adjustment (typically 0)
  * @returns The score differential
  */
 export const calculateScoreDifferential = (
   adjustedGrossScore: number,
   courseRating: number,
-  slopeRating: number
+  slopeRating: number,
+  playingConditionsCalculation: number = 0
 ): number => {
-  return (adjustedGrossScore - courseRating) * (113 / slopeRating);
+  return (adjustedGrossScore - courseRating - playingConditionsCalculation) * (113 / slopeRating);
 };
 
 /**
@@ -179,7 +267,7 @@ export const updateUserHandicap = async (userId: string): Promise<number> => {
           adjustedScore = round.gross_score * 2 + 1;
         }
 
-        const differential = calculateScoreDifferential(adjustedScore, courseRating, slopeRating);
+      const differential = calculateScoreDifferential(adjustedScore, courseRating, slopeRating, 0);
         scoreDifferentials.push(differential);
         scores.push(round.gross_score);
         holes.push(holesPlayed);
@@ -196,7 +284,7 @@ export const updateUserHandicap = async (userId: string): Promise<number> => {
         adjustedScore = round.gross_score * 2 + 1;
       }
 
-      const differential = calculateScoreDifferential(adjustedScore, courseRating, slopeRating);
+      const differential = calculateScoreDifferential(adjustedScore, courseRating, slopeRating, 0);
       scoreDifferentials.push(differential);
       scores.push(round.gross_score);
       holes.push(holesPlayed);
