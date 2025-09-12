@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAdminActions } from "@/hooks/use-admin-actions";
 import { RefreshCw } from "lucide-react";
+import { TestHandicapUpdate } from "@/components/admin/TestHandicapUpdate";
 
 export function AdminActions() {
   const { recalculateAllHandicaps, isRecalculatingHandicaps } = useAdminActions();
@@ -46,6 +47,8 @@ export function AdminActions() {
           </CardFooter>
         </Card>
       </div>
+      
+      <TestHandicapUpdate />
     </div>
   );
 }

@@ -30,9 +30,10 @@ export const calculateHandicapIndex = (scoreDifferentials: number[], scores: num
   const sortedDifferentials = [...scoreDifferentials].sort((a, b) => a - b);
   
   // Log for debugging
-  console.log("Calculating handicap with score differentials:", sortedDifferentials);
-  console.log("Original scores:", scores);
-  console.log("Hole counts:", holes);
+    console.log("Calculating handicap with score differentials:", sortedDifferentials);
+    console.log("Original scores:", scores);
+    console.log("Hole counts:", holes);
+    console.log("User rounds count:", scoreDifferentials.length);
   
   // Determine how many differentials to use based on available rounds
   // Following the World Handicap System
@@ -267,7 +268,8 @@ export const updateUserHandicap = async (userId: string): Promise<number> => {
           adjustedScore = round.gross_score * 2 + 1;
         }
 
-      const differential = calculateScoreDifferential(adjustedScore, courseRating, slopeRating, 0);
+        const differential = calculateScoreDifferential(adjustedScore, courseRating, slopeRating, 0);
+        console.log(`Score: ${round.gross_score}, Adjusted: ${adjustedScore}, Rating: ${courseRating}, Slope: ${slopeRating}, Differential: ${differential}`);
         scoreDifferentials.push(differential);
         scores.push(round.gross_score);
         holes.push(holesPlayed);
