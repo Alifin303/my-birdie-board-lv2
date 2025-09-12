@@ -2,7 +2,7 @@
 import { supabase } from "@/integrations/supabase";
 import { UseCourseHandlersProps } from "./types";
 import { ensureCourseExists, findOrCreateCourseByApiId, updateUserHandicap } from "@/integrations/supabase";
-import { getCourseTeesByIdFromDatabase } from "@/integrations/supabase/course/course-db-operations";
+import { getCourseTeesByIdFromDatabase, saveCourseTeesToDatabase } from "@/integrations/supabase/course/course-db-operations";
 import { calculateNetScore } from "@/integrations/supabase";
 
 export function createSaveRoundHandler({
@@ -174,6 +174,35 @@ export function createSaveRoundHandler({
         
         dbCourseId = courseId;
         console.log("Using course_id for API course:", dbCourseId);
+        
+        // Save tee data for API courses to ensure handicap calculations work correctly
+        if (selectedCourse.tees && selectedCourse.tees.length > 0) {
+          console.log("Saving API course tee data to database...");
+          try {
+            // Convert course tees to TeeData format for database storage
+            const teeDataForDb = selectedCourse.tees.map(tee => ({
+              id: tee.id,
+              tee_id: tee.id,
+              name: tee.name,
+              color: tee.gender === 'female' ? 'Red' : 'Blue', // Default colors
+              rating: tee.rating || 72,
+              slope: tee.slope || 113,
+              par: tee.par || 72,
+              gender: (tee.gender || 'male') as 'male' | 'female',
+              yards: tee.yards,
+              holes: tee.holes || []
+            }));
+            
+            const saveSuccess = await saveCourseTeesToDatabase(dbCourseId, teeDataForDb);
+            if (saveSuccess) {
+              console.log("Successfully saved API course tee data");
+            } else {
+              console.warn("Failed to save API course tee data");
+            }
+          } catch (error) {
+            console.warn("Error saving API course tee data:", error);
+          }
+        }
       } else {
         console.log("Ensuring user-added course exists:", selectedCourse.id);
         
