@@ -152,8 +152,8 @@ export const MainContent = ({
                     <div className="rounded-full p-2 w-fit mb-2 bg-[2f4c3d] bg-secondary-foreground">
                       <Upload className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
-                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Upload & Store Your Scorecards</h3>
-                    <p className="mb-2 text-xs text-secondary-foreground">Keep a history of your rounds and track stats effortlessly.</p>
+                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Upload & Store Scorecards</h3>
+                    <p className="mb-2 text-xs text-secondary-foreground">Easily keep a digital history of every round — no more lost scorecards.</p>
                     <div className="mt-auto pt-1">
                       <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.scorecards)} aria-label="Learn more about scorecard uploads" className="p-0 text-xs text-secondary-foreground">
                         Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
@@ -168,7 +168,7 @@ export const MainContent = ({
                       <BarChart2 className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
                     <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Visual Progress Tracking</h3>
-                    <p className="mb-2 text-xs text-secondary-foreground">Charts and graphs give you insights into your strengths and areas to improve.</p>
+                    <p className="mb-2 text-xs text-secondary-foreground">Charts and graphs show where you're improving and where to focus next.</p>
                     <div className="mt-auto pt-1">
                       <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.progress)} aria-label="Learn more about progress tracking" className="p-0 text-xs text-secondary-foreground">
                         Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
@@ -182,8 +182,8 @@ export const MainContent = ({
                     <div className="rounded-full p-2 w-fit mb-2 bg-[s] bg-secondary-foreground">
                       <Award className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
-                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Handicap Generator</h3>
-                    <p className="mb-2 text-xs text-secondary-foreground">Get an accurate handicap calculation based on your rounds.</p>
+                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Handicap Calculator</h3>
+                    <p className="mb-2 text-xs text-secondary-foreground">Get an accurate handicap instantly, based on your rounds.</p>
                     <div className="mt-auto pt-1 bg-transparent">
                       <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.handicap)} aria-label="Learn more about handicap calculation" className="p-0 text-xs text-secondary-foreground">
                         Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
@@ -198,7 +198,7 @@ export const MainContent = ({
                       <Trophy className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
                     <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Course Leaderboards</h3>
-                    <p className="mb-2 text-xs text-secondary-foreground">Compete with friends and other golfers at your favorite courses.</p>
+                    <p className="mb-2 text-xs text-secondary-foreground">Compete with friends and golfers at your favorite courses.</p>
                     <div className="mt-auto pt-1">
                       <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.leaderboards)} aria-label="Learn more about course leaderboards" className="p-0 text-xs text-secondary-foreground">
                         Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
