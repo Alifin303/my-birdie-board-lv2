@@ -46,6 +46,13 @@ const Index = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <link rel="canonical" href="https://mybirdieboard.com/" />
         
+        {/* Open Graph meta tags for social sharing */}
+        <meta property="og:image" content="https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" />
+        <meta property="og:image:alt" content="MyBirdieBoard - Best Golf Score Tracking App" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:image" content="https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" />
+        
         {/* Enhanced structured data with long-tail keywords */}
         <script type="application/ld+json">
           {JSON.stringify({
@@ -128,6 +135,13 @@ const Index = () => {
             backgroundAttachment: isMobile ? "scroll" : "fixed", // Better performance on mobile
           }}
         >
+          {/* Preload critical background image for performance */}
+          <link 
+            rel="preload" 
+            as="image" 
+            href={currentBackgroundImage}
+            fetchPriority="high"
+          />
           {/* Dark overlay with improved opacity for better text contrast */}
           <div 
             className="absolute inset-0 bg-black z-0" 
