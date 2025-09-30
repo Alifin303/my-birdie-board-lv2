@@ -8,7 +8,7 @@ export function createDefaultTee(holes: number = 18): TeeData {
     name: 'White',
     color: '#FFFFFF',
     gender: 'male',
-    rating: holes === 9 ? 36.0 : 72.0,
+    rating: 72.0, // Always use 18-hole equivalent rating for WHS compliance
     slope: 113,
     par: holes === 9 ? 36 : 72,
     holes: Array(holes).fill(null).map((_, idx) => ({

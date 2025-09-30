@@ -258,13 +258,14 @@ export const updateUserHandicap = async (userId: string): Promise<number> => {
       
       if (teeError || !teeData) {
         console.warn(`No tee data found for round with course_id: ${round.course_id}, tee_id: ${round.tee_id}, using defaults`);
-        // Use default values if no tee data found
-        const courseRating = 72;
+        // Use default values if no tee data found (always 18-hole equivalents)
+        let courseRating = 72;
         const slopeRating = 113;
         const holesPlayed = round.holes_played || 18;
         
         let adjustedScore = round.gross_score;
         if (holesPlayed === 9) {
+          // Apply WHS 9-hole adjustment: double the score and add 1
           adjustedScore = round.gross_score * 2 + 1;
         }
 
@@ -276,13 +277,20 @@ export const updateUserHandicap = async (userId: string): Promise<number> => {
         continue;
       }
 
-      const courseRating = teeData.rating || 72;
-      const slopeRating = teeData.slope || 113;
       const holesPlayed = round.holes_played || 18;
       
-      // Adjust score for 9-hole rounds (WHS: double and add adjustment)
+      // For 9-hole rounds, use 18-hole equivalent ratings and adjust the score
+      // WHS: Double the score and add 1 when using 18-hole ratings
+      let courseRating = teeData.rating || 72;
+      let slopeRating = teeData.slope || 113;
       let adjustedScore = round.gross_score;
+      
       if (holesPlayed === 9) {
+        // If the stored rating appears to be a 9-hole rating (≈36), convert to 18-hole equivalent
+        if (courseRating < 50) {
+          courseRating = courseRating * 2;
+        }
+        // Apply WHS 9-hole adjustment: double the score and add 1
         adjustedScore = round.gross_score * 2 + 1;
       }
 
