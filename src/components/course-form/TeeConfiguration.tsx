@@ -77,10 +77,15 @@ export function TeeConfiguration({
             id="course-rating"
             type="number"
             step="0.1"
-            value={currentTee.rating || (currentTee.holes.length === 9 ? 36.0 : 72.0)}
-            onChange={(e) => onRatingChange('rating', parseFloat(e.target.value) || (currentTee.holes.length === 9 ? 36.0 : 72.0))}
-            placeholder={currentTee.holes.length === 9 ? "36.0" : "72.0"}
+            value={currentTee.rating || 72.0}
+            onChange={(e) => onRatingChange('rating', parseFloat(e.target.value) || 72.0)}
+            placeholder="72.0"
           />
+          <p className="text-xs text-muted-foreground">
+            {currentTee.holes.length === 9 
+              ? "Enter 18-hole equivalent rating (9-hole courses use 18-hole ratings per WHS)"
+              : "Official USGA course rating for this tee"}
+          </p>
         </div>
         
         <div className="space-y-2">
@@ -96,11 +101,14 @@ export function TeeConfiguration({
             onChange={(e) => onRatingChange('slope', parseInt(e.target.value) || 113)}
             placeholder="113"
           />
+          <p className="text-xs text-muted-foreground">
+            Official USGA slope rating (55-155)
+          </p>
         </div>
       </div>
       
       <p className="text-xs text-muted-foreground mt-2">
-        Course and slope ratings will be auto-calculated if left at defaults, or you can enter official ratings.
+        Ratings will be auto-calculated if left at defaults. For accurate handicaps, enter official USGA ratings found on course scorecards or GHIN.
       </p>
     </div>
   );

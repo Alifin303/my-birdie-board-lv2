@@ -29,6 +29,7 @@ export const calculateRatings = (tee: TeeData) => {
   
   const totalYards = tee.holes.reduce((sum, hole) => sum + (Number(hole.yards) || 0), 0);
   const totalPar = tee.holes.reduce((sum, hole) => sum + (Number(hole.par) || 0), 0);
+  const numberOfHoles = tee.holes.length;
   
   // If manual ratings are being used, return the manual values
   if (tee.useManualRatings && tee.rating !== undefined && tee.slope !== undefined) {
@@ -45,11 +46,24 @@ export const calculateRatings = (tee: TeeData) => {
     (tee.rating === 72.0 && tee.slope === 113);
   
   if (shouldAutoCalculate) {
-    // Simulated rating based on total yards and par
-    const calculatedRating = parseFloat(((totalYards / 100) * 0.56 + totalPar * 0.24).toFixed(1));
+    // For 9-hole courses, calculate based on actual data then scale to 18-hole equivalent
+    // This ensures 9-hole courses get realistic 18-hole equivalent ratings
+    let calculatedRating: number;
+    let calculatedSlope: number;
     
-    // Simulated slope based on total yards
-    const calculatedSlope = Math.round(113 + (totalYards - 6000) * 0.05);
+    if (numberOfHoles === 9) {
+      // Calculate 9-hole rating, then double it for 18-hole equivalent
+      const nineHoleRating = (totalYards / 100) * 0.56 + totalPar * 0.24;
+      calculatedRating = parseFloat((nineHoleRating * 2).toFixed(1));
+      
+      // Calculate 9-hole slope, adjust for 18-hole equivalent
+      const nineHoleSlope = 113 + (totalYards - 3000) * 0.05;
+      calculatedSlope = Math.round(Math.min(155, Math.max(55, nineHoleSlope * 2)));
+    } else {
+      // Standard 18-hole calculation
+      calculatedRating = parseFloat(((totalYards / 100) * 0.56 + totalPar * 0.24).toFixed(1));
+      calculatedSlope = Math.round(Math.min(155, Math.max(55, 113 + (totalYards - 6000) * 0.05)));
+    }
     
     return { 
       rating: calculatedRating, 
