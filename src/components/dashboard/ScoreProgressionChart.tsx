@@ -14,6 +14,7 @@ interface Round {
   to_par_gross: number;
   to_par_net?: number;
   hole_scores?: any;
+  holes_played?: number;
 }
 
 interface ScoreProgressionChartProps {
@@ -26,12 +27,21 @@ const ScoreProgressionChart = ({ rounds, scoreType, handicapIndex = 0 }: ScorePr
   const [chartData, setChartData] = useState<any[]>([]);
   const [displayMode, setDisplayMode] = useState<'strokes' | 'to_par'>('strokes');
   const [showParLine, setShowParLine] = useState(false);
+  const [holeFilter, setHoleFilter] = useState<'all' | '9' | '18'>('all');
 
   useEffect(() => {
     if (!rounds || rounds.length === 0) return;
 
+    // Filter rounds by hole count
+    const filteredRounds = rounds.filter(round => {
+      if (holeFilter === 'all') return true;
+      if (holeFilter === '9') return round.holes_played === 9;
+      if (holeFilter === '18') return round.holes_played === 18;
+      return true;
+    });
+
     // Sort rounds by date (oldest to newest)
-    const sortedRounds = [...rounds].sort((a, b) => 
+    const sortedRounds = [...filteredRounds].sort((a, b) => 
       new Date(a.date).getTime() - new Date(b.date).getTime()
     );
 
@@ -64,7 +74,7 @@ const ScoreProgressionChart = ({ rounds, scoreType, handicapIndex = 0 }: ScorePr
     });
 
     setChartData(data);
-  }, [rounds, scoreType, handicapIndex, displayMode]);
+  }, [rounds, scoreType, handicapIndex, displayMode, holeFilter]);
 
   if (rounds.length < 2) {
     return (
@@ -91,9 +101,27 @@ const ScoreProgressionChart = ({ rounds, scoreType, handicapIndex = 0 }: ScorePr
 
   return (
     <div className="w-full">
-      <div className="flex justify-between items-center mb-2">
-        <h3 className="text-lg font-medium">Score Progression Over Time</h3>
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-3 mb-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-medium">Score Progression Over Time</h3>
+        </div>
+        <div className="flex justify-between items-center flex-wrap gap-3">
+          <ToggleGroup 
+            type="single" 
+            value={holeFilter} 
+            onValueChange={(value) => value && setHoleFilter(value as 'all' | '9' | '18')}
+          >
+            <ToggleGroupItem value="all" aria-label="All rounds">
+              All Rounds
+            </ToggleGroupItem>
+            <ToggleGroupItem value="9" aria-label="9 hole rounds">
+              9 Holes
+            </ToggleGroupItem>
+            <ToggleGroupItem value="18" aria-label="18 hole rounds">
+              18 Holes
+            </ToggleGroupItem>
+          </ToggleGroup>
+          <div className="flex items-center gap-4">
           <div className="flex items-center space-x-2">
             <Switch
               id="show-par"
@@ -119,6 +147,7 @@ const ScoreProgressionChart = ({ rounds, scoreType, handicapIndex = 0 }: ScorePr
               To Par
             </ToggleGroupItem>
           </ToggleGroup>
+          </div>
         </div>
       </div>
       <div className="h-80 mb-2">
