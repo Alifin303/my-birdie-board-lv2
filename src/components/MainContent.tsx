@@ -118,8 +118,8 @@ export const MainContent = ({
   return <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center mt-16 sm:mt-20 md:mt-8 lg:mt-0">
         <div className="max-w-5xl animate-fade-in mb-4 px-0 mx-0 my-0">
-          <h1 id="hero-heading" className="sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-8 drop-shadow-md lg:text-5xl text-3xl">Play Smarter. Track Every Score. Lower Your Handicap.</h1>
-          <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium mb-8 max-w-3xl mx-auto bg-black/35 backdrop-blur-sm px-4 py-2 rounded-lg lg:text-lg">Join 1,000+ golfers already improving their game with the easiest way to upload scorecards, track stats, and see exactly where you're losing strokes.</p>
+          <h1 id="hero-heading" className="sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-8 drop-shadow-md lg:text-5xl text-3xl">Your Digital Golf Journal for Golf Score Tracking & Performance Analysis</h1>
+          <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium mb-8 max-w-3xl mx-auto bg-black/35 backdrop-blur-sm px-4 py-2 rounded-lg lg:text-lg">Join 1,000+ golfers using the best digital golf journal for golf score tracking. Upload scorecards, analyze your game, and see exactly where you're losing strokes — all in one place.</p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-6">
             <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-lg px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground">
@@ -214,8 +214,8 @@ export const MainContent = ({
       
       <section aria-labelledby="cta-heading" className="w-full py-4 sm:py-6 bg-black/30 backdrop-blur-sm mt-2 sm:mt-3">
         <div className="max-w-5xl mx-auto text-center px-4">
-          <h2 id="cta-heading" className="text-lg sm:text-xl font-bold text-white mb-2">Turn every round into part of your journey.</h2>
-          <p className="text-sm sm:text-base text-white/90 mb-3">Start your digital golf journal today.</p>
+          <h2 id="cta-heading" className="text-lg sm:text-xl font-bold text-white mb-2">Turn every round into part of your digital golf journal.</h2>
+          <p className="text-sm sm:text-base text-white/90 mb-3">Start golf score tracking the smart way with MyBirdieBoard today.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-base px-6 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground">
               <UserPlus className="mr-2 h-5 w-5 flex-shrink-0" aria-hidden="true" />
