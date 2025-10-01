@@ -40,9 +40,9 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>Digital Golf Journal & Golf Score Tracking App - MyBirdieBoard</title>
-        <meta name="description" content="The best digital golf journal for golf score tracking. Track every round, analyze your game, calculate your handicap, and improve your performance. Join 1,000+ golfers using MyBirdieBoard for comprehensive golf score tracking and analytics." />
-        <meta name="keywords" content="digital golf journal, golf score tracking, golf score tracking app, best golf score tracking app for beginners, how to calculate golf handicap step by step, golf analytics, golf performance tracking, golf handicap calculator, golf statistics tracker, course leaderboards, digital golf scorecard" />
+        <title>Best Golf Score Tracking App for Beginners - Calculate Golf Handicap Step by Step | MyBirdieBoard</title>
+        <meta name="description" content="The best golf score tracking app for beginners and pros. Learn how to calculate golf handicap step by step, track golf scores effectively, analyze performance with golf analytics, and compete on course leaderboards." />
+        <meta name="keywords" content="best golf score tracking app for beginners, how to calculate golf handicap step by step, golf score tracking, golf analytics, golf performance tracking, golf handicap calculator, golf statistics tracker, course leaderboards, digital golf scorecard, golf app" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <link rel="canonical" href="https://mybirdieboard.com/" />
         
@@ -61,9 +61,9 @@ const Index = () => {
             "applicationCategory": "SportsApplication",
             "applicationSubCategory": "GolfScoreTracking",
             "operatingSystem": "Web",
-            "name": "MyBirdieBoard - Digital Golf Journal & Golf Score Tracking",
-            "description": "The best digital golf journal and golf score tracking app for golfers of all levels. Track every round, calculate your handicap step by step, and analyze your game with comprehensive golf analytics.",
-            "keywords": "digital golf journal, golf score tracking, golf score tracking app, best golf score tracking app for beginners, how to calculate golf handicap step by step, golf analytics, golf performance tracking, golf handicap calculator, golf statistics tracker, course leaderboards, digital golf scorecard",
+            "name": "MyBirdieBoard - Best Golf Score Tracking App for Beginners",
+            "description": "The best golf score tracking app for beginners and experienced golfers. Learn how to calculate golf handicap step by step, track golf scores effectively, and analyze performance with golf analytics.",
+            "keywords": "best golf score tracking app for beginners, how to calculate golf handicap step by step, golf score tracking, golf analytics, golf performance tracking, golf handicap calculator, golf statistics tracker, course leaderboards, digital golf scorecard",
             "offers": {
               "@type": "Offer",
               "price": "2.99",
@@ -88,8 +88,6 @@ const Index = () => {
               }
             },
             "featureList": [
-              "Digital Golf Journal",
-              "Golf Score Tracking",
               "Best Golf Score Tracking App for Beginners",
               "How to Calculate Golf Handicap Step by Step", 
               "Golf Performance Analytics",
@@ -116,7 +114,7 @@ const Index = () => {
             "@type": "Organization",
             "name": "MyBirdieBoard",
             "url": "https://mybirdieboard.com",
-            "description": "Your digital golf journal for comprehensive golf score tracking. Track every round, calculate your handicap, and improve your game through performance analytics.",
+            "description": "The best golf score tracking app for beginners, helping golfers learn how to calculate golf handicap step by step and improve their game through performance analytics.",
             "sameAs": [
               "https://twitter.com/mybirdieboard",
               "https://facebook.com/mybirdieboard"
@@ -185,7 +183,7 @@ const Index = () => {
         {/* Enhanced Golf Resources section with internal links */}
         <section className="py-12 bg-muted/30">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-8">Master Golf Score Tracking with Your Digital Golf Journal</h2>
+            <h2 className="text-3xl font-bold text-center mb-8">Learn More About Golf Score Tracking</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               <div className="text-center p-6 bg-white rounded-lg shadow-md">
                 <h3 className="text-xl font-semibold mb-3">How to Calculate Golf Handicap Step by Step</h3>
