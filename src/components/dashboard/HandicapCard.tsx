@@ -31,7 +31,7 @@ export const HandicapCard = ({ open, onOpenChange, userName, handicap, userId }:
   const { data: handicapRounds, isLoading } = useQuery({
     queryKey: ['handicapRounds', userId, handicap],
     queryFn: async () => {
-      console.log('Fetching handicap rounds for user:', userId);
+      console.log('Fetching handicap rounds for user:', userId, 'with handicap:', handicap);
       // Fetch all rounds with course and tee information
       const { data: rounds, error } = await supabase
         .from('rounds')

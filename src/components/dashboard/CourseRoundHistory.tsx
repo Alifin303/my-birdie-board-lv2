@@ -110,6 +110,11 @@ export const CourseRoundHistory = ({
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
+      if (!session) {
+        console.error("No active session");
+        return;
+      }
+      
       console.log(`Deleting round with ID ${roundId} from Supabase database`);
       
       const { error } = await supabase
@@ -155,6 +160,8 @@ export const CourseRoundHistory = ({
       });
       
       queryClient.invalidateQueries({ queryKey: ['userRounds'] });
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      queryClient.invalidateQueries({ queryKey: ['handicapRounds'] });
       
     } catch (error: any) {
       console.error("Error deleting round:", error);
