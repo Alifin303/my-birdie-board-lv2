@@ -40,6 +40,7 @@ export const HandicapCard = ({ open, onOpenChange, userName, handicap, userId }:
           date,
           gross_score,
           holes_played,
+          course_id,
           courses:course_id(name),
           tee_name,
           tee_id
@@ -62,6 +63,7 @@ export const HandicapCard = ({ open, onOpenChange, userName, handicap, userId }:
           const { data: teeData } = await supabase
             .from('course_tees')
             .select('slope, rating, par')
+            .eq('course_id', round.course_id)
             .eq('tee_id', round.tee_id)
             .maybeSingle();
 
