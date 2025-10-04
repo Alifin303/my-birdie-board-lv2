@@ -1,7 +1,8 @@
 import { CalendarDays, Trophy, Flag } from "lucide-react";
 import { Stats, Round } from "./types";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { HandicapCard } from "./HandicapCard";
 
 type RoundFilter = 'all' | '9hole' | '18hole';
 
@@ -15,6 +16,8 @@ interface StatsDisplayProps {
   profileHandicap?: number;
   roundFilter?: RoundFilter;
   onRoundFilterChange?: (filter: RoundFilter) => void;
+  userName?: string;
+  userId?: string;
 }
 
 const filterRoundsByType = (rounds: Round[], filter: RoundFilter): Round[] => {
@@ -218,8 +221,9 @@ export const MainStats = ({
   );
 };
 
-export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTypeChange, calculateStats, handicapIndex, profileHandicap }: StatsDisplayProps) => {
+export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTypeChange, calculateStats, handicapIndex, profileHandicap, userName, userId }: StatsDisplayProps) => {
   const roundsKey = userRounds ? `rounds-${userRounds.length}` : 'no-rounds';
+  const [showHandicapCard, setShowHandicapCard] = useState(false);
   
   useEffect(() => {
     console.log("[HandicapCircle] Rounds data changed, handicap info:", { 
@@ -311,6 +315,26 @@ export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTy
           )}
         </div>
       </div>
+      
+      {hasHandicap && userName && userId && (
+        <Button 
+          onClick={() => setShowHandicapCard(true)}
+          variant="outline"
+          className="mt-4"
+        >
+          Show Handicap Card
+        </Button>
+      )}
+
+      {userName && userId && (
+        <HandicapCard
+          open={showHandicapCard}
+          onOpenChange={setShowHandicapCard}
+          userName={userName}
+          handicap={displayHandicap}
+          userId={userId}
+        />
+      )}
     </div>
   );
 };

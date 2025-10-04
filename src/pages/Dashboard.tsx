@@ -303,6 +303,8 @@ export default function Dashboard() {
                   calculateStats={calculateStats}
                   handicapIndex={handicapFromProfile}
                   profileHandicap={handicapFromProfile}
+                  userName={`${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'Golfer'}
+                  userId={profile?.id}
                 />
               </div>
             </div>
