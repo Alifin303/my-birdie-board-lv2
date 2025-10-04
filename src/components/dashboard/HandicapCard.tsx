@@ -134,13 +134,8 @@ export const HandicapCard = ({ open, onOpenChange, userName, handicap, userId }:
         </DialogHeader>
         
         <div id="handicap-card-content" className="bg-white p-8 space-y-6">
-          {/* Header with Logo */}
-          <div className="flex items-start justify-between border-b pb-4">
-            <img 
-              src="/logo.png" 
-              alt="MyBirdieBoard Logo" 
-              className="h-16 w-auto object-contain"
-            />
+          {/* Header */}
+          <div className="flex items-start justify-end border-b pb-4">
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Issued by</p>
               <p className="font-semibold">MyBirdieBoard</p>
