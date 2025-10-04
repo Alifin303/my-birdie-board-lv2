@@ -29,8 +29,9 @@ export const HandicapCard = ({ open, onOpenChange, userName, handicap, userId }:
   const [isDownloading, setIsDownloading] = useState(false);
 
   const { data: handicapRounds, isLoading } = useQuery({
-    queryKey: ['handicapRounds', userId],
+    queryKey: ['handicapRounds', userId, handicap],
     queryFn: async () => {
+      console.log('Fetching handicap rounds for user:', userId);
       // Fetch all rounds with course and tee information
       const { data: rounds, error } = await supabase
         .from('rounds')
@@ -48,10 +49,15 @@ export const HandicapCard = ({ open, onOpenChange, userName, handicap, userId }:
 
       if (error) throw error;
 
+      console.log('Fetched rounds:', rounds);
+
       // For each round, get the tee info (slope and rating)
       const roundsWithTeeInfo = await Promise.all(
         rounds.map(async (round) => {
-          if (!round.tee_id) return null;
+          if (!round.tee_id) {
+            console.log('Round missing tee_id:', round);
+            return null;
+          }
 
           const { data: teeData } = await supabase
             .from('course_tees')
@@ -59,7 +65,10 @@ export const HandicapCard = ({ open, onOpenChange, userName, handicap, userId }:
             .eq('tee_id', round.tee_id)
             .maybeSingle();
 
-          if (!teeData) return null;
+          if (!teeData) {
+            console.log('No tee data found for tee_id:', round.tee_id);
+            return null;
+          }
 
           // Calculate score differential
           const adjustedScore = round.holes_played === 9 
@@ -84,6 +93,8 @@ export const HandicapCard = ({ open, onOpenChange, userName, handicap, userId }:
 
       const validRounds = roundsWithTeeInfo.filter(r => r !== null) as RoundForHandicap[];
       
+      console.log('Valid rounds with tee data:', validRounds.length);
+      
       // Sort by score differential and take the best ones used for handicap
       const sortedByDifferential = [...validRounds].sort((a, b) => a.scoreDifferential - b.scoreDifferential);
       
@@ -95,9 +106,15 @@ export const HandicapCard = ({ open, onOpenChange, userName, handicap, userId }:
       else if (validRounds.length >= 5) roundsToUse = 3;
       else roundsToUse = 1;
 
-      return sortedByDifferential.slice(0, roundsToUse);
+      console.log(`Using ${roundsToUse} out of ${validRounds.length} rounds`);
+      const selectedRounds = sortedByDifferential.slice(0, roundsToUse);
+      console.log('Selected rounds for handicap card:', selectedRounds);
+
+      return selectedRounds;
     },
-    enabled: open
+    enabled: open,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false
   });
 
   const handleDownload = async () => {
