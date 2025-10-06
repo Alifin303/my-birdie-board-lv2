@@ -280,6 +280,7 @@ export function createSaveRoundHandler({
       
       queryClient.invalidateQueries({ queryKey: ['userRounds'] });
       queryClient.invalidateQueries({ queryKey: ['profile'] });
+      queryClient.invalidateQueries({ queryKey: ['handicapRounds'] });
       
       toast.toast({
         title: "Success",
