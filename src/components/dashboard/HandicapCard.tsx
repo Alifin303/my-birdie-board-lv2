@@ -65,7 +65,8 @@ export const HandicapCard = ({ open, onOpenChange, userName, handicap, userId }:
             .select('slope, rating, par')
             .eq('course_id', round.course_id)
             .eq('tee_id', round.tee_id)
-            .maybeSingle();
+            .limit(1)
+            .single();
 
           if (!teeData) {
             console.log('No tee data found for tee_id:', round.tee_id);
