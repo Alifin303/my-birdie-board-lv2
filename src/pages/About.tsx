@@ -19,6 +19,43 @@ const About = () => {
         <meta name="keywords" content="golf score tracking platform, golf analytics software, golf performance tracking, golf handicap system, golf statistics tracker, course leaderboards technology" />
         <link rel="canonical" href="https://mybirdieboard.com/about" />
         
+        {/* Open Graph meta tags */}
+        <meta property="og:title" content="About MyBirdieBoard - Leading Golf Score Tracking Platform" />
+        <meta property="og:description" content="Learn about MyBirdieBoard's golf score tracking, performance analytics, handicap calculator, and course leaderboards." />
+        <meta property="og:url" content="https://mybirdieboard.com/about" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
+        <meta property="og:image:alt" content="MyBirdieBoard - Golf Score Tracking & Analytics Platform" />
+        
+        {/* Twitter Card meta tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="About MyBirdieBoard - Golf Score Tracking Platform" />
+        <meta name="twitter:description" content="Digital golf journal for tracking scores, calculating handicaps, and competing on course leaderboards." />
+        <meta name="twitter:image" content="https://mybirdieboard.com/og-image.png" />
+        <meta name="twitter:image:alt" content="MyBirdieBoard About Page" />
+        
+        {/* Breadcrumb Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://mybirdieboard.com/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "About",
+                "item": "https://mybirdieboard.com/about"
+              }
+            ]
+          })}
+        </script>
+        
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",

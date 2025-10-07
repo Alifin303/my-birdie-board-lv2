@@ -9,6 +9,44 @@ export default function Quiz() {
       <Helmet>
         <title>Golf Improvement Quiz - Find Your Weaknesses | MyBirdieBoard</title>
         <meta name="description" content="Take our quick quiz to identify what's holding your golf game back and get personalized recommendations for improvement." />
+        <link rel="canonical" href="https://mybirdieboard.com/quiz" />
+        
+        {/* Open Graph meta tags */}
+        <meta property="og:title" content="Golf Improvement Quiz - Find Your Weaknesses | MyBirdieBoard" />
+        <meta property="og:description" content="Take our quick quiz to identify what's holding your golf game back and get personalized recommendations for improvement." />
+        <meta property="og:url" content="https://mybirdieboard.com/quiz" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
+        <meta property="og:image:alt" content="MyBirdieBoard Golf Improvement Quiz" />
+        
+        {/* Twitter Card meta tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Golf Improvement Quiz - Find Your Weaknesses" />
+        <meta name="twitter:description" content="Discover what's holding your golf game back with our personalized assessment quiz." />
+        <meta name="twitter:image" content="https://mybirdieboard.com/og-image.png" />
+        <meta name="twitter:image:alt" content="Golf Improvement Quiz" />
+        
+        {/* Breadcrumb Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://mybirdieboard.com/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Quiz",
+                "item": "https://mybirdieboard.com/quiz"
+              }
+            ]
+          })}
+        </script>
       </Helmet>
       
       <div className="min-h-screen flex flex-col"

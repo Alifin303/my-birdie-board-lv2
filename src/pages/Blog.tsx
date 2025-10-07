@@ -62,6 +62,43 @@ export default function Blog() {
         <meta name="keywords" content="golf blog, golf tips, golf analytics, golf performance, golf score tracking tips, golf handicap advice, course leaderboards strategy" />
         <link rel="canonical" href="https://mybirdieboard.com/blog" />
         
+        {/* Open Graph meta tags */}
+        <meta property="og:title" content="Golf Blog - Tips, Analytics & Performance Insights | MyBirdieBoard" />
+        <meta property="og:description" content="Expert golf tips, performance analytics insights, and score tracking strategies to improve your golf game." />
+        <meta property="og:url" content="https://mybirdieboard.com/blog" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
+        <meta property="og:image:alt" content="MyBirdieBoard Golf Blog" />
+        
+        {/* Twitter Card meta tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Golf Blog - Expert Tips & Analytics Insights" />
+        <meta name="twitter:description" content="Data-driven golf tips and performance insights to help you improve your game." />
+        <meta name="twitter:image" content="https://mybirdieboard.com/og-image.png" />
+        <meta name="twitter:image:alt" content="MyBirdieBoard Golf Blog" />
+        
+        {/* Breadcrumb Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://mybirdieboard.com/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Blog",
+                "item": "https://mybirdieboard.com/blog"
+              }
+            ]
+          })}
+        </script>
+        
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",

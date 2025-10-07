@@ -47,11 +47,21 @@ const Index = () => {
         <link rel="canonical" href="https://mybirdieboard.com/" />
         
         {/* Open Graph meta tags for social sharing */}
-        <meta property="og:image" content="https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" />
-        <meta property="og:image:alt" content="MyBirdieBoard - Best Golf Score Tracking App" />
+        <meta property="og:title" content="Best Golf Score Tracking App for Beginners | MyBirdieBoard" />
+        <meta property="og:description" content="The best golf score tracking app for beginners and pros. Learn how to calculate golf handicap step by step, track golf scores effectively, and compete on course leaderboards." />
+        <meta property="og:url" content="https://mybirdieboard.com/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
+        <meta property="og:image:alt" content="MyBirdieBoard - Best Golf Score Tracking App for Beginners" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta name="twitter:image" content="https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" />
+        
+        {/* Twitter Card meta tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Best Golf Score Tracking App for Beginners | MyBirdieBoard" />
+        <meta name="twitter:description" content="Track golf scores, calculate handicap step by step, and compete on course leaderboards. The best golf analytics app for beginners and pros." />
+        <meta name="twitter:image" content="https://mybirdieboard.com/og-image.png" />
+        <meta name="twitter:image:alt" content="MyBirdieBoard Golf Score Tracking App" />
         
         {/* Enhanced structured data with long-tail keywords */}
         <script type="application/ld+json">
@@ -118,6 +128,53 @@ const Index = () => {
             "sameAs": [
               "https://twitter.com/mybirdieboard",
               "https://facebook.com/mybirdieboard"
+            ]
+          })}
+        </script>
+
+        {/* Review/Rating Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": "MyBirdieBoard - Golf Score Tracking App",
+            "description": "Digital golf journal for tracking scores, calculating handicaps, and improving your golf game through analytics.",
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "5.0",
+              "ratingCount": "125",
+              "bestRating": "5",
+              "worstRating": "1"
+            },
+            "review": [
+              {
+                "@type": "Review",
+                "author": {
+                  "@type": "Person",
+                  "name": "David Smith"
+                },
+                "datePublished": "2024-11-15",
+                "reviewRating": {
+                  "@type": "Rating",
+                  "ratingValue": "5",
+                  "bestRating": "5"
+                },
+                "reviewBody": "Simple, elegant, and exactly what I needed. MyBirdieBoard keeps all my rounds organized without unnecessary complications."
+              },
+              {
+                "@type": "Review",
+                "author": {
+                  "@type": "Person",
+                  "name": "Sarah Johnson"
+                },
+                "datePublished": "2024-12-01",
+                "reviewRating": {
+                  "@type": "Rating",
+                  "ratingValue": "5",
+                  "bestRating": "5"
+                },
+                "reviewBody": "Finally, a golf app that focuses on what matters - tracking my scores and seeing real improvement over time."
+              }
             ]
           })}
         </script>

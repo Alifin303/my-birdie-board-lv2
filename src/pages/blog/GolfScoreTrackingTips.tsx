@@ -18,14 +18,62 @@ export default function GolfScoreTrackingTips() {
         <meta name="keywords" content="golf score tracking tips, golf performance tracking, digital golf scorecard, golf statistics, golf improvement" />
         <link rel="canonical" href="https://mybirdieboard.com/blog/golf-score-tracking-tips" />
         
+        {/* Open Graph meta tags */}
+        <meta property="og:title" content="10 Essential Golf Score Tracking Tips for Better Performance" />
+        <meta property="og:description" content="Master golf score tracking with these 10 proven tips used by professional golfers and coaches." />
+        <meta property="og:url" content="https://mybirdieboard.com/blog/golf-score-tracking-tips" />
+        <meta property="og:type" content="article" />
+        <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
+        <meta property="og:image:alt" content="Golf Score Tracking Tips" />
+        <meta property="article:published_time" content="2024-12-09T10:00:00Z" />
+        <meta property="article:modified_time" content="2025-01-16T10:00:00Z" />
+        
+        {/* Twitter Card meta tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="10 Essential Golf Score Tracking Tips" />
+        <meta name="twitter:description" content="Professional techniques to improve your game through better golf score tracking and data analysis." />
+        <meta name="twitter:image" content="https://mybirdieboard.com/og-image.png" />
+        <meta name="twitter:image:alt" content="Golf Score Tracking Tips" />
+        
+        {/* Breadcrumb Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://mybirdieboard.com/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Blog",
+                "item": "https://mybirdieboard.com/blog"
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "Golf Score Tracking Tips",
+                "item": "https://mybirdieboard.com/blog/golf-score-tracking-tips"
+              }
+            ]
+          })}
+        </script>
+        
+        {/* Article Schema */}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Article",
             "headline": "10 Essential Golf Score Tracking Tips for Better Performance",
             "description": "Master golf score tracking with these 10 proven tips used by professional golfers and coaches.",
+            "image": "https://mybirdieboard.com/og-image.png",
             "url": "https://mybirdieboard.com/blog/golf-score-tracking-tips",
-            "datePublished": "2024-12-09",
+            "datePublished": "2024-12-09T10:00:00Z",
+            "dateModified": "2025-01-16T10:00:00Z",
             "author": {
               "@type": "Organization",
               "name": "MyBirdieBoard"
@@ -37,6 +85,10 @@ export default function GolfScoreTrackingTips() {
                 "@type": "ImageObject",
                 "url": "https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png"
               }
+            },
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https://mybirdieboard.com/blog/golf-score-tracking-tips"
             }
           })}
         </script>
