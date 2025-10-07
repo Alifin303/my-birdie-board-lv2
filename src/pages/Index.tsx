@@ -238,9 +238,9 @@ const Index = () => {
         </div>
         
         {/* Enhanced Golf Resources section with internal links */}
-        <section className="py-12 bg-muted/30">
+        <section aria-labelledby="resources-heading" className="py-12 bg-muted/30">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-8">Learn More About Golf Score Tracking</h2>
+            <h2 id="resources-heading" className="text-3xl font-bold text-center mb-8">Learn More About Golf Score Tracking</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               <div className="text-center p-6 bg-white rounded-lg shadow-md">
                 <h3 className="text-xl font-semibold mb-3">How to Calculate Golf Handicap Step by Step</h3>
