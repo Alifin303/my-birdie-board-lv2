@@ -172,7 +172,7 @@ export const MainContent = ({
       </section>
       
       {/* Why MyBirdieBoard Exists */}
-      <section aria-labelledby="why-heading" className="w-full max-w-5xl mx-auto px-4 pb-6">
+      <section aria-labelledby="why-heading" className="section-why w-full max-w-5xl mx-auto px-4 pb-6">
         <h2 id="why-heading" className="text-2xl sm:text-3xl font-bold text-center text-white mb-4 drop-shadow-md">
           Why MyBirdieBoard Exists
         </h2>
