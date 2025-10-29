@@ -116,12 +116,12 @@ export const MainContent = ({
     setSelectedFeature(null);
   };
   return <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
-      <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-left md:text-left mt-16 sm:mt-20 md:mt-8 lg:mt-0">
+      <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-left md:text-left mt-16 sm:mt-20 md:mt-8 lg:mt-0 my-0">
         <div className="max-w-[680px] animate-fade-in mb-4 px-0 mx-auto">
-          <h1 id="hero-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-4 drop-shadow-lg">
+          <h1 id="hero-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-4 drop-shadow-lg my-[50px]">
             Every Round Tells a Story. Don't Let Yours Be Forgotten.
           </h1>
-          <h3 className="text-base sm:text-lg md:text-xl text-white/95 font-medium mb-3 drop-shadow-md">
+          <h3 className="text-base sm:text-lg md:text-xl text-white/95 font-medium mb-3 drop-shadow-md my-0 py-0">
             Track your scores after you play—no apps on the course, no distractions—just pure golf and a permanent record of your journey, progress, and legacy.
           </h3>
           <p className="text-xs sm:text-sm text-white/80 mb-6 italic">
@@ -129,24 +129,12 @@ export const MainContent = ({
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
-            <Button 
-              size="lg" 
-              onClick={onStartSignup} 
-              data-id="cta_hero_start_tracking"
-              aria-label="Start tracking your golf rounds" 
-              className="text-accent-foreground text-lg px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground w-full sm:w-auto"
-            >
+            <Button size="lg" onClick={onStartSignup} data-id="cta_hero_start_tracking" aria-label="Start tracking your golf rounds" className="text-accent-foreground text-lg px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground w-full sm:w-auto">
               <UserPlus className="mr-2 h-5 w-5 flex-shrink-0" aria-hidden="true" />
               <span className="text-sm sm:text-base md:text-lg">Start Tracking My Rounds</span>
             </Button>
             <Link to="/demo" className="w-full sm:w-auto">
-              <Button 
-                size="lg" 
-                variant="outline" 
-                data-id="cta_hero_watch_demo"
-                className="bg-white/10 hover:bg-white/20 text-white border-white/30 px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 w-full" 
-                aria-label="Watch how MyBirdieBoard works"
-              >
+              <Button size="lg" variant="outline" data-id="cta_hero_watch_demo" className="bg-white/10 hover:bg-white/20 text-white border-white/30 px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 w-full" aria-label="Watch how MyBirdieBoard works">
                 <BarChart2 className="mr-2 h-5 w-5 flex-shrink-0" />
                 <span className="text-sm sm:text-base md:text-lg">Watch How It Works</span>
               </Button>
@@ -265,34 +253,18 @@ export const MainContent = ({
             Play with focus. Track with purpose. Improve with clarity.
           </h2>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button 
-              size="lg" 
-              onClick={onStartSignup} 
-              data-id="cta_strip_start_free"
-              aria-label="Start free with MyBirdieBoard" 
-              className="text-accent-foreground text-base px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground w-full sm:w-auto"
-            >
+            <Button size="lg" onClick={onStartSignup} data-id="cta_strip_start_free" aria-label="Start free with MyBirdieBoard" className="text-accent-foreground text-base px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground w-full sm:w-auto">
               <UserPlus className="mr-2 h-5 w-5 flex-shrink-0" aria-hidden="true" />
               <span className="text-sm sm:text-base">Start Free</span>
             </Button>
             <Link to="/demo" className="w-full sm:w-auto">
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="bg-white/10 hover:bg-white/20 text-white border-white/30 px-8 h-auto py-3 shadow-lg transition-all duration-300 w-full" 
-                aria-label="View demo dashboard"
-              >
+              <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white border-white/30 px-8 h-auto py-3 shadow-lg transition-all duration-300 w-full" aria-label="View demo dashboard">
                 <BarChart2 className="mr-2 h-4 w-4 flex-shrink-0" />
                 <span className="text-sm sm:text-base">Try Demo</span>
               </Button>
             </Link>
             <Link to="/faq" className="w-full sm:w-auto">
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="bg-white/10 hover:bg-white/20 text-white border-white/30 px-8 h-auto py-3 shadow-lg transition-all duration-300 w-full" 
-                aria-label="View frequently asked questions"
-              >
+              <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white border-white/30 px-8 h-auto py-3 shadow-lg transition-all duration-300 w-full" aria-label="View frequently asked questions">
                 <HelpCircle className="mr-2 h-4 w-4 flex-shrink-0" />
                 <span className="text-sm sm:text-base">FAQ</span>
               </Button>
