@@ -229,7 +229,7 @@ const Index = () => {
             </div>
           </header>
           
-          <main className="relative z-[1] pt-24 md:pt-32 lg:pt-0 w-full text-center sm:text-left">
+          <main className="relative z-[1] pt-32 sm:pt-0 w-full text-center sm:text-left">
             <MainContent onStartSignup={handleStartSignup} />
             
             {/* Add the UserReviews component */}
