@@ -206,7 +206,7 @@ const Index = () => {
             aria-hidden="true"
           ></div>
           
-          <header className="site-header absolute top-0 left-0 right-0 z-10">
+          <header className="absolute top-0 left-0 right-0 z-10">
             <div className="container mx-auto px-4 py-2">
               <nav className="flex items-center justify-between">
                 <Link to="/" className="flex items-center" aria-label="MyBirdieBoard Home - Best Golf Score Tracking App">
@@ -229,7 +229,7 @@ const Index = () => {
             </div>
           </header>
           
-          <main className="relative z-[1] w-full text-center sm:text-left">
+          <main className="relative z-[1] pt-32 sm:pt-0 w-full text-center sm:text-left">
             <MainContent onStartSignup={handleStartSignup} />
             
             {/* Add the UserReviews component */}
