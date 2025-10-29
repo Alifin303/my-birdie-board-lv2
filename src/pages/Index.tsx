@@ -40,28 +40,28 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>Best Golf Score Tracking App for Beginners - Calculate Golf Handicap Step by Step | MyBirdieBoard</title>
-        <meta name="description" content="The best golf score tracking app for beginners and pros. Learn how to calculate golf handicap step by step, track golf scores effectively, analyze performance with golf analytics, and compete on course leaderboards." />
-        <meta name="keywords" content="best golf score tracking app for beginners, how to calculate golf handicap step by step, golf score tracking, golf analytics, golf performance tracking, golf handicap calculator, golf statistics tracker, course leaderboards, digital golf scorecard, golf app" />
+        <title>MyBirdieBoard — Track Every Round. Improve With Clarity.</title>
+        <meta name="description" content="Play with focus and track your golf journey after you play. Keep every round, see progress, compete on leaderboards. Start free with MyBirdieBoard." />
+        <meta name="keywords" content="golf score tracking, golf handicap calculator, golf performance analytics, course leaderboards, digital golf scorecard, golf app, golf journey" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <link rel="canonical" href="https://mybirdieboard.com/" />
         
         {/* Open Graph meta tags for social sharing */}
-        <meta property="og:title" content="Best Golf Score Tracking App for Beginners | MyBirdieBoard" />
-        <meta property="og:description" content="The best golf score tracking app for beginners and pros. Learn how to calculate golf handicap step by step, track golf scores effectively, and compete on course leaderboards." />
+        <meta property="og:title" content="MyBirdieBoard — Track Every Round. Improve With Clarity." />
+        <meta property="og:description" content="Play with focus and track your golf journey after you play. Keep every round, see progress, compete on leaderboards." />
         <meta property="og:url" content="https://mybirdieboard.com/" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
-        <meta property="og:image:alt" content="MyBirdieBoard - Best Golf Score Tracking App for Beginners" />
+        <meta property="og:image:alt" content="MyBirdieBoard dashboard showing handicap and score progression chart" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         
         {/* Twitter Card meta tags */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Best Golf Score Tracking App for Beginners | MyBirdieBoard" />
-        <meta name="twitter:description" content="Track golf scores, calculate handicap step by step, and compete on course leaderboards. The best golf analytics app for beginners and pros." />
+        <meta name="twitter:title" content="MyBirdieBoard — Track Every Round. Improve With Clarity." />
+        <meta name="twitter:description" content="Play with focus and track your golf journey after you play. Keep every round, see progress, compete on leaderboards." />
         <meta name="twitter:image" content="https://mybirdieboard.com/og-image.png" />
-        <meta name="twitter:image:alt" content="MyBirdieBoard Golf Score Tracking App" />
+        <meta name="twitter:image:alt" content="MyBirdieBoard dashboard showing handicap and score progression" />
         
         {/* Enhanced structured data with long-tail keywords */}
         <script type="application/ld+json">
@@ -212,7 +212,7 @@ const Index = () => {
                 <Link to="/" className="flex items-center" aria-label="MyBirdieBoard Home - Best Golf Score Tracking App">
                   <img 
                     src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" 
-                    alt="MyBirdieBoard - Best Golf Score Tracking App for Beginners & Pros" 
+                    alt="MyBirdieBoard - Track your golf journey" 
                     className="h-32 w-auto object-contain" 
                   />
                 </Link>
@@ -220,7 +220,7 @@ const Index = () => {
                   onClick={() => setShowLoginDialog(true)}
                   variant="ghost" 
                   className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all text-xs sm:text-sm py-1"
-                  aria-label="Log in to your golf tracking account"
+                  aria-label="Log in to your account"
                 >
                   <User className="mr-1 h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
                   Log In

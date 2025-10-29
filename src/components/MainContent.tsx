@@ -116,28 +116,74 @@ export const MainContent = ({
     setSelectedFeature(null);
   };
   return <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
-      <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-center mt-16 sm:mt-20 md:mt-8 lg:mt-0">
-        <div className="max-w-5xl animate-fade-in mb-4 px-0 mx-0 my-0">
-          <h1 id="hero-heading" className="sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-8 drop-shadow-md lg:text-5xl text-3xl">Play Smarter. Track Every Score. Lower Your Handicap.</h1>
-          <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium mb-8 max-w-3xl mx-auto bg-black/35 backdrop-blur-sm px-4 py-2 rounded-lg lg:text-lg">Join 1,000+ golfers already improving their game with the easiest way to upload scorecards, track stats, and see exactly where you're losing strokes.</p>
+      <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-left md:text-left mt-16 sm:mt-20 md:mt-8 lg:mt-0">
+        <div className="max-w-[680px] animate-fade-in mb-4 px-0 mx-auto">
+          <h1 id="hero-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-4 drop-shadow-lg">
+            Every Round Tells a Story. Don't Let Yours Be Forgotten.
+          </h1>
+          <h3 className="text-base sm:text-lg md:text-xl text-white/95 font-medium mb-3 drop-shadow-md">
+            Track your scores after you play—no apps on the course, no distractions—just pure golf and a permanent record of your journey, progress, and legacy.
+          </h3>
+          <p className="text-xs sm:text-sm text-white/80 mb-6 italic">
+            Trusted by 1,000+ golfers already building their golf archive and climbing their course leaderboards.
+          </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-6">
-            <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-lg px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground">
+          <div className="flex flex-col sm:flex-row gap-4 mb-4">
+            <Button 
+              size="lg" 
+              onClick={onStartSignup} 
+              data-id="cta_hero_start_tracking"
+              aria-label="Start tracking your golf rounds" 
+              className="text-accent-foreground text-lg px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground w-full sm:w-auto"
+            >
               <UserPlus className="mr-2 h-5 w-5 flex-shrink-0" aria-hidden="true" />
-              <span className="text-sm sm:text-base md:text-lg">Start Free Trial</span>
+              <span className="text-sm sm:text-base md:text-lg">Start Tracking My Rounds</span>
             </Button>
-            <Link to="/demo">
-              <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300" aria-label="Try demo dashboard">
+            <Link to="/demo" className="w-full sm:w-auto">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                data-id="cta_hero_watch_demo"
+                className="bg-white/10 hover:bg-white/20 text-white border-white/30 px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 w-full" 
+                aria-label="Watch how MyBirdieBoard works"
+              >
                 <BarChart2 className="mr-2 h-5 w-5 flex-shrink-0" />
-                <span className="text-sm sm:text-base md:text-lg">Try Demo</span>
+                <span className="text-sm sm:text-base md:text-lg">Watch How It Works</span>
               </Button>
             </Link>
+          </div>
+          
+          {/* Micro trust row */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs sm:text-sm text-white/90 mt-4">
+            <div className="flex items-center gap-1.5">
+              <span className="text-accent-foreground">✓</span>
+              <span>No phone on the course</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-accent-foreground">✓</span>
+              <span>Add rounds in seconds after you play</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-accent-foreground">✓</span>
+              <span>Your golf history, saved forever</span>
+            </div>
           </div>
         </div>
       </section>
       
+      {/* Why MyBirdieBoard Exists */}
+      <section aria-labelledby="why-heading" className="w-full max-w-5xl mx-auto px-4 pb-6">
+        <h2 id="why-heading" className="text-2xl sm:text-3xl font-bold text-center text-white mb-4 drop-shadow-md">
+          Why MyBirdieBoard Exists
+        </h2>
+        <p className="text-sm sm:text-base md:text-lg text-white/90 text-center max-w-3xl mx-auto mb-6 bg-black/35 backdrop-blur-sm px-4 py-3 rounded-lg">
+          Golf is more than a game—it's your personal journey. Paper scorecards get lost, and most apps distract you mid-round. MyBirdieBoard is the only distraction-free way to play with focus and still keep a powerful digital memory of every round afterward.
+        </p>
+        <div className="w-24 h-0.5 bg-white/30 mx-auto mb-8"></div>
+      </section>
+      
       <section aria-labelledby="features-heading" className="w-full max-w-5xl mx-auto px-4 pb-8">
-        <h2 id="features-heading" className="text-2xl sm:text-3xl font-bold text-center text-white mb-6 drop-shadow-md">Everything You Need to Track Your Golf Game</h2>
+        <h2 id="features-heading" className="sr-only">Key Features</h2>
         
         <div className="backdrop-blur-sm rounded-xl p-4 shadow-lg bg-black/35">
           <div className="flex flex-col lg:flex-row gap-6 justify-between">
@@ -152,10 +198,10 @@ export const MainContent = ({
                     <div className="rounded-full p-2 w-fit mb-2 bg-[2f4c3d] bg-secondary-foreground">
                       <Upload className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
-                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Upload & Store Scorecards</h3>
-                    <p className="mb-2 text-xs text-secondary-foreground">Easily keep a digital history of every round — no more lost scorecards.</p>
+                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Keep a permanent digital record of every round</h3>
+                    <p className="mb-2 text-xs text-secondary-foreground">Upload in seconds after you play—no more lost scorecards.</p>
                     <div className="mt-auto pt-1">
-                      <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.scorecards)} aria-label="Learn more about scorecard uploads" className="p-0 text-xs text-secondary-foreground">
+                      <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.scorecards)} aria-label="Learn more about round archives" className="p-0 text-xs text-secondary-foreground">
                         Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
                       </Button>
                     </div>
@@ -167,10 +213,10 @@ export const MainContent = ({
                     <div className="rounded-full p-2 w-fit mb-2 bg-secondary-foreground bg-[2f4c3d]">
                       <BarChart2 className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
-                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Visual Progress Tracking</h3>
-                    <p className="mb-2 text-xs text-secondary-foreground">Charts and graphs show where you're improving and where to focus next.</p>
+                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">See exactly where you're gaining and losing strokes</h3>
+                    <p className="mb-2 text-xs text-secondary-foreground">Clear charts show trends, so you know what to practice next.</p>
                     <div className="mt-auto pt-1">
-                      <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.progress)} aria-label="Learn more about progress tracking" className="p-0 text-xs text-secondary-foreground">
+                      <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.progress)} aria-label="Learn more about progress analytics" className="p-0 text-xs text-secondary-foreground">
                         Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
                       </Button>
                     </div>
@@ -179,13 +225,13 @@ export const MainContent = ({
                 
                 <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
                   <CardContent className="p-3 flex flex-col h-full bg-stone-200 rounded-xl">
-                    <div className="rounded-full p-2 w-fit mb-2 bg-[s] bg-secondary-foreground">
+                    <div className="rounded-full p-2 w-fit mb-2 bg-secondary-foreground">
                       <Award className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
-                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Handicap Calculator</h3>
-                    <p className="mb-2 text-xs text-secondary-foreground">Get an accurate handicap instantly, based on your rounds.</p>
+                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Watch your handicap drop over time</h3>
+                    <p className="mb-2 text-xs text-secondary-foreground">Your index updates as you add rounds.</p>
                     <div className="mt-auto pt-1 bg-transparent">
-                      <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.handicap)} aria-label="Learn more about handicap calculation" className="p-0 text-xs text-secondary-foreground">
+                      <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.handicap)} aria-label="Learn more about handicap tracking" className="p-0 text-xs text-secondary-foreground">
                         Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
                       </Button>
                     </div>
@@ -197,10 +243,10 @@ export const MainContent = ({
                     <div className="rounded-full p-2 w-fit mb-2 bg-[2f4c3d] bg-secondary-foreground">
                       <Trophy className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
-                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Course Leaderboards</h3>
-                    <p className="mb-2 text-xs text-secondary-foreground">Compete with friends and golfers at your favorite courses.</p>
+                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Compete on course leaderboards</h3>
+                    <p className="mb-2 text-xs text-secondary-foreground">Find your rank at your home course and chase the top spot.</p>
                     <div className="mt-auto pt-1">
-                      <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.leaderboards)} aria-label="Learn more about course leaderboards" className="p-0 text-xs text-secondary-foreground">
+                      <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.leaderboards)} aria-label="Learn more about leaderboards" className="p-0 text-xs text-secondary-foreground">
                         Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
                       </Button>
                     </div>
@@ -212,23 +258,41 @@ export const MainContent = ({
         </div>
       </section>
       
-      <section aria-labelledby="cta-heading" className="w-full py-4 sm:py-6 bg-black/30 backdrop-blur-sm mt-2 sm:mt-3">
+      {/* CTA Reinforcement Strip */}
+      <section aria-labelledby="cta-heading" className="w-full py-6 sm:py-8 bg-black/40 backdrop-blur-sm mt-2 sm:mt-3">
         <div className="max-w-5xl mx-auto text-center px-4">
-          <h2 id="cta-heading" className="text-lg sm:text-xl font-bold text-white mb-2">Turn every round into part of your journey.</h2>
-          <p className="text-sm sm:text-base text-white/90 mb-3">Start your digital golf journal today.</p>
+          <h2 id="cta-heading" className="text-xl sm:text-2xl font-bold text-white mb-4">
+            Play with focus. Track with purpose. Improve with clarity.
+          </h2>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button size="lg" onClick={onStartSignup} aria-label="Sign up for MyBirdieBoard" className="text-accent-foreground text-base px-6 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground">
+            <Button 
+              size="lg" 
+              onClick={onStartSignup} 
+              data-id="cta_strip_start_free"
+              aria-label="Start free with MyBirdieBoard" 
+              className="text-accent-foreground text-base px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground w-full sm:w-auto"
+            >
               <UserPlus className="mr-2 h-5 w-5 flex-shrink-0" aria-hidden="true" />
-              <span className="text-sm sm:text-base">Start Free Trial</span>
+              <span className="text-sm sm:text-base">Start Free</span>
             </Button>
-            <Link to="/demo">
-              <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white px-6 h-auto py-3 shadow-lg transition-all duration-300" aria-label="View demo dashboard">
+            <Link to="/demo" className="w-full sm:w-auto">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="bg-white/10 hover:bg-white/20 text-white border-white/30 px-8 h-auto py-3 shadow-lg transition-all duration-300 w-full" 
+                aria-label="View demo dashboard"
+              >
                 <BarChart2 className="mr-2 h-4 w-4 flex-shrink-0" />
                 <span className="text-sm sm:text-base">Try Demo</span>
               </Button>
             </Link>
-            <Link to="/faq">
-              <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white px-6 h-auto py-3 shadow-lg transition-all duration-300" aria-label="View frequently asked questions">
+            <Link to="/faq" className="w-full sm:w-auto">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="bg-white/10 hover:bg-white/20 text-white border-white/30 px-8 h-auto py-3 shadow-lg transition-all duration-300 w-full" 
+                aria-label="View frequently asked questions"
+              >
                 <HelpCircle className="mr-2 h-4 w-4 flex-shrink-0" />
                 <span className="text-sm sm:text-base">FAQ</span>
               </Button>
