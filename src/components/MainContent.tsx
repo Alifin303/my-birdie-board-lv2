@@ -116,7 +116,7 @@ export const MainContent = ({
     setSelectedFeature(null);
   };
   return <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
-      <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center px-4 py-6 text-left md:text-left mt-16 sm:mt-20 md:mt-8 lg:mt-0 my-0">
+      <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center text-left md:text-left mt-16 sm:mt-20 md:mt-8 lg:mt-0 px-[16px] py-px my-0">
         <div className="max-w-[680px] animate-fade-in mb-4 px-0 mx-auto">
           <h1 id="hero-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-4 drop-shadow-lg my-[50px]">
             Every Round Tells a Story. Don't Let Yours Be Forgotten.
