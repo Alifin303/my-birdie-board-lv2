@@ -36,9 +36,12 @@ const Index = () => {
       <Helmet>
         <title>MyBirdieBoard — Track Every Round. Improve With Clarity.</title>
         <meta name="description" content="Play with focus and track your golf journey after you play. Keep every round, see progress, compete on leaderboards. Start free with MyBirdieBoard." />
-        <meta name="keywords" content="golf score tracking, golf handicap calculator, golf performance analytics, course leaderboards, digital golf scorecard, golf app, golf journey" />
+        <meta name="keywords" content="golf score tracking, golf handicap calculator, golf performance analytics, course leaderboards, digital golf scorecard, golf app, golf journey, track golf scores, golf statistics, golf improvement" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <link rel="canonical" href="https://mybirdieboard.com/" />
+        
+        {/* Preload critical hero image for LCP performance */}
+        <link rel="preload" as="image" href={currentBackgroundImage} fetchPriority="high" />
         
         {/* Open Graph meta tags for social sharing */}
         <meta property="og:title" content="MyBirdieBoard — Track Every Round. Improve With Clarity." />
@@ -46,7 +49,7 @@ const Index = () => {
         <meta property="og:url" content="https://mybirdieboard.com/" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
-        <meta property="og:image:alt" content="MyBirdieBoard dashboard showing handicap and score progression chart" />
+        <meta property="og:image:alt" content="MyBirdieBoard golf score tracking dashboard showing handicap index calculation and score progression analytics for golfers" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         
@@ -55,7 +58,7 @@ const Index = () => {
         <meta name="twitter:title" content="MyBirdieBoard — Track Every Round. Improve With Clarity." />
         <meta name="twitter:description" content="Play with focus and track your golf journey after you play. Keep every round, see progress, compete on leaderboards." />
         <meta name="twitter:image" content="https://mybirdieboard.com/og-image.png" />
-        <meta name="twitter:image:alt" content="MyBirdieBoard dashboard showing handicap and score progression" />
+        <meta name="twitter:image:alt" content="Golf score tracking app dashboard with handicap calculator and performance analytics" />
         
         {/* Enhanced structured data with long-tail keywords */}
         <script type="application/ld+json">
@@ -159,6 +162,64 @@ const Index = () => {
           }]
         })}
         </script>
+
+        {/* FAQ Schema for Featured Snippets */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [{
+            "@type": "Question",
+            "name": "How do I track my golf scores with MyBirdieBoard?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "After you finish your round, simply log in to MyBirdieBoard and add your scores in seconds. No need to use your phone on the course - play with focus and track afterwards. Your rounds are saved permanently in your digital golf archive."
+            }
+          }, {
+            "@type": "Question",
+            "name": "How does MyBirdieBoard calculate my golf handicap?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "MyBirdieBoard automatically calculates your handicap index using the World Handicap System (WHS) formula. As you add rounds, your handicap updates automatically based on your best 8 scores from your last 20 rounds, adjusted for course difficulty and slope rating."
+            }
+          }, {
+            "@type": "Question",
+            "name": "Can I see my golf performance analytics?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes! MyBirdieBoard provides clear charts showing your score progression, trends over time, and exactly where you're gaining or losing strokes. You'll see which areas of your game need practice and track your improvement journey."
+            }
+          }, {
+            "@type": "Question",
+            "name": "What are course leaderboards?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Course leaderboards let you compare your performance with other golfers at your home course. See where you rank and compete for the top spot based on your best rounds at each course you play."
+            }
+          }, {
+            "@type": "Question",
+            "name": "Is MyBirdieBoard free to use?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, you can start tracking your golf rounds with MyBirdieBoard for free. Premium features are available for £2.99 to unlock advanced analytics and unlimited round storage."
+            }
+          }]
+        })}
+        </script>
+
+        {/* Breadcrumb Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [{
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://mybirdieboard.com/"
+          }]
+        })}
+        </script>
       </Helmet>
       
       <div className="min-h-screen flex flex-col">
@@ -171,8 +232,6 @@ const Index = () => {
         // Fallback color
         backgroundAttachment: isMobile ? "scroll" : "fixed" // Better performance on mobile
       }}>
-          {/* Preload critical background image for performance */}
-          <link rel="preload" as="image" href={currentBackgroundImage} fetchPriority="high" />
           {/* Dark overlay with improved opacity for better text contrast */}
           <div className="absolute inset-0 bg-black z-0" style={{
           opacity: 0.25
@@ -182,7 +241,7 @@ const Index = () => {
             <div className="container mx-auto px-4 py-2">
               <nav className="flex items-center justify-between mx-0 my-0">
                 <Link to="/" className="flex items-center" aria-label="MyBirdieBoard Home - Best Golf Score Tracking App">
-                  <img src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" alt="MyBirdieBoard - Track your golf journey" className="h-32 w-auto object-contain" />
+                  <img src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" alt="MyBirdieBoard logo - Best golf score tracking app for calculating handicap and tracking golf performance" className="h-32 w-auto object-contain" />
                 </Link>
                 <Button onClick={() => setShowLoginDialog(true)} variant="ghost" className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all text-xs sm:text-sm py-1" aria-label="Log in to your account">
                   <User className="mr-1 h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
@@ -201,7 +260,7 @@ const Index = () => {
         </div>
         
         {/* Enhanced Golf Resources section with internal links */}
-        <section aria-labelledby="resources-heading" className="py-12 bg-muted/30">
+        <section aria-labelledby="resources-heading" aria-label="Golf score tracking resources and guides" className="py-12 bg-muted/30">
           <div className="container mx-auto px-4">
             <h2 id="resources-heading" className="text-3xl font-bold text-center mb-8">Learn More About Golf Score Tracking</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
