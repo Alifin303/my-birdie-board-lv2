@@ -121,10 +121,10 @@ export const MainContent = ({
           <h1 id="hero-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-4 drop-shadow-lg my-[50px]">
             Every Round Tells a Story. Don't Let Yours Be Forgotten.
           </h1>
-          <h3 className="text-base sm:text-lg md:text-xl text-white/95 font-medium mb-3 drop-shadow-md my-0 py-0">
+          <h3 className="text-base sm:text-lg md:text-xl text-white/95 font-medium mb-3 drop-shadow-md my-0 bg-black/35 backdrop-blur-sm px-4 py-3 rounded-lg">
             Track your scores after you play—no apps on the course, no distractions—just pure golf and a permanent record of your journey, progress, and legacy.
           </h3>
-          <p className="text-xs sm:text-sm text-white/80 mb-6 italic">
+          <p className="text-xs sm:text-sm text-white/80 mb-6 italic bg-black/35 backdrop-blur-sm px-4 py-3 rounded-lg">
             Trusted by 1,000+ golfers already building their golf archive and climbing their course leaderboards.
           </p>
           
@@ -142,7 +142,7 @@ export const MainContent = ({
           </div>
           
           {/* Micro trust row */}
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs sm:text-sm text-white/90 mt-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs sm:text-sm text-white/90 mt-4 bg-black/35 backdrop-blur-sm px-4 py-3 rounded-lg">
             <div className="flex items-center gap-1.5">
               <span className="text-accent-foreground">✓</span>
               <span>No phone on the course</span>
