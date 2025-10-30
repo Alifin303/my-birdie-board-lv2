@@ -121,39 +121,41 @@ export const MainContent = ({
           <h1 id="hero-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-4 drop-shadow-lg my-[50px]">
             Every Round Tells a Story. Don't Let Yours Be Forgotten.
           </h1>
-          <h3 className="text-base sm:text-lg md:text-xl text-white/95 font-medium mb-3 drop-shadow-md my-0 bg-black/35 backdrop-blur-sm px-4 py-3 rounded-lg">
-            Track your scores after you play—no apps on the course, no distractions—just pure golf and a permanent record of your journey, progress, and legacy.
-          </h3>
-          <p className="text-xs sm:text-sm text-white/80 mb-6 italic bg-black/35 backdrop-blur-sm px-4 py-3 rounded-lg">
-            Trusted by 1,000+ golfers already building their golf archive and climbing their course leaderboards.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 mb-4">
-            <Button size="lg" onClick={onStartSignup} data-id="cta_hero_start_tracking" aria-label="Start tracking your golf rounds" className="text-accent-foreground text-lg px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground w-full sm:w-auto">
-              <UserPlus className="mr-2 h-5 w-5 flex-shrink-0" aria-hidden="true" />
-              <span className="text-sm sm:text-base md:text-lg">Start Tracking My Rounds</span>
-            </Button>
-            <Link to="/demo" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" data-id="cta_hero_watch_demo" className="bg-white/10 hover:bg-white/20 text-white border-white/30 px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 w-full" aria-label="Watch how MyBirdieBoard works">
-                <BarChart2 className="mr-2 h-5 w-5 flex-shrink-0" />
-                <span className="text-sm sm:text-base md:text-lg">Watch How It Works</span>
+          <div className="bg-black/35 backdrop-blur-sm px-4 py-4 rounded-lg">
+            <h3 className="text-base sm:text-lg md:text-xl text-white/95 font-medium mb-3 drop-shadow-md my-0">
+              Track your scores after you play—no apps on the course, no distractions—just pure golf and a permanent record of your journey, progress, and legacy.
+            </h3>
+            <p className="text-xs sm:text-sm text-white/80 mb-6 italic">
+              Trusted by 1,000+ golfers already building their golf archive and climbing their course leaderboards.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 mb-4">
+              <Button size="lg" onClick={onStartSignup} data-id="cta_hero_start_tracking" aria-label="Start tracking your golf rounds" className="text-accent-foreground text-lg px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground w-full sm:w-auto">
+                <UserPlus className="mr-2 h-5 w-5 flex-shrink-0" aria-hidden="true" />
+                <span className="text-sm sm:text-base md:text-lg">Start Tracking My Rounds</span>
               </Button>
-            </Link>
-          </div>
-          
-          {/* Micro trust row */}
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs sm:text-sm text-white/90 mt-4 bg-black/35 backdrop-blur-sm px-4 py-3 rounded-lg">
-            <div className="flex items-center gap-1.5">
-              <span className="text-accent-foreground">✓</span>
-              <span>No phone on the course</span>
+              <Link to="/demo" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" data-id="cta_hero_watch_demo" className="bg-white/10 hover:bg-white/20 text-white border-white/30 px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 w-full" aria-label="Watch how MyBirdieBoard works">
+                  <BarChart2 className="mr-2 h-5 w-5 flex-shrink-0" />
+                  <span className="text-sm sm:text-base md:text-lg">Watch How It Works</span>
+                </Button>
+              </Link>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-accent-foreground">✓</span>
-              <span>Add rounds in seconds after you play</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-accent-foreground">✓</span>
-              <span>Your golf history, saved forever</span>
+            
+            {/* Micro trust row */}
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs sm:text-sm text-white/90 mt-4">
+              <div className="flex items-center gap-1.5">
+                <span className="text-accent-foreground">✓</span>
+                <span>No phone on the course</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-accent-foreground">✓</span>
+                <span>Add rounds in seconds after you play</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-accent-foreground">✓</span>
+                <span>Your golf history, saved forever</span>
+              </div>
             </div>
           </div>
         </div>
