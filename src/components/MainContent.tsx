@@ -129,7 +129,7 @@ export const MainContent = ({
               Trusted by 1,000+ golfers already building their golf archive and climbing their course leaderboards.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row gap-4 mb-4 justify-center items-center">
               <Button size="lg" onClick={onStartSignup} data-id="cta_hero_start_tracking" aria-label="Start tracking your golf rounds" className="text-accent-foreground text-lg px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground w-full sm:w-auto">
                 <UserPlus className="mr-2 h-5 w-5 flex-shrink-0" aria-hidden="true" />
                 <span className="text-sm sm:text-base md:text-lg">Start Tracking My Rounds</span>
@@ -143,7 +143,7 @@ export const MainContent = ({
             </div>
             
             {/* Micro trust row */}
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs sm:text-sm text-white/90 mt-4">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs sm:text-sm text-white/90 mt-4 justify-center items-center">
               <div className="flex items-center gap-1.5">
                 <span className="text-accent-foreground">✓</span>
                 <span>No phone on the course</span>
