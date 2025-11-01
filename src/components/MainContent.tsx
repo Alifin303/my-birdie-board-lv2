@@ -117,7 +117,7 @@ export const MainContent = ({
   };
   return <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center text-left md:text-left mt-16 sm:mt-20 md:mt-8 lg:mt-0 px-[16px] py-px my-0">
-        <div className="max-w-[680px] animate-fade-in mb-4 px-0 mx-auto">
+        <div className="max-w-5xl animate-fade-in mb-4 px-0 mx-auto">
           <h1 id="hero-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-4 drop-shadow-lg my-[50px]">
             Every Round Tells a Story. Don't Let Yours Be Forgotten.
           </h1>
@@ -166,7 +166,7 @@ export const MainContent = ({
         <h2 id="why-heading" className="text-2xl sm:text-3xl font-bold text-center text-white mb-4 drop-shadow-md">
           Why MyBirdieBoard Exists
         </h2>
-        <p className="text-sm sm:text-base md:text-lg text-white/90 text-center max-w-3xl mx-auto mb-6 bg-black/35 backdrop-blur-sm px-4 py-3 rounded-lg">
+        <p className="text-sm sm:text-base md:text-lg text-white/90 text-center mb-6 bg-black/35 backdrop-blur-sm px-4 py-3 rounded-lg">
           Golf is more than a game—it's your personal journey. Paper scorecards get lost, and most apps distract you mid-round. MyBirdieBoard is the only distraction-free way to play with focus and still keep a powerful digital memory of every round afterward.
         </p>
         <div className="w-24 h-0.5 bg-white/30 mx-auto mb-8"></div>
