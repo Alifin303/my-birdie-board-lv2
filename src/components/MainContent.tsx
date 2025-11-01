@@ -118,14 +118,14 @@ export const MainContent = ({
   return <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center text-left md:text-left mt-16 sm:mt-20 md:mt-8 lg:mt-0 px-[16px] py-px my-0">
         <div className="max-w-5xl animate-fade-in mb-4 px-0 mx-auto">
-          <h1 id="hero-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-4 drop-shadow-lg my-[50px]">
+          <h1 id="hero-heading" className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-4 drop-shadow-lg my-[50px] text-center md:text-4xl">
             Every Round Tells a Story. Don't Let Yours Be Forgotten.
           </h1>
           <div className="bg-black/35 backdrop-blur-sm px-4 py-4 rounded-lg">
-            <h3 className="text-base sm:text-lg md:text-xl text-white/95 font-medium mb-3 drop-shadow-md my-0">
+            <h3 className="text-base sm:text-lg text-white/95 font-medium mb-3 drop-shadow-md my-0 text-center md:text-2xl">
               Track your scores after you play—no apps on the course, no distractions—just pure golf and a permanent record of your journey, progress, and legacy.
             </h3>
-            <p className="text-xs sm:text-sm text-white/80 mb-6 italic">
+            <p className="text-xs text-white/80 mb-6 italic text-center sm:text-lg">
               Trusted by 1,000+ golfers already building their golf archive and climbing their course leaderboards.
             </p>
             
@@ -135,7 +135,7 @@ export const MainContent = ({
                 <span className="text-sm sm:text-base md:text-lg">Start Tracking My Rounds</span>
               </Button>
               <Link to="/demo" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" data-id="cta_hero_watch_demo" className="bg-white/10 hover:bg-white/20 text-white border-white/30 px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 w-full" aria-label="Watch how MyBirdieBoard works">
+                <Button size="lg" variant="outline" data-id="cta_hero_watch_demo" aria-label="Watch how MyBirdieBoard works" className="bg-white/10 hover:bg-white/20 text-white border-white/30 px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 w-full text-right">
                   <BarChart2 className="mr-2 h-5 w-5 flex-shrink-0" />
                   <span className="text-sm sm:text-base md:text-lg">Watch How It Works</span>
                 </Button>
@@ -166,7 +166,7 @@ export const MainContent = ({
         <h2 id="why-heading" className="text-2xl sm:text-3xl font-bold text-center text-white mb-4 drop-shadow-md">
           Why MyBirdieBoard Exists
         </h2>
-        <p className="text-sm sm:text-base md:text-lg text-white/90 text-center mb-6 bg-black/35 backdrop-blur-sm px-4 py-3 rounded-lg">
+        <p className="text-sm sm:text-base text-white/90 text-center mb-6 bg-black/35 backdrop-blur-sm px-4 py-3 rounded-lg md:text-lg">
           Golf is more than a game—it's your personal journey. Paper scorecards get lost, and most apps distract you mid-round. MyBirdieBoard is the only distraction-free way to play with focus and still keep a powerful digital memory of every round afterward.
         </p>
         <div className="w-24 h-0.5 bg-white/30 mx-auto mb-8"></div>
