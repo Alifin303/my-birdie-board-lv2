@@ -171,7 +171,7 @@ export default function Checkout() {
                     {processingStatus === "redirecting" ? "Redirecting to Stripe..." : "Processing..."}
                   </> : <>
                     <CreditCard className="mr-2 h-5 w-5" />
-                    Start Free Trial
+                    Continue
                   </>}
               </Button>
               
