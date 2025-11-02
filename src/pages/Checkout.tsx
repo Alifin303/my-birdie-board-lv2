@@ -142,9 +142,8 @@ export default function Checkout() {
       <div className="flex-1 flex justify-center items-center relative z-10 py-0 px-[15px]">
         <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-xl p-6 sm:p-8 max-w-2xl w-full">
           <div className="text-center mb-6">
-            <h1 className="font-bold text-primary mb-3 text-2xl">Join thousands of golfers using MyBirdieBoard to track, improve, and lower their scores.
-          </h1>
-            <p className="text-muted-foreground"></p>
+            <h1 className="font-bold text-primary mb-3 text-3xl">Start your 30-Day Free Trial</h1>
+            <p className="text-muted-foreground text-base">Unlock full access to MyBirdieBoard, track your rounds, handicap, and progress with no limits.</p>
           </div>
           
           {error && <Alert variant="destructive" className="mb-6">
@@ -152,60 +151,31 @@ export default function Checkout() {
             </Alert>}
           
           <div className="grid gap-6">
-            <div className="bg-accent/10 rounded-lg p-6 py-0 px-[10px]">
-              <div className="mb-6 py-[10px]">
-                <h2 className="text-xl font-bold text-accent mb-4 text-left">What you get:</h2>
-                <ul className="space-y-3">
-                  <li className="flex items-center text-base">
-                    <CheckCircle className="h-5 w-5 text-accent mr-2 flex-shrink-0" />
-                    <span>Track unlimited rounds</span>
+            <div className="bg-accent/10 rounded-lg p-6">
+              <div className="mb-6">
+                <ul className="space-y-4">
+                  <li className="flex items-start text-lg font-medium">
+                    <span className="mr-3 text-2xl">✅</span>
+                    <span>Free for 30 days</span>
                   </li>
-                  <li className="flex items-center text-base">
-                    <CheckCircle className="h-5 w-5 text-accent mr-2 flex-shrink-0" />
-                    <span>Detailed analytics to spot trends & patterns</span>
-                  </li>
-                  <li className="flex items-center text-base">
-                    <CheckCircle className="h-5 w-5 text-accent mr-2 flex-shrink-0" />
-                    <span>Course leaderboards — see how you rank at every course you play</span>
-                  </li>
-                  <li className="flex items-center text-base">
-                    <CheckCircle className="h-5 w-5 text-accent mr-2 flex-shrink-0" />
-                    <span>Advanced progress tracking for your best rounds & records</span>
-                  </li>
-                  <li className="flex items-center text-base">
-                    <CheckCircle className="h-5 w-5 text-accent mr-2 flex-shrink-0" />
-                    <span>Handicap tracking</span>
+                  <li className="flex items-start text-lg font-medium">
+                    <span className="mr-3 text-2xl">❌</span>
+                    <span>Cancel anytime — you won't be charged if you cancel during your trial</span>
                   </li>
                 </ul>
               </div>
               
-              <div className="mb-6">
-                <div className="bg-primary/10 p-5 rounded-lg mb-5 text-center">
-                  <p className="font-bold text-primary mb-2 text-xl">🎉 Start your 7-day free trial today 🎉</p>
-                  <p className="text-sm">Try MyBirdieBoard with zero risk—cancel before the trial ends and pay nothing. Continue for only £2.99/month. Secure payment via Stripe</p>
-                </div>
-                
-                
-                
-                
-                
-              </div>
-              
-              <div className="mb-6">
-                
-              </div>
-              
-              <Button onClick={handleCreateCheckout} disabled={isLoading || !user} className="w-full bg-accent hover:bg-accent/90 text-white py-6 text-lg">
+              <Button onClick={handleCreateCheckout} disabled={isLoading || !user} className="w-full bg-accent hover:bg-accent/90 text-white py-6 text-lg mb-3">
                 {isLoading ? <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     {processingStatus === "redirecting" ? "Redirecting to Stripe..." : "Processing..."}
                   </> : <>
                     <CreditCard className="mr-2 h-5 w-5" />
-                    Subscribe now
+                    Start Free Trial
                   </>}
               </Button>
               
-              <p className="text-center text-sm text-muted-foreground mt-3"> You won’t be charged until your trial ends. Cancel anytime. Prices shown in GBP; local currency calculated at checkout.</p>
+              <p className="text-center text-sm text-muted-foreground">Secure payment via Stripe. £2.99/month after trial. Billed in your local currency.</p>
             </div>
           </div>
         </div>
