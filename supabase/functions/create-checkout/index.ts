@@ -119,7 +119,7 @@ serve(async (req) => {
         metadata: {
           user_id: user_id,
         },
-        trial_period_days: 7, // 7-day free trial
+        trial_period_days: 30, // 30-day free trial
       },
       allow_promotion_codes: true,
     });
