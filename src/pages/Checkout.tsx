@@ -156,11 +156,11 @@ export default function Checkout() {
                 <ul className="space-y-4">
                   <li className="flex items-start text-lg font-medium">
                     <span className="mr-3 text-2xl">✅</span>
-                    <span>Free for 30 days</span>
+                    <span>Free for 30 days — No upfront payment required </span>
                   </li>
                   <li className="flex items-start text-lg font-medium">
                     <span className="mr-3 text-2xl">❌</span>
-                    <span>Cancel anytime — you won't be charged if you cancel during your trial</span>
+                    <span>Cancel anytime — No charge if you cancel during your trial</span>
                   </li>
                 </ul>
               </div>
