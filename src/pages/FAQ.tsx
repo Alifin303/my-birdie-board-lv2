@@ -137,7 +137,7 @@ export default function FAQ() {
                 <Link to="/guides/golf-performance-analytics" className="text-primary hover:underline mx-1">
                   golf performance analytics guide
                 </Link>.
-                Start your 7-day free trial, then just £2.99/month.
+                Start your 30-day free trial, then just £2.99/month.
               </p>
             </section>
             
