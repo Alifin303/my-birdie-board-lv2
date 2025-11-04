@@ -24,7 +24,7 @@ const faqItems = [{
 }, {
   id: "item-5",
   question: "How much does MyBirdieBoard cost?",
-  answer: "MyBirdieBoard costs £2.99 per month — cancel anytime. The price is shown in GBP but will be converted to your local currency at checkout. Plus, all new subscribers get a 7-day free trial — cancel before the trial ends if it's not for you, and you won't be charged."
+  answer: "MyBirdieBoard costs £2.99 per month — cancel anytime. The price is shown in GBP but will be converted to your local currency at checkout. Plus, all new subscribers get a 30-day free trial — cancel before the trial ends if it's not for you, and you won't be charged."
 }, {
   id: "item-6",
   question: "Why should I use MyBirdieBoard instead of a notebook or spreadsheet?",
