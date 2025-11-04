@@ -142,8 +142,13 @@ export const MainContent = ({
               </Link>
             </div>
             
+            {/* Pricing text */}
+            <p className="text-xs text-white/80 text-center mt-3">
+              30-day free trial. £2.99/month thereafter. Cancel anytime.
+            </p>
+            
             {/* Micro trust row */}
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs sm:text-sm text-white/90 mt-4 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-sm sm:text-base text-white/90 mt-4 justify-center items-center">
               <div className="flex items-center gap-1.5">
                 <span className="text-accent-foreground">✓</span>
                 <span>No phone on the course</span>
