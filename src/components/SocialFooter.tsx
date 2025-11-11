@@ -20,6 +20,12 @@ export const SocialFooter = () => {
           </div>
           
           <div className="flex items-center space-x-4">
+            <Link to="/blog" onClick={handleNavigate}>
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
+                Blog
+              </Button>
+            </Link>
+            
             <Link to="/faq" onClick={handleNavigate}>
               <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
                 FAQ

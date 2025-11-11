@@ -108,6 +108,34 @@ serve(async (req) => {
   <changefreq>monthly</changefreq>
 </url>
 
+<url>
+  <loc>https://mybirdieboard.com/blog/best-golf-clubs-for-beginners</loc>
+  <lastmod>${currentDate}</lastmod>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+
+<url>
+  <loc>https://mybirdieboard.com/blog/improve-your-golf-swing</loc>
+  <lastmod>${currentDate}</lastmod>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+
+<url>
+  <loc>https://mybirdieboard.com/blog/course-management-tips</loc>
+  <lastmod>${currentDate}</lastmod>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+
+<url>
+  <loc>https://mybirdieboard.com/blog/understanding-golf-handicap-system</loc>
+  <lastmod>${currentDate}</lastmod>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+
 <!-- SEO-focused guide pages -->
 <url>
   <loc>https://mybirdieboard.com/guides/how-to-track-golf-scores</loc>

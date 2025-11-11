@@ -11,43 +11,53 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 const blogPosts = [
   {
     id: "golf-score-tracking-tips",
-    title: "10 Essential Tips for Better Golf Score Tracking",
-    description: "Master the art of golf score tracking with these proven techniques used by professional golfers and coaches.",
-    excerpt: "Discover how proper golf score tracking can dramatically improve your game performance and help you identify areas for improvement.",
-    date: "2024-12-09",
-    readTime: "5 min read",
-    tags: ["Golf Score Tracking", "Golf Tips", "Performance"],
+    title: "How to Track Golf Scores Effectively",
+    description: "Master the art of golf score tracking with our comprehensive guide. Learn proven strategies to track scores, analyze performance, and improve your game with data-driven insights.",
+    excerpt: "Discover how effective score tracking can transform your golf game. From choosing the right tracking method to analyzing your performance data, we'll show you everything you need to know.",
+    date: "2025-01-20",
+    readTime: "8 min read",
+    tags: ["Score Tracking", "Analytics", "Improvement"],
     link: "/blog/golf-score-tracking-tips"
   },
   {
-    id: "understanding-golf-handicap",
-    title: "Understanding Your Golf Handicap: A Complete Guide",
-    description: "Everything you need to know about golf handicaps, how they're calculated, and how to use them to improve your game.",
-    excerpt: "Learn how golf handicaps work, why they matter, and how to use your handicap data to set realistic goals and track improvement.",
-    date: "2024-12-08",
-    readTime: "7 min read",
-    tags: ["Golf Handicap", "Golf Analytics", "WHS"],
-    link: "/blog/understanding-golf-handicap"
-  },
-  {
-    id: "golf-analytics-explained",
-    title: "Golf Analytics: The Future of Performance Improvement",
-    description: "How data-driven golf analytics are revolutionizing the way golfers improve their game and track performance.",
-    excerpt: "Explore the world of golf analytics and discover how professional golfers use data to gain competitive advantages.",
-    date: "2024-12-07",
-    readTime: "6 min read",
-    tags: ["Golf Analytics", "Performance Tracking", "Technology"],
-    link: "/blog/golf-analytics-explained"
-  },
-  {
-    id: "course-leaderboards-strategy",
-    title: "How to Dominate Course Leaderboards",
-    description: "Strategic approaches to climbing course leaderboards and competing effectively against other golfers.",
-    excerpt: "Learn the strategies top golfers use to consistently rank high on course leaderboards and compete at their best.",
-    date: "2024-12-06",
+    id: "best-golf-clubs-for-beginners",
+    title: "Best Golf Clubs for Beginners 2025",
+    description: "Complete buying guide for beginner golf clubs. Expert recommendations on drivers, irons, putters, and complete sets to start your golf journey right.",
+    excerpt: "Starting golf? Learn which clubs are best for beginners, what to look for, and top recommendations for complete sets and individual clubs.",
+    date: "2025-01-20",
     readTime: "8 min read",
-    tags: ["Course Leaderboards", "Golf Strategy", "Competition"],
-    link: "/blog/course-leaderboards-strategy"
+    tags: ["Equipment", "Beginners", "Buying Guide"],
+    link: "/blog/best-golf-clubs-for-beginners"
+  },
+  {
+    id: "improve-your-golf-swing",
+    title: "How to Improve Your Golf Swing",
+    description: "10 proven tips to master your golf swing. Learn proper grip, stance, rotation, and follow-through to lower your scores consistently.",
+    excerpt: "Transform your golf swing with these expert techniques. From fundamentals to advanced tips, discover what it takes to build a consistent, powerful swing.",
+    date: "2025-01-20",
+    readTime: "10 min read",
+    tags: ["Technique", "Instruction", "Improvement"],
+    link: "/blog/improve-your-golf-swing"
+  },
+  {
+    id: "course-management-tips",
+    title: "Golf Course Management Tips",
+    description: "Strategic tips to make smarter decisions on the course. Learn when to be aggressive, how to avoid big numbers, and lower your scores through better course management.",
+    excerpt: "Good course management can save you 5-10 strokes per round. Learn the strategic decisions that separate smart golfers from the rest.",
+    date: "2025-01-20",
+    readTime: "9 min read",
+    tags: ["Strategy", "Course Management", "Tips"],
+    link: "/blog/course-management-tips"
+  },
+  {
+    id: "understanding-golf-handicap-system",
+    title: "Understanding the Golf Handicap System",
+    description: "Complete guide to the World Handicap System. Learn how handicaps are calculated, what they mean, and how to establish and improve yours.",
+    excerpt: "Everything you need to know about golf handicaps, from the basics of the WHS to advanced concepts like slope rating and course handicap.",
+    date: "2025-01-20",
+    readTime: "12 min read",
+    tags: ["Handicap", "Rules", "Education"],
+    link: "/blog/understanding-golf-handicap-system"
   }
 ];
 

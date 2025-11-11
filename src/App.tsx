@@ -16,6 +16,10 @@ import Course from "@/pages/Course";
 import Courses from "@/pages/Courses";
 import Blog from "@/pages/Blog";
 import GolfScoreTrackingTips from "@/pages/blog/GolfScoreTrackingTips";
+import BestGolfClubsBeginners from "@/pages/blog/BestGolfClubsBeginners";
+import ImproveGolfSwing from "@/pages/blog/ImproveGolfSwing";
+import CourseManagementTips from "@/pages/blog/CourseManagementTips";
+import UnderstandingHandicap from "@/pages/blog/UnderstandingHandicap";
 import HowToTrackGolfScores from "@/pages/guides/HowToTrackGolfScores";
 import GolfHandicapCalculator from "@/pages/guides/GolfHandicapCalculator";
 import BestGolfScoreApps from "@/pages/guides/BestGolfScoreApps";
@@ -95,13 +99,75 @@ function App() {
                 } />
                 
                 {/* High-volume keyword landing pages */}
-                <Route path="/golf-equipment" element={<GolfEquipment />} />
-                <Route path="/golf-tips" element={<GolfTips />} />
-                <Route path="/golf-lessons" element={<GolfLessons />} />
+                <Route path="/golf-equipment" element={
+                  <>
+                    <Helmet>
+                      <link rel="canonical" href="https://mybirdieboard.com/golf-equipment" />
+                    </Helmet>
+                    <GolfEquipment />
+                  </>
+                } />
+                <Route path="/golf-tips" element={
+                  <>
+                    <Helmet>
+                      <link rel="canonical" href="https://mybirdieboard.com/golf-tips" />
+                    </Helmet>
+                    <GolfTips />
+                  </>
+                } />
+                <Route path="/golf-lessons" element={
+                  <>
+                    <Helmet>
+                      <link rel="canonical" href="https://mybirdieboard.com/golf-lessons" />
+                    </Helmet>
+                    <GolfLessons />
+                  </>
+                } />
                 
                 {/* Blog routes */}
-                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog" element={
+                  <>
+                    <Helmet>
+                      <title>Golf Tips & Insights Blog | MyBirdieBoard</title>
+                      <meta name="description" content="Expert golf tips, equipment reviews, technique guides, and course management strategies to improve your game." />
+                      <link rel="canonical" href="https://mybirdieboard.com/blog" />
+                    </Helmet>
+                    <Blog />
+                  </>
+                } />
                 <Route path="/blog/golf-score-tracking-tips" element={<GolfScoreTrackingTips />} />
+                <Route path="/blog/best-golf-clubs-for-beginners" element={
+                  <>
+                    <Helmet>
+                      <link rel="canonical" href="https://mybirdieboard.com/blog/best-golf-clubs-for-beginners" />
+                    </Helmet>
+                    <BestGolfClubsBeginners />
+                  </>
+                } />
+                <Route path="/blog/improve-your-golf-swing" element={
+                  <>
+                    <Helmet>
+                      <link rel="canonical" href="https://mybirdieboard.com/blog/improve-your-golf-swing" />
+                    </Helmet>
+                    <ImproveGolfSwing />
+                  </>
+                } />
+                <Route path="/blog/course-management-tips" element={
+                  <>
+                    <Helmet>
+                      <link rel="canonical" href="https://mybirdieboard.com/blog/course-management-tips" />
+                    </Helmet>
+                    <CourseManagementTips />
+                  </>
+                } />
+                <Route path="/blog/understanding-golf-handicap-system" element={
+                  <>
+                    <Helmet>
+                      <link rel="canonical" href="https://mybirdieboard.com/blog/understanding-golf-handicap-system" />
+                    </Helmet>
+                    <UnderstandingHandicap />
+                  </>
+                } />
                 
                 {/* Demo route */}
                 <Route path="/demo" element={
@@ -119,7 +185,14 @@ function App() {
                 <Route path="/quiz" element={<Navigate to="/" replace />} />
                 
                 {/* New routes for courses */}
-                <Route path="/courses" element={<Courses />} />
+                <Route path="/courses" element={
+                  <>
+                    <Helmet>
+                      <link rel="canonical" href="https://mybirdieboard.com/courses" />
+                    </Helmet>
+                    <Courses />
+                  </>
+                } />
                 <Route path="/courses/:courseId" element={<Course />} />
                 
                 {/* New SEO-focused guide routes */}

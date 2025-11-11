@@ -27,8 +27,60 @@ serve(async (req) => {
         <news:language>en</news:language>
       </news:publication>
       <news:publication_date>${currentDate}</news:publication_date>
-      <news:title>How to Track Golf Scores Effectively - Expert Tips for Better Performance</news:title>
+      <news:title>How to Track Golf Scores Effectively - Expert Tips</news:title>
       <news:keywords>golf score tracking, golf performance, golf tips, golf analytics</news:keywords>
+    </news:news>
+  </url>
+  
+  <url>
+    <loc>https://mybirdieboard.com/blog/best-golf-clubs-for-beginners</loc>
+    <news:news>
+      <news:publication>
+        <news:name>MyBirdieBoard Golf Blog</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>${currentDate}</news:publication_date>
+      <news:title>Best Golf Clubs for Beginners 2025 - Complete Guide</news:title>
+      <news:keywords>golf clubs, beginner golf, golf equipment, golf gear</news:keywords>
+    </news:news>
+  </url>
+  
+  <url>
+    <loc>https://mybirdieboard.com/blog/improve-your-golf-swing</loc>
+    <news:news>
+      <news:publication>
+        <news:name>MyBirdieBoard Golf Blog</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>${currentDate}</news:publication_date>
+      <news:title>How to Improve Your Golf Swing - 10 Proven Tips</news:title>
+      <news:keywords>golf swing, golf technique, golf instruction, golf tips</news:keywords>
+    </news:news>
+  </url>
+  
+  <url>
+    <loc>https://mybirdieboard.com/blog/course-management-tips</loc>
+    <news:news>
+      <news:publication>
+        <news:name>MyBirdieBoard Golf Blog</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>${currentDate}</news:publication_date>
+      <news:title>Golf Course Management - Strategic Tips to Lower Scores</news:title>
+      <news:keywords>golf strategy, course management, golf tactics, smart golf</news:keywords>
+    </news:news>
+  </url>
+  
+  <url>
+    <loc>https://mybirdieboard.com/blog/understanding-golf-handicap-system</loc>
+    <news:news>
+      <news:publication>
+        <news:name>MyBirdieBoard Golf Blog</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>${currentDate}</news:publication_date>
+      <news:title>Understanding Golf Handicap System - Complete Guide</news:title>
+      <news:keywords>golf handicap, WHS, handicap calculation, golf rules</news:keywords>
     </news:news>
   </url>
 
