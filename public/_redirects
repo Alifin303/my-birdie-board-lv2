@@ -20,8 +20,9 @@
 # SEO guide routes
 /guides/*           /index.html        200
 
-# Ensure sitemap.xml is served with correct content type
-/sitemap.xml        /sitemap.xml       200!   Content-Type=application/xml
+# Serve dynamic sitemaps via edge functions
+/sitemap.xml        /.netlify/functions/sitemap       200
+/sitemap-news.xml   /.netlify/functions/sitemap-news  200
 
 # Handle dynamic routes and client-side routing
 /*                  /index.html        200
