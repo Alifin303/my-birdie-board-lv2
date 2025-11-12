@@ -3,14 +3,14 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
-import { User, BarChart, Users, Flag } from "lucide-react";
+import { User, BarChart, Users, Flag, CreditCard } from "lucide-react";
 
 export function AdminStats() {
   const [stats, setStats] = useState<{
     totalUsers: number;
     totalRounds: number;
     totalCourses: number;
-    averageRoundsPerUser: number;
+    activeSubscriptions: number;
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -40,14 +40,19 @@ export function AdminStats() {
           
         if (courseError) throw courseError;
         
-        // Calculate average rounds per user
-        const averageRounds = userCount ? Math.round((roundCount / userCount) * 10) / 10 : 0;
+        // Get active subscriptions
+        const { count: activeSubCount, error: subError } = await supabase
+          .from('customer_subscriptions')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'active');
+          
+        if (subError) throw subError;
         
         setStats({
           totalUsers: userCount || 0,
           totalRounds: roundCount || 0,
           totalCourses: courseCount || 0,
-          averageRoundsPerUser: averageRounds
+          activeSubscriptions: activeSubCount || 0
         });
       } catch (error) {
         console.error('Error fetching admin stats:', error);
@@ -74,22 +79,22 @@ export function AdminStats() {
           description="Registered users"
         />
         <StatCard 
+          title="Active Subscriptions" 
+          value={stats?.activeSubscriptions || 0}
+          icon={<CreditCard className="h-5 w-5 text-green-500" />}
+          description="Users with active subscription"
+        />
+        <StatCard 
           title="Total Rounds" 
           value={stats?.totalRounds || 0}
-          icon={<Flag className="h-5 w-5 text-green-500" />}
+          icon={<Flag className="h-5 w-5 text-purple-500" />}
           description="Rounds played"
         />
         <StatCard 
           title="Unique Courses" 
           value={stats?.totalCourses || 0}
-          icon={<BarChart className="h-5 w-5 text-purple-500" />}
-          description="Different golf courses"
-        />
-        <StatCard 
-          title="Avg. Rounds/User" 
-          value={stats?.averageRoundsPerUser || 0}
-          icon={<User className="h-5 w-5 text-orange-500" />}
-          description="Average rounds per user"
+          icon={<BarChart className="h-5 w-5 text-orange-500" />}
+          description="All courses in database"
         />
       </div>
     </div>
