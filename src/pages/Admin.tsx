@@ -8,6 +8,7 @@ import { AdminStats } from "@/components/admin/AdminStats";
 import { UsersList } from "@/components/admin/UsersList";
 import { UserDetail } from "@/components/admin/UserDetail";
 import { AdminActions } from "@/components/admin/AdminActions";
+import { CourseManagement } from "@/components/admin/CourseManagement";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -102,6 +103,7 @@ export default function Admin() {
               <TabsList className="mb-6">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="users">Users</TabsTrigger>
+                <TabsTrigger value="courses">Courses</TabsTrigger>
                 <TabsTrigger value="actions">Admin Actions</TabsTrigger>
               </TabsList>
               
@@ -111,6 +113,10 @@ export default function Admin() {
               
               <TabsContent value="users">
                 <UsersList onUserSelect={setSelectedUserId} />
+              </TabsContent>
+              
+              <TabsContent value="courses">
+                <CourseManagement />
               </TabsContent>
               
               <TabsContent value="actions">
