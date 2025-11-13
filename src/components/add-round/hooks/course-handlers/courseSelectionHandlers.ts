@@ -2,6 +2,7 @@ import { SimplifiedCourseDetail, SimplifiedGolfCourse } from "../../types";
 import { UseCourseHandlersProps } from "./types";
 import { getCourseDetails, GolfCourse } from "@/services/golfCourseApi";
 import { convertToSimplifiedCourseDetail, loadUserAddedCourseDetails } from "../../utils/courseUtils";
+import { supabase } from "@/integrations/supabase/client";
 
 export function createCourseSelectionHandlers({
   currentStep,
@@ -59,14 +60,40 @@ export function createCourseSelectionHandlers({
       // Handle API course or database-stored API course
       else if (course.isApiCourse || course.apiCourseId) {
         const apiId = course.apiCourseId || course.id.toString();
-        console.log("Loading API course:", apiId);
+        console.log("Loading course with API ID:", apiId);
         
+        // First, check if this course exists in our database with full tee data
+        try {
+          const { data: dbCourse, error: dbError } = await supabase
+            .from('courses')
+            .select('id, name, city, state, api_course_id')
+            .eq('api_course_id', apiId)
+            .maybeSingle();
+          
+          if (!dbError && dbCourse) {
+            console.log("Found course in database with API ID:", apiId, "DB ID:", dbCourse.id);
+            
+            // Try to load full course details from database
+            const dbCourseDetail = await loadUserAddedCourseDetails(dbCourse.id);
+            
+            if (dbCourseDetail && dbCourseDetail.tees && dbCourseDetail.tees.length > 0) {
+              console.log("Using database version of course (has been edited or saved)");
+              setSelectedCourse(dbCourseDetail);
+              setOriginalCourseDetail(null);
+              setScores([]);
+              setCurrentStep('scorecard');
+              return;
+            }
+          }
+        } catch (dbCheckError) {
+          console.log("Error checking database for course, will fetch from API:", dbCheckError);
+        }
+        
+        // If not in database or no tees, fetch from API
+        console.log("Fetching course from API:", apiId);
         const apiCourseDetail = await getCourseDetails(apiId);
         console.log("API course details:", apiCourseDetail);
         
-        // Store the original API response - convert to null for proper typing
-        // We're not using the original course detail directly in the UI flow, 
-        // but keeping it for reference/debugging purposes
         setOriginalCourseDetail(null);
         
         // Convert to our simplified format
@@ -83,7 +110,7 @@ export function createCourseSelectionHandlers({
         }
         
         setSelectedCourse(simplifiedCourseDetail);
-      } 
+      }
       // Fallback for any course without clear origin
       else {
         console.log("Loading course by ID:", course.id);
