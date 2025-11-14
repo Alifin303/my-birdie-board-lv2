@@ -40,11 +40,11 @@ export function AdminStats() {
           
         if (courseError) throw courseError;
         
-        // Get active subscriptions
+        // Get active and trialing subscriptions
         const { count: activeSubCount, error: subError } = await supabase
           .from('customer_subscriptions')
           .select('*', { count: 'exact', head: true })
-          .eq('status', 'active');
+          .in('status', ['active', 'trialing']);
           
         if (subError) throw subError;
         
