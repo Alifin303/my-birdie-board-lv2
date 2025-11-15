@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -56,6 +57,7 @@ export function TeeEditor({ tee, courseId, onBack }: TeeEditorProps) {
     yards: tee?.yards || null,
   });
   const [holes, setHoles] = useState<HoleData[]>([]);
+  const [holeCount, setHoleCount] = useState<9 | 18>(18);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -71,6 +73,13 @@ export function TeeEditor({ tee, courseId, onBack }: TeeEditorProps) {
       })));
     }
   }, [tee]);
+
+  useEffect(() => {
+    // Update hole count based on actual holes loaded
+    if (holes.length > 0) {
+      setHoleCount(holes.length <= 9 ? 9 : 18);
+    }
+  }, [holes.length]);
 
   const fetchHoles = async () => {
     if (!tee?.id) return;
@@ -229,6 +238,28 @@ export function TeeEditor({ tee, courseId, onBack }: TeeEditorProps) {
     setHoles(newHoles);
   };
 
+  const handleHoleCountChange = (count: string) => {
+    const newCount = parseInt(count) as 9 | 18;
+    setHoleCount(newCount);
+    
+    if (newCount > holes.length) {
+      // Add more holes
+      const additionalHoles = Array.from(
+        { length: newCount - holes.length },
+        (_, i) => ({
+          hole_number: holes.length + i + 1,
+          par: 4,
+          yards: null,
+          handicap: holes.length + i + 1,
+        })
+      );
+      setHoles([...holes, ...additionalHoles]);
+    } else if (newCount < holes.length) {
+      // Remove extra holes
+      setHoles(holes.slice(0, newCount));
+    }
+  };
+
   const { totalPar, totalYards } = calculateTotals();
 
   return (
@@ -330,7 +361,21 @@ export function TeeEditor({ tee, courseId, onBack }: TeeEditorProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Hole-by-Hole Details</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Hole-by-Hole Details</CardTitle>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="hole-count" className="text-sm">Number of Holes:</Label>
+              <Select value={holeCount.toString()} onValueChange={handleHoleCountChange}>
+                <SelectTrigger id="hole-count" className="w-24">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="9">9</SelectItem>
+                  <SelectItem value="18">18</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
