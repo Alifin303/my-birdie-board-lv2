@@ -26,6 +26,8 @@ interface LeaderboardEntry {
   net_score?: number;
   holes_played?: number;
   round_type?: string;
+  stableford_gross?: number;
+  stableford_net?: number;
 }
 
 interface CourseLeaderboardProps {
@@ -46,8 +48,8 @@ export const CourseLeaderboard = ({
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [dateRange, setDateRange] = useState<'monthly' | 'yearly' | 'all-time'>('monthly');
-  const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
-  const [displayedScoreType, setDisplayedScoreType] = useState<'gross' | 'net'>('gross');
+  const [scoreType, setScoreType] = useState<'gross' | 'net' | 'stableford-gross' | 'stableford-net'>('gross');
+  const [displayedScoreType, setDisplayedScoreType] = useState<'gross' | 'net' | 'stableford-gross' | 'stableford-net'>('gross');
   const [selectedMonth, setSelectedMonth] = useState<Date | undefined>(new Date());
   const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -195,6 +197,8 @@ export const CourseLeaderboard = ({
           net_score,
           to_par_gross,
           to_par_net,
+          stableford_gross,
+          stableford_net,
           user_id,
           tee_name,
           holes_played,
@@ -325,6 +329,13 @@ export const CourseLeaderboard = ({
             const grossScore = round.gross_score;
             const adjustedHandicap = playerHandicap / 2; // 9-hole handicap
             const netScore = round.net_score !== null ? round.net_score : calculateNetScore(grossScore, adjustedHandicap);
+            const stablefordGross = round.stableford_gross || 0;
+            const stablefordNet = round.stableford_net || 0;
+            
+            let displayScore = grossScore;
+            if (scoreType === 'net') displayScore = netScore;
+            else if (scoreType === 'stableford-gross') displayScore = stablefordGross;
+            else if (scoreType === 'stableford-net') displayScore = stablefordNet;
             
             processedData.push({
               id: round.id,
@@ -332,7 +343,9 @@ export const CourseLeaderboard = ({
               username: username,
               gross_score: grossScore,
               net_score: netScore,
-              score: scoreType === 'gross' ? grossScore : netScore,
+              stableford_gross: stablefordGross,
+              stableford_net: stablefordNet,
+              score: displayScore,
               isCurrentUser: round.user_id === currentUserId,
               tee_name: round.tee_name,
               user_id: round.user_id,
@@ -341,11 +354,14 @@ export const CourseLeaderboard = ({
               round_type: "Front 9 Only"
             });
           } else if (round.holes_played === 18 && holeScores.length > 0) {
-            // 18-hole round - calculate front 9 score
+            // 18-hole round - calculate front 9 score (Stableford not available for partial rounds)
             const { gross: front9Gross, par: front9Par } = calculateRoundScore(holeScores, 'front9', 18);
             if (front9Gross > 0) {
               const adjustedHandicap = playerHandicap / 2; // 9-hole handicap
               const front9NetScore = calculateNetScore(front9Gross, adjustedHandicap);
+              
+              let displayScore = front9Gross;
+              if (scoreType === 'net') displayScore = front9NetScore;
               
               processedData.push({
                 id: round.id,
@@ -353,7 +369,9 @@ export const CourseLeaderboard = ({
                 username: username,
                 gross_score: front9Gross,
                 net_score: front9NetScore,
-                score: scoreType === 'gross' ? front9Gross : front9NetScore,
+                stableford_gross: 0,
+                stableford_net: 0,
+                score: displayScore,
                 isCurrentUser: round.user_id === currentUserId,
                 tee_name: round.tee_name,
                 user_id: round.user_id,
@@ -370,6 +388,13 @@ export const CourseLeaderboard = ({
             const grossScore = round.gross_score;
             const adjustedHandicap = playerHandicap / 2; // 9-hole handicap
             const netScore = round.net_score !== null ? round.net_score : calculateNetScore(grossScore, adjustedHandicap);
+            const stablefordGross = round.stableford_gross || 0;
+            const stablefordNet = round.stableford_net || 0;
+            
+            let displayScore = grossScore;
+            if (scoreType === 'net') displayScore = netScore;
+            else if (scoreType === 'stableford-gross') displayScore = stablefordGross;
+            else if (scoreType === 'stableford-net') displayScore = stablefordNet;
             
             processedData.push({
               id: round.id,
@@ -377,7 +402,9 @@ export const CourseLeaderboard = ({
               username: username,
               gross_score: grossScore,
               net_score: netScore,
-              score: scoreType === 'gross' ? grossScore : netScore,
+              stableford_gross: stablefordGross,
+              stableford_net: stablefordNet,
+              score: displayScore,
               isCurrentUser: round.user_id === currentUserId,
               tee_name: round.tee_name,
               user_id: round.user_id,
@@ -386,11 +413,14 @@ export const CourseLeaderboard = ({
               round_type: "Back 9 Only"
             });
           } else if (round.holes_played === 18 && holeScores.length > 0) {
-            // 18-hole round - calculate back 9 score
+            // 18-hole round - calculate back 9 score (Stableford not available for partial rounds)
             const { gross: back9Gross, par: back9Par } = calculateRoundScore(holeScores, 'back9', 18);
             if (back9Gross > 0) {
               const adjustedHandicap = playerHandicap / 2; // 9-hole handicap
               const back9NetScore = calculateNetScore(back9Gross, adjustedHandicap);
+              
+              let displayScore = back9Gross;
+              if (scoreType === 'net') displayScore = back9NetScore;
               
               processedData.push({
                 id: round.id,
@@ -398,7 +428,9 @@ export const CourseLeaderboard = ({
                 username: username,
                 gross_score: back9Gross,
                 net_score: back9NetScore,
-                score: scoreType === 'gross' ? back9Gross : back9NetScore,
+                stableford_gross: 0,
+                stableford_net: 0,
+                score: displayScore,
                 isCurrentUser: round.user_id === currentUserId,
                 tee_name: round.tee_name,
                 user_id: round.user_id,
@@ -412,6 +444,8 @@ export const CourseLeaderboard = ({
           // All rounds or 18-hole only
           const grossScore = round.gross_score;
           const playerHandicapValue = playerHandicap !== undefined ? playerHandicap : 0;
+          const stablefordGross = round.stableford_gross || 0;
+          const stablefordNet = round.stableford_net || 0;
           
           let netScore;
           if (round.net_score !== null && round.net_score !== undefined) {
@@ -429,13 +463,20 @@ export const CourseLeaderboard = ({
             roundTypeDisplay = "9 Holes";
           }
           
+          let displayScore = grossScore;
+          if (scoreType === 'net') displayScore = netScore;
+          else if (scoreType === 'stableford-gross') displayScore = stablefordGross;
+          else if (scoreType === 'stableford-net') displayScore = stablefordNet;
+          
           processedData.push({
             id: round.id,
             date: round.date,
             username: username,
             gross_score: grossScore,
             net_score: netScore,
-            score: scoreType === 'gross' ? grossScore : netScore,
+            stableford_gross: stablefordGross,
+            stableford_net: stablefordNet,
+            score: displayScore,
             isCurrentUser: round.user_id === currentUserId,
             tee_name: round.tee_name,
             user_id: round.user_id,
@@ -464,7 +505,12 @@ export const CourseLeaderboard = ({
         }))
       );
       
-      processedData.sort((a, b) => a.score - b.score);
+      // Sort by score - for Stableford, higher is better
+      if (scoreType === 'stableford-gross' || scoreType === 'stableford-net') {
+        processedData.sort((a, b) => b.score - a.score); // Descending for Stableford
+      } else {
+        processedData.sort((a, b) => a.score - b.score); // Ascending for stroke play
+      }
       
       processedData = processedData.map((entry, index) => ({
         ...entry,
@@ -665,6 +711,8 @@ export const CourseLeaderboard = ({
                 <SelectContent>
                   <SelectItem value="gross">Gross Score</SelectItem>
                   <SelectItem value="net">Net Score</SelectItem>
+                  <SelectItem value="stableford-gross">Stableford (Gross)</SelectItem>
+                  <SelectItem value="stableford-net">Stableford (Net)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -688,7 +736,12 @@ export const CourseLeaderboard = ({
                 <div>
                   <p className="text-sm">Date: {format(new Date(userBestScore.date), 'MMM d, yyyy')}</p>
                   <p className="text-sm">
-                    Score: {displayedScoreType === 'gross' ? userBestScore.gross_score : userBestScore.net_score}
+                    Score: {
+                      displayedScoreType === 'gross' ? userBestScore.gross_score :
+                      displayedScoreType === 'net' ? userBestScore.net_score :
+                      displayedScoreType === 'stableford-gross' ? `${userBestScore.stableford_gross} pts` :
+                      `${userBestScore.stableford_net} pts`
+                    }
                   </p>
                   <p className="text-sm">Round: {getRoundTypeLabel(userBestScore)}</p>
                   {userBestScore.tee_name && <p className="text-sm">Tee: {userBestScore.tee_name}</p>}
@@ -712,7 +765,10 @@ export const CourseLeaderboard = ({
                     {!isMobile && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Round</th>}
                     {!isMobile && availableTees.length > 0 && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Tee</th>}
                     <th className="text-right p-3 text-sm font-medium text-muted-foreground">
-                      {displayedScoreType === 'gross' ? 'Gross' : 'Net'}
+                      {displayedScoreType === 'gross' ? 'Gross' :
+                       displayedScoreType === 'net' ? 'Net' :
+                       displayedScoreType === 'stableford-gross' ? 'Points (Gross)' :
+                       'Points (Net)'}
                     </th>
                   </tr>
                 </thead>
@@ -752,7 +808,10 @@ export const CourseLeaderboard = ({
                         {!isMobile && <td className="p-3 text-sm">{getRoundTypeLabel(entry)}</td>}
                         {!isMobile && availableTees.length > 0 && <td className="p-3 text-sm">{entry.tee_name || 'N/A'}</td>}
                         <td className="p-3 text-sm text-right">
-                          {displayedScoreType === 'gross' ? entry.gross_score : entry.net_score}
+                          {displayedScoreType === 'gross' ? entry.gross_score :
+                           displayedScoreType === 'net' ? entry.net_score :
+                           displayedScoreType === 'stableford-gross' ? entry.stableford_gross :
+                           entry.stableford_net}
                         </td>
                       </tr>
                     ))
