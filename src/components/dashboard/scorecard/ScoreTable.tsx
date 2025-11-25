@@ -2,6 +2,7 @@
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScoreTableProps } from "./types";
+import { calculateHoleStableford, calculateNetHoleStableford } from "@/utils/stablefordCalculator";
 
 export const ScoreTable = ({ 
   scores, 
@@ -20,6 +21,13 @@ export const ScoreTable = ({
   const totalPenalties = scores.reduce((sum, score) => sum + (score.penalties || 0), 0);
   const girCount = scores.filter(score => score.gir).length;
   const girPercentage = scores.length > 0 ? Math.round((girCount / scores.length) * 100) : 0;
+  
+  // Calculate Stableford points per hole
+  const stablefordPoints = scores.map(score => {
+    if (!score.strokes || score.strokes === 0) return 0;
+    return calculateHoleStableford(score.strokes, score.par);
+  });
+  const totalStableford = stablefordPoints.reduce((sum, points) => sum + points, 0);
 
   const scoreChunks = [];
   for (let i = 0; i < scores.length; i += 3) {
@@ -84,6 +92,21 @@ export const ScoreTable = ({
                 );
               })}
               <td className="px-2 py-2 text-center font-medium text-primary">{totalStrokes}</td>
+            </tr>
+            
+            <tr className="border-b bg-accent/10">
+              <td className="px-2 py-2 text-sm font-medium text-primary">Points</td>
+              {scores.map((score, index) => {
+                const points = stablefordPoints[index];
+                return (
+                  <td key={`stableford-${score.hole}`} className="px-1 py-2 text-center">
+                    <div className="w-7 h-7 flex items-center justify-center mx-auto text-sm font-medium text-primary">
+                      {score.strokes ? points : '-'}
+                    </div>
+                  </td>
+                );
+              })}
+              <td className="px-2 py-2 text-center font-medium text-primary">{totalStableford}</td>
             </tr>
             
             {showDetailedStats && (
@@ -221,6 +244,21 @@ export const ScoreTable = ({
               })}
             </div>
             
+            <div className="grid grid-cols-3 border-b bg-accent/10">
+              {chunk.map((score, index) => {
+                const chunkStartIndex = chunkIndex * 3;
+                const globalIndex = chunkStartIndex + index + startIndex;
+                const points = stablefordPoints[globalIndex];
+                
+                return (
+                  <div key={`mobile-stableford-${score.hole}`} className="p-2 text-center border-r last:border-r-0">
+                    <span className="text-xs text-muted-foreground block mb-1">Points</span>
+                    <span className="text-sm font-medium">{score.strokes ? points : '-'}</span>
+                  </div>
+                );
+              })}
+            </div>
+            
             {showDetailedStats && (
               <>
                 <div className="grid grid-cols-3 border-b">
@@ -310,6 +348,9 @@ export const ScoreTable = ({
           
           <div className="text-sm font-medium">Total Score:</div>
           <div className="text-sm text-right">{totalStrokes}</div>
+          
+          <div className="text-sm font-medium bg-accent/10 -mx-3 px-3 py-1">Stableford Points:</div>
+          <div className="text-sm text-right bg-accent/10 -mx-3 px-3 py-1 font-semibold">{totalStableford}</div>
           
           {showDetailedStats && (
             <>

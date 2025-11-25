@@ -4,6 +4,8 @@ import { UseCourseHandlersProps } from "./types";
 import { ensureCourseExists, findOrCreateCourseByApiId, updateUserHandicap } from "@/integrations/supabase";
 import { getCourseTeesByIdFromDatabase, saveCourseTeesToDatabase } from "@/integrations/supabase/course/course-db-operations";
 import { calculateNetScore } from "@/integrations/supabase";
+import { calculateGrossStableford, calculateNetStableford } from "@/utils/stablefordCalculator";
+import { calculateCourseHandicap } from "@/integrations/supabase/handicap/handicap-calculator";
 
 export function createSaveRoundHandler({
   selectedCourse,
@@ -228,6 +230,28 @@ export function createSaveRoundHandler({
       console.log(`- tee_name: "${teeName}" (${typeof teeName})`);
       console.log(`- tee_id: "${teeId}" (${typeof teeId})`);
       
+      // Calculate Stableford scores
+      const grossStableford = calculateGrossStableford(scores);
+      
+      // Calculate course handicap for net Stableford
+      let courseHandicap = 0;
+      if (handicapIndex && handicapIndex > 0 && selectedTee.rating && selectedTee.slope) {
+        const par = scores.reduce((sum, s) => sum + s.par, 0);
+        courseHandicap = calculateCourseHandicap(
+          handicapIndex,
+          selectedTee.slope,
+          selectedTee.rating,
+          par
+        );
+        
+        // Adjust for 9-hole rounds
+        if (holesPlayed === 9) {
+          courseHandicap = Math.round(courseHandicap / 2);
+        }
+      }
+      
+      const netStableford = calculateNetStableford(scores, courseHandicap);
+      
       const roundData = {
         user_id: session.user.id,
         course_id: dbCourseId,
@@ -238,6 +262,8 @@ export function createSaveRoundHandler({
         to_par_gross: toParGross,
         net_score: netScore,
         to_par_net: toParNet,
+        stableford_gross: grossStableford,
+        stableford_net: netStableford,
         hole_scores: JSON.stringify(scores),
         handicap_at_posting: handicapIndex,
         holes_played: holesPlayed

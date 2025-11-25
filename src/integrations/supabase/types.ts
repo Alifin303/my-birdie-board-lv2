@@ -224,6 +224,8 @@ export type Database = {
           holes_played: number | null
           id: number
           net_score: number | null
+          stableford_gross: number | null
+          stableford_net: number | null
           tee_id: string | null
           tee_name: string | null
           to_par_gross: number | null
@@ -241,6 +243,8 @@ export type Database = {
           holes_played?: number | null
           id?: number
           net_score?: number | null
+          stableford_gross?: number | null
+          stableford_net?: number | null
           tee_id?: string | null
           tee_name?: string | null
           to_par_gross?: number | null
@@ -258,6 +262,8 @@ export type Database = {
           holes_played?: number | null
           id?: number
           net_score?: number | null
+          stableford_gross?: number | null
+          stableford_net?: number | null
           tee_id?: string | null
           tee_name?: string | null
           to_par_gross?: number | null
