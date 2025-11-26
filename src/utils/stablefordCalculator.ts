@@ -54,13 +54,14 @@ export const calculateGrossStableford = (scores: HoleScore[]): number => {
 
 /**
  * Calculate handicap strokes for each hole based on course handicap
- * Distributes strokes across holes based on hole handicap (difficulty)
+ * Distributes strokes across holes based on hole handicap (difficulty/stroke index)
  */
 const getHandicapStrokesForHole = (
   holeHandicap: number, 
   courseHandicap: number
 ): number => {
-  if (!holeHandicap || courseHandicap <= 0) return 0;
+  // Validate inputs
+  if (courseHandicap <= 0 || holeHandicap <= 0) return 0;
   
   // Each hole with handicap <= courseHandicap gets 1 stroke
   let strokes = holeHandicap <= courseHandicap ? 1 : 0;
@@ -84,22 +85,36 @@ export const calculateNetStableford = (
   courseHandicap: number
 ): number => {
   if (!courseHandicap || courseHandicap <= 0) {
+    console.log("No course handicap, using gross Stableford");
     return calculateGrossStableford(scores);
   }
 
+  console.log("Calculating net Stableford with course handicap:", courseHandicap);
+  
   return scores.reduce((total, score) => {
     if (score.strokes === undefined || score.strokes === null) return total;
     
+    // Use hole's handicap (stroke index) if available, otherwise default to hole number
+    const holeHandicap = score.handicap ?? score.hole;
+    
+    if (!score.handicap) {
+      console.warn(`Hole ${score.hole} missing handicap/stroke index, using hole number as default`);
+    }
+    
     const handicapStrokes = getHandicapStrokesForHole(
-      score.handicap || 1, 
+      holeHandicap, 
       courseHandicap
     );
     
-    return total + calculateNetHoleStableford(
+    const netPoints = calculateNetHoleStableford(
       score.strokes, 
       score.par, 
       handicapStrokes
     );
+    
+    console.log(`Hole ${score.hole}: strokes=${score.strokes}, par=${score.par}, holeHandicap=${holeHandicap}, handicapStrokes=${handicapStrokes}, netPoints=${netPoints}`);
+    
+    return total + netPoints;
   }, 0);
 };
 
@@ -119,8 +134,10 @@ export const getStablefordPointsPerHole = (
     
     let net = gross;
     if (courseHandicap && courseHandicap > 0) {
+      // Use hole's handicap (stroke index) if available, otherwise default to hole number
+      const holeHandicap = score.handicap ?? score.hole;
       const handicapStrokes = getHandicapStrokesForHole(
-        score.handicap || 1, 
+        holeHandicap, 
         courseHandicap
       );
       net = calculateNetHoleStableford(score.strokes, score.par, handicapStrokes);
