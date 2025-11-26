@@ -231,7 +231,16 @@ export function createSaveRoundHandler({
       console.log(`- tee_id: "${teeId}" (${typeof teeId})`);
       
       // Calculate Stableford scores
+      console.log("Calculating Stableford scores...");
+      console.log("Scores data for Stableford:", scores.map(s => ({ 
+        hole: s.hole, 
+        strokes: s.strokes, 
+        par: s.par, 
+        handicap: s.handicap 
+      })));
+      
       const grossStableford = calculateGrossStableford(scores);
+      console.log("Gross Stableford:", grossStableford);
       
       // Calculate course handicap for net Stableford
       let courseHandicap = 0;
@@ -244,13 +253,18 @@ export function createSaveRoundHandler({
           par
         );
         
+        console.log("Course handicap before 9-hole adjustment:", courseHandicap);
+        
         // Adjust for 9-hole rounds
         if (holesPlayed === 9) {
           courseHandicap = Math.round(courseHandicap / 2);
         }
+        
+        console.log("Final course handicap for Stableford:", courseHandicap);
       }
       
       const netStableford = calculateNetStableford(scores, courseHandicap);
+      console.log("Net Stableford:", netStableford);
       
       const roundData = {
         user_id: session.user.id,
