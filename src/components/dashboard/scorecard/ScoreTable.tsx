@@ -11,7 +11,9 @@ export const ScoreTable = ({
   handleGIRChange,
   title,
   startIndex = 0,
-  showDetailedStats = false
+  showDetailedStats = false,
+  courseHandicap = 0,
+  showNet = false
 }: ScoreTableProps) => {
   if (!scores || scores.length === 0) return null;
   
@@ -22,11 +24,40 @@ export const ScoreTable = ({
   const girCount = scores.filter(score => score.gir).length;
   const girPercentage = scores.length > 0 ? Math.round((girCount / scores.length) * 100) : 0;
   
-  // Calculate Stableford points per hole
-  const stablefordPoints = scores.map(score => {
+  // Calculate gross Stableford points per hole
+  const grossStablefordPoints = scores.map(score => {
     if (!score.strokes || score.strokes === 0) return 0;
     return calculateHoleStableford(score.strokes, score.par);
   });
+  
+  // Calculate net Stableford points per hole with handicap strokes
+  const netStablefordPoints = scores.map(score => {
+    if (!score.strokes || score.strokes === 0) return 0;
+    if (!courseHandicap || courseHandicap <= 0) {
+      return calculateHoleStableford(score.strokes, score.par);
+    }
+    
+    // Use hole handicap (stroke index) if available, otherwise default to hole number
+    const holeHandicap = score.handicap ?? score.hole;
+    
+    // Calculate handicap strokes for this hole
+    let handicapStrokes = 0;
+    if (holeHandicap <= courseHandicap) {
+      handicapStrokes = 1;
+    }
+    // For course handicaps > 18, add additional strokes
+    if (courseHandicap > 18) {
+      const extraStrokes = courseHandicap - 18;
+      if (holeHandicap <= extraStrokes) {
+        handicapStrokes += 1;
+      }
+    }
+    
+    return calculateNetHoleStableford(score.strokes, score.par, handicapStrokes);
+  });
+  
+  // Use the appropriate points based on showNet flag
+  const stablefordPoints = showNet ? netStablefordPoints : grossStablefordPoints;
   const totalStableford = stablefordPoints.reduce((sum, points) => sum + points, 0);
 
   const scoreChunks = [];

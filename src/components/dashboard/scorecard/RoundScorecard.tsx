@@ -549,6 +549,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
                     handleGIRChange={handleGIRChange}
                     title="Front Nine"
                     showDetailedStats={showDetailedStats}
+                    courseHandicap={roundHandicap}
+                    showNet={showNet}
                   />
                 )}
                 
@@ -561,6 +563,8 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
                     title="Back Nine"
                     startIndex={front9.length}
                     showDetailedStats={showDetailedStats}
+                    courseHandicap={roundHandicap}
+                    showNet={showNet}
                   />
                 )}
                 
