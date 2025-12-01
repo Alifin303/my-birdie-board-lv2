@@ -7,6 +7,8 @@ export interface HoleScore {
   putts?: number;           // Added for putting statistics
   gir?: boolean;            // Added for green in regulation
   penalties?: number;       // Added for penalty tracking
+  handicap?: number;        // Stroke index (1-18) for handicap allocation
+  yards?: number;           // Hole yardage
 }
 
 export interface RoundScorecardProps {
@@ -25,6 +27,9 @@ export interface ScoreTableProps {
   title: string;
   startIndex?: number;
   showDetailedStats?: boolean;
+  handicapIndex?: number;   // Player's handicap index for net scoring
+  courseHandicap?: number;  // Course handicap for this round
+  showNet?: boolean;        // Whether to show net Stableford points
 }
 
 export interface ScoreTableSummaryProps {
