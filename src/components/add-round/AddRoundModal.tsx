@@ -17,7 +17,7 @@ import { useScoreHandlers } from "./hooks/useScoreHandlers";
 import { useCourseHandlers } from "./hooks/useCourseHandlers";
 import { calculateScoreSummary } from "./utils/scoreUtils";
 
-export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
+export function AddRoundModal({ open, onOpenChange, handicapIndex = 0 }: AddRoundModalProps) {
   const {
     currentStep,
     setCurrentStep,
@@ -53,7 +53,9 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
     setManualCourseOpen,
     courseAndTeeReady,
     courseLoadFailure,
-    setCourseLoadFailure
+    setCourseLoadFailure,
+    showNetStableford,
+    setShowNetStableford
   } = useAddRoundState();
   
   const toast = useToast();
@@ -235,6 +237,9 @@ export function AddRoundModal({ open, onOpenChange }: AddRoundModalProps) {
               isLoading={isLoading}
               dataLoadingError={dataLoadingError}
               today={today}
+              handicapIndex={handicapIndex}
+              showNetStableford={showNetStableford}
+              setShowNetStableford={setShowNetStableford}
             />
           )}
         </DialogContent>

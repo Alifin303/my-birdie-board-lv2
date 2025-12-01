@@ -369,6 +369,7 @@ export default function Dashboard() {
       <AddRoundModal 
         open={isModalOpen} 
         onOpenChange={setIsModalOpen}
+        handicapIndex={profile?.handicap || 0}
       />
     </div>
   );

@@ -26,6 +26,7 @@ export const useAddRoundState = () => {
   const [manualCourseOpen, setManualCourseOpen] = useState<boolean>(false);
   const [courseAndTeeReady, setCourseAndTeeReady] = useState<boolean>(false);
   const [courseLoadFailure, setCourseLoadFailure] = useState<boolean>(false);
+  const [showNetStableford, setShowNetStableford] = useState<boolean>(false);
 
   // Reset selectedTeeId whenever selectedCourse changes
   useEffect(() => {
@@ -134,6 +135,8 @@ export const useAddRoundState = () => {
     setManualCourseOpen,
     courseAndTeeReady,
     courseLoadFailure,
-    setCourseLoadFailure
+    setCourseLoadFailure,
+    showNetStableford,
+    setShowNetStableford
   };
 };

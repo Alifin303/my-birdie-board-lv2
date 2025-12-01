@@ -36,6 +36,9 @@ interface ScorecardStepProps {
   isLoading: boolean;
   dataLoadingError: string | null;
   today: Date;
+  handicapIndex?: number;
+  showNetStableford?: boolean;
+  setShowNetStableford?: (value: boolean) => void;
 }
 
 export const ScorecardStep: React.FC<ScorecardStepProps> = ({
@@ -57,7 +60,10 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   setCalendarOpen,
   isLoading,
   dataLoadingError,
-  today
+  today,
+  handicapIndex = 0,
+  showNetStableford = false,
+  setShowNetStableford
 }) => {
   const [localSelectedTeeId, setLocalSelectedTeeId] = useState<string | null>(selectedTeeId);
   const [showDetailedStats, setShowDetailedStats] = useState(false);
@@ -178,9 +184,27 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
       strokes: score.strokes || 0,
       putts: score.putts,
       gir: score.gir,
-      penalties: score.penalties
+      penalties: score.penalties,
+      handicap: score.handicap,
+      yards: score.yards
     }));
   };
+  
+  // Calculate course handicap from handicap index
+  const calculateCourseHandicap = (): number => {
+    if (!handicapIndex || !selectedTee || !selectedTee.slope || !selectedTee.rating || !selectedTee.par) {
+      return 0;
+    }
+    
+    // WHS Formula: Handicap Index × (Slope Rating ÷ 113) + (Course Rating − Par)
+    const courseHandicap = Math.round(
+      handicapIndex * (selectedTee.slope / 113) + (selectedTee.rating - selectedTee.par)
+    );
+    
+    return Math.max(0, courseHandicap);
+  };
+  
+  const courseHandicap = calculateCourseHandicap();
   
   const validateScores = (): boolean => {
     let requiredHoles = [];
@@ -364,12 +388,27 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
         </div>
       </div>
       
-      <div className="flex items-center space-x-2 mb-4">
-        <Switch id="detailed-stats" checked={showDetailedStats} onCheckedChange={setShowDetailedStats} />
-        <Label htmlFor="detailed-stats" className="flex items-center cursor-pointer">
-          <BarChart className="h-4 w-4 mr-1.5 text-primary" />
-          <span>Track advanced stats (putts, GIR, penalties)</span>
-        </Label>
+      <div className="space-y-3 mb-4">
+        <div className="flex items-center space-x-2">
+          <Switch id="detailed-stats" checked={showDetailedStats} onCheckedChange={setShowDetailedStats} />
+          <Label htmlFor="detailed-stats" className="flex items-center cursor-pointer">
+            <BarChart className="h-4 w-4 mr-1.5 text-primary" />
+            <span>Track advanced stats (putts, GIR, penalties)</span>
+          </Label>
+        </div>
+        
+        {handicapIndex > 0 && setShowNetStableford && (
+          <div className="flex items-center space-x-2">
+            <Switch 
+              id="net-stableford" 
+              checked={showNetStableford} 
+              onCheckedChange={setShowNetStableford} 
+            />
+            <Label htmlFor="net-stableford" className="flex items-center cursor-pointer">
+              <span>Show Net Stableford Points (Handicap: {handicapIndex}, Course Handicap: {courseHandicap})</span>
+            </Label>
+          </div>
+        )}
       </div>
       
       {frontNineScores.length > 0 && (holeSelection.type === 'all' || holeSelection.type === 'front9') && <div className="mb-4">
@@ -384,7 +423,9 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
             handleGIRChange={handleGIRChange} 
             title="Front Nine" 
             startIndex={0} 
-            showDetailedStats={showDetailedStats} 
+            showDetailedStats={showDetailedStats}
+            courseHandicap={courseHandicap}
+            showNet={showNetStableford}
           />
         </div>}
       
@@ -400,7 +441,9 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
             handleGIRChange={handleGIRChange} 
             title="Back Nine" 
             startIndex={frontNineScores.length} 
-            showDetailedStats={showDetailedStats} 
+            showDetailedStats={showDetailedStats}
+            courseHandicap={courseHandicap}
+            showNet={showNetStableford}
           />
         </div>}
       
