@@ -75,6 +75,7 @@ export interface RoundScore {
 export interface AddRoundModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  handicapIndex?: number;
 }
 
 // Define ScoreSummary type needed by ScorecardStep.tsx
