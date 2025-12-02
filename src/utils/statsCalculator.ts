@@ -24,6 +24,8 @@ interface Round {
   };
   handicap_at_posting?: number;
   holes_played?: number;
+  stableford_gross?: number;
+  stableford_net?: number;
 }
 
 interface Stats {
@@ -35,6 +37,10 @@ interface Stats {
   averageScore: number;
   handicapIndex: number;
   roundsNeededForHandicap: number;
+  bestStablefordGross?: number;
+  bestStablefordNet?: number;
+  avgStablefordGross?: number;
+  avgStablefordNet?: number;
 }
 
 interface CourseStats {
@@ -219,6 +225,21 @@ export const calculateStats = (rounds: Round[]): Stats => {
   const roundsNeededForHandicap = validRoundsCount >= ROUNDS_NEEDED_FOR_HANDICAP ? 
     0 : ROUNDS_NEEDED_FOR_HANDICAP - validRoundsCount;
 
+  // Calculate Stableford stats
+  const roundsWithStableford = rounds.filter(r => r.stableford_gross !== null && r.stableford_gross !== undefined);
+  const bestStablefordGross = roundsWithStableford.length > 0 
+    ? Math.max(...roundsWithStableford.map(r => r.stableford_gross!)) 
+    : undefined;
+  const bestStablefordNet = roundsWithStableford.length > 0 
+    ? Math.max(...roundsWithStableford.filter(r => r.stableford_net !== null && r.stableford_net !== undefined).map(r => r.stableford_net!)) 
+    : undefined;
+  const avgStablefordGross = roundsWithStableford.length > 0 
+    ? Math.round(roundsWithStableford.reduce((sum, r) => sum + (r.stableford_gross || 0), 0) / roundsWithStableford.length) 
+    : undefined;
+  const avgStablefordNet = roundsWithStableford.length > 0 
+    ? Math.round(roundsWithStableford.filter(r => r.stableford_net !== null).reduce((sum, r) => sum + (r.stableford_net || 0), 0) / roundsWithStableford.filter(r => r.stableford_net !== null).length) 
+    : undefined;
+
   return {
     totalRounds,
     bestGrossScore,
@@ -227,7 +248,11 @@ export const calculateStats = (rounds: Round[]): Stats => {
     bestToParNet,
     averageScore,
     handicapIndex: calculatedHandicapIndex,
-    roundsNeededForHandicap
+    roundsNeededForHandicap,
+    bestStablefordGross,
+    bestStablefordNet,
+    avgStablefordGross,
+    avgStablefordNet
   };
 };
 

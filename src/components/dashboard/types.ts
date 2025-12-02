@@ -9,8 +9,10 @@ export interface Round {
   to_par_gross: number;
   to_par_net?: number;
   hole_scores?: any;
-  handicap_at_posting?: number; // Add this field to store the handicap at posting time
-  holes_played?: number; // Add the missing property for 9 vs 18 hole rounds
+  handicap_at_posting?: number;
+  holes_played?: number;
+  stableford_gross?: number;
+  stableford_net?: number;
   courses?: {
     id: number;
     name: string;
@@ -51,4 +53,8 @@ export interface Stats {
   bestToParNet: number | null;
   handicapIndex: number;
   roundsNeededForHandicap: number;
+  bestStablefordGross?: number;
+  bestStablefordNet?: number;
+  avgStablefordGross?: number;
+  avgStablefordNet?: number;
 }

@@ -1,10 +1,12 @@
-import { CalendarDays, Trophy, Flag } from "lucide-react";
+import { CalendarDays, Trophy, Flag, TrendingUp, Hash } from "lucide-react";
 import { Stats, Round } from "./types";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { HandicapCard } from "./HandicapCard";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 type RoundFilter = 'all' | '9hole' | '18hole';
+type ScoreMode = 'stroke' | 'stableford';
 
 interface StatsDisplayProps {
   userRounds: Round[] | undefined;
@@ -16,6 +18,8 @@ interface StatsDisplayProps {
   profileHandicap?: number;
   roundFilter?: RoundFilter;
   onRoundFilterChange?: (filter: RoundFilter) => void;
+  scoreMode?: ScoreMode;
+  onScoreModeChange?: (mode: ScoreMode) => void;
   userName?: string;
   userId?: string;
 }
@@ -41,7 +45,9 @@ export const MainStats = ({
   calculateStats, 
   handicapIndex, 
   roundFilter = 'all',
-  onRoundFilterChange 
+  onRoundFilterChange,
+  scoreMode = 'stroke',
+  onScoreModeChange
 }: Omit<StatsDisplayProps, 'onScoreTypeChange' | 'profileHandicap'>) => {
   const roundsKey = userRounds ? `rounds-${userRounds.length}` : 'no-rounds';
   
@@ -76,7 +82,9 @@ export const MainStats = ({
       bestNetScore: stats.bestNetScore,
       bestToPar: stats.bestToPar,
       bestToParNet: stats.bestToParNet,
-      handicapIndex: handicapIndex
+      handicapIndex: handicapIndex,
+      bestStablefordGross: stats.bestStablefordGross,
+      bestStablefordNet: stats.bestStablefordNet
     });
     
     if (scoreType === 'net' && filteredRounds.length > 0) {
@@ -98,31 +106,6 @@ export const MainStats = ({
       const sortedByNetScore = [...calculatedRounds].sort((a, b) => a.net - b.net);
       const sortedByToParNet = [...calculatedRounds].sort((a, b) => a.toParNet - b.toParNet);
       
-      console.log("[MainStats] All rounds with net scores:", calculatedRounds.map(r => ({
-        id: r.id,
-        date: new Date(r.date).toLocaleDateString(),
-        course: r.courseName,
-        club: r.clubName,
-        gross: r.gross,
-        net: r.net,
-        toPar: r.toPar,
-        toParNet: r.toParNet
-      })));
-      
-      console.log("[MainStats] Best rounds by net score:", sortedByNetScore.slice(0, 3).map(r => ({
-        id: r.id,
-        course: r.courseName,
-        score: r.net,
-        date: new Date(r.date).toLocaleDateString()
-      })));
-      
-      console.log("[MainStats] Best rounds by net to par:", sortedByToParNet.slice(0, 3).map(r => ({
-        id: r.id,
-        course: r.courseName,
-        toPar: r.toParNet,
-        date: new Date(r.date).toLocaleDateString()
-      })));
-
       stats.bestNetScore = sortedByNetScore[0]?.net || null;
       stats.bestToParNet = sortedByToParNet[0]?.toParNet || null;
     }
@@ -138,10 +121,62 @@ export const MainStats = ({
       </div>
     );
   }
+
+  // Determine what to display based on scoreMode
+  const isStablefordMode = scoreMode === 'stableford';
+  
+  // Get display values based on mode
+  const getDisplayValues = () => {
+    if (isStablefordMode) {
+      const stablefordValue = scoreType === 'gross' 
+        ? stats.bestStablefordGross 
+        : stats.bestStablefordNet;
+      const avgStableford = scoreType === 'gross'
+        ? stats.avgStablefordGross
+        : stats.avgStablefordNet;
+      return {
+        mainLabel: 'Best Stableford',
+        mainValue: stablefordValue ?? '-',
+        secondLabel: 'Avg Stableford',
+        secondValue: avgStableford ?? '-'
+      };
+    }
+    return {
+      mainLabel: 'Best Score',
+      mainValue: scoreType === 'gross' ? stats.bestGrossScore : stats.bestNetScore,
+      secondLabel: 'Best to Par',
+      secondValue: scoreType === 'gross' 
+        ? (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar 
+        : (stats.bestToParNet !== null && stats.bestToParNet > 0 ? '+' : '') + stats.bestToParNet
+    };
+  };
+
+  const displayValues = getDisplayValues();
   
   // Render the actual stats
   return (
     <div key={roundsKey} className="space-y-4 p-4 sm:p-6">
+      {/* Score Mode Toggle (Stroke/Stableford) */}
+      {onScoreModeChange && (
+        <div className="flex justify-center">
+          <ToggleGroup 
+            type="single" 
+            value={scoreMode} 
+            onValueChange={(value) => value && onScoreModeChange(value as ScoreMode)}
+            className="bg-muted/50 p-1 rounded-lg"
+          >
+            <ToggleGroupItem value="stroke" aria-label="Stroke play" className="px-4">
+              <Hash className="h-4 w-4 mr-2" />
+              Stroke
+            </ToggleGroupItem>
+            <ToggleGroupItem value="stableford" aria-label="Stableford" className="px-4">
+              <TrendingUp className="h-4 w-4 mr-2" />
+              Stableford
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+      )}
+      
       {/* Round Filter Toggle */}
       {onRoundFilterChange && (
         <div className="flex justify-center">
@@ -175,46 +210,48 @@ export const MainStats = ({
       )}
       
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-      <div className="bg-background rounded-lg p-4 border">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1 pr-2">
-            <p className="text-sm font-medium text-muted-foreground">Rounds Played</p>
-            <p className="text-2xl sm:text-3xl font-bold truncate">{stats.totalRounds}</p>
-          </div>
-          <div className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 rounded-full flex items-center justify-center bg-primary/10">
-            <CalendarDays className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+        <div className="bg-background rounded-lg p-4 border">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1 pr-2">
+              <p className="text-sm font-medium text-muted-foreground">Rounds Played</p>
+              <p className="text-2xl sm:text-3xl font-bold truncate">{stats.totalRounds}</p>
+            </div>
+            <div className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 rounded-full flex items-center justify-center bg-primary/10">
+              <CalendarDays className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+            </div>
           </div>
         </div>
-      </div>
       
-      <div className="bg-background rounded-lg p-4 border">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1 pr-2">
-            <p className="text-sm font-medium text-muted-foreground">Best Score</p>
-            <p className="text-2xl sm:text-3xl font-bold truncate">
-              {scoreType === 'gross' ? stats.bestGrossScore : stats.bestNetScore}
-            </p>
-          </div>
-          <div className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 rounded-full flex items-center justify-center bg-primary/10">
-            <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+        <div className="bg-background rounded-lg p-4 border">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1 pr-2">
+              <p className="text-sm font-medium text-muted-foreground">{displayValues.mainLabel}</p>
+              <p className="text-2xl sm:text-3xl font-bold truncate">
+                {displayValues.mainValue}
+              </p>
+            </div>
+            <div className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 rounded-full flex items-center justify-center bg-primary/10">
+              <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+            </div>
           </div>
         </div>
-      </div>
       
-      <div className="bg-background rounded-lg p-4 border">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1 pr-2">
-            <p className="text-sm font-medium text-muted-foreground">Best to Par</p>
-            <p className="text-2xl sm:text-3xl font-bold truncate">
-              {scoreType === 'gross' 
-                ? (stats.bestToPar > 0 ? '+' : '') + stats.bestToPar 
-                : (stats.bestToParNet !== null && stats.bestToParNet > 0 ? '+' : '') + stats.bestToParNet}
-            </p>
+        <div className="bg-background rounded-lg p-4 border">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1 pr-2">
+              <p className="text-sm font-medium text-muted-foreground">{displayValues.secondLabel}</p>
+              <p className="text-2xl sm:text-3xl font-bold truncate">
+                {displayValues.secondValue}
+              </p>
+            </div>
+            <div className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 rounded-full flex items-center justify-center bg-primary/10">
+              {isStablefordMode ? (
+                <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              ) : (
+                <Flag className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              )}
+            </div>
           </div>
-          <div className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 rounded-full flex items-center justify-center bg-primary/10">
-            <Flag className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-          </div>
-        </div>
         </div>
       </div>
     </div>
@@ -275,7 +312,6 @@ export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTy
   }
   
   // Format the handicap with a + sign for negative handicaps (plus handicaps in golf terms)
-  // In golf, a handicap of -2 is displayed as "+2"
   const formattedHandicap = displayHandicap < 0 
     ? `+${Math.abs(displayHandicap).toFixed(1)}` 
     : displayHandicap.toFixed(1);

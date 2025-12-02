@@ -49,6 +49,7 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
   const [roundFilter, setRoundFilter] = useState<'all' | '9hole' | '18hole'>('all');
+  const [scoreMode, setScoreMode] = useState<'stroke' | 'stableford'>('stroke');
   const [processingStripeSession, setProcessingStripeSession] = useState(false);
   
   const sessionId = searchParams.get('session_id');
@@ -283,6 +284,8 @@ export default function Dashboard() {
                 handicapIndex={handicapFromProfile}
                 roundFilter={roundFilter}
                 onRoundFilterChange={setRoundFilter}
+                scoreMode={scoreMode}
+                onScoreModeChange={setScoreMode}
               />
             </div>
             
@@ -315,6 +318,8 @@ export default function Dashboard() {
                 rounds={userRounds || []}
                 scoreType={scoreType}
                 handicapIndex={handicapFromProfile}
+                scoreMode={scoreMode}
+                onScoreModeChange={setScoreMode}
               />
             </div>
             
