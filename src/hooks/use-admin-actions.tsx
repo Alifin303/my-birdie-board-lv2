@@ -5,6 +5,7 @@ import { HoleScore } from '@/components/dashboard/scorecard/types';
 
 export function useAdminActions() {
   const [isRecalculatingHandicaps, setIsRecalculatingHandicaps] = useState(false);
+  const [isRecalculatingStableford, setIsRecalculatingStableford] = useState(false);
   const { toast } = useToast();
 
   const recalculateAllHandicaps = async () => {
@@ -37,6 +38,39 @@ export function useAdminActions() {
       return false;
     } finally {
       setIsRecalculatingHandicaps(false);
+    }
+  };
+
+  const recalculateAllStableford = async () => {
+    setIsRecalculatingStableford(true);
+    try {
+      const { data, error } = await supabase.rpc('recalculate_all_stableford_scores');
+      
+      if (error) {
+        console.error('Error recalculating Stableford scores:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to recalculate Stableford scores. Please try again.',
+          variant: 'destructive',
+        });
+        return false;
+      }
+      
+      toast({
+        title: 'Success',
+        description: 'All Stableford scores have been recalculated successfully.',
+      });
+      return true;
+    } catch (err) {
+      console.error('Error in recalculate all Stableford scores:', err);
+      toast({
+        title: 'Error',
+        description: 'An unexpected error occurred. Please try again.',
+        variant: 'destructive',
+      });
+      return false;
+    } finally {
+      setIsRecalculatingStableford(false);
     }
   };
 
@@ -120,6 +154,8 @@ export function useAdminActions() {
   return {
     recalculateAllHandicaps,
     isRecalculatingHandicaps,
+    recalculateAllStableford,
+    isRecalculatingStableford,
     updateRoundScoreAndHoles
   };
 }

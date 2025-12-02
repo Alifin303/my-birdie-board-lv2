@@ -1,12 +1,16 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAdminActions } from "@/hooks/use-admin-actions";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Target } from "lucide-react";
 import { TestHandicapUpdate } from "@/components/admin/TestHandicapUpdate";
 
 export function AdminActions() {
-  const { recalculateAllHandicaps, isRecalculatingHandicaps } = useAdminActions();
+  const { 
+    recalculateAllHandicaps, 
+    isRecalculatingHandicaps,
+    recalculateAllStableford,
+    isRecalculatingStableford
+  } = useAdminActions();
   
   return (
     <div className="space-y-6">
@@ -41,6 +45,40 @@ export function AdminActions() {
                 <>
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Recalculate All Handicaps
+                </>
+              )}
+            </Button>
+          </CardFooter>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Stableford Scores</CardTitle>
+            <CardDescription>
+              Recalculate Stableford scores for all existing rounds
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              This action will calculate gross and net Stableford points for all rounds
+              that have hole score data. Use this for rounds added before Stableford tracking.
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button 
+              onClick={recalculateAllStableford} 
+              disabled={isRecalculatingStableford}
+              className="w-full"
+            >
+              {isRecalculatingStableford ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Recalculating...
+                </>
+              ) : (
+                <>
+                  <Target className="h-4 w-4 mr-2" />
+                  Recalculate All Stableford
                 </>
               )}
             </Button>
