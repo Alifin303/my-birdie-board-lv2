@@ -4,7 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { format } from "date-fns";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Switch } from "@/components/ui/switch";
-import { Hash, Target } from "lucide-react";
+import { Hash, Target, TrendingUp } from "lucide-react";
 
 interface Round {
   id: number;
@@ -15,19 +15,42 @@ interface Round {
   to_par_net?: number;
   hole_scores?: any;
   holes_played?: number;
+  stableford_gross?: number;
+  stableford_net?: number;
 }
 
 interface ScoreProgressionChartProps {
   rounds: Round[];
   scoreType: 'gross' | 'net';
   handicapIndex?: number;
+  scoreMode?: 'stroke' | 'stableford';
+  onScoreModeChange?: (mode: 'stroke' | 'stableford') => void;
 }
 
-const ScoreProgressionChart = ({ rounds, scoreType, handicapIndex = 0 }: ScoreProgressionChartProps) => {
+type ScoreMode = 'stroke' | 'stableford';
+
+const ScoreProgressionChart = ({ 
+  rounds, 
+  scoreType, 
+  handicapIndex = 0,
+  scoreMode: externalScoreMode,
+  onScoreModeChange 
+}: ScoreProgressionChartProps) => {
   const [chartData, setChartData] = useState<any[]>([]);
   const [displayMode, setDisplayMode] = useState<'strokes' | 'to_par'>('strokes');
   const [showParLine, setShowParLine] = useState(false);
   const [holeFilter, setHoleFilter] = useState<'all' | '9' | '18'>('all');
+  const [internalScoreMode, setInternalScoreMode] = useState<ScoreMode>('stroke');
+  
+  // Use external scoreMode if provided, otherwise use internal state
+  const scoreMode = externalScoreMode ?? internalScoreMode;
+  const handleScoreModeChange = (mode: ScoreMode) => {
+    if (onScoreModeChange) {
+      onScoreModeChange(mode);
+    } else {
+      setInternalScoreMode(mode);
+    }
+  };
 
   useEffect(() => {
     if (!rounds || rounds.length === 0) return;
@@ -47,34 +70,44 @@ const ScoreProgressionChart = ({ rounds, scoreType, handicapIndex = 0 }: ScorePr
 
     // Format data for the chart
     const data = sortedRounds.map(round => {
-      // Calculate scores with handicap when in net mode
-      let score = scoreType === 'gross' ? round.gross_score : round.net_score;
-      let toPar = scoreType === 'gross' ? round.to_par_gross : round.to_par_net;
-      
-      // If we're in net mode and there's no net_score but we have a handicap
-      if (scoreType === 'net' && handicapIndex > 0 && !round.net_score) {
-        score = Math.max(0, round.gross_score - handicapIndex);
+      if (scoreMode === 'stableford') {
+        // Stableford mode
+        const stablefordScore = scoreType === 'gross' 
+          ? round.stableford_gross 
+          : round.stableford_net;
+        
+        return {
+          date: format(new Date(round.date), 'MMM d, yyyy'),
+          score: stablefordScore ?? 0,
+          id: round.id
+        };
+      } else {
+        // Stroke mode (existing logic)
+        let score = scoreType === 'gross' ? round.gross_score : round.net_score;
+        let toPar = scoreType === 'gross' ? round.to_par_gross : round.to_par_net;
+        
+        if (scoreType === 'net' && handicapIndex > 0 && !round.net_score) {
+          score = Math.max(0, round.gross_score - handicapIndex);
+        }
+        
+        if (scoreType === 'net' && handicapIndex > 0 && !round.to_par_net) {
+          toPar = Math.max(-36, round.to_par_gross - handicapIndex);
+        }
+        
+        const actualPar = score ? score - toPar : 72;
+        
+        return {
+          date: format(new Date(round.date), 'MMM d, yyyy'),
+          strokes: score,
+          to_par: toPar,
+          par: displayMode === 'strokes' ? actualPar : 0,
+          id: round.id
+        };
       }
-      
-      // If we're in net mode and there's no to_par_net but we have a handicap
-      if (scoreType === 'net' && handicapIndex > 0 && !round.to_par_net) {
-        toPar = Math.max(-36, round.to_par_gross - handicapIndex);
-      }
-      
-      // Calculate actual par for this round based on the score and to_par
-      const actualPar = score ? score - toPar : 72; // fallback to 72 if we can't calculate
-      
-      return {
-        date: format(new Date(round.date), 'MMM d, yyyy'),
-        strokes: score,
-        to_par: toPar,
-        par: displayMode === 'strokes' ? actualPar : 0, // Use actual par for strokes mode, 0 for to_par mode
-        id: round.id
-      };
     });
 
     setChartData(data);
-  }, [rounds, scoreType, handicapIndex, displayMode, holeFilter]);
+  }, [rounds, scoreType, handicapIndex, displayMode, holeFilter, scoreMode]);
 
   if (rounds.length < 2) {
     return (
@@ -88,16 +121,29 @@ const ScoreProgressionChart = ({ rounds, scoreType, handicapIndex = 0 }: ScorePr
     );
   }
 
-  // Determine the data key and label based on display mode
-  const dataKey = displayMode === 'strokes' ? 'strokes' : 'to_par';
-  const tooltipLabel = displayMode === 'strokes' ? 'Score' : 'To Par';
-  const tooltipFormat = (value: number) => displayMode === 'strokes' 
-    ? `${value} strokes` 
-    : value > 0 
-      ? `+${value}` 
-      : value === 0 
-        ? 'Even' 
-        : `${value}`;
+  // Determine the data key and label based on display mode and score mode
+  const getDataConfig = () => {
+    if (scoreMode === 'stableford') {
+      return {
+        dataKey: 'score',
+        tooltipLabel: 'Stableford Points',
+        tooltipFormat: (value: number) => `${value} points`
+      };
+    }
+    return {
+      dataKey: displayMode === 'strokes' ? 'strokes' : 'to_par',
+      tooltipLabel: displayMode === 'strokes' ? 'Score' : 'To Par',
+      tooltipFormat: (value: number) => displayMode === 'strokes' 
+        ? `${value} strokes` 
+        : value > 0 
+          ? `+${value}` 
+          : value === 0 
+            ? 'Even' 
+            : `${value}`
+    };
+  };
+
+  const { dataKey, tooltipLabel, tooltipFormat } = getDataConfig();
 
   return (
     <div className="w-full">
@@ -105,6 +151,26 @@ const ScoreProgressionChart = ({ rounds, scoreType, handicapIndex = 0 }: ScorePr
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-medium">Score Progression Over Time</h3>
         </div>
+        
+        {/* Score Mode Toggle (Stroke/Stableford) */}
+        <div className="flex justify-center">
+          <ToggleGroup 
+            type="single" 
+            value={scoreMode} 
+            onValueChange={(value) => value && handleScoreModeChange(value as ScoreMode)}
+            className="bg-muted/50 p-1 rounded-lg"
+          >
+            <ToggleGroupItem value="stroke" aria-label="Stroke play" className="px-4">
+              <Hash className="h-4 w-4 mr-2" />
+              Stroke
+            </ToggleGroupItem>
+            <ToggleGroupItem value="stableford" aria-label="Stableford" className="px-4">
+              <TrendingUp className="h-4 w-4 mr-2" />
+              Stableford
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+        
         <div className="flex justify-between items-center flex-wrap gap-3">
           <ToggleGroup 
             type="single" 
@@ -121,33 +187,36 @@ const ScoreProgressionChart = ({ rounds, scoreType, handicapIndex = 0 }: ScorePr
               18 Holes
             </ToggleGroupItem>
           </ToggleGroup>
-          <div className="flex items-center gap-4">
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="show-par"
-              checked={showParLine}
-              onCheckedChange={setShowParLine}
-            />
-            <label htmlFor="show-par" className="text-sm font-medium">
-              Show Par Line
-            </label>
-          </div>
-          <ToggleGroup 
-            type="single" 
-            value={displayMode} 
-            onValueChange={(value) => value && setDisplayMode(value as 'strokes' | 'to_par')}
-            className="ml-auto"
-          >
-            <ToggleGroupItem value="strokes" aria-label="Display strokes">
-              <Hash className="h-4 w-4 mr-2" />
-              Strokes
-            </ToggleGroupItem>
-            <ToggleGroupItem value="to_par" aria-label="Display to par">
-              <Target className="h-4 w-4 mr-2" />
-              To Par
-            </ToggleGroupItem>
-          </ToggleGroup>
-          </div>
+          
+          {scoreMode === 'stroke' && (
+            <div className="flex items-center gap-4">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="show-par"
+                  checked={showParLine}
+                  onCheckedChange={setShowParLine}
+                />
+                <label htmlFor="show-par" className="text-sm font-medium">
+                  Show Par Line
+                </label>
+              </div>
+              <ToggleGroup 
+                type="single" 
+                value={displayMode} 
+                onValueChange={(value) => value && setDisplayMode(value as 'strokes' | 'to_par')}
+                className="ml-auto"
+              >
+                <ToggleGroupItem value="strokes" aria-label="Display strokes">
+                  <Hash className="h-4 w-4 mr-2" />
+                  Strokes
+                </ToggleGroupItem>
+                <ToggleGroupItem value="to_par" aria-label="Display to par">
+                  <Target className="h-4 w-4 mr-2" />
+                  To Par
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+          )}
         </div>
       </div>
       <div className="h-80 mb-2">
@@ -165,7 +234,11 @@ const ScoreProgressionChart = ({ rounds, scoreType, handicapIndex = 0 }: ScorePr
               padding={{ left: 10, right: 10 }}
             />
             <YAxis 
-              domain={displayMode === 'to_par' ? ['dataMin - 2', 'dataMax + 2'] : ['dataMin - 3', 'dataMax + 3']}
+              domain={scoreMode === 'stableford' 
+                ? ['dataMin - 2', 'dataMax + 2'] 
+                : displayMode === 'to_par' 
+                  ? ['dataMin - 2', 'dataMax + 2'] 
+                  : ['dataMin - 3', 'dataMax + 3']}
               allowDecimals={false}
               tick={{ fontSize: 11 }}
             />
@@ -181,13 +254,13 @@ const ScoreProgressionChart = ({ rounds, scoreType, handicapIndex = 0 }: ScorePr
             <Line 
               type="monotone" 
               dataKey={dataKey} 
-              stroke="#6366F1" 
+              stroke={scoreMode === 'stableford' ? '#10B981' : '#6366F1'} 
               strokeWidth={2} 
               activeDot={{ r: 5 }} 
               dot={{ r: 3 }}
               name="score"
             />
-            {showParLine && (
+            {scoreMode === 'stroke' && showParLine && (
               <Line 
                 type="monotone" 
                 dataKey="par" 
