@@ -312,6 +312,7 @@ export type Database = {
         Returns: boolean
       }
       recalculate_all_handicaps: { Args: never; Returns: undefined }
+      recalculate_all_stableford_scores: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "user"
