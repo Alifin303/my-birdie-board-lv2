@@ -22,6 +22,7 @@ interface Round {
 interface ScoreProgressionChartProps {
   rounds: Round[];
   scoreType: 'gross' | 'net';
+  onScoreTypeChange?: (type: 'gross' | 'net') => void;
   handicapIndex?: number;
   scoreMode?: 'stroke' | 'stableford';
   onScoreModeChange?: (mode: 'stroke' | 'stableford') => void;
@@ -31,7 +32,8 @@ type ScoreMode = 'stroke' | 'stableford';
 
 const ScoreProgressionChart = ({ 
   rounds, 
-  scoreType, 
+  scoreType,
+  onScoreTypeChange,
   handicapIndex = 0,
   scoreMode: externalScoreMode,
   onScoreModeChange 
@@ -152,8 +154,27 @@ const ScoreProgressionChart = ({
           <h3 className="text-lg font-medium">Score Progression Over Time</h3>
         </div>
         
-        {/* Score Mode Toggle (Stroke/Stableford) */}
-        <div className="flex justify-center">
+        {/* Score Type & Mode Toggles */}
+        <div className="flex flex-wrap justify-center gap-3">
+          {/* Gross/Net Toggle */}
+          {onScoreTypeChange && (
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => onScoreTypeChange('gross')} 
+                className={`px-3 py-1 rounded-full text-sm font-medium ${scoreType === 'gross' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+              >
+                Gross
+              </button>
+              <button 
+                onClick={() => onScoreTypeChange('net')} 
+                className={`px-3 py-1 rounded-full text-sm font-medium ${scoreType === 'net' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+              >
+                Net
+              </button>
+            </div>
+          )}
+          
+          {/* Score Mode Toggle (Stroke/Stableford) */}
           <ToggleGroup 
             type="single" 
             value={scoreMode} 

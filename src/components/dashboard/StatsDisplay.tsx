@@ -42,13 +42,14 @@ export const MainStats = ({
   userRounds, 
   roundsLoading, 
   scoreType, 
+  onScoreTypeChange,
   calculateStats, 
   handicapIndex, 
   roundFilter = 'all',
   onRoundFilterChange,
   scoreMode = 'stroke',
   onScoreModeChange
-}: Omit<StatsDisplayProps, 'onScoreTypeChange' | 'profileHandicap'>) => {
+}: Omit<StatsDisplayProps, 'profileHandicap'>) => {
   const roundsKey = userRounds ? `rounds-${userRounds.length}` : 'no-rounds';
   
   useEffect(() => {
@@ -156,9 +157,28 @@ export const MainStats = ({
   // Render the actual stats
   return (
     <div key={roundsKey} className="space-y-4 p-4 sm:p-6">
-      {/* Score Mode Toggle (Stroke/Stableford) */}
-      {onScoreModeChange && (
-        <div className="flex justify-center">
+      {/* Score Type & Mode Toggles */}
+      <div className="flex flex-wrap justify-center gap-3">
+        {/* Gross/Net Toggle */}
+        {onScoreTypeChange && (
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => onScoreTypeChange('gross')} 
+              className={`px-3 py-1 rounded-full text-sm font-medium ${scoreType === 'gross' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+            >
+              Gross
+            </button>
+            <button 
+              onClick={() => onScoreTypeChange('net')} 
+              className={`px-3 py-1 rounded-full text-sm font-medium ${scoreType === 'net' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+            >
+              Net
+            </button>
+          </div>
+        )}
+        
+        {/* Score Mode Toggle (Stroke/Stableford) */}
+        {onScoreModeChange && (
           <ToggleGroup 
             type="single" 
             value={scoreMode} 
@@ -174,8 +194,8 @@ export const MainStats = ({
               Stableford
             </ToggleGroupItem>
           </ToggleGroup>
-        </div>
-      )}
+        )}
+      </div>
       
       {/* Round Filter Toggle */}
       {onRoundFilterChange && (

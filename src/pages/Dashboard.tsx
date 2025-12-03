@@ -280,6 +280,7 @@ export default function Dashboard() {
                 userRounds={userRounds}
                 roundsLoading={roundsLoading}
                 scoreType={scoreType}
+                onScoreTypeChange={handleScoreTypeChange}
                 calculateStats={calculateStats}
                 handicapIndex={handicapFromProfile}
                 roundFilter={roundFilter}
@@ -317,6 +318,7 @@ export default function Dashboard() {
               <ScoreProgressionChart 
                 rounds={userRounds || []}
                 scoreType={scoreType}
+                onScoreTypeChange={handleScoreTypeChange}
                 handicapIndex={handicapFromProfile}
                 scoreMode={scoreMode}
                 onScoreModeChange={setScoreMode}
