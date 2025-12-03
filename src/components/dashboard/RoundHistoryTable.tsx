@@ -105,6 +105,9 @@ export const RoundHistoryTable = ({
                 {renderSortIndicator('to_par_gross')}
               </button>
             </th>
+            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+              <span>Stableford</span>
+            </th>
             <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">
               <span>Actions</span>
             </th>
@@ -137,6 +140,11 @@ export const RoundHistoryTable = ({
                   {scoreType === 'gross' 
                     ? (round.to_par_gross > 0 ? '+' : '') + round.to_par_gross
                     : (netToPar > 0 ? '+' : '') + netToPar}
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  {scoreType === 'gross' 
+                    ? (round.stableford_gross ?? '-')
+                    : (round.stableford_net ?? '-')}
                 </td>
                 <td className="px-4 py-3 text-sm text-right">
                   <div className="flex justify-end space-x-2">
