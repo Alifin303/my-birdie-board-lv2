@@ -97,6 +97,7 @@ export function AddRoundModal({ open, onOpenChange, handicapIndex = 0 }: AddRoun
   const { 
     handleScoreChange,
     handleGIRChange,
+    handleFairwayHitChange,
     handleHoleSelectionChange,
     updateScorecardForTee,
     handleTeeChange
@@ -226,6 +227,7 @@ export function AddRoundModal({ open, onOpenChange, handicapIndex = 0 }: AddRoun
               handleHoleSelectionChange={handleHoleSelectionChange}
               handleScoreChange={handleScoreChange}
               handleGIRChange={handleGIRChange}
+              handleFairwayHitChange={handleFairwayHitChange}
               handleBackToSearch={handleBackToSearch}
               handleSaveRound={handleSaveRoundAndClose}
               handleCloseModal={handleCloseModal}

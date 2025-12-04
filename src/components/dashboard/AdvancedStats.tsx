@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Target, Circle, AlertCircle, Info } from "lucide-react";
+import { ChevronDown, ChevronUp, Target, Circle, AlertCircle, Info, TreeDeciduous } from "lucide-react";
 import { Round } from "./types";
 import { calculateGIRPercentage } from "@/components/add-round/utils/scoreUtils";
 import { StatsLineChart } from "./StatsLineChart";
@@ -39,12 +39,14 @@ export const AdvancedStats = ({ userRounds, isLoading }: AdvancedStatsProps) => 
     return scores.some((score: any) => 
       score.putts !== undefined || 
       score.gir !== undefined || 
+      score.fairwayHit !== undefined ||
       score.penalties !== undefined
     );
   });
   
   const puttingStats = calculatePuttingStats(userRounds || []);
   const girStats = calculateGIRStats(userRounds || []);
+  const fairwayStats = calculateFairwayStats(userRounds || []);
   const penaltyStats = calculatePenaltyStats(userRounds || []);
   
   return (
@@ -114,6 +116,33 @@ export const AdvancedStats = ({ userRounds, isLoading }: AdvancedStatsProps) => 
                         <li className="flex justify-between">
                           <span className="text-muted-foreground">Rounds Tracked:</span>
                           <span className="font-medium">{girStats.roundsTracked}</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </Card>
+              )}
+              
+              {fairwayStats.tracked && (
+                <Card className="p-4 shadow-sm">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-medium flex items-center gap-1.5">
+                        <TreeDeciduous className="h-4 w-4 text-primary" />
+                        Fairways in Regulation
+                      </h3>
+                      <ul className="mt-2 space-y-1 text-sm">
+                        <li className="flex justify-between">
+                          <span className="text-muted-foreground">FIR Percentage:</span>
+                          <span className="font-medium">{fairwayStats.firPercentage}%</span>
+                        </li>
+                        <li className="flex justify-between">
+                          <span className="text-muted-foreground">Best FIR Round:</span>
+                          <span className="font-medium">{fairwayStats.bestFIRRound}%</span>
+                        </li>
+                        <li className="flex justify-between">
+                          <span className="text-muted-foreground">Rounds Tracked:</span>
+                          <span className="font-medium">{fairwayStats.roundsTracked}</span>
                         </li>
                       </ul>
                     </div>
@@ -355,5 +384,61 @@ function calculatePenaltyStats(rounds: Round[]) {
     avgPenaltiesPerRound: roundsWithPenaltyData > 0 ? totalPenalties / roundsWithPenaltyData : 0,
     roundsWithoutPenalties,
     roundsTracked: roundsWithPenaltyData
+  };
+}
+
+function calculateFairwayStats(rounds: Round[]) {
+  let totalFairwayHits = 0;
+  let totalFairwayHoles = 0;
+  let roundsWithFIRData = 0;
+  let roundFIRPercentages: number[] = [];
+
+  rounds.forEach(round => {
+    let scores;
+    try {
+      scores = typeof round.hole_scores === 'string' 
+        ? JSON.parse(round.hole_scores) 
+        : round.hole_scores || [];
+    } catch (e) {
+      return;
+    }
+    
+    const hasFIRData = scores.some((score: any) => score.fairwayHit !== undefined);
+    if (!hasFIRData) return;
+    
+    roundsWithFIRData++;
+    
+    // Only count par 4s and par 5s for fairway stats
+    const fairwayHoles = scores.filter((score: any) => 
+      score.par >= 4 && score.strokes !== undefined && score.strokes > 0
+    );
+    
+    const roundFIRHits = fairwayHoles.filter((score: any) => score.fairwayHit === true).length;
+    const roundFairwayHoles = fairwayHoles.length;
+    
+    totalFairwayHits += roundFIRHits;
+    totalFairwayHoles += roundFairwayHoles;
+    
+    const roundFIRPercentage = roundFairwayHoles > 0 ? 
+      Math.round((roundFIRHits / roundFairwayHoles) * 100) : 0;
+    
+    if (roundFairwayHoles >= 5) {
+      roundFIRPercentages.push(roundFIRPercentage);
+    }
+  });
+  
+  const overallFIRPercentage = totalFairwayHoles > 0 ? 
+    Math.round((totalFairwayHits / totalFairwayHoles) * 100) : 0;
+  
+  let bestFIRRound = 0;
+  if (roundFIRPercentages.length > 0) {
+    bestFIRRound = Math.max(...roundFIRPercentages);
+  }
+  
+  return {
+    tracked: roundsWithFIRData > 0,
+    firPercentage: overallFIRPercentage,
+    bestFIRRound,
+    roundsTracked: roundsWithFIRData
   };
 }
