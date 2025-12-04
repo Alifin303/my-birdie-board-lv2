@@ -23,6 +23,9 @@ interface Round {
   to_par_gross: number;
   to_par_net?: number;
   hole_scores?: any;
+  holes_played?: number;
+  stableford_gross?: number;
+  stableford_net?: number;
   courses?: {
     id: number;
     name: string;
