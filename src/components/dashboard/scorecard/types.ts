@@ -6,6 +6,7 @@ export interface HoleScore {
   strokes?: number;
   putts?: number;           // Added for putting statistics
   gir?: boolean;            // Added for green in regulation
+  fairwayHit?: boolean;     // Added for fairway hit tracking
   penalties?: number;       // Added for penalty tracking
   handicap?: number;        // Stroke index (1-18) for handicap allocation
   yards?: number;           // Hole yardage
@@ -24,6 +25,7 @@ export interface ScoreTableProps {
   isEditing: boolean;
   handleScoreChange: (index: number, field: 'strokes' | 'putts' | 'penalties', value: string) => void;
   handleGIRChange?: (index: number, value: boolean) => void;
+  handleFairwayHitChange?: (index: number, value: boolean) => void;
   title: string;
   startIndex?: number;
   showDetailedStats?: boolean;

@@ -352,6 +352,15 @@ export function useScoreHandlers({
     setScores(newScores);
   };
 
+  const handleFairwayHitChange = (index: number, value: boolean) => {
+    const newScores = [...scores];
+    newScores[index] = {
+      ...newScores[index],
+      fairwayHit: value
+    };
+    setScores(newScores);
+  };
+
   // Add validation function
   const validateScores = (holeSelectionType: HoleSelection['type']): boolean => {
     let requiredHoles = [];
@@ -371,6 +380,7 @@ export function useScoreHandlers({
   return {
     handleScoreChange,
     handleGIRChange,
+    handleFairwayHitChange,
     handleHoleSelectionChange,
     updateScorecardForTee,
     handleTeeChange,

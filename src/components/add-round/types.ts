@@ -56,6 +56,7 @@ export type Score = {
   par: number;
   putts?: number | null;
   gir?: boolean;
+  fairwayHit?: boolean;
   fairway?: 'hit' | 'left' | 'right' | 'miss' | null;
   penalties?: number | null;
   yards?: number;

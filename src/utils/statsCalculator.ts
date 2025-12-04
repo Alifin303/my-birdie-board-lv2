@@ -387,7 +387,13 @@ export const calculateHoleStats = (rounds: Round[]) => {
     bogeys: 0,
     doubleBogeys: 0,
     others: 0,
-    totalHoles: 0
+    totalHoles: 0,
+    girCount: 0,
+    girTotal: 0,
+    girPercentage: 0,
+    fairwayHitCount: 0,
+    fairwayTotal: 0,
+    fairwayPercentage: 0
   };
 
   if (!rounds || rounds.length === 0) {
@@ -449,11 +455,33 @@ export const calculateHoleStats = (rounds: Round[]) => {
           stats.others++;
           console.log(`Other (${relativeToPar}) on hole ${holeScore.hole}, par ${holeScore.par}, strokes ${holeScore.strokes}`);
         }
+        
+        // Track GIR (Green in Regulation)
+        if (holeScore.gir !== undefined) {
+          stats.girTotal++;
+          if (holeScore.gir === true) {
+            stats.girCount++;
+          }
+        }
+        
+        // Track Fairway Hit (only for par 4s and par 5s)
+        if (holeScore.par >= 4) {
+          if (holeScore.fairwayHit !== undefined) {
+            stats.fairwayTotal++;
+            if (holeScore.fairwayHit === true) {
+              stats.fairwayHitCount++;
+            }
+          }
+        }
       });
     } else {
       console.log(`Round ${round.id} has no hole_scores or invalid format:`, round.hole_scores);
     }
   });
+
+  // Calculate percentages
+  stats.girPercentage = stats.girTotal > 0 ? Math.round((stats.girCount / stats.girTotal) * 100) : 0;
+  stats.fairwayPercentage = stats.fairwayTotal > 0 ? Math.round((stats.fairwayHitCount / stats.fairwayTotal) * 100) : 0;
 
   console.log("Final calculated hole stats:", stats);
   return stats;

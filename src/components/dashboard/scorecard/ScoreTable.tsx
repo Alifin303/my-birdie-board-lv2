@@ -9,6 +9,7 @@ export const ScoreTable = ({
   isEditing, 
   handleScoreChange,
   handleGIRChange,
+  handleFairwayHitChange,
   title,
   startIndex = 0,
   showDetailedStats = false,
@@ -23,6 +24,11 @@ export const ScoreTable = ({
   const totalPenalties = scores.reduce((sum, score) => sum + (score.penalties || 0), 0);
   const girCount = scores.filter(score => score.gir).length;
   const girPercentage = scores.length > 0 ? Math.round((girCount / scores.length) * 100) : 0;
+  
+  // Count fairways hit (only for par 4s and par 5s)
+  const fairwayHoles = scores.filter(score => score.par >= 4);
+  const fairwayHitCount = fairwayHoles.filter(score => score.fairwayHit).length;
+  const fairwayPercentage = fairwayHoles.length > 0 ? Math.round((fairwayHitCount / fairwayHoles.length) * 100) : 0;
   
   // Calculate gross Stableford points per hole
   const grossStablefordPoints = scores.map(score => {
@@ -191,6 +197,32 @@ export const ScoreTable = ({
                 </tr>
                 
                 <tr className="border-b">
+                  <td className="px-2 py-2 text-sm font-medium text-primary">FIR</td>
+                  {scores.map((score, index) => {
+                    const actualIndex = index + startIndex;
+                    const isPar3 = score.par === 3;
+                    return (
+                      <td key={`fairway-${score.hole}`} className="px-1 py-2 text-center">
+                        {isPar3 ? (
+                          <span className="text-muted-foreground text-xs">N/A</span>
+                        ) : isEditing && handleFairwayHitChange ? (
+                          <Checkbox
+                            checked={score.fairwayHit || false}
+                            onCheckedChange={(checked) => 
+                              handleFairwayHitChange(actualIndex, checked === true)
+                            }
+                            className="mx-auto"
+                          />
+                        ) : (
+                          <span>{score.fairwayHit ? '✓' : '-'}</span>
+                        )}
+                      </td>
+                    );
+                  })}
+                  <td className="px-2 py-2 text-center font-medium text-primary">{fairwayPercentage}%</td>
+                </tr>
+                
+                <tr className="border-b">
                   <td className="px-2 py-2 text-sm font-medium text-primary">Penalties</td>
                   {scores.map((score, index) => {
                     const actualIndex = index + startIndex;
@@ -343,6 +375,34 @@ export const ScoreTable = ({
                   })}
                 </div>
                 
+                <div className="grid grid-cols-3 border-b">
+                  {chunk.map((score, index) => {
+                    const chunkStartIndex = chunkIndex * 3;
+                    const actualIndex = chunkStartIndex + index + startIndex;
+                    const isPar3 = score.par === 3;
+                    
+                    return (
+                      <div key={`mobile-fairway-${score.hole}`} className="p-2 text-center border-r last:border-r-0">
+                        <span className="text-xs text-muted-foreground block mb-1">FIR</span>
+                        {isPar3 ? (
+                          <span className="text-muted-foreground text-xs">N/A</span>
+                        ) : isEditing && handleFairwayHitChange ? (
+                          <div className="flex justify-center">
+                            <Checkbox
+                              checked={score.fairwayHit || false}
+                              onCheckedChange={(checked) => 
+                                handleFairwayHitChange(actualIndex, checked === true)
+                              }
+                            />
+                          </div>
+                        ) : (
+                          <span>{score.fairwayHit ? '✓' : '-'}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                
                 <div className="grid grid-cols-3">
                   {chunk.map((score, index) => {
                     const chunkStartIndex = chunkIndex * 3;
@@ -390,6 +450,9 @@ export const ScoreTable = ({
               
               <div className="text-sm font-medium">GIR %:</div>
               <div className="text-sm text-right">{girPercentage}%</div>
+              
+              <div className="text-sm font-medium">FIR %:</div>
+              <div className="text-sm text-right">{fairwayPercentage}%</div>
               
               <div className="text-sm font-medium">Penalties:</div>
               <div className="text-sm text-right">{totalPenalties || '-'}</div>

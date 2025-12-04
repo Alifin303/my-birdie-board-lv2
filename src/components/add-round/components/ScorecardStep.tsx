@@ -25,6 +25,7 @@ interface ScorecardStepProps {
   handleHoleSelectionChange: (selection: HoleSelection) => void;
   handleScoreChange: (index: number, field: 'strokes' | 'putts' | 'penalties', value: string) => void;
   handleGIRChange?: (index: number, value: boolean) => void;
+  handleFairwayHitChange?: (index: number, value: boolean) => void;
   handleBackToSearch: () => void;
   handleSaveRound: () => Promise<void>;
   handleCloseModal: () => void;
@@ -50,6 +51,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   handleHoleSelectionChange,
   handleScoreChange,
   handleGIRChange,
+  handleFairwayHitChange,
   handleBackToSearch,
   handleSaveRound,
   handleCloseModal,
@@ -184,6 +186,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
       strokes: score.strokes || 0,
       putts: score.putts,
       gir: score.gir,
+      fairwayHit: score.fairwayHit,
       penalties: score.penalties,
       handicap: score.handicap,
       yards: score.yards
@@ -393,7 +396,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
           <Switch id="detailed-stats" checked={showDetailedStats} onCheckedChange={setShowDetailedStats} />
           <Label htmlFor="detailed-stats" className="flex items-center cursor-pointer">
             <BarChart className="h-4 w-4 mr-1.5 text-primary" />
-            <span>Track advanced stats (putts, GIR, penalties)</span>
+            <span>Track advanced stats (putts, GIR, fairways, penalties)</span>
           </Label>
         </div>
         
@@ -420,7 +423,8 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
             scores={frontNineHoleScores} 
             isEditing={true} 
             handleScoreChange={handleScoreChange} 
-            handleGIRChange={handleGIRChange} 
+            handleGIRChange={handleGIRChange}
+            handleFairwayHitChange={handleFairwayHitChange}
             title="Front Nine" 
             startIndex={0} 
             showDetailedStats={showDetailedStats}
@@ -438,7 +442,8 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
             scores={backNineHoleScores} 
             isEditing={true} 
             handleScoreChange={handleScoreChange} 
-            handleGIRChange={handleGIRChange} 
+            handleGIRChange={handleGIRChange}
+            handleFairwayHitChange={handleFairwayHitChange}
             title="Back Nine" 
             startIndex={frontNineScores.length} 
             showDetailedStats={showDetailedStats}
