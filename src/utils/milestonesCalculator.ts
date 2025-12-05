@@ -19,8 +19,9 @@ interface Round {
   handicap_at_posting?: number;
 }
 
-const BIRDIE_MILESTONES = [1, 5, 10, 25, 50, 100, 250, 500];
-const EAGLE_MILESTONES = [1, 5, 10, 25, 50];
+const BIRDIE_MILESTONES = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 75, 100, 150, 200, 250, 500];
+const EAGLE_MILESTONES = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 75, 100];
+const HOLE_IN_ONE_MILESTONES = [1, 5, 10, 15, 20, 25];
 const ROUND_MILESTONES = [1, 5, 10, 25, 50, 100, 250, 500];
 const COURSE_MILESTONES = [1, 5, 10, 25, 50, 100];
 const SCORE_MILESTONES = [120, 110, 100, 90, 80, 70];
@@ -52,14 +53,16 @@ export function calculateMilestones(rounds: Round[]): Milestone[] {
           // Hole in one
           if (hole.score === 1) {
             holeInOneCount++;
-            milestones.push({
-              id: `hole-in-one-${holeInOneCount}`,
-              type: 'hole_in_one',
-              title: holeInOneCount === 1 ? 'First Hole-in-One!' : `Hole-in-One #${holeInOneCount}`,
-              description: `Scored an ace!`,
-              date: round.date,
-              value: holeInOneCount
-            });
+            if (HOLE_IN_ONE_MILESTONES.includes(holeInOneCount)) {
+              milestones.push({
+                id: `hole-in-one-${holeInOneCount}`,
+                type: 'hole_in_one',
+                title: holeInOneCount === 1 ? 'First Hole-in-One!' : `${getOrdinal(holeInOneCount)} Hole-in-One`,
+                description: holeInOneCount === 1 ? 'Scored your first ace!' : `Reached ${holeInOneCount} career aces`,
+                date: round.date,
+                value: holeInOneCount
+              });
+            }
           }
           
           // Eagle (2 under par, but not hole-in-one on par 3)
