@@ -201,10 +201,11 @@ export function AddRoundModal({ open, onOpenChange, handicapIndex = 0 }: AddRoun
 
   return (
     <>
-      {/* Custom backdrop overlay */}
+      {/* Custom backdrop overlay - fixed position independent of scrollbar */}
       {open && (
         <div 
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
+          className="fixed top-0 left-0 right-0 bottom-0 z-50 bg-black/80 backdrop-blur-sm"
+          style={{ width: '100vw', height: '100vh' }}
           aria-hidden="true"
         />
       )}
@@ -217,7 +218,7 @@ export function AddRoundModal({ open, onOpenChange, handicapIndex = 0 }: AddRoun
         // Don't call onOpenChange(false) - let handleCloseModal handle closing
       }} modal={false}>
         <DialogContent 
-          className="sm:max-w-[1000px] p-6 max-h-[90vh] overflow-y-auto bg-background border shadow-2xl z-50"
+          className="sm:max-w-[1000px] p-6 max-h-[90vh] overflow-y-auto bg-background border shadow-2xl z-50 fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
           onInteractOutside={(e) => e.preventDefault()}
           onPointerDownOutside={(e) => e.preventDefault()}
           onFocusOutside={(e) => e.preventDefault()}
