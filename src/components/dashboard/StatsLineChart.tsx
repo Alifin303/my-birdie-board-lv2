@@ -6,8 +6,24 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Circle, Target, AlertCircle, TrendingUp } from "lucide-react";
+import { Circle, Target, AlertCircle, TrendingUp, TreeDeciduous } from "lucide-react";
 import { calculateGIRPercentage } from "@/components/add-round/utils/scoreUtils";
+
+// Calculate fairway hit percentage from hole scores
+const calculateFairwayPercentage = (scores: any[]): number | null => {
+  if (!scores || scores.length === 0) return null;
+  
+  // Only count par 4s and par 5s
+  const fairwayHoles = scores.filter((score: any) => score.par >= 4);
+  if (fairwayHoles.length === 0) return null;
+  
+  // Check if any fairway data exists
+  const holesWithFairwayData = fairwayHoles.filter((score: any) => score.fairwayHit !== undefined);
+  if (holesWithFairwayData.length === 0) return null;
+  
+  const fairwaysHit = fairwayHoles.filter((score: any) => score.fairwayHit === true).length;
+  return Math.round((fairwaysHit / fairwayHoles.length) * 100);
+};
 
 interface DataPoint {
   date: string;
@@ -21,7 +37,7 @@ interface StatsLineChartProps {
 }
 
 export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) => {
-  const [selectedStat, setSelectedStat] = useState<"putts" | "gir" | "penalties">("putts");
+  const [selectedStat, setSelectedStat] = useState<"putts" | "gir" | "fairways" | "penalties">("putts");
   const [showScore, setShowScore] = useState(false);
   
   // Format date for display in chart
@@ -55,6 +71,9 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
       
       // For GIR calculation, use the utility function that calculates consistently
       const { girPercentage } = calculateGIRPercentage(scores);
+      
+      // Calculate fairway hit percentage
+      const fairwayPercentage = calculateFairwayPercentage(scores);
       
       // Calculate total score and count putts/penalties from played holes
       scores.forEach((score: any) => {
@@ -92,6 +111,7 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
         rawDate: round.date,
         putts: puttHoles > 0 ? puttsValue : null,
         gir: girPercentage,
+        fairways: fairwayPercentage,
         penalties: penaltiesValue,
         score: totalScore || round.total_score || 0,
         id: round.id
@@ -100,6 +120,7 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
       // Only include rounds that have data for the selected stat
       if (selectedStat === "putts") return item.putts !== null;
       if (selectedStat === "gir") return item.gir !== null;
+      if (selectedStat === "fairways") return item.fairways !== null;
       if (selectedStat === "penalties") return true; // Always show penalties (0 is valid)
       return false;
     });
@@ -127,6 +148,15 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
           yAxisLabel: "GIR %",
           valueFormatter: (value: number) => `${value}%`,
           emptyMessage: "No GIR data available."
+        };
+      case "fairways":
+        return {
+          label: "Fairways Hit %",
+          dataKey: "fairways",
+          color: "#2e8b57",
+          yAxisLabel: "Fairways %",
+          valueFormatter: (value: number) => `${value}%`,
+          emptyMessage: "No fairway data available."
         };
       case "penalties":
         return {
@@ -175,6 +205,10 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
               <Target className="h-4 w-4 mr-2" />
               GIR %
             </ToggleGroupItem>
+            <ToggleGroupItem value="fairways" aria-label="Toggle fairways chart">
+              <TreeDeciduous className="h-4 w-4 mr-2" />
+              Fairways
+            </ToggleGroupItem>
             <ToggleGroupItem value="penalties" aria-label="Toggle penalties chart">
               <AlertCircle className="h-4 w-4 mr-2" />
               Penalties
@@ -218,6 +252,10 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
             <ToggleGroupItem value="gir" aria-label="Toggle GIR chart">
               <Target className="h-4 w-4 mr-2" />
               GIR %
+            </ToggleGroupItem>
+            <ToggleGroupItem value="fairways" aria-label="Toggle fairways chart">
+              <TreeDeciduous className="h-4 w-4 mr-2" />
+              Fairways
             </ToggleGroupItem>
             <ToggleGroupItem value="penalties" aria-label="Toggle penalties chart">
               <AlertCircle className="h-4 w-4 mr-2" />
@@ -265,7 +303,7 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
                     position: 'insideLeft',
                     style: { textAnchor: 'middle', fontSize: 11 }
                   }}
-                  domain={selectedStat === "gir" ? [0, 100] : ['auto', 'auto']}
+                  domain={selectedStat === "gir" || selectedStat === "fairways" ? [0, 100] : ['auto', 'auto']}
                 />
                 {showScore && (
                   <YAxis 
