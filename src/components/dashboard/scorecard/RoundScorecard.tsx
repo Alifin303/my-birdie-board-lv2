@@ -97,6 +97,15 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
     setScores(newScores);
   };
 
+  const handleFairwayHitChange = (index: number, value: boolean) => {
+    const newScores = [...scores];
+    newScores[index] = {
+      ...newScores[index],
+      fairwayHit: value,
+    };
+    setScores(newScores);
+  };
+
   const handleSaveChanges = async () => {
     if (!round.id) {
       toast({
@@ -547,6 +556,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
                     isEditing={isEditing}
                     handleScoreChange={handleScoreChange}
                     handleGIRChange={handleGIRChange}
+                    handleFairwayHitChange={handleFairwayHitChange}
                     title="Front Nine"
                     showDetailedStats={showDetailedStats}
                     courseHandicap={roundHandicap}
@@ -560,6 +570,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
                     isEditing={isEditing}
                     handleScoreChange={handleScoreChange}
                     handleGIRChange={handleGIRChange}
+                    handleFairwayHitChange={handleFairwayHitChange}
                     title="Back Nine"
                     startIndex={front9.length}
                     showDetailedStats={showDetailedStats}
