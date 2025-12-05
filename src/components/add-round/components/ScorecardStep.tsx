@@ -249,8 +249,19 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   const frontNineHoleScores = convertToHoleScores(frontNineScores);
   const backNineHoleScores = convertToHoleScores(backNineScores);
   
-  // Determine if this is a 9-hole course
-  const is9HoleCourse = backNineScores.length === 0 && frontNineScores.length === 9;
+  // Determine if this is a 9-hole course based on course data, not filtered scores
+  const is9HoleCourse = (() => {
+    // Check if selected tee has holes data
+    if (selectedTee?.holes && selectedTee.holes.length > 0) {
+      return selectedTee.holes.length === 9 && selectedTee.holes.every(h => h.number <= 9);
+    }
+    // Fall back to course-level holes
+    if (selectedCourse.holes && selectedCourse.holes.length > 0) {
+      return selectedCourse.holes.length === 9 && selectedCourse.holes.every(h => h.number <= 9);
+    }
+    // Default to 18-hole course
+    return false;
+  })();
   
   // Add required field flag based on hole selection
   const isHoleRequired = (holeNumber: number): boolean => {
