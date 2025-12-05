@@ -9,6 +9,7 @@ import { CourseStatsTable, CourseRoundHistory } from "@/components/dashboard/Cou
 import { DetailedStats } from "@/components/dashboard/DetailedStats";
 import { AdvancedStats } from "@/components/dashboard/AdvancedStats";
 import ScoreProgressionChart from "@/components/dashboard/ScoreProgressionChart";
+import { MilestonesDisplay } from "@/components/dashboard/MilestonesDisplay";
 import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
 import { useToast } from "@/hooks/use-toast";
 import { clearSubscriptionCache } from "@/integrations/supabase/subscription/subscription-utils";
@@ -274,6 +275,7 @@ export default function Dashboard() {
             onAddRound={handleOpenModal}
             subscription={subscription}
           />
+          <MilestonesDisplay rounds={userRounds || []} />
         </div>
         
         {!selectedCourseId && (
