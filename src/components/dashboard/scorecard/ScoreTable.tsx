@@ -197,7 +197,7 @@ export const ScoreTable = ({
                 </tr>
                 
                 <tr className="border-b">
-                  <td className="px-2 py-2 text-sm font-medium text-primary">FIR</td>
+                  <td className="px-2 py-2 text-sm font-medium text-primary">Fairway</td>
                   {scores.map((score, index) => {
                     const actualIndex = index + startIndex;
                     const isPar3 = score.par === 3;
@@ -383,7 +383,7 @@ export const ScoreTable = ({
                     
                     return (
                       <div key={`mobile-fairway-${score.hole}`} className="p-2 text-center border-r last:border-r-0">
-                        <span className="text-xs text-muted-foreground block mb-1">FIR</span>
+                        <span className="text-xs text-muted-foreground block mb-1">Fairway</span>
                         {isPar3 ? (
                           <span className="text-muted-foreground text-xs">N/A</span>
                         ) : isEditing && handleFairwayHitChange ? (
