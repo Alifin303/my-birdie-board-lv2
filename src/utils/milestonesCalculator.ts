@@ -206,22 +206,42 @@ export function calculateMilestones(rounds: Round[]): Milestone[] {
     }
   });
 
-  // Track handicap changes/improvements
+  // Track handicap changes (improvements and increases)
   let previousHandicap: number | null = null;
+  let firstHandicapRecorded = false;
+  
   sortedRounds.forEach((round) => {
-    if (round.handicap_at_posting !== undefined && round.handicap_at_posting !== null) {
-      if (previousHandicap !== null && round.handicap_at_posting < previousHandicap) {
-        const improvement = (previousHandicap - round.handicap_at_posting).toFixed(1);
+    const handicap = round.handicap_at_posting;
+    if (handicap !== undefined && handicap !== null && typeof handicap === 'number') {
+      // Track first handicap as a milestone
+      if (!firstHandicapRecorded) {
+        firstHandicapRecorded = true;
         milestones.push({
-          id: `handicap-${round.date}-${round.handicap_at_posting}`,
+          id: `handicap-first-${round.date}`,
+          type: 'handicap',
+          title: 'First Handicap',
+          description: `Starting handicap: ${handicap.toFixed(1)}`,
+          date: round.date,
+          value: handicap
+        });
+        previousHandicap = handicap;
+        return;
+      }
+      
+      // Track handicap improvements
+      if (previousHandicap !== null && handicap < previousHandicap) {
+        const improvement = (previousHandicap - handicap).toFixed(1);
+        milestones.push({
+          id: `handicap-improved-${round.date}-${handicap}`,
           type: 'handicap',
           title: 'Handicap Improved',
-          description: `Dropped to ${round.handicap_at_posting.toFixed(1)} (improved by ${improvement})`,
+          description: `Dropped to ${handicap.toFixed(1)} (improved by ${improvement})`,
           date: round.date,
-          value: round.handicap_at_posting
+          value: handicap
         });
       }
-      previousHandicap = round.handicap_at_posting;
+      
+      previousHandicap = handicap;
     }
   });
 
