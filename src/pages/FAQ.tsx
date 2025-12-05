@@ -45,6 +45,10 @@ const faqItems = [{
   id: "item-10",
   question: "How do I add a new golf course that isn't listed?",
   answer: "If you don't find your course in our database, you can easily add it by navigating to 'Add Round' and selecting 'Add New Course'. You'll need to provide the course name, location, and hole information including par and distances."
+}, {
+  id: "item-11",
+  question: "Does MyBirdieBoard support Stableford scoring?",
+  answer: "Yes! MyBirdieBoard automatically calculates both gross and net Stableford scores for every round you track. When you enter your hole-by-hole scores, we calculate your Stableford points based on your score relative to par on each hole. Net Stableford takes your handicap into account, distributing strokes across holes based on the stroke index. You can view your Stableford scores in your round history and dashboard."
 }];
 
 export default function FAQ() {

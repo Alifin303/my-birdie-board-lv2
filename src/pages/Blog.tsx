@@ -10,6 +10,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 const blogPosts = [
   {
+    id: "stableford-scoring",
+    title: "What is Stableford Scoring in Golf?",
+    description: "Complete guide to Stableford scoring - learn how points are calculated, the difference between gross and net Stableford, and why it's a popular alternative to stroke play.",
+    excerpt: "Stableford is a points-based scoring system that rewards good holes and minimizes the impact of bad ones. Learn how to calculate Stableford points and track your scores.",
+    date: "2025-01-25",
+    readTime: "10 min read",
+    tags: ["Stableford", "Scoring", "Rules"],
+    link: "/blog/stableford-scoring"
+  },
+  {
     id: "golf-score-tracking-tips",
     title: "How to Track Golf Scores Effectively",
     description: "Master the art of golf score tracking with our comprehensive guide. Learn proven strategies to track scores, analyze performance, and improve your game with data-driven insights.",

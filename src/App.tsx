@@ -20,6 +20,7 @@ import BestGolfClubsBeginners from "@/pages/blog/BestGolfClubsBeginners";
 import ImproveGolfSwing from "@/pages/blog/ImproveGolfSwing";
 import CourseManagementTips from "@/pages/blog/CourseManagementTips";
 import UnderstandingHandicap from "@/pages/blog/UnderstandingHandicap";
+import StablefordScoring from "@/pages/blog/StablefordScoring";
 import HowToTrackGolfScores from "@/pages/guides/HowToTrackGolfScores";
 import GolfHandicapCalculator from "@/pages/guides/GolfHandicapCalculator";
 import BestGolfScoreApps from "@/pages/guides/BestGolfScoreApps";
@@ -166,6 +167,14 @@ function App() {
                       <link rel="canonical" href="https://mybirdieboard.com/blog/understanding-golf-handicap-system" />
                     </Helmet>
                     <UnderstandingHandicap />
+                  </>
+                } />
+                <Route path="/blog/stableford-scoring" element={
+                  <>
+                    <Helmet>
+                      <link rel="canonical" href="https://mybirdieboard.com/blog/stableford-scoring" />
+                    </Helmet>
+                    <StablefordScoring />
                   </>
                 } />
                 
