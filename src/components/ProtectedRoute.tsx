@@ -229,12 +229,18 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
       async (_event, session) => {
         // Prevent concurrent auth state change processing
         if (authStateChangeInProgress.current) return;
+        
+        // Ignore TOKEN_REFRESHED events - these happen on tab switch and shouldn't cause loading
+        if (_event === 'TOKEN_REFRESHED') {
+          console.log("Token refreshed - ignoring to prevent UI flicker");
+          return;
+        }
+        
         authStateChangeInProgress.current = true;
         
         try {
           if (!isMounted) return;
           
-          setLoadingPhase("auth state changed");
           console.log(`Auth state changed: ${_event}, User: ${session?.user?.id || "none"}`);
           
           const isAuth = !!session;
@@ -245,10 +251,13 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
           // Avoid unnecessary state updates if authentication status hasn't changed
           if (isAuthenticated !== isAuth) {
             setIsAuthenticated(isAuth);
+            // Only show loading state for actual auth changes (sign in/out), not token refreshes
+            setLoadingPhase("auth state changed");
           }
           
           // If auth state changes and user is authenticated, check subscription
-          if (isAuth && requireSubscription) {
+          // Only run this for significant auth changes, not every event
+          if (isAuth && requireSubscription && (_event === 'SIGNED_IN' || _event === 'INITIAL_SESSION')) {
             setIsLoading(true);
             try {
               const subscription = await fetchUserSubscription(session.user.id, supabase);
