@@ -9,7 +9,6 @@ import { CourseStatsTable, CourseRoundHistory } from "@/components/dashboard/Cou
 import { DetailedStats } from "@/components/dashboard/DetailedStats";
 import { AdvancedStats } from "@/components/dashboard/AdvancedStats";
 import ScoreProgressionChart from "@/components/dashboard/ScoreProgressionChart";
-import { AchievementBadges } from "@/components/dashboard/AchievementBadges";
 import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
 import { useToast } from "@/hooks/use-toast";
 import { clearSubscriptionCache } from "@/integrations/supabase/subscription/subscription-utils";
@@ -334,10 +333,6 @@ export default function Dashboard() {
                 userRounds={userRounds}
                 isLoading={roundsLoading}
               />
-            </div>
-            
-            <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
-              <AchievementBadges rounds={userRounds || []} />
             </div>
           </>
         )}
