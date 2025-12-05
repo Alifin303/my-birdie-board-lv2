@@ -25,6 +25,7 @@ const Demo = () => {
   };
 
   // Demo rounds data matching the real Round interface
+  // hole_scores must be an array of objects for AdvancedStats compatibility
   const demoRounds = [
     {
       id: 1,
@@ -37,10 +38,7 @@ const Demo = () => {
       holes_played: 18,
       stableford_gross: 32,
       stableford_net: 38,
-      hole_scores: {
-        scores: [4, 5, 3, 5, 4, 4, 5, 3, 5, 4, 5, 4, 4, 5, 3, 5, 4, 5],
-        pars: [4, 4, 3, 5, 4, 4, 5, 3, 4, 4, 5, 4, 4, 5, 3, 4, 4, 4]
-      },
+      hole_scores: null, // No advanced stats in demo
       courses: {
         id: 1,
         name: 'Pine Valley Golf Club',
@@ -61,10 +59,7 @@ const Demo = () => {
       holes_played: 18,
       stableford_gross: 26,
       stableford_net: 33,
-      hole_scores: {
-        scores: [5, 4, 4, 6, 5, 4, 6, 4, 5, 5, 6, 5, 4, 5, 4, 6, 5, 6],
-        pars: [4, 4, 3, 5, 4, 4, 5, 3, 4, 4, 5, 4, 4, 5, 3, 4, 4, 4]
-      },
+      hole_scores: null,
       courses: {
         id: 2,
         name: 'Augusta National Golf Club',
@@ -85,10 +80,7 @@ const Demo = () => {
       holes_played: 18,
       stableford_gross: 36,
       stableford_net: 42,
-      hole_scores: {
-        scores: [4, 4, 3, 4, 4, 3, 5, 3, 4, 4, 4, 4, 3, 5, 3, 4, 4, 4],
-        pars: [4, 4, 3, 5, 4, 4, 5, 3, 4, 4, 5, 4, 4, 5, 3, 4, 4, 4]
-      },
+      hole_scores: null,
       courses: {
         id: 3,
         name: 'Pebble Beach Golf Links',
@@ -109,10 +101,7 @@ const Demo = () => {
       holes_played: 18,
       stableford_gross: 29,
       stableford_net: 35,
-      hole_scores: {
-        scores: [4, 5, 4, 5, 5, 4, 5, 3, 5, 5, 5, 4, 4, 5, 3, 5, 5, 5],
-        pars: [4, 4, 3, 5, 4, 4, 5, 3, 4, 4, 5, 4, 4, 5, 3, 4, 4, 4]
-      },
+      hole_scores: null,
       courses: {
         id: 4,
         name: 'St Andrews Old Course',
@@ -133,10 +122,7 @@ const Demo = () => {
       holes_played: 18,
       stableford_gross: 24,
       stableford_net: 31,
-      hole_scores: {
-        scores: [5, 5, 4, 6, 5, 5, 6, 4, 5, 5, 6, 5, 5, 6, 4, 5, 5, 6],
-        pars: [4, 4, 3, 5, 4, 4, 5, 3, 4, 4, 5, 4, 4, 5, 3, 4, 4, 4]
-      },
+      hole_scores: null,
       courses: {
         id: 1,
         name: 'Pine Valley Golf Club',
