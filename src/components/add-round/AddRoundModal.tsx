@@ -202,7 +202,10 @@ export function AddRoundModal({ open, onOpenChange, handicapIndex = 0 }: AddRoun
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[1000px] p-6 max-h-[90vh] overflow-y-auto">
+        <DialogContent 
+          className="sm:max-w-[1000px] p-6 max-h-[90vh] overflow-y-auto"
+          onInteractOutside={(e) => e.preventDefault()}
+        >
           {currentStep === 'search' ? (
             <SearchStep 
               searchQuery={searchQuery}
