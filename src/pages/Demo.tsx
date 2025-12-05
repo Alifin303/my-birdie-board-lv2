@@ -442,26 +442,24 @@ const Demo = () => {
             </div>
 
             {/* Bottom CTA */}
-            <Card className="bg-primary/10 border-primary/20">
-              <CardContent className="p-6 sm:p-8 text-center">
-                <h3 className="text-2xl font-bold mb-4">Ready to Track Your Own Rounds?</h3>
-                <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                  This is just a preview of what MyBirdieBoard can do for your game. Start tracking your real rounds 
-                  and unlock detailed analytics, handicap calculations, Stableford scoring, and course leaderboards.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button size="lg" onClick={() => setShowSignupDialog(true)}>
-                    <UserPlus className="h-5 w-5 mr-2" />
-                    Start Your Free Trial
+            <div className="bg-black/40 backdrop-blur-md rounded-lg border border-white/20 p-6 sm:p-8 text-center">
+              <h3 className="text-2xl font-bold mb-4 text-white">Ready to Track Your Own Rounds?</h3>
+              <p className="text-white/90 mb-6 max-w-2xl mx-auto">
+                This is just a preview of what MyBirdieBoard can do for your game. Start tracking your real rounds 
+                and unlock detailed analytics, handicap calculations, Stableford scoring, and course leaderboards.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button size="lg" onClick={() => setShowSignupDialog(true)} className="bg-white text-primary hover:bg-white/90">
+                  <UserPlus className="h-5 w-5 mr-2" />
+                  Start Your Free Trial
+                </Button>
+                <Link to="/faq">
+                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/20">
+                    Learn More
                   </Button>
-                  <Link to="/faq">
-                    <Button size="lg" variant="outline">
-                      Learn More
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </div>
