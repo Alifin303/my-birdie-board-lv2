@@ -191,6 +191,11 @@ const HowToTrackGolfScores = () => {
                   </Link>
                 </li>
                 <li>
+                  <Link to="/blog/stableford-scoring" className="text-primary hover:underline">
+                    Stableford Scoring Guide
+                  </Link>
+                </li>
+                <li>
                   <Link to="/faq" className="text-primary hover:underline">
                     Golf Score Tracking FAQ
                   </Link>

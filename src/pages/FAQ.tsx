@@ -223,6 +223,11 @@ export default function FAQ() {
                         Golf Performance Analytics
                       </Link>
                     </li>
+                    <li>
+                      <Link to="/blog/stableford-scoring" className="text-primary hover:underline">
+                        Stableford Scoring Guide
+                      </Link>
+                    </li>
                   </ul>
                 </div>
               </div>
