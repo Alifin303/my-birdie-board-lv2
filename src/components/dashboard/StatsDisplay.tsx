@@ -3,7 +3,6 @@ import { Stats, Round } from "./types";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { HandicapCard } from "./HandicapCard";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 type RoundFilter = 'all' | '9hole' | '18hole';
 type ScoreMode = 'stroke' | 'stableford';
@@ -158,19 +157,19 @@ export const MainStats = ({
   return (
     <div key={roundsKey} className="space-y-4 p-4 sm:p-6">
       {/* Score Type & Mode Toggles */}
-      <div className="flex flex-wrap justify-center gap-3">
+      <div className="flex flex-wrap justify-center gap-4">
         {/* Gross/Net Toggle */}
         {onScoreTypeChange && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 bg-muted/30 p-1 rounded-lg shadow-sm border border-border/50">
             <button 
               onClick={() => onScoreTypeChange('gross')} 
-              className={`px-3 py-1 rounded-full text-sm font-medium ${scoreType === 'gross' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium min-w-[60px] transition-colors ${scoreType === 'gross' ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted'}`}
             >
               Gross
             </button>
             <button 
               onClick={() => onScoreTypeChange('net')} 
-              className={`px-3 py-1 rounded-full text-sm font-medium ${scoreType === 'net' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium min-w-[60px] transition-colors ${scoreType === 'net' ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted'}`}
             >
               Net
             </button>
@@ -179,21 +178,22 @@ export const MainStats = ({
         
         {/* Score Mode Toggle (Stroke/Stableford) */}
         {onScoreModeChange && (
-          <ToggleGroup 
-            type="single" 
-            value={scoreMode} 
-            onValueChange={(value) => value && onScoreModeChange(value as ScoreMode)}
-            className="bg-muted/50 p-1 rounded-lg"
-          >
-            <ToggleGroupItem value="stroke" aria-label="Stroke play" className="px-4">
-              <Hash className="h-4 w-4 mr-2" />
+          <div className="flex items-center gap-1 bg-muted/30 p-1 rounded-lg shadow-sm border border-border/50">
+            <button 
+              onClick={() => onScoreModeChange('stroke')} 
+              className={`px-4 py-1.5 rounded-md text-sm font-medium min-w-[90px] flex items-center justify-center gap-1.5 transition-colors ${scoreMode === 'stroke' ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted'}`}
+            >
+              <Hash className="h-4 w-4" />
               Stroke
-            </ToggleGroupItem>
-            <ToggleGroupItem value="stableford" aria-label="Stableford" className="px-4">
-              <TrendingUp className="h-4 w-4 mr-2" />
+            </button>
+            <button 
+              onClick={() => onScoreModeChange('stableford')} 
+              className={`px-4 py-1.5 rounded-md text-sm font-medium min-w-[90px] flex items-center justify-center gap-1.5 transition-colors ${scoreMode === 'stableford' ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted'}`}
+            >
+              <TrendingUp className="h-4 w-4" />
               Stableford
-            </ToggleGroupItem>
-          </ToggleGroup>
+            </button>
+          </div>
         )}
       </div>
       
