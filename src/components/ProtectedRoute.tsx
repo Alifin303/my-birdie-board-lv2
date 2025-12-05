@@ -40,14 +40,18 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
   const cachedAuth = localStorage.getItem('userAuthenticated') === 'true';
   const cachedSubscription = getCachedSubscription();
   
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // null = not yet checked
+  // Use cached values immediately if available
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(cachedAuth ? true : null);
   const [hasSubscription, setHasSubscription] = useState(cachedSubscription ?? true);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!cachedAuth); // Don't show loading if cached
+  const [hasInitialized, setHasInitialized] = useState(false);
   
   const location = useLocation();
 
-  // Single effect to check auth and subscription on mount
+  // Single effect to check auth and subscription on mount - only once
   useEffect(() => {
+    if (hasInitialized) return; // Prevent re-running
+    
     let isMounted = true;
 
     const checkAuthAndSubscription = async () => {
@@ -57,8 +61,6 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
         const isAuth = !!session;
         
         if (!isMounted) return;
-        
-        console.log("Auth check result:", isAuth ? "authenticated" : "not authenticated");
         setIsAuthenticated(isAuth);
         
         if (isAuth) {
@@ -101,6 +103,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
       } finally {
         if (isMounted) {
           setIsLoading(false);
+          setHasInitialized(true);
         }
       }
     };
@@ -110,7 +113,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
     return () => {
       isMounted = false;
     };
-  }, []); // Empty deps - only run once on mount
+  }, [hasInitialized]); // Include hasInitialized to satisfy linter but guard prevents re-run
 
   // Listen for auth state changes (login/logout only)
   useEffect(() => {
@@ -150,8 +153,9 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
     };
   }, [requireSubscription]);
 
-  // Show loading only during initial check
-  if (isLoading || isAuthenticated === null) {
+  // Show loading only if no cached auth AND still loading
+  // This prevents loading flash when returning to tab with valid cache
+  if (isLoading && isAuthenticated === null) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
