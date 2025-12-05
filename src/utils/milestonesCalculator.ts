@@ -11,7 +11,7 @@ interface Round {
   id: number;
   date: string;
   gross_score: number;
-  hole_scores?: { score: number; par: number }[] | null;
+  hole_scores?: { score?: number; strokes?: number; par: number }[] | null;
   holes_played?: number;
   course_id?: number;
   courses?: { id: number; name: string };
@@ -46,12 +46,13 @@ export function calculateMilestones(rounds: Round[]): Milestone[] {
   
   sortedRounds.forEach((round) => {
     if (round.hole_scores && Array.isArray(round.hole_scores)) {
-      round.hole_scores.forEach((hole: { score: number; par: number }) => {
-        if (hole.score && hole.par) {
-          const difference = hole.score - hole.par;
+      round.hole_scores.forEach((hole: { score?: number; strokes?: number; par: number }) => {
+        const holeScore = hole.strokes ?? hole.score;
+        if (holeScore && hole.par) {
+          const difference = holeScore - hole.par;
           
           // Hole in one
-          if (hole.score === 1) {
+          if (holeScore === 1) {
             holeInOneCount++;
             if (HOLE_IN_ONE_MILESTONES.includes(holeInOneCount)) {
               milestones.push({
@@ -66,7 +67,7 @@ export function calculateMilestones(rounds: Round[]): Milestone[] {
           }
           
           // Eagle (2 under par, but not hole-in-one on par 3)
-          if (difference <= -2 && hole.score !== 1) {
+          if (difference <= -2 && holeScore !== 1) {
             eagleCount++;
             if (EAGLE_MILESTONES.includes(eagleCount) && !eaglesMilestoneHit.has(eagleCount)) {
               eaglesMilestoneHit.add(eagleCount);
