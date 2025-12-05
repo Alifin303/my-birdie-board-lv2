@@ -105,4 +105,18 @@
   </ai:content>
 </url>
 
+<url>
+  <loc>https://mybirdieboard.com/blog/stableford-scoring</loc>
+  <lastmod>2025-01-25T10:00:00+00:00</lastmod>
+  <priority>0.9</priority>
+  <changefreq>monthly</changefreq>
+  <ai:content>
+    <ai:type>Guide</ai:type>
+    <ai:title>What is Stableford Scoring in Golf? Complete Guide &amp; Calculator</ai:title>
+    <ai:description>Learn how Stableford scoring works in golf, how to calculate points for each hole, gross vs net Stableford, and why it's a popular alternative to stroke play.</ai:description>
+    <ai:keywords>stableford scoring, stableford points, golf stableford, stableford calculator, net stableford, gross stableford, golf scoring methods</ai:keywords>
+    <ai:primaryTopic>Stableford Scoring System</ai:primaryTopic>
+  </ai:content>
+</url>
+
 </urlset>
