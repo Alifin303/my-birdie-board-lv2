@@ -205,6 +205,8 @@ export function AddRoundModal({ open, onOpenChange, handicapIndex = 0 }: AddRoun
         <DialogContent 
           className="sm:max-w-[1000px] p-6 max-h-[90vh] overflow-y-auto"
           onInteractOutside={(e) => e.preventDefault()}
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onFocusOutside={(e) => e.preventDefault()}
         >
           {currentStep === 'search' ? (
             <SearchStep 
