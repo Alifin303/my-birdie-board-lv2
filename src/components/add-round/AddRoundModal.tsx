@@ -210,7 +210,7 @@ export function AddRoundModal({ open, onOpenChange, handicapIndex = 0 }: AddRoun
         // Don't call onOpenChange(false) - let handleCloseModal handle closing
       }} modal={false}>
         <DialogContent 
-          className="sm:max-w-[1000px] p-6 max-h-[90vh] overflow-y-auto"
+          className="sm:max-w-[1000px] p-6 max-h-[90vh] overflow-y-auto bg-muted/95 border shadow-xl"
           onInteractOutside={(e) => e.preventDefault()}
           onPointerDownOutside={(e) => e.preventDefault()}
           onFocusOutside={(e) => e.preventDefault()}
