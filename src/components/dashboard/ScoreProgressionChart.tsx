@@ -192,32 +192,33 @@ const ScoreProgressionChart = ({
           </ToggleGroup>
         </div>
         
-        <div className="flex justify-between items-center flex-wrap gap-3">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <ToggleGroup 
             type="single" 
             value={holeFilter} 
             onValueChange={(value) => value && setHoleFilter(value as 'all' | '9' | '18')}
+            className="flex-wrap justify-start"
           >
-            <ToggleGroupItem value="all" aria-label="All rounds">
+            <ToggleGroupItem value="all" aria-label="All rounds" className="text-xs sm:text-sm px-2 sm:px-3">
               All Rounds
             </ToggleGroupItem>
-            <ToggleGroupItem value="9" aria-label="9 hole rounds">
+            <ToggleGroupItem value="9" aria-label="9 hole rounds" className="text-xs sm:text-sm px-2 sm:px-3">
               9 Holes
             </ToggleGroupItem>
-            <ToggleGroupItem value="18" aria-label="18 hole rounds">
+            <ToggleGroupItem value="18" aria-label="18 hole rounds" className="text-xs sm:text-sm px-2 sm:px-3">
               18 Holes
             </ToggleGroupItem>
           </ToggleGroup>
           
           {scoreMode === 'stroke' && (
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
               <div className="flex items-center space-x-2">
                 <Switch
                   id="show-par"
                   checked={showParLine}
                   onCheckedChange={setShowParLine}
                 />
-                <label htmlFor="show-par" className="text-sm font-medium">
+                <label htmlFor="show-par" className="text-xs sm:text-sm font-medium whitespace-nowrap">
                   Show Par Line
                 </label>
               </div>
@@ -225,14 +226,14 @@ const ScoreProgressionChart = ({
                 type="single" 
                 value={displayMode} 
                 onValueChange={(value) => value && setDisplayMode(value as 'strokes' | 'to_par')}
-                className="ml-auto"
+                className="flex-wrap"
               >
-                <ToggleGroupItem value="strokes" aria-label="Display strokes">
-                  <Hash className="h-4 w-4 mr-2" />
+                <ToggleGroupItem value="strokes" aria-label="Display strokes" className="text-xs sm:text-sm px-2 sm:px-3">
+                  <Hash className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                   Strokes
                 </ToggleGroupItem>
-                <ToggleGroupItem value="to_par" aria-label="Display to par">
-                  <Target className="h-4 w-4 mr-2" />
+                <ToggleGroupItem value="to_par" aria-label="Display to par" className="text-xs sm:text-sm px-2 sm:px-3">
+                  <Target className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                   To Par
                 </ToggleGroupItem>
               </ToggleGroup>
