@@ -13,6 +13,20 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PasswordForm } from "./PasswordForm";
+import { MilestonesDialog } from "./MilestonesDialog";
+
+interface Round {
+  id: number;
+  date: string;
+  gross_score: number;
+  hole_scores?: { score: number; par: number }[] | null;
+  holes_played?: number;
+  course_id?: number;
+  courses?: { id: number; name: string };
+  stableford_gross?: number;
+  handicap_at_posting?: number;
+}
+
 interface Subscription {
   id?: string;
   subscription_id?: string;
@@ -26,6 +40,7 @@ interface DashboardHeaderProps {
   profileData: any;
   onAddRound: () => void;
   subscription?: Subscription | null;
+  rounds?: Round[];
 }
 const profileFormSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
@@ -44,7 +59,8 @@ const passwordFormSchema = z.object({
 export const DashboardHeader = ({
   profileData,
   onAddRound,
-  subscription
+  subscription,
+  rounds = []
 }: DashboardHeaderProps) => {
   const navigate = useNavigate();
   const {
@@ -442,6 +458,7 @@ export const DashboardHeader = ({
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate">Welcome, {profileData?.first_name || 'Golfer'}!</h1>
         </div>
         <div className="flex items-center gap-2 self-end sm:self-auto">
+          <MilestonesDialog rounds={rounds} />
           <Button onClick={onAddRound} className="text-sm sm:text-base px-3 sm:px-4" size="sm" title="Add a New Round">
             Add a New Round
           </Button>
