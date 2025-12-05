@@ -27,7 +27,7 @@ const SCORE_MILESTONES = [120, 110, 100, 90, 80, 70];
 const STABLEFORD_MILESTONES = [20, 25, 30, 32, 34, 36, 38, 40];
 
 export function calculateMilestones(rounds: Round[]): Milestone[] {
-  if (!rounds || rounds.length === 0) return [];
+  if (!rounds || !Array.isArray(rounds) || rounds.length === 0) return [];
 
   const milestones: Milestone[] = [];
   
