@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -40,20 +40,14 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
   const cachedAuth = localStorage.getItem('userAuthenticated') === 'true';
   const cachedSubscription = getCachedSubscription();
   
-  const [isAuthenticated, setIsAuthenticated] = useState(cachedAuth);
-  const [hasSubscription, setHasSubscription] = useState(cachedSubscription ?? true); // Default true to avoid flash
-  const [initialCheckComplete, setInitialCheckComplete] = useState(false);
-  const [showLoading, setShowLoading] = useState(!cachedAuth); // Only show loading if not cached
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // null = not yet checked
+  const [hasSubscription, setHasSubscription] = useState(cachedSubscription ?? true);
+  const [isLoading, setIsLoading] = useState(true);
   
-  const hasCheckedRef = useRef(false);
   const location = useLocation();
 
-  // Single effect to check auth and subscription on mount only
+  // Single effect to check auth and subscription on mount
   useEffect(() => {
-    // Skip if already checked this session
-    if (hasCheckedRef.current) return;
-    hasCheckedRef.current = true;
-    
     let isMounted = true;
 
     const checkAuthAndSubscription = async () => {
@@ -64,7 +58,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
         
         if (!isMounted) return;
         
-        // Update auth state
+        console.log("Auth check result:", isAuth ? "authenticated" : "not authenticated");
         setIsAuthenticated(isAuth);
         
         if (isAuth) {
@@ -97,8 +91,6 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
           // Not authenticated - clear cache
           localStorage.removeItem('userAuthenticated');
           localStorage.removeItem('userId');
-          localStorage.removeItem('subscriptionStatus');
-          localStorage.removeItem('subscriptionCheckedAt');
           setHasSubscription(false);
         }
       } catch (error) {
@@ -108,8 +100,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
         setHasSubscription(false);
       } finally {
         if (isMounted) {
-          setInitialCheckComplete(true);
-          setShowLoading(false);
+          setIsLoading(false);
         }
       }
     };
@@ -124,10 +115,10 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
   // Listen for auth state changes (login/logout only)
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log("Auth state change:", event);
         
-        // Only handle actual login/logout events
+        // Only handle actual login/logout events, ignore token refreshes
         if (event === 'SIGNED_OUT') {
           setIsAuthenticated(false);
           setHasSubscription(false);
@@ -140,15 +131,17 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
           localStorage.setItem('userAuthenticated', 'true');
           localStorage.setItem('userId', session.user.id);
           
-          // Fetch subscription on new login
+          // Defer subscription check to avoid deadlock
           if (requireSubscription) {
-            const sub = await fetchUserSubscription(session.user.id, supabase);
-            const isValid = sub ? isSubscriptionValid(sub) : false;
-            setHasSubscription(isValid);
-            cacheSubscription(isValid);
+            setTimeout(async () => {
+              const sub = await fetchUserSubscription(session.user.id, supabase);
+              const isValid = sub ? isSubscriptionValid(sub) : false;
+              setHasSubscription(isValid);
+              cacheSubscription(isValid);
+            }, 0);
           }
         }
-        // Ignore TOKEN_REFRESHED, USER_UPDATED, etc. - these shouldn't affect UI
+        // Ignore TOKEN_REFRESHED, USER_UPDATED, INITIAL_SESSION etc.
       }
     );
 
@@ -157,19 +150,14 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
     };
   }, [requireSubscription]);
 
-  // Show loading only on initial page load when no cache exists
-  if (showLoading && !initialCheckComplete) {
+  // Show loading only during initial check
+  if (isLoading || isAuthenticated === null) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
         <p className="text-gray-500">Loading...</p>
       </div>
     );
-  }
-
-  // Wait for initial check to complete before redirecting
-  if (!initialCheckComplete) {
-    return null; // Render nothing briefly while checking
   }
 
   // Redirect if not authenticated
