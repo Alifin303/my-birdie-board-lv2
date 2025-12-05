@@ -17,7 +17,7 @@ interface Round {
   id: number;
   date: string;
   gross_score: number;
-  hole_scores?: { score: number; par: number }[] | null;
+  hole_scores?: { score?: number; strokes?: number; par: number }[] | null;
   holes_played?: number;
   course_id?: number;
   courses?: { id: number; name: string };
