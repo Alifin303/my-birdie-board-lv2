@@ -155,7 +155,7 @@ export default function Dashboard() {
     },
     retry: 3,
     retryDelay: 1000,
-    refetchOnWindowFocus: true
+    refetchOnWindowFocus: false
   });
 
   const { data: userRounds, isLoading: roundsLoading } = useQuery({
