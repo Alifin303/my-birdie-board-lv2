@@ -61,6 +61,8 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
     let isMounted = true;
     
     const checkSession = async () => {
+      // Skip if initial check is already complete - prevents re-running on auth state updates
+      if (initialCheckComplete) return;
       if (authCheckCompleted.current && sessionChecksAttempted.current > 2) return; // Prevent excessive checks
       
       sessionChecksAttempted.current += 1;
@@ -218,7 +220,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
       isMounted = false;
       clearTimeoutSafely();
     };
-  }, [requireSubscription, isAuthenticated]);
+  }, [requireSubscription]); // Remove isAuthenticated to prevent re-running after initial check
 
   // This effect handles auth state changes
   useEffect(() => {
@@ -339,7 +341,7 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [requireSubscription, isAuthenticated]);
+  }, [requireSubscription]); // Remove isAuthenticated to prevent unnecessary re-subscriptions
 
   // Show loading state with more details
   if (!initialCheckComplete || isLoading) {
