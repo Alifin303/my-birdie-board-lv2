@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, Calculator, TrendingUp, Target, Award, Map } from "lucide-react";
+import { BarChart3, Calculator, TrendingUp, Target, Award, Map, Star } from "lucide-react";
 
 export const GolfResourcesSection = () => {
   const resources = [
@@ -19,6 +19,13 @@ export const GolfResourcesSection = () => {
       icon: Calculator,
       link: "/guides/golf-handicap-calculator",
       keywords: "golf handicap, handicap calculator"
+    },
+    {
+      title: "Stableford Scoring Explained",
+      description: "Learn how Stableford points work and track your Stableford scores",
+      icon: Star,
+      link: "/blog/stableford-scoring",
+      keywords: "stableford scoring, stableford points, golf scoring"
     },
     {
       title: "Best Golf Score Apps",
