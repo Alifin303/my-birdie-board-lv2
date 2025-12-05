@@ -201,6 +201,13 @@ export function AddRoundModal({ open, onOpenChange, handicapIndex = 0 }: AddRoun
 
   return (
     <>
+      {/* Custom backdrop overlay */}
+      {open && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
+          aria-hidden="true"
+        />
+      )}
       <Dialog open={open} onOpenChange={(newOpen) => {
         // Only allow closing via explicit user action (close button/cancel)
         // Prevent automatic closing on tab switch/focus loss
@@ -210,7 +217,7 @@ export function AddRoundModal({ open, onOpenChange, handicapIndex = 0 }: AddRoun
         // Don't call onOpenChange(false) - let handleCloseModal handle closing
       }} modal={false}>
         <DialogContent 
-          className="sm:max-w-[1000px] p-6 max-h-[90vh] overflow-y-auto bg-muted/95 border shadow-xl"
+          className="sm:max-w-[1000px] p-6 max-h-[90vh] overflow-y-auto bg-background border shadow-2xl z-50"
           onInteractOutside={(e) => e.preventDefault()}
           onPointerDownOutside={(e) => e.preventDefault()}
           onFocusOutside={(e) => e.preventDefault()}
