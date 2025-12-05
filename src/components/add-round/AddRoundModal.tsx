@@ -201,12 +201,20 @@ export function AddRoundModal({ open, onOpenChange, handicapIndex = 0 }: AddRoun
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={(newOpen) => {
+        // Only allow closing via explicit user action (close button/cancel)
+        // Prevent automatic closing on tab switch/focus loss
+        if (newOpen === true) {
+          onOpenChange(true);
+        }
+        // Don't call onOpenChange(false) - let handleCloseModal handle closing
+      }} modal={false}>
         <DialogContent 
           className="sm:max-w-[1000px] p-6 max-h-[90vh] overflow-y-auto"
           onInteractOutside={(e) => e.preventDefault()}
           onPointerDownOutside={(e) => e.preventDefault()}
           onFocusOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
         >
           {currentStep === 'search' ? (
             <SearchStep 
