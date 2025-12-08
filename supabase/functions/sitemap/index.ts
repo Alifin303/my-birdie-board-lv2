@@ -12,12 +12,13 @@ serve(async (req) => {
   }
 
   try {
-    const currentDate = new Date().toISOString();
+    const currentDate = new Date().toISOString().split('T')[0];
     
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xmlns:geo="http://www.google.com/geo/schemas/sitemap/1.0"
+      xmlns:xhtml="http://www.w3.org/1999/xhtml"
+      xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
       xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
@@ -27,6 +28,12 @@ serve(async (req) => {
   <lastmod>${currentDate}</lastmod>
   <priority>1.0</priority>
   <changefreq>weekly</changefreq>
+  <xhtml:link rel="alternate" hreflang="en" href="https://mybirdieboard.com/"/>
+  <xhtml:link rel="alternate" hreflang="x-default" href="https://mybirdieboard.com/"/>
+  <image:image>
+    <image:loc>https://mybirdieboard.com/og-image.png</image:loc>
+    <image:title>MyBirdieBoard Golf Score Tracking App</image:title>
+  </image:image>
 </url>
 
 <url>
@@ -60,14 +67,14 @@ serve(async (req) => {
 <url>
   <loc>https://mybirdieboard.com/privacy</loc>
   <lastmod>${currentDate}</lastmod>
-  <priority>0.7</priority>
-  <changefreq>monthly</changefreq>
+  <priority>0.5</priority>
+  <changefreq>yearly</changefreq>
 </url>
 
 <url>
-  <loc>https://mybirdieboard.com/quiz</loc>
+  <loc>https://mybirdieboard.com/demo</loc>
   <lastmod>${currentDate}</lastmod>
-  <priority>0.8</priority>
+  <priority>0.7</priority>
   <changefreq>monthly</changefreq>
 </url>
 
@@ -93,7 +100,7 @@ serve(async (req) => {
   <changefreq>weekly</changefreq>
 </url>
 
-<!-- New blog section for content marketing -->
+<!-- Blog section -->
 <url>
   <loc>https://mybirdieboard.com/blog</loc>
   <lastmod>${currentDate}</lastmod>
@@ -131,6 +138,13 @@ serve(async (req) => {
 
 <url>
   <loc>https://mybirdieboard.com/blog/understanding-golf-handicap-system</loc>
+  <lastmod>${currentDate}</lastmod>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+
+<url>
+  <loc>https://mybirdieboard.com/blog/stableford-scoring</loc>
   <lastmod>${currentDate}</lastmod>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>

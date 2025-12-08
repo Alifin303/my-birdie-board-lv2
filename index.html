@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="og: https://ogp.me/ns#">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
     <title>Golf Score Tracker & Handicap Calculator | MyBirdieBoard</title>
     <meta name="description" content="Track golf scores, calculate handicap, and analyze performance. Free 30-day trial. Join thousands improving their game with MyBirdieBoard.">
     <meta name="theme-color" content="#2C4A3B">
@@ -13,18 +12,66 @@
     <meta name="apple-mobile-web-app-title" content="MyBirdieBoard">
     <link rel="apple-touch-icon" href="/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png">
     <link rel="manifest" href="/manifest.json">
+    
+    <!-- Preconnect to external resources for faster loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://images.unsplash.com">
+    
+    <!-- Default Open Graph tags (overridden by page-specific Helmet tags) -->
+    <meta property="og:site_name" content="MyBirdieBoard">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="website">
+    
+    <!-- Twitter default card -->
+    <meta name="twitter:site" content="@mybirdieboard">
+    <meta name="twitter:creator" content="@mybirdieboard">
+    
+    <!-- Additional SEO meta tags -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow">
+    <meta name="bingbot" content="index, follow">
+    <meta name="author" content="MyBirdieBoard">
+    <meta name="generator" content="Lovable">
+    <meta name="rating" content="General">
+    <meta name="distribution" content="global">
+    <meta name="revisit-after" content="7 days">
+    
+    <!-- Geographic targeting -->
+    <meta name="geo.region" content="GB">
+    <meta name="geo.placename" content="United Kingdom">
+    
+    <!-- Language alternatives for international SEO -->
+    <link rel="alternate" hreflang="en" href="https://mybirdieboard.com/">
+    <link rel="alternate" hreflang="en-GB" href="https://mybirdieboard.com/">
+    <link rel="alternate" hreflang="en-US" href="https://mybirdieboard.com/">
+    <link rel="alternate" hreflang="x-default" href="https://mybirdieboard.com/">
+    
+    <!-- Structured data for website -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "MyBirdieBoard",
+        "alternateName": ["MyBirdieBoard Golf App", "MBB Golf Tracker"],
         "url": "https://mybirdieboard.com",
         "description": "Best golf score tracking app for beginners and pros. Track scores, calculate handicap, analyze performance.",
+        "inLanguage": "en",
+        "publisher": {
+          "@type": "Organization",
+          "name": "MyBirdieBoard",
+          "url": "https://mybirdieboard.com",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://mybirdieboard.com/logo.png"
+          }
+        },
         "potentialAction": {
           "@type": "SearchAction",
-          "target": "https://mybirdieboard.com/courses?search={search_term_string}",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://mybirdieboard.com/courses?search={search_term_string}"
+          },
           "query-input": "required name=search_term_string"
         }
       }
