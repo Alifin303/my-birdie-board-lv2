@@ -1,4 +1,3 @@
-
 # www.robotstxt.org
 
 User-agent: *
@@ -9,6 +8,7 @@ Disallow: /auth/callback
 Disallow: /auth/confirm
 Disallow: /auth/reset-password
 Disallow: /admin
+Disallow: /demo
 
 # Explicitly allow important pages
 Allow: /about
@@ -18,9 +18,16 @@ Allow: /dashboard
 Allow: /privacy
 Allow: /courses
 Allow: /courses/
+Allow: /blog
+Allow: /blog/
+Allow: /guides
+Allow: /guides/
 
 # Explicitly allow logo image
 Allow: /lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
 
 # Specific instructions for AI crawlers
 User-agent: GPTBot
@@ -28,6 +35,8 @@ Allow: /
 Allow: /faq
 Allow: /about
 Allow: /courses
+Allow: /blog
+Allow: /guides
 Disallow: /auth/
 Disallow: /checkout
 Disallow: /admin
@@ -37,6 +46,8 @@ Allow: /
 Allow: /faq
 Allow: /about 
 Allow: /courses
+Allow: /blog
+Allow: /guides
 Disallow: /auth/
 Disallow: /checkout
 Disallow: /admin
@@ -46,16 +57,20 @@ Allow: /
 Allow: /faq
 Allow: /about
 Allow: /courses
+Allow: /blog
+Allow: /guides
 Disallow: /auth/
 Disallow: /checkout
 Disallow: /admin
 
 # Perplexity AI Bot
-User-agent: Perplexity
+User-agent: PerplexityBot
 Allow: /
 Allow: /faq
 Allow: /about
 Allow: /courses
+Allow: /blog
+Allow: /guides
 Disallow: /auth/
 Disallow: /checkout
 Disallow: /admin
@@ -66,9 +81,24 @@ Allow: /
 Allow: /faq
 Allow: /about
 Allow: /courses
+Allow: /blog
+Allow: /guides
 Disallow: /auth/
 Disallow: /checkout
 Disallow: /admin
+
+# Microsoft Copilot
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Meta AI
+User-agent: FacebookBot
+Allow: /
+
+# Apple Bot
+User-agent: Applebot
+Allow: /
 
 # Site descriptor for search engines & crawlers
 # MyBirdieBoard - Digital Golf Journal & Score Tracker
@@ -78,12 +108,16 @@ Sitemap: https://mybirdieboard.com/sitemap.xml
 Sitemap: https://mybirdieboard.com/ai-sitemap.xml
 Sitemap: https://mybirdieboard.com/sitemap-news.xml
 
+# Security contact
+# See https://mybirdieboard.com/.well-known/security.txt
+
 # Prevent media crawling for bandwidth (except the logo)
 User-agent: Googlebot-Image
 Allow: /lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png
+Allow: /og-image.png
+Allow: /logo.png
 Disallow: /lovable-uploads/
 
 # Prevent archive crawling
 User-agent: ia_archiver
 Disallow: /
-
