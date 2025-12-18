@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -102,7 +103,12 @@ export const AuthConfirm = () => {
   }, [navigate, toast]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+    <>
+      <Helmet>
+        <title>Verify Account | MyBirdieBoard</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center">
@@ -148,6 +154,7 @@ export const AuthConfirm = () => {
         </CardFooter>
       </Card>
     </div>
+    </>
   );
 };
 

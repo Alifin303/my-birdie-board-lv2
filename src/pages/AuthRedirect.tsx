@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -224,7 +225,12 @@ export const AuthRedirect = () => {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <>
+        <Helmet>
+          <title>Authentication | MyBirdieBoard</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+        <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-center">Processing Authentication</CardTitle>
@@ -235,6 +241,7 @@ export const AuthRedirect = () => {
           </CardContent>
         </Card>
       </div>
+      </>
     );
   }
 

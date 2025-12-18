@@ -15,6 +15,7 @@ const PrivacyPolicy = () => {
       <Helmet>
         <title>Privacy Policy | MyBirdieBoard</title>
         <meta name="description" content="MyBirdieBoard's Privacy Policy - Learn how we protect and handle your data" />
+        <link rel="canonical" href="https://mybirdieboard.com/privacy" />
       </Helmet>
       
       <div className="container mx-auto px-4 py-8 md:py-12">

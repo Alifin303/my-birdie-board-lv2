@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase, parseCourseName, updateCourseWithUserId } from "@/integrations/supabase/client";
@@ -365,7 +366,12 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen py-4 px-2 sm:py-6 sm:px-4"
+    <>
+      <Helmet>
+        <title>Golf Dashboard | MyBirdieBoard</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+      <div className="min-h-screen py-4 px-2 sm:py-6 sm:px-4"
       style={{
         backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
         backgroundSize: 'cover',
@@ -383,5 +389,6 @@ export default function Dashboard() {
         handicapIndex={profile?.handicap || 0}
       />
     </div>
+    </>
   );
 }

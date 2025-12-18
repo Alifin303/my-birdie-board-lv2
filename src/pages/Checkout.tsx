@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -126,7 +127,12 @@ export default function Checkout() {
       setIsLoading(false);
     }
   };
-  return <div className="min-h-screen flex flex-col bg-cover bg-center bg-no-repeat" style={{
+  return <>
+    <Helmet>
+      <title>Checkout | MyBirdieBoard</title>
+      <meta name="robots" content="noindex, nofollow" />
+    </Helmet>
+    <div className="min-h-screen flex flex-col bg-cover bg-center bg-no-repeat" style={{
     backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
     backgroundColor: "#2C4A3B" // Fallback color if image fails to load
   }}>
@@ -180,5 +186,6 @@ export default function Checkout() {
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  </>;
 }
