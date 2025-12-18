@@ -8,7 +8,7 @@
 <!-- Main application pages -->
 <url>
   <loc>https://mybirdieboard.com/</loc>
-  <lastmod>2025-12-08T10:00:00+00:00</lastmod>
+  <lastmod>2024-12-15T10:00:00+00:00</lastmod>
   <priority>1.0</priority>
   <changefreq>weekly</changefreq>
   <ai:content>
@@ -24,7 +24,7 @@
 
 <url>
   <loc>https://mybirdieboard.com/about</loc>
-  <lastmod>2025-12-08T10:00:00+00:00</lastmod>
+  <lastmod>2024-11-20T10:00:00+00:00</lastmod>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
   <ai:content>
@@ -37,7 +37,7 @@
 
 <url>
   <loc>https://mybirdieboard.com/faq</loc>
-  <lastmod>2025-12-08T10:00:00+00:00</lastmod>
+  <lastmod>2024-12-10T10:00:00+00:00</lastmod>
   <priority>0.9</priority>
   <changefreq>weekly</changefreq>
   <ai:content>
@@ -50,7 +50,7 @@
 
 <url>
   <loc>https://mybirdieboard.com/courses</loc>
-  <lastmod>2025-12-08T10:00:00+00:00</lastmod>
+  <lastmod>2024-12-16T10:00:00+00:00</lastmod>
   <priority>0.8</priority>
   <changefreq>daily</changefreq>
   <ai:content>
@@ -63,7 +63,7 @@
 
 <url>
   <loc>https://mybirdieboard.com/blog</loc>
-  <lastmod>2025-12-08T10:00:00+00:00</lastmod>
+  <lastmod>2024-12-12T10:00:00+00:00</lastmod>
   <priority>0.9</priority>
   <changefreq>weekly</changefreq>
   <ai:content>
@@ -77,7 +77,7 @@
 <!-- SEO-focused guide pages -->
 <url>
   <loc>https://mybirdieboard.com/guides/how-to-track-golf-scores</loc>
-  <lastmod>2025-12-08T10:00:00+00:00</lastmod>
+  <lastmod>2024-12-10T10:00:00+00:00</lastmod>
   <priority>0.9</priority>
   <changefreq>monthly</changefreq>
   <ai:content>
@@ -91,7 +91,7 @@
 
 <url>
   <loc>https://mybirdieboard.com/guides/golf-handicap-calculator</loc>
-  <lastmod>2025-12-08T10:00:00+00:00</lastmod>
+  <lastmod>2024-12-08T10:00:00+00:00</lastmod>
   <priority>0.9</priority>
   <changefreq>monthly</changefreq>
   <ai:content>
@@ -105,21 +105,21 @@
 
 <url>
   <loc>https://mybirdieboard.com/guides/best-golf-score-tracking-apps</loc>
-  <lastmod>2025-12-08T10:00:00+00:00</lastmod>
+  <lastmod>2024-11-28T10:00:00+00:00</lastmod>
   <priority>0.9</priority>
   <changefreq>monthly</changefreq>
   <ai:content>
     <ai:type>Comparison</ai:type>
-    <ai:title>Best Golf Score Tracking Apps 2025: Complete App Comparison</ai:title>
-    <ai:description>Compare the best golf score tracking apps of 2025. Find the perfect golf app for score tracking, handicap calculation, and performance analysis to improve your game.</ai:description>
-    <ai:keywords>best golf score apps, golf score tracking apps, golf apps 2025, golf handicap apps, golf statistics apps</ai:keywords>
+    <ai:title>Best Golf Score Tracking Apps 2024: Complete App Comparison</ai:title>
+    <ai:description>Compare the best golf score tracking apps of 2024. Find the perfect golf app for score tracking, handicap calculation, and performance analysis to improve your game.</ai:description>
+    <ai:keywords>best golf score apps, golf score tracking apps, golf apps 2024, golf handicap apps, golf statistics apps</ai:keywords>
     <ai:primaryTopic>Golf Score Tracking Apps</ai:primaryTopic>
   </ai:content>
 </url>
 
 <url>
   <loc>https://mybirdieboard.com/guides/golf-performance-analytics</loc>
-  <lastmod>2025-12-08T10:00:00+00:00</lastmod>
+  <lastmod>2024-11-15T10:00:00+00:00</lastmod>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
   <ai:content>
@@ -133,7 +133,7 @@
 
 <url>
   <loc>https://mybirdieboard.com/guides/golf-statistics-tracker</loc>
-  <lastmod>2025-12-08T10:00:00+00:00</lastmod>
+  <lastmod>2024-11-22T10:00:00+00:00</lastmod>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
   <ai:content>
@@ -148,7 +148,7 @@
 <!-- Blog posts -->
 <url>
   <loc>https://mybirdieboard.com/blog/stableford-scoring</loc>
-  <lastmod>2025-12-08T10:00:00+00:00</lastmod>
+  <lastmod>2024-11-05T10:00:00+00:00</lastmod>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
   <ai:content>
@@ -162,7 +162,7 @@
 
 <url>
   <loc>https://mybirdieboard.com/blog/golf-score-tracking-tips</loc>
-  <lastmod>2025-12-08T10:00:00+00:00</lastmod>
+  <lastmod>2024-11-25T10:00:00+00:00</lastmod>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
   <ai:content>
@@ -176,7 +176,7 @@
 
 <url>
   <loc>https://mybirdieboard.com/blog/understanding-golf-handicap-system</loc>
-  <lastmod>2025-12-08T10:00:00+00:00</lastmod>
+  <lastmod>2024-10-20T10:00:00+00:00</lastmod>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
   <ai:content>
@@ -190,12 +190,12 @@
 
 <url>
   <loc>https://mybirdieboard.com/blog/best-golf-clubs-for-beginners</loc>
-  <lastmod>2025-12-08T10:00:00+00:00</lastmod>
+  <lastmod>2024-11-18T10:00:00+00:00</lastmod>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
   <ai:content>
     <ai:type>Article</ai:type>
-    <ai:title>Best Golf Clubs for Beginners 2025 - Complete Buying Guide</ai:title>
+    <ai:title>Best Golf Clubs for Beginners 2024 - Complete Buying Guide</ai:title>
     <ai:description>Find the best golf clubs for beginners. Expert recommendations on starter sets, individual clubs, and what to look for when buying your first golf clubs.</ai:description>
     <ai:keywords>best golf clubs beginners, beginner golf clubs, golf clubs for beginners, starter golf set, golf equipment beginners</ai:keywords>
     <ai:primaryTopic>Golf Equipment for Beginners</ai:primaryTopic>
@@ -204,7 +204,7 @@
 
 <url>
   <loc>https://mybirdieboard.com/blog/improve-your-golf-swing</loc>
-  <lastmod>2025-12-08T10:00:00+00:00</lastmod>
+  <lastmod>2024-11-10T10:00:00+00:00</lastmod>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
   <ai:content>
@@ -218,7 +218,7 @@
 
 <url>
   <loc>https://mybirdieboard.com/blog/course-management-tips</loc>
-  <lastmod>2025-12-08T10:00:00+00:00</lastmod>
+  <lastmod>2024-12-08T10:00:00+00:00</lastmod>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
   <ai:content>
@@ -233,7 +233,7 @@
 <!-- Landing pages -->
 <url>
   <loc>https://mybirdieboard.com/golf-equipment</loc>
-  <lastmod>2025-12-08T10:00:00+00:00</lastmod>
+  <lastmod>2024-12-01T10:00:00+00:00</lastmod>
   <priority>0.9</priority>
   <changefreq>weekly</changefreq>
   <ai:content>
@@ -247,7 +247,7 @@
 
 <url>
   <loc>https://mybirdieboard.com/golf-tips</loc>
-  <lastmod>2025-12-08T10:00:00+00:00</lastmod>
+  <lastmod>2024-12-05T10:00:00+00:00</lastmod>
   <priority>0.9</priority>
   <changefreq>weekly</changefreq>
   <ai:content>
@@ -261,7 +261,7 @@
 
 <url>
   <loc>https://mybirdieboard.com/golf-lessons</loc>
-  <lastmod>2025-12-08T10:00:00+00:00</lastmod>
+  <lastmod>2024-12-03T10:00:00+00:00</lastmod>
   <priority>0.9</priority>
   <changefreq>weekly</changefreq>
   <ai:content>
