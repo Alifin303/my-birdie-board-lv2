@@ -181,6 +181,7 @@ const Demo = () => {
       <Helmet>
         <title>Demo Dashboard - See MyBirdieBoard in Action</title>
         <meta name="description" content="Experience MyBirdieBoard's golf tracking features with our interactive demo. See how easy it is to track scores, analyze performance, and improve your game." />
+        <link rel="canonical" href="https://mybirdieboard.com/demo" />
       </Helmet>
 
       <div className="min-h-screen py-4 px-2 sm:py-6 sm:px-4" style={{
