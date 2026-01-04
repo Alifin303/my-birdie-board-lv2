@@ -29,8 +29,8 @@ export default function HowToBreak100() {
         "url": "https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png"
       }
     },
-    "datePublished": "2025-01-04",
-    "dateModified": "2025-01-04",
+    "datePublished": "2026-01-04",
+    "dateModified": "2026-01-04",
     "mainEntityOfPage": {
       "@type": "WebPage",
       "@id": "https://mybirdieboard.com/blog/how-to-break-100"
@@ -109,7 +109,7 @@ export default function HowToBreak100() {
                 The complete guide to finally shooting in the 90s and joining the top 30% of golfers
               </p>
               <div className="flex items-center gap-4 mt-4 text-sm text-white/70">
-                <span>January 4, 2025</span>
+                <span>January 4, 2026</span>
                 <span>•</span>
                 <span>12 min read</span>
               </div>

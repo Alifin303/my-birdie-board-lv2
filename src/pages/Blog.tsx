@@ -14,7 +14,7 @@ const blogPosts = [
     title: "How to Break 100 in Golf: 15 Proven Tips",
     description: "Learn how to break 100 in golf with these 15 proven tips. From course management to avoiding big numbers, discover strategies that will help you shoot in the 90s.",
     excerpt: "Breaking 100 is a major milestone. Learn the strategies that separate the top 30% of golfers from the rest, including avoiding big numbers and smart course management.",
-    date: "2025-01-04",
+    date: "2026-01-04",
     readTime: "12 min read",
     tags: ["Beginner", "Scoring", "Strategy"],
     link: "/blog/how-to-break-100"
