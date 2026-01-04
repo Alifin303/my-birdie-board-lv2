@@ -21,6 +21,7 @@ import ImproveGolfSwing from "@/pages/blog/ImproveGolfSwing";
 import CourseManagementTips from "@/pages/blog/CourseManagementTips";
 import UnderstandingHandicap from "@/pages/blog/UnderstandingHandicap";
 import StablefordScoring from "@/pages/blog/StablefordScoring";
+import HowToBreak100 from "@/pages/blog/HowToBreak100";
 import HowToTrackGolfScores from "@/pages/guides/HowToTrackGolfScores";
 import GolfHandicapCalculator from "@/pages/guides/GolfHandicapCalculator";
 import BestGolfScoreApps from "@/pages/guides/BestGolfScoreApps";
@@ -175,6 +176,14 @@ function App() {
                       <link rel="canonical" href="https://mybirdieboard.com/blog/stableford-scoring" />
                     </Helmet>
                     <StablefordScoring />
+                  </>
+                } />
+                <Route path="/blog/how-to-break-100" element={
+                  <>
+                    <Helmet>
+                      <link rel="canonical" href="https://mybirdieboard.com/blog/how-to-break-100" />
+                    </Helmet>
+                    <HowToBreak100 />
                   </>
                 } />
                 

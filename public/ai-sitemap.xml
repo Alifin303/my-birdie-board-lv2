@@ -78,6 +78,13 @@
 
 <!-- Blog posts -->
 <url>
+  <loc>https://mybirdieboard.com/blog/how-to-break-100</loc>
+  <lastmod>2025-01-04</lastmod>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+
+<url>
   <loc>https://mybirdieboard.com/blog/stableford-scoring</loc>
   <lastmod>2024-11-05</lastmod>
   <priority>0.8</priority>
