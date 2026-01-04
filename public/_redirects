@@ -20,9 +20,7 @@
 # SEO guide routes
 /guides/*           /index.html        200
 
-# Serve dynamic sitemaps via edge functions
-/sitemap.xml        /.netlify/functions/sitemap       200
-/sitemap-news.xml   /.netlify/functions/sitemap-news  200
+# Sitemaps are served as static files from public folder
 
 # Handle dynamic routes and client-side routing
 /*                  /index.html        200
