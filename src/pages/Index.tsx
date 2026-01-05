@@ -252,6 +252,7 @@ const Index = () => {
           </header>
           
           <main className="relative z-[1] pt-32 sm:pt-0 w-full text-center sm:text-left">
+            <h1 className="sr-only">MyBirdieBoard - Golf Score Tracking & Handicap Calculator App</h1>
             <MainContent onStartSignup={handleStartSignup} />
             
             {/* Add the UserReviews component */}

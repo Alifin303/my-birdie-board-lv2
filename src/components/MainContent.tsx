@@ -118,9 +118,9 @@ export const MainContent = ({
   return <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center text-left md:text-left mt-16 sm:mt-20 md:mt-8 lg:mt-0 px-[16px] py-px my-0">
         <div className="max-w-5xl animate-fade-in mb-4 px-4 mx-auto">
-          <h1 id="hero-heading" className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-4 drop-shadow-lg my-[50px] text-center md:text-4xl">
+          <h2 id="hero-heading" className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-4 drop-shadow-lg my-[50px] text-center md:text-4xl">
             Every Round Tells a Story. Don't Let Yours Be Forgotten.
-          </h1>
+          </h2>
           <div className="bg-black/35 backdrop-blur-sm px-4 py-4 rounded-lg">
             <h3 className="text-base sm:text-lg text-white/95 font-medium mb-3 drop-shadow-md my-0 text-center md:text-2xl">
               Track your scores after you play—no apps on the course, no distractions—just pure golf and a permanent record of your journey, progress, and legacy.
