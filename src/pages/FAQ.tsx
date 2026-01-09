@@ -75,7 +75,7 @@ export default function FAQ() {
     <>
       <Helmet>
         <title>Golf Score Tracking FAQ - How to Calculate Golf Handicap Step by Step | MyBirdieBoard</title>
-        <meta name="description" content="Learn how to calculate golf handicap step by step, track golf scores effectively, and find the best golf score tracking app for beginners. Complete FAQ guide for golf performance analytics." />
+        <meta name="description" content="Get answers to common golf tracking questions. Learn how handicaps work, what Stableford scoring is, subscription details, and how to add courses to MyBirdieBoard." />
         <meta name="keywords" content="how to calculate golf handicap step by step, best golf score tracking app for beginners, golf score tracking FAQ, golf analytics questions, golf handicap calculator help, golf statistics tracker guide, course leaderboards FAQ" />
         <link rel="canonical" href="https://mybirdieboard.com/faq" />
         

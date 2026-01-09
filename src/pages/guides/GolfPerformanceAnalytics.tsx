@@ -5,7 +5,7 @@ const GolfPerformanceAnalytics = () => {
   return (
     <GuideLayout
       title="Golf Performance Analytics: Track Stats to Improve Your Game | MyBirdieBoard"
-      description="Master golf performance analytics to lower your scores. Learn which golf statistics matter most, how to track them, and use data-driven insights to improve your golf game."
+      description="Discover Strokes Gained analysis, GIR percentages, and putting stats that reveal exactly where you're losing shots. Build an analytics routine to lower your handicap faster."
       canonicalUrl="https://mybirdieboard.com/guides/golf-performance-analytics"
       keywords="golf performance analytics, golf statistics, golf data analysis, golf improvement, golf metrics, strokes gained, golf performance tracking"
     >
