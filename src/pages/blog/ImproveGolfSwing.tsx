@@ -8,7 +8,7 @@ const ImproveGolfSwing = () => {
     <div className="min-h-screen bg-background">
       <Helmet>
         <title>How to Improve Your Golf Swing - 10 Proven Tips for Better Performance | MyBirdieBoard</title>
-        <meta name="description" content="Master your golf swing with these 10 proven techniques. Learn proper grip, stance, rotation, and follow-through to lower your scores consistently." />
+        <meta name="description" content="Fix common swing faults like slicing and hooking with 10 expert tips. Master grip, posture, rotation, and follow-through to hit more fairways and lower scores." />
         <meta name="keywords" content="improve golf swing, golf swing tips, golf technique, better golf swing, golf fundamentals, golf instruction" />
         <link rel="canonical" href="https://mybirdieboard.com/blog/improve-your-golf-swing" />
         

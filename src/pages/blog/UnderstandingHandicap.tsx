@@ -7,8 +7,8 @@ const UnderstandingHandicap = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Understanding Golf Handicap System - Complete Guide 2025 | MyBirdieBoard</title>
-        <meta name="description" content="Learn everything about the golf handicap system, how it's calculated, what it means, and how to establish and improve your handicap index." />
+        <title>Understanding Golf Handicap System - Complete Guide 2026 | MyBirdieBoard</title>
+        <meta name="description" content="Complete guide to the World Handicap System (WHS). Understand slope ratings, course handicaps, score differentials, and how to establish your first handicap index." />
         <meta name="keywords" content="golf handicap, handicap system, calculate golf handicap, handicap index, WHS, World Handicap System" />
         <link rel="canonical" href="https://mybirdieboard.com/blog/understanding-golf-handicap-system" />
         
