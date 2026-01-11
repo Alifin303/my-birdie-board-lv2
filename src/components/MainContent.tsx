@@ -198,8 +198,8 @@ export const MainContent = ({
                     <div className="rounded-full p-2 w-fit mb-2 bg-[2f4c3d] bg-secondary-foreground">
                       <Upload className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
-                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Keep a permanent digital record of every round</h3>
-                    <p className="mb-2 text-xs text-secondary-foreground">Upload in seconds after you play—no more lost scorecards.</p>
+                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Never Lose a Round Again</h3>
+                    <p className="mb-2 text-xs text-secondary-foreground">Save your scores in seconds after you play — no more lost scorecards, no forgotten rounds.</p>
                     <div className="mt-auto pt-1">
                       <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.scorecards)} aria-label="Learn more about round archives" className="p-0 text-xs text-secondary-foreground">
                         Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
@@ -228,8 +228,8 @@ export const MainContent = ({
                     <div className="rounded-full p-2 w-fit mb-2 bg-secondary-foreground">
                       <Award className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
-                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Watch your handicap drop over time</h3>
-                    <p className="mb-2 text-xs text-secondary-foreground">Your index updates as you add rounds.</p>
+                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Track Real Improvement Over Time</h3>
+                    <p className="mb-2 text-xs text-secondary-foreground">Your handicap updates automatically as you add rounds, giving you a true picture of your progress.</p>
                     <div className="mt-auto pt-1 bg-transparent">
                       <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.handicap)} aria-label="Learn more about handicap tracking" className="p-0 text-xs text-secondary-foreground">
                         Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
@@ -243,8 +243,8 @@ export const MainContent = ({
                     <div className="rounded-full p-2 w-fit mb-2 bg-[2f4c3d] bg-secondary-foreground">
                       <Trophy className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
-                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Compete on course leaderboards</h3>
-                    <p className="mb-2 text-xs text-secondary-foreground">Find your rank at your home course and chase the top spot.</p>
+                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">See Where You Stack Up</h3>
+                    <p className="mb-2 text-xs text-secondary-foreground">See your ranking at your home course and track your climb up the leaderboard.</p>
                     <div className="mt-auto pt-1">
                       <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.leaderboards)} aria-label="Learn more about leaderboards" className="p-0 text-xs text-secondary-foreground">
                         Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
