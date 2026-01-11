@@ -258,6 +258,33 @@ export const MainContent = ({
         </div>
       </section>
       
+      {/* How It Works Strip */}
+      <section aria-labelledby="how-it-works-heading" className="w-full max-w-5xl mx-auto px-4 py-8">
+        <h2 id="how-it-works-heading" className="text-2xl sm:text-3xl font-bold text-center text-white mb-6 drop-shadow-md">
+          How MyBirdieBoard Fits Your Game
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-black/35 backdrop-blur-sm rounded-lg p-5 text-center">
+            <div className="w-10 h-10 bg-secondary-foreground rounded-full flex items-center justify-center mx-auto mb-3">
+              <span className="text-white font-bold text-lg">1</span>
+            </div>
+            <p className="text-white/90 text-sm sm:text-base">Play your round — no phone, no distractions</p>
+          </div>
+          <div className="bg-black/35 backdrop-blur-sm rounded-lg p-5 text-center">
+            <div className="w-10 h-10 bg-secondary-foreground rounded-full flex items-center justify-center mx-auto mb-3">
+              <span className="text-white font-bold text-lg">2</span>
+            </div>
+            <p className="text-white/90 text-sm sm:text-base">Enter your scores in seconds afterward</p>
+          </div>
+          <div className="bg-black/35 backdrop-blur-sm rounded-lg p-5 text-center">
+            <div className="w-10 h-10 bg-secondary-foreground rounded-full flex items-center justify-center mx-auto mb-3">
+              <span className="text-white font-bold text-lg">3</span>
+            </div>
+            <p className="text-white/90 text-sm sm:text-base">Watch your golf history and handicap grow over time</p>
+          </div>
+        </div>
+      </section>
+      
       {/* CTA Reinforcement Strip */}
       <section aria-labelledby="cta-heading" className="w-full py-6 sm:py-8 bg-black/40 backdrop-blur-sm mt-2 sm:mt-3">
         <div className="max-w-5xl mx-auto text-center px-4">
