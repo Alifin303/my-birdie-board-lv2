@@ -3,7 +3,6 @@ import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { isSubscriptionValid, fetchUserSubscription } from "@/integrations/supabase/subscription/subscription-utils";
-import { canAccessPremiumFeatures } from "@/integrations/supabase/subscription/freemium-utils";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -76,19 +75,12 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
             console.log("Using cached subscription status:", cachedSub);
             setHasSubscription(cachedSub);
           } else if (requireSubscription) {
-            // Fetch fresh data including freemium check
-            console.log("Checking premium access (subscription OR free tier)...");
-            
-            const { canAccess, hasSubscription: hasSub, roundCount } = 
-              await canAccessPremiumFeatures(session.user.id, supabase);
-            
-            if (!isMounted) return;
-            
-            // User can access if they have subscription OR are within free tier limit
-            setHasSubscription(canAccess);
-            cacheSubscription(canAccess);
-            
-            console.log("Premium access check result:", { canAccess, hasSub, roundCount });
+            // For freemium model: always allow access to dashboard
+            // The round limit is enforced in AddRoundModal, not here
+            // This allows users to view their existing rounds even after hitting the limit
+            console.log("Freemium model: allowing dashboard access for authenticated user");
+            setHasSubscription(true);
+            cacheSubscription(true);
           } else {
             setHasSubscription(true);
           }
@@ -137,12 +129,11 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
           localStorage.setItem('userAuthenticated', 'true');
           localStorage.setItem('userId', session.user.id);
           
-          // Defer freemium check to avoid deadlock
+          // For freemium model: always allow dashboard access
           if (requireSubscription) {
-            setTimeout(async () => {
-              const { canAccess } = await canAccessPremiumFeatures(session.user.id, supabase);
-              setHasSubscription(canAccess);
-              cacheSubscription(canAccess);
+            setTimeout(() => {
+              setHasSubscription(true);
+              cacheSubscription(true);
             }, 0);
           }
         }
