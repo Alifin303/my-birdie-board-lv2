@@ -14,8 +14,8 @@ const About = () => {
   return (
     <>
       <Helmet>
-        <title>About MyBirdieBoard - Leading Golf Score Tracking & Analytics Platform</title>
-        <meta name="description" content="Learn about MyBirdieBoard's golf score tracking, performance analytics, handicap calculator, and course leaderboards. The comprehensive golf statistics platform for serious golfers." />
+        <title>About MyBirdieBoard - Distraction-Free Golf Score Tracking & Analytics</title>
+        <meta name="description" content="MyBirdieBoard is the distraction-free golf score tracker. Log rounds after you play, track your handicap, and compete on course leaderboards." />
         <meta name="keywords" content="golf score tracking platform, golf analytics software, golf performance tracking, golf handicap system, golf statistics tracker, course leaderboards technology" />
         <link rel="canonical" href="https://mybirdieboard.com/about" />
         
@@ -89,43 +89,63 @@ const About = () => {
             ← Back to home
           </Link>
           <article className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-8 text-white">
-            <h1 className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6">MyBirdieBoard</h1>
+            <h1 className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6">About MyBirdieBoard</h1>
             
             <div className="space-y-4 sm:space-y-6 text-white/90 text-sm sm:text-base">
-              <p>Your digital golf journal — built for golfers who want to track, reflect, and improve.</p>
+              <p className="text-lg sm:text-xl font-medium">Your digital golf journal — built for golfers who want to track, reflect, and improve.</p>
 
-              <p>Every round of golf tells a story — the clutch birdie, the double on 18, the near-miss personal best. But how do you remember it all?
-That’s where MyBirdieBoard comes in.
-            </p>
+              <section>
+                <h2 className="text-xl sm:text-2xl font-semibold mb-3">Our Mission</h2>
+                <p>Every round of golf tells a story — the clutch birdie, the double on 18, the near-miss personal best. But paper scorecards get lost, and most apps pull your attention away mid-round.</p>
+                <p className="mt-3">MyBirdieBoard was built on a simple belief: <strong>golf should be played with focus</strong>. That's why we created the only score tracker designed to be used <em>after</em> you play — so you can stay present on the course and still keep a powerful digital record of every round.</p>
+              </section>
 
-              <div className="my-6 sm:my-8">
-                <p className="font-semibold mb-2 sm:mb-4">With MyBirdieBoard, you can:</p>
+              <section>
+                <h2 className="text-xl sm:text-2xl font-semibold mb-3">Why We Built MyBirdieBoard</h2>
+                <p>We're golfers ourselves, and we were frustrated. We wanted a simple way to log rounds, track progress, and see how we stack up at our home courses — without the distractions of GPS features, swing tips, or mid-round notifications.</p>
+                <p className="mt-3">So we built MyBirdieBoard: a clean, focused platform that respects the way golf should be played — and still gives you the data you need to improve.</p>
+              </section>
+
+              <section>
+                <h2 className="text-xl sm:text-2xl font-semibold mb-3">What You Can Do With MyBirdieBoard</h2>
                 <ul className="space-y-2 sm:space-y-3">
                   <li className="flex items-start">
                     <span className="mr-2" aria-hidden="true">🏌️</span>
-                    <span> Log every round you play — no more lost scorecards or forgotten milestones.</span>
+                    <span><strong>Log every round you play</strong> — no more lost scorecards or forgotten milestones. Your entire golf history in one place.</span>
                   </li>
                   <li className="flex items-start">
                     <span className="mr-2" aria-hidden="true">📊</span>
-                    <span>Track your performance over time — spot patterns, set goals, and keep improving.</span>
+                    <span><strong>Track your performance over time</strong> — spot patterns in your scoring, set goals, and measure real improvement.</span>
                   </li>
                   <li className="flex items-start">
                     <span className="mr-2" aria-hidden="true">🏆</span>
-                    <span>Compete on course leaderboards — see where you stand with Gross and Net scores.</span>
+                    <span><strong>Compete on course leaderboards</strong> — see where you rank at your home course with Gross and Net scores.</span>
                   </li>
                   <li className="flex items-start">
                     <span className="mr-2" aria-hidden="true">⛳</span>
-                    <span>Monitor your handicap — watch your trends and measure real progress.</span>
+                    <span><strong>Monitor your handicap</strong> — your index updates automatically as you add rounds, giving you a true picture of your progress.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-2" aria-hidden="true">📱</span>
+                    <span><strong>Quick score entry</strong> — add your round in seconds after you play. Simple, fast, distraction-free.</span>
                   </li>
                 </ul>
-              </div>
+              </section>
 
-              <p>Whether you’re a weekend golfer or a scratch player, MyBirdieBoard gives you a place to store your stats, tell your story, and stay motivated — all after you’ve walked off the 18th green.</p>
+              <section>
+                <h2 className="text-xl sm:text-2xl font-semibold mb-3">Who Is MyBirdieBoard For?</h2>
+                <p>MyBirdieBoard is for golfers who care about their game — whether you're a weekend player working to break 100, or a single-digit handicapper chasing your best season yet.</p>
+                <p className="mt-3">If you want to play focused, track your scores after the round, and build a permanent record of your golf journey, MyBirdieBoard is for you.</p>
+              </section>
 
-              <p className="font-semibold mt-4 sm:mt-6">
-                Ready to take control of your golf game?<br />
-                Join MyBirdieBoard today. Your best round is yet to come.
-              </p>
+              <section>
+                <h2 className="text-xl sm:text-2xl font-semibold mb-3">Your Golf Legacy Starts Here</h2>
+                <p>Every round you play is part of your story. MyBirdieBoard makes sure none of it gets lost.</p>
+                <p className="font-semibold mt-4">
+                  Ready to take control of your golf game?<br />
+                  Join MyBirdieBoard today. Your best round is yet to come.
+                </p>
+              </section>
             </div>
 
             <div className="mt-6 sm:mt-8 text-center">
