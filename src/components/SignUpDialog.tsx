@@ -124,7 +124,7 @@ export function SignUpDialog({
       });
       setTimeout(() => {
         handleOpenChange(false);
-        navigate("/checkout");
+        navigate("/dashboard");
       }, 2000);
       form.reset();
     } catch (error: any) {
@@ -164,7 +164,7 @@ export function SignUpDialog({
             </div>
             <h3 className="text-xl font-semibold text-center">Account Created Successfully!</h3>
             <p className="text-center text-muted-foreground">
-              You will now be redirected to complete your subscription setup.
+              You will now be redirected to your dashboard. You have 4 free rounds to get started!
             </p>
             <Button onClick={() => handleOpenChange(false)} className="mt-4">
               Got it
