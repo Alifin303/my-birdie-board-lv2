@@ -18,7 +18,6 @@ import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
 import { ForgotPasswordDialog } from "./ForgotPasswordDialog";
-import { canAccessPremiumFeatures } from "@/integrations/supabase/subscription/freemium-utils";
 
 export function LoginDialog({ 
   open, 
@@ -34,26 +33,6 @@ export function LoginDialog({
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  const checkPremiumAccess = async (userId: string) => {
-    try {
-      console.log(`Checking premium access for user: ${userId}`);
-      
-      const { canAccess, hasSubscription, roundCount } = 
-        await canAccessPremiumFeatures(userId, supabase);
-      
-      console.log("Login - Premium access check:", {
-        canAccess,
-        hasSubscription,
-        roundCount
-      });
-      
-      return canAccess;
-    } catch (error) {
-      console.error("Error in checkPremiumAccess:", error);
-      return false;
-    }
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,15 +60,10 @@ export function LoginDialog({
       
       onOpenChange(false);
       
-      const canAccess = await checkPremiumAccess(data.user.id);
-      
-      if (canAccess) {
-        console.log("User can access dashboard (subscription or free tier), redirecting");
-        navigate("/dashboard");
-      } else {
-        console.log("User exceeded free tier and no subscription, redirecting to checkout");
-        navigate("/checkout");
-      }
+      // Freemium model: always redirect to dashboard
+      // Round limit is enforced in AddRoundModal, not at login
+      console.log("Login successful, redirecting to dashboard");
+      navigate("/dashboard");
       
     } catch (error: any) {
       console.error("Login error:", error);
