@@ -13,9 +13,10 @@ const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Privacy Policy | MyBirdieBoard</title>
-        <meta name="description" content="MyBirdieBoard's Privacy Policy - Learn how we protect and handle your data" />
+        <title>Privacy Policy - How MyBirdieBoard Protects Your Golf Data | MyBirdieBoard</title>
+        <meta name="description" content="Read MyBirdieBoard's Privacy Policy. Learn how we collect, protect, and handle your golf scores, account information, and personal data. Your privacy matters to us." />
         <link rel="canonical" href="https://mybirdieboard.com/privacy" />
+        <meta name="keywords" content="MyBirdieBoard privacy policy, golf app privacy, golf data protection, user data security" />
       </Helmet>
       
       <div className="container mx-auto px-4 py-8 md:py-12">
