@@ -3,6 +3,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { isSubscriptionValid, fetchUserSubscription } from "@/integrations/supabase/subscription/subscription-utils";
+import { canAccessPremiumFeatures } from "@/integrations/supabase/subscription/freemium-utils";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -75,17 +76,19 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
             console.log("Using cached subscription status:", cachedSub);
             setHasSubscription(cachedSub);
           } else if (requireSubscription) {
-            // Fetch fresh subscription data
-            console.log("Fetching fresh subscription data...");
-            const subscription = await fetchUserSubscription(session.user.id, supabase);
+            // Fetch fresh data including freemium check
+            console.log("Checking premium access (subscription OR free tier)...");
+            
+            const { canAccess, hasSubscription: hasSub, roundCount } = 
+              await canAccessPremiumFeatures(session.user.id, supabase);
             
             if (!isMounted) return;
             
-            const isValid = subscription ? isSubscriptionValid(subscription) : false;
-            setHasSubscription(isValid);
-            cacheSubscription(isValid);
+            // User can access if they have subscription OR are within free tier limit
+            setHasSubscription(canAccess);
+            cacheSubscription(canAccess);
             
-            console.log("Subscription check result:", { isValid, subscription });
+            console.log("Premium access check result:", { canAccess, hasSub, roundCount });
           } else {
             setHasSubscription(true);
           }
@@ -134,13 +137,12 @@ export const ProtectedRoute = ({ children, requireSubscription = true }: Protect
           localStorage.setItem('userAuthenticated', 'true');
           localStorage.setItem('userId', session.user.id);
           
-          // Defer subscription check to avoid deadlock
+          // Defer freemium check to avoid deadlock
           if (requireSubscription) {
             setTimeout(async () => {
-              const sub = await fetchUserSubscription(session.user.id, supabase);
-              const isValid = sub ? isSubscriptionValid(sub) : false;
-              setHasSubscription(isValid);
-              cacheSubscription(isValid);
+              const { canAccess } = await canAccessPremiumFeatures(session.user.id, supabase);
+              setHasSubscription(canAccess);
+              cacheSubscription(canAccess);
             }, 0);
           }
         }

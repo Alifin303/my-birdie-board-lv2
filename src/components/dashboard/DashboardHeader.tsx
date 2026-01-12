@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User, LogOut, CreditCard, Key, Loader2, AlertCircle, ExternalLink } from "lucide-react";
+import { User, LogOut, CreditCard, Key, Loader2, AlertCircle, ExternalLink, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +14,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PasswordForm } from "./PasswordForm";
 import { MilestonesDialog } from "./MilestonesDialog";
+import { FREE_ROUND_LIMIT, getRemainingFreeRounds } from "@/integrations/supabase/subscription/freemium-utils";
+import { isSubscriptionValid } from "@/integrations/supabase/subscription/subscription-utils";
 
 interface Round {
   id: number;
@@ -88,7 +90,11 @@ export const DashboardHeader = ({
     return "expired";
   };
   const subscriptionState = getSubscriptionState();
-  console.log("Current subscription state:", subscriptionState, subscription);
+  const hasValidSubscription = subscription ? isSubscriptionValid(subscription) : false;
+  const roundCount = rounds?.length || 0;
+  const remainingFreeRounds = getRemainingFreeRounds(roundCount, hasValidSubscription);
+  const isFreeTier = !hasValidSubscription && roundCount < FREE_ROUND_LIMIT;
+  console.log("Current subscription state:", subscriptionState, subscription, { roundCount, remainingFreeRounds, isFreeTier });
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
@@ -455,7 +461,23 @@ export const DashboardHeader = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-4">
           <img src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" alt="BirdieBoard Logo" className="h-10 sm:h-12 w-auto object-contain brightness-[0.85] contrast-[1.15]" />
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate">Welcome, {profileData?.first_name || 'Golfer'}!</h1>
+          <div className="flex flex-col">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate">Welcome, {profileData?.first_name || 'Golfer'}!</h1>
+            {isFreeTier && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span>Free tier: {remainingFreeRounds} round{remainingFreeRounds !== 1 ? 's' : ''} remaining</span>
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  className="h-auto p-0 text-xs text-primary hover:text-primary/80"
+                  onClick={() => handleSubscriptionAction("create_checkout")}
+                >
+                  <Sparkles className="h-3 w-3 mr-0.5" />
+                  Upgrade
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-2 self-end sm:self-auto">
           <MilestonesDialog rounds={rounds} />

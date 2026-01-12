@@ -35,6 +35,15 @@ export {
   clearSubscriptionCache 
 } from './subscription/subscription-utils';
 
+// Export freemium utils
+export {
+  FREE_ROUND_LIMIT,
+  fetchUserRoundCount,
+  canAccessPremiumFeatures,
+  canAddMoreRounds,
+  getRemainingFreeRounds
+} from './subscription/freemium-utils';
+
 // Define DatabaseError type directly in this file since it's not in types.ts
 export type DatabaseError = {
   code: string;

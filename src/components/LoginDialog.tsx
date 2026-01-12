@@ -18,7 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
 import { ForgotPasswordDialog } from "./ForgotPasswordDialog";
-import { isSubscriptionValid } from "@/integrations/supabase/subscription/subscription-utils";
+import { canAccessPremiumFeatures } from "@/integrations/supabase/subscription/freemium-utils";
 
 export function LoginDialog({ 
   open, 
@@ -35,42 +35,22 @@ export function LoginDialog({
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const checkSubscriptionStatus = async (userId: string) => {
+  const checkPremiumAccess = async (userId: string) => {
     try {
-      console.log(`Checking subscription status for user: ${userId}`);
+      console.log(`Checking premium access for user: ${userId}`);
       
-      const { data: subscription, error: subError } = await supabase
-        .from("customer_subscriptions")
-        .select("status, subscription_id, cancel_at_period_end, current_period_end")
-        .eq("user_id", userId)
-        .maybeSingle();
-        
-      if (subError) {
-        console.error("Error checking subscription after login:", subError);
-        return false;
-      }
+      const { canAccess, hasSubscription, roundCount } = 
+        await canAccessPremiumFeatures(userId, supabase);
       
-      console.log("Login - Subscription data:", subscription);
-      
-      if (!subscription) {
-        console.log("No subscription found for this user");
-        return false;
-      }
-      
-      const isValid = isSubscriptionValid(subscription);
-      
-      console.log("Subscription validation results:", {
-        status: subscription.status,
-        cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        currentPeriodEnd: subscription.current_period_end,
-        now: new Date().toISOString(),
-        isStillValid: subscription.current_period_end ? new Date(subscription.current_period_end) > new Date() : false,
-        isValid
+      console.log("Login - Premium access check:", {
+        canAccess,
+        hasSubscription,
+        roundCount
       });
       
-      return isValid;
+      return canAccess;
     } catch (error) {
-      console.error("Error in checkSubscriptionStatus:", error);
+      console.error("Error in checkPremiumAccess:", error);
       return false;
     }
   };
@@ -101,13 +81,13 @@ export function LoginDialog({
       
       onOpenChange(false);
       
-      const hasValidSubscription = await checkSubscriptionStatus(data.user.id);
+      const canAccess = await checkPremiumAccess(data.user.id);
       
-      if (hasValidSubscription) {
-        console.log("User has valid subscription, redirecting to dashboard");
+      if (canAccess) {
+        console.log("User can access dashboard (subscription or free tier), redirecting");
         navigate("/dashboard");
       } else {
-        console.log("No valid subscription found, redirecting to checkout");
+        console.log("User exceeded free tier and no subscription, redirecting to checkout");
         navigate("/checkout");
       }
       
