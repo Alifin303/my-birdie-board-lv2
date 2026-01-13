@@ -17,6 +17,8 @@ const UnderstandingHandicap = () => {
         <meta property="og:description" content="Learn everything about the golf handicap system and how to calculate and improve your handicap." />
         <meta property="og:url" content="https://mybirdieboard.com/blog/understanding-golf-handicap-system" />
         <meta property="og:type" content="article" />
+        <meta property="article:published_time" content="2025-01-20T10:00:00Z" />
+        <meta property="article:modified_time" content="2025-01-20T10:00:00Z" />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />

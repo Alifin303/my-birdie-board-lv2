@@ -18,6 +18,8 @@ const BestGolfClubsBeginners = () => {
         <meta property="og:description" content="Expert recommendations on the best golf clubs for beginners. Find the perfect starter set to begin your golf journey." />
         <meta property="og:url" content="https://mybirdieboard.com/blog/best-golf-clubs-for-beginners" />
         <meta property="og:type" content="article" />
+        <meta property="article:published_time" content="2025-01-20T10:00:00Z" />
+        <meta property="article:modified_time" content="2025-01-20T10:00:00Z" />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
