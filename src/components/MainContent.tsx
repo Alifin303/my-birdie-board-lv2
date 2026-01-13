@@ -145,10 +145,6 @@ export const MainContent = ({
               </Link>
             </div>
             
-            {/* Pricing text */}
-            <p className="text-xs text-white/80 text-center mt-3">
-              Start with a 30-day free trial. Cancel anytime.
-            </p>
             
             {/* Micro trust row */}
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-sm sm:text-base text-white/90 mt-4 justify-center items-center">

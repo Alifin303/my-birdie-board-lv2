@@ -184,6 +184,14 @@ export default function Checkout() {
               <p className="text-center text-sm text-muted-foreground">Secure payment via Stripe. £2.99/month after trial. Billed in your local currency.</p>
             </div>
           </div>
+          
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/dashboard")}
+            className="w-full mt-4 text-muted-foreground hover:text-foreground"
+          >
+            Return to dashboard
+          </Button>
         </div>
       </div>
     </div>
