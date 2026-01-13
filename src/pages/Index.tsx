@@ -241,7 +241,7 @@ const Index = () => {
             <div className="container mx-auto px-4 py-2">
               <nav className="flex items-center justify-between mx-0 my-0">
                 <Link to="/" className="flex items-center" aria-label="MyBirdieBoard Home - Best Golf Score Tracking App">
-                  <img src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" alt="MyBirdieBoard logo - Best golf score tracking app for calculating handicap and tracking golf performance" className="h-32 w-auto object-contain" />
+                  <img src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" alt="MyBirdieBoard logo - Best golf score tracking app for calculating handicap and tracking golf performance" className="h-20 sm:h-24 md:h-32 w-auto object-contain" />
                 </Link>
                 <Button onClick={() => setShowLoginDialog(true)} variant="ghost" className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all text-xs sm:text-sm py-1" aria-label="Log in to your account">
                   <User className="mr-1 h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
@@ -251,7 +251,7 @@ const Index = () => {
             </div>
           </header>
           
-          <main className="relative z-[1] pt-32 sm:pt-0 w-full text-center sm:text-left">
+          <main className="relative z-[1] pt-24 sm:pt-28 md:pt-36 w-full text-center sm:text-left">
             <h1 className="sr-only">MyBirdieBoard - Golf Score Tracking & Handicap Calculator App</h1>
             <MainContent onStartSignup={handleStartSignup} />
             
