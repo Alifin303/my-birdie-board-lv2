@@ -81,6 +81,8 @@ export default function HowToBreak100() {
         <meta property="og:url" content="https://mybirdieboard.com/blog/how-to-break-100" />
         <meta property="og:type" content="article" />
         <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
+        <meta property="article:published_time" content="2026-01-04T10:00:00Z" />
+        <meta property="article:modified_time" content="2026-01-04T10:00:00Z" />
         
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="How to Break 100 in Golf: 15 Proven Tips" />

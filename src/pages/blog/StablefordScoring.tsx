@@ -50,6 +50,8 @@ export default function StablefordScoring() {
         <meta property="og:url" content="https://mybirdieboard.com/blog/stableford-scoring" />
         <meta property="og:type" content="article" />
         <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
+        <meta property="article:published_time" content="2025-01-25T10:00:00Z" />
+        <meta property="article:modified_time" content="2025-01-25T10:00:00Z" />
         
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="What is Stableford Scoring in Golf?" />

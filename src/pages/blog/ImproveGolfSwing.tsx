@@ -17,6 +17,8 @@ const ImproveGolfSwing = () => {
         <meta property="og:description" content="Master your golf swing with these 10 proven techniques from golf professionals." />
         <meta property="og:url" content="https://mybirdieboard.com/blog/improve-your-golf-swing" />
         <meta property="og:type" content="article" />
+        <meta property="article:published_time" content="2025-01-20T10:00:00Z" />
+        <meta property="article:modified_time" content="2025-01-20T10:00:00Z" />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
