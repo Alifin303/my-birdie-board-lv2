@@ -24,7 +24,7 @@ const faqItems = [{
 }, {
   id: "item-5",
   question: "How much does MyBirdieBoard cost?",
-  answer: "MyBirdieBoard costs £2.99 per month — cancel anytime. The price is shown in GBP but will be converted to your local currency at checkout. Plus, all new subscribers get a 30-day free trial — cancel before the trial ends if it's not for you, and you won't be charged."
+  answer: "MyBirdieBoard offers a free tier that lets you track up to 4 rounds — perfect for trying out the app. For unlimited rounds and full access to all features, the Pro plan costs just £2.99 per month (cancel anytime). The price is shown in GBP but will be converted to your local currency at checkout. Plus, Pro subscribers get a 30-day free trial — cancel before the trial ends if it's not for you, and you won't be charged."
 }, {
   id: "item-6",
   question: "Why should I use MyBirdieBoard instead of a notebook or spreadsheet?",
@@ -141,7 +141,7 @@ export default function FAQ() {
                 <Link to="/guides/golf-performance-analytics" className="text-primary hover:underline mx-1">
                   golf performance analytics guide
                 </Link>.
-                Start your 30-day free trial, then just £2.99/month.
+                Start free with 4 rounds, or upgrade to Pro for unlimited rounds at just £2.99/month.
               </p>
             </section>
             
