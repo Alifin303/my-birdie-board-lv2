@@ -3,25 +3,13 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
-import { User, BarChart, Users, Flag, CreditCard, Crown, Gift, UserX } from "lucide-react";
-
-// Complimentary email addresses (manually granted premium access)
-const COMPLIMENTARY_EMAILS = [
-  'alastair.finlayson93@gmail.com',
-  'alastair_finlayson@hotmail.com',
-  'ewelina@koendu.pl',
-  'ewelina_was@hotmail.com',
-  'oliagolf56@gmail.com',
-  'driscoll_213@hotmail.com',
-  'mark.nmg@secure.media'
-];
+import { BarChart, Users, Flag, Crown, Gift, UserX } from "lucide-react";
 
 export function AdminStats() {
   const [stats, setStats] = useState<{
     totalUsers: number;
     totalRounds: number;
     totalCourses: number;
-    activeSubscriptions: number;
     freeAccounts: number;
     proAccounts: number;
     complimentaryAccounts: number;
@@ -53,17 +41,17 @@ export function AdminStats() {
           .select('*', { count: 'exact', head: true });
           
         if (courseError) throw courseError;
+
+        // Fetch complimentary emails from database
+        const { data: complimentaryData, error: compError } = await supabase
+          .from('complimentary_accounts')
+          .select('email');
         
-        // Get active and trialing subscriptions
-        const { count: activeSubCount, error: subError } = await supabase
-          .from('customer_subscriptions')
-          .select('*', { count: 'exact', head: true })
-          .in('status', ['active', 'trialing']);
-          
-        if (subError) throw subError;
+        if (compError) throw compError;
+
+        const complimentaryEmails = complimentaryData?.map(c => c.email.toLowerCase()) || [];
 
         // Fetch user base split data
-        // Get all profiles with emails
         const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
           .select('id, email');
@@ -88,9 +76,7 @@ export function AdminStats() {
 
         profiles?.forEach(profile => {
           const email = profile.email?.toLowerCase() || '';
-          const isComplimentary = COMPLIMENTARY_EMAILS.some(
-            compEmail => compEmail.toLowerCase() === email
-          );
+          const isComplimentary = complimentaryEmails.includes(email);
           const hasSubscription = subscribedUserIds.has(profile.id);
 
           if (isComplimentary) {
@@ -106,7 +92,6 @@ export function AdminStats() {
           totalUsers: userCount || 0,
           totalRounds: roundCount || 0,
           totalCourses: courseCount || 0,
-          activeSubscriptions: activeSubCount || 0,
           freeAccounts: freeCount,
           proAccounts: proCount,
           complimentaryAccounts: complimentaryCount
@@ -129,18 +114,12 @@ export function AdminStats() {
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-bold mb-4">Platform Overview</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-3">
           <StatCard 
             title="Total Users" 
             value={stats?.totalUsers || 0}
             icon={<Users className="h-5 w-5 text-blue-500" />}
             description="Registered users"
-          />
-          <StatCard 
-            title="Active Subscriptions" 
-            value={stats?.activeSubscriptions || 0}
-            icon={<CreditCard className="h-5 w-5 text-green-500" />}
-            description="Users with active subscription"
           />
           <StatCard 
             title="Total Rounds" 
@@ -211,8 +190,8 @@ function StatsCardSkeleton() {
     <div className="space-y-8">
       <div>
         <Skeleton className="h-8 w-48 mb-4" />
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map(i => (
+        <div className="grid gap-4 md:grid-cols-3">
+          {[1, 2, 3].map(i => (
             <Card key={i}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <Skeleton className="h-4 w-24" />
