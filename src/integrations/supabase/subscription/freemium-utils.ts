@@ -37,14 +37,59 @@ export const fetchUserRoundCount = async (userId: string): Promise<number> => {
 };
 
 /**
+ * Check if user has a complimentary account based on their email
+ */
+export const isComplimentaryAccount = async (
+  userEmail: string,
+  supabaseClient: typeof supabase
+): Promise<boolean> => {
+  if (!userEmail) {
+    return false;
+  }
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("complimentary_accounts")
+      .select("email")
+      .ilike("email", userEmail)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error checking complimentary account:", error);
+      return false;
+    }
+
+    const isComplimentary = !!data;
+    console.log(`Complimentary account check for ${userEmail}: ${isComplimentary}`);
+    return isComplimentary;
+  } catch (error) {
+    console.error("Error in isComplimentaryAccount:", error);
+    return false;
+  }
+};
+
+/**
  * Check if user can access premium features (dashboard)
- * Returns true if user has valid subscription OR has fewer than FREE_ROUND_LIMIT rounds
+ * Returns true if user has valid subscription, is a complimentary account, OR has fewer than FREE_ROUND_LIMIT rounds
  */
 export const canAccessPremiumFeatures = async (
   userId: string,
   supabaseClient: typeof supabase
-): Promise<{ canAccess: boolean; hasSubscription: boolean; roundCount: number }> => {
+): Promise<{ canAccess: boolean; hasSubscription: boolean; roundCount: number; isComplimentary?: boolean }> => {
   try {
+    // First get the user's email to check complimentary status
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    const userEmail = user?.email;
+
+    // Check if user has a complimentary account
+    if (userEmail) {
+      const hasComplimentaryAccess = await isComplimentaryAccount(userEmail, supabaseClient);
+      if (hasComplimentaryAccess) {
+        console.log(`User ${userEmail} has complimentary premium access`);
+        return { canAccess: true, hasSubscription: true, roundCount: 0, isComplimentary: true };
+      }
+    }
+
     // Check subscription status
     const { data: subscription, error: subError } = await supabaseClient
       .from("customer_subscriptions")
