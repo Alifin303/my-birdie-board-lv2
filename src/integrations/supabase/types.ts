@@ -335,6 +335,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_complimentary_email: {
+        Args: { check_email: string }
+        Returns: boolean
+      }
       recalculate_all_handicaps: { Args: never; Returns: undefined }
       recalculate_all_stableford_scores: { Args: never; Returns: undefined }
     }

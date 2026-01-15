@@ -38,6 +38,7 @@ export const fetchUserRoundCount = async (userId: string): Promise<number> => {
 
 /**
  * Check if user has a complimentary account based on their email
+ * Uses a security definer function to bypass RLS restrictions
  */
 export const isComplimentaryAccount = async (
   userEmail: string,
@@ -48,11 +49,10 @@ export const isComplimentaryAccount = async (
   }
 
   try {
+    // Use the security definer function to check complimentary status
+    // This bypasses RLS so regular users can check their own email
     const { data, error } = await supabaseClient
-      .from("complimentary_accounts")
-      .select("email")
-      .ilike("email", userEmail)
-      .maybeSingle();
+      .rpc('is_complimentary_email', { check_email: userEmail });
 
     if (error) {
       console.error("Error checking complimentary account:", error);
