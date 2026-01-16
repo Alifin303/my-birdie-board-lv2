@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserRounds } from "./UserRounds";
+import { ComplimentaryAccessManager } from "./ComplimentaryAccessManager";
 import { ArrowLeft, Settings } from "lucide-react";
 
 interface UserProfile {
@@ -19,6 +20,11 @@ interface UserProfile {
   coursesCount: number;
 }
 
+interface UserSubscription {
+  status: string;
+  current_period_end: string | null;
+}
+
 interface UserDetailProps {
   userId: string;
   onBack?: () => void;
@@ -26,67 +32,81 @@ interface UserDetailProps {
 
 export function UserDetail({ userId, onBack }: UserDetailProps) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userSubscription, setUserSubscription] = useState<UserSubscription | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("profile");
   
-  useEffect(() => {
-    const fetchUserDetails = async () => {
-      setLoading(true);
-      try {
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*, created_at, last_login')
-          .eq('id', userId)
-          .single();
-          
-        if (profileError) {
-          console.error('Error fetching user profile:', profileError);
-          return;
-        }
+  const fetchUserDetails = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*, created_at, last_login')
+        .eq('id', userId)
+        .single();
         
-        const { count: roundsCount, error: roundsError } = await supabase
-          .from('rounds')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', userId);
-          
-        if (roundsError) {
-          console.error('Error counting user rounds:', roundsError);
-        }
-        
-        const { data: coursesData, error: coursesError } = await supabase
-          .from('rounds')
-          .select('course_id')
-          .eq('user_id', userId);
-          
-        if (coursesError) {
-          console.error('Error fetching user courses:', coursesError);
-        }
-        
-        const uniqueCourseIds = new Set(coursesData?.map(r => r.course_id) || []);
-        
-        const userProfileData: UserProfile = {
-          id: profileData.id,
-          username: profileData.username,
-          first_name: profileData.first_name,
-          last_name: profileData.last_name,
-          handicap: profileData.handicap,
-          email: profileData.email,
-          created_at: profileData.created_at,
-          last_login: profileData.last_login,
-          roundsCount: roundsCount || 0,
-          coursesCount: uniqueCourseIds.size
-        };
-
-        setUserProfile(userProfileData);
-      } catch (error) {
-        console.error('Error in fetchUserDetails:', error);
-      } finally {
-        setLoading(false);
+      if (profileError) {
+        console.error('Error fetching user profile:', profileError);
+        return;
       }
-    };
-    
-    fetchUserDetails();
+      
+      const { count: roundsCount, error: roundsError } = await supabase
+        .from('rounds')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId);
+        
+      if (roundsError) {
+        console.error('Error counting user rounds:', roundsError);
+      }
+      
+      const { data: coursesData, error: coursesError } = await supabase
+        .from('rounds')
+        .select('course_id')
+        .eq('user_id', userId);
+        
+      if (coursesError) {
+        console.error('Error fetching user courses:', coursesError);
+      }
+      
+      // Fetch subscription data
+      const { data: subscriptionData, error: subscriptionError } = await supabase
+        .from('customer_subscriptions')
+        .select('status, current_period_end')
+        .eq('user_id', userId)
+        .maybeSingle();
+        
+      if (subscriptionError) {
+        console.error('Error fetching user subscription:', subscriptionError);
+      }
+      
+      setUserSubscription(subscriptionData);
+      
+      const uniqueCourseIds = new Set(coursesData?.map(r => r.course_id) || []);
+      
+      const userProfileData: UserProfile = {
+        id: profileData.id,
+        username: profileData.username,
+        first_name: profileData.first_name,
+        last_name: profileData.last_name,
+        handicap: profileData.handicap,
+        email: profileData.email,
+        created_at: profileData.created_at,
+        last_login: profileData.last_login,
+        roundsCount: roundsCount || 0,
+        coursesCount: uniqueCourseIds.size
+      };
+
+      setUserProfile(userProfileData);
+    } catch (error) {
+      console.error('Error in fetchUserDetails:', error);
+    } finally {
+      setLoading(false);
+    }
   }, [userId]);
+  
+  useEffect(() => {
+    fetchUserDetails();
+  }, [fetchUserDetails]);
 
   if (loading) {
     return (
@@ -199,6 +219,14 @@ export function UserDetail({ userId, onBack }: UserDetailProps) {
                 </dl>
               </CardContent>
             </Card>
+            
+            {/* Complimentary Access Manager */}
+            <ComplimentaryAccessManager
+              userId={userProfile.id}
+              userEmail={userProfile.email}
+              currentSubscription={userSubscription}
+              onUpdate={fetchUserDetails}
+            />
           </div>
         </TabsContent>
         
