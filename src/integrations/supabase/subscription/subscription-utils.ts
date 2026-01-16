@@ -10,10 +10,10 @@ export const isSubscriptionValid = (subscription: any): boolean => {
     return false;
   }
   
-  // Valid subscription statuses
-  const validStatuses = ['active', 'trialing', 'paid'];
+  // Valid subscription statuses (including complimentary for admin-granted access)
+  const validStatuses = ['active', 'trialing', 'paid', 'complimentary'];
   
-  // Check if the subscription status is valid in Stripe
+  // Check if the subscription status is valid
   const hasValidStatus = validStatuses.includes(subscription.status);
   
   // Check if it's canceled but still in active period
