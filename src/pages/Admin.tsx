@@ -10,6 +10,7 @@ import { UserDetail } from "@/components/admin/UserDetail";
 import { AdminActions } from "@/components/admin/AdminActions";
 import { CourseManagement } from "@/components/admin/CourseManagement";
 import { ComplimentaryAccountsManager } from "@/components/admin/ComplimentaryAccountsManager";
+import { AdminAnalytics } from "@/components/admin/analytics/AdminAnalytics";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -103,6 +104,7 @@ export default function Admin() {
             <Tabs defaultValue="overview" className="w-full">
               <TabsList className="mb-6 flex-wrap">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="analytics">Analytics</TabsTrigger>
                 <TabsTrigger value="users">Users</TabsTrigger>
                 <TabsTrigger value="complimentary">Complimentary</TabsTrigger>
                 <TabsTrigger value="courses">Courses</TabsTrigger>
@@ -111,6 +113,10 @@ export default function Admin() {
               
               <TabsContent value="overview" className="space-y-6">
                 <AdminStats />
+              </TabsContent>
+              
+              <TabsContent value="analytics">
+                <AdminAnalytics />
               </TabsContent>
               
               <TabsContent value="users">
