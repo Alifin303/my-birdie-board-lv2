@@ -16,8 +16,8 @@ interface RevenueData {
   monthlyData: { month: string; subscriptions: number; revenue: number }[];
 }
 
-// Assuming monthly price - you may want to make this configurable
-const MONTHLY_PRICE = 9.99;
+// Monthly subscription price in GBP
+const MONTHLY_PRICE = 2.99;
 
 export function RevenueStats() {
   const [data, setData] = useState<RevenueData | null>(null);
@@ -139,7 +139,7 @@ export function RevenueStats() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Monthly Recurring Revenue</p>
-                <p className="text-3xl font-bold">${data.mrr.toFixed(2)}</p>
+                <p className="text-3xl font-bold">£{data.mrr.toFixed(2)}</p>
               </div>
               <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                 <DollarSign className="h-6 w-6 text-primary" />
@@ -218,7 +218,7 @@ export function RevenueStats() {
                     borderRadius: "8px"
                   }}
                   formatter={(value: number, name: string) => [
-                    name === "revenue" ? `$${value.toFixed(2)}` : value,
+                    name === "revenue" ? `£${value.toFixed(2)}` : value,
                     name === "revenue" ? "Revenue" : "Subscriptions"
                   ]}
                 />
@@ -280,8 +280,7 @@ export function RevenueStats() {
       <Card>
         <CardContent className="pt-6">
           <p className="text-sm text-muted-foreground">
-            <strong>Note:</strong> MRR is calculated at ${MONTHLY_PRICE}/month per subscriber. 
-            Adjust the MONTHLY_PRICE constant in the code if your pricing differs.
+            <strong>Note:</strong> MRR is calculated at £{MONTHLY_PRICE}/month per subscriber.
           </p>
         </CardContent>
       </Card>
