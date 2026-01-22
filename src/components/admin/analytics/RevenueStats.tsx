@@ -35,14 +35,14 @@ export function RevenueStats() {
         .from("profiles")
         .select("*", { count: "exact", head: true });
 
-      // Get active paid subscriptions
+      // Get active paid subscriptions (only 'active' status, not 'trialing' or 'complimentary')
       const { data: subscriptions } = await supabase
         .from("customer_subscriptions")
         .select("*")
-        .in("status", ["active", "trialing"]);
+        .eq("status", "active");
 
-      // Separate pro (paid) from complimentary
-      const proSubs = subscriptions?.filter(s => s.status !== "complimentary") || [];
+      // These are paying pro subscribers
+      const proSubs = subscriptions || [];
       const complimentarySubs = subscriptions?.filter(s => s.status === "complimentary") || [];
 
       // Also check for complimentary accounts table
