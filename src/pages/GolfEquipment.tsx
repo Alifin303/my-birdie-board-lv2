@@ -35,17 +35,17 @@ export default function GolfEquipment() {
   return (
     <>
       <Helmet>
-        <title>Best Golf Equipment 2024 - GPS Watches, Clubs & Performance Gear | MyBirdieBoard</title>
-        <meta name="description" content="Discover the best golf equipment for 2024. GPS watches, golf clubs, balls, and performance tracking gear to improve your golf game. Expert reviews and recommendations." />
-        <meta name="keywords" content="golf equipment, best golf equipment 2024, golf GPS watches, golf clubs, golf balls, golf gear, golf accessories, golf performance equipment" />
+        <title>Best Golf Equipment 2025 - GPS Watches, Clubs & Performance Gear | MyBirdieBoard</title>
+        <meta name="description" content="Discover the best golf equipment for 2025. GPS watches, golf clubs, balls, and performance tracking gear to improve your golf game. Expert reviews and recommendations." />
+        <meta name="keywords" content="golf equipment, best golf equipment 2025, golf GPS watches, golf clubs, golf balls, golf gear, golf accessories, golf performance equipment" />
         <link rel="canonical" href="https://mybirdieboard.com/golf-equipment" />
         
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebPage",
-            "name": "Best Golf Equipment 2024",
-            "description": "Discover the best golf equipment for 2024. GPS watches, golf clubs, balls, and performance tracking gear.",
+            "name": "Best Golf Equipment 2025",
+            "description": "Discover the best golf equipment for 2025. GPS watches, golf clubs, balls, and performance tracking gear.",
             "url": "https://mybirdieboard.com/golf-equipment",
             "mainEntity": {
               "@type": "ItemList",
@@ -69,7 +69,7 @@ export default function GolfEquipment() {
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Home
               </Link>
-              <h1 className="text-3xl md:text-4xl font-bold mb-4">Best Golf Equipment 2024</h1>
+              <h1 className="text-3xl md:text-4xl font-bold mb-4">Best Golf Equipment 2025</h1>
               <p className="text-lg text-white/90">GPS watches, golf clubs, balls, and performance gear to elevate your game</p>
             </div>
           </div>

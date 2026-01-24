@@ -9,12 +9,11 @@ Disallow: /auth/confirm
 Disallow: /auth/reset-password
 Disallow: /admin
 Disallow: /demo
+Disallow: /dashboard
 
 # Explicitly allow important pages
 Allow: /about
 Allow: /faq
-Allow: /quiz
-Allow: /dashboard
 Allow: /privacy
 Allow: /courses
 Allow: /courses/
@@ -40,6 +39,7 @@ Allow: /guides
 Disallow: /auth/
 Disallow: /checkout
 Disallow: /admin
+Disallow: /dashboard
 
 User-agent: Anthropic-AI
 Allow: /
@@ -51,6 +51,7 @@ Allow: /guides
 Disallow: /auth/
 Disallow: /checkout
 Disallow: /admin
+Disallow: /dashboard
 
 User-agent: Claude-Web
 Allow: /
@@ -62,6 +63,7 @@ Allow: /guides
 Disallow: /auth/
 Disallow: /checkout
 Disallow: /admin
+Disallow: /dashboard
 
 # Perplexity AI Bot
 User-agent: PerplexityBot
@@ -74,6 +76,7 @@ Allow: /guides
 Disallow: /auth/
 Disallow: /checkout
 Disallow: /admin
+Disallow: /dashboard
 
 # Bard/Gemini AI Bot
 User-agent: Google-Extended
@@ -86,6 +89,7 @@ Allow: /guides
 Disallow: /auth/
 Disallow: /checkout
 Disallow: /admin
+Disallow: /dashboard
 
 # Microsoft Copilot
 User-agent: Bingbot
@@ -106,7 +110,6 @@ Allow: /
 
 Sitemap: https://mybirdieboard.com/sitemap.xml
 Sitemap: https://mybirdieboard.com/ai-sitemap.xml
-Sitemap: https://mybirdieboard.com/sitemap-news.xml
 
 # Security contact
 # See https://mybirdieboard.com/.well-known/security.txt
