@@ -26,7 +26,7 @@ export default function GolfScoreTrackingTips() {
         <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
         <meta property="og:image:alt" content="Golf Score Tracking Tips" />
         <meta property="article:published_time" content="2024-12-09T10:00:00Z" />
-        <meta property="article:modified_time" content="2025-01-16T10:00:00Z" />
+        <meta property="article:modified_time" content="2026-01-24T10:00:00Z" />
         
         {/* Twitter Card meta tags */}
         <meta name="twitter:card" content="summary_large_image" />
@@ -73,7 +73,7 @@ export default function GolfScoreTrackingTips() {
             "image": "https://mybirdieboard.com/og-image.png",
             "url": "https://mybirdieboard.com/blog/golf-score-tracking-tips",
             "datePublished": "2024-12-09T10:00:00Z",
-            "dateModified": "2025-01-16T10:00:00Z",
+            "dateModified": "2026-01-24T10:00:00Z",
             "author": {
               "@type": "Organization",
               "name": "MyBirdieBoard"
