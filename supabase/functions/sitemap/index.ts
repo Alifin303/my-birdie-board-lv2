@@ -58,24 +58,10 @@ serve(async (req) => {
 </url>
 
 <url>
-  <loc>https://mybirdieboard.com/dashboard</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.9</priority>
-  <changefreq>weekly</changefreq>
-</url>
-
-<url>
   <loc>https://mybirdieboard.com/privacy</loc>
   <lastmod>${currentDate}</lastmod>
   <priority>0.5</priority>
   <changefreq>yearly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/demo</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.7</priority>
-  <changefreq>monthly</changefreq>
 </url>
 
 <!-- High-volume keyword landing pages -->
