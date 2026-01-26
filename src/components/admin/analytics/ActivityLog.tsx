@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { format } from "date-fns";
-import { CalendarIcon, ArrowUpDown, RefreshCw, LogIn, Plus, Trash2, User } from "lucide-react";
+import { CalendarIcon, RefreshCw, LogIn, Plus, Trash2, User, ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ActivityLogEntry {
@@ -21,7 +21,13 @@ interface ActivityLogEntry {
   user_email?: string;
 }
 
-type SortDirection = "asc" | "desc";
+interface GroupedActivity {
+  user_id: string;
+  user_email: string;
+  date: string;
+  activities: ActivityLogEntry[];
+  summary: { [key: string]: number };
+}
 
 const ACTION_LABELS: Record<string, { label: string; icon: React.ReactNode; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   user_login: { label: "Login", icon: <LogIn className="h-3 w-3" />, variant: "default" },
@@ -33,11 +39,11 @@ const ACTION_LABELS: Record<string, { label: string; icon: React.ReactNode; vari
 export function ActivityLog() {
   const [logs, setLogs] = useState<ActivityLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [actionFilter, setActionFilter] = useState<string>("all");
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [userProfiles, setUserProfiles] = useState<Record<string, string>>({});
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   const fetchLogs = async () => {
     setLoading(true);
@@ -45,8 +51,8 @@ export function ActivityLog() {
       let query = supabase
         .from("activity_logs")
         .select("*")
-        .order("created_at", { ascending: sortDirection === "asc" })
-        .limit(100);
+        .order("created_at", { ascending: false })
+        .limit(500);
 
       if (actionFilter !== "all") {
         query = query.eq("action", actionFilter);
@@ -71,7 +77,6 @@ export function ActivityLog() {
 
       setLogs(data || []);
 
-      // Fetch user emails for the logs
       const userIds = [...new Set((data || []).map((log) => log.user_id))];
       if (userIds.length > 0) {
         const { data: profiles } = await supabase
@@ -96,10 +101,52 @@ export function ActivityLog() {
 
   useEffect(() => {
     fetchLogs();
-  }, [sortDirection, actionFilter, startDate, endDate]);
+  }, [actionFilter, startDate, endDate]);
 
-  const toggleSort = () => {
-    setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+  const groupedActivities = useMemo(() => {
+    const groups: Record<string, GroupedActivity> = {};
+
+    logs.forEach((log) => {
+      const dateKey = format(new Date(log.created_at), "yyyy-MM-dd");
+      const groupKey = `${log.user_id}-${dateKey}`;
+
+      if (!groups[groupKey]) {
+        groups[groupKey] = {
+          user_id: log.user_id,
+          user_email: userProfiles[log.user_id] || log.user_id.slice(0, 8) + "...",
+          date: dateKey,
+          activities: [],
+          summary: {},
+        };
+      }
+
+      groups[groupKey].activities.push(log);
+      groups[groupKey].summary[log.action] = (groups[groupKey].summary[log.action] || 0) + 1;
+    });
+
+    // Sort activities within each group by time (newest first)
+    Object.values(groups).forEach((group) => {
+      group.activities.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    });
+
+    // Sort groups by most recent activity
+    return Object.values(groups).sort((a, b) => {
+      const aLatest = new Date(a.activities[0].created_at).getTime();
+      const bLatest = new Date(b.activities[0].created_at).getTime();
+      return bLatest - aLatest;
+    });
+  }, [logs, userProfiles]);
+
+  const toggleRow = (key: string) => {
+    setExpandedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
   };
 
   const clearFilters = () => {
@@ -130,6 +177,17 @@ export function ActivityLog() {
       default:
         return JSON.stringify(details).slice(0, 50);
     }
+  };
+
+  const getSummaryBadges = (summary: { [key: string]: number }) => {
+    return Object.entries(summary).map(([action, count]) => {
+      const config = ACTION_LABELS[action] || { label: action, variant: "outline" as const };
+      return (
+        <Badge key={action} variant={config.variant} className="text-xs">
+          {count}x {config.label}
+        </Badge>
+      );
+    });
   };
 
   return (
@@ -187,20 +245,15 @@ export function ActivityLog() {
           </Button>
         </div>
 
-        {/* Table */}
+        {/* Grouped Table */}
         <div className="rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="cursor-pointer" onClick={toggleSort}>
-                  <div className="flex items-center gap-2">
-                    Date/Time
-                    <ArrowUpDown className="h-4 w-4" />
-                  </div>
-                </TableHead>
+                <TableHead className="w-[40px]"></TableHead>
+                <TableHead>Date</TableHead>
                 <TableHead>User</TableHead>
-                <TableHead>Action</TableHead>
-                <TableHead>Details</TableHead>
+                <TableHead>Activity Summary</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -210,34 +263,77 @@ export function ActivityLog() {
                     <RefreshCw className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
                   </TableCell>
                 </TableRow>
-              ) : logs.length === 0 ? (
+              ) : groupedActivities.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                     No activity logs found
                   </TableCell>
                 </TableRow>
               ) : (
-                logs.map((log) => (
-                  <TableRow key={log.id}>
-                    <TableCell className="whitespace-nowrap">
-                      {format(new Date(log.created_at), "PPp")}
-                    </TableCell>
-                    <TableCell className="max-w-[200px] truncate">
-                      {userProfiles[log.user_id] || log.user_id.slice(0, 8) + "..."}
-                    </TableCell>
-                    <TableCell>{getActionDisplay(log.action)}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {formatDetails(log.action, log.details)}
-                    </TableCell>
-                  </TableRow>
-                ))
+                groupedActivities.map((group) => {
+                  const rowKey = `${group.user_id}-${group.date}`;
+                  const isExpanded = expandedRows.has(rowKey);
+
+                  return (
+                    <Collapsible key={rowKey} asChild open={isExpanded} onOpenChange={() => toggleRow(rowKey)}>
+                      <>
+                        <TableRow className="cursor-pointer hover:bg-muted/50">
+                          <TableCell>
+                            <CollapsibleTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                {isExpanded ? (
+                                  <ChevronDown className="h-4 w-4" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </CollapsibleTrigger>
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {format(new Date(group.date), "PPP")}
+                          </TableCell>
+                          <TableCell className="max-w-[200px] truncate">
+                            {group.user_email}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-wrap gap-1">
+                              {getSummaryBadges(group.summary)}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                        <CollapsibleContent asChild>
+                          <TableRow className="bg-muted/30">
+                            <TableCell colSpan={4} className="p-0">
+                              <div className="p-4 space-y-2">
+                                {group.activities.map((activity) => (
+                                  <div
+                                    key={activity.id}
+                                    className="flex items-center gap-4 text-sm py-2 px-3 rounded-md bg-background border"
+                                  >
+                                    <span className="text-muted-foreground whitespace-nowrap">
+                                      {format(new Date(activity.created_at), "HH:mm:ss")}
+                                    </span>
+                                    {getActionDisplay(activity.action)}
+                                    <span className="text-muted-foreground">
+                                      {formatDetails(activity.action, activity.details)}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        </CollapsibleContent>
+                      </>
+                    </Collapsible>
+                  );
+                })
               )}
             </TableBody>
           </Table>
         </div>
 
         <p className="text-sm text-muted-foreground">
-          Showing {logs.length} most recent entries
+          Showing {groupedActivities.length} user-day groups ({logs.length} total activities)
         </p>
       </CardContent>
     </Card>
