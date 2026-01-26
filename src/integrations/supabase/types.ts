@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       complimentary_accounts: {
         Row: {
           created_at: string
@@ -338,6 +362,10 @@ export type Database = {
       is_complimentary_email: {
         Args: { check_email: string }
         Returns: boolean
+      }
+      log_user_activity: {
+        Args: { p_action: string; p_details?: Json; p_user_id: string }
+        Returns: string
       }
       recalculate_all_handicaps: { Args: never; Returns: undefined }
       recalculate_all_stableford_scores: { Args: never; Returns: undefined }
