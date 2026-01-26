@@ -2,6 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserActivityChart } from "./UserActivityChart";
 import { ChurnRiskList } from "./ChurnRiskList";
 import { RevenueStats } from "./RevenueStats";
+import { ActivityLog } from "./ActivityLog";
 import { Activity, AlertTriangle, DollarSign } from "lucide-react";
 
 export function AdminAnalytics() {
@@ -25,8 +26,9 @@ export function AdminAnalytics() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="activity">
+        <TabsContent value="activity" className="space-y-6">
           <UserActivityChart />
+          <ActivityLog />
         </TabsContent>
 
         <TabsContent value="churn">
