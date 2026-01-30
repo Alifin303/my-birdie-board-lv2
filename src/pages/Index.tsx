@@ -34,31 +34,31 @@ const Index = () => {
   const currentBackgroundImage = isMobile ? mobileBackgroundImageUrl : backgroundImageUrl;
   return <>
       <Helmet>
-        <title>MyBirdieBoard — Track Every Round. Improve With Clarity.</title>
-        <meta name="description" content="Play with focus and track your golf journey after you play. Keep every round, see progress, compete on leaderboards. Start free with MyBirdieBoard." />
-        <meta name="keywords" content="golf score tracking, golf handicap calculator, golf performance analytics, course leaderboards, digital golf scorecard, golf app, golf journey, track golf scores, golf statistics, golf improvement" />
+        {/* Title <60 chars, Description <160 chars */}
+        <title>Golf Score Tracker & Handicap Calculator | MyBirdieBoard</title>
+        <meta name="description" content="Track golf scores, calculate handicap, analyze performance. Free to start with 4 rounds. Join golfers improving their game with MyBirdieBoard." />
+        <meta name="keywords" content="golf score tracking, golf handicap calculator, golf performance analytics, course leaderboards, digital golf scorecard" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <link rel="canonical" href="https://mybirdieboard.com/" />
         
         {/* Preload critical hero image for LCP performance */}
         <link rel="preload" as="image" href={currentBackgroundImage} fetchPriority="high" />
         
-        {/* Open Graph meta tags for social sharing */}
-        <meta property="og:title" content="MyBirdieBoard — Track Every Round. Improve With Clarity." />
-        <meta property="og:description" content="Play with focus and track your golf journey after you play. Keep every round, see progress, compete on leaderboards." />
+        {/* Open Graph meta tags */}
+        <meta property="og:title" content="Golf Score Tracker & Handicap Calculator" />
+        <meta property="og:description" content="Track scores, calculate handicap, compete on leaderboards. Start free with MyBirdieBoard." />
         <meta property="og:url" content="https://mybirdieboard.com/" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
-        <meta property="og:image:alt" content="MyBirdieBoard golf score tracking dashboard showing handicap index calculation and score progression analytics for golfers" />
+        <meta property="og:image:alt" content="MyBirdieBoard golf score tracking dashboard" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         
         {/* Twitter Card meta tags */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="MyBirdieBoard — Track Every Round. Improve With Clarity." />
-        <meta name="twitter:description" content="Play with focus and track your golf journey after you play. Keep every round, see progress, compete on leaderboards." />
+        <meta name="twitter:title" content="Golf Score Tracker & Handicap Calculator" />
+        <meta name="twitter:description" content="Track scores, calculate handicap, compete on leaderboards. Start free." />
         <meta name="twitter:image" content="https://mybirdieboard.com/og-image.png" />
-        <meta name="twitter:image:alt" content="Golf score tracking app dashboard with handicap calculator and performance analytics" />
         
         {/* Enhanced structured data with long-tail keywords */}
         <script type="application/ld+json">

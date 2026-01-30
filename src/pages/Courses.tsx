@@ -87,11 +87,9 @@ const Courses = () => {
   return (
     <>
       <Helmet>
-        <title>Golf Courses | MyBirdieBoard</title>
-        <meta 
-          name="description" 
-          content="Browse golf courses, view course statistics, and track your golf performance on MyBirdieBoard. Find courses by location and compare your scores with other golfers." 
-        />
+        {/* Title <60 chars, Description <160 chars */}
+        <title>Golf Courses Directory | MyBirdieBoard</title>
+        <meta name="description" content="Browse golf courses with player stats and leaderboards. Find courses by location and compare your scores with other golfers." />
         <link rel="canonical" href="https://mybirdieboard.com/courses" />
         
         <link rel="alternate" hrefLang="en" href="https://mybirdieboard.com/courses" />

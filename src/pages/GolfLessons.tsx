@@ -41,9 +41,10 @@ export default function GolfLessons() {
   return (
     <>
       <Helmet>
-        <title>Golf Lessons & Instruction - Find Golf Instructors Near You | MyBirdieBoard</title>
-        <meta name="description" content="Find golf lessons and professional instruction near you. Private lessons, group classes, online instruction, and golf clinics to improve your golf game." />
-        <meta name="keywords" content="golf lessons, golf instruction, golf lessons near me, private golf lessons, group golf lessons, golf coach, golf instructor, learn golf" />
+        {/* Title <60 chars, Description <160 chars */}
+        <title>Find Golf Lessons Near You | MyBirdieBoard</title>
+        <meta name="description" content="Find golf lessons and professional instruction. Private lessons, group classes, online coaching, and golf clinics." />
+        <meta name="keywords" content="golf lessons, golf instruction, golf lessons near me, private golf lessons, golf coach" />
         <link rel="canonical" href="https://mybirdieboard.com/golf-lessons" />
         
         <script type="application/ld+json">

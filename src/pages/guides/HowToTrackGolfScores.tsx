@@ -5,10 +5,10 @@ import { Link } from "react-router-dom";
 const HowToTrackGolfScores = () => {
   return (
     <GuideLayout
-      title="How to Track Golf Scores: Complete Guide for Better Performance | MyBirdieBoard"
-      description="Learn how to track golf scores effectively with digital tools, scorecards, and apps. Improve your golf game with proper score tracking methods and performance analysis. Best practices for beginners and experienced golfers."
+      title="How to Track Golf Scores | MyBirdieBoard"
+      description="Learn how to track golf scores effectively. Digital tools, apps, and best practices for beginners and pros."
       canonicalUrl="https://mybirdieboard.com/guides/how-to-track-golf-scores"
-      keywords="how to track golf scores, golf score tracking, golf scorecard, digital golf scorecard, golf performance tracking, golf score app, golf statistics, best golf score tracking app for beginners"
+      keywords="how to track golf scores, golf score tracking, golf scorecard, digital golf scorecard"
     >
       <div className="space-y-8">
         <section>

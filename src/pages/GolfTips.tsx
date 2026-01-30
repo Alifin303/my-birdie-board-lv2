@@ -41,9 +41,10 @@ export default function GolfTips() {
   return (
     <>
       <Helmet>
-        <title>Golf Tips & Improvement Strategies - Lower Your Scores | MyBirdieBoard</title>
-        <meta name="description" content="Expert golf tips to improve your game. Swing fundamentals, short game techniques, course management strategies, and practice routines to lower your golf scores." />
-        <meta name="keywords" content="golf tips, golf improvement, golf swing tips, golf lessons, how to play golf better, golf techniques, golf practice, golf instruction" />
+        {/* Title <60 chars, Description <160 chars */}
+        <title>Golf Tips to Lower Your Scores | MyBirdieBoard</title>
+        <meta name="description" content="Expert golf tips for swing, short game, course management, and practice. Data-driven strategies to improve fast." />
+        <meta name="keywords" content="golf tips, golf improvement, golf swing tips, golf techniques, golf practice" />
         <link rel="canonical" href="https://mybirdieboard.com/golf-tips" />
         
         <script type="application/ld+json">

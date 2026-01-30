@@ -4,10 +4,10 @@ import { GuideLayout } from "@/components/guides/GuideLayout";
 const BestGolfScoreApps = () => {
   return (
     <GuideLayout
-      title="Best Golf Score Tracking Apps 2024: Complete App Comparison | MyBirdieBoard"
-      description="Compare the best golf score tracking apps of 2024. Find the perfect golf app for score tracking, handicap calculation, and performance analysis to improve your game."
+      title="Best Golf Score Apps 2025 | MyBirdieBoard"
+      description="Compare the best golf score tracking apps. Features, pricing, and which app is right for your game."
       canonicalUrl="https://mybirdieboard.com/guides/best-golf-score-tracking-apps"
-      keywords="best golf score apps, golf score tracking apps, golf apps 2024, golf handicap apps, golf statistics apps, digital golf scorecard"
+      keywords="best golf score apps, golf score tracking apps, golf apps 2025, golf handicap apps"
     >
       <div className="space-y-8">
         <section>

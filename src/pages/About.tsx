@@ -14,9 +14,10 @@ const About = () => {
   return (
     <>
       <Helmet>
-        <title>About MyBirdieBoard - Distraction-Free Golf Score Tracking & Analytics</title>
-        <meta name="description" content="MyBirdieBoard is the distraction-free golf score tracker. Log rounds after you play, track your handicap, and compete on course leaderboards." />
-        <meta name="keywords" content="golf score tracking platform, golf analytics software, golf performance tracking, golf handicap system, golf statistics tracker, course leaderboards technology" />
+        {/* Title <60 chars, Description <160 chars */}
+        <title>About Us - Golf Score Tracking App | MyBirdieBoard</title>
+        <meta name="description" content="MyBirdieBoard is a distraction-free golf score tracker. Log rounds after you play, track handicap, and compete on course leaderboards." />
+        <meta name="keywords" content="golf score tracking, golf analytics, golf performance tracking, golf handicap, golf statistics tracker" />
         <link rel="canonical" href="https://mybirdieboard.com/about" />
         
         {/* Open Graph meta tags */}

@@ -4,10 +4,10 @@ import { GuideLayout } from "@/components/guides/GuideLayout";
 const GolfStatisticsTracker = () => {
   return (
     <GuideLayout
-      title="Golf Statistics Tracker: Essential Stats Every Golfer Should Monitor | MyBirdieBoard"
-      description="Discover which golf statistics to track for maximum improvement. Learn about essential golf metrics, how to collect them, and use statistical analysis to lower your golf scores."
+      title="Golf Statistics Tracker Guide | MyBirdieBoard"
+      description="Track key golf statistics to improve your game. Fairways, greens in regulation, putts, and more."
       canonicalUrl="https://mybirdieboard.com/guides/golf-statistics-tracker"
-      keywords="golf statistics tracker, golf stats, golf metrics, golf performance stats, golf data tracking, golf improvement statistics"
+      keywords="golf statistics tracker, golf stats, golf metrics, golf performance stats"
     >
       <div className="space-y-8">
         <section>
