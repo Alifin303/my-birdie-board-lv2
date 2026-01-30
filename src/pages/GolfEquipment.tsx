@@ -35,9 +35,10 @@ export default function GolfEquipment() {
   return (
     <>
       <Helmet>
-        <title>Best Golf Equipment 2025 - GPS Watches, Clubs & Performance Gear | MyBirdieBoard</title>
-        <meta name="description" content="Discover the best golf equipment for 2025. GPS watches, golf clubs, balls, and performance tracking gear to improve your golf game. Expert reviews and recommendations." />
-        <meta name="keywords" content="golf equipment, best golf equipment 2025, golf GPS watches, golf clubs, golf balls, golf gear, golf accessories, golf performance equipment" />
+        {/* Title <60 chars, Description <160 chars */}
+        <title>Best Golf Equipment 2025 | MyBirdieBoard</title>
+        <meta name="description" content="Discover top golf equipment for 2025. GPS watches, clubs, balls, and gear to improve your game. Expert reviews included." />
+        <meta name="keywords" content="golf equipment, best golf equipment 2025, golf GPS watches, golf clubs, golf balls" />
         <link rel="canonical" href="https://mybirdieboard.com/golf-equipment" />
         
         <script type="application/ld+json">

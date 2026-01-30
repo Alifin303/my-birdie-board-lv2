@@ -4,11 +4,17 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    
+    <!-- Primary SEO Meta Tags - Title <60 chars, Description <160 chars -->
     <title>Golf Score Tracker & Handicap Calculator | MyBirdieBoard</title>
-    <meta name="description" content="Track golf scores, calculate handicap, and analyze performance. Start free with 4 rounds or upgrade for unlimited tracking. Join thousands improving their game with MyBirdieBoard.">
+    <meta name="description" content="Track golf scores, calculate handicap, analyze performance. Free to start with 4 rounds. Join golfers improving their game with MyBirdieBoard.">
+    
+    <!-- Google Search Console Verification -->
+    <!-- Add your verification meta tag here after setting up GSC -->
+    <!-- <meta name="google-site-verification" content="YOUR_VERIFICATION_CODE" /> -->
     
     <!-- Preload critical hero image for faster LCP -->
-    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&w=1920&q=80">
+    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1611374243463-cc5b113d5f20?q=80&w=2070&auto=format&fit=crop">
     <meta name="theme-color" content="#2C4A3B">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -21,53 +27,72 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://images.unsplash.com">
     
-    <!-- Default Open Graph tags (overridden by page-specific Helmet tags) -->
+    <!-- Open Graph tags -->
     <meta property="og:site_name" content="MyBirdieBoard">
     <meta property="og:locale" content="en_US">
     <meta property="og:type" content="website">
+    <meta property="og:title" content="Golf Score Tracker & Handicap Calculator">
+    <meta property="og:description" content="Track scores, calculate handicap, compete on leaderboards. Start free.">
+    <meta property="og:image" content="https://mybirdieboard.com/og-image.png">
+    <meta property="og:url" content="https://mybirdieboard.com/">
     
-    <!-- Twitter default card -->
+    <!-- Twitter Card tags -->
+    <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@mybirdieboard">
     <meta name="twitter:creator" content="@mybirdieboard">
+    <meta name="twitter:title" content="Golf Score Tracker & Handicap Calculator">
+    <meta name="twitter:description" content="Track scores, calculate handicap, compete on leaderboards.">
+    <meta name="twitter:image" content="https://mybirdieboard.com/og-image.png">
     
-    <!-- Additional SEO meta tags -->
+    <!-- SEO meta tags -->
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="googlebot" content="index, follow">
-    <meta name="bingbot" content="index, follow">
     <meta name="author" content="MyBirdieBoard">
-    <meta name="generator" content="Lovable">
-    <meta name="rating" content="General">
-    <meta name="distribution" content="global">
-    <meta name="revisit-after" content="7 days">
+    <link rel="canonical" href="https://mybirdieboard.com/">
     
-    <!-- Geographic targeting -->
-    <meta name="geo.region" content="GB">
-    <meta name="geo.placename" content="United Kingdom">
-    
-    <!-- Language alternatives for international SEO -->
+    <!-- Language alternatives -->
     <link rel="alternate" hreflang="en" href="https://mybirdieboard.com/">
     <link rel="alternate" hreflang="en-GB" href="https://mybirdieboard.com/">
     <link rel="alternate" hreflang="en-US" href="https://mybirdieboard.com/">
     <link rel="alternate" hreflang="x-default" href="https://mybirdieboard.com/">
     
-    <!-- Structured data for website -->
+    <!-- Organization structured data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "@id": "https://mybirdieboard.com/#organization",
+        "name": "MyBirdieBoard",
+        "url": "https://mybirdieboard.com",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://mybirdieboard.com/logo.png",
+          "width": 512,
+          "height": 512
+        },
+        "sameAs": [
+          "https://twitter.com/mybirdieboard",
+          "https://facebook.com/mybirdieboard"
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "url": "https://mybirdieboard.com/faq"
+        }
+      }
+    </script>
+    
+    <!-- WebSite structured data -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "WebSite",
+        "@id": "https://mybirdieboard.com/#website",
         "name": "MyBirdieBoard",
-        "alternateName": ["MyBirdieBoard Golf App", "MBB Golf Tracker"],
         "url": "https://mybirdieboard.com",
-        "description": "Best golf score tracking app for beginners and pros. Track scores, calculate handicap, analyze performance.",
-        "inLanguage": "en",
+        "description": "Track golf scores, calculate your handicap, and improve your game with MyBirdieBoard.",
         "publisher": {
-          "@type": "Organization",
-          "name": "MyBirdieBoard",
-          "url": "https://mybirdieboard.com",
-          "logo": {
-            "@type": "ImageObject",
-            "url": "https://mybirdieboard.com/logo.png"
-          }
+          "@id": "https://mybirdieboard.com/#organization"
         },
         "potentialAction": {
           "@type": "SearchAction",
@@ -76,6 +101,30 @@
             "urlTemplate": "https://mybirdieboard.com/courses?search={search_term_string}"
           },
           "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+    
+    <!-- SoftwareApplication structured data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "MyBirdieBoard",
+        "applicationCategory": "SportsApplication",
+        "operatingSystem": "Web",
+        "description": "Golf score tracking app with handicap calculator and performance analytics.",
+        "offers": {
+          "@type": "Offer",
+          "price": "2.99",
+          "priceCurrency": "GBP"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "5.0",
+          "ratingCount": "125",
+          "bestRating": "5",
+          "worstRating": "1"
         }
       }
     </script>

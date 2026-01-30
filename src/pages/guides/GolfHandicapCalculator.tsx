@@ -5,10 +5,10 @@ import { Link } from "react-router-dom";
 const GolfHandicapCalculator = () => {
   return (
     <GuideLayout
-      title="How to Calculate Golf Handicap Step by Step - Official WHS Method | MyBirdieBoard"
-      description="Learn how to calculate your golf handicap step by step using the official WHS method. Complete guide to golf handicap calculation, tracking, and improvement for beginners and experienced golfers."
+      title="Golf Handicap Calculator Guide | MyBirdieBoard"
+      description="Learn how to calculate your golf handicap step by step using the official WHS method. Free handicap tracking."
       canonicalUrl="https://mybirdieboard.com/guides/golf-handicap-calculator"
-      keywords="how to calculate golf handicap step by step, golf handicap calculator, WHS handicap calculation, golf handicap system, handicap index calculation, golf scoring system, official golf handicap method"
+      keywords="golf handicap calculator, how to calculate golf handicap, WHS handicap, handicap index"
     >
       <div className="space-y-8">
         <section>

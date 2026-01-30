@@ -4,10 +4,10 @@ import { GuideLayout } from "@/components/guides/GuideLayout";
 const GolfPerformanceAnalytics = () => {
   return (
     <GuideLayout
-      title="Golf Performance Analytics: Track Stats to Improve Your Game | MyBirdieBoard"
-      description="Discover Strokes Gained analysis, GIR percentages, and putting stats that reveal exactly where you're losing shots. Build an analytics routine to lower your handicap faster."
+      title="Golf Performance Analytics Guide | MyBirdieBoard"
+      description="Use data to improve your golf game. Learn to analyze stats, identify weaknesses, and track progress."
       canonicalUrl="https://mybirdieboard.com/guides/golf-performance-analytics"
-      keywords="golf performance analytics, golf statistics, golf data analysis, golf improvement, golf metrics, strokes gained, golf performance tracking"
+      keywords="golf performance analytics, golf statistics, strokes gained, golf improvement, golf metrics"
     >
       <div className="space-y-8">
         <section>

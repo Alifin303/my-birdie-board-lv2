@@ -69,9 +69,8 @@ function App() {
                 <Route path="/" element={
                   <>
                     <Helmet>
-                      <title>MyBirdieBoard - Golf Score Tracking, Analytics & Performance Improvement</title>
-                      <meta name="description" content="Track golf scores, analyze performance with golf analytics, calculate handicap, compete on course leaderboards. Golf equipment reviews, tips, lessons & more." />
-                      <meta name="keywords" content="golf, golf score tracking, golf analytics, golf equipment, golf tips, golf lessons, golf performance tracking, golf handicap calculator, course leaderboards" />
+                      <title>Golf Score Tracker & Handicap Calculator | MyBirdieBoard</title>
+                      <meta name="description" content="Track golf scores, calculate handicap, analyze performance. Free to start with 4 rounds. Join golfers improving their game." />
                       <link rel="canonical" href="https://mybirdieboard.com/" />
                     </Helmet>
                     <Index />
@@ -81,8 +80,8 @@ function App() {
                 <Route path="/about" element={
                   <>
                     <Helmet>
-                      <title>About MyBirdieBoard - Your Ultimate Golf Tracking Solution</title>
-                      <meta name="description" content="Learn how MyBirdieBoard helps golfers track scores, analyze performance, and compete on leaderboards to improve their game." />
+                      <title>About Us - Golf Score Tracking App | MyBirdieBoard</title>
+                      <meta name="description" content="MyBirdieBoard is a distraction-free golf score tracker. Log rounds after you play, track handicap, and compete on leaderboards." />
                       <link rel="canonical" href="https://mybirdieboard.com/about" />
                     </Helmet>
                     <About />
@@ -92,8 +91,8 @@ function App() {
                 <Route path="/faq" element={
                   <>
                     <Helmet>
-                      <title>Frequently Asked Questions | MyBirdieBoard Golf Tracking</title>
-                      <meta name="description" content="Find answers to common questions about MyBirdieBoard's golf score tracking, handicap calculations, and performance analytics." />
+                      <title>Golf Score Tracking FAQ | MyBirdieBoard</title>
+                      <meta name="description" content="Answers to common golf tracking questions. Learn about handicaps, Stableford scoring, subscriptions, and adding courses." />
                       <link rel="canonical" href="https://mybirdieboard.com/faq" />
                     </Helmet>
                     <FAQ />
