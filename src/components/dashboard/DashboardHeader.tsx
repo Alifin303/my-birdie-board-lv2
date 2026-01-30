@@ -460,7 +460,7 @@ export const DashboardHeader = ({
   return <>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-4">
-          <img src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" alt="BirdieBoard Logo" className="h-10 sm:h-12 w-auto object-contain brightness-[0.85] contrast-[1.15]" />
+          <img src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" alt="BirdieBoard Logo" className="h-10 sm:h-12 w-auto object-contain brightness-[0.85] contrast-[1.15]" width="48" height="48" loading="eager" decoding="async" />
           <div className="flex flex-col">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate">Welcome, {profileData?.first_name || 'Golfer'}!</h1>
             {isFreeTier && (
