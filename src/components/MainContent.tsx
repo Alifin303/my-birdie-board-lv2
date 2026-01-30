@@ -184,7 +184,15 @@ export const MainContent = ({
         <div className="backdrop-blur-sm rounded-xl p-4 shadow-lg bg-black/35">
           <div className="flex flex-col lg:flex-row gap-6 justify-between">
             <div className="flex justify-center order-1 lg:justify-start lg:w-1/2 lg:order-1 mb-6 lg:mb-0">
-              <img src="/lovable-uploads/cab862e7-c7cc-4446-9f24-b1c57c6531a0.png" alt="MyBirdieBoard App Screenshots" className="max-w-full h-auto object-contain rounded-lg" />
+              <img 
+                src="/lovable-uploads/cab862e7-c7cc-4446-9f24-b1c57c6531a0.png" 
+                alt="MyBirdieBoard App Screenshots showing golf score tracking dashboard with handicap calculator and performance analytics" 
+                className="max-w-full h-auto object-contain rounded-lg"
+                loading="lazy"
+                decoding="async"
+                width="600"
+                height="400"
+              />
             </div>
             
             <div className="lg:w-1/2 order-2 lg:order-2">

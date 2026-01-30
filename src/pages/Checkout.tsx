@@ -141,7 +141,7 @@ export default function Checkout() {
       
       <div className="container mx-auto px-4 flex justify-center relative z-10 py-0">
         <Link to="/" className="flex items-center">
-          <img src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" alt="MyBirdieBoard Logo" className="h-32 w-auto object-contain" />
+          <img src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" alt="MyBirdieBoard Logo" className="h-32 w-auto object-contain" width="128" height="128" loading="eager" decoding="async" />
         </Link>
       </div>
       

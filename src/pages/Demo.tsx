@@ -203,7 +203,7 @@ const Demo = () => {
                       Back
                     </Button>
                   </Link>
-                  <img src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" alt="BirdieBoard Logo" className="h-10 sm:h-12 w-auto object-contain brightness-[0.85] contrast-[1.15]" />
+                  <img src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" alt="BirdieBoard Logo" className="h-10 sm:h-12 w-auto object-contain brightness-[0.85] contrast-[1.15]" width="48" height="48" loading="eager" decoding="async" />
                   <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate">
                     Welcome, {demoProfile.first_name}!
                   </h1>
