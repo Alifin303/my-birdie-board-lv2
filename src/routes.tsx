@@ -1,39 +1,39 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import type { RouteRecord } from 'vite-react-ssg'
 import { Navigate } from 'react-router-dom'
 import { RootLayout } from '@/components/RootLayout'
 
-// Lazy-loaded components for code splitting
-const Index = React.lazy(() => import('@/pages/Index'))
-const About = React.lazy(() => import('@/pages/About'))
-const FAQ = React.lazy(() => import('@/pages/FAQ'))
-const Courses = React.lazy(() => import('@/pages/Courses'))
+// Static imports for SSG pre-rendered pages (required for content to be in HTML)
+import Index from '@/pages/Index'
+import About from '@/pages/About'
+import FAQ from '@/pages/FAQ'
+import Courses from '@/pages/Courses'
+import Blog from '@/pages/Blog'
+import Demo from '@/pages/Demo'
+import GolfEquipment from '@/pages/GolfEquipment'
+import GolfTips from '@/pages/GolfTips'
+import GolfLessons from '@/pages/GolfLessons'
+import PrivacyPolicy from '@/pages/PrivacyPolicy'
+import NotFound from '@/pages/NotFound'
+
+// Blog pages - static imports for SSG
+import GolfScoreTrackingTips from '@/pages/blog/GolfScoreTrackingTips'
+import BestGolfClubsBeginners from '@/pages/blog/BestGolfClubsBeginners'
+import ImproveGolfSwing from '@/pages/blog/ImproveGolfSwing'
+import CourseManagementTips from '@/pages/blog/CourseManagementTips'
+import UnderstandingHandicap from '@/pages/blog/UnderstandingHandicap'
+import StablefordScoring from '@/pages/blog/StablefordScoring'
+import HowToBreak100 from '@/pages/blog/HowToBreak100'
+
+// Guide pages - static imports for SSG
+import HowToTrackGolfScores from '@/pages/guides/HowToTrackGolfScores'
+import GolfHandicapCalculator from '@/pages/guides/GolfHandicapCalculator'
+import BestGolfScoreApps from '@/pages/guides/BestGolfScoreApps'
+import GolfPerformanceAnalytics from '@/pages/guides/GolfPerformanceAnalytics'
+import GolfStatisticsTracker from '@/pages/guides/GolfStatisticsTracker'
+
+// Client-side only pages (lazy-loaded, not pre-rendered)
 const Course = React.lazy(() => import('@/pages/Course'))
-const Blog = React.lazy(() => import('@/pages/Blog'))
-const Demo = React.lazy(() => import('@/pages/Demo'))
-const GolfEquipment = React.lazy(() => import('@/pages/GolfEquipment'))
-const GolfTips = React.lazy(() => import('@/pages/GolfTips'))
-const GolfLessons = React.lazy(() => import('@/pages/GolfLessons'))
-const PrivacyPolicy = React.lazy(() => import('@/pages/PrivacyPolicy'))
-const NotFound = React.lazy(() => import('@/pages/NotFound'))
-
-// Blog pages
-const GolfScoreTrackingTips = React.lazy(() => import('@/pages/blog/GolfScoreTrackingTips'))
-const BestGolfClubsBeginners = React.lazy(() => import('@/pages/blog/BestGolfClubsBeginners'))
-const ImproveGolfSwing = React.lazy(() => import('@/pages/blog/ImproveGolfSwing'))
-const CourseManagementTips = React.lazy(() => import('@/pages/blog/CourseManagementTips'))
-const UnderstandingHandicap = React.lazy(() => import('@/pages/blog/UnderstandingHandicap'))
-const StablefordScoring = React.lazy(() => import('@/pages/blog/StablefordScoring'))
-const HowToBreak100 = React.lazy(() => import('@/pages/blog/HowToBreak100'))
-
-// Guide pages
-const HowToTrackGolfScores = React.lazy(() => import('@/pages/guides/HowToTrackGolfScores'))
-const GolfHandicapCalculator = React.lazy(() => import('@/pages/guides/GolfHandicapCalculator'))
-const BestGolfScoreApps = React.lazy(() => import('@/pages/guides/BestGolfScoreApps'))
-const GolfPerformanceAnalytics = React.lazy(() => import('@/pages/guides/GolfPerformanceAnalytics'))
-const GolfStatisticsTracker = React.lazy(() => import('@/pages/guides/GolfStatisticsTracker'))
-
-// Auth pages (client-side only, not pre-rendered)
 const AuthRedirect = React.lazy(() => import('@/pages/AuthRedirect'))
 const AuthConfirm = React.lazy(() => import('@/pages/AuthConfirm'))
 const ResetPassword = React.lazy(() => import('@/pages/ResetPassword'))
@@ -43,6 +43,13 @@ const Admin = React.lazy(() => import('@/pages/Admin'))
 
 // Import ProtectedRoute
 import { ProtectedRoute } from '@/components/ProtectedRoute'
+
+// Wrapper for lazy-loaded components
+const LazyWrapper = ({ children }: { children: React.ReactNode }) => (
+  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>}>
+    {children}
+  </Suspense>
+)
 
 /**
  * Route configuration for vite-react-ssg
@@ -77,8 +84,8 @@ export const routes: RouteRecord[] = [
       },
       {
         path: '/courses/:courseId',
-        element: <Course />,
-        // Dynamic routes are not pre-rendered by default
+        element: <LazyWrapper><Course /></LazyWrapper>,
+        // Dynamic routes are not pre-rendered
       },
       {
         path: '/blog',
@@ -178,31 +185,31 @@ export const routes: RouteRecord[] = [
       // ===== CLIENT-SIDE ONLY ROUTES (Not pre-rendered) =====
       {
         path: '/auth/callback',
-        element: <AuthRedirect />,
+        element: <LazyWrapper><AuthRedirect /></LazyWrapper>,
       },
       {
         path: '/auth/confirm',
-        element: <AuthConfirm />,
+        element: <LazyWrapper><AuthConfirm /></LazyWrapper>,
       },
       {
         path: '/auth/reset-password',
-        element: <ResetPassword />,
+        element: <LazyWrapper><ResetPassword /></LazyWrapper>,
       },
       {
         path: '/checkout',
-        element: <Checkout />,
+        element: <LazyWrapper><Checkout /></LazyWrapper>,
       },
       {
         path: '/dashboard',
         element: (
           <ProtectedRoute>
-            <Dashboard />
+            <LazyWrapper><Dashboard /></LazyWrapper>
           </ProtectedRoute>
         ),
       },
       {
         path: '/admin',
-        element: <Admin />,
+        element: <LazyWrapper><Admin /></LazyWrapper>,
       },
       
       // Redirects

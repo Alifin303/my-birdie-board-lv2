@@ -46,17 +46,17 @@ export default defineConfig(({ mode }) => ({
     },
   },
   // SSG configuration for vite-react-ssg
-  // This enables static site generation at build time
+  // IMPORTANT: Run with "vite-react-ssg build" not "vite build"
   ssgOptions: {
-    // Custom function to determine which routes to pre-render
+    // Routes to pre-render at build time
     includedRoutes: () => prerenderRoutes,
-    // Script loading strategy for better performance
+    // Script loading strategy
     script: 'async',
-    // Output directory style: /about -> /about/index.html
+    // Output as /about/index.html style
     dirStyle: 'nested',
-    // Mock browser globals during SSG build
+    // Mock browser globals during SSG
     mock: true,
-    // Root container selector
-    rootContainerId: 'root',
+    // Formatting for readable HTML output
+    formatting: 'minify',
   },
 }));
