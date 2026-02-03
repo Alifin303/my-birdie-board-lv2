@@ -1,9 +1,10 @@
-// vite.config.ts
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
+// List of all public routes to pre-render as static HTML
+// These routes will have their full content rendered into HTML at build time
 const prerenderRoutes = [
   '/',
   '/about',
@@ -29,6 +30,7 @@ const prerenderRoutes = [
   '/privacy',
 ];
 
+// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
@@ -43,14 +45,18 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // SSG configuration for vite-react-ssg
+  // IMPORTANT: Run with "vite-react-ssg build" not "vite build"
   ssgOptions: {
-    // Add this line to point to your real entry file
-    entry: 'src/main.tsx',
-
+    // Routes to pre-render at build time
     includedRoutes: () => prerenderRoutes,
+    // Script loading strategy
     script: 'async',
+    // Output as /about/index.html style
     dirStyle: 'nested',
+    // Mock browser globals during SSG
     mock: true,
+    // Formatting for readable HTML output
     formatting: 'minify',
   },
 }));
