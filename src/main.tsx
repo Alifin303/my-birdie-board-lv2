@@ -1,5 +1,6 @@
 import { ViteReactSSG } from 'vite-react-ssg'
 import { routes } from './routes'
+import { supabase } from './integrations/supabase/client'
 import './index.css'
 
 /**
@@ -26,14 +27,12 @@ export const createRoot = ViteReactSSG(
     // Client-side only initialization
     if (isClient) {
       // Initialize Supabase auth on client
-      import('./integrations/supabase/client').then(({ supabase }) => {
-        supabase.auth.getSession().then(({ data, error }) => {
-          if (error) {
-            console.error('Error initializing auth:', error)
-          } else if (data?.session) {
-            console.log('Session restored successfully')
-          }
-        })
+      supabase.auth.getSession().then(({ data, error }) => {
+        if (error) {
+          console.error('Error initializing auth:', error)
+        } else if (data?.session) {
+          console.log('Session restored successfully')
+        }
       })
     }
   },

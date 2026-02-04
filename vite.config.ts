@@ -45,6 +45,11 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // SSR configuration - exclude external CDN scripts from server bundle
+  ssr: {
+    noExternal: [],
+    external: ['https://cdn.gpteng.co/gptengineer.js'],
+  },
   // SSG configuration for vite-react-ssg
   // IMPORTANT: Run with "vite-react-ssg build" not "vite build"
   ssgOptions: {
