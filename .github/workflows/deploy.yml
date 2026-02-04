@@ -35,9 +35,19 @@ jobs:
       - name: Build with vite-react-ssg
         run: npx vite-react-ssg build
         env:
-          # Add any environment variables needed for build
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Verify SSG output
+        run: |
+          echo "=== Checking dist folder ==="
+          ls -la ./dist/
+          echo ""
+          echo "=== Checking for pre-rendered HTML files ==="
+          find ./dist -name "*.html" | head -20
+          echo ""
+          echo "=== Sample of index.html content ==="
+          head -100 ./dist/index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
