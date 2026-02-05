@@ -19,6 +19,11 @@ const Courses = () => {
   const [isBot, setIsBot] = useState(false);
   
   useEffect(() => {
+    // SSR-safe check for navigator
+    if (typeof window === "undefined" || typeof navigator === "undefined") {
+      return;
+    }
+    
     const botPattern = /bot|googlebot|crawler|spider|robot|crawling/i;
     const isSearchEngine = botPattern.test(navigator.userAgent);
     setIsBot(isSearchEngine);

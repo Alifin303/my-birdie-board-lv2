@@ -8,7 +8,9 @@ import { Target, Calculator, TrendingUp, CheckCircle } from "lucide-react";
 
 export default function StablefordScoring() {
   useEffect(() => {
-    window.scrollTo(0, 0);
+    if (typeof window !== "undefined") {
+      window.scrollTo(0, 0);
+    }
   }, []);
 
   const structuredData = {

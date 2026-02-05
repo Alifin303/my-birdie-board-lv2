@@ -160,6 +160,11 @@ export async function insertCourse(courseData: {
  * Gets course metadata from localStorage
  */
 export function getCourseMetadataFromLocalStorage(courseId: number) {
+  // SSR-safe: return null if not in browser
+  if (typeof window === "undefined") {
+    return null;
+  }
+  
   try {
     const metadataKey = `golf_course_${courseId}`;
     const storedMetadata = localStorage.getItem(metadataKey);
