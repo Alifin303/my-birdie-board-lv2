@@ -16,7 +16,7 @@ const Index = () => {
   const isMobile = useIsMobile();
   useEffect(() => {
     // Track page view in Meta Pixel when component mounts
-    if (window.fbq) {
+    if (typeof window !== "undefined" && window.fbq) {
       window.fbq('track', 'PageView');
     }
   }, []);

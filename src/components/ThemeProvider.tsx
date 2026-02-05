@@ -1,6 +1,16 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
+// SSR-safe storage access helper
+const getStoredTheme = (key: string, fallback: Theme): Theme => {
+  if (typeof window === "undefined") return fallback;
+  try {
+    return (localStorage.getItem(key) as Theme) || fallback;
+  } catch {
+    return fallback;
+  }
+};
+
 type Theme = "dark" | "light" | "system";
 
 type ThemeProviderProps = {
@@ -27,11 +37,12 @@ export function ThemeProvider({
   storageKey = "vite-ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+  const [theme, setTheme] = useState<Theme>(() => 
+    getStoredTheme(storageKey, defaultTheme)
   );
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
 
@@ -50,7 +61,9 @@ export function ThemeProvider({
   const value = {
     theme,
     setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
+      if (typeof window !== "undefined") {
+        localStorage.setItem(storageKey, theme);
+      }
       setTheme(theme);
     },
   };

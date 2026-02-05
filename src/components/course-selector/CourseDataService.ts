@@ -51,7 +51,7 @@ export async function getUserCourseTees(courseId: number) {
     
     // Try to get course data from localStorage as fallback
     const metadataKey = `golf_course_${courseId}`;
-    const storedMetadata = localStorage.getItem(metadataKey);
+    const storedMetadata = typeof window !== "undefined" ? localStorage.getItem(metadataKey) : null;
     let localStorageTees = [];
     
     if (storedMetadata) {
@@ -82,7 +82,7 @@ export async function getUserCourseTees(courseId: number) {
     // Fallback to localStorage completely if database fetch fails
     try {
       const metadataKey = `golf_course_${courseId}`;
-      const storedMetadata = localStorage.getItem(metadataKey);
+      const storedMetadata = typeof window !== "undefined" ? localStorage.getItem(metadataKey) : null;
       
       if (storedMetadata) {
         const parsedData = JSON.parse(storedMetadata);

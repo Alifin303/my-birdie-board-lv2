@@ -64,4 +64,16 @@ export default defineConfig(({ mode }) => ({
     // Formatting for readable HTML output
     formatting: 'minify',
   },
+  // Build optimization
+  build: {
+    // Improve SSG compatibility
+    rollupOptions: {
+      // Ensure clean module resolution for SSR
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+        },
+      },
+    },
+  },
 }));

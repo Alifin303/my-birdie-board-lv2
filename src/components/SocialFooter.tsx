@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 
 export const SocialFooter = () => {
   const handleNavigate = () => {
-    window.scrollTo(0, 0);
+    if (typeof window !== "undefined") {
+      window.scrollTo(0, 0);
+    }
   };
 
   return (
