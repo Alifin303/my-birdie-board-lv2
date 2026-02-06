@@ -21,7 +21,16 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+// SSR-safe: disable localStorage-based auth persistence during server-side rendering
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    ...(typeof window === 'undefined' ? {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    } : {}),
+  },
+});
 
 // Re-export all necessary functions and utilities
 export {

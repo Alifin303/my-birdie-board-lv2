@@ -11,17 +11,8 @@ import './index.css'
  * This ensures Googlebot sees fully rendered HTML without executing JavaScript
  */
 export const createRoot = ViteReactSSG(
-  // Router options
-  { 
-    routes,
-    future: {
-      v7_normalizeFormMethod: true,
-      v7_fetcherPersist: true,
-      v7_relativeSplatPath: true,
-      v7_skipActionErrorRevalidation: true,
-      v7_partialHydration: true,
-    },
-  },
+  // Router options - no future flags (they can break vite-react-ssg's internal router)
+  { routes },
   // Context callback - runs on both server and client
   ({ isClient }) => {
     // Client-side only initialization
