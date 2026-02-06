@@ -1,29 +1,16 @@
-import { HelmetProvider } from 'react-helmet-async'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Outlet } from 'react-router-dom'
-import { Toaster } from '@/components/ui/toaster'
-
-// Create a query client
-const queryClient = new QueryClient()
+import { Providers } from '@/components/Providers'
 
 /**
- * Root layout component that wraps all routes with global providers
- * This ensures HelmetProvider, QueryClient, and Toaster are available on all pages
+ * Legacy RootLayout - kept for compatibility.
+ * Routes no longer use this as a layout wrapper;
+ * providers are applied directly per-route instead.
  */
 export function RootLayout() {
   return (
-    <HelmetProvider>
-      <QueryClientProvider client={queryClient}>
-        <div className="min-h-screen">
-          <div className="flex flex-col min-h-screen">
-            <main className="flex-1">
-              <Outlet />
-            </main>
-          </div>
-        </div>
-        <Toaster />
-      </QueryClientProvider>
-    </HelmetProvider>
+    <Providers>
+      <Outlet />
+    </Providers>
   )
 }
 
