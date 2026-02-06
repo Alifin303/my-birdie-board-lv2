@@ -1,9 +1,9 @@
 import React, { Suspense } from 'react'
 import type { RouteRecord } from 'vite-react-ssg'
 import { Navigate } from 'react-router-dom'
-import { RootLayout } from '@/components/RootLayout'
+import { Providers } from '@/components/Providers'
 
-// Static imports for SSG pre-rendered pages (required for content to be in HTML)
+// Static imports for SSG pre-rendered pages
 import Index from '@/pages/Index'
 import About from '@/pages/About'
 import FAQ from '@/pages/FAQ'
@@ -41,8 +41,10 @@ const Checkout = React.lazy(() => import('@/pages/Checkout'))
 const Dashboard = React.lazy(() => import('@/pages/Dashboard'))
 const Admin = React.lazy(() => import('@/pages/Admin'))
 
-// Import ProtectedRoute
 import { ProtectedRoute } from '@/components/ProtectedRoute'
+
+// Helper: wrap a page element with Providers
+const P = (el: React.ReactNode) => <Providers>{el}</Providers>
 
 // Wrapper for lazy-loaded components
 const LazyWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -52,185 +54,53 @@ const LazyWrapper = ({ children }: { children: React.ReactNode }) => (
 )
 
 /**
- * Route configuration for vite-react-ssg
- * All public routes will be statically pre-rendered at build time
+ * FLAT route configuration for vite-react-ssg.
+ * No nested layout routes — each route is top-level so vite-react-ssg
+ * can discover and pre-render every path.
  */
 export const routes: RouteRecord[] = [
-  {
-    // Root layout wraps all routes with providers
-    element: <RootLayout />,
-    entry: 'src/components/RootLayout.tsx',
-    children: [
-      // ===== PUBLIC PAGES (Pre-rendered as static HTML) =====
-      {
-        path: '/',
-        element: <Index />,
-        entry: 'src/pages/Index.tsx',
-      },
-      {
-        path: '/about',
-        element: <About />,
-        entry: 'src/pages/About.tsx',
-      },
-      {
-        path: '/faq',
-        element: <FAQ />,
-        entry: 'src/pages/FAQ.tsx',
-      },
-      {
-        path: '/courses',
-        element: <Courses />,
-        entry: 'src/pages/Courses.tsx',
-      },
-      {
-        path: '/courses/:courseId',
-        element: <LazyWrapper><Course /></LazyWrapper>,
-        // Dynamic routes are not pre-rendered
-      },
-      {
-        path: '/blog',
-        element: <Blog />,
-        entry: 'src/pages/Blog.tsx',
-      },
-      {
-        path: '/blog/golf-score-tracking-tips',
-        element: <GolfScoreTrackingTips />,
-        entry: 'src/pages/blog/GolfScoreTrackingTips.tsx',
-      },
-      {
-        path: '/blog/best-golf-clubs-for-beginners',
-        element: <BestGolfClubsBeginners />,
-        entry: 'src/pages/blog/BestGolfClubsBeginners.tsx',
-      },
-      {
-        path: '/blog/improve-your-golf-swing',
-        element: <ImproveGolfSwing />,
-        entry: 'src/pages/blog/ImproveGolfSwing.tsx',
-      },
-      {
-        path: '/blog/course-management-tips',
-        element: <CourseManagementTips />,
-        entry: 'src/pages/blog/CourseManagementTips.tsx',
-      },
-      {
-        path: '/blog/understanding-golf-handicap-system',
-        element: <UnderstandingHandicap />,
-        entry: 'src/pages/blog/UnderstandingHandicap.tsx',
-      },
-      {
-        path: '/blog/stableford-scoring',
-        element: <StablefordScoring />,
-        entry: 'src/pages/blog/StablefordScoring.tsx',
-      },
-      {
-        path: '/blog/how-to-break-100',
-        element: <HowToBreak100 />,
-        entry: 'src/pages/blog/HowToBreak100.tsx',
-      },
-      
-      // Guide pages
-      {
-        path: '/guides/how-to-track-golf-scores',
-        element: <HowToTrackGolfScores />,
-        entry: 'src/pages/guides/HowToTrackGolfScores.tsx',
-      },
-      {
-        path: '/guides/golf-handicap-calculator',
-        element: <GolfHandicapCalculator />,
-        entry: 'src/pages/guides/GolfHandicapCalculator.tsx',
-      },
-      {
-        path: '/guides/best-golf-score-tracking-apps',
-        element: <BestGolfScoreApps />,
-        entry: 'src/pages/guides/BestGolfScoreApps.tsx',
-      },
-      {
-        path: '/guides/golf-performance-analytics',
-        element: <GolfPerformanceAnalytics />,
-        entry: 'src/pages/guides/GolfPerformanceAnalytics.tsx',
-      },
-      {
-        path: '/guides/golf-statistics-tracker',
-        element: <GolfStatisticsTracker />,
-        entry: 'src/pages/guides/GolfStatisticsTracker.tsx',
-      },
-      
-      // High-volume keyword landing pages
-      {
-        path: '/golf-equipment',
-        element: <GolfEquipment />,
-        entry: 'src/pages/GolfEquipment.tsx',
-      },
-      {
-        path: '/golf-tips',
-        element: <GolfTips />,
-        entry: 'src/pages/GolfTips.tsx',
-      },
-      {
-        path: '/golf-lessons',
-        element: <GolfLessons />,
-        entry: 'src/pages/GolfLessons.tsx',
-      },
-      {
-        path: '/demo',
-        element: <Demo />,
-        entry: 'src/pages/Demo.tsx',
-      },
-      {
-        path: '/privacy',
-        element: <PrivacyPolicy />,
-        entry: 'src/pages/PrivacyPolicy.tsx',
-      },
-      
-      // ===== CLIENT-SIDE ONLY ROUTES (Not pre-rendered) =====
-      {
-        path: '/auth/callback',
-        element: <LazyWrapper><AuthRedirect /></LazyWrapper>,
-      },
-      {
-        path: '/auth/confirm',
-        element: <LazyWrapper><AuthConfirm /></LazyWrapper>,
-      },
-      {
-        path: '/auth/reset-password',
-        element: <LazyWrapper><ResetPassword /></LazyWrapper>,
-      },
-      {
-        path: '/checkout',
-        element: <LazyWrapper><Checkout /></LazyWrapper>,
-      },
-      {
-        path: '/dashboard',
-        element: (
-          <ProtectedRoute>
-            <LazyWrapper><Dashboard /></LazyWrapper>
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/admin',
-        element: <LazyWrapper><Admin /></LazyWrapper>,
-      },
-      
-      // Redirects
-      {
-        path: '/quiz',
-        element: <Navigate to="/" replace />,
-      },
-      {
-        path: '/verify',
-        element: <Navigate to="/auth/callback" replace />,
-      },
-      {
-        path: '/auth/v1/verify',
-        element: <Navigate to="/auth/callback" replace />,
-      },
-      
-      // 404 fallback
-      {
-        path: '*',
-        element: <NotFound />,
-      },
-    ],
-  },
+  // ===== PUBLIC PAGES (Pre-rendered as static HTML) =====
+  { path: '/', element: P(<Index />) },
+  { path: '/about', element: P(<About />) },
+  { path: '/faq', element: P(<FAQ />) },
+  { path: '/courses', element: P(<Courses />) },
+  { path: '/blog', element: P(<Blog />) },
+  { path: '/demo', element: P(<Demo />) },
+  { path: '/golf-equipment', element: P(<GolfEquipment />) },
+  { path: '/golf-tips', element: P(<GolfTips />) },
+  { path: '/golf-lessons', element: P(<GolfLessons />) },
+  { path: '/privacy', element: P(<PrivacyPolicy />) },
+
+  // Blog pages
+  { path: '/blog/golf-score-tracking-tips', element: P(<GolfScoreTrackingTips />) },
+  { path: '/blog/best-golf-clubs-for-beginners', element: P(<BestGolfClubsBeginners />) },
+  { path: '/blog/improve-your-golf-swing', element: P(<ImproveGolfSwing />) },
+  { path: '/blog/course-management-tips', element: P(<CourseManagementTips />) },
+  { path: '/blog/understanding-golf-handicap-system', element: P(<UnderstandingHandicap />) },
+  { path: '/blog/stableford-scoring', element: P(<StablefordScoring />) },
+  { path: '/blog/how-to-break-100', element: P(<HowToBreak100 />) },
+
+  // Guide pages
+  { path: '/guides/how-to-track-golf-scores', element: P(<HowToTrackGolfScores />) },
+  { path: '/guides/golf-handicap-calculator', element: P(<GolfHandicapCalculator />) },
+  { path: '/guides/best-golf-score-tracking-apps', element: P(<BestGolfScoreApps />) },
+  { path: '/guides/golf-performance-analytics', element: P(<GolfPerformanceAnalytics />) },
+  { path: '/guides/golf-statistics-tracker', element: P(<GolfStatisticsTracker />) },
+
+  // ===== CLIENT-SIDE ONLY ROUTES (Not pre-rendered) =====
+  { path: '/courses/:courseId', element: P(<LazyWrapper><Course /></LazyWrapper>) },
+  { path: '/auth/callback', element: P(<LazyWrapper><AuthRedirect /></LazyWrapper>) },
+  { path: '/auth/confirm', element: P(<LazyWrapper><AuthConfirm /></LazyWrapper>) },
+  { path: '/auth/reset-password', element: P(<LazyWrapper><ResetPassword /></LazyWrapper>) },
+  { path: '/checkout', element: P(<LazyWrapper><Checkout /></LazyWrapper>) },
+  { path: '/dashboard', element: P(<ProtectedRoute><LazyWrapper><Dashboard /></LazyWrapper></ProtectedRoute>) },
+  { path: '/admin', element: P(<LazyWrapper><Admin /></LazyWrapper>) },
+
+  // Redirects
+  { path: '/quiz', element: <Navigate to="/" replace /> },
+  { path: '/verify', element: <Navigate to="/auth/callback" replace /> },
+  { path: '/auth/v1/verify', element: <Navigate to="/auth/callback" replace /> },
+
+  // 404 fallback
+  { path: '*', element: P(<NotFound />) },
 ]
