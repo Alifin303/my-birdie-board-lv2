@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BreadcrumbNav } from "@/components/BreadcrumbNav";
@@ -72,31 +72,21 @@ export default function HowToBreak100() {
 
   return (
     <>
-      <Helmet>
-        <title>How to Break 100 in Golf: 15 Proven Tips for Beginners | MyBirdieBoard</title>
-        <meta name="description" content="Learn how to break 100 in golf with 15 proven tips. From course management to practice drills, discover strategies that will help you finally shoot in the 90s." />
-        <meta name="keywords" content="how to break 100 in golf, break 100 golf tips, golf beginner tips, shoot under 100, golf scoring tips, lower golf scores, golf improvement" />
-        <link rel="canonical" href="https://mybirdieboard.com/blog/how-to-break-100" />
-        
-        <meta property="og:title" content="How to Break 100 in Golf: 15 Proven Tips" />
-        <meta property="og:description" content="Finally break 100 with these proven strategies. Learn course management, avoid big numbers, and track your progress." />
-        <meta property="og:url" content="https://mybirdieboard.com/blog/how-to-break-100" />
-        <meta property="og:type" content="article" />
-        <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
+      <SEOHead
+        title="How to Break 100 in Golf: 15 Proven Tips for Beginners | MyBirdieBoard"
+        description="Learn how to break 100 in golf with 15 proven tips. From course management to practice drills, discover strategies that will help you finally shoot in the 90s."
+        keywords="how to break 100 in golf, break 100 golf tips, golf beginner tips, shoot under 100, golf scoring tips, lower golf scores, golf improvement"
+        ogType="article"
+        lastModified="2026-01-24T10:00:00Z"
+      >
         <meta property="article:published_time" content="2026-01-04T10:00:00Z" />
-        <meta property="article:modified_time" content="2026-01-24T10:00:00Z" />
-        
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="How to Break 100 in Golf: 15 Proven Tips" />
-        <meta name="twitter:description" content="Master these strategies to finally break 100 and shoot in the 90s." />
-        
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
         </script>
         <script type="application/ld+json">
           {JSON.stringify(faqStructuredData)}
         </script>
-      </Helmet>
+      </SEOHead>
 
       <div className="min-h-screen bg-background">
         <header className="bg-primary text-white py-12">

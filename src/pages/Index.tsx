@@ -4,7 +4,7 @@ import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "@/components/SEOHead";
 import { SocialFooter } from "@/components/SocialFooter";
 import { SignUpDialog } from "@/components/SignUpDialog";
 import { UserReviews } from "@/components/UserReviews";
@@ -33,137 +33,40 @@ const Index = () => {
   // Determine which image to use based on device
   const currentBackgroundImage = isMobile ? mobileBackgroundImageUrl : backgroundImageUrl;
   return <>
-      <Helmet>
-        {/* Title <60 chars, Description <160 chars */}
-        <title>Golf Score Tracker & Handicap Calculator | MyBirdieBoard</title>
-        <meta name="description" content="Track golf scores, calculate handicap, analyze performance. Free to start with 4 rounds. Join golfers improving their game with MyBirdieBoard." />
-        <meta name="keywords" content="golf score tracking, golf handicap calculator, golf performance analytics, course leaderboards, digital golf scorecard" />
+      <SEOHead
+        title="Golf Score Tracker & Handicap Calculator | MyBirdieBoard"
+        description="Track golf scores, calculate handicap, analyze performance. Free to start with 4 rounds. Join golfers improving their game with MyBirdieBoard."
+        keywords="golf score tracking, golf handicap calculator, golf performance analytics, course leaderboards, digital golf scorecard"
+      >
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-        <link rel="canonical" href="https://mybirdieboard.com/" />
-        
-        {/* Preload critical hero image for LCP performance */}
         <link rel="preload" as="image" href={currentBackgroundImage} fetchPriority="high" />
-        
-        {/* Open Graph meta tags */}
-        <meta property="og:title" content="Golf Score Tracker & Handicap Calculator" />
-        <meta property="og:description" content="Track scores, calculate handicap, compete on leaderboards. Start free with MyBirdieBoard." />
-        <meta property="og:url" content="https://mybirdieboard.com/" />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
-        <meta property="og:image:alt" content="MyBirdieBoard golf score tracking dashboard" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         
-        {/* Twitter Card meta tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Golf Score Tracker & Handicap Calculator" />
-        <meta name="twitter:description" content="Track scores, calculate handicap, compete on leaderboards. Start free." />
-        <meta name="twitter:image" content="https://mybirdieboard.com/og-image.png" />
-        
-        {/* Enhanced structured data with long-tail keywords */}
         <script type="application/ld+json">
           {JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
           "applicationCategory": "SportsApplication",
-          "applicationSubCategory": "GolfScoreTracking",
           "operatingSystem": "Web",
           "name": "MyBirdieBoard - Best Golf Score Tracking App for Beginners",
-          "description": "The best golf score tracking app for beginners and experienced golfers. Learn how to calculate golf handicap step by step, track golf scores effectively, and analyze performance with golf analytics.",
-          "keywords": "best golf score tracking app for beginners, how to calculate golf handicap step by step, golf score tracking, golf analytics, golf performance tracking, golf handicap calculator, golf statistics tracker, course leaderboards, digital golf scorecard",
-          "offers": {
-            "@type": "Offer",
-            "price": "2.99",
-            "priceCurrency": "GBP",
-            "priceValidUntil": "2025-12-31",
-            "availability": "https://schema.org/OnlineOnly"
-          },
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "5.0",
-            "ratingCount": "125",
-            "bestRating": "5",
-            "worstRating": "1"
-          },
+          "description": "The best golf score tracking app for beginners and experienced golfers.",
+          "offers": { "@type": "Offer", "price": "2.99", "priceCurrency": "GBP", "availability": "https://schema.org/OnlineOnly" },
           "contentRating": "General",
-          "audience": {
-            "@type": "Audience",
-            "audienceType": "Golfers of all skill levels",
-            "geographicArea": {
-              "@type": "Country",
-              "name": ["United States", "United Kingdom", "Australia", "Canada"]
-            }
-          },
-          "featureList": ["Best Golf Score Tracking App for Beginners", "How to Calculate Golf Handicap Step by Step", "Golf Performance Analytics", "Golf Statistics Tracker", "Course Leaderboards", "Digital Golf Scorecard"],
-          "potentialAction": {
-            "@type": "UseAction",
-            "actionStatus": "PotentialActionStatus",
-            "object": {
-              "@type": "EntryPoint",
-              "urlTemplate": "https://mybirdieboard.com/",
-              "actionPlatform": ["https://schema.org/DesktopWebPlatform", "https://schema.org/MobileWebPlatform"]
-            }
-          }
+          "featureList": ["Golf Score Tracking", "Handicap Calculator", "Performance Analytics", "Course Leaderboards"]
         })}
         </script>
 
-        {/* Additional Organization Schema */}
         <script type="application/ld+json">
           {JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Organization",
           "name": "MyBirdieBoard",
           "url": "https://mybirdieboard.com",
-          "description": "The best golf score tracking app for beginners, helping golfers learn how to calculate golf handicap step by step and improve their game through performance analytics.",
           "sameAs": ["https://twitter.com/mybirdieboard", "https://facebook.com/mybirdieboard"]
         })}
         </script>
 
-        {/* Review/Rating Schema */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Product",
-          "name": "MyBirdieBoard - Golf Score Tracking App",
-          "description": "Digital golf journal for tracking scores, calculating handicaps, and improving your golf game through analytics.",
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "5.0",
-            "ratingCount": "125",
-            "bestRating": "5",
-            "worstRating": "1"
-          },
-          "review": [{
-            "@type": "Review",
-            "author": {
-              "@type": "Person",
-              "name": "David Smith"
-            },
-            "datePublished": "2024-11-15",
-            "reviewRating": {
-              "@type": "Rating",
-              "ratingValue": "5",
-              "bestRating": "5"
-            },
-            "reviewBody": "Simple, elegant, and exactly what I needed. MyBirdieBoard keeps all my rounds organized without unnecessary complications."
-          }, {
-            "@type": "Review",
-            "author": {
-              "@type": "Person",
-              "name": "Sarah Johnson"
-            },
-            "datePublished": "2024-12-01",
-            "reviewRating": {
-              "@type": "Rating",
-              "ratingValue": "5",
-              "bestRating": "5"
-            },
-            "reviewBody": "Finally, a golf app that focuses on what matters - tracking my scores and seeing real improvement over time."
-          }]
-        })}
-        </script>
-
-        {/* FAQ Schema for Featured Snippets */}
         <script type="application/ld+json">
           {JSON.stringify({
           "@context": "https://schema.org",
@@ -171,56 +74,27 @@ const Index = () => {
           "mainEntity": [{
             "@type": "Question",
             "name": "How do I track my golf scores with MyBirdieBoard?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "After you finish your round, simply log in to MyBirdieBoard and add your scores in seconds. No need to use your phone on the course - play with focus and track afterwards. Your rounds are saved permanently in your digital golf archive."
-            }
+            "acceptedAnswer": { "@type": "Answer", "text": "After you finish your round, simply log in to MyBirdieBoard and add your scores in seconds." }
           }, {
             "@type": "Question",
             "name": "How does MyBirdieBoard calculate my golf handicap?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "MyBirdieBoard automatically calculates your handicap index using the World Handicap System (WHS) formula. As you add rounds, your handicap updates automatically based on your best 8 scores from your last 20 rounds, adjusted for course difficulty and slope rating."
-            }
-          }, {
-            "@type": "Question",
-            "name": "Can I see my golf performance analytics?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Yes! MyBirdieBoard provides clear charts showing your score progression, trends over time, and exactly where you're gaining or losing strokes. You'll see which areas of your game need practice and track your improvement journey."
-            }
-          }, {
-            "@type": "Question",
-            "name": "What are course leaderboards?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Course leaderboards let you compare your performance with other golfers at your home course. See where you rank and compete for the top spot based on your best rounds at each course you play."
-            }
+            "acceptedAnswer": { "@type": "Answer", "text": "MyBirdieBoard automatically calculates your handicap index using the World Handicap System (WHS) formula." }
           }, {
             "@type": "Question",
             "name": "Is MyBirdieBoard free to use?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Yes, you can start tracking your golf rounds with MyBirdieBoard for free. Premium features are available for £2.99 to unlock advanced analytics and unlimited round storage."
-            }
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes, you can start tracking your golf rounds with MyBirdieBoard for free. Premium features are available for £2.99." }
           }]
         })}
         </script>
 
-        {/* Breadcrumb Schema */}
         <script type="application/ld+json">
           {JSON.stringify({
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
-          "itemListElement": [{
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Home",
-            "item": "https://mybirdieboard.com/"
-          }]
+          "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://mybirdieboard.com/" }]
         })}
         </script>
-      </Helmet>
+      </SEOHead>
       
       <div className="min-h-screen flex flex-col">
         <div className="relative flex-1 overflow-hidden" style={{

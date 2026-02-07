@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "@/components/SEOHead";
 import { BreadcrumbNav } from "@/components/BreadcrumbNav";
 
 interface GuideLayoutProps {
@@ -25,58 +25,25 @@ export const GuideLayout = ({
 }: GuideLayoutProps) => {
   return (
     <>
-      <Helmet>
-        <title>{title}</title>
-        <meta name="description" content={description} />
-        <link rel="canonical" href={canonicalUrl} />
-        <meta name="keywords" content={keywords} />
-        <meta name="lastmod" content={lastModified} />
-        
-        {/* Open Graph meta tags */}
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content={description} />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:type" content="article" />
-        <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
-        <meta property="og:image:alt" content={title} />
-        <meta property="article:modified_time" content={lastModified} />
-        
-        {/* Twitter Card meta tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={title} />
-        <meta name="twitter:description" content={description} />
-        <meta name="twitter:image" content="https://mybirdieboard.com/og-image.png" />
-        <meta name="twitter:image:alt" content={title} />
-        
-        {/* Breadcrumb Schema */}
+      <SEOHead
+        title={title}
+        description={description}
+        canonicalPath={new URL(canonicalUrl).pathname}
+        keywords={keywords}
+        ogType="article"
+        lastModified={lastModified}
+      >
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             "itemListElement": [
-              {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": "https://mybirdieboard.com/"
-              },
-              {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "Guides",
-                "item": "https://mybirdieboard.com/guides"
-              },
-              {
-                "@type": "ListItem",
-                "position": 3,
-                "name": title.split('|')[0].trim(),
-                "item": canonicalUrl
-              }
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://mybirdieboard.com/" },
+              { "@type": "ListItem", "position": 2, "name": "Guides", "item": "https://mybirdieboard.com/guides" },
+              { "@type": "ListItem", "position": 3, "name": title.split('|')[0].trim(), "item": canonicalUrl }
             ]
           })}
         </script>
-        
-        {/* Article Schema */}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -87,25 +54,12 @@ export const GuideLayout = ({
             "url": canonicalUrl,
             "datePublished": "2024-12-01T10:00:00Z",
             "dateModified": lastModified,
-            "author": {
-              "@type": "Organization",
-              "name": "MyBirdieBoard"
-            },
-            "publisher": {
-              "@type": "Organization",
-              "name": "MyBirdieBoard",
-              "logo": {
-                "@type": "ImageObject",
-                "url": "https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png"
-              }
-            },
-            "mainEntityOfPage": {
-              "@type": "WebPage",
-              "@id": canonicalUrl
-            }
+            "author": { "@type": "Organization", "name": "MyBirdieBoard" },
+            "publisher": { "@type": "Organization", "name": "MyBirdieBoard", "logo": { "@type": "ImageObject", "url": "https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" } },
+            "mainEntityOfPage": { "@type": "WebPage", "@id": canonicalUrl }
           })}
         </script>
-      </Helmet>
+      </SEOHead>
       
       <div className="min-h-screen bg-background">
         <header className="bg-primary text-white py-8">
