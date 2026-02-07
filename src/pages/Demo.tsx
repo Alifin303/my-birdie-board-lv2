@@ -213,7 +213,7 @@ const Demo = () => {
                   </Badge>
                   <Button onClick={() => setShowSignupDialog(true)} className="bg-primary hover:bg-primary/90">
                     <UserPlus className="h-4 w-4 mr-2" />
-                    Start Free Trial
+                    Create Free Account
                   </Button>
                 </div>
               </div>
@@ -379,7 +379,7 @@ const Demo = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" onClick={() => setShowSignupDialog(true)} className="bg-white text-primary hover:bg-white/90">
                   <UserPlus className="h-5 w-5 mr-2" />
-                  Start Your Free Trial
+                  Create Your Free Account
                 </Button>
                 <Link to="/faq">
                   <Button size="lg" variant="outline" className="border-white text-white bg-ring">
