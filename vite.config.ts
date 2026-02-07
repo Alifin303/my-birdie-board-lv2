@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
-import { generateMetaTagsHTML } from "./src/lib/route-seo-map";
+import { replaceMetaTagsInHTML } from "./src/lib/route-seo-map";
 
 // List of all public routes to pre-render as static HTML
 const prerenderRoutes = [
@@ -68,11 +68,7 @@ export default defineConfig(({ mode }) => ({
      * <title>, <meta description>, <link rel="canonical">, and OG tags.
      */
     onPageRendered(route: string, html: string) {
-      const metaTags = generateMetaTagsHTML(route);
-      if (!metaTags) return html;
-
-      // Inject after <head> opening tag
-      return html.replace('<head>', `<head>\n    ${metaTags}`);
+      return replaceMetaTagsInHTML(route, html);
     },
   },
 }));
