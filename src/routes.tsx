@@ -2,6 +2,7 @@ import React, { Suspense } from 'react'
 import type { RouteRecord } from 'vite-react-ssg'
 import { Navigate } from 'react-router-dom'
 import { Providers } from '@/components/Providers'
+import { LazyLoadErrorBoundary } from '@/components/LazyLoadErrorBoundary'
 
 // Static imports for SSG pre-rendered pages
 import Index from '@/pages/Index'
@@ -46,11 +47,13 @@ import { ProtectedRoute } from '@/components/ProtectedRoute'
 // Helper: wrap a page element with Providers
 const P = (el: React.ReactNode) => <Providers>{el}</Providers>
 
-// Wrapper for lazy-loaded components
+// Wrapper for lazy-loaded components with error boundary for chunk failures
 const LazyWrapper = ({ children }: { children: React.ReactNode }) => (
-  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>}>
-    {children}
-  </Suspense>
+  <LazyLoadErrorBoundary>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>}>
+      {children}
+    </Suspense>
+  </LazyLoadErrorBoundary>
 )
 
 /**
