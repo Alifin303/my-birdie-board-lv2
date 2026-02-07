@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { LoginDialog } from "@/components/LoginDialog";
 import { User, ArrowLeft, Star, TrendingUp, Award } from "lucide-react";
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "@/components/SEOHead";
 import { BreadcrumbNav } from "@/components/BreadcrumbNav";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -34,13 +34,11 @@ export default function GolfEquipment() {
 
   return (
     <>
-      <Helmet>
-        {/* Title <60 chars, Description <160 chars */}
-        <title>Best Golf Equipment 2025 | MyBirdieBoard</title>
-        <meta name="description" content="Discover top golf equipment for 2025. GPS watches, clubs, balls, and gear to improve your game. Expert reviews included." />
-        <meta name="keywords" content="golf equipment, best golf equipment 2025, golf GPS watches, golf clubs, golf balls" />
-        <link rel="canonical" href="https://mybirdieboard.com/golf-equipment" />
-        
+      <SEOHead
+        title="Best Golf Equipment 2025 | MyBirdieBoard"
+        description="Discover top golf equipment for 2025. GPS watches, clubs, balls, and gear to improve your game. Expert reviews included."
+        keywords="golf equipment, best golf equipment 2025, golf GPS watches, golf clubs, golf balls"
+      >
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -59,7 +57,7 @@ export default function GolfEquipment() {
             }
           })}
         </script>
-      </Helmet>
+      </SEOHead>
       
       <div className="min-h-screen bg-background">
         <header className="bg-primary text-white py-12">

@@ -1,4 +1,4 @@
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
@@ -6,25 +6,15 @@ import { ChevronLeft } from "lucide-react";
 const CourseManagementTips = () => {
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>Golf Course Management: Strategy Tips to Lower Your Score | MyBirdieBoard</title>
-        <meta name="description" content="Master golf course management with these strategic tips. Learn when to be aggressive, how to avoid big numbers, and make smarter decisions on the course." />
-        <meta name="keywords" content="golf course management, golf strategy, course management tips, smart golf, golf tactics, lower golf scores" />
-        <link rel="canonical" href="https://mybirdieboard.com/blog/course-management-tips" />
-        
-        {/* Open Graph */}
-        <meta property="og:title" content="Golf Course Management: Strategy Tips to Lower Your Score" />
-        <meta property="og:description" content="Master golf course management with strategic tips to make smarter decisions and lower your scores." />
-        <meta property="og:url" content="https://mybirdieboard.com/blog/course-management-tips" />
-        <meta property="og:type" content="article" />
+      <SEOHead
+        title="Golf Course Management: Strategy Tips to Lower Your Score | MyBirdieBoard"
+        description="Master golf course management with these strategic tips. Learn when to be aggressive, how to avoid big numbers, and make smarter decisions on the course."
+        keywords="golf course management, golf strategy, course management tips, smart golf, golf tactics, lower golf scores"
+        ogType="article"
+        lastModified="2026-01-24T10:00:00Z"
+      >
         <meta property="article:published_time" content="2025-01-20T10:00:00Z" />
-        <meta property="article:modified_time" content="2026-01-24T10:00:00Z" />
-        
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Golf Course Management Tips" />
-        <meta name="twitter:description" content="Strategic tips to make smarter decisions and lower your golf scores." />
-      </Helmet>
+      </SEOHead>
 
       <article className="container mx-auto px-4 py-8 max-w-4xl">
         <Link to="/blog" className="inline-flex items-center text-primary hover:underline mb-6">

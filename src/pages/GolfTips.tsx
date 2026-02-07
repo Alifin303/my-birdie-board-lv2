@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { LoginDialog } from "@/components/LoginDialog";
 import { User, ArrowLeft, Target, TrendingUp, BarChart3, Lightbulb } from "lucide-react";
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "@/components/SEOHead";
 import { BreadcrumbNav } from "@/components/BreadcrumbNav";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -40,13 +40,11 @@ export default function GolfTips() {
 
   return (
     <>
-      <Helmet>
-        {/* Title <60 chars, Description <160 chars */}
-        <title>Golf Tips to Lower Your Scores | MyBirdieBoard</title>
-        <meta name="description" content="Expert golf tips for swing, short game, course management, and practice. Data-driven strategies to improve fast." />
-        <meta name="keywords" content="golf tips, golf improvement, golf swing tips, golf techniques, golf practice" />
-        <link rel="canonical" href="https://mybirdieboard.com/golf-tips" />
-        
+      <SEOHead
+        title="Golf Tips to Lower Your Scores | MyBirdieBoard"
+        description="Expert golf tips for swing, short game, course management, and practice. Data-driven strategies to improve fast."
+        keywords="golf tips, golf improvement, golf swing tips, golf techniques, golf practice"
+      >
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -65,7 +63,7 @@ export default function GolfTips() {
             }
           })}
         </script>
-      </Helmet>
+      </SEOHead>
       
       <div className="min-h-screen bg-background">
         <header className="bg-primary text-white py-12">

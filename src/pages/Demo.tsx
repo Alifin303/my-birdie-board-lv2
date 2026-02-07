@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
+import { SEOHead } from '@/components/SEOHead';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { SignUpDialog } from '@/components/SignUpDialog';
@@ -178,11 +178,10 @@ const Demo = () => {
     stat.avgScore = Math.round(stat.rounds.reduce((a: number, b: any) => a + b.gross_score, 0) / stat.rounds.length * 10) / 10;
   });
   return <>
-      <Helmet>
-        <title>Demo Dashboard - See MyBirdieBoard in Action</title>
-        <meta name="description" content="Experience MyBirdieBoard's golf tracking features with our interactive demo. See how easy it is to track scores, analyze performance, and improve your game." />
-        <link rel="canonical" href="https://mybirdieboard.com/demo" />
-      </Helmet>
+      <SEOHead
+        title="Demo Dashboard - See MyBirdieBoard in Action"
+        description="Experience MyBirdieBoard's golf tracking features with our interactive demo. See how easy it is to track scores, analyze performance, and improve your game."
+      />
 
       <div className="min-h-screen py-4 px-2 sm:py-6 sm:px-4" style={{
       backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
