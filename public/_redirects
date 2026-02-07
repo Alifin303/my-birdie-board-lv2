@@ -1,26 +1,14 @@
 
-# Specific routes
-/about              /index.html        200
-/faq                /index.html        200
-/quiz               /index.html        200
+# SPA fallback for client-side only routes (not pre-rendered by SSG)
+# SSG-rendered pages (/, /about, /faq, /blog/*, /guides/*, etc.) are served
+# directly as static HTML files by Netlify — no redirect needed.
+
+# Client-side only routes (lazy-loaded, not pre-rendered)
 /dashboard          /index.html        200
-/privacy            /index.html        200
-/courses            /index.html        200
-/courses/*          /index.html        200
+/admin              /index.html        200
+/checkout           /index.html        200
+/auth/*             /index.html        200
+/courses/:id        /index.html        200
 
-# High-volume keyword landing pages
-/golf-equipment     /index.html        200
-/golf-tips          /index.html        200
-/golf-lessons       /index.html        200
-
-# New blog routes
-/blog               /index.html        200
-/blog/*             /index.html        200
-
-# SEO guide routes
-/guides/*           /index.html        200
-
-# Sitemaps are served as static files from public folder
-
-# Handle dynamic routes and client-side routing
+# Final SPA fallback — only fires if no static file exists at the path
 /*                  /index.html        200

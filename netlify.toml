@@ -5,7 +5,10 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# SPA fallback — only applies when no static file exists at the requested path.
+# SSG-built pages are served as static HTML automatically by Netlify.
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  force = false
