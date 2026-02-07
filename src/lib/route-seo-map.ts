@@ -140,6 +140,12 @@ export const routeSEOMap: Record<string, RouteSEO> = {
     keywords: 'golf stats to track, golf statistics, fairways in regulation, greens in regulation, putts per round, golf analytics',
     ogType: 'article',
   },
+  '/blog/playing-without-phone': {
+    title: 'Why Playing Golf Without Your Phone Might Be the Best Decision You Make | MyBirdieBoard',
+    description: 'Discover why keeping your phone in the bag during a round leads to better focus, lower scores, and more enjoyment.',
+    keywords: 'golf without phone, golf focus, golf mental game, distraction free golf, post round tracking, golf flow state',
+    ogType: 'article',
+  },
 
   // ===== Guide pages =====
   '/guides/how-to-track-golf-scores': {
