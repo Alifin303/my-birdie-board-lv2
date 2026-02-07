@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Helmet } from "react-helmet-async";
+import { Head } from "vite-react-ssg";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -119,10 +119,10 @@ export const ResetPassword = () => {
 
   return (
     <>
-      <Helmet>
+      <Head>
         <title>Reset Password | MyBirdieBoard</title>
         <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
+      </Head>
       <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>

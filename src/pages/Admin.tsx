@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { Helmet } from "react-helmet-async";
+import { Head } from "vite-react-ssg";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -83,10 +83,10 @@ export default function Admin() {
 
   return (
     <>
-      <Helmet>
+      <Head>
         <title>Admin Dashboard | MyBirdieBoard</title>
         <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
+      </Head>
       
       <div className="min-h-screen bg-background">
         <div className="container mx-auto py-8 px-4">
