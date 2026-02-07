@@ -122,6 +122,24 @@ export const routeSEOMap: Record<string, RouteSEO> = {
     keywords: 'match play scoring, how to keep score match play, match play golf rules, match play vs stroke play, dormie, golf match play',
     ogType: 'article',
   },
+  '/blog/putts-per-round': {
+    title: 'How Many Putts Per Round is Good? Putting Stats by Handicap | MyBirdieBoard',
+    description: 'Find out how many putts per round is good for your skill level. Putting averages by handicap, PGA Tour benchmarks, and tips to lower your putts per round.',
+    keywords: 'putts per round, how many putts per round is good, putting average, putting stats, putts per GIR, golf putting statistics',
+    ogType: 'article',
+  },
+  '/blog/how-to-calculate-golf-handicap': {
+    title: 'How to Calculate Golf Handicap: Beginner\'s Guide | MyBirdieBoard',
+    description: 'Learn how to calculate your golf handicap step by step. A simple beginner-friendly guide to the World Handicap System, score differentials, and handicap index.',
+    keywords: 'how to calculate golf handicap, golf handicap for beginners, handicap index, score differential, World Handicap System',
+    ogType: 'article',
+  },
+  '/blog/golf-stats-to-track': {
+    title: 'Golf Stats You Should Track to Improve | MyBirdieBoard',
+    description: 'Discover the most important golf statistics to track. From fairways hit to putts per round, learn which stats reveal where you\'re losing strokes.',
+    keywords: 'golf stats to track, golf statistics, fairways in regulation, greens in regulation, putts per round, golf analytics',
+    ogType: 'article',
+  },
 
   // ===== Guide pages =====
   '/guides/how-to-track-golf-scores': {
