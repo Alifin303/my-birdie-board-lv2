@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SEOHead } from '@/components/SEOHead';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { SignUpDialog } from '@/components/SignUpDialog';
+import { LoginDialog } from '@/components/LoginDialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { UserPlus, ArrowLeft, CalendarDays, Trophy, Flag, TrendingUp, Hash } from 'lucide-react';
@@ -12,9 +13,16 @@ import { AdvancedStats } from '@/components/dashboard/AdvancedStats';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 const Demo = () => {
   const [showSignupDialog, setShowSignupDialog] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [scoreType, setScoreType] = useState<'gross' | 'net'>('gross');
   const [scoreMode, setScoreMode] = useState<'stroke' | 'stableford'>('stroke');
   const [roundFilter, setRoundFilter] = useState<'all' | '9hole' | '18hole'>('all');
+
+  useEffect(() => {
+    const handleOpenLogin = () => setShowLoginDialog(true);
+    window.addEventListener('open-login-dialog', handleOpenLogin);
+    return () => window.removeEventListener('open-login-dialog', handleOpenLogin);
+  }, []);
 
   // Demo profile data
   const demoProfile = {
@@ -393,6 +401,7 @@ const Demo = () => {
       </div>
       
       <SignUpDialog open={showSignupDialog} onOpenChange={setShowSignupDialog} />
+      <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
     </>;
 };
 export default Demo;

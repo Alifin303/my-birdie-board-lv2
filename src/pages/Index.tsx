@@ -20,6 +20,12 @@ const Index = () => {
       window.fbq('track', 'PageView');
     }
   }, []);
+
+  useEffect(() => {
+    const handleOpenLogin = () => setShowLoginDialog(true);
+    window.addEventListener('open-login-dialog', handleOpenLogin);
+    return () => window.removeEventListener('open-login-dialog', handleOpenLogin);
+  }, []);
   const handleStartSignup = () => {
     setShowSignupDialog(true);
   };
