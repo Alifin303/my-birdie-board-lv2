@@ -43,6 +43,9 @@ export const BreadcrumbNav = () => {
       'privacy': 'Privacy Policy',
       'checkout': 'Premium Subscription',
       'admin': 'Admin Dashboard',
+      'putts-per-round': 'How Many Putts Per Round is Good?',
+      'how-to-calculate-golf-handicap': 'How to Calculate Golf Handicap',
+      'golf-stats-to-track': 'Golf Stats You Should Track',
       'golf-score-tracking-tips': 'Golf Score Tracking Tips',
       
       // Future-proofing for common golf terms

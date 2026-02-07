@@ -10,6 +10,36 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 const blogPosts = [
   {
+    id: "putts-per-round",
+    title: "How Many Putts Per Round is Good?",
+    description: "Find out how many putts per round is good for your skill level. Putting averages by handicap, PGA Tour benchmarks, and tips to lower your putts per round.",
+    excerpt: "Putting accounts for 40% of your strokes. Learn what a good number of putts per round looks like for your handicap level, and how to improve your putting stats.",
+    date: "2026-02-07",
+    readTime: "9 min read",
+    tags: ["Putting", "Statistics", "Improvement"],
+    link: "/blog/putts-per-round"
+  },
+  {
+    id: "how-to-calculate-golf-handicap",
+    title: "How to Calculate Golf Handicap: A Beginner's Guide",
+    description: "Learn how to calculate your golf handicap step by step. A simple beginner-friendly guide to the World Handicap System, score differentials, and handicap index.",
+    excerpt: "The handicap system can seem confusing, but the core concept is straightforward. Learn the step-by-step calculation with examples any beginner can follow.",
+    date: "2026-02-07",
+    readTime: "10 min read",
+    tags: ["Handicap", "Beginner", "Education"],
+    link: "/blog/how-to-calculate-golf-handicap"
+  },
+  {
+    id: "golf-stats-to-track",
+    title: "Golf Stats You Should Track to Improve",
+    description: "Discover the most important golf statistics to track. From fairways hit to putts per round, learn which stats reveal where you're losing strokes.",
+    excerpt: "Most golfers know their handicap but few track the stats that explain why they shoot what they shoot. These 6 essential stats cover every part of your game.",
+    date: "2026-02-07",
+    readTime: "11 min read",
+    tags: ["Statistics", "Analytics", "Improvement"],
+    link: "/blog/golf-stats-to-track"
+  },
+  {
     id: "match-play-scoring",
     title: "How to Keep Score in Match Play Golf",
     description: "Learn how to keep score in match play golf. Understand holes up/down, dormie, concessions, handicap strokes, and all the rules for match play scoring.",
