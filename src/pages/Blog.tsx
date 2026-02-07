@@ -10,6 +10,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 const blogPosts = [
   {
+    id: "match-play-scoring",
+    title: "How to Keep Score in Match Play Golf",
+    description: "Learn how to keep score in match play golf. Understand holes up/down, dormie, concessions, handicap strokes, and all the rules for match play scoring.",
+    excerpt: "Match play is a hole-by-hole battle where you track holes won, not total strokes. Learn the scoring system, key terminology like dormie and concessions, and strategy tips.",
+    date: "2026-02-07",
+    readTime: "10 min read",
+    tags: ["Match Play", "Scoring", "Rules"],
+    link: "/blog/match-play-scoring"
+  },
+  {
     id: "how-to-break-100",
     title: "How to Break 100 in Golf: 15 Proven Tips",
     description: "Learn how to break 100 in golf with these 15 proven tips. From course management to avoiding big numbers, discover strategies that will help you shoot in the 90s.",

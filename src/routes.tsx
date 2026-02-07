@@ -25,6 +25,7 @@ import CourseManagementTips from '@/pages/blog/CourseManagementTips'
 import UnderstandingHandicap from '@/pages/blog/UnderstandingHandicap'
 import StablefordScoring from '@/pages/blog/StablefordScoring'
 import HowToBreak100 from '@/pages/blog/HowToBreak100'
+import MatchPlayScoring from '@/pages/blog/MatchPlayScoring'
 
 // Guide pages - static imports for SSG
 import HowToTrackGolfScores from '@/pages/guides/HowToTrackGolfScores'
@@ -82,6 +83,7 @@ export const routes: RouteRecord[] = [
   { path: '/blog/understanding-golf-handicap-system', element: P(<UnderstandingHandicap />) },
   { path: '/blog/stableford-scoring', element: P(<StablefordScoring />) },
   { path: '/blog/how-to-break-100', element: P(<HowToBreak100 />) },
+  { path: '/blog/match-play-scoring', element: P(<MatchPlayScoring />) },
 
   // Guide pages
   { path: '/guides/how-to-track-golf-scores', element: P(<HowToTrackGolfScores />) },

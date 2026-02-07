@@ -116,6 +116,12 @@ export const routeSEOMap: Record<string, RouteSEO> = {
     keywords: 'how to break 100 in golf, break 100, golf tips for beginners, golf scoring tips',
     ogType: 'article',
   },
+  '/blog/match-play-scoring': {
+    title: 'How to Keep Score in Match Play Golf | MyBirdieBoard',
+    description: 'Learn how to keep score in match play golf. Understand holes up/down, dormie, concessions, handicap strokes, and all the rules for match play scoring.',
+    keywords: 'match play scoring, how to keep score match play, match play golf rules, match play vs stroke play, dormie, golf match play',
+    ogType: 'article',
+  },
 
   // ===== Guide pages =====
   '/guides/how-to-track-golf-scores': {
