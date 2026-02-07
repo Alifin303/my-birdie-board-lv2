@@ -11,8 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 const blogPosts = [
   {
     id: "playing-without-phone",
-    title: "Why Playing Golf Without Your Phone Might Be the Best Decision You Make",
-    description: "Discover why keeping your phone in the bag during a round leads to better focus, lower scores, and more enjoyment — and how to still track your progress afterward.",
+    title: "Why Playing Golf Without Your Phone Improves Focus and Enjoyment",
+    description: "Discover why playing golf without your phone improves focus, enjoyment, and performance — and how to track your rounds after the game.",
     excerpt: "Technology has made golf smarter, but it's also made it noisier. Many golfers find they score better when they stop trying to track everything in real time.",
     date: "2026-02-07",
     readTime: "8 min read",

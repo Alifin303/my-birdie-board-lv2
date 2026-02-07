@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { BreadcrumbNav } from "@/components/BreadcrumbNav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Smartphone, Focus, BarChart3, BookOpen, HelpCircle } from "lucide-react";
+import golferWalkingFairway from "@/assets/golfer-walking-fairway.jpg";
 
 export default function PlayingWithoutPhone() {
   useEffect(() => {
@@ -16,8 +17,8 @@ export default function PlayingWithoutPhone() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
-    "headline": "Why Playing Golf Without Your Phone Might Be the Best Decision You Make",
-    "description": "Discover why keeping your phone in the bag during a round leads to better focus, lower scores, and more enjoyment — and how to still track your progress afterward.",
+    "headline": "Why Playing Golf Without Your Phone Improves Focus and Enjoyment",
+    "description": "Discover why playing golf without your phone improves focus, enjoyment, and performance — and how to track your rounds after the game.",
     "image": "https://mybirdieboard.com/og-image.png",
     "author": { "@type": "Organization", "name": "MyBirdieBoard" },
     "publisher": {
@@ -42,12 +43,12 @@ export default function PlayingWithoutPhone() {
       {
         "@type": "Question",
         "name": "Can I still track my golf scores without using my phone on the course?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Yes. Post-round tracking apps like MyBirdieBoard let you log your scores, track handicap, and analyze performance after you play. You get all the data benefits without any on-course distraction." }
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. Post-round golf tracking apps like MyBirdieBoard let you log your scores, track handicap, and analyze performance after you play. You get all the data benefits without any on-course distraction." }
       },
       {
         "@type": "Question",
         "name": "Do golf apps hurt your score?",
-        "acceptedAnswer": { "@type": "Answer", "text": "They can. Every time you pull out your phone to check yardage, enter a score, or log a stat, you break your mental rhythm. Golf performance depends on flow — staying present with your target, the wind, and the shot shape. Phone use pulls you into analysis mode and away from feel." }
+        "acceptedAnswer": { "@type": "Answer", "text": "They can. Every time you pull out your phone to check yardage, enter a score, or log a stat, you break your mental rhythm. Golf focus and concentration depend on flow — staying present with your target, the wind, and the shot shape. Phone use pulls you into analysis mode and away from feel." }
       }
     ]
   };
@@ -55,9 +56,9 @@ export default function PlayingWithoutPhone() {
   return (
     <>
       <SEOHead
-        title="Why Playing Golf Without Your Phone Might Be the Best Decision You Make | MyBirdieBoard"
-        description="Discover why keeping your phone in the bag during a round leads to better focus, lower scores, and more enjoyment — and how to still track your progress afterward."
-        keywords="golf without phone, golf focus, golf mental game, distraction free golf, post round tracking, golf presence, golf flow state"
+        title="Playing Golf Without Your Phone | Better Focus & Scores"
+        description="Discover why playing golf without your phone improves focus, enjoyment, and performance — and how to track your rounds after the game."
+        keywords="distraction-free golf, golf focus and concentration, playing golf without a phone, track golf rounds after playing, post-round golf tracking, golf mental game, golf flow state"
         ogType="article"
       >
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
@@ -73,7 +74,7 @@ export default function PlayingWithoutPhone() {
                 ← Back to Golf Blog
               </Link>
               <h1 className="text-3xl md:text-4xl font-bold mb-4">
-                Why Playing Golf Without Your Phone Might Be the Best Decision You Make
+                Why Playing Golf Without Your Phone Improves Focus and Enjoyment
               </h1>
               <div className="flex items-center space-x-4 text-white/80">
                 <span>February 7, 2026</span>
@@ -92,16 +93,29 @@ export default function PlayingWithoutPhone() {
               Golf has always been a game of feel, rhythm, and presence. Yet somewhere along the way, many of us started bringing a second opponent onto the course: our phone.
             </p>
             <p>
-              Yardage apps, stat tracking, score entry, shot tracking, swing videos… technology has made golf smarter. But it has also made it noisier. And for many players, that noise is quietly costing them focus, enjoyment, and even strokes.
+              Yardage apps, stat tracking, score entry, shot tracking, swing videos… technology has made golf smarter. But it has also made it noisier. And for many players, that noise is quietly costing them golf focus and concentration, enjoyment, and even strokes.
             </p>
+
+            {/* SEO image */}
+            <figure className="my-8">
+              <img
+                src={golferWalkingFairway}
+                alt="Golfer tracking score after a round without using a phone"
+                className="w-full rounded-lg"
+                loading="lazy"
+                width={1024}
+                height={576}
+              />
+            </figure>
+
             <p className="text-lg font-semibold">
-              Here's the surprising truth: you might play your best golf when your phone stays in the bag.
+              Here's the surprising truth: you might play your best golf when your phone stays in the bag — embracing truly distraction-free golf.
             </p>
 
             {/* Section 1 */}
             <h2 className="text-2xl font-bold mt-10 mb-4 flex items-center gap-2">
               <Smartphone className="h-6 w-6 text-primary" />
-              The Hidden Cost of Using Apps During a Round
+              Why Phones Hurt Focus on the Golf Course
             </h2>
             <p>
               On paper, in-round golf apps sound helpful. More data. More insight. Better decisions. But golf isn't played on paper — it's played in the mind.
@@ -120,7 +134,7 @@ export default function PlayingWithoutPhone() {
             <Card className="my-6 border-primary/20">
               <CardContent className="pt-6">
                 <p className="text-muted-foreground italic">
-                  You start thinking about numbers instead of feel. You start managing data instead of managing the course. And before long, you're playing golf — but not fully in the game.
+                  You start thinking about numbers instead of feel. You start managing data instead of managing the course. And before long, you're playing golf without a phone-free mind — technically on the course, but not fully in the game.
                 </p>
               </CardContent>
             </Card>
@@ -128,7 +142,7 @@ export default function PlayingWithoutPhone() {
             {/* Section 2 */}
             <h2 className="text-2xl font-bold mt-10 mb-4 flex items-center gap-2">
               <Focus className="h-6 w-6 text-primary" />
-              Golf Was Built for Presence
+              The Benefits of Playing Golf Without Distractions
             </h2>
             <p>For most of golf's history, players used three simple tools:</p>
             <ul className="space-y-2">
@@ -139,7 +153,9 @@ export default function PlayingWithoutPhone() {
             <p>
               That was enough. A quick mark after each hole. A fast yardage check. Then back to walking, talking, and thinking about the next shot — not the next stat entry.
             </p>
-            <p>This simpler approach does something powerful: it <strong>protects your focus</strong>.</p>
+
+            <h3 className="text-xl font-semibold mt-6 mb-3">Why Traditional Golf Feels More Enjoyable</h3>
+            <p>This simpler, distraction-free golf approach does something powerful: it <strong>protects your focus</strong>.</p>
             <p>You stay engaged with:</p>
             <ul className="space-y-2">
               <li>The wind</li>
@@ -148,34 +164,34 @@ export default function PlayingWithoutPhone() {
               <li>The conversation with your playing partners</li>
             </ul>
             <p>
-              Golf becomes immersive again, not something filtered through a screen. And ironically, many golfers find they <strong>score better</strong> when they stop trying to track everything in real time.
+              Golf becomes immersive again, not something filtered through a screen. And ironically, many golfers find they <strong>score better</strong> when they stop trying to track everything in real time. Playing golf without a phone lets you return to the rhythm the game was designed for.
             </p>
 
             {/* Section 3 */}
             <h2 className="text-2xl font-bold mt-10 mb-4 flex items-center gap-2">
               <BarChart3 className="h-6 w-6 text-primary" />
-              But Tracking Your Golf Progress Does Matter
+              How to Track Your Round After You Finish Playing
             </h2>
             <p>
               Just because phones don't belong in your hands mid-round doesn't mean tracking your game isn't important. In fact, keeping a record of your rounds is one of the best ways to:
             </p>
             <ul className="space-y-2">
               <li>Monitor improvement over time</li>
-              <li>Understand scoring trends</li>
+              <li>Understand scoring trends with a <Link to="/guides/golf-handicap-calculator" className="text-primary hover:underline">golf handicap calculator</Link></li>
               <li>Track milestones like your first birdie or <Link to="/blog/how-to-break-100" className="text-primary hover:underline">breaking 100</Link></li>
               <li>Build a personal history of your golf journey</li>
             </ul>
             <p>
-              The key is <strong>when</strong> you track — not whether you track.
+              The key is <strong>when</strong> you track — not whether you track. The best approach is to track golf rounds after playing, once you're off the course.
             </p>
             <p>
-              Logging your round after you play keeps the focus where it belongs during the game, while still giving you the long-term insights that help you improve. It turns reflection into part of the post-round ritual — like reliving the best shots and learning from the tough holes — instead of a distraction between swings.
+              Logging your round after you play keeps the focus where it belongs during the game, while still giving you the long-term insights that help you improve. If you're new to this, our guide on <Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline">how to track golf scores</Link> explains the best methods. Post-round reflection becomes part of the ritual — like reliving the best shots and learning from the tough holes — instead of a distraction between swings.
             </p>
 
             {/* Section 4 */}
             <h2 className="text-2xl font-bold mt-10 mb-4 flex items-center gap-2">
               <BookOpen className="h-6 w-6 text-primary" />
-              The Distraction-Free Way to Track Your Game
+              A Better Way to Keep Your Golf History
             </h2>
             <p>There's a growing group of golfers who want both things:</p>
             <ul className="space-y-2">
@@ -183,10 +199,10 @@ export default function PlayingWithoutPhone() {
               <li><strong>A complete digital record</strong> of their golf journey</li>
             </ul>
             <p>
-              That's exactly why <Link to="/" className="text-primary hover:underline font-semibold">MyBirdieBoard</Link> was built.
+              That's exactly why <Link to="/" className="text-primary hover:underline font-semibold">MyBirdieBoard</Link> was built — as a dedicated post-round golf tracking tool.
             </p>
             <p>
-              It's designed specifically for <strong>post-round tracking</strong> — so your phone stays in your pocket on the course, but every round still gets saved, organized, and remembered afterward.
+              It's designed specifically for post-round tracking — so your phone stays in your pocket on the course, but every round still gets saved, organized, and remembered afterward. You can compare your progress using the <Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline">best golf score tracking apps</Link> available.
             </p>
             <Card className="my-6 bg-primary/5 border-primary/20">
               <CardContent className="pt-6 space-y-2">
@@ -213,6 +229,11 @@ export default function PlayingWithoutPhone() {
               Because the best golf memories aren't made on a phone. They're made on the course.
             </p>
 
+            {/* SEO closing paragraph */}
+            <p className="mt-6">
+              Whether you're a beginner learning <Link to="/guides/golf-handicap-calculator" className="text-primary hover:underline">how your handicap works</Link> or a seasoned player chasing a personal best, distraction-free golf gives you the mental clarity to play your best. Tools like <Link to="/" className="text-primary hover:underline">MyBirdieBoard</Link> make it easy to track golf rounds after playing — so nothing gets lost, and nothing gets in the way of the game you love.
+            </p>
+
             {/* FAQ */}
             <h2 className="text-2xl font-bold mt-12 mb-6 flex items-center gap-2">
               <HelpCircle className="h-6 w-6 text-primary" />
@@ -237,6 +258,7 @@ export default function PlayingWithoutPhone() {
                 <li><Link to="/blog/golf-stats-to-track" className="text-primary hover:underline">Golf Stats You Should Track to Improve</Link></li>
                 <li><Link to="/blog/course-management-tips" className="text-primary hover:underline">Golf Course Management Tips</Link></li>
                 <li><Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline">How to Track Golf Scores (Guide)</Link></li>
+                <li><Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline">Best Golf Score Tracking Apps</Link></li>
               </ul>
             </div>
 

@@ -141,9 +141,9 @@ export const routeSEOMap: Record<string, RouteSEO> = {
     ogType: 'article',
   },
   '/blog/playing-without-phone': {
-    title: 'Why Playing Golf Without Your Phone Might Be the Best Decision You Make | MyBirdieBoard',
-    description: 'Discover why keeping your phone in the bag during a round leads to better focus, lower scores, and more enjoyment.',
-    keywords: 'golf without phone, golf focus, golf mental game, distraction free golf, post round tracking, golf flow state',
+    title: 'Playing Golf Without Your Phone | Better Focus & Scores',
+    description: 'Discover why playing golf without your phone improves focus, enjoyment, and performance — and how to track your rounds after the game.',
+    keywords: 'distraction-free golf, golf focus and concentration, playing golf without a phone, track golf rounds after playing, post-round golf tracking',
     ogType: 'article',
   },
 
