@@ -4,7 +4,7 @@ import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "@/components/SEOHead";
 import { SocialFooter } from "@/components/SocialFooter";
 import { SignUpDialog } from "@/components/SignUpDialog";
 import { UserReviews } from "@/components/UserReviews";
@@ -33,32 +33,16 @@ const Index = () => {
   // Determine which image to use based on device
   const currentBackgroundImage = isMobile ? mobileBackgroundImageUrl : backgroundImageUrl;
   return <>
-      <Helmet>
-        {/* Title <60 chars, Description <160 chars */}
-        <title>Golf Score Tracker & Handicap Calculator | MyBirdieBoard</title>
-        <meta name="description" content="Track golf scores, calculate handicap, analyze performance. Free to start with 4 rounds. Join golfers improving their game with MyBirdieBoard." />
-        <meta name="keywords" content="golf score tracking, golf handicap calculator, golf performance analytics, course leaderboards, digital golf scorecard" />
+      <SEOHead
+        title="Golf Score Tracker & Handicap Calculator | MyBirdieBoard"
+        description="Track golf scores, calculate handicap, analyze performance. Free to start with 4 rounds. Join golfers improving their game with MyBirdieBoard."
+        keywords="golf score tracking, golf handicap calculator, golf performance analytics, course leaderboards, digital golf scorecard"
+      >
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-        <link rel="canonical" href="https://mybirdieboard.com/" />
-        
         {/* Preload critical hero image for LCP performance */}
         <link rel="preload" as="image" href={currentBackgroundImage} fetchPriority="high" />
-        
-        {/* Open Graph meta tags */}
-        <meta property="og:title" content="Golf Score Tracker & Handicap Calculator" />
-        <meta property="og:description" content="Track scores, calculate handicap, compete on leaderboards. Start free with MyBirdieBoard." />
-        <meta property="og:url" content="https://mybirdieboard.com/" />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
-        <meta property="og:image:alt" content="MyBirdieBoard golf score tracking dashboard" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        
-        {/* Twitter Card meta tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Golf Score Tracker & Handicap Calculator" />
-        <meta name="twitter:description" content="Track scores, calculate handicap, compete on leaderboards. Start free." />
-        <meta name="twitter:image" content="https://mybirdieboard.com/og-image.png" />
         
         {/* Enhanced structured data with long-tail keywords */}
         <script type="application/ld+json">
@@ -220,7 +204,7 @@ const Index = () => {
           }]
         })}
         </script>
-      </Helmet>
+      </SEOHead>
       
       <div className="min-h-screen flex flex-col">
         <div className="relative flex-1 overflow-hidden" style={{
