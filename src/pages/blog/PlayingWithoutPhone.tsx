@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { BreadcrumbNav } from "@/components/BreadcrumbNav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Smartphone, Focus, BarChart3, BookOpen, HelpCircle } from "lucide-react";
-import golferWalkingFairway from "@/assets/golfer-walking-fairway.jpg";
+
 
 export default function PlayingWithoutPhone() {
   useEffect(() => {
@@ -96,17 +96,6 @@ export default function PlayingWithoutPhone() {
               Yardage apps, stat tracking, score entry, shot tracking, swing videos… technology has made golf smarter. But it has also made it noisier. And for many players, that noise is quietly costing them golf focus and concentration, enjoyment, and even strokes.
             </p>
 
-            {/* SEO image */}
-            <figure className="my-8">
-              <img
-                src={golferWalkingFairway}
-                alt="Golfer tracking score after a round without using a phone"
-                className="w-full rounded-lg"
-                loading="lazy"
-                width={1024}
-                height={576}
-              />
-            </figure>
 
             <p className="text-lg font-semibold">
               Here's the surprising truth: you might play your best golf when your phone stays in the bag — embracing truly distraction-free golf.
