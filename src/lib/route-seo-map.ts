@@ -203,8 +203,8 @@ export function replaceMetaTagsInHTML(routePath: string, html: string): string {
 
   let cleaned = html;
 
-  // Remove any existing <title>...</title>
-  cleaned = cleaned.replace(/<title>[^<]*<\/title>/gi, '');
+  // Remove any existing <title>...</title> (including those with data-rh or other attributes)
+  cleaned = cleaned.replace(/<title[^>]*>[^<]*<\/title>/gi, '');
 
   // Remove existing meta tags we control (name="...")
   // Match <meta ...name="X"...> regardless of attribute order
