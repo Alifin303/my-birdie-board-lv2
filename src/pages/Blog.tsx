@@ -10,6 +10,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 const blogPosts = [
   {
+    id: "playing-without-phone",
+    title: "Why Playing Golf Without Your Phone Might Be the Best Decision You Make",
+    description: "Discover why keeping your phone in the bag during a round leads to better focus, lower scores, and more enjoyment — and how to still track your progress afterward.",
+    excerpt: "Technology has made golf smarter, but it's also made it noisier. Many golfers find they score better when they stop trying to track everything in real time.",
+    date: "2026-02-07",
+    readTime: "8 min read",
+    tags: ["Mental Game", "Focus", "Post-Round Tracking"],
+    link: "/blog/playing-without-phone"
+  },
+  {
     id: "putts-per-round",
     title: "How Many Putts Per Round is Good?",
     description: "Find out how many putts per round is good for your skill level. Putting averages by handicap, PGA Tour benchmarks, and tips to lower your putts per round.",
