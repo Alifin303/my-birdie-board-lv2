@@ -226,6 +226,23 @@ export function SignUpDialog({
                     Creating Account...
                   </> : "Create Account"}
               </Button>
+              <p className="text-center text-sm text-muted-foreground mt-2">
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  className="text-primary hover:underline font-medium"
+                  onClick={() => {
+                    handleOpenChange(false);
+                    // Small delay to allow signup dialog to close before login opens
+                    setTimeout(() => {
+                      const loginEvent = new CustomEvent('open-login-dialog');
+                      window.dispatchEvent(loginEvent);
+                    }, 150);
+                  }}
+                >
+                  Sign in
+                </button>
+              </p>
             </form>
           </Form>}
       </DialogContent>
