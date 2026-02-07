@@ -188,3 +188,44 @@ export function generateMetaTagsHTML(routePath: string): string {
 
   return tags.join('\n    ');
 }
+
+/**
+ * Strip any existing SEO tags from the HTML that would conflict with
+ * route-specific tags, then inject the correct ones.
+ * This ensures there are never duplicate <title>, description, or OG tags.
+ */
+export function replaceMetaTagsInHTML(routePath: string, html: string): string {
+  const metaTags = generateMetaTagsHTML(routePath);
+  if (!metaTags) return html;
+
+  let cleaned = html;
+
+  // Remove any existing <title>...</title>
+  cleaned = cleaned.replace(/<title>[^<]*<\/title>/g, '');
+
+  // Remove existing meta tags we control (name="...")
+  const metaNamesToRemove = [
+    'description', 'keywords', 'twitter:card', 'twitter:title',
+    'twitter:description', 'twitter:image', 'twitter:image:alt',
+  ];
+  for (const name of metaNamesToRemove) {
+    cleaned = cleaned.replace(new RegExp(`<meta\\s+name=["']${name}["'][^>]*>`, 'gi'), '');
+  }
+
+  // Remove existing OG property tags we control
+  const ogPropsToRemove = [
+    'og:title', 'og:description', 'og:url', 'og:type',
+    'og:image', 'og:image:alt', 'article:modified_time',
+  ];
+  for (const prop of ogPropsToRemove) {
+    cleaned = cleaned.replace(new RegExp(`<meta\\s+property=["']${prop}["'][^>]*>`, 'gi'), '');
+  }
+
+  // Remove existing canonical link
+  cleaned = cleaned.replace(/<link\s+rel=["']canonical["'][^>]*>/gi, '');
+
+  // Inject route-specific tags after <head>
+  cleaned = cleaned.replace('<head>', `<head>\n    ${metaTags}`);
+
+  return cleaned;
+}
