@@ -1,4 +1,4 @@
-import { SEOHead } from "@/components/SEOHead";
+import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
@@ -6,15 +6,25 @@ import { ChevronLeft } from "lucide-react";
 const UnderstandingHandicap = () => {
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead
-        title="Understanding Golf Handicap System - Complete Guide 2026 | MyBirdieBoard"
-        description="Complete guide to the World Handicap System (WHS). Understand slope ratings, course handicaps, score differentials, and how to establish your first handicap index."
-        keywords="golf handicap, handicap system, calculate golf handicap, handicap index, WHS, World Handicap System"
-        ogType="article"
-        lastModified="2026-01-24T10:00:00Z"
-      >
+      <Helmet>
+        <title>Understanding Golf Handicap System - Complete Guide 2026 | MyBirdieBoard</title>
+        <meta name="description" content="Complete guide to the World Handicap System (WHS). Understand slope ratings, course handicaps, score differentials, and how to establish your first handicap index." />
+        <meta name="keywords" content="golf handicap, handicap system, calculate golf handicap, handicap index, WHS, World Handicap System" />
+        <link rel="canonical" href="https://mybirdieboard.com/blog/understanding-golf-handicap-system" />
+        
+        {/* Open Graph */}
+        <meta property="og:title" content="Understanding Golf Handicap System - Complete Guide 2025" />
+        <meta property="og:description" content="Learn everything about the golf handicap system and how to calculate and improve your handicap." />
+        <meta property="og:url" content="https://mybirdieboard.com/blog/understanding-golf-handicap-system" />
+        <meta property="og:type" content="article" />
         <meta property="article:published_time" content="2025-01-20T10:00:00Z" />
-      </SEOHead>
+        <meta property="article:modified_time" content="2026-01-24T10:00:00Z" />
+        
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Understanding Golf Handicap System" />
+        <meta name="twitter:description" content="Complete guide to the golf handicap system and how it works." />
+      </Helmet>
 
       <article className="container mx-auto px-4 py-8 max-w-4xl">
         <Link to="/blog" className="inline-flex items-center text-primary hover:underline mb-6">

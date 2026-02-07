@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { SEOHead } from "@/components/SEOHead";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Course {
@@ -91,10 +91,12 @@ const Courses = () => {
   
   return (
     <>
-      <SEOHead
-        title="Golf Courses Directory | MyBirdieBoard"
-        description="Browse golf courses with player stats and leaderboards. Find courses by location and compare your scores with other golfers."
-      >
+      <Helmet>
+        {/* Title <60 chars, Description <160 chars */}
+        <title>Golf Courses Directory | MyBirdieBoard</title>
+        <meta name="description" content="Browse golf courses with player stats and leaderboards. Find courses by location and compare your scores with other golfers." />
+        <link rel="canonical" href="https://mybirdieboard.com/courses" />
+        
         <link rel="alternate" hrefLang="en" href="https://mybirdieboard.com/courses" />
         <link rel="alternate" hrefLang="en-us" href="https://mybirdieboard.com/courses" />
         <link rel="alternate" hrefLang="en-gb" href="https://mybirdieboard.com/courses" />
@@ -103,7 +105,22 @@ const Courses = () => {
         <meta name="geo.region" content="US, GB, AU, CA" /> 
         <meta name="geo.position" content="39.8283;-98.5795" />
         <meta name="ICBM" content="39.8283, -98.5795" />
-      </SEOHead>
+        
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Golf Courses | MyBirdieBoard" />
+        <meta 
+          property="og:description" 
+          content="Browse golf courses, view course statistics, and track your golf performance on MyBirdieBoard." 
+        />
+        <meta property="og:url" content="https://mybirdieboard.com/courses" />
+        
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Golf Courses | MyBirdieBoard" />
+        <meta 
+          name="twitter:description" 
+          content="Browse golf courses, view course statistics, and track your golf performance on MyBirdieBoard." 
+        />
+      </Helmet>
       
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">

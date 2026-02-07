@@ -1,17 +1,16 @@
 
 import { ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { SEOHead } from "@/components/SEOHead";
+import { Helmet } from "react-helmet-async";
 import { BreadcrumbNav } from "@/components/BreadcrumbNav";
-import { SITE_CONFIG } from "@/lib/seo";
 
 interface GuideLayoutProps {
   children: ReactNode;
   title: string;
   description: string;
-  canonicalUrl?: string; // Deprecated - canonical is now auto-generated
+  canonicalUrl: string;
   keywords: string;
   lastModified?: string;
 }
@@ -20,21 +19,35 @@ export const GuideLayout = ({
   children, 
   title, 
   description, 
+  canonicalUrl, 
   keywords,
   lastModified = new Date().toISOString()
 }: GuideLayoutProps) => {
-  const { pathname } = useLocation();
-  const canonicalUrl = `${SITE_CONFIG.url}${pathname}`;
-
   return (
     <>
-      <SEOHead
-        title={title}
-        description={description}
-        keywords={keywords}
-        ogType="article"
-        lastModified={lastModified}
-      >
+      <Helmet>
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta name="keywords" content={keywords} />
+        <meta name="lastmod" content={lastModified} />
+        
+        {/* Open Graph meta tags */}
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:type" content="article" />
+        <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
+        <meta property="og:image:alt" content={title} />
+        <meta property="article:modified_time" content={lastModified} />
+        
+        {/* Twitter Card meta tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content="https://mybirdieboard.com/og-image.png" />
+        <meta name="twitter:image:alt" content={title} />
+        
         {/* Breadcrumb Schema */}
         <script type="application/ld+json">
           {JSON.stringify({
@@ -45,13 +58,13 @@ export const GuideLayout = ({
                 "@type": "ListItem",
                 "position": 1,
                 "name": "Home",
-                "item": `${SITE_CONFIG.url}/`
+                "item": "https://mybirdieboard.com/"
               },
               {
                 "@type": "ListItem",
                 "position": 2,
                 "name": "Guides",
-                "item": `${SITE_CONFIG.url}/guides`
+                "item": "https://mybirdieboard.com/guides"
               },
               {
                 "@type": "ListItem",
@@ -70,7 +83,7 @@ export const GuideLayout = ({
             "@type": "Article",
             "headline": title,
             "description": description,
-            "image": SITE_CONFIG.ogImage,
+            "image": "https://mybirdieboard.com/og-image.png",
             "url": canonicalUrl,
             "datePublished": "2024-12-01T10:00:00Z",
             "dateModified": lastModified,
@@ -92,7 +105,7 @@ export const GuideLayout = ({
             }
           })}
         </script>
-      </SEOHead>
+      </Helmet>
       
       <div className="min-h-screen bg-background">
         <header className="bg-primary text-white py-8">

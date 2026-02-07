@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { LoginDialog } from "@/components/LoginDialog";
 import { User, ArrowLeft, GraduationCap, Users, Video, MapPin } from "lucide-react";
-import { SEOHead } from "@/components/SEOHead";
+import { Helmet } from "react-helmet-async";
 import { BreadcrumbNav } from "@/components/BreadcrumbNav";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -40,11 +40,13 @@ export default function GolfLessons() {
 
   return (
     <>
-      <SEOHead
-        title="Find Golf Lessons Near You | MyBirdieBoard"
-        description="Find golf lessons and professional instruction. Private lessons, group classes, online coaching, and golf clinics."
-        keywords="golf lessons, golf instruction, golf lessons near me, private golf lessons, golf coach"
-      >
+      <Helmet>
+        {/* Title <60 chars, Description <160 chars */}
+        <title>Find Golf Lessons Near You | MyBirdieBoard</title>
+        <meta name="description" content="Find golf lessons and professional instruction. Private lessons, group classes, online coaching, and golf clinics." />
+        <meta name="keywords" content="golf lessons, golf instruction, golf lessons near me, private golf lessons, golf coach" />
+        <link rel="canonical" href="https://mybirdieboard.com/golf-lessons" />
+        
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -63,7 +65,7 @@ export default function GolfLessons() {
             }
           })}
         </script>
-      </SEOHead>
+      </Helmet>
       
       <div className="min-h-screen bg-background">
         <header className="bg-primary text-white py-12">

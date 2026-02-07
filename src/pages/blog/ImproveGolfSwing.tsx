@@ -1,4 +1,4 @@
-import { SEOHead } from "@/components/SEOHead";
+import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
@@ -6,15 +6,25 @@ import { ChevronLeft } from "lucide-react";
 const ImproveGolfSwing = () => {
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead
-        title="How to Improve Your Golf Swing - 10 Proven Tips for Better Performance | MyBirdieBoard"
-        description="Fix common swing faults like slicing and hooking with 10 expert tips. Master grip, posture, rotation, and follow-through to hit more fairways and lower scores."
-        keywords="improve golf swing, golf swing tips, golf technique, better golf swing, golf fundamentals, golf instruction"
-        ogType="article"
-        lastModified="2026-01-24T10:00:00Z"
-      >
+      <Helmet>
+        <title>How to Improve Your Golf Swing - 10 Proven Tips for Better Performance | MyBirdieBoard</title>
+        <meta name="description" content="Fix common swing faults like slicing and hooking with 10 expert tips. Master grip, posture, rotation, and follow-through to hit more fairways and lower scores." />
+        <meta name="keywords" content="improve golf swing, golf swing tips, golf technique, better golf swing, golf fundamentals, golf instruction" />
+        <link rel="canonical" href="https://mybirdieboard.com/blog/improve-your-golf-swing" />
+        
+        {/* Open Graph */}
+        <meta property="og:title" content="How to Improve Your Golf Swing - 10 Proven Tips" />
+        <meta property="og:description" content="Master your golf swing with these 10 proven techniques from golf professionals." />
+        <meta property="og:url" content="https://mybirdieboard.com/blog/improve-your-golf-swing" />
+        <meta property="og:type" content="article" />
         <meta property="article:published_time" content="2025-01-20T10:00:00Z" />
-      </SEOHead>
+        <meta property="article:modified_time" content="2026-01-24T10:00:00Z" />
+        
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="How to Improve Your Golf Swing" />
+        <meta name="twitter:description" content="10 proven tips to master your golf swing and lower your scores." />
+      </Helmet>
 
       <article className="container mx-auto px-4 py-8 max-w-4xl">
         <Link to="/blog" className="inline-flex items-center text-primary hover:underline mb-6">

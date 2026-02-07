@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { LoginDialog } from "@/components/LoginDialog";
 import { User, Clock, Tag } from "lucide-react";
-import { SEOHead } from "@/components/SEOHead";
+import { Helmet } from "react-helmet-async";
 import { BreadcrumbNav } from "@/components/BreadcrumbNav";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -86,11 +86,27 @@ export default function Blog() {
 
   return (
     <>
-      <SEOHead
-        title="Golf Blog - Tips, Analytics & Performance Insights | MyBirdieBoard"
-        description="Expert golf tips, performance analytics insights, and score tracking strategies. Improve your golf game with data-driven advice from MyBirdieBoard's golf blog."
-        keywords="golf blog, golf tips, golf analytics, golf performance, golf score tracking tips, golf handicap advice, course leaderboards strategy"
-      >
+      <Helmet>
+        <title>Golf Blog - Tips, Analytics & Performance Insights | MyBirdieBoard</title>
+        <meta name="description" content="Expert golf tips, performance analytics insights, and score tracking strategies. Improve your golf game with data-driven advice from MyBirdieBoard's golf blog." />
+        <meta name="keywords" content="golf blog, golf tips, golf analytics, golf performance, golf score tracking tips, golf handicap advice, course leaderboards strategy" />
+        <link rel="canonical" href="https://mybirdieboard.com/blog" />
+        
+        {/* Open Graph meta tags */}
+        <meta property="og:title" content="Golf Blog - Tips, Analytics & Performance Insights | MyBirdieBoard" />
+        <meta property="og:description" content="Expert golf tips, performance analytics insights, and score tracking strategies to improve your golf game." />
+        <meta property="og:url" content="https://mybirdieboard.com/blog" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
+        <meta property="og:image:alt" content="MyBirdieBoard Golf Blog" />
+        
+        {/* Twitter Card meta tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Golf Blog - Expert Tips & Analytics Insights" />
+        <meta name="twitter:description" content="Data-driven golf tips and performance insights to help you improve your game." />
+        <meta name="twitter:image" content="https://mybirdieboard.com/og-image.png" />
+        <meta name="twitter:image:alt" content="MyBirdieBoard Golf Blog" />
+        
         {/* Breadcrumb Schema */}
         <script type="application/ld+json">
           {JSON.stringify({
@@ -141,7 +157,7 @@ export default function Blog() {
             }))
           })}
         </script>
-      </SEOHead>
+      </Helmet>
       
       <div className="min-h-screen bg-background">
         <header className="bg-primary text-white py-12">

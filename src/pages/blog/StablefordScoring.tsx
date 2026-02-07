@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { SEOHead } from "@/components/SEOHead";
+import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BreadcrumbNav } from "@/components/BreadcrumbNav";
@@ -41,19 +41,28 @@ export default function StablefordScoring() {
 
   return (
     <>
-      <SEOHead
-        title="What is Stableford Scoring in Golf? Complete Guide & Calculator | MyBirdieBoard"
-        description="Learn how Stableford scoring works in golf, how to calculate points for each hole, and why it's a popular alternative to stroke play. Track Stableford scores with MyBirdieBoard."
-        keywords="stableford scoring, stableford points, golf stableford, stableford calculator, stableford scoring system, net stableford, gross stableford, golf scoring methods"
-        ogType="article"
-        lastModified="2026-01-24T10:00:00Z"
-      >
+      <Helmet>
+        <title>What is Stableford Scoring in Golf? Complete Guide & Calculator | MyBirdieBoard</title>
+        <meta name="description" content="Learn how Stableford scoring works in golf, how to calculate points for each hole, and why it's a popular alternative to stroke play. Track Stableford scores with MyBirdieBoard." />
+        <meta name="keywords" content="stableford scoring, stableford points, golf stableford, stableford calculator, stableford scoring system, net stableford, gross stableford, golf scoring methods" />
+        <link rel="canonical" href="https://mybirdieboard.com/blog/stableford-scoring" />
+        
+        <meta property="og:title" content="What is Stableford Scoring in Golf? Complete Guide" />
+        <meta property="og:description" content="Learn how Stableford scoring works, calculate points, and track your Stableford scores with MyBirdieBoard." />
+        <meta property="og:url" content="https://mybirdieboard.com/blog/stableford-scoring" />
+        <meta property="og:type" content="article" />
+        <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
         <meta property="article:published_time" content="2025-01-25T10:00:00Z" />
+        <meta property="article:modified_time" content="2026-01-24T10:00:00Z" />
+        
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="What is Stableford Scoring in Golf?" />
+        <meta name="twitter:description" content="Complete guide to Stableford scoring - learn how to calculate points and track your scores." />
         
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
         </script>
-      </SEOHead>
+      </Helmet>
 
       <div className="min-h-screen bg-background">
         <header className="bg-primary text-white py-12">

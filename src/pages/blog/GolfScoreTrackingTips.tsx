@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { LoginDialog } from "@/components/LoginDialog";
 import { User, ArrowLeft } from "lucide-react";
-import { SEOHead } from "@/components/SEOHead";
+import { Helmet } from "react-helmet-async";
 import { BreadcrumbNav } from "@/components/BreadcrumbNav";
 
 export default function GolfScoreTrackingTips() {
@@ -12,14 +12,28 @@ export default function GolfScoreTrackingTips() {
 
   return (
     <>
-      <SEOHead
-        title="10 Essential Golf Score Tracking Tips for Better Performance | MyBirdieBoard"
-        description="Master golf score tracking with these 10 proven tips. Learn professional techniques to improve your game through better data collection and analysis."
-        keywords="golf score tracking tips, golf performance tracking, digital golf scorecard, golf statistics, golf improvement"
-        ogType="article"
-        lastModified="2026-01-24T10:00:00Z"
-      >
+      <Helmet>
+        <title>10 Essential Golf Score Tracking Tips for Better Performance | MyBirdieBoard</title>
+        <meta name="description" content="Master golf score tracking with these 10 proven tips. Learn professional techniques to improve your game through better data collection and analysis." />
+        <meta name="keywords" content="golf score tracking tips, golf performance tracking, digital golf scorecard, golf statistics, golf improvement" />
+        <link rel="canonical" href="https://mybirdieboard.com/blog/golf-score-tracking-tips" />
+        
+        {/* Open Graph meta tags */}
+        <meta property="og:title" content="10 Essential Golf Score Tracking Tips for Better Performance" />
+        <meta property="og:description" content="Master golf score tracking with these 10 proven tips used by professional golfers and coaches." />
+        <meta property="og:url" content="https://mybirdieboard.com/blog/golf-score-tracking-tips" />
+        <meta property="og:type" content="article" />
+        <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
+        <meta property="og:image:alt" content="Golf Score Tracking Tips" />
         <meta property="article:published_time" content="2024-12-09T10:00:00Z" />
+        <meta property="article:modified_time" content="2026-01-24T10:00:00Z" />
+        
+        {/* Twitter Card meta tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="10 Essential Golf Score Tracking Tips" />
+        <meta name="twitter:description" content="Professional techniques to improve your game through better golf score tracking and data analysis." />
+        <meta name="twitter:image" content="https://mybirdieboard.com/og-image.png" />
+        <meta name="twitter:image:alt" content="Golf Score Tracking Tips" />
         
         {/* Breadcrumb Schema */}
         <script type="application/ld+json">
@@ -78,7 +92,7 @@ export default function GolfScoreTrackingTips() {
             }
           })}
         </script>
-      </SEOHead>
+      </Helmet>
       
       <div className="min-h-screen bg-background">
         <header className="bg-primary text-white py-8">
