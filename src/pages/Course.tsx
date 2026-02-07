@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Navigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { Head } from "vite-react-ssg";
 import { supabase } from "@/integrations/supabase/client";
 import { searchForCourses } from "@/components/course-selector/CourseDataService";
 import { useQueryClient } from "@tanstack/react-query";
@@ -209,7 +209,7 @@ const Course = () => {
   
   return (
     <>
-      <Helmet>
+      <Head>
         <title>{`${courseName} | Golf Course Statistics and Leaderboard | MyBirdieBoard`}</title>
         <meta 
           name="description" 
@@ -252,7 +252,7 @@ const Course = () => {
             {generateGeoStructuredData()}
           </script>
         )}
-      </Helmet>
+      </Head>
       
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">

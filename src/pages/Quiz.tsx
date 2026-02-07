@@ -1,12 +1,12 @@
 
 import { QuizContainer } from "@/components/quiz/QuizContainer";
-import { Helmet } from "react-helmet-async";
+import { Head } from "vite-react-ssg";
 import { Link } from "react-router-dom";
 
 export default function Quiz() {
   return (
     <>
-      <Helmet>
+      <Head>
         <title>Golf Improvement Quiz - Find Your Weaknesses | MyBirdieBoard</title>
         <meta name="description" content="Take our quick quiz to identify what's holding your golf game back and get personalized recommendations for improvement." />
         <link rel="canonical" href="https://mybirdieboard.com/quiz" />
@@ -47,7 +47,7 @@ export default function Quiz() {
             ]
           })}
         </script>
-      </Helmet>
+      </Head>
       
       <div className="min-h-screen flex flex-col"
         style={{
