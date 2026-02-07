@@ -1,4 +1,4 @@
-import { Helmet } from "react-helmet-async";
+import { Head } from "vite-react-ssg";
 import { useLocation } from "react-router-dom";
 import { SITE_CONFIG } from "@/lib/seo";
 
@@ -34,7 +34,7 @@ export const SEOHead = ({
   const canonicalUrl = `${SITE_CONFIG.url}${normalizedPath}`;
 
   return (
-    <Helmet>
+    <Head>
       <title>{title}</title>
       <meta name="description" content={description} />
       <link rel="canonical" href={canonicalUrl} />
@@ -60,6 +60,6 @@ export const SEOHead = ({
       <meta name="twitter:image:alt" content={title} />
 
       {children}
-    </Helmet>
+    </Head>
   );
 };
