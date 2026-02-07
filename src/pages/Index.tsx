@@ -3,7 +3,7 @@ import { MainContent } from "@/components/MainContent";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { SEOHead } from "@/components/SEOHead";
 import { SocialFooter } from "@/components/SocialFooter";
 import { SignUpDialog } from "@/components/SignUpDialog";
@@ -11,9 +11,18 @@ import { UserReviews } from "@/components/UserReviews";
 import { GolfResourcesSection } from "@/components/GolfResourcesSection";
 import { useIsMobile } from "@/hooks/use-mobile";
 const Index = () => {
+  const location = useLocation();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showSignupDialog, setShowSignupDialog] = useState(false);
   const isMobile = useIsMobile();
+
+  // When SSG fallback serves the homepage HTML for a different route (e.g. /admin),
+  // force a full reload so the client-side router picks up the correct route.
+  useEffect(() => {
+    if (typeof window !== 'undefined' && location.pathname !== '/') {
+      window.location.reload();
+    }
+  }, []);
   useEffect(() => {
     // Track page view in Meta Pixel when component mounts
     if (typeof window !== "undefined" && window.fbq) {
