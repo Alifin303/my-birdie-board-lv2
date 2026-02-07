@@ -1,4 +1,4 @@
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,25 +7,15 @@ import { ChevronLeft } from "lucide-react";
 const BestGolfClubsBeginners = () => {
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>Best Golf Clubs for Beginners 2025 - Complete Buying Guide | MyBirdieBoard</title>
-        <meta name="description" content="Discover the best golf clubs for beginners in 2025. Expert recommendations on drivers, irons, putters, and complete sets to start your golf journey right." />
-        <meta name="keywords" content="best golf clubs for beginners, beginner golf clubs, golf equipment, golf club sets, starter golf clubs, best drivers for beginners" />
-        <link rel="canonical" href="https://mybirdieboard.com/blog/best-golf-clubs-for-beginners" />
-        
-        {/* Open Graph */}
-        <meta property="og:title" content="Best Golf Clubs for Beginners 2025 - Complete Buying Guide" />
-        <meta property="og:description" content="Expert recommendations on the best golf clubs for beginners. Find the perfect starter set to begin your golf journey." />
-        <meta property="og:url" content="https://mybirdieboard.com/blog/best-golf-clubs-for-beginners" />
-        <meta property="og:type" content="article" />
+      <SEOHead
+        title="Best Golf Clubs for Beginners 2025 - Complete Buying Guide | MyBirdieBoard"
+        description="Discover the best golf clubs for beginners in 2025. Expert recommendations on drivers, irons, putters, and complete sets to start your golf journey right."
+        keywords="best golf clubs for beginners, beginner golf clubs, golf equipment, golf club sets, starter golf clubs, best drivers for beginners"
+        ogType="article"
+        lastModified="2026-01-24T10:00:00Z"
+      >
         <meta property="article:published_time" content="2025-01-20T10:00:00Z" />
-        <meta property="article:modified_time" content="2026-01-24T10:00:00Z" />
-        
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Best Golf Clubs for Beginners 2025" />
-        <meta name="twitter:description" content="Expert recommendations on the best golf clubs for beginners." />
-      </Helmet>
+      </SEOHead>
 
       <article className="container mx-auto px-4 py-8 max-w-4xl">
         <Link to="/blog" className="inline-flex items-center text-primary hover:underline mb-6">

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { SignUpDialog } from "@/components/SignUpDialog";
 import { LoginDialog } from "@/components/LoginDialog";
 import { UserPlus } from "lucide-react";
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "@/components/SEOHead";
 const About = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showSignupDialog, setShowSignupDialog] = useState(false);
@@ -13,65 +13,31 @@ const About = () => {
   };
   return (
     <>
-      <Helmet>
-        {/* Title <60 chars, Description <160 chars */}
-        <title>About Us - Golf Score Tracking App | MyBirdieBoard</title>
-        <meta name="description" content="MyBirdieBoard is a distraction-free golf score tracker. Log rounds after you play, track handicap, and compete on course leaderboards." />
-        <meta name="keywords" content="golf score tracking, golf analytics, golf performance tracking, golf handicap, golf statistics tracker" />
-        <link rel="canonical" href="https://mybirdieboard.com/about" />
-        
-        {/* Open Graph meta tags */}
-        <meta property="og:title" content="About MyBirdieBoard - Leading Golf Score Tracking Platform" />
-        <meta property="og:description" content="Learn about MyBirdieBoard's golf score tracking, performance analytics, handicap calculator, and course leaderboards." />
-        <meta property="og:url" content="https://mybirdieboard.com/about" />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://mybirdieboard.com/og-image.png" />
-        <meta property="og:image:alt" content="MyBirdieBoard - Golf Score Tracking & Analytics Platform" />
-        
-        {/* Twitter Card meta tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="About MyBirdieBoard - Golf Score Tracking Platform" />
-        <meta name="twitter:description" content="Digital golf journal for tracking scores, calculating handicaps, and competing on course leaderboards." />
-        <meta name="twitter:image" content="https://mybirdieboard.com/og-image.png" />
-        <meta name="twitter:image:alt" content="MyBirdieBoard About Page" />
-        
-        {/* Breadcrumb Schema */}
+      <SEOHead
+        title="About Us - Golf Score Tracking App | MyBirdieBoard"
+        description="MyBirdieBoard is a distraction-free golf score tracker. Log rounds after you play, track handicap, and compete on course leaderboards."
+        keywords="golf score tracking, golf analytics, golf performance tracking, golf handicap, golf statistics tracker"
+      >
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             "itemListElement": [
-              {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": "https://mybirdieboard.com/"
-              },
-              {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "About",
-                "item": "https://mybirdieboard.com/about"
-              }
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://mybirdieboard.com/" },
+              { "@type": "ListItem", "position": 2, "name": "About", "item": "https://mybirdieboard.com/about" }
             ]
           })}
         </script>
-        
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "AboutPage",
             "name": "About MyBirdieBoard",
-            "description": "MyBirdieBoard is the leading golf score tracking and analytics platform, helping golfers improve through data-driven insights, accurate handicap calculations, and performance tracking.",
-            "keywords": "golf score tracking, golf analytics, golf performance tracking, golf handicap calculator, golf statistics tracker, course leaderboards",
-            "mainEntity": {
-              "@type": "Organization",
-              "name": "MyBirdieBoard",
-              "description": "Leading provider of golf score tracking, analytics, and performance improvement tools for golfers worldwide."
-            }
+            "description": "MyBirdieBoard is the leading golf score tracking and analytics platform.",
+            "mainEntity": { "@type": "Organization", "name": "MyBirdieBoard" }
           })}
         </script>
-      </Helmet>
+      </SEOHead>
       <div className="min-h-screen bg-cover bg-center bg-fixed bg-no-repeat relative" style={{
       backgroundImage: `url('https://www.suttongreengc.co.uk/wp-content/uploads/2023/02/membership-featured.jpg')`,
       backgroundColor: "#2C4A3B" // Fallback color if image fails to load

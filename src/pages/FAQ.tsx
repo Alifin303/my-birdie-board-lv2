@@ -1,6 +1,6 @@
 
 import React, { useEffect } from "react";
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -75,40 +75,25 @@ export default function FAQ() {
 
   return (
     <>
-      <Helmet>
-        {/* Title <60 chars, Description <160 chars */}
-        <title>Golf Score Tracking FAQ | MyBirdieBoard</title>
-        <meta name="description" content="Answers to common golf tracking questions. Learn about handicaps, Stableford scoring, subscriptions, and how to add courses." />
-        <meta name="keywords" content="how to calculate golf handicap step by step, best golf score tracking app for beginners, golf score tracking FAQ, golf analytics questions, golf handicap calculator help, golf statistics tracker guide, course leaderboards FAQ" />
-        <link rel="canonical" href="https://mybirdieboard.com/faq" />
-        
-        {/* Enhanced FAQ Schema Markup */}
+      <SEOHead
+        title="Golf Score Tracking FAQ | MyBirdieBoard"
+        description="Answers to common golf tracking questions. Learn about handicaps, Stableford scoring, subscriptions, and how to add courses."
+        keywords="how to calculate golf handicap step by step, best golf score tracking app for beginners, golf score tracking FAQ, golf analytics questions, golf handicap calculator help, golf statistics tracker guide, course leaderboards FAQ"
+      >
         <script type="application/ld+json">
           {JSON.stringify(generateFAQStructuredData())}
         </script>
-
-        {/* Additional Breadcrumb Schema */}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             "itemListElement": [
-              {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": "https://mybirdieboard.com/"
-              },
-              {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "FAQ",
-                "item": "https://mybirdieboard.com/faq"
-              }
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://mybirdieboard.com/" },
+              { "@type": "ListItem", "position": 2, "name": "FAQ", "item": "https://mybirdieboard.com/faq" }
             ]
           })}
         </script>
-      </Helmet>
+      </SEOHead>
       
       <div className="min-h-screen bg-background">
         <header className="bg-primary text-white py-12">
