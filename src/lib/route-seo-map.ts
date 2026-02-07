@@ -193,6 +193,9 @@ export function generateMetaTagsHTML(routePath: string): string {
  * Strip any existing SEO tags from the HTML that would conflict with
  * route-specific tags, then inject the correct ones.
  * This ensures there are never duplicate <title>, description, or OG tags.
+ *
+ * IMPORTANT: jsdom (used by vite-react-ssg) may reorder HTML attributes,
+ * so all regex patterns must be attribute-order-independent.
  */
 export function replaceMetaTagsInHTML(routePath: string, html: string): string {
   const metaTags = generateMetaTagsHTML(routePath);
@@ -201,31 +204,39 @@ export function replaceMetaTagsInHTML(routePath: string, html: string): string {
   let cleaned = html;
 
   // Remove any existing <title>...</title>
-  cleaned = cleaned.replace(/<title>[^<]*<\/title>/g, '');
+  cleaned = cleaned.replace(/<title>[^<]*<\/title>/gi, '');
 
   // Remove existing meta tags we control (name="...")
+  // Match <meta ...name="X"...> regardless of attribute order
   const metaNamesToRemove = [
-    'description', 'keywords', 'twitter:card', 'twitter:title',
-    'twitter:description', 'twitter:image', 'twitter:image:alt',
+    'description', 'keywords', 'twitter\\:card', 'twitter\\:title',
+    'twitter\\:description', 'twitter\\:image', 'twitter\\:image\\:alt',
   ];
   for (const name of metaNamesToRemove) {
-    cleaned = cleaned.replace(new RegExp(`<meta\\s+name=["']${name}["'][^>]*>`, 'gi'), '');
+    cleaned = cleaned.replace(
+      new RegExp(`<meta\\s[^>]*name=["']${name}["'][^>]*\\/?>`, 'gi'),
+      ''
+    );
   }
 
   // Remove existing OG property tags we control
+  // Match <meta ...property="og:X"...> regardless of attribute order
   const ogPropsToRemove = [
-    'og:title', 'og:description', 'og:url', 'og:type',
-    'og:image', 'og:image:alt', 'article:modified_time',
+    'og\\:title', 'og\\:description', 'og\\:url', 'og\\:type',
+    'og\\:image', 'og\\:image\\:alt', 'article\\:modified_time',
   ];
   for (const prop of ogPropsToRemove) {
-    cleaned = cleaned.replace(new RegExp(`<meta\\s+property=["']${prop}["'][^>]*>`, 'gi'), '');
+    cleaned = cleaned.replace(
+      new RegExp(`<meta\\s[^>]*property=["']${prop}["'][^>]*\\/?>`, 'gi'),
+      ''
+    );
   }
 
-  // Remove existing canonical link
-  cleaned = cleaned.replace(/<link\s+rel=["']canonical["'][^>]*>/gi, '');
+  // Remove existing canonical link (attribute-order-independent)
+  cleaned = cleaned.replace(/<link\s[^>]*rel=["']canonical["'][^>]*\/?>/gi, '');
 
   // Inject route-specific tags after <head>
-  cleaned = cleaned.replace('<head>', `<head>\n    ${metaTags}`);
+  cleaned = cleaned.replace(/<head[^>]*>/i, (match) => `${match}\n    ${metaTags}`);
 
   return cleaned;
 }
