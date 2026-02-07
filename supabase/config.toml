@@ -7,3 +7,6 @@ project_id = "rbhzesocmhazynkfyhst"
 [functions]
 [functions.stripe-webhook]
 verify_jwt = false
+
+[functions.golf-course-api]
+verify_jwt = false

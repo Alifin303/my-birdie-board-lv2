@@ -97,9 +97,7 @@ This may be due to CORS restrictions, API unavailability, or network issues.`);
       const diagInfo = [
         `Search query: "${searchQuery}"`,
         `Search performed: ${new Date().toISOString()}`,
-        `API URL: ${API_CONFIG.API_URL}/search`,
-        `Request params: search_query=${searchQuery}`,
-        `Request headers: Authorization: Key ${API_CONFIG.API_KEY}`,
+        `Endpoint: Edge Function (golf-course-api)`,
         `Matching courses found: ${results.length}`,
       ];
       
@@ -136,10 +134,8 @@ This may be due to CORS restrictions, API unavailability, or network issues.`);
       setDiagnosticInfo(`Failed API request details:
 - Time: ${new Date().toISOString()}
 - Search query: "${searchQuery}"
-- API URL: ${API_CONFIG.API_URL}/search
-- Request headers: Authorization: Key ${API_CONFIG.API_KEY}
-- Error: ${err.message}
-- Current endpoint: ${API_CONFIG.API_URL}/search`);
+- Endpoint: Edge Function (golf-course-api)
+- Error: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -166,8 +162,7 @@ This may be due to CORS restrictions, API unavailability, or network issues.`);
       setDiagnosticInfo(`Course details fetch:
 - Time: ${new Date().toISOString()}
 - Course ID: ${courseId}
-- API URL: ${API_CONFIG.API_URL}/courses/${courseId}
-- Request headers: Authorization: Key ${API_CONFIG.API_KEY}
+- Endpoint: Edge Function (golf-course-api)
 - Response received successfully`);
       
       if (!details) {
@@ -194,8 +189,7 @@ This may be due to CORS restrictions, API unavailability, or network issues.`);
       setDiagnosticInfo(`Failed course details request:
 - Time: ${new Date().toISOString()}
 - Course ID: ${courseId}
-- API URL: ${API_CONFIG.API_URL}/courses/${courseId}
-- Request headers: Authorization: Key ${API_CONFIG.API_KEY}
+- Endpoint: Edge Function (golf-course-api)
 - Error: ${err.message}`);
     } finally {
       setIsLoading(false);
@@ -231,8 +225,8 @@ This may be due to CORS restrictions, API unavailability, or network issues.`);
           </CardHeader>
           <CardContent>
             <div className="text-sm text-muted-foreground mb-4">
-              <p>API URL: {API_CONFIG.API_URL}</p>
-              <p>Authorization Header: <code>Authorization: Key {API_CONFIG.API_KEY.substring(0, 4)}...{API_CONFIG.API_KEY.substring(API_CONFIG.API_KEY.length - 4)}</code></p>
+              <p>Endpoint: Edge Function Proxy (golf-course-api)</p>
+              <p>API Key: Stored securely as server-side secret</p>
             </div>
             <Button 
               onClick={checkApiStatus} 
@@ -495,11 +489,11 @@ This may be due to CORS restrictions, API unavailability, or network issues.`);
       <div className="mt-6 p-4 border rounded-md bg-muted/30">
         <h3 className="font-medium mb-2">API Integration Notes:</h3>
         <ul className="list-disc pl-5 space-y-1 text-sm">
-          <li>API Base URL: {API_CONFIG.API_URL}</li>
-          <li>Auth Header Format: <code>Authorization: Key {API_CONFIG.API_KEY.substring(0, 4)}...</code></li>
-          <li>Search Endpoint: /search with search_query parameter</li>
-          <li>Course Details Endpoint: /courses/{'{id}'}</li>
-          <li>Health Endpoint: /healthcheck</li>
+          <li>Requests proxied through Edge Function (API key kept server-side)</li>
+          <li>Edge Function URL: {API_CONFIG.EDGE_FUNCTION_URL}</li>
+          <li>Search: ?action=search&q=query</li>
+          <li>Course Details: ?action=course&id=courseId</li>
+          <li>Health: ?action=health</li>
         </ul>
       </div>
     </div>
