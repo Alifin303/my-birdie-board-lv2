@@ -2,9 +2,9 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import { generateMetaTagsHTML } from "./src/lib/route-seo-map";
 
 // List of all public routes to pre-render as static HTML
-// These routes will have their full content rendered into HTML at build time
 const prerenderRoutes = [
   '/',
   '/about',
@@ -45,25 +45,34 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // SSR configuration - exclude external CDN scripts from server bundle
+  // SSR configuration
   ssr: {
     noExternal: [],
     external: ['https://cdn.gpteng.co/gptengineer.js'],
   },
   // SSG configuration for vite-react-ssg
-  // IMPORTANT: Run with "vite-react-ssg build" not "vite build"
   ssgOptions: {
-    // Routes to pre-render at build time
     includedRoutes: () => prerenderRoutes,
-    // Script loading strategy
     script: 'async',
-    // Output as /about/index.html style
     dirStyle: 'nested',
-    // Mock browser globals during SSG
     mock: true,
-    // Formatting for readable HTML output
     formatting: 'minify',
+
+    /**
+     * Post-render hook: inject route-specific SEO meta tags into <head>.
+     *
+     * react-helmet-async has a dual-package hazard (CJS vs ESM) that prevents
+     * the Head/Helmet component from sharing context with HelmetProvider during SSG.
+     * This hook bypasses that by injecting meta tags directly into the HTML string
+     * after the page is rendered, ensuring each route gets its own unique
+     * <title>, <meta description>, <link rel="canonical">, and OG tags.
+     */
+    onPageRendered(route: string, html: string) {
+      const metaTags = generateMetaTagsHTML(route);
+      if (!metaTags) return html;
+
+      // Inject after <head> opening tag
+      return html.replace('<head>', `<head>\n    ${metaTags}`);
+    },
   },
-  // Build optimization - note: manualChunks removed as it conflicts with SSR build
-  // vite-react-ssg handles chunking automatically
 }));
