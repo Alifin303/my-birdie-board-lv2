@@ -155,10 +155,12 @@ export const routeSEOMap: Record<string, RouteSEO> = {
  * Used by the SSG `onPageRendered` hook to inject into <head>.
  */
 export function generateMetaTagsHTML(routePath: string): string {
-  const seo = routeSEOMap[routePath];
+  // Normalize: strip trailing slashes (except root) before lookup
+  const normalized = routePath === '/' ? '/' : routePath.replace(/\/+$/, '');
+  const seo = routeSEOMap[normalized];
   if (!seo) return '';
 
-  const normalizedPath = routePath === '/' ? '/' : routePath.replace(/\/+$/, '');
+  const normalizedPath = normalized === '/' ? '/' : normalized.replace(/\/+$/, '');
   const canonicalUrl = `${SITE_URL}${normalizedPath}`;
   const ogType = seo.ogType || 'website';
   const ogImage = seo.ogImage || OG_IMAGE;
