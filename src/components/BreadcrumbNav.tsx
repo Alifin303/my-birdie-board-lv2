@@ -13,6 +13,15 @@ export const BreadcrumbNav = () => {
   const location = useLocation();
   const pathnames = location.pathname.split('/').filter((x) => x);
 
+  // Map breadcrumb segments to actual routes when they differ
+  const getRouteOverride = (segments: string[]): string | null => {
+    const path = '/' + segments.join('/');
+    const overrides: { [key: string]: string } = {
+      '/guides': '/blog',
+    };
+    return overrides[path] || null;
+  };
+
   const getPageTitle = (path: string) => {
     const titles: { [key: string]: string } = {
       'guides': 'Golf Guides',
@@ -112,7 +121,8 @@ export const BreadcrumbNav = () => {
             </BreadcrumbItem>
             
             {pathnames.map((name, index) => {
-              const routeTo = `/${pathnames.slice(0, index + 1).join('/')}`;
+              const segments = pathnames.slice(0, index + 1);
+              const routeTo = getRouteOverride(segments) || `/${segments.join('/')}`;
               const isLast = index === pathnames.length - 1;
               const pageTitle = getPageTitle(name);
               
