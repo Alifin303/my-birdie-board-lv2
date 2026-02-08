@@ -89,16 +89,20 @@ const Index = () => {
           "@type": "FAQPage",
           "mainEntity": [{
             "@type": "Question",
-            "name": "How do I track my golf scores with MyBirdieBoard?",
-            "acceptedAnswer": { "@type": "Answer", "text": "After you finish your round, simply log in to MyBirdieBoard and add your scores in seconds." }
+            "name": "Can I track golf scores without using my phone during a round?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes — MyBirdieBoard is designed specifically for post-round score entry. Play your round distraction-free, then log your scores in seconds when you're done. No need to carry your phone on the course." }
           }, {
             "@type": "Question",
-            "name": "How does MyBirdieBoard calculate my golf handicap?",
-            "acceptedAnswer": { "@type": "Answer", "text": "MyBirdieBoard automatically calculates your handicap index using the World Handicap System (WHS) formula." }
+            "name": "How do I calculate my golf handicap?",
+            "acceptedAnswer": { "@type": "Answer", "text": "MyBirdieBoard calculates your handicap automatically using the World Handicap System (WHS) formula. Just add your rounds and your handicap index updates after each one." }
           }, {
             "@type": "Question",
-            "name": "Is MyBirdieBoard free to use?",
-            "acceptedAnswer": { "@type": "Answer", "text": "Yes, you can start tracking your golf rounds with MyBirdieBoard for free. Premium features are available for £2.99." }
+            "name": "What is the best way to track golf performance over time?",
+            "acceptedAnswer": { "@type": "Answer", "text": "The best approach is consistent post-round tracking. MyBirdieBoard stores every round, visualizes scoring trends, and highlights where you're gaining or losing strokes — giving you a clear picture of your progress." }
+          }, {
+            "@type": "Question",
+            "name": "Is MyBirdieBoard a golf score tracking app?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes — MyBirdieBoard is a golf score tracker, handicap calculator, and performance analytics tool built for golfers who prefer to focus on the game during their round and record everything afterward." }
           }]
         })}
         </script>
