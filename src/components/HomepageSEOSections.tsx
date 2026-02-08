@@ -33,7 +33,7 @@ export const HomepageSEOSections = () => {
       <section aria-labelledby="features-seo-heading" className="py-12 bg-background">
         <div className="container mx-auto px-4 max-w-4xl">
           <h2 id="features-seo-heading" className="text-3xl font-bold text-center mb-8">
-            Everything You Need in a Golf Score Tracking App
+            Everything You Need in a Golf Score Tracker
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="p-6 bg-muted/30 rounded-lg">
@@ -43,6 +43,10 @@ export const HomepageSEOSections = () => {
               </div>
               <p className="text-muted-foreground">
                 Log 9 or 18 hole rounds in seconds and build a complete history of your golf performance.
+                Not sure how to keep accurate records? Read our guide on{' '}
+                <Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline">
+                  how to track golf scores properly
+                </Link>.
               </p>
             </div>
             <div className="p-6 bg-muted/30 rounded-lg">
@@ -109,8 +113,20 @@ export const HomepageSEOSections = () => {
         </div>
       </section>
 
-      {/* Section 7 – FAQ for rich results */}
-      <section aria-labelledby="faq-seo-heading" className="py-12 bg-background">
+      {/* Section – SEO block before FAQ */}
+      <section aria-labelledby="serious-golfers-heading" className="py-12 bg-background">
+        <div className="container mx-auto px-4 max-w-3xl text-center">
+          <h2 id="serious-golfers-heading" className="text-3xl font-bold mb-4">
+            A Golf Score Tracking App Designed for Serious Golfers
+          </h2>
+          <p className="text-muted-foreground text-lg leading-relaxed">
+            Unlike GPS or on-course apps, MyBirdieBoard is a golf score tracking app built for reflection and improvement after the round. Log your scores, monitor your handicap, and build a lifelong archive of your golf journey without distractions during play.
+          </p>
+        </div>
+      </section>
+
+      {/* FAQ for rich results */}
+      <section aria-labelledby="faq-seo-heading" className="py-12 bg-muted/20">
         <div className="container mx-auto px-4 max-w-3xl">
           <h2 id="faq-seo-heading" className="text-3xl font-bold text-center mb-8">
             Golf Score Tracking FAQs
@@ -134,7 +150,11 @@ export const HomepageSEOSections = () => {
             <div>
               <h3 className="text-lg font-semibold mb-2">What is the best way to track golf performance over time?</h3>
               <p className="text-muted-foreground">
-                The best approach is consistent post-round tracking. MyBirdieBoard stores every round, visualizes scoring trends, and highlights where you're gaining or losing strokes — giving you a clear picture of your progress.
+                The best approach is consistent post-round tracking. MyBirdieBoard stores every round, visualizes scoring trends, and highlights where you're{' '}
+                <Link to="/guides/golf-performance-analytics" className="text-primary hover:underline">
+                  gaining or losing strokes
+                </Link>{' '}
+                — giving you a clear picture of your progress.
               </p>
             </div>
             <div>
