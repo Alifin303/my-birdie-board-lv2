@@ -119,10 +119,10 @@ export const MainContent = ({
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center text-left md:text-left px-[16px] py-px my-0">
         <div className="max-w-5xl animate-fade-in mb-4 px-4 mx-auto">
           <h2 id="hero-heading" className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2 drop-shadow-lg my-[50px] text-center md:text-4xl">
-            Every Round Tells a Story. Don't Let Yours Be Forgotten.
+            Golf Score Tracker & Handicap Calculator Without On-Course Distractions
           </h2>
           <p className="text-lg sm:text-xl text-white/90 text-center mb-4 drop-shadow-md md:text-2xl">
-            A distraction-free golf score tracker that saves every round, tracks your handicap, and shows your progress over time.
+            A distraction-free golf score tracking app that lets you log rounds after you play, track your handicap, and see your progress over time.
           </p>
           <div className="bg-black/35 backdrop-blur-sm px-4 py-4 rounded-lg">
             <h3 className="text-base sm:text-lg text-white/95 font-medium mb-3 drop-shadow-md my-0 text-center md:text-2xl">

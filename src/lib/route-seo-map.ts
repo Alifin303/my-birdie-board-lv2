@@ -24,9 +24,9 @@ interface RouteSEO {
 export const routeSEOMap: Record<string, RouteSEO> = {
   // ===== Core pages =====
   '/': {
-    title: 'Golf Score Tracker & Handicap Calculator | MyBirdieBoard',
-    description: 'Track golf scores, calculate handicap, analyze performance. Free to start with 4 rounds. Join golfers improving their game with MyBirdieBoard.',
-    keywords: 'golf score tracking, golf handicap calculator, golf performance analytics, course leaderboards, digital golf scorecard',
+    title: 'Golf Score Tracker & Handicap App | MyBirdieBoard',
+    description: 'Track golf scores after your round, calculate your handicap, and analyze performance over time with MyBirdieBoard\'s distraction-free golf tracker.',
+    keywords: 'golf score tracking, golf handicap calculator, golf score tracker, golf performance analytics, course leaderboards, digital golf scorecard, golf logbook',
   },
   '/about': {
     title: 'About Us - Golf Score Tracking App | MyBirdieBoard',
