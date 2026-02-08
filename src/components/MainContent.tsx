@@ -129,7 +129,7 @@ export const MainContent = ({
               Track your scores after you play — no phone on the course, no mid-round distractions. Just pure golf, and a permanent digital record of your journey, progress, and legacy.
             </h3>
             <p className="text-xs text-white/80 mb-6 italic text-center sm:text-lg">
-              Trusted by 1,000+ golfers already building their personal golf archive and rising up their course leaderboards.
+              Trusted by 1,000+ golfers tracking their progress the distraction-free way.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 mb-4 justify-center items-center">
@@ -180,7 +180,7 @@ export const MainContent = ({
       </section>
       
       <section aria-labelledby="features-heading" className="w-full max-w-5xl mx-auto px-4 pb-8">
-        <h2 id="features-heading" className="sr-only">Key Features</h2>
+        <h2 id="features-heading" className="text-2xl sm:text-3xl font-bold text-center text-white mb-4 drop-shadow-md">Key Features of MyBirdieBoard</h2>
         
         <div className="backdrop-blur-sm rounded-xl p-4 shadow-lg bg-black/35">
           <div className="flex flex-col lg:flex-row gap-6 justify-between">
