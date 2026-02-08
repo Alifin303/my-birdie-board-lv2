@@ -136,6 +136,48 @@ serve(async (req) => {
   <changefreq>monthly</changefreq>
 </url>
 
+<url>
+  <loc>https://mybirdieboard.com/blog/how-to-break-100</loc>
+  <lastmod>${currentDate}</lastmod>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+
+<url>
+  <loc>https://mybirdieboard.com/blog/match-play-scoring</loc>
+  <lastmod>${currentDate}</lastmod>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+
+<url>
+  <loc>https://mybirdieboard.com/blog/putts-per-round</loc>
+  <lastmod>${currentDate}</lastmod>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+
+<url>
+  <loc>https://mybirdieboard.com/blog/how-to-calculate-golf-handicap</loc>
+  <lastmod>${currentDate}</lastmod>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+
+<url>
+  <loc>https://mybirdieboard.com/blog/golf-stats-to-track</loc>
+  <lastmod>${currentDate}</lastmod>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+
+<url>
+  <loc>https://mybirdieboard.com/blog/playing-without-phone</loc>
+  <lastmod>${currentDate}</lastmod>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+
 <!-- SEO-focused guide pages -->
 <url>
   <loc>https://mybirdieboard.com/guides/how-to-track-golf-scores</loc>
