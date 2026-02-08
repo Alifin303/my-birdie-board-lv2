@@ -66,6 +66,15 @@ export default function GolfHandicapBeginner() {
       >
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
         <script type="application/ld+json">{JSON.stringify(faqData)}</script>
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://mybirdieboard.com/" },
+            { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://mybirdieboard.com/blog" },
+            { "@type": "ListItem", "position": 3, "name": "How to Calculate Golf Handicap", "item": "https://mybirdieboard.com/blog/how-to-calculate-golf-handicap" }
+          ]
+        })}</script>
       </SEOHead>
 
       <div className="min-h-screen bg-background">

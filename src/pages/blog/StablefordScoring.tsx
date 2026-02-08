@@ -52,6 +52,28 @@ export default function StablefordScoring() {
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
         </script>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://mybirdieboard.com/" },
+              { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://mybirdieboard.com/blog" },
+              { "@type": "ListItem", "position": 3, "name": "Stableford Scoring", "item": "https://mybirdieboard.com/blog/stableford-scoring" }
+            ]
+          })}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+              { "@type": "Question", "name": "What is Stableford scoring in golf?", "acceptedAnswer": { "@type": "Answer", "text": "Stableford is a points-based scoring system where you earn points based on your score relative to par on each hole. Par earns 2 points, birdie 3, eagle 4, bogey 1, and double bogey or worse 0. Higher points is better, unlike stroke play." } },
+              { "@type": "Question", "name": "What is a good Stableford score?", "acceptedAnswer": { "@type": "Answer", "text": "For 18 holes, 36 points is considered playing to your handicap. Above 36 is a strong round. 30-35 points is solid, 24-29 is average, and below 24 is a tough day." } },
+              { "@type": "Question", "name": "What is the difference between gross and net Stableford?", "acceptedAnswer": { "@type": "Answer", "text": "Gross Stableford uses your actual score compared to par. Net Stableford applies handicap strokes to specific holes based on the stroke index, levelling the playing field for players of different abilities." } }
+            ]
+          })}
+        </script>
       </SEOHead>
 
       <div className="min-h-screen bg-background">

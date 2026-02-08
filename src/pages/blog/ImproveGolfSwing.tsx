@@ -3,6 +3,39 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "How to Improve Your Golf Swing - 10 Proven Tips for Better Performance",
+  "description": "Fix common swing faults like slicing and hooking with 10 expert tips. Master grip, posture, rotation, and follow-through to hit more fairways and lower scores.",
+  "image": "https://mybirdieboard.com/og-image.png",
+  "author": { "@type": "Organization", "name": "MyBirdieBoard" },
+  "publisher": { "@type": "Organization", "name": "MyBirdieBoard", "logo": { "@type": "ImageObject", "url": "https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" } },
+  "datePublished": "2025-01-20T10:00:00Z",
+  "dateModified": "2026-01-24T10:00:00Z",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://mybirdieboard.com/blog/improve-your-golf-swing" }
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://mybirdieboard.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://mybirdieboard.com/blog" },
+    { "@type": "ListItem", "position": 3, "name": "Improve Your Golf Swing", "item": "https://mybirdieboard.com/blog/improve-your-golf-swing" }
+  ]
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "How long does it take to improve your golf swing?", "acceptedAnswer": { "@type": "Answer", "text": "Most golfers see noticeable improvement within 4-8 weeks of focused practice. However, building a truly consistent swing takes 3-6 months of regular practice with proper fundamentals. Working with a PGA professional can accelerate this timeline significantly." } },
+    { "@type": "Question", "name": "What is the most common golf swing mistake?", "acceptedAnswer": { "@type": "Answer", "text": "The most common swing mistake is an over-the-top move, where the club swings on an outside-in path. This causes slices and pulled shots. It's usually caused by starting the downswing with the arms instead of the lower body." } },
+    { "@type": "Question", "name": "Should I get golf lessons to improve my swing?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, even a few lessons from a qualified PGA professional can save you months of frustration. A pro can identify swing faults that are invisible to you and provide drills tailored to your specific issues." } }
+  ]
+};
+
 const ImproveGolfSwing = () => {
   return (
     <div className="min-h-screen bg-background">
@@ -14,6 +47,9 @@ const ImproveGolfSwing = () => {
         lastModified="2026-01-24T10:00:00Z"
       >
         <meta property="article:published_time" content="2025-01-20T10:00:00Z" />
+        <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
+        <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
+        <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
       </SEOHead>
 
       <article className="container mx-auto px-4 py-8 max-w-4xl">
@@ -100,7 +136,7 @@ const ImproveGolfSwing = () => {
           <div className="bg-primary/5 p-6 rounded-lg my-8">
             <h3 className="text-xl font-semibold mb-3">Track Your Improvement</h3>
             <p className="mb-4">
-              The best way to see if your swing changes are working is to track your performance on the course. MyBirdieBoard helps you monitor your scores, fairways hit, greens in regulation, and putting stats to identify which areas of your game are improving.
+              The best way to see if your swing changes are working is to <Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline">track your golf scores</Link> on the course. MyBirdieBoard helps you monitor your scores, <Link to="/guides/golf-statistics-tracker" className="text-primary hover:underline">fairways hit, greens in regulation</Link>, and putting stats to identify which areas of your game are improving.
             </p>
           </div>
 
@@ -117,7 +153,7 @@ const ImproveGolfSwing = () => {
 
           <h2>When to Get Professional Help</h2>
           <p>
-            While these tips will help most golfers improve, nothing beats personalized instruction from a qualified PGA professional. Consider booking a lesson if you're struggling with persistent issues or want to accelerate your improvement.
+            While these tips will help most golfers improve, nothing beats personalized instruction from a qualified PGA professional. Consider <Link to="/golf-lessons" className="text-primary hover:underline">booking a golf lesson</Link> if you're struggling with persistent issues or want to accelerate your improvement.
           </p>
 
           <div className="mt-8 p-6 bg-primary/5 rounded-lg">

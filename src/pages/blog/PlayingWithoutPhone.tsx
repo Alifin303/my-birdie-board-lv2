@@ -63,6 +63,15 @@ export default function PlayingWithoutPhone() {
       >
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
         <script type="application/ld+json">{JSON.stringify(faqData)}</script>
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://mybirdieboard.com/" },
+            { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://mybirdieboard.com/blog" },
+            { "@type": "ListItem", "position": 3, "name": "Playing Golf Without Your Phone", "item": "https://mybirdieboard.com/blog/playing-without-phone" }
+          ]
+        })}</script>
       </SEOHead>
 
       <div className="min-h-screen bg-background">

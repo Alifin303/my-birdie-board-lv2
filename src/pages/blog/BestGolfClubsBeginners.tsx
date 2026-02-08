@@ -4,6 +4,39 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronLeft } from "lucide-react";
 
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Best Golf Clubs for Beginners 2025 - Complete Buying Guide",
+  "description": "Discover the best golf clubs for beginners in 2025. Expert recommendations on drivers, irons, putters, and complete sets to start your golf journey right.",
+  "image": "https://mybirdieboard.com/og-image.png",
+  "author": { "@type": "Organization", "name": "MyBirdieBoard" },
+  "publisher": { "@type": "Organization", "name": "MyBirdieBoard", "logo": { "@type": "ImageObject", "url": "https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" } },
+  "datePublished": "2025-01-20T10:00:00Z",
+  "dateModified": "2026-01-24T10:00:00Z",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://mybirdieboard.com/blog/best-golf-clubs-for-beginners" }
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://mybirdieboard.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://mybirdieboard.com/blog" },
+    { "@type": "ListItem", "position": 3, "name": "Best Golf Clubs for Beginners", "item": "https://mybirdieboard.com/blog/best-golf-clubs-for-beginners" }
+  ]
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "How many clubs should a beginner carry?", "acceptedAnswer": { "@type": "Answer", "text": "Beginners should start with 10-12 clubs. A driver, 3-wood, 5-hybrid, 6-9 irons, pitching wedge, sand wedge, and putter covers everything you need. You can carry up to 14 clubs under the Rules of Golf." } },
+    { "@type": "Question", "name": "Should beginners buy new or used golf clubs?", "acceptedAnswer": { "@type": "Answer", "text": "Used clubs are a great option for beginners. You can find quality sets that are 1-2 years old at 40-60% off retail. This lets you invest more in lessons while still getting forgiving, well-made equipment." } },
+    { "@type": "Question", "name": "When should I upgrade from beginner golf clubs?", "acceptedAnswer": { "@type": "Answer", "text": "Consider upgrading after at least one full season or when your handicap drops below 20. At that point, you'll have a consistent enough swing to benefit from custom fitting and more specialized equipment." } }
+  ]
+};
+
 const BestGolfClubsBeginners = () => {
   return (
     <div className="min-h-screen bg-background">
@@ -15,6 +48,9 @@ const BestGolfClubsBeginners = () => {
         lastModified="2026-01-24T10:00:00Z"
       >
         <meta property="article:published_time" content="2025-01-20T10:00:00Z" />
+        <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
+        <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
+        <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
       </SEOHead>
 
       <article className="container mx-auto px-4 py-8 max-w-4xl">
@@ -117,7 +153,7 @@ const BestGolfClubsBeginners = () => {
 
           <h2>Start Tracking Your Rounds</h2>
           <p>
-            Once you have your clubs, the best way to improve is to track your performance. MyBirdieBoard makes it easy to log your rounds, track which clubs you're hitting well, and identify areas for improvement.
+            Once you have your clubs, the best way to improve is to <Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline">track your golf scores</Link> consistently. MyBirdieBoard makes it easy to log your rounds, track which clubs you're hitting well, and identify areas for improvement. You can also use our <Link to="/guides/golf-handicap-calculator" className="text-primary hover:underline">handicap calculator</Link> to monitor your progress as you develop your game, or compare your setup with the <Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline">best golf score tracking apps</Link>.
           </p>
 
           <div className="mt-8 p-6 bg-primary/5 rounded-lg">
