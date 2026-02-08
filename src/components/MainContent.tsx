@@ -292,9 +292,12 @@ export const MainContent = ({
       {/* CTA Reinforcement Strip */}
       <section aria-labelledby="cta-heading" className="w-full py-6 sm:py-8 bg-black/40 backdrop-blur-sm mt-2 sm:mt-3">
         <div className="max-w-5xl mx-auto text-center px-4">
-          <h2 id="cta-heading" className="text-xl sm:text-2xl font-bold text-white mb-4">
-            Play with focus. Track with purpose. Improve with clarity.
+          <h2 id="cta-heading" className="text-xl sm:text-2xl font-bold text-white mb-2">
+            Start Tracking Your Golf Scores the Smarter Way
           </h2>
+          <p className="text-white/80 text-sm sm:text-base mb-4">
+            Join golfers using MyBirdieBoard as their go-to golf score tracker, handicap tracking tool, and performance history archive.
+          </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button size="lg" onClick={onStartSignup} data-id="cta_strip_start_free" aria-label="Start free with MyBirdieBoard" className="text-accent-foreground text-base px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground w-full sm:w-auto">
               <UserPlus className="mr-2 h-5 w-5 flex-shrink-0" aria-hidden="true" />
