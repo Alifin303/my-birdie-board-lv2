@@ -122,7 +122,7 @@ export const MainContent = ({
             Golf Score Tracker & Handicap Calculator Without On-Course Distractions
           </h2>
           <p className="text-lg sm:text-xl text-white/90 text-center mb-4 drop-shadow-md md:text-2xl">
-            A distraction-free golf score tracking app that lets you log rounds after you play, track your handicap, and see your progress over time.
+            MyBirdieBoard is a distraction-free golf score tracker and handicap calculator built for golfers who prefer to play without apps during their round. Add your scores after you finish, track your handicap automatically, and analyze your golf performance over time.
           </p>
           <div className="bg-black/35 backdrop-blur-sm px-4 py-4 rounded-lg">
             <h3 className="text-base sm:text-lg text-white/95 font-medium mb-3 drop-shadow-md my-0 text-center md:text-2xl">
@@ -172,6 +172,7 @@ export const MainContent = ({
         </h2>
         <div className="text-sm sm:text-base text-white/90 text-center mb-6 bg-black/35 backdrop-blur-sm px-4 py-3 rounded-lg md:text-lg space-y-3">
           <p>Golf is more than a game — it's a personal journey.</p>
+          <p>Keeping a complete history of your rounds is the best way to improve. MyBirdieBoard acts as your personal digital golf logbook, helping you track golf scores, monitor your handicap, and see long-term trends in your performance — all without using your phone on the course.</p>
           <p>Paper scorecards get lost. Most apps pull your attention away mid-round.</p>
           <p>MyBirdieBoard was built for golfers who want to stay present on the course — and still keep a powerful digital memory of every round once the day is done.</p>
         </div>
