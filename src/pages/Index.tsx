@@ -50,8 +50,8 @@ const Index = () => {
   const currentBackgroundImage = isMobile ? mobileBackgroundImageUrl : backgroundImageUrl;
   return <>
       <SEOHead
-        title="Golf Score Tracker & Handicap Calculator App | MyBirdieBoard"
-        description="Track your golf scores after the round, calculate your handicap automatically, and analyze performance over time with MyBirdieBoard — distraction-free golf tracking for golfers who love the game, not screens."
+        title="Golf Score Tracker & Handicap Tracker App | MyBirdieBoard"
+        description="Track golf scores after your round, calculate your handicap automatically, and see your performance improve over time. MyBirdieBoard is the distraction-free golf score tracker built for real golfers."
         keywords="golf score tracking, golf handicap calculator, golf score tracker, golf performance analytics, course leaderboards, digital golf scorecard, golf logbook"
       >
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -95,20 +95,16 @@ const Index = () => {
           "@type": "FAQPage",
           "mainEntity": [{
             "@type": "Question",
-            "name": "Can I track golf scores without using my phone during a round?",
-            "acceptedAnswer": { "@type": "Answer", "text": "Yes — MyBirdieBoard is designed specifically for post-round score entry. Play your round distraction-free, then log your scores in seconds when you're done. No need to carry your phone on the course." }
+          "name": "Can I track golf scores without using my phone during a round?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. MyBirdieBoard is designed for post-round entry. Play your round without distractions, then add your scores afterward to keep a permanent digital record." }
           }, {
             "@type": "Question",
-            "name": "How do I calculate my golf handicap?",
-            "acceptedAnswer": { "@type": "Answer", "text": "MyBirdieBoard calculates your handicap automatically using the World Handicap System (WHS) formula. Just add your rounds and your handicap index updates after each one." }
-          }, {
-            "@type": "Question",
-            "name": "What is the best way to track golf performance over time?",
-            "acceptedAnswer": { "@type": "Answer", "text": "The best approach is consistent post-round tracking. MyBirdieBoard stores every round, visualizes scoring trends, and highlights where you're gaining or losing strokes — giving you a clear picture of your progress." }
+            "name": "Does MyBirdieBoard calculate my golf handicap?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. Your handicap updates automatically as you add rounds, helping you track improvement over time." }
           }, {
             "@type": "Question",
             "name": "Is MyBirdieBoard a golf score tracking app?",
-            "acceptedAnswer": { "@type": "Answer", "text": "Yes — MyBirdieBoard is a golf score tracker, handicap calculator, and performance analytics tool built for golfers who prefer to focus on the game during their round and record everything afterward." }
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. MyBirdieBoard is a golf score tracker that lets you log rounds after you play, track your handicap, and analyze your performance history." }
           }]
         })}
         </script>
@@ -159,7 +155,7 @@ const Index = () => {
           </header>
           
           <main className="relative z-[1] pt-24 sm:pt-28 md:pt-36 w-full text-center sm:text-left">
-            <h1 className="sr-only">Golf Score Tracker & Handicap Calculator Without On-Course Distractions</h1>
+            <h1 className="sr-only">Golf Score Tracker & Handicap Tracking Without On-Course Distractions</h1>
             <MainContent onStartSignup={handleStartSignup} />
             
             {/* Add the UserReviews component */}
