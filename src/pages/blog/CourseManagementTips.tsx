@@ -3,6 +3,39 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Golf Course Management: Strategy Tips to Lower Your Score",
+  "description": "Master golf course management with these strategic tips. Learn when to be aggressive, how to avoid big numbers, and make smarter decisions on the course.",
+  "image": "https://mybirdieboard.com/og-image.png",
+  "author": { "@type": "Organization", "name": "MyBirdieBoard" },
+  "publisher": { "@type": "Organization", "name": "MyBirdieBoard", "logo": { "@type": "ImageObject", "url": "https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" } },
+  "datePublished": "2025-01-20T10:00:00Z",
+  "dateModified": "2026-01-24T10:00:00Z",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://mybirdieboard.com/blog/course-management-tips" }
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://mybirdieboard.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://mybirdieboard.com/blog" },
+    { "@type": "ListItem", "position": 3, "name": "Course Management Tips", "item": "https://mybirdieboard.com/blog/course-management-tips" }
+  ]
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What is course management in golf?", "acceptedAnswer": { "@type": "Answer", "text": "Course management is the strategic decision-making process during a round of golf. It involves choosing the right club, aiming for safe targets, managing risk, and playing to your strengths rather than attempting low-percentage shots." } },
+    { "@type": "Question", "name": "How can course management lower my golf score?", "acceptedAnswer": { "@type": "Answer", "text": "Good course management can save 5-10 strokes per round without any swing changes. By avoiding penalty areas, aiming for the centre of greens, and playing within your abilities, you eliminate big numbers and create more birdie opportunities." } },
+    { "@type": "Question", "name": "Should I always aim for the pin?", "acceptedAnswer": { "@type": "Answer", "text": "No. Unless you're a single-digit handicapper with a confident approach club, aim for the centre of the green. The centre gives the largest margin for error and typically leaves manageable putting distances." } }
+  ]
+};
+
 const CourseManagementTips = () => {
   return (
     <div className="min-h-screen bg-background">
@@ -14,6 +47,9 @@ const CourseManagementTips = () => {
         lastModified="2026-01-24T10:00:00Z"
       >
         <meta property="article:published_time" content="2025-01-20T10:00:00Z" />
+        <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
+        <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
+        <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
       </SEOHead>
 
       <article className="container mx-auto px-4 py-8 max-w-4xl">
@@ -149,7 +185,7 @@ const CourseManagementTips = () => {
           <div className="bg-primary/5 p-6 rounded-lg my-8">
             <h3 className="text-xl font-semibold mb-3">Track Your Course Management</h3>
             <p className="mb-4">
-              MyBirdieBoard helps you analyze which strategic decisions are working. Track fairways hit, greens in regulation, and scrambling percentage to see where your course management is paying off.
+              MyBirdieBoard helps you analyze which strategic decisions are working. <Link to="/guides/golf-statistics-tracker" className="text-primary hover:underline">Track fairways hit, greens in regulation</Link>, and scrambling percentage to see where your course management is paying off. Use our <Link to="/guides/golf-performance-analytics" className="text-primary hover:underline">performance analytics</Link> to identify trends across rounds and courses.
             </p>
           </div>
 

@@ -86,6 +86,17 @@ export default function HowToBreak100() {
         <script type="application/ld+json">
           {JSON.stringify(faqStructuredData)}
         </script>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://mybirdieboard.com/" },
+              { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://mybirdieboard.com/blog" },
+              { "@type": "ListItem", "position": 3, "name": "How to Break 100", "item": "https://mybirdieboard.com/blog/how-to-break-100" }
+            ]
+          })}
+        </script>
       </SEOHead>
 
       <div className="min-h-screen bg-background">

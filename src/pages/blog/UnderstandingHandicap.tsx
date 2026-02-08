@@ -3,6 +3,39 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Understanding the Golf Handicap System - Complete Guide 2026",
+  "description": "Complete guide to the World Handicap System (WHS). Understand slope ratings, course handicaps, score differentials, and how to establish your first handicap index.",
+  "image": "https://mybirdieboard.com/og-image.png",
+  "author": { "@type": "Organization", "name": "MyBirdieBoard" },
+  "publisher": { "@type": "Organization", "name": "MyBirdieBoard", "logo": { "@type": "ImageObject", "url": "https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" } },
+  "datePublished": "2025-01-20T10:00:00Z",
+  "dateModified": "2026-01-24T10:00:00Z",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://mybirdieboard.com/blog/understanding-golf-handicap-system" }
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://mybirdieboard.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://mybirdieboard.com/blog" },
+    { "@type": "ListItem", "position": 3, "name": "Understanding the Golf Handicap System", "item": "https://mybirdieboard.com/blog/understanding-golf-handicap-system" }
+  ]
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "How many rounds do I need to get a golf handicap?", "acceptedAnswer": { "@type": "Answer", "text": "Under the World Handicap System, you need a minimum of 54 holes (3 rounds of 18 holes or 6 rounds of 9 holes) to establish a handicap index. Your handicap becomes more accurate as you add more rounds, up to 20 in the calculation." } },
+    { "@type": "Question", "name": "What is a good handicap for a beginner?", "acceptedAnswer": { "@type": "Answer", "text": "Most beginners start with a handicap between 28 and 36. After a few months of regular play, many golfers reach 20-28. Getting below 20 typically requires dedicated practice and solid course management." } },
+    { "@type": "Question", "name": "How often does my handicap update?", "acceptedAnswer": { "@type": "Answer", "text": "Under the World Handicap System, your handicap index updates daily. Every time you post a new score, the system recalculates using your best 8 scores from your most recent 20 rounds." } }
+  ]
+};
+
 const UnderstandingHandicap = () => {
   return (
     <div className="min-h-screen bg-background">
@@ -14,6 +47,9 @@ const UnderstandingHandicap = () => {
         lastModified="2026-01-24T10:00:00Z"
       >
         <meta property="article:published_time" content="2025-01-20T10:00:00Z" />
+        <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
+        <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
+        <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
       </SEOHead>
 
       <article className="container mx-auto px-4 py-8 max-w-4xl">
@@ -61,7 +97,7 @@ const UnderstandingHandicap = () => {
 
           <h2>How is a Handicap Calculated?</h2>
           <p>
-            Your Handicap Index is calculated using your best 8 scores from your most recent 20 rounds. Here's the process:
+            Your Handicap Index is calculated using your best 8 scores from your most recent 20 rounds. For a step-by-step walkthrough, see our <Link to="/guides/golf-handicap-calculator" className="text-primary hover:underline">golf handicap calculator guide</Link>. Here's the process:
           </p>
 
           <ol>
@@ -171,7 +207,7 @@ const UnderstandingHandicap = () => {
           <div className="bg-primary/5 p-6 rounded-lg my-8">
             <h3 className="text-xl font-semibold mb-3">Track Your Handicap Journey</h3>
             <p className="mb-4">
-              MyBirdieBoard automatically calculates your handicap using the official WHS methodology. Track every round, see your handicap trend over time, and identify which areas of your game need work to lower your handicap faster.
+              MyBirdieBoard automatically calculates your handicap using the official WHS methodology. <Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline">Track every round</Link>, see your handicap trend over time, and use our <Link to="/guides/golf-performance-analytics" className="text-primary hover:underline">performance analytics</Link> to identify which areas of your game need work to lower your handicap faster.
             </p>
           </div>
 

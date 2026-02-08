@@ -45,6 +45,17 @@ export default function GolfScoreTrackingTips() {
             "mainEntityOfPage": { "@type": "WebPage", "@id": "https://mybirdieboard.com/blog/golf-score-tracking-tips" }
           })}
         </script>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+              { "@type": "Question", "name": "What should I track besides my golf score?", "acceptedAnswer": { "@type": "Answer", "text": "Track fairways hit, greens in regulation, putts per hole, and up-and-downs. These statistics reveal where you're losing strokes and help you focus practice on the areas that will improve your score the most." } },
+              { "@type": "Question", "name": "Should I use a digital scorecard or paper?", "acceptedAnswer": { "@type": "Answer", "text": "Digital scorecards offer automatic calculations, long-term data storage, and performance analytics. Paper scorecards are simple and distraction-free. Many golfers use paper on the course and log scores digitally after the round for the best of both worlds." } },
+              { "@type": "Question", "name": "How often should I review my golf stats?", "acceptedAnswer": { "@type": "Answer", "text": "Review your golf performance data monthly. This gives you enough rounds to spot meaningful trends without overreacting to individual bad rounds. Focus on 3-5 key metrics that align with your improvement goals." } }
+            ]
+          })}
+        </script>
       </SEOHead>
       
       <div className="min-h-screen bg-background">
