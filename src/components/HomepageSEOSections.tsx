@@ -113,8 +113,20 @@ export const HomepageSEOSections = () => {
         </div>
       </section>
 
+      {/* Section – Handicap tracking over time */}
+      <section aria-labelledby="handicap-over-time-heading" className="py-12 bg-background">
+        <div className="container mx-auto px-4 max-w-3xl text-center">
+          <h2 id="handicap-over-time-heading" className="text-3xl font-bold mb-4">
+            Track Your Golf Handicap Over Time
+          </h2>
+          <p className="text-muted-foreground text-lg leading-relaxed">
+            Your handicap tells the story of your improvement. MyBirdieBoard automatically calculates your golf handicap as you add rounds, showing clear trends over time so you can see how your game is evolving season after season.
+          </p>
+        </div>
+      </section>
+
       {/* Section – SEO block before FAQ */}
-      <section aria-labelledby="serious-golfers-heading" className="py-12 bg-background">
+      <section aria-labelledby="serious-golfers-heading" className="py-12 bg-muted/20">
         <div className="container mx-auto px-4 max-w-3xl text-center">
           <h2 id="serious-golfers-heading" className="text-3xl font-bold mb-4">
             A Golf Score Tracking App Designed for Serious Golfers
