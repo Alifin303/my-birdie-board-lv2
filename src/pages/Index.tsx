@@ -9,6 +9,7 @@ import { SocialFooter } from "@/components/SocialFooter";
 import { SignUpDialog } from "@/components/SignUpDialog";
 import { UserReviews } from "@/components/UserReviews";
 import { GolfResourcesSection } from "@/components/GolfResourcesSection";
+import { HomepageSEOSections } from "@/components/HomepageSEOSections";
 import { useIsMobile } from "@/hooks/use-mobile";
 const Index = () => {
   const location = useLocation();
@@ -49,9 +50,9 @@ const Index = () => {
   const currentBackgroundImage = isMobile ? mobileBackgroundImageUrl : backgroundImageUrl;
   return <>
       <SEOHead
-        title="Golf Score Tracker & Handicap Calculator | MyBirdieBoard"
-        description="Track golf scores, calculate handicap, analyze performance. Free to start with 4 rounds. Join golfers improving their game with MyBirdieBoard."
-        keywords="golf score tracking, golf handicap calculator, golf performance analytics, course leaderboards, digital golf scorecard"
+        title="Golf Score Tracker & Handicap App | MyBirdieBoard"
+        description="Track golf scores after your round, calculate your handicap, and analyze performance over time with MyBirdieBoard's distraction-free golf tracker."
+        keywords="golf score tracking, golf handicap calculator, golf score tracker, golf performance analytics, course leaderboards, digital golf scorecard, golf logbook"
       >
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <link rel="preload" as="image" href={currentBackgroundImage} fetchPriority="high" />
@@ -64,7 +65,7 @@ const Index = () => {
           "@type": "SoftwareApplication",
           "applicationCategory": "SportsApplication",
           "operatingSystem": "Web",
-          "name": "MyBirdieBoard - Best Golf Score Tracking App for Beginners",
+          "name": "MyBirdieBoard - Golf Score Tracker & Handicap App",
           "description": "The best golf score tracking app for beginners and experienced golfers.",
           "offers": { "@type": "Offer", "price": "2.99", "priceCurrency": "GBP", "availability": "https://schema.org/OnlineOnly" },
           "contentRating": "General",
@@ -148,13 +149,15 @@ const Index = () => {
           </header>
           
           <main className="relative z-[1] pt-24 sm:pt-28 md:pt-36 w-full text-center sm:text-left">
-            <h1 className="sr-only">MyBirdieBoard - Golf Score Tracking & Handicap Calculator App</h1>
+            <h1 className="sr-only">Golf Score Tracker & Handicap Calculator Without On-Course Distractions</h1>
             <MainContent onStartSignup={handleStartSignup} />
             
             {/* Add the UserReviews component */}
             <UserReviews />
           </main>
         </div>
+        
+        <HomepageSEOSections />
         
         {/* Enhanced Golf Resources section with internal links */}
         <section aria-labelledby="resources-heading" aria-label="Golf score tracking resources and guides" className="py-12 bg-muted/30">
