@@ -115,6 +115,20 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Client-only routes served via SPA fallback get pre-rendered homepage HTML.
+      // Clear it so React does a fresh render instead of a broken hydration.
+      (function(){
+        var p = location.pathname;
+        var clientOnly = ['/dashboard','/admin','/checkout','/auth/'];
+        for(var i=0;i<clientOnly.length;i++){
+          if(p===clientOnly[i]||p.startsWith(clientOnly[i]+'/')||p.startsWith('/courses/')){
+            document.getElementById('root').innerHTML='';
+            break;
+          }
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
