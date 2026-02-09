@@ -43,6 +43,11 @@ export const routeSEOMap: Record<string, RouteSEO> = {
     description: 'Browse golf courses with player stats and leaderboards. Find courses by location and compare your scores with other golfers.',
     keywords: 'golf courses, golf course directory, course leaderboards, golf course stats',
   },
+  '/guides': {
+    title: 'Golf Guides — Score Tracking, Handicaps & Performance | MyBirdieBoard',
+    description: 'In-depth golf guides covering score tracking, handicap calculation, performance analytics, and the best golf apps. Improve your game with data-driven insights.',
+    keywords: 'golf guides, golf score tracking guide, golf handicap guide, golf analytics, golf improvement',
+  },
   '/blog': {
     title: 'Golf Blog - Tips, Analytics & Performance Insights | MyBirdieBoard',
     description: 'Expert golf tips, performance analytics insights, and score tracking strategies. Improve your golf game with data-driven advice from MyBirdieBoard\'s golf blog.',

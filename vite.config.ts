@@ -11,6 +11,7 @@ const prerenderRoutes = [
   '/about',
   '/faq',
   '/courses',
+  '/guides',
   '/blog',
   '/blog/golf-score-tracking-tips',
   '/blog/best-golf-clubs-for-beginners',
