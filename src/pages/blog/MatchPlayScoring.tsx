@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { BlogScoreTrackingCTA } from "@/components/BlogScoreTrackingCTA";
 import { SEOHead } from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -645,6 +646,7 @@ export default function MatchPlayScoring() {
                 </Link>
               </div>
             </section>
+            <BlogScoreTrackingCTA />
           </article>
         </main>
       </div>

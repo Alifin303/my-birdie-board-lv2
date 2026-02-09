@@ -2,6 +2,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
+import { BlogScoreTrackingCTA } from "@/components/BlogScoreTrackingCTA";
 
 const articleSchema = {
   "@context": "https://schema.org",
@@ -243,6 +244,7 @@ const UnderstandingHandicap = () => {
               <Button>Get Started Free</Button>
             </Link>
           </div>
+          <BlogScoreTrackingCTA />
         </div>
       </article>
     </div>

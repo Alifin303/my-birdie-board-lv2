@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { BlogScoreTrackingCTA } from "@/components/BlogScoreTrackingCTA";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { LoginDialog } from "@/components/LoginDialog";
@@ -143,6 +144,7 @@ export default function GolfScoreTrackingTips() {
                 </Link>
               </div>
             </div>
+            <BlogScoreTrackingCTA />
           </article>
         </main>
         
