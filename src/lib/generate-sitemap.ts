@@ -12,14 +12,24 @@ import type { Plugin } from 'vite';
 
 const SITE_URL = 'https://mybirdieboard.com';
 
+/** High-value educational/stat-focused blog posts get 0.7 */
+const HIGH_VALUE_BLOGS = new Set([
+  '/blog/how-to-calculate-golf-handicap',
+  '/blog/golf-stats-to-track',
+  '/blog/understanding-golf-handicap-system',
+  '/blog/putts-per-round',
+  '/blog/golf-score-tracking-tips',
+]);
+
 function getPriority(route: string): string {
   if (route === '/') return '1.0';
   if (route.startsWith('/guides/')) return '0.8';
+  if (HIGH_VALUE_BLOGS.has(route)) return '0.7';
   if (route.startsWith('/blog/')) return '0.6';
   if (route === '/blog') return '0.6';
-  if (['/about', '/faq', '/courses'].includes(route)) return '0.4';
-  if (route === '/privacy') return '0.2';
-  // Demo and any other pages
+  if (['/about', '/faq'].includes(route)) return '0.4';
+  if (['/courses'].includes(route)) return '0.4';
+  if (route === '/privacy') return '0.3';
   return '0.4';
 }
 
