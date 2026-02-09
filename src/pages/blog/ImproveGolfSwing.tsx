@@ -2,6 +2,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
+import { BlogScoreTrackingCTA } from "@/components/BlogScoreTrackingCTA";
 
 const articleSchema = {
   "@context": "https://schema.org",
@@ -153,7 +154,8 @@ const ImproveGolfSwing = () => {
 
           <h2>When to Get Professional Help</h2>
           <p>
-            While these tips will help most golfers improve, nothing beats personalized instruction from a qualified PGA professional. Consider <Link to="/golf-lessons" className="text-primary hover:underline">booking a golf lesson</Link> if you're struggling with persistent issues or want to accelerate your improvement.
+            While these tips will help most golfers improve, nothing beats personalized instruction from a qualified PGA professional. Consider
+            booking a golf lesson if you're struggling with persistent issues or want to accelerate your improvement.
           </p>
 
           <div className="mt-8 p-6 bg-primary/5 rounded-lg">
@@ -165,6 +167,7 @@ const ImproveGolfSwing = () => {
               <Button>Get Started Free</Button>
             </Link>
           </div>
+          <BlogScoreTrackingCTA />
         </div>
       </article>
     </div>

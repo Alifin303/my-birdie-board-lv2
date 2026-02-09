@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronLeft } from "lucide-react";
+import { BlogScoreTrackingCTA } from "@/components/BlogScoreTrackingCTA";
 
 const articleSchema = {
   "@context": "https://schema.org",
@@ -165,6 +166,7 @@ const BestGolfClubsBeginners = () => {
               <Button>Get Started Free</Button>
             </Link>
           </div>
+          <BlogScoreTrackingCTA />
         </div>
       </article>
     </div>

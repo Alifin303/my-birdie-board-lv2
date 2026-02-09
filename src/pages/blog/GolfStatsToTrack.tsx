@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { BlogScoreTrackingCTA } from "@/components/BlogScoreTrackingCTA";
 import { SEOHead } from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -225,6 +226,7 @@ export default function GolfStatsToTrack() {
                 <Link to="/"><Button size="lg" className="bg-accent hover:bg-accent/90">Get Started Free</Button></Link>
               </div>
             </div>
+            <BlogScoreTrackingCTA />
           </article>
         </main>
       </div>

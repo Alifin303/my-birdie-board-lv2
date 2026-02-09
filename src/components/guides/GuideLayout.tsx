@@ -1,10 +1,11 @@
 
 import { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { SEOHead } from "@/components/SEOHead";
 import { BreadcrumbNav } from "@/components/BreadcrumbNav";
+import { RelatedGuides } from "@/components/RelatedGuides";
 
 interface GuideLayoutProps {
   children: ReactNode;
@@ -23,6 +24,7 @@ export const GuideLayout = ({
   keywords,
   lastModified = new Date().toISOString()
 }: GuideLayoutProps) => {
+  const { pathname } = useLocation();
   return (
     <>
       <SEOHead
@@ -102,6 +104,8 @@ export const GuideLayout = ({
                 </Link>
               </div>
             </div>
+
+            <RelatedGuides currentPath={pathname} />
           </div>
         </main>
       </div>
