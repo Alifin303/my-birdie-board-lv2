@@ -11,9 +11,6 @@ import FAQ from '@/pages/FAQ'
 import Courses from '@/pages/Courses'
 import Blog from '@/pages/Blog'
 import Demo from '@/pages/Demo'
-import GolfEquipment from '@/pages/GolfEquipment'
-import GolfTips from '@/pages/GolfTips'
-import GolfLessons from '@/pages/GolfLessons'
 import PrivacyPolicy from '@/pages/PrivacyPolicy'
 import NotFound from '@/pages/NotFound'
 
@@ -74,9 +71,6 @@ export const routes: RouteRecord[] = [
   { path: '/courses', element: P(<Courses />) },
   { path: '/blog', element: P(<Blog />) },
   { path: '/demo', element: P(<Demo />) },
-  { path: '/golf-equipment', element: P(<GolfEquipment />) },
-  { path: '/golf-tips', element: P(<GolfTips />) },
-  { path: '/golf-lessons', element: P(<GolfLessons />) },
   { path: '/privacy', element: P(<PrivacyPolicy />) },
 
   // Blog pages

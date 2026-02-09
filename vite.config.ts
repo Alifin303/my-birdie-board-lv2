@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { replaceMetaTagsInHTML } from "./src/lib/route-seo-map";
+import { sitemapPlugin } from "./src/lib/generate-sitemap";
 
 // List of all public routes to pre-render as static HTML
 const prerenderRoutes = [
@@ -23,9 +24,6 @@ const prerenderRoutes = [
   '/guides/best-golf-score-tracking-apps',
   '/guides/golf-performance-analytics',
   '/guides/golf-statistics-tracker',
-  '/golf-equipment',
-  '/golf-tips',
-  '/golf-lessons',
   '/demo',
   '/privacy',
 ];
@@ -39,6 +37,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === 'development' && componentTagger(),
+    mode === 'production' && sitemapPlugin(prerenderRoutes),
   ].filter(Boolean),
   resolve: {
     alias: {

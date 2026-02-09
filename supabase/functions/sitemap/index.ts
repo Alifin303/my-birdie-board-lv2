@@ -6,6 +6,44 @@ const corsHeaders = {
   'Content-Type': 'application/xml',
 };
 
+/**
+ * Dynamic sitemap edge function.
+ * Kept as a fallback / supplement to the static sitemap.xml generated at build time.
+ */
+
+const SITE_URL = 'https://mybirdieboard.com';
+
+const routes: { path: string; priority: string; changefreq: string }[] = [
+  // Core
+  { path: '/', priority: '1.0', changefreq: 'weekly' },
+  { path: '/about', priority: '0.4', changefreq: 'monthly' },
+  { path: '/faq', priority: '0.4', changefreq: 'monthly' },
+  { path: '/courses', priority: '0.4', changefreq: 'daily' },
+  { path: '/privacy', priority: '0.2', changefreq: 'yearly' },
+
+  // Blog
+  { path: '/blog', priority: '0.6', changefreq: 'weekly' },
+  { path: '/blog/golf-score-tracking-tips', priority: '0.6', changefreq: 'monthly' },
+  { path: '/blog/best-golf-clubs-for-beginners', priority: '0.6', changefreq: 'monthly' },
+  { path: '/blog/improve-your-golf-swing', priority: '0.6', changefreq: 'monthly' },
+  { path: '/blog/course-management-tips', priority: '0.6', changefreq: 'monthly' },
+  { path: '/blog/understanding-golf-handicap-system', priority: '0.6', changefreq: 'monthly' },
+  { path: '/blog/stableford-scoring', priority: '0.6', changefreq: 'monthly' },
+  { path: '/blog/how-to-break-100', priority: '0.6', changefreq: 'monthly' },
+  { path: '/blog/match-play-scoring', priority: '0.6', changefreq: 'monthly' },
+  { path: '/blog/putts-per-round', priority: '0.6', changefreq: 'monthly' },
+  { path: '/blog/how-to-calculate-golf-handicap', priority: '0.6', changefreq: 'monthly' },
+  { path: '/blog/golf-stats-to-track', priority: '0.6', changefreq: 'monthly' },
+  { path: '/blog/playing-without-phone', priority: '0.6', changefreq: 'monthly' },
+
+  // Guides
+  { path: '/guides/how-to-track-golf-scores', priority: '0.8', changefreq: 'monthly' },
+  { path: '/guides/golf-handicap-calculator', priority: '0.8', changefreq: 'monthly' },
+  { path: '/guides/best-golf-score-tracking-apps', priority: '0.8', changefreq: 'monthly' },
+  { path: '/guides/golf-performance-analytics', priority: '0.8', changefreq: 'monthly' },
+  { path: '/guides/golf-statistics-tracker', priority: '0.8', changefreq: 'monthly' },
+];
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -13,220 +51,28 @@ serve(async (req) => {
 
   try {
     const currentDate = new Date().toISOString().split('T')[0];
-    
+
+    const urls = routes.map(r => {
+      const loc = r.path === '/' ? `${SITE_URL}/` : `${SITE_URL}${r.path}`;
+      return `  <url>
+    <loc>${loc}</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>${r.changefreq}</changefreq>
+    <priority>${r.priority}</priority>
+  </url>`;
+    });
+
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xmlns:xhtml="http://www.w3.org/1999/xhtml"
-      xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
-      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-
-<!-- Main pages -->
-<url>
-  <loc>https://mybirdieboard.com/</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>1.0</priority>
-  <changefreq>weekly</changefreq>
-  <xhtml:link rel="alternate" hreflang="en" href="https://mybirdieboard.com/"/>
-  <xhtml:link rel="alternate" hreflang="x-default" href="https://mybirdieboard.com/"/>
-  <image:image>
-    <image:loc>https://mybirdieboard.com/og-image.png</image:loc>
-    <image:title>MyBirdieBoard Golf Score Tracking App</image:title>
-  </image:image>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/about</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/faq</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.9</priority>
-  <changefreq>weekly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/courses</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.8</priority>
-  <changefreq>daily</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/privacy</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.5</priority>
-  <changefreq>yearly</changefreq>
-</url>
-
-<!-- High-volume keyword landing pages -->
-<url>
-  <loc>https://mybirdieboard.com/golf-equipment</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.9</priority>
-  <changefreq>weekly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/golf-tips</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.9</priority>
-  <changefreq>weekly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/golf-lessons</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.9</priority>
-  <changefreq>weekly</changefreq>
-</url>
-
-<!-- Blog section -->
-<url>
-  <loc>https://mybirdieboard.com/blog</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.9</priority>
-  <changefreq>weekly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/blog/golf-score-tracking-tips</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/blog/best-golf-clubs-for-beginners</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/blog/improve-your-golf-swing</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/blog/course-management-tips</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/blog/understanding-golf-handicap-system</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/blog/stableford-scoring</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/blog/how-to-break-100</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/blog/match-play-scoring</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/blog/putts-per-round</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/blog/how-to-calculate-golf-handicap</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/blog/golf-stats-to-track</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/blog/playing-without-phone</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-
-<!-- SEO-focused guide pages -->
-<url>
-  <loc>https://mybirdieboard.com/guides/how-to-track-golf-scores</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.9</priority>
-  <changefreq>monthly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/guides/golf-handicap-calculator</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.9</priority>
-  <changefreq>monthly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/guides/best-golf-score-tracking-apps</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.9</priority>
-  <changefreq>monthly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/guides/golf-performance-analytics</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-
-<url>
-  <loc>https://mybirdieboard.com/guides/golf-statistics-tracker</loc>
-  <lastmod>${currentDate}</lastmod>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.join('\n')}
 </urlset>`;
 
-    return new Response(sitemap, { 
-      headers: corsHeaders,
-    });
+    return new Response(sitemap, { headers: corsHeaders });
   } catch (error) {
     console.error('Error generating sitemap:', error);
     return new Response(
-      JSON.stringify({ error: 'Failed to generate sitemap' }), 
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
+      JSON.stringify({ error: 'Failed to generate sitemap' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
