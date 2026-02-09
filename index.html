@@ -128,6 +128,24 @@
           }
         }
       })();
+
+      // Global handler: catch stale-chunk errors that escape React error boundaries.
+      // Auto-reload once per session to pick up fresh assets after a deploy.
+      window.addEventListener('error', function(e) {
+        var m = e && e.message || '';
+        if (
+          m.indexOf('is not valid JSON') !== -1 ||
+          m.indexOf("Unexpected token '<'") !== -1 ||
+          m.indexOf('Failed to fetch dynamically imported module') !== -1 ||
+          m.indexOf('Loading chunk') !== -1
+        ) {
+          var k = 'chunk_error_reload';
+          if (!sessionStorage.getItem(k)) {
+            sessionStorage.setItem(k, '1');
+            window.location.reload();
+          }
+        }
+      });
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
