@@ -52,21 +52,6 @@ export const routeSEOMap: Record<string, RouteSEO> = {
     title: 'Demo Dashboard - See MyBirdieBoard in Action',
     description: 'Experience MyBirdieBoard\'s golf tracking features with our interactive demo. See how easy it is to track scores, analyze performance, and improve your game.',
   },
-  '/golf-equipment': {
-    title: 'Best Golf Equipment 2025 | MyBirdieBoard',
-    description: 'Discover top golf equipment for 2025. GPS watches, clubs, balls, and gear to improve your game. Expert reviews included.',
-    keywords: 'golf equipment, golf GPS watches, golf clubs, golf gear 2025',
-  },
-  '/golf-tips': {
-    title: 'Golf Tips to Lower Your Scores | MyBirdieBoard',
-    description: 'Expert golf tips for swing, short game, course management, and practice. Data-driven strategies to improve fast.',
-    keywords: 'golf tips, golf improvement, golf swing tips, short game tips, course management',
-  },
-  '/golf-lessons': {
-    title: 'Find Golf Lessons Near You | MyBirdieBoard',
-    description: 'Find golf lessons and professional instruction. Private lessons, group classes, online coaching, and golf clinics.',
-    keywords: 'golf lessons, golf instruction, golf coaching, golf clinics',
-  },
   '/privacy': {
     title: 'Privacy Policy - How MyBirdieBoard Protects Your Golf Data | MyBirdieBoard',
     description: 'Read MyBirdieBoard\'s Privacy Policy. Learn how we collect, protect, and handle your golf scores, account information, and personal data. Your privacy matters to us.',
