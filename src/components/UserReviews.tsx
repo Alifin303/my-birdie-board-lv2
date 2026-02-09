@@ -78,6 +78,10 @@ export const UserReviews = () => {
       },
       "review": reviews.map(review => ({
         "@type": "Review",
+        "itemReviewed": {
+          "@type": "SoftwareApplication",
+          "name": "MyBirdieBoard"
+        },
         "reviewRating": {
           "@type": "Rating",
           "ratingValue": review.rating.toString(),
