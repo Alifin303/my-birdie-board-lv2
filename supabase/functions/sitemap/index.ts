@@ -20,6 +20,7 @@ const routes: { path: string; priority: string; changefreq: string }[] = [
   { path: '/faq', priority: '0.4', changefreq: 'monthly' },
   { path: '/courses', priority: '0.4', changefreq: 'monthly' },
   { path: '/privacy', priority: '0.3', changefreq: 'monthly' },
+  { path: '/guides', priority: '0.7', changefreq: 'weekly' },
 
   // Blog
   { path: '/blog', priority: '0.6', changefreq: 'weekly' },

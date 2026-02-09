@@ -23,6 +23,7 @@ const HIGH_VALUE_BLOGS = new Set([
 
 function getPriority(route: string): string {
   if (route === '/') return '1.0';
+  if (route === '/guides') return '0.7';
   if (route.startsWith('/guides/')) return '0.8';
   if (HIGH_VALUE_BLOGS.has(route)) return '0.7';
   if (route.startsWith('/blog/')) return '0.6';
@@ -36,6 +37,7 @@ function getPriority(route: string): string {
 function getChangefreq(route: string): string {
   if (route === '/') return 'weekly';
   if (route === '/courses') return 'daily';
+  if (route === '/guides') return 'weekly';
   if (route === '/blog') return 'weekly';
   if (route.startsWith('/blog/') || route.startsWith('/guides/')) return 'monthly';
   return 'monthly';

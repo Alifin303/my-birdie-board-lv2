@@ -9,6 +9,7 @@ import Index from '@/pages/Index'
 import About from '@/pages/About'
 import FAQ from '@/pages/FAQ'
 import Courses from '@/pages/Courses'
+import Guides from '@/pages/Guides'
 import Blog from '@/pages/Blog'
 import Demo from '@/pages/Demo'
 import PrivacyPolicy from '@/pages/PrivacyPolicy'
@@ -69,6 +70,7 @@ export const routes: RouteRecord[] = [
   { path: '/about', element: P(<About />) },
   { path: '/faq', element: P(<FAQ />) },
   { path: '/courses', element: P(<Courses />) },
+  { path: '/guides', element: P(<Guides />) },
   { path: '/blog', element: P(<Blog />) },
   { path: '/demo', element: P(<Demo />) },
   { path: '/privacy', element: P(<PrivacyPolicy />) },

@@ -16,9 +16,7 @@ export const BreadcrumbNav = () => {
   // Map breadcrumb segments to actual routes when they differ
   const getRouteOverride = (segments: string[]): string | null => {
     const path = '/' + segments.join('/');
-    const overrides: { [key: string]: string } = {
-      '/guides': '/blog',
-    };
+    const overrides: { [key: string]: string } = {};
     return overrides[path] || null;
   };
 
