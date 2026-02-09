@@ -19,7 +19,7 @@ import { calculateScoreSummary } from "./utils/scoreUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { canAddMoreRounds, FREE_ROUND_LIMIT } from "@/integrations/supabase/subscription/freemium-utils";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Lock } from "lucide-react";
+import { Sparkles, Lock, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export function AddRoundModal({ open, onOpenChange, handicapIndex = 0 }: AddRoundModalProps) {
@@ -303,8 +303,15 @@ export function AddRoundModal({ open, onOpenChange, handicapIndex = 0 }: AddRoun
           onInteractOutside={(e) => e.preventDefault()}
           onPointerDownOutside={(e) => e.preventDefault()}
           onFocusOutside={(e) => e.preventDefault()}
-          onEscapeKeyDown={(e) => e.preventDefault()}
+          onEscapeKeyDown={() => handleCloseModal()}
         >
+          <button
+            onClick={handleCloseModal}
+            className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 z-10"
+            aria-label="Close"
+          >
+            <X className="h-4 w-4" />
+          </button>
           {currentStep === 'search' ? (
             <SearchStep 
               searchQuery={searchQuery}
