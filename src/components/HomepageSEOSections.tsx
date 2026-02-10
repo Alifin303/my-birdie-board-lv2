@@ -21,7 +21,15 @@ export const HomepageSEOSections = () => {
               how to track golf scores properly
             </Link>{' '}
             with post-round entry, automatic handicap tracking, and long-term performance
-            analysis — all without pulling out your phone mid-round. Prefer{' '}
+            analysis — all without pulling out your phone mid-round. Discover the{' '}
+            <Link to="/guides/golf-performance-metrics" className="text-primary hover:underline">
+              golf performance metrics that matter most
+            </Link>{' '}
+            and learn how{' '}
+            <Link to="/guides/post-round-golf-analysis" className="text-primary hover:underline">
+              post-round analysis
+            </Link>{' '}
+            can transform your game. Prefer{' '}
             <Link to="/blog/playing-without-phone" className="text-primary hover:underline">
               playing golf without your phone
             </Link>? That's exactly what we're built for.

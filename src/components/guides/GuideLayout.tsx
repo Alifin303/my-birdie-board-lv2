@@ -41,7 +41,7 @@ export const GuideLayout = ({
             "@type": "BreadcrumbList",
             "itemListElement": [
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://mybirdieboard.com/" },
-              { "@type": "ListItem", "position": 2, "name": "Guides", "item": "https://mybirdieboard.com/guides" },
+              { "@type": "ListItem", "position": 2, "name": canonicalUrl.includes('/compare/') ? "Compare" : "Guides", "item": canonicalUrl.includes('/compare/') ? "https://mybirdieboard.com/guides" : "https://mybirdieboard.com/guides" },
               { "@type": "ListItem", "position": 3, "name": title.split('|')[0].trim(), "item": canonicalUrl }
             ]
           })}

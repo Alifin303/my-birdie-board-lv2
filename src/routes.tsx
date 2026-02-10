@@ -35,6 +35,13 @@ import GolfHandicapCalculator from '@/pages/guides/GolfHandicapCalculator'
 import BestGolfScoreApps from '@/pages/guides/BestGolfScoreApps'
 import GolfPerformanceAnalytics from '@/pages/guides/GolfPerformanceAnalytics'
 import GolfStatisticsTracker from '@/pages/guides/GolfStatisticsTracker'
+import GolfPerformanceMetrics from '@/pages/guides/GolfPerformanceMetrics'
+import ImproveGolfUsingData from '@/pages/guides/ImproveGolfUsingData'
+import PostRoundGolfAnalysis from '@/pages/guides/PostRoundGolfAnalysis'
+import ChoosingGolfScoreTracker from '@/pages/guides/ChoosingGolfScoreTracker'
+
+// Compare pages - static imports for SSG
+import BestGolfScoreTrackingApps from '@/pages/compare/BestGolfScoreTrackingApps'
 
 // Client-side only pages (lazy-loaded, not pre-rendered)
 const Course = React.lazy(() => import('@/pages/Course'))
@@ -95,6 +102,13 @@ export const routes: RouteRecord[] = [
   { path: '/guides/best-golf-score-tracking-apps', element: P(<BestGolfScoreApps />) },
   { path: '/guides/golf-performance-analytics', element: P(<GolfPerformanceAnalytics />) },
   { path: '/guides/golf-statistics-tracker', element: P(<GolfStatisticsTracker />) },
+  { path: '/guides/golf-performance-metrics', element: P(<GolfPerformanceMetrics />) },
+  { path: '/guides/how-to-improve-at-golf-using-data', element: P(<ImproveGolfUsingData />) },
+  { path: '/guides/post-round-golf-analysis', element: P(<PostRoundGolfAnalysis />) },
+  { path: '/guides/choosing-the-right-golf-score-tracker', element: P(<ChoosingGolfScoreTracker />) },
+
+  // Compare pages
+  { path: '/compare/best-golf-score-tracking-apps', element: P(<BestGolfScoreTrackingApps />) },
 
   // ===== CLIENT-SIDE ONLY ROUTES (Not pre-rendered) =====
   { path: '/courses/:courseId', element: P(<LazyWrapper><Course /></LazyWrapper>) },
