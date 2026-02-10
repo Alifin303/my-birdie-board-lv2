@@ -21,6 +21,16 @@ export const BlogScoreTrackingCTA = () => (
           → Golf Handicap Calculator Guide
         </Link>
       </li>
+      <li>
+        <Link to="/guides/golf-performance-metrics" className="text-primary hover:underline">
+          → The Ultimate Guide to Golf Performance Metrics
+        </Link>
+      </li>
+      <li>
+        <Link to="/guides/post-round-golf-analysis" className="text-primary hover:underline">
+          → Post-Round Golf Analysis Guide
+        </Link>
+      </li>
     </ul>
   </div>
 );

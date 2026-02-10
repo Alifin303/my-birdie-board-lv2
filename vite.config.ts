@@ -30,6 +30,11 @@ const prerenderRoutes = [
   '/guides/best-golf-score-tracking-apps',
   '/guides/golf-performance-analytics',
   '/guides/golf-statistics-tracker',
+  '/guides/golf-performance-metrics',
+  '/guides/how-to-improve-at-golf-using-data',
+  '/guides/post-round-golf-analysis',
+  '/guides/choosing-the-right-golf-score-tracker',
+  '/compare/best-golf-score-tracking-apps',
   '/demo',
   '/privacy',
 ];

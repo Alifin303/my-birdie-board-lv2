@@ -25,6 +25,7 @@ function getPriority(route: string): string {
   if (route === '/') return '1.0';
   if (route === '/guides') return '0.7';
   if (route.startsWith('/guides/')) return '0.8';
+  if (route.startsWith('/compare/')) return '0.8';
   if (HIGH_VALUE_BLOGS.has(route)) return '0.7';
   if (route.startsWith('/blog/')) return '0.6';
   if (route === '/blog') return '0.6';
@@ -39,7 +40,7 @@ function getChangefreq(route: string): string {
   if (route === '/courses') return 'daily';
   if (route === '/guides') return 'weekly';
   if (route === '/blog') return 'weekly';
-  if (route.startsWith('/blog/') || route.startsWith('/guides/')) return 'monthly';
+  if (route.startsWith('/blog/') || route.startsWith('/guides/') || route.startsWith('/compare/')) return 'monthly';
   return 'monthly';
 }
 

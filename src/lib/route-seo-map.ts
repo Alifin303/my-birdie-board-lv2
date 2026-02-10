@@ -168,6 +168,38 @@ export const routeSEOMap: Record<string, RouteSEO> = {
     keywords: 'golf statistics tracker, golf stats, golf metrics, golf performance stats',
     ogType: 'article',
   },
+  '/guides/golf-performance-metrics': {
+    title: 'The Ultimate Guide to Golf Performance Metrics | MyBirdieBoard',
+    description: 'Discover the golf performance metrics that matter most. Learn which stats to track, how to use analytics to lower your scores, and why post-round analysis beats mid-round tracking.',
+    keywords: 'golf performance metrics, golf stats to track, golf analytics, golf statistics, greens in regulation, fairways hit, putts per round, scrambling percentage',
+    ogType: 'article',
+  },
+  '/guides/how-to-improve-at-golf-using-data': {
+    title: 'How to Improve Your Golf Game Using Data (Not Guesswork) | MyBirdieBoard',
+    description: 'Stop relying on feel and start using data to improve at golf. Learn how to review rounds, identify weaknesses from score patterns, and turn stats into focused practice.',
+    keywords: 'improve golf using stats, golf data analysis, how to improve at golf, golf improvement tips, golf practice plan, golf performance data',
+    ogType: 'article',
+  },
+  '/guides/post-round-golf-analysis': {
+    title: 'Post-Round Golf Analysis: How to Review Your Round Like a Pro | MyBirdieBoard',
+    description: 'Learn how to review your golf round after play. A step-by-step guide to post-round analysis that turns every round into a learning opportunity.',
+    keywords: 'post round golf analysis, how to review a golf round, golf round review, golf performance review, analyse golf round, golf journal',
+    ogType: 'article',
+  },
+  '/guides/choosing-the-right-golf-score-tracker': {
+    title: 'Choosing the Right Golf Score Tracker for Your Playing Style | MyBirdieBoard',
+    description: 'Not every golf tracker is built the same. Learn the difference between all-in-one golf platforms and post-round trackers, and find the right fit for how you play.',
+    keywords: 'golf score tracker, best golf tracker, golf app comparison, post round golf tracker, distraction free golf, golf score tracking app',
+    ogType: 'article',
+  },
+
+  // ===== Compare pages =====
+  '/compare/best-golf-score-tracking-apps': {
+    title: 'Best Golf Score Tracking Apps (And Which One Is Right for You) | MyBirdieBoard',
+    description: 'Compare the best golf score tracking apps. From GPS-based tools to post-round trackers, find the right app for how you actually play golf.',
+    keywords: 'best golf score tracking apps, golf score app, golf tracker app, golf handicap app, golfshake alternative, post round golf tracker',
+    ogType: 'article',
+  },
 };
 
 /**

@@ -36,6 +36,36 @@ const guides = [
     icon: Award,
     link: "/guides/golf-statistics-tracker",
   },
+  {
+    title: "Golf Performance Metrics",
+    description: "The ultimate guide to the metrics that matter most — GIR, fairways, putts, scrambling, and scoring average.",
+    icon: BarChart3,
+    link: "/guides/golf-performance-metrics",
+  },
+  {
+    title: "Improve Using Data",
+    description: "How to use real data — not guesswork — to identify weaknesses, guide practice, and lower your scores faster.",
+    icon: TrendingUp,
+    link: "/guides/how-to-improve-at-golf-using-data",
+  },
+  {
+    title: "Post-Round Golf Analysis",
+    description: "How to review your round like a pro. A step-by-step guide to turning every round into a learning opportunity.",
+    icon: Target,
+    link: "/guides/post-round-golf-analysis",
+  },
+  {
+    title: "Choosing the Right Golf Score Tracker",
+    description: "All-in-one platforms vs post-round trackers — find the approach that matches your playing style.",
+    icon: Award,
+    link: "/guides/choosing-the-right-golf-score-tracker",
+  },
+  {
+    title: "Best Golf Score Tracking Apps",
+    description: "GPS apps, social platforms, and post-round trackers compared. Find the right app for how you actually play.",
+    icon: Calculator,
+    link: "/compare/best-golf-score-tracking-apps",
+  },
 ];
 
 export default function Guides() {
