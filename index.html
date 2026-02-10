@@ -131,13 +131,13 @@
 
       // Global handler: catch stale-chunk errors that escape React error boundaries.
       // Auto-reload once per session to pick up fresh assets after a deploy.
-      window.addEventListener('error', function(e) {
-        var m = e && e.message || '';
+      function handleChunkError(m) {
         if (
           m.indexOf('is not valid JSON') !== -1 ||
           m.indexOf("Unexpected token '<'") !== -1 ||
           m.indexOf('Failed to fetch dynamically imported module') !== -1 ||
-          m.indexOf('Loading chunk') !== -1
+          m.indexOf('Loading chunk') !== -1 ||
+          m.indexOf('Loading CSS chunk') !== -1
         ) {
           var k = 'chunk_error_reload';
           if (!sessionStorage.getItem(k)) {
@@ -145,6 +145,14 @@
             window.location.reload();
           }
         }
+      }
+      window.addEventListener('error', function(e) {
+        handleChunkError(e && e.message || '');
+      });
+      // Dynamic import failures surface as unhandled promise rejections
+      window.addEventListener('unhandledrejection', function(e) {
+        var r = e && e.reason;
+        handleChunkError(r && (r.message || String(r)) || '');
       });
     </script>
     <script type="module" src="/src/main.tsx"></script>
