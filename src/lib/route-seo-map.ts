@@ -145,9 +145,9 @@ export const routeSEOMap: Record<string, RouteSEO> = {
     ogType: 'article',
   },
   '/guides/golf-handicap-calculator': {
-    title: 'Golf Handicap Calculator Guide | MyBirdieBoard',
-    description: 'Learn how to calculate your golf handicap step by step using the official WHS method. Free handicap tracking.',
-    keywords: 'golf handicap calculator, how to calculate golf handicap, WHS handicap, handicap index',
+    title: 'Golf Handicap Calculator & Generator | MyBirdieBoard',
+    description: 'Free golf handicap generator and calculator. Learn how to calculate your handicap step by step using the official WHS method.',
+    keywords: 'golf handicap generator, golf handicap calculator, how to calculate golf handicap, WHS handicap, handicap index, free handicap generator',
     ogType: 'article',
   },
   '/guides/best-golf-score-tracking-apps': {
