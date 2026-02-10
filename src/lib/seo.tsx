@@ -160,8 +160,8 @@ export const SEO_PAGES = {
     description: "Learn how MyBirdieBoard protects and handles your data. Our commitment to your privacy and security.",
   },
   handicapCalculator: {
-    title: "Golf Handicap Calculator Guide | MyBirdieBoard",
-    description: "Learn how to calculate your golf handicap step by step using the World Handicap System. Free handicap tracking.",
+    title: "Golf Handicap Calculator & Generator | MyBirdieBoard",
+    description: "Free golf handicap generator and calculator. Learn how to calculate your handicap step by step using the official WHS method.",
   },
   trackScores: {
     title: "How to Track Golf Scores | MyBirdieBoard",

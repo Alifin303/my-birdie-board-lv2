@@ -5,14 +5,14 @@ import { Link } from "react-router-dom";
 const GolfHandicapCalculator = () => {
   return (
     <GuideLayout
-      title="Golf Handicap Calculator Guide | MyBirdieBoard"
-      description="Learn how to calculate your golf handicap step by step using the official WHS method. Free handicap tracking."
+      title="Golf Handicap Calculator & Generator | MyBirdieBoard"
+      description="Free golf handicap generator and calculator. Learn how to calculate your handicap step by step using the official WHS method."
       canonicalUrl="https://mybirdieboard.com/guides/golf-handicap-calculator"
-      keywords="golf handicap calculator, how to calculate golf handicap, WHS handicap, handicap index"
+      keywords="golf handicap generator, golf handicap calculator, how to calculate golf handicap, WHS handicap, handicap index, free handicap generator"
     >
       <div className="space-y-8">
         <section>
-          <h2 className="text-2xl font-bold mb-4">What is a Golf Handicap?</h2>
+          <h2 className="text-2xl font-bold mb-4">What is a Golf Handicap? (And Why You Need a Handicap Generator)</h2>
           <p className="text-muted-foreground mb-4">
             A golf handicap is a numerical measure of a golfer's playing ability, allowing players of different 
             skill levels to compete fairly. It represents the number of strokes above par a golfer typically scores.
@@ -103,17 +103,17 @@ const GolfHandicapCalculator = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Using Digital Golf Handicap Calculators</h2>
+          <h2 className="text-2xl font-bold mb-4">Using a Golf Handicap Generator to Automate Your Calculation</h2>
           <p className="text-muted-foreground mb-4">
-            While learning how to calculate golf handicap step by step manually is important, modern golf apps 
-            make handicap calculation automatic and accurate. The 
+            While learning the manual method is important, a golf handicap generator does the heavy lifting for you — 
+            calculating differentials, selecting your best scores, and updating your index after every round. The
             <Link to="/guides/best-golf-score-apps" className="text-primary hover:underline mx-1">
               best golf score tracking apps
             </Link>
             include built-in handicap calculators.
           </p>
           
-          <h3 className="text-xl font-semibold mb-3">Benefits of Digital Handicap Calculators</h3>
+          <h3 className="text-xl font-semibold mb-3">Benefits of Using a Golf Handicap Generator</h3>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground mb-6">
             <li>Automatic score differential calculations</li>
             <li>Real-time handicap updates after each round</li>
@@ -124,8 +124,8 @@ const GolfHandicapCalculator = () => {
 
           <h3 className="text-xl font-semibold mb-3">MyBirdieBoard Handicap Features</h3>
           <p className="text-muted-foreground mb-4">
-            MyBirdieBoard automatically calculates your handicap using official WHS methods, eliminating the need 
-            to manually calculate golf handicap step by step:
+            MyBirdieBoard acts as your free golf handicap generator, automatically calculating your index using 
+            official WHS methods after every round you log:
           </p>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
             <li>Automatic handicap calculation after each round</li>
