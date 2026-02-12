@@ -166,8 +166,8 @@ const GolfPerformanceMetrics = () => {
         <section>
           <h2 className="text-2xl font-bold mb-4">Start Tracking Your Golf Performance Metrics Today</h2>
           <p className="text-muted-foreground mb-4">
-            You don't need expensive technology or complex systems to start tracking meaningful golf metrics. With{' '}
-            <Link to="/" className="text-primary hover:underline">MyBirdieBoard</Link>, you can:
+            You don't need expensive technology or complex systems to start tracking meaningful golf metrics. With MyBirdieBoard's free{' '}
+            <Link to="/" className="text-primary hover:underline">golf score tracker</Link>, you can:
           </p>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground mb-6">
             <li>Log your scores in seconds after each round</li>

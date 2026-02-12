@@ -131,10 +131,10 @@ const ChoosingGolfScoreTracker = () => {
             <li>If you prefer distraction-free golf and want to review your performance after the round → MyBirdieBoard is designed exactly for you.</li>
           </ul>
           <p className="text-muted-foreground mb-4">
-            If you prefer to stay focused during your round and review your performance afterward,{' '}
+            If you prefer to stay focused during your round and review your performance afterward, try our free{' '}
             <Link to="/" className="text-primary hover:underline">
-              MyBirdieBoard is designed specifically for that style of golfer
-            </Link>.
+              golf score tracker
+            </Link>{' '} — MyBirdieBoard is designed specifically for that style of golfer.
           </p>
         </section>
       </div>

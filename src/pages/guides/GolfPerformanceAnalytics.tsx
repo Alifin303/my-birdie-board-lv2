@@ -1,5 +1,6 @@
 
 import { GuideLayout } from "@/components/guides/GuideLayout";
+import { Link } from "react-router-dom";
 
 const GolfPerformanceAnalytics = () => {
   return (
@@ -19,7 +20,9 @@ const GolfPerformanceAnalytics = () => {
           </p>
           <p className="text-muted-foreground mb-4">
             Modern golf analytics go beyond just tracking scores - they help you understand the 
-            'why' behind your performance and guide your practice and course management decisions.
+            'why' behind your performance and guide your practice and course management decisions. A dedicated{' '}
+            <Link to="/" className="text-primary hover:underline">golf score tracker</Link>{' '}
+            like MyBirdieBoard makes capturing this data effortless.
           </p>
         </section>
 

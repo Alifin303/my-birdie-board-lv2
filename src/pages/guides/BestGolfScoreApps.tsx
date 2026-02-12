@@ -1,5 +1,6 @@
 
 import { GuideLayout } from "@/components/guides/GuideLayout";
+import { Link } from "react-router-dom";
 
 const BestGolfScoreApps = () => {
   return (
@@ -216,6 +217,11 @@ const BestGolfScoreApps = () => {
             <li>Focus on golf performance, not unnecessary features</li>
             <li>Worldwide course database coverage</li>
           </ul>
+          <p className="text-muted-foreground mt-4">
+            Ready to try the best post-round{' '}
+            <Link to="/" className="text-primary hover:underline">golf score tracker</Link>{' '}
+            for yourself? Sign up free and start logging your rounds today.
+          </p>
         </section>
       </div>
     </GuideLayout>
