@@ -3,8 +3,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Re-export core client utilities from modular imports
-import { getSiteUrl, logSupabaseOperation } from './core/client';
 import { parseCourseName, formatCourseName, isUserAddedCourse } from './utils/course-utils';
 import { 
   fetchCourseById, 
@@ -32,10 +30,21 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   },
 });
 
+// Helper function to get the site URL for authentication redirects
+export function getSiteUrl(): string {
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  return 'http://localhost:5173';
+}
+
+// Helper function to log Supabase operations for debugging
+export function logSupabaseOperation(operation: string, data: any): void {
+  console.log(`[Supabase ${operation}]`, data);
+}
+
 // Re-export all necessary functions and utilities
 export {
-  getSiteUrl,
-  logSupabaseOperation,
   parseCourseName,
   formatCourseName,
   isUserAddedCourse,

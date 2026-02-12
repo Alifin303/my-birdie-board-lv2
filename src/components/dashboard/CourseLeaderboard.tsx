@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Calendar, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/core/client";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
