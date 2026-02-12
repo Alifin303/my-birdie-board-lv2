@@ -316,7 +316,7 @@ export const CourseLeaderboard = ({
         // Parse hole scores
         let holeScores = [];
         try {
-          holeScores = round.hole_scores ? JSON.parse(round.hole_scores) : [];
+          holeScores = round.hole_scores ? JSON.parse(typeof round.hole_scores === 'string' ? round.hole_scores : JSON.stringify(round.hole_scores)) : [];
         } catch (e) {
           console.error(`Error parsing hole scores for round ${round.id}:`, e);
           holeScores = [];
