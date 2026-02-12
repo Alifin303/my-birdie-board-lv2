@@ -4,10 +4,11 @@ import { GuideLayout } from "@/components/guides/GuideLayout";
 const BestGolfScoreApps = () => {
   return (
     <GuideLayout
-      title="Best Golf Score Apps 2025 | MyBirdieBoard"
-      description="Compare the best golf score tracking apps. Features, pricing, and which app is right for your game."
+      title="Best Golf Score Apps 2026 | MyBirdieBoard"
+      description="Compare the best golf score tracking apps in 2026. Features, pricing, and which app is right for your game."
       canonicalUrl="https://mybirdieboard.com/guides/best-golf-score-tracking-apps"
-      keywords="best golf score apps, golf score tracking apps, golf apps 2025, golf handicap apps"
+      keywords="best golf score apps, golf score tracking apps, golf apps 2026, golf handicap apps"
+      lastModified="2026-02-12T10:00:00Z"
     >
       <div className="space-y-8">
         <section>
@@ -69,8 +70,8 @@ const BestGolfScoreApps = () => {
                 <li>Comprehensive course leaderboards</li>
                 <li>Automatic handicap calculation</li>
                 <li>Clean, focused interface</li>
-                <li>Affordable pricing (£2.99/month)</li>
-                <li>7-day free trial</li>
+                <li>Generous free version with up to 4 rounds</li>
+                <li>Affordable premium at just £2.99/month for unlimited rounds</li>
               </ul>
               
               <h4 className="font-semibold mb-2">Best For:</h4>
@@ -211,7 +212,7 @@ const BestGolfScoreApps = () => {
             <li>Simple, distraction-free score entry</li>
             <li>Comprehensive course leaderboards with gross and net scores</li>
             <li>Automatic handicap calculation using official methods</li>
-            <li>Affordable pricing with full-featured free trial</li>
+            <li>Free version to get started, with affordable premium upgrade</li>
             <li>Focus on golf performance, not unnecessary features</li>
             <li>Worldwide course database coverage</li>
           </ul>
