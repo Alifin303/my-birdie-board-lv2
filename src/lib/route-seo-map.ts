@@ -151,9 +151,9 @@ export const routeSEOMap: Record<string, RouteSEO> = {
     ogType: 'article',
   },
   '/guides/best-golf-score-tracking-apps': {
-    title: 'Best Golf Score Apps 2025 | MyBirdieBoard',
-    description: 'Compare the best golf score tracking apps. Features, pricing, and which app is right for your game.',
-    keywords: 'best golf score apps, golf score tracking apps, golf apps 2025, golf handicap apps',
+    title: 'Best Golf Score Apps 2026 | MyBirdieBoard',
+    description: 'Compare the best golf score tracking apps in 2026. Features, pricing, and which app is right for your game.',
+    keywords: 'best golf score apps, golf score tracking apps, golf apps 2026, golf handicap apps',
     ogType: 'article',
   },
   '/guides/golf-performance-analytics': {
