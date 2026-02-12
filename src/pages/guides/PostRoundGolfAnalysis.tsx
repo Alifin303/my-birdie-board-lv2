@@ -139,9 +139,9 @@ const PostRoundGolfAnalysis = () => {
             <li><strong>Review monthly:</strong> Once a month, spend 15 minutes looking at your broader trends and adjusting your practice plan.</li>
           </ul>
           <p className="text-muted-foreground mb-4">
-            Serious improvement comes after the round. If you're ready to start building your golf performance data,{' '}
+            Serious improvement comes after the round. If you're ready to start building your golf performance data, try our free{' '}
             <Link to="/" className="text-primary hover:underline">
-              create your free MyBirdieBoard account
+              golf score tracker
             </Link>{' '}
             and turn every round into a step toward a better game.
           </p>

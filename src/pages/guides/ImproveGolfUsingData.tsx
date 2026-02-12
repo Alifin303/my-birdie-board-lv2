@@ -118,8 +118,8 @@ const ImproveGolfUsingData = () => {
             Don't try to overhaul everything at once. Use a simple cycle:
           </p>
           <ol className="list-decimal pl-6 space-y-3 text-muted-foreground mb-6">
-            <li><strong>Track 10 rounds:</strong> Log every round in{' '}
-              <Link to="/" className="text-primary hover:underline">MyBirdieBoard</Link>.</li>
+            <li><strong>Track 10 rounds:</strong> Log every round in MyBirdieBoard's{' '}
+              <Link to="/" className="text-primary hover:underline">golf score tracker</Link>.</li>
             <li><strong>Review your stats:</strong> Identify your single biggest weakness using the{' '}
               <Link to="/guides/golf-performance-metrics" className="text-primary hover:underline">metrics that matter</Link>.</li>
             <li><strong>Focus your practice:</strong> Dedicate the next 3–4 weeks of practice to that one area.</li>
@@ -140,8 +140,8 @@ const ImproveGolfUsingData = () => {
             MyBirdieBoard takes a different approach: <strong>play the round, record the story after.</strong> You get all the analytical benefits of data tracking with none of the on-course disruption. Your digital golf journal builds round by round, giving you the trends and insights you need to practise smarter.
           </p>
           <p className="text-muted-foreground mb-4">
-            If you're ready to stop guessing and start improving with real data,{' '}
-            <Link to="/" className="text-primary hover:underline">create your free MyBirdieBoard account</Link>{' '}
+            If you're ready to stop guessing and start improving with real data, try our free{' '}
+            <Link to="/" className="text-primary hover:underline">golf score tracker</Link>{' '}
             and start logging your rounds today.
           </p>
         </section>

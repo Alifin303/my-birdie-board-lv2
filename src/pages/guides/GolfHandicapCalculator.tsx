@@ -26,7 +26,9 @@ const GolfHandicapCalculator = () => {
             <Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline mx-1">
               complete guide on how to track golf scores
             </Link>
-            before diving into handicap calculations.
+            before diving into handicap calculations. Or jump straight into MyBirdieBoard's free{' '}
+            <Link to="/" className="text-primary hover:underline">golf score tracker</Link>{' '}
+            which calculates your handicap automatically.
           </p>
         </section>
 

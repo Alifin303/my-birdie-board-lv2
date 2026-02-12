@@ -1,5 +1,6 @@
 
 import { GuideLayout } from "@/components/guides/GuideLayout";
+import { Link } from "react-router-dom";
 
 const GolfStatisticsTracker = () => {
   return (
@@ -236,8 +237,9 @@ const GolfStatisticsTracker = () => {
 
           <h3 className="text-xl font-semibold mb-3">Getting Started</h3>
           <p className="text-muted-foreground mb-4">
-            Start tracking your golf statistics today with MyBirdieBoard's simple and comprehensive 
-            tracking system. Focus on consistent data collection, and let the insights guide your 
+            Start tracking your golf statistics today with MyBirdieBoard's{' '}
+            <Link to="/" className="text-primary hover:underline">golf score tracker</Link>.
+            Focus on consistent data collection, and let the insights guide your 
             improvement journey.
           </p>
         </section>

@@ -15,7 +15,9 @@ const HowToTrackGolfScores = () => {
           <h2 className="text-2xl font-bold mb-4">Why Track Your Golf Scores?</h2>
           <p className="text-muted-foreground mb-4">
             Learning how to track golf scores effectively is essential for improving your game. It helps you identify patterns, 
-            monitor progress, calculate your handicap, and set realistic goals for improvement.
+            monitor progress, calculate your handicap, and set realistic goals for improvement. A good{' '}
+            <Link to="/" className="text-primary hover:underline">golf score tracker</Link>{' '}
+            makes this process effortless.
           </p>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
             <li>Monitor your progress over time</li>
