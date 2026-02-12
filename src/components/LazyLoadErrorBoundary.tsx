@@ -43,10 +43,11 @@ export class LazyLoadErrorBoundary extends Component<Props, State> {
       msg.includes('Loading CSS chunk');
 
     if (isChunkError) {
-      // Only auto-reload once to avoid infinite loops
       const key = 'chunk_error_reload';
-      if (!sessionStorage.getItem(key)) {
-        sessionStorage.setItem(key, '1');
+      const now = Date.now();
+      const last = parseInt(sessionStorage.getItem(key) || '0', 10);
+      if (!last || (now - last) > 10000) {
+        sessionStorage.setItem(key, String(now));
         window.location.reload();
       }
     }

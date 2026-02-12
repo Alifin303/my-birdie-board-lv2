@@ -130,7 +130,7 @@
       })();
 
       // Global handler: catch stale-chunk errors that escape React error boundaries.
-      // Auto-reload once per session to pick up fresh assets after a deploy.
+      // Auto-reload once to pick up fresh assets after a deploy.
       function handleChunkError(m) {
         if (
           m.indexOf('is not valid JSON') !== -1 ||
@@ -140,8 +140,11 @@
           m.indexOf('Loading CSS chunk') !== -1
         ) {
           var k = 'chunk_error_reload';
-          if (!sessionStorage.getItem(k)) {
-            sessionStorage.setItem(k, '1');
+          var now = Date.now();
+          var last = parseInt(sessionStorage.getItem(k) || '0', 10);
+          // Allow a reload if last one was more than 10 seconds ago (prevents infinite loops but allows retries)
+          if (!last || (now - last) > 10000) {
+            sessionStorage.setItem(k, String(now));
             window.location.reload();
           }
         }
@@ -153,6 +156,10 @@
       window.addEventListener('unhandledrejection', function(e) {
         var r = e && e.reason;
         handleChunkError(r && (r.message || String(r)) || '');
+      });
+      // Clear the reload guard on successful load so future deploys can trigger a fresh reload
+      window.addEventListener('load', function() {
+        sessionStorage.removeItem('chunk_error_reload');
       });
     </script>
     <script type="module" src="/src/main.tsx"></script>
