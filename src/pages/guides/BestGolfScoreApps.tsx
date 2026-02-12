@@ -70,7 +70,7 @@ const BestGolfScoreApps = () => {
                 <li>Comprehensive course leaderboards</li>
                 <li>Automatic handicap calculation</li>
                 <li>Clean, focused interface</li>
-                <li>Generous free version with up to 4 rounds</li>
+                <li>Free version available to get started</li>
                 <li>Affordable premium at just £2.99/month for unlimited rounds</li>
               </ul>
               
