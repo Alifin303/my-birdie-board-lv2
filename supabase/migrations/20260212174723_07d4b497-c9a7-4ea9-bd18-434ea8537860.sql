@@ -1,0 +1,1 @@
+DELETE FROM rounds WHERE user_id = 'e547e675-5a31-4ee9-aa0d-4a8b03165c1c';
