@@ -10,6 +10,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 const blogPosts = [
   {
+    id: "course-leaderboards",
+    title: "Golf Course Leaderboards: Compete Without Playing Together",
+    description: "Learn how MyBirdieBoard's course-by-course leaderboards let you compete with friends and other golfers — without needing to play at the same time.",
+    excerpt: "Golf is one of the few sports where you don't need to be on the course at the same time as your competitors. MyBirdieBoard's course leaderboards make friendly competition effortless.",
+    date: "2026-02-12",
+    readTime: "8 min read",
+    tags: ["Leaderboards", "Competition", "Features"],
+    link: "/blog/course-leaderboards"
+  },
+  {
     id: "playing-without-phone",
     title: "Why Playing Golf Without Your Phone Improves Focus and Enjoyment",
     description: "Discover why playing golf without your phone improves focus, enjoyment, and performance — and how to track your rounds after the game.",
