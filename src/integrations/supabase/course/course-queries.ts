@@ -117,10 +117,10 @@ export async function searchCourses(query: string) {
     
     // Map each course to include a flag indicating if it's from the API
     if (data) {
-      data.forEach(course => {
-        // If the course has an api_course_id, it's from the API
-        course.isApiCourse = !!course.api_course_id;
-      });
+      return { data: data.map(course => ({
+        ...course,
+        isApiCourse: !!course.api_course_id,
+      })), error: null };
     }
     
     return { data, error: null };
