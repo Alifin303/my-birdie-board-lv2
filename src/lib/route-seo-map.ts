@@ -136,6 +136,12 @@ export const routeSEOMap: Record<string, RouteSEO> = {
     keywords: 'distraction-free golf, golf focus and concentration, playing golf without a phone, track golf rounds after playing, post-round golf tracking',
     ogType: 'article',
   },
+  '/blog/course-leaderboards': {
+    title: 'Golf Course Leaderboards: Compete With Friends Without Playing Together | MyBirdieBoard',
+    description: 'Learn how course-by-course leaderboards let you compete with friends and other golfers at your course — without needing to play at the same time.',
+    keywords: 'golf course leaderboard, compete with friends golf, golf leaderboard app, course leaderboard golf, golf competition app, asynchronous golf competition',
+    ogType: 'article',
+  },
 
   // ===== Guide pages =====
   '/guides/how-to-track-golf-scores': {
