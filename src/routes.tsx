@@ -2,6 +2,7 @@ import React, { Suspense } from 'react'
 import type { RouteRecord } from 'vite-react-ssg'
 import { Navigate } from 'react-router-dom'
 import { Providers } from '@/components/Providers'
+import { AppErrorBoundary } from '@/components/AppErrorBoundary'
 import { LazyLoadErrorBoundary } from '@/components/LazyLoadErrorBoundary'
 
 // Static imports for SSG pre-rendered pages
@@ -55,8 +56,12 @@ const Admin = React.lazy(() => import('@/pages/Admin'))
 
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 
-// Helper: wrap a page element with Providers
-const P = (el: React.ReactNode) => <Providers>{el}</Providers>
+// Helper: wrap a page element with Providers + global error boundary
+const P = (el: React.ReactNode) => (
+  <AppErrorBoundary>
+    <Providers>{el}</Providers>
+  </AppErrorBoundary>
+)
 
 // Wrapper for lazy-loaded components with error boundary for chunk failures
 const LazyWrapper = ({ children }: { children: React.ReactNode }) => (
