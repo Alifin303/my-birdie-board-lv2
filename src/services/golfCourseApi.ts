@@ -112,6 +112,11 @@ export async function searchCourses(query: string, includeMockData: boolean = fa
       throw new Error(`API returned error status: ${response.status}`);
     }
     
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      console.error('[golfCourseApi] Expected JSON but received non-JSON response');
+      throw new Error('Invalid API response format');
+    }
     const data = await response.json();
     console.log(`API response data:`, data);
     
@@ -156,6 +161,10 @@ export async function getCourseDetails(courseId: number | string): Promise<Cours
       throw new Error(`API returned error status: ${response.status}`);
     }
     
+    const ct = response.headers.get('content-type') || '';
+    if (!ct.includes('application/json')) {
+      throw new Error('Invalid API response format');
+    }
     const data = await response.json();
     console.log(`API course details data:`, data);
     
@@ -215,6 +224,10 @@ export async function checkApiHealth(): Promise<{status: string, available: bool
       return { status: `Error: ${response.status}`, available: false };
     }
     
+    const ct2 = response.headers.get('content-type') || '';
+    if (!ct2.includes('application/json')) {
+      return { status: 'Invalid response format', available: false };
+    }
     const data = await response.json();
     
     return { 
