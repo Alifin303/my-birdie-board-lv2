@@ -123,7 +123,7 @@ export default function Dashboard() {
         .from('profiles')
         .select('*')
         .eq('id', session.user.id)
-        .single();
+        .maybeSingle();
         
       if (error) throw error;
       console.log("Retrieved user profile with handicap:", data?.handicap);

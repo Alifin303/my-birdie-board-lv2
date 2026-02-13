@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom'
 import { Providers } from '@/components/Providers'
 import { AppErrorBoundary } from '@/components/AppErrorBoundary'
 import { LazyLoadErrorBoundary } from '@/components/LazyLoadErrorBoundary'
+import { RouteErrorFallback } from '@/components/RouteErrorFallback'
 
 // Static imports for SSG pre-rendered pages
 import Index from '@/pages/Index'
@@ -79,52 +80,52 @@ const LazyWrapper = ({ children }: { children: React.ReactNode }) => (
  */
 export const routes: RouteRecord[] = [
   // ===== PUBLIC PAGES (Pre-rendered as static HTML) =====
-  { path: '/', element: P(<Index />) },
-  { path: '/about', element: P(<About />) },
-  { path: '/faq', element: P(<FAQ />) },
-  { path: '/courses', element: P(<Courses />) },
-  { path: '/guides', element: P(<Guides />) },
-  { path: '/blog', element: P(<Blog />) },
-  { path: '/demo', element: P(<Demo />) },
-  { path: '/privacy', element: P(<PrivacyPolicy />) },
+  { path: '/', element: P(<Index />), errorElement: <RouteErrorFallback /> },
+  { path: '/about', element: P(<About />), errorElement: <RouteErrorFallback /> },
+  { path: '/faq', element: P(<FAQ />), errorElement: <RouteErrorFallback /> },
+  { path: '/courses', element: P(<Courses />), errorElement: <RouteErrorFallback /> },
+  { path: '/guides', element: P(<Guides />), errorElement: <RouteErrorFallback /> },
+  { path: '/blog', element: P(<Blog />), errorElement: <RouteErrorFallback /> },
+  { path: '/demo', element: P(<Demo />), errorElement: <RouteErrorFallback /> },
+  { path: '/privacy', element: P(<PrivacyPolicy />), errorElement: <RouteErrorFallback /> },
 
   // Blog pages
-  { path: '/blog/golf-score-tracking-tips', element: P(<GolfScoreTrackingTips />) },
-  { path: '/blog/best-golf-clubs-for-beginners', element: P(<BestGolfClubsBeginners />) },
-  { path: '/blog/improve-your-golf-swing', element: P(<ImproveGolfSwing />) },
-  { path: '/blog/course-management-tips', element: P(<CourseManagementTips />) },
-  { path: '/blog/understanding-golf-handicap-system', element: P(<UnderstandingHandicap />) },
-  { path: '/blog/stableford-scoring', element: P(<StablefordScoring />) },
-  { path: '/blog/how-to-break-100', element: P(<HowToBreak100 />) },
-  { path: '/blog/match-play-scoring', element: P(<MatchPlayScoring />) },
-  { path: '/blog/putts-per-round', element: P(<PuttsPerRound />) },
-  { path: '/blog/how-to-calculate-golf-handicap', element: P(<GolfHandicapBeginner />) },
-  { path: '/blog/golf-stats-to-track', element: P(<GolfStatsToTrack />) },
-  { path: '/blog/playing-without-phone', element: P(<PlayingWithoutPhone />) },
-  { path: '/blog/course-leaderboards', element: P(<CourseLeaderboards />) },
+  { path: '/blog/golf-score-tracking-tips', element: P(<GolfScoreTrackingTips />), errorElement: <RouteErrorFallback /> },
+  { path: '/blog/best-golf-clubs-for-beginners', element: P(<BestGolfClubsBeginners />), errorElement: <RouteErrorFallback /> },
+  { path: '/blog/improve-your-golf-swing', element: P(<ImproveGolfSwing />), errorElement: <RouteErrorFallback /> },
+  { path: '/blog/course-management-tips', element: P(<CourseManagementTips />), errorElement: <RouteErrorFallback /> },
+  { path: '/blog/understanding-golf-handicap-system', element: P(<UnderstandingHandicap />), errorElement: <RouteErrorFallback /> },
+  { path: '/blog/stableford-scoring', element: P(<StablefordScoring />), errorElement: <RouteErrorFallback /> },
+  { path: '/blog/how-to-break-100', element: P(<HowToBreak100 />), errorElement: <RouteErrorFallback /> },
+  { path: '/blog/match-play-scoring', element: P(<MatchPlayScoring />), errorElement: <RouteErrorFallback /> },
+  { path: '/blog/putts-per-round', element: P(<PuttsPerRound />), errorElement: <RouteErrorFallback /> },
+  { path: '/blog/how-to-calculate-golf-handicap', element: P(<GolfHandicapBeginner />), errorElement: <RouteErrorFallback /> },
+  { path: '/blog/golf-stats-to-track', element: P(<GolfStatsToTrack />), errorElement: <RouteErrorFallback /> },
+  { path: '/blog/playing-without-phone', element: P(<PlayingWithoutPhone />), errorElement: <RouteErrorFallback /> },
+  { path: '/blog/course-leaderboards', element: P(<CourseLeaderboards />), errorElement: <RouteErrorFallback /> },
 
   // Guide pages
-  { path: '/guides/how-to-track-golf-scores', element: P(<HowToTrackGolfScores />) },
-  { path: '/guides/golf-handicap-calculator', element: P(<GolfHandicapCalculator />) },
-  { path: '/guides/best-golf-score-tracking-apps', element: P(<BestGolfScoreApps />) },
-  { path: '/guides/golf-performance-analytics', element: P(<GolfPerformanceAnalytics />) },
-  { path: '/guides/golf-statistics-tracker', element: P(<GolfStatisticsTracker />) },
-  { path: '/guides/golf-performance-metrics', element: P(<GolfPerformanceMetrics />) },
-  { path: '/guides/how-to-improve-at-golf-using-data', element: P(<ImproveGolfUsingData />) },
-  { path: '/guides/post-round-golf-analysis', element: P(<PostRoundGolfAnalysis />) },
-  { path: '/guides/choosing-the-right-golf-score-tracker', element: P(<ChoosingGolfScoreTracker />) },
+  { path: '/guides/how-to-track-golf-scores', element: P(<HowToTrackGolfScores />), errorElement: <RouteErrorFallback /> },
+  { path: '/guides/golf-handicap-calculator', element: P(<GolfHandicapCalculator />), errorElement: <RouteErrorFallback /> },
+  { path: '/guides/best-golf-score-tracking-apps', element: P(<BestGolfScoreApps />), errorElement: <RouteErrorFallback /> },
+  { path: '/guides/golf-performance-analytics', element: P(<GolfPerformanceAnalytics />), errorElement: <RouteErrorFallback /> },
+  { path: '/guides/golf-statistics-tracker', element: P(<GolfStatisticsTracker />), errorElement: <RouteErrorFallback /> },
+  { path: '/guides/golf-performance-metrics', element: P(<GolfPerformanceMetrics />), errorElement: <RouteErrorFallback /> },
+  { path: '/guides/how-to-improve-at-golf-using-data', element: P(<ImproveGolfUsingData />), errorElement: <RouteErrorFallback /> },
+  { path: '/guides/post-round-golf-analysis', element: P(<PostRoundGolfAnalysis />), errorElement: <RouteErrorFallback /> },
+  { path: '/guides/choosing-the-right-golf-score-tracker', element: P(<ChoosingGolfScoreTracker />), errorElement: <RouteErrorFallback /> },
 
   // Compare pages
-  { path: '/compare/best-golf-score-tracking-apps', element: P(<BestGolfScoreTrackingApps />) },
+  { path: '/compare/best-golf-score-tracking-apps', element: P(<BestGolfScoreTrackingApps />), errorElement: <RouteErrorFallback /> },
 
   // ===== CLIENT-SIDE ONLY ROUTES (Not pre-rendered) =====
-  { path: '/courses/:courseId', element: P(<LazyWrapper><Course /></LazyWrapper>) },
-  { path: '/auth/callback', element: P(<LazyWrapper><AuthRedirect /></LazyWrapper>) },
-  { path: '/auth/confirm', element: P(<LazyWrapper><AuthConfirm /></LazyWrapper>) },
-  { path: '/auth/reset-password', element: P(<LazyWrapper><ResetPassword /></LazyWrapper>) },
-  { path: '/checkout', element: P(<LazyWrapper><Checkout /></LazyWrapper>) },
-  { path: '/dashboard', element: P(<ProtectedRoute><LazyWrapper><Dashboard /></LazyWrapper></ProtectedRoute>) },
-  { path: '/admin', element: P(<LazyWrapper><Admin /></LazyWrapper>) },
+  { path: '/courses/:courseId', element: P(<LazyWrapper><Course /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
+  { path: '/auth/callback', element: P(<LazyWrapper><AuthRedirect /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
+  { path: '/auth/confirm', element: P(<LazyWrapper><AuthConfirm /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
+  { path: '/auth/reset-password', element: P(<LazyWrapper><ResetPassword /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
+  { path: '/checkout', element: P(<LazyWrapper><Checkout /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
+  { path: '/dashboard', element: P(<ProtectedRoute><LazyWrapper><Dashboard /></LazyWrapper></ProtectedRoute>), errorElement: <RouteErrorFallback /> },
+  { path: '/admin', element: P(<LazyWrapper><Admin /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
 
   // Redirects
   { path: '/quiz', element: <Navigate to="/" replace /> },
@@ -132,5 +133,5 @@ export const routes: RouteRecord[] = [
   { path: '/auth/v1/verify', element: <Navigate to="/auth/callback" replace /> },
 
   // 404 fallback
-  { path: '*', element: P(<NotFound />) },
+  { path: '*', element: P(<NotFound />), errorElement: <RouteErrorFallback /> },
 ]
