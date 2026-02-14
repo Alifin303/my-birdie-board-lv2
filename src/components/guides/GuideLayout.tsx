@@ -35,8 +35,9 @@ export const GuideLayout = ({
         ogType="article"
         lastModified={lastModified}
       >
-        <script type="application/ld+json">
-          {JSON.stringify({
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             "itemListElement": [
@@ -44,10 +45,11 @@ export const GuideLayout = ({
               { "@type": "ListItem", "position": 2, "name": canonicalUrl.includes('/compare/') ? "Compare" : "Guides", "item": canonicalUrl.includes('/compare/') ? "https://mybirdieboard.com/guides" : "https://mybirdieboard.com/guides" },
               { "@type": "ListItem", "position": 3, "name": title.split('|')[0].trim(), "item": canonicalUrl }
             ]
-          })}
-        </script>
-        <script type="application/ld+json">
-          {JSON.stringify({
+          }) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Article",
             "headline": title,
@@ -57,10 +59,10 @@ export const GuideLayout = ({
             "datePublished": "2024-12-01T10:00:00Z",
             "dateModified": lastModified,
             "author": { "@type": "Organization", "name": "MyBirdieBoard" },
-            "publisher": { "@type": "Organization", "name": "MyBirdieBoard", "logo": { "@type": "ImageObject", "url": "https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" } },
+            "publisher": { "@type": "Organization", "name": "MyBirdieBoard", "logo": { "@type": "ImageObject", "url": "https://mybirdieboard.com/logo.png" } },
             "mainEntityOfPage": { "@type": "WebPage", "@id": canonicalUrl }
-          })}
-        </script>
+          }) }}
+        />
       </SEOHead>
       
       <div className="min-h-screen bg-background">
