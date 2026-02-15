@@ -128,7 +128,7 @@ export const routes: RouteRecord[] = [
   { path: '/admin', element: P(<LazyWrapper><Admin /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
 
   // Redirects
-  { path: '/quiz', element: <Navigate to="/" replace /> },
+  // /quiz removed – deprecated page, falls through to 404
   { path: '/verify', element: <Navigate to="/auth/callback" replace /> },
   { path: '/auth/v1/verify', element: <Navigate to="/auth/callback" replace /> },
 
