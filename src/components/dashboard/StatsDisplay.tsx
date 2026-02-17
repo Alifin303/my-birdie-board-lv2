@@ -3,6 +3,7 @@ import { Stats, Round } from "./types";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { HandicapCard } from "./HandicapCard";
+import { MilestonesDialog } from "./MilestonesDialog";
 
 type RoundFilter = 'all' | '9hole' | '18hole';
 type ScoreMode = 'stroke' | 'stableford';
@@ -380,6 +381,12 @@ export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTy
         >
           Show Handicap Card
         </Button>
+      )}
+
+      {userRounds && userRounds.length > 0 && (
+        <div className="mt-2">
+          <MilestonesDialog rounds={userRounds} />
+        </div>
       )}
 
       {userName && userId && (
