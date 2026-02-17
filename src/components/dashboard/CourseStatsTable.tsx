@@ -164,19 +164,19 @@ export const CourseStatsTable = ({
         <tbody>
           {sortedStats.map((courseStat) => (
             <tr key={courseStat.courseId} className="border-b last:border-0 hover:bg-secondary/5 transition-colors">
-              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium max-w-[120px] sm:max-w-none">
+              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium max-w-[140px] sm:max-w-none">
                 <button 
-                  className="hover:underline text-primary flex items-center gap-1 max-w-full"
+                  className="hover:underline text-primary flex items-start gap-1 max-w-full text-left"
                   onClick={() => onCourseClick(courseStat.courseId)}
                 >
-                  <Flag className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
-                  <span className="truncate">
+                  <Flag className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0 mt-0.5" />
+                  <span className="break-words line-clamp-2 sm:line-clamp-none">
                     {courseStat.clubName !== courseStat.courseName 
                       ? `${courseStat.clubName} - ${courseStat.courseName}`
                       : courseStat.courseName}
                   </span>
                 </button>
-                <p className="text-xs text-muted-foreground mt-0.5 pl-4 truncate">
+                <p className="text-xs text-muted-foreground mt-0.5 pl-4 break-words">
                   {courseStat.city}{courseStat.state ? `, ${courseStat.state}` : ''}
                 </p>
               </td>
