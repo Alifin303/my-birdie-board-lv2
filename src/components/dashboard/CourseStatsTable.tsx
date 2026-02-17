@@ -164,9 +164,9 @@ export const CourseStatsTable = ({
         <tbody>
           {sortedStats.map((courseStat) => (
             <tr key={courseStat.courseId} className="border-b last:border-0 hover:bg-secondary/5 transition-colors">
-              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium">
+              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium max-w-[120px] sm:max-w-none">
                 <button 
-                  className="hover:underline text-primary flex items-center gap-1"
+                  className="hover:underline text-primary flex items-center gap-1 max-w-full"
                   onClick={() => onCourseClick(courseStat.courseId)}
                 >
                   <Flag className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
