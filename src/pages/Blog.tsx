@@ -10,6 +10,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 const blogPosts = [
   {
+    id: "golf-scoring-terms",
+    title: "Golf Scoring Terms Explained: Birdie, Bogey, Eagle & More",
+    description: "Learn every golf scoring term from birdie and bogey to eagle, albatross, and double bogey. A simple guide to golf scorecard terminology for beginners.",
+    excerpt: "If you're new to golf — or just want to finally understand what 'albatross' means — this guide covers every scoring term you'll hear on the course, from the common to the extremely rare.",
+    date: "2026-02-18",
+    readTime: "9 min read",
+    tags: ["Scoring", "Beginner", "Terminology"],
+    link: "/blog/golf-scoring-terms"
+  },
+  {
     id: "course-leaderboards",
     title: "Golf Course Leaderboards: Compete Without Playing Together",
     description: "Learn how MyBirdieBoard's course-by-course leaderboards let you compete with friends and other golfers — without needing to play at the same time.",

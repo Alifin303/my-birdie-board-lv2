@@ -142,6 +142,12 @@ export const routeSEOMap: Record<string, RouteSEO> = {
     keywords: 'golf course leaderboard, compete with friends golf, golf leaderboard app, course leaderboard golf, golf competition app, asynchronous golf competition',
     ogType: 'article',
   },
+  '/blog/golf-scoring-terms': {
+    title: 'Golf Scoring Terms Explained: Birdie, Bogey, Eagle & More | MyBirdieBoard',
+    description: 'Learn every golf scoring term from birdie and bogey to eagle, albatross, and double bogey. A simple guide to understanding golf scorecard terminology for beginners.',
+    keywords: 'golf scoring terms, birdie in golf, bogey meaning, eagle golf, albatross golf, par in golf, double bogey, golf terminology, golf scorecard terms',
+    ogType: 'article',
+  },
 
   // ===== Guide pages =====
   '/guides/how-to-track-golf-scores': {
