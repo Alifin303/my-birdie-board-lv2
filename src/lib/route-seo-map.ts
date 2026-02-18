@@ -148,6 +148,12 @@ export const routeSEOMap: Record<string, RouteSEO> = {
     keywords: 'golf scoring terms, birdie in golf, bogey meaning, eagle golf, albatross golf, par in golf, double bogey, golf terminology, golf scorecard terms',
     ogType: 'article',
   },
+  '/blog/what-is-a-good-golf-score': {
+    title: 'What is a Good Golf Score? Averages by Handicap, Age & Skill Level | MyBirdieBoard',
+    description: 'Find out what a good golf score is for your level. Average golf scores by handicap, age, and skill level with benchmarks for beginners, intermediates, and low handicappers.',
+    keywords: 'what is a good golf score, average golf score, good score in golf, average golf score by age, average golf score by handicap, golf score averages, beginner golf score',
+    ogType: 'article',
+  },
 
   // ===== Guide pages =====
   '/guides/how-to-track-golf-scores': {
