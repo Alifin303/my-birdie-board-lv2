@@ -10,6 +10,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 const blogPosts = [
   {
+    id: "what-is-a-good-golf-score",
+    title: "What is a Good Golf Score? Averages by Handicap, Age & Skill Level",
+    description: "Find out what a good golf score is for your level. Average golf scores by handicap, age, and skill level with benchmarks for beginners, intermediates, and low handicappers.",
+    excerpt: "\"What's a good score?\" is the most common question new golfers ask — and the answer depends entirely on who you are. Here's a data-driven breakdown by handicap, age, and skill level.",
+    date: "2026-02-18",
+    readTime: "10 min read",
+    tags: ["Scoring", "Averages", "Beginner"],
+    link: "/blog/what-is-a-good-golf-score"
+  },
+  {
     id: "golf-scoring-terms",
     title: "Golf Scoring Terms Explained: Birdie, Bogey, Eagle & More",
     description: "Learn every golf scoring term from birdie and bogey to eagle, albatross, and double bogey. A simple guide to golf scorecard terminology for beginners.",
