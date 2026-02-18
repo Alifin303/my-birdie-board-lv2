@@ -31,6 +31,7 @@ import GolfHandicapBeginner from '@/pages/blog/GolfHandicapBeginner'
 import GolfStatsToTrack from '@/pages/blog/GolfStatsToTrack'
 import PlayingWithoutPhone from '@/pages/blog/PlayingWithoutPhone'
 import CourseLeaderboards from '@/pages/blog/CourseLeaderboards'
+import GolfScoringTerms from '@/pages/blog/GolfScoringTerms'
 
 // Guide pages - static imports for SSG
 import HowToTrackGolfScores from '@/pages/guides/HowToTrackGolfScores'
@@ -103,6 +104,7 @@ export const routes: RouteRecord[] = [
   { path: '/blog/golf-stats-to-track', element: P(<GolfStatsToTrack />), errorElement: <RouteErrorFallback /> },
   { path: '/blog/playing-without-phone', element: P(<PlayingWithoutPhone />), errorElement: <RouteErrorFallback /> },
   { path: '/blog/course-leaderboards', element: P(<CourseLeaderboards />), errorElement: <RouteErrorFallback /> },
+  { path: '/blog/golf-scoring-terms', element: P(<GolfScoringTerms />), errorElement: <RouteErrorFallback /> },
 
   // Guide pages
   { path: '/guides/how-to-track-golf-scores', element: P(<HowToTrackGolfScores />), errorElement: <RouteErrorFallback /> },
