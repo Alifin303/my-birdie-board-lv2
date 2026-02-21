@@ -585,6 +585,9 @@ export const CourseLeaderboard = ({
               <DialogDescription>
                 Compare your scores with other players on this course.
               </DialogDescription>
+              <p className="text-xs text-muted-foreground mt-1">
+                Want more competition? Tell your golf buddies about <span className="font-semibold">mybirdieboard.com</span> to see them on the leaderboard!
+              </p>
             </div>
             <Button
               variant="ghost"
