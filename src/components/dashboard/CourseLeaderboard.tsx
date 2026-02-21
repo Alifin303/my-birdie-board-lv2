@@ -578,26 +578,14 @@ export const CourseLeaderboard = ({
   return (
     <Dialog open={open} onOpenChange={handleDialogOpen}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <DialogTitle className="text-xl">{courseName} Leaderboards</DialogTitle>
+         <DialogHeader>
+            <DialogTitle className="text-xl">{courseName} Leaderboards</DialogTitle>
               <DialogDescription>
                 Compare your scores with other players on this course.
               </DialogDescription>
               <p className="text-xs text-muted-foreground mt-1">
                 Want more competition? Tell your golf buddies about <span className="font-semibold">mybirdieboard.com</span> to see them on the leaderboard!
               </p>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleDialogOpen(false)}
-              className="h-6 w-6"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
         </DialogHeader>
         
         <div className="space-y-4 mt-4">
