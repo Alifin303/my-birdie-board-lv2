@@ -10,6 +10,7 @@ import { CourseStatsTable, CourseRoundHistory } from "@/components/dashboard/Cou
 import { DetailedStats } from "@/components/dashboard/DetailedStats";
 import { AdvancedStats } from "@/components/dashboard/AdvancedStats";
 import ScoreProgressionChart from "@/components/dashboard/ScoreProgressionChart";
+import { LeaderboardBanner } from "@/components/dashboard/LeaderboardBanner";
 import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
 import { useToast } from "@/hooks/use-toast";
 import { clearSubscriptionCache } from "@/integrations/supabase/subscription/subscription-utils";
@@ -336,6 +337,11 @@ export default function Dashboard() {
                 isLoading={roundsLoading}
               />
             </div>
+            
+            <LeaderboardBanner 
+              userRounds={userRounds}
+              handicapIndex={handicapFromProfile}
+            />
           </>
         )}
         
