@@ -3,14 +3,26 @@ import { SEOHead } from "@/components/SEOHead";
 import { BreadcrumbNav } from "@/components/BreadcrumbNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, Calculator, Target, TrendingUp, Award } from "lucide-react";
+import { BarChart3, Calculator, Target, TrendingUp, Award, BookOpen, Smartphone, Crosshair, Trophy, Users } from "lucide-react";
 
 const guides = [
+  {
+    title: "Ultimate Guide to Tracking Golf Scores",
+    description: "Everything you need to know about golf score tracking — methods, tools, and best practices for recording and analysing every round.",
+    icon: BookOpen,
+    link: "/guides/golf-score-tracking-guide",
+  },
   {
     title: "How to Track Golf Scores",
     description: "Learn the best methods for tracking your golf scores effectively. Digital tools, apps, and best practices for beginners and experienced golfers.",
     icon: BarChart3,
     link: "/guides/how-to-track-golf-scores",
+  },
+  {
+    title: "Golf Score Tracking for Beginners",
+    description: "New to golf? Learn basic scoring, how to record rounds, and how to understand your handicap from day one.",
+    icon: Users,
+    link: "/guides/golf-score-tracking-for-beginners",
   },
   {
     title: "Golf Handicap Calculator Guide",
@@ -23,6 +35,48 @@ const guides = [
     description: "Compare the top golf score tracking apps. Features, pricing, and which app is right for your game.",
     icon: Target,
     link: "/guides/best-golf-score-tracking-apps",
+  },
+  {
+    title: "Golf Apps Without Phone During Round",
+    description: "Discover golf tracking apps that don't require your phone during play. Post-round logging for distraction-free golf.",
+    icon: Smartphone,
+    link: "/guides/golf-apps-without-phone-during-round",
+  },
+  {
+    title: "Golf Score Tracker vs GPS Apps",
+    description: "Compare score trackers and GPS golf apps. Understand the differences to choose the right tool for how you play.",
+    icon: Crosshair,
+    link: "/guides/golf-score-tracker-vs-gps-apps",
+  },
+  {
+    title: "How to Analyse Your Golf Performance",
+    description: "Learn to analyse golf scores, identify weaknesses, and track trends for better results on the course.",
+    icon: TrendingUp,
+    link: "/guides/how-to-analyse-golf-performance",
+  },
+  {
+    title: "Golf Statistics Every Player Should Track",
+    description: "Essential golf stats — fairways hit, GIR, putts per round, and scoring trends. Know which numbers lower your scores.",
+    icon: Award,
+    link: "/guides/golf-statistics-to-track",
+  },
+  {
+    title: "Digital Golf Journals Explained",
+    description: "Keep a digital golf journal to track rounds, review patterns, and improve your game over time.",
+    icon: BookOpen,
+    link: "/guides/digital-golf-journal",
+  },
+  {
+    title: "How to Break 90 Using Statistics",
+    description: "Use tracked golf data to break 90. Stats-based strategies for mid-handicap golfers chasing the 80s.",
+    icon: Trophy,
+    link: "/guides/how-to-break-90-using-stats",
+  },
+  {
+    title: "Golf Performance Analytics Explained",
+    description: "How golfers use performance analytics to improve. Scoring trends, handicap data, and historical analysis.",
+    icon: BarChart3,
+    link: "/guides/golf-performance-analytics-explained",
   },
   {
     title: "Golf Performance Analytics",
@@ -61,7 +115,7 @@ const guides = [
     link: "/guides/choosing-the-right-golf-score-tracker",
   },
   {
-    title: "Best Golf Score Tracking Apps",
+    title: "Best Golf Score Tracking Apps (Comparison)",
     description: "GPS apps, social platforms, and post-round trackers compared. Find the right app for how you actually play.",
     icon: Calculator,
     link: "/compare/best-golf-score-tracking-apps",
