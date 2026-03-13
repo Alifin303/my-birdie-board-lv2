@@ -44,6 +44,15 @@ import GolfPerformanceMetrics from '@/pages/guides/GolfPerformanceMetrics'
 import ImproveGolfUsingData from '@/pages/guides/ImproveGolfUsingData'
 import PostRoundGolfAnalysis from '@/pages/guides/PostRoundGolfAnalysis'
 import ChoosingGolfScoreTracker from '@/pages/guides/ChoosingGolfScoreTracker'
+import GolfScoreTrackingGuide from '@/pages/guides/GolfScoreTrackingGuide'
+import GolfAppsWithoutPhone from '@/pages/guides/GolfAppsWithoutPhone'
+import HowToAnalyseGolfPerformance from '@/pages/guides/HowToAnalyseGolfPerformance'
+import GolfStatisticsToTrack from '@/pages/guides/GolfStatisticsToTrack'
+import DigitalGolfJournal from '@/pages/guides/DigitalGolfJournal'
+import GolfScoreTrackerVsGpsApps from '@/pages/guides/GolfScoreTrackerVsGpsApps'
+import HowToBreak90UsingStats from '@/pages/guides/HowToBreak90UsingStats'
+import GolfPerformanceAnalyticsExplained from '@/pages/guides/GolfPerformanceAnalyticsExplained'
+import GolfScoreTrackingForBeginners from '@/pages/guides/GolfScoreTrackingForBeginners'
 
 // Compare pages - static imports for SSG
 import BestGolfScoreTrackingApps from '@/pages/compare/BestGolfScoreTrackingApps'
@@ -118,6 +127,15 @@ export const routes: RouteRecord[] = [
   { path: '/guides/how-to-improve-at-golf-using-data', element: P(<ImproveGolfUsingData />), errorElement: <RouteErrorFallback /> },
   { path: '/guides/post-round-golf-analysis', element: P(<PostRoundGolfAnalysis />), errorElement: <RouteErrorFallback /> },
   { path: '/guides/choosing-the-right-golf-score-tracker', element: P(<ChoosingGolfScoreTracker />), errorElement: <RouteErrorFallback /> },
+  { path: '/guides/golf-score-tracking-guide', element: P(<GolfScoreTrackingGuide />), errorElement: <RouteErrorFallback /> },
+  { path: '/guides/golf-apps-without-phone-during-round', element: P(<GolfAppsWithoutPhone />), errorElement: <RouteErrorFallback /> },
+  { path: '/guides/how-to-analyse-golf-performance', element: P(<HowToAnalyseGolfPerformance />), errorElement: <RouteErrorFallback /> },
+  { path: '/guides/golf-statistics-to-track', element: P(<GolfStatisticsToTrack />), errorElement: <RouteErrorFallback /> },
+  { path: '/guides/digital-golf-journal', element: P(<DigitalGolfJournal />), errorElement: <RouteErrorFallback /> },
+  { path: '/guides/golf-score-tracker-vs-gps-apps', element: P(<GolfScoreTrackerVsGpsApps />), errorElement: <RouteErrorFallback /> },
+  { path: '/guides/how-to-break-90-using-stats', element: P(<HowToBreak90UsingStats />), errorElement: <RouteErrorFallback /> },
+  { path: '/guides/golf-performance-analytics-explained', element: P(<GolfPerformanceAnalyticsExplained />), errorElement: <RouteErrorFallback /> },
+  { path: '/guides/golf-score-tracking-for-beginners', element: P(<GolfScoreTrackingForBeginners />), errorElement: <RouteErrorFallback /> },
 
   // Compare pages
   { path: '/compare/best-golf-score-tracking-apps', element: P(<BestGolfScoreTrackingApps />), errorElement: <RouteErrorFallback /> },
@@ -132,7 +150,6 @@ export const routes: RouteRecord[] = [
   { path: '/admin', element: P(<LazyWrapper><Admin /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
 
   // Redirects
-  // /quiz removed – deprecated page, falls through to 404
   { path: '/verify', element: <Navigate to="/auth/callback" replace /> },
   { path: '/auth/v1/verify', element: <Navigate to="/auth/callback" replace /> },
 
