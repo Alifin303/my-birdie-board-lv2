@@ -51,7 +51,7 @@ const HowToTrackGolfScores = () => {
           <h2 className="text-2xl font-bold mb-4">Digital Golf Score Tracking - The Modern Approach</h2>
           <p className="text-muted-foreground mb-4">
             Modern golfers are increasingly turning to digital solutions for score tracking. The 
-            <Link to="/guides/best-golf-score-apps" className="text-primary hover:underline mx-1">
+            <Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline mx-1">
               best golf score tracking apps for beginners
             </Link>
             offer numerous advantages over traditional methods:
@@ -188,7 +188,7 @@ const HowToTrackGolfScores = () => {
               <h3 className="font-semibold mb-2">Apps & Tools</h3>
               <ul className="space-y-1 text-sm text-muted-foreground">
                 <li>
-                  <Link to="/guides/best-golf-score-apps" className="text-primary hover:underline">
+                  <Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline">
                     Best Golf Score Apps Comparison
                   </Link>
                 </li>
