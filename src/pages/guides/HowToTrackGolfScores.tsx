@@ -188,7 +188,7 @@ const HowToTrackGolfScores = () => {
               <h3 className="font-semibold mb-2">Apps & Tools</h3>
               <ul className="space-y-1 text-sm text-muted-foreground">
                 <li>
-                  <Link to="/guides/best-golf-score-apps" className="text-primary hover:underline">
+                  <Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline">
                     Best Golf Score Apps Comparison
                   </Link>
                 </li>
