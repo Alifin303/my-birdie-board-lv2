@@ -190,7 +190,7 @@ const GolfHandicapCalculator = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/guides/best-golf-score-apps" className="text-primary hover:underline">
+                  <Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline">
                     Best Golf Score Apps for Handicap Tracking
                   </Link>
                 </li>
