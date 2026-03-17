@@ -6,11 +6,6 @@ const corsHeaders = {
   'Content-Type': 'application/xml',
 };
 
-/**
- * Dynamic sitemap edge function.
- * Kept as a fallback / supplement to the static sitemap.xml generated at build time.
- */
-
 const SITE_URL = 'https://mybirdieboard.com';
 
 const routes: { path: string; priority: string; changefreq: string }[] = [
@@ -18,7 +13,7 @@ const routes: { path: string; priority: string; changefreq: string }[] = [
   { path: '/', priority: '1.0', changefreq: 'weekly' },
   { path: '/about', priority: '0.4', changefreq: 'monthly' },
   { path: '/faq', priority: '0.4', changefreq: 'monthly' },
-  { path: '/courses', priority: '0.4', changefreq: 'monthly' },
+  { path: '/courses', priority: '0.4', changefreq: 'daily' },
   { path: '/privacy', priority: '0.3', changefreq: 'monthly' },
   { path: '/guides', priority: '0.7', changefreq: 'weekly' },
 
@@ -36,6 +31,9 @@ const routes: { path: string; priority: string; changefreq: string }[] = [
   { path: '/blog/how-to-calculate-golf-handicap', priority: '0.7', changefreq: 'monthly' },
   { path: '/blog/golf-stats-to-track', priority: '0.7', changefreq: 'monthly' },
   { path: '/blog/playing-without-phone', priority: '0.6', changefreq: 'monthly' },
+  { path: '/blog/course-leaderboards', priority: '0.6', changefreq: 'monthly' },
+  { path: '/blog/golf-scoring-terms', priority: '0.7', changefreq: 'monthly' },
+  { path: '/blog/what-is-a-good-golf-score', priority: '0.7', changefreq: 'monthly' },
 
   // Guides
   { path: '/guides/how-to-track-golf-scores', priority: '0.8', changefreq: 'monthly' },
@@ -43,6 +41,22 @@ const routes: { path: string; priority: string; changefreq: string }[] = [
   { path: '/guides/best-golf-score-tracking-apps', priority: '0.8', changefreq: 'monthly' },
   { path: '/guides/golf-performance-analytics', priority: '0.8', changefreq: 'monthly' },
   { path: '/guides/golf-statistics-tracker', priority: '0.8', changefreq: 'monthly' },
+  { path: '/guides/golf-performance-metrics', priority: '0.8', changefreq: 'monthly' },
+  { path: '/guides/how-to-improve-at-golf-using-data', priority: '0.8', changefreq: 'monthly' },
+  { path: '/guides/post-round-golf-analysis', priority: '0.8', changefreq: 'monthly' },
+  { path: '/guides/choosing-the-right-golf-score-tracker', priority: '0.8', changefreq: 'monthly' },
+  { path: '/guides/golf-score-tracking-guide', priority: '0.8', changefreq: 'monthly' },
+  { path: '/guides/golf-apps-without-phone-during-round', priority: '0.8', changefreq: 'monthly' },
+  { path: '/guides/how-to-analyse-golf-performance', priority: '0.8', changefreq: 'monthly' },
+  { path: '/guides/golf-statistics-to-track', priority: '0.8', changefreq: 'monthly' },
+  { path: '/guides/digital-golf-journal', priority: '0.8', changefreq: 'monthly' },
+  { path: '/guides/golf-score-tracker-vs-gps-apps', priority: '0.8', changefreq: 'monthly' },
+  { path: '/guides/how-to-break-90-using-stats', priority: '0.8', changefreq: 'monthly' },
+  { path: '/guides/golf-performance-analytics-explained', priority: '0.8', changefreq: 'monthly' },
+  { path: '/guides/golf-score-tracking-for-beginners', priority: '0.8', changefreq: 'monthly' },
+
+  // Compare
+  { path: '/compare/best-golf-score-tracking-apps', priority: '0.8', changefreq: 'monthly' },
 ];
 
 serve(async (req) => {

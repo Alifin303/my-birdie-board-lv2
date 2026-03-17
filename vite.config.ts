@@ -13,6 +13,10 @@ const prerenderRoutes = [
   '/courses',
   '/guides',
   '/blog',
+  '/demo',
+  '/privacy',
+
+  // Blog posts
   '/blog/golf-score-tracking-tips',
   '/blog/best-golf-clubs-for-beginners',
   '/blog/improve-your-golf-swing',
@@ -25,6 +29,11 @@ const prerenderRoutes = [
   '/blog/how-to-calculate-golf-handicap',
   '/blog/golf-stats-to-track',
   '/blog/playing-without-phone',
+  '/blog/course-leaderboards',
+  '/blog/golf-scoring-terms',
+  '/blog/what-is-a-good-golf-score',
+
+  // Guides
   '/guides/how-to-track-golf-scores',
   '/guides/golf-handicap-calculator',
   '/guides/best-golf-score-tracking-apps',
@@ -34,9 +43,18 @@ const prerenderRoutes = [
   '/guides/how-to-improve-at-golf-using-data',
   '/guides/post-round-golf-analysis',
   '/guides/choosing-the-right-golf-score-tracker',
+  '/guides/golf-score-tracking-guide',
+  '/guides/golf-apps-without-phone-during-round',
+  '/guides/how-to-analyse-golf-performance',
+  '/guides/golf-statistics-to-track',
+  '/guides/digital-golf-journal',
+  '/guides/golf-score-tracker-vs-gps-apps',
+  '/guides/how-to-break-90-using-stats',
+  '/guides/golf-performance-analytics-explained',
+  '/guides/golf-score-tracking-for-beginners',
+
+  // Compare
   '/compare/best-golf-score-tracking-apps',
-  '/demo',
-  '/privacy',
 ];
 
 // https://vitejs.dev/config/
