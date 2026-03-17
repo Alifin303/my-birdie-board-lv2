@@ -19,6 +19,8 @@ const HIGH_VALUE_BLOGS = new Set([
   '/blog/understanding-golf-handicap-system',
   '/blog/putts-per-round',
   '/blog/golf-score-tracking-tips',
+  '/blog/what-is-a-good-golf-score',
+  '/blog/golf-scoring-terms',
 ]);
 
 function getPriority(route: string): string {
