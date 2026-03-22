@@ -196,21 +196,21 @@ export const StatsLineChart = ({ roundsData, isLoading }: StatsLineChartProps) =
       <Card className="p-4 mt-4">
         <div className="flex flex-col space-y-2">
         <div className="flex flex-col gap-3">
-          <ToggleGroup type="single" value={selectedStat} onValueChange={(value) => value && setSelectedStat(value as any)}>
-            <ToggleGroupItem value="putts" aria-label="Toggle putts chart">
-              <Circle className="h-4 w-4 mr-2" />
+          <ToggleGroup type="single" value={selectedStat} onValueChange={(value) => value && setSelectedStat(value as any)} className="flex flex-wrap gap-1">
+            <ToggleGroupItem value="putts" aria-label="Toggle putts chart" className="text-xs sm:text-sm px-2 sm:px-3">
+              <Circle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               Putting
             </ToggleGroupItem>
-            <ToggleGroupItem value="gir" aria-label="Toggle GIR chart">
-              <Target className="h-4 w-4 mr-2" />
+            <ToggleGroupItem value="gir" aria-label="Toggle GIR chart" className="text-xs sm:text-sm px-2 sm:px-3">
+              <Target className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               GIR %
             </ToggleGroupItem>
-            <ToggleGroupItem value="fairways" aria-label="Toggle fairways chart">
-              <TreeDeciduous className="h-4 w-4 mr-2" />
+            <ToggleGroupItem value="fairways" aria-label="Toggle fairways chart" className="text-xs sm:text-sm px-2 sm:px-3">
+              <TreeDeciduous className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               Fairways
             </ToggleGroupItem>
-            <ToggleGroupItem value="penalties" aria-label="Toggle penalties chart">
-              <AlertCircle className="h-4 w-4 mr-2" />
+            <ToggleGroupItem value="penalties" aria-label="Toggle penalties chart" className="text-xs sm:text-sm px-2 sm:px-3">
+              <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               Penalties
             </ToggleGroupItem>
           </ToggleGroup>
