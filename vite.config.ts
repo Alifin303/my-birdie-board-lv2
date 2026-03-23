@@ -15,6 +15,7 @@ const prerenderRoutes = [
   '/blog',
   '/demo',
   '/privacy',
+  '/get-started',
 
   // Blog posts
   '/blog/golf-score-tracking-tips',
