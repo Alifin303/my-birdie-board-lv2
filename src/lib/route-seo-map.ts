@@ -57,6 +57,11 @@ export const routeSEOMap: Record<string, RouteSEO> = {
     title: 'Demo Dashboard - See MyBirdieBoard in Action',
     description: 'Experience MyBirdieBoard\'s golf tracking features with our interactive demo. See how easy it is to track scores, analyze performance, and improve your game.',
   },
+  '/get-started': {
+    title: 'Get Started — Track Golf Scores & Improve | MyBirdieBoard',
+    description: 'Start tracking your golf scores, handicap, and performance for free. Log rounds after you play. No phone distractions on the course.',
+    keywords: 'golf score tracker, track golf scores, golf handicap tracker, golf analytics, golf improvement',
+  },
   '/privacy': {
     title: 'Privacy Policy - How MyBirdieBoard Protects Your Golf Data | MyBirdieBoard',
     description: 'Read MyBirdieBoard\'s Privacy Policy. Learn how we collect, protect, and handle your golf scores, account information, and personal data. Your privacy matters to us.',
