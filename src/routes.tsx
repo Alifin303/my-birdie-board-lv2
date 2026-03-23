@@ -14,6 +14,7 @@ import Courses from '@/pages/Courses'
 import Guides from '@/pages/Guides'
 import Blog from '@/pages/Blog'
 import Demo from '@/pages/Demo'
+import GetStarted from '@/pages/GetStarted'
 import PrivacyPolicy from '@/pages/PrivacyPolicy'
 import NotFound from '@/pages/NotFound'
 
@@ -98,6 +99,7 @@ export const routes: RouteRecord[] = [
   { path: '/guides', element: P(<Guides />), errorElement: <RouteErrorFallback /> },
   { path: '/blog', element: P(<Blog />), errorElement: <RouteErrorFallback /> },
   { path: '/demo', element: P(<Demo />), errorElement: <RouteErrorFallback /> },
+  { path: '/get-started', element: P(<GetStarted />), errorElement: <RouteErrorFallback /> },
   { path: '/privacy', element: P(<PrivacyPolicy />), errorElement: <RouteErrorFallback /> },
 
   // Blog pages
