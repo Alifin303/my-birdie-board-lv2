@@ -14,6 +14,7 @@ import Courses from '@/pages/Courses'
 import Guides from '@/pages/Guides'
 import Blog from '@/pages/Blog'
 import Demo from '@/pages/Demo'
+import GetStarted from '@/pages/GetStarted'
 import PrivacyPolicy from '@/pages/PrivacyPolicy'
 import NotFound from '@/pages/NotFound'
 
