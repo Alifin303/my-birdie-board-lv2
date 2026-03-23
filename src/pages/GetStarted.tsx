@@ -50,7 +50,7 @@ const GetStarted = () => {
       <SEOHead
         title="Get Started — Track Golf Scores & Improve | MyBirdieBoard"
         description="Start tracking your golf scores, handicap, and performance for free. Log rounds after you play. No phone distractions on the course."
-        canonicalUrl="/get-started"
+        canonicalPath="/get-started"
         keywords="golf score tracker, track golf scores, golf handicap tracker, golf analytics, golf improvement"
       />
       <script
