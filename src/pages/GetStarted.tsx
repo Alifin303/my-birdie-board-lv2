@@ -96,7 +96,7 @@ const GetStarted = () => {
                 size="lg"
                 variant="outline"
                 asChild
-                className="border-white/40 text-primary-foreground hover:bg-white/10 text-lg px-8 py-6"
+                className="border-white/40 text-primary hover:bg-white/10 text-lg px-8 py-6"
               >
                 <Link to="/demo">See Demo</Link>
               </Button>
@@ -304,11 +304,12 @@ const GetStarted = () => {
                 </p>
                 <ul className="space-y-3 mb-6">
                   {[
-                    "Track up to 4 rounds",
-                    "Handicap calculation",
+                   "Track up to 4 rounds",
                     "Score progression chart",
                     "Stableford scoring",
                     "Course search",
+                    "Detailed stats (putts, GIR, fairways)",
+                    "Course leaderboards",
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
                       <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
@@ -336,10 +337,8 @@ const GetStarted = () => {
                 </p>
                 <ul className="space-y-3 mb-6">
                   {[
-                    "Unlimited round tracking",
-                    "Advanced performance analytics",
-                    "Course leaderboards",
-                    "Detailed stats (putts, GIR, fairways)",
+                   "Unlimited round tracking",
+                    "Handicap calculation",
                     "Score milestones & achievements",
                     "Full round history",
                   ].map((item, i) => (
