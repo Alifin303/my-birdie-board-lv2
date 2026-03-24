@@ -34,6 +34,7 @@ import PlayingWithoutPhone from '@/pages/blog/PlayingWithoutPhone'
 import CourseLeaderboards from '@/pages/blog/CourseLeaderboards'
 import GolfScoringTerms from '@/pages/blog/GolfScoringTerms'
 import WhatIsAGoodGolfScore from '@/pages/blog/WhatIsAGoodGolfScore'
+import Journal18MeetsBirdieBoard from '@/pages/blog/Journal18MeetsBirdieBoard'
 
 // Guide pages - static imports for SSG
 import HowToTrackGolfScores from '@/pages/guides/HowToTrackGolfScores'
