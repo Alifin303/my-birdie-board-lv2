@@ -6,7 +6,7 @@ export const Logo = () => {
   return (
     <Link to="/" className="flex items-center">
       <img 
-        src="/logo.png" 
+        src="/lovable-uploads/e65e4018-8608-4c06-aefc-191f9e9de8e0.png" 
         alt="MyBirdieBoard Logo" 
         className="h-16 w-auto object-contain"
       />
