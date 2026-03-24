@@ -337,10 +337,8 @@ const GetStarted = () => {
                 </p>
                 <ul className="space-y-3 mb-6">
                   {[
-                    "Unlimited round tracking",
-                    "Advanced performance analytics",
-                    "Course leaderboards",
-                    "Detailed stats (putts, GIR, fairways)",
+                   "Unlimited round tracking",
+                    "Handicap calculation",
                     "Score milestones & achievements",
                     "Full round history",
                   ].map((item, i) => (
