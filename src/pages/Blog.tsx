@@ -10,6 +10,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 const blogPosts = [
   {
+    id: "journal-18-meets-mybirdieboard",
+    title: "Journal 18 Meets MyBirdieBoard: The Perfect Golf Tracking System",
+    description: "Use Journal 18 on the course to capture your round, then transfer it to MyBirdieBoard for a complete digital archive. The perfect golf tracking system combining physical journaling with digital insights.",
+    excerpt: "Pair Journal 18's beautiful on-course journaling with MyBirdieBoard's digital insights to create the ultimate golf tracking system — capture every detail, unlock every insight.",
+    date: "2026-03-24",
+    readTime: "12 min read",
+    tags: ["Post-Round Tracking", "Golf Journal", "Journal 18"],
+    link: "/blog/journal-18-meets-mybirdieboard"
+  },
+  {
     id: "what-is-a-good-golf-score",
     title: "What is a Good Golf Score? Averages by Handicap, Age & Skill Level",
     description: "Find out what a good golf score is for your level. Average golf scores by handicap, age, and skill level with benchmarks for beginners, intermediates, and low handicappers.",

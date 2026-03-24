@@ -159,6 +159,12 @@ export const routeSEOMap: Record<string, RouteSEO> = {
     keywords: 'what is a good golf score, average golf score, good score in golf, average golf score by age, average golf score by handicap, golf score averages, beginner golf score',
     ogType: 'article',
   },
+  '/blog/journal-18-meets-mybirdieboard': {
+    title: 'Journal 18 Meets MyBirdieBoard: The Perfect Golf Tracking System',
+    description: 'Use Journal 18 on the course to capture your round, then transfer it to MyBirdieBoard for a complete digital archive. The perfect golf tracking system.',
+    keywords: 'Journal 18, Journal 18 digital companion, golf tracking app, golf journaling, digital golf journal, post-round golf tracking',
+    ogType: 'article',
+  },
 
   // ===== Guide pages =====
   '/guides/how-to-track-golf-scores': {
