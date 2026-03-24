@@ -64,13 +64,7 @@ export default function Journal18MeetsBirdieBoard() {
 
         <main className="flex-1">
           <article className="container mx-auto px-4 py-8 max-w-3xl">
-            <BreadcrumbNav
-              items={[
-                { label: "Home", href: "/" },
-                { label: "Blog", href: "/blog" },
-                { label: "Journal 18 Meets MyBirdieBoard" },
-              ]}
-            />
+            <BreadcrumbNav />
 
             <div className="mt-6 mb-8">
               <Link to="/blog" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-4">
