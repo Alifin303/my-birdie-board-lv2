@@ -96,7 +96,7 @@ const GetStarted = () => {
                 size="lg"
                 variant="outline"
                 asChild
-                className="border-white/40 text-primary-foreground hover:bg-white/10 text-lg px-8 py-6"
+                className="border-white/40 text-primary hover:bg-white/10 text-lg px-8 py-6"
               >
                 <Link to="/demo">See Demo</Link>
               </Button>
