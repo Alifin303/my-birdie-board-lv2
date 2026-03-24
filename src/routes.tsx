@@ -118,6 +118,7 @@ export const routes: RouteRecord[] = [
   { path: '/blog/course-leaderboards', element: P(<CourseLeaderboards />), errorElement: <RouteErrorFallback /> },
   { path: '/blog/golf-scoring-terms', element: P(<GolfScoringTerms />), errorElement: <RouteErrorFallback /> },
   { path: '/blog/what-is-a-good-golf-score', element: P(<WhatIsAGoodGolfScore />), errorElement: <RouteErrorFallback /> },
+  { path: '/blog/journal-18-meets-mybirdieboard', element: P(<Journal18MeetsBirdieBoard />), errorElement: <RouteErrorFallback /> },
 
   // Guide pages
   { path: '/guides/how-to-track-golf-scores', element: P(<HowToTrackGolfScores />), errorElement: <RouteErrorFallback /> },
