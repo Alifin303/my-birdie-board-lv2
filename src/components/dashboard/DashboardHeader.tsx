@@ -465,7 +465,7 @@ export const DashboardHeader = ({
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate">Welcome, {profileData?.first_name || 'Golfer'}!</h1>
             {isFreeTier && (
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span>Free tier: {remainingFreeRounds} round{remainingFreeRounds !== 1 ? 's' : ''} remaining</span>
+                <span>Free Tier</span>
                 <Button 
                   variant="link" 
                   size="sm" 
