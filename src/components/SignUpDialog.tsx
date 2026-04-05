@@ -118,16 +118,13 @@ export function SignUpDialog({
       if (signInError) {
         console.error("Auto sign-in error:", signInError);
       }
-      setSignupSuccess(true);
       toast({
         title: "Account created!",
         description: "You are now logged in and can access the app.",
         duration: 5000
       });
-      setTimeout(() => {
-        handleOpenChange(false);
-        navigate("/dashboard");
-      }, 2000);
+      handleOpenChange(false);
+      navigate("/dashboard");
       form.reset();
     } catch (error: any) {
       console.error("Sign up error:", error);
