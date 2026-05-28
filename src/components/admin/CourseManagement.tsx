@@ -4,8 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Plus, ChevronRight } from "lucide-react";
+import { Edit, Plus, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
 import { CourseEditor } from "./CourseEditor";
+
+interface CoursePlayer {
+  user_id: string;
+  name: string;
+  email: string | null;
+  roundsCount: number;
+}
 
 interface Course {
   id: number;
