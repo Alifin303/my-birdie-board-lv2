@@ -9,7 +9,7 @@ const GolfScoreTrackerVsGpsApps = () => {
       description="Compare golf score trackers and GPS golf apps. Understand the differences to choose the right tool for how you play."
       canonicalUrl="https://mybirdieboard.com/guides/golf-score-tracker-vs-gps-apps"
       keywords="golf score tracker vs gps app, golf tracking apps comparison, golf app comparison, gps golf app vs score tracker"
-      lastModified="2026-03-13T10:00:00Z"
+      lastModified="2026-06-01T10:00:00Z"
     >
       <div className="space-y-8">
         <section>

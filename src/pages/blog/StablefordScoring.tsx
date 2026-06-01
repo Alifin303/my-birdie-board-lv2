@@ -33,7 +33,7 @@ export default function StablefordScoring() {
       }
     },
     "datePublished": "2025-01-25",
-    "dateModified": "2026-01-24",
+    "dateModified": "2026-06-01T10:00:00Z",
     "mainEntityOfPage": {
       "@type": "WebPage",
       "@id": "https://mybirdieboard.com/blog/stableford-scoring"
@@ -47,7 +47,7 @@ export default function StablefordScoring() {
         description="Learn how Stableford scoring works in golf, how to calculate points for each hole, and why it's a popular alternative to stroke play. Track Stableford scores with MyBirdieBoard."
         keywords="stableford scoring, stableford points, golf stableford, stableford calculator, stableford scoring system, net stableford, gross stableford, golf scoring methods"
         ogType="article"
-        lastModified="2026-01-24T10:00:00Z"
+        lastModified="2026-06-01T10:00:00Z"
       >
         <meta property="article:published_time" content="2025-01-25T10:00:00Z" />
         <script type="application/ld+json">

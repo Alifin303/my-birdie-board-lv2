@@ -9,7 +9,7 @@ const GolfStatisticsToTrack = () => {
       description="Essential golf stats to track — fairways hit, GIR, putts per round, and scoring trends. Know which numbers actually lower your scores."
       canonicalUrl="https://mybirdieboard.com/guides/golf-statistics-to-track"
       keywords="golf stats to track, golf statistics tracking, golf performance stats, golf metrics, golf data tracking"
-      lastModified="2026-03-13T10:00:00Z"
+      lastModified="2026-06-01T10:00:00Z"
     >
       <div className="space-y-8">
         <section>

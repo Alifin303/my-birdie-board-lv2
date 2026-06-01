@@ -9,7 +9,7 @@ const GolfPerformanceAnalyticsExplained = () => {
       description="How golfers use performance analytics to improve. Understand scoring trends, handicap data, and historical analysis for better results."
       canonicalUrl="https://mybirdieboard.com/guides/golf-performance-analytics-explained"
       keywords="golf performance analytics, golf data analysis, golf analytics explained, golf scoring analytics, golf performance data"
-      lastModified="2026-03-13T10:00:00Z"
+      lastModified="2026-06-01T10:00:00Z"
     >
       <div className="space-y-8">
         <section>

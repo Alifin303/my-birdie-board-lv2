@@ -18,7 +18,7 @@ export default function WhatIsAGoodGolfScore() {
         description="Find out what a good golf score is for your level. Average golf scores by handicap, age, and skill level with benchmarks for beginners, intermediates, and low handicappers."
         keywords="what is a good golf score, average golf score, good score in golf, average golf score by age, average golf score by handicap, golf score averages, beginner golf score"
         ogType="article"
-        lastModified="2026-02-18T12:00:00Z"
+        lastModified="2026-06-01T10:00:00Z"
       >
         <meta property="article:published_time" content="2026-02-18T12:00:00Z" />
         <script type="application/ld+json">
@@ -40,7 +40,7 @@ export default function WhatIsAGoodGolfScore() {
             "image": "https://mybirdieboard.com/og-image.png",
             "url": "https://mybirdieboard.com/blog/what-is-a-good-golf-score",
             "datePublished": "2026-02-18T12:00:00Z",
-            "dateModified": "2026-02-18T12:00:00Z",
+            "dateModified": "2026-06-01T10:00:00Z",
             "author": { "@type": "Organization", "name": "MyBirdieBoard" },
             "publisher": { "@type": "Organization", "name": "MyBirdieBoard", "logo": { "@type": "ImageObject", "url": "https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" } },
             "mainEntityOfPage": { "@type": "WebPage", "@id": "https://mybirdieboard.com/blog/what-is-a-good-golf-score" }

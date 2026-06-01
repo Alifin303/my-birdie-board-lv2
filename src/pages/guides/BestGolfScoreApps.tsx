@@ -9,7 +9,7 @@ const BestGolfScoreApps = () => {
       description="Compare the best golf score tracking apps in 2026. Features, pricing, and which app suits your playing style."
       canonicalUrl="https://mybirdieboard.com/guides/best-golf-score-tracking-apps"
       keywords="best golf score tracking apps, golf score tracker app, golf scoring apps, best golf apps 2026"
-      lastModified="2026-03-13T10:00:00Z"
+      lastModified="2026-06-01T10:00:00Z"
     >
       <div className="space-y-8">
         <section>

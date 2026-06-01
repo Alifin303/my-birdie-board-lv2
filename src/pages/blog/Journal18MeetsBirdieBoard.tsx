@@ -18,7 +18,7 @@ export default function Journal18MeetsBirdieBoard() {
         description="Use Journal 18 on the course to capture your round, then transfer it to MyBirdieBoard for a complete digital archive. The perfect golf tracking system combining physical journaling with digital insights."
         keywords="Journal 18, Journal 18 digital companion, golf tracking app, golf journaling, digital golf journal, post-round golf tracking, golf score tracker, Journal 18 golf"
         ogType="article"
-        lastModified="2026-03-24T10:00:00Z"
+        lastModified="2026-06-01T10:00:00Z"
       >
         <meta property="article:published_time" content="2026-03-24T10:00:00Z" />
         <script type="application/ld+json">
@@ -40,7 +40,7 @@ export default function Journal18MeetsBirdieBoard() {
             "image": "https://mybirdieboard.com/og-image.png",
             "url": "https://mybirdieboard.com/blog/journal-18-meets-mybirdieboard",
             "datePublished": "2026-03-24T10:00:00Z",
-            "dateModified": "2026-03-24T10:00:00Z",
+            "dateModified": "2026-06-01T10:00:00Z",
             "author": { "@type": "Organization", "name": "MyBirdieBoard" },
             "publisher": { "@type": "Organization", "name": "MyBirdieBoard", "logo": { "@type": "ImageObject", "url": "https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" } },
             "mainEntityOfPage": { "@type": "WebPage", "@id": "https://mybirdieboard.com/blog/journal-18-meets-mybirdieboard" }

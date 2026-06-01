@@ -9,7 +9,7 @@ const GolfPerformanceMetrics = () => {
       description="Discover the golf performance metrics that matter most. Learn which stats to track, how to use analytics to lower your scores, and why post-round analysis beats mid-round tracking."
       canonicalUrl="https://mybirdieboard.com/guides/golf-performance-metrics"
       keywords="golf performance metrics, golf stats to track, golf analytics, golf statistics, greens in regulation, fairways hit, putts per round, scrambling percentage"
-      lastModified="2026-02-10T10:00:00Z"
+      lastModified="2026-06-01T10:00:00Z"
     >
       <div className="space-y-8">
         <section>

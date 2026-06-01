@@ -13,7 +13,7 @@ const articleSchema = {
   "author": { "@type": "Organization", "name": "MyBirdieBoard" },
   "publisher": { "@type": "Organization", "name": "MyBirdieBoard", "logo": { "@type": "ImageObject", "url": "https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" } },
   "datePublished": "2025-01-20T10:00:00Z",
-  "dateModified": "2026-01-24T10:00:00Z",
+  "dateModified": "2026-06-01T10:00:00Z",
   "mainEntityOfPage": { "@type": "WebPage", "@id": "https://mybirdieboard.com/blog/course-management-tips" }
 };
 
@@ -45,7 +45,7 @@ const CourseManagementTips = () => {
         description="Master golf course management with these strategic tips. Learn when to be aggressive, how to avoid big numbers, and make smarter decisions on the course."
         keywords="golf course management, golf strategy, course management tips, smart golf, golf tactics, lower golf scores"
         ogType="article"
-        lastModified="2026-01-24T10:00:00Z"
+        lastModified="2026-06-01T10:00:00Z"
       >
         <meta property="article:published_time" content="2025-01-20T10:00:00Z" />
         <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>

@@ -9,7 +9,7 @@ const BestGolfScoreTrackingApps = () => {
       description="Compare the best golf score tracking apps. From GPS-based tools to post-round trackers, find the right app for how you actually play golf."
       canonicalUrl="https://mybirdieboard.com/compare/best-golf-score-tracking-apps"
       keywords="best golf score tracking apps, golf score app, golf tracker app, golf handicap app, golfshake alternative, post round golf tracker"
-      lastModified="2026-02-10T10:00:00Z"
+      lastModified="2026-06-01T10:00:00Z"
     >
       <div className="space-y-8">
         <section>

@@ -9,7 +9,7 @@ const GolfScoreTrackingGuide = () => {
       description="Learn how to track golf scores effectively. Methods, tools, and best practices for recording and analysing every round you play."
       canonicalUrl="https://mybirdieboard.com/guides/golf-score-tracking-guide"
       keywords="track golf scores, golf score tracking, how to track golf scores, golf score tracker, golf scoring guide"
-      lastModified="2026-03-13T10:00:00Z"
+      lastModified="2026-06-01T10:00:00Z"
     >
       <div className="space-y-8">
         <section>

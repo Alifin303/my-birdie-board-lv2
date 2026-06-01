@@ -33,7 +33,7 @@ export default function HowToBreak100() {
       }
     },
     "datePublished": "2026-01-04",
-    "dateModified": "2026-01-24",
+    "dateModified": "2026-06-01T10:00:00Z",
     "mainEntityOfPage": {
       "@type": "WebPage",
       "@id": "https://mybirdieboard.com/blog/how-to-break-100"
@@ -78,7 +78,7 @@ export default function HowToBreak100() {
         description="Learn how to break 100 in golf with 15 proven tips. From course management to practice drills, discover strategies that will help you finally shoot in the 90s."
         keywords="how to break 100 in golf, break 100 golf tips, golf beginner tips, shoot under 100, golf scoring tips, lower golf scores, golf improvement"
         ogType="article"
-        lastModified="2026-01-24T10:00:00Z"
+        lastModified="2026-06-01T10:00:00Z"
       >
         <meta property="article:published_time" content="2026-01-04T10:00:00Z" />
         <script type="application/ld+json">

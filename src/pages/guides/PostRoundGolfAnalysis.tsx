@@ -9,7 +9,7 @@ const PostRoundGolfAnalysis = () => {
       description="Learn how to review your golf round after play. A step-by-step guide to post-round analysis that turns every round into a learning opportunity."
       canonicalUrl="https://mybirdieboard.com/guides/post-round-golf-analysis"
       keywords="post round golf analysis, how to review a golf round, golf round review, golf performance review, analyse golf round, golf journal"
-      lastModified="2026-02-10T10:00:00Z"
+      lastModified="2026-06-01T10:00:00Z"
     >
       <div className="space-y-8">
         <section>

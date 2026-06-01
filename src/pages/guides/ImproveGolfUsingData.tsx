@@ -9,7 +9,7 @@ const ImproveGolfUsingData = () => {
       description="Stop relying on feel and start using data to improve at golf. Learn how to review rounds, identify weaknesses from score patterns, and turn stats into focused practice."
       canonicalUrl="https://mybirdieboard.com/guides/how-to-improve-at-golf-using-data"
       keywords="improve golf using stats, golf data analysis, how to improve at golf, golf improvement tips, golf practice plan, golf performance data"
-      lastModified="2026-02-10T10:00:00Z"
+      lastModified="2026-06-01T10:00:00Z"
     >
       <div className="space-y-8">
         <section>
