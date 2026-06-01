@@ -13,7 +13,7 @@ const articleSchema = {
   "author": { "@type": "Organization", "name": "MyBirdieBoard" },
   "publisher": { "@type": "Organization", "name": "MyBirdieBoard", "logo": { "@type": "ImageObject", "url": "https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" } },
   "datePublished": "2025-01-20T10:00:00Z",
-  "dateModified": "2026-01-24T10:00:00Z",
+  "dateModified": "2026-06-01T10:00:00Z",
   "mainEntityOfPage": { "@type": "WebPage", "@id": "https://mybirdieboard.com/blog/understanding-golf-handicap-system" }
 };
 
@@ -45,7 +45,7 @@ const UnderstandingHandicap = () => {
         description="Complete guide to the World Handicap System (WHS). Understand slope ratings, course handicaps, score differentials, and how to establish your first handicap index."
         keywords="golf handicap, handicap system, calculate golf handicap, handicap index, WHS, World Handicap System"
         ogType="article"
-        lastModified="2026-01-24T10:00:00Z"
+        lastModified="2026-06-01T10:00:00Z"
       >
         <meta property="article:published_time" content="2025-01-20T10:00:00Z" />
         <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>

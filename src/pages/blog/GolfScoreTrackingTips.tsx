@@ -18,7 +18,7 @@ export default function GolfScoreTrackingTips() {
         description="Master golf score tracking with these 10 proven tips. Learn professional techniques to improve your game through better data collection and analysis."
         keywords="golf score tracking tips, golf performance tracking, digital golf scorecard, golf statistics, golf improvement"
         ogType="article"
-        lastModified="2026-01-24T10:00:00Z"
+        lastModified="2026-06-01T10:00:00Z"
       >
         <meta property="article:published_time" content="2024-12-09T10:00:00Z" />
         <script type="application/ld+json">
@@ -40,7 +40,7 @@ export default function GolfScoreTrackingTips() {
             "image": "https://mybirdieboard.com/og-image.png",
             "url": "https://mybirdieboard.com/blog/golf-score-tracking-tips",
             "datePublished": "2024-12-09T10:00:00Z",
-            "dateModified": "2026-01-24T10:00:00Z",
+            "dateModified": "2026-06-01T10:00:00Z",
             "author": { "@type": "Organization", "name": "MyBirdieBoard" },
             "publisher": { "@type": "Organization", "name": "MyBirdieBoard", "logo": { "@type": "ImageObject", "url": "https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" } },
             "mainEntityOfPage": { "@type": "WebPage", "@id": "https://mybirdieboard.com/blog/golf-score-tracking-tips" }

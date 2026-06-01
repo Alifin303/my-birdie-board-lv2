@@ -9,7 +9,7 @@ const HowToBreak90UsingStats = () => {
       description="Use tracked golf data to break 90. Practical stats-based strategies for mid-handicap golfers looking to shoot in the 80s consistently."
       canonicalUrl="https://mybirdieboard.com/guides/how-to-break-90-using-stats"
       keywords="break 90 golf tips, golf improvement stats, how to break 90, golf stats to break 90, break 90 strategy"
-      lastModified="2026-03-13T10:00:00Z"
+      lastModified="2026-06-01T10:00:00Z"
     >
       <div className="space-y-8">
         <section>

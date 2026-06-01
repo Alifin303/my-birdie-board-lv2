@@ -13,7 +13,7 @@ const articleSchema = {
   "author": { "@type": "Organization", "name": "MyBirdieBoard" },
   "publisher": { "@type": "Organization", "name": "MyBirdieBoard", "logo": { "@type": "ImageObject", "url": "https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" } },
   "datePublished": "2025-01-20T10:00:00Z",
-  "dateModified": "2026-01-24T10:00:00Z",
+  "dateModified": "2026-06-01T10:00:00Z",
   "mainEntityOfPage": { "@type": "WebPage", "@id": "https://mybirdieboard.com/blog/improve-your-golf-swing" }
 };
 
@@ -45,7 +45,7 @@ const ImproveGolfSwing = () => {
         description="Fix common swing faults like slicing and hooking with 10 expert tips. Master grip, posture, rotation, and follow-through to hit more fairways and lower scores."
         keywords="improve golf swing, golf swing tips, golf technique, better golf swing, golf fundamentals, golf instruction"
         ogType="article"
-        lastModified="2026-01-24T10:00:00Z"
+        lastModified="2026-06-01T10:00:00Z"
       >
         <meta property="article:published_time" content="2025-01-20T10:00:00Z" />
         <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>

@@ -9,7 +9,7 @@ const GolfAppsWithoutPhone = () => {
       description="Discover golf tracking apps that don't require your phone during the round. Post-round logging for distraction-free golf."
       canonicalUrl="https://mybirdieboard.com/guides/golf-apps-without-phone-during-round"
       keywords="golf apps without phone, golf tracking without phone, golf score tracker after round, post-round golf tracking, distraction-free golf"
-      lastModified="2026-03-13T10:00:00Z"
+      lastModified="2026-06-01T10:00:00Z"
     >
       <div className="space-y-8">
         <section>

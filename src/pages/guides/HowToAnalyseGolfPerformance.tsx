@@ -9,7 +9,7 @@ const HowToAnalyseGolfPerformance = () => {
       description="Learn to analyse golf scores, identify weaknesses, and track trends. A practical guide to golf performance analysis for all levels."
       canonicalUrl="https://mybirdieboard.com/guides/how-to-analyse-golf-performance"
       keywords="golf performance analysis, analyse golf scores, golf stats improvement, golf data analysis, golf performance review"
-      lastModified="2026-03-13T10:00:00Z"
+      lastModified="2026-06-01T10:00:00Z"
     >
       <div className="space-y-8">
         <section>

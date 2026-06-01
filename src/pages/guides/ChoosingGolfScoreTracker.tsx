@@ -9,7 +9,7 @@ const ChoosingGolfScoreTracker = () => {
       description="Not every golf tracker is built the same. Learn the difference between all-in-one golf platforms and post-round trackers, and find the right fit for how you play."
       canonicalUrl="https://mybirdieboard.com/guides/choosing-the-right-golf-score-tracker"
       keywords="golf score tracker, best golf tracker, golf app comparison, post round golf tracker, distraction free golf, golf score tracking app"
-      lastModified="2026-02-10T10:00:00Z"
+      lastModified="2026-06-01T10:00:00Z"
     >
       <div className="space-y-8">
         <section>

@@ -33,7 +33,7 @@ export default function MatchPlayScoring() {
       }
     },
     "datePublished": "2026-02-07",
-    "dateModified": "2026-02-07",
+    "dateModified": "2026-06-01T10:00:00Z",
     "mainEntityOfPage": {
       "@type": "WebPage",
       "@id": "https://mybirdieboard.com/blog/match-play-scoring"
@@ -86,7 +86,7 @@ export default function MatchPlayScoring() {
         description="Learn how to keep score in match play golf. Understand holes up/down, dormie, concessions, handicap strokes, and all the rules for match play scoring."
         keywords="match play scoring, how to keep score match play, match play golf rules, match play vs stroke play, dormie, golf match play, concede putt match play"
         ogType="article"
-        lastModified="2026-02-07T10:00:00Z"
+        lastModified="2026-06-01T10:00:00Z"
       >
         <meta property="article:published_time" content="2026-02-07T10:00:00Z" />
         <script type="application/ld+json">

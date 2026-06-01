@@ -14,7 +14,7 @@ const articleSchema = {
   "author": { "@type": "Organization", "name": "MyBirdieBoard" },
   "publisher": { "@type": "Organization", "name": "MyBirdieBoard", "logo": { "@type": "ImageObject", "url": "https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" } },
   "datePublished": "2025-01-20T10:00:00Z",
-  "dateModified": "2026-01-24T10:00:00Z",
+  "dateModified": "2026-06-01T10:00:00Z",
   "mainEntityOfPage": { "@type": "WebPage", "@id": "https://mybirdieboard.com/blog/best-golf-clubs-for-beginners" }
 };
 
@@ -46,7 +46,7 @@ const BestGolfClubsBeginners = () => {
         description="Discover the best golf clubs for beginners in 2025. Expert recommendations on drivers, irons, putters, and complete sets to start your golf journey right."
         keywords="best golf clubs for beginners, beginner golf clubs, golf equipment, golf club sets, starter golf clubs, best drivers for beginners"
         ogType="article"
-        lastModified="2026-01-24T10:00:00Z"
+        lastModified="2026-06-01T10:00:00Z"
       >
         <meta property="article:published_time" content="2025-01-20T10:00:00Z" />
         <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>

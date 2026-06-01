@@ -18,7 +18,7 @@ export default function CourseLeaderboards() {
         description="Learn how MyBirdieBoard's course-by-course leaderboards let you compete with friends and other golfers at your local course — without needing to play at the same time."
         keywords="golf course leaderboard, compete with friends golf, golf leaderboard app, course leaderboard golf, golf competition app, asynchronous golf competition"
         ogType="article"
-        lastModified="2026-02-12T10:00:00Z"
+        lastModified="2026-06-01T10:00:00Z"
       >
         <meta property="article:published_time" content="2026-02-12T10:00:00Z" />
         <script type="application/ld+json">
@@ -40,7 +40,7 @@ export default function CourseLeaderboards() {
             "image": "https://mybirdieboard.com/og-image.png",
             "url": "https://mybirdieboard.com/blog/course-leaderboards",
             "datePublished": "2026-02-12T10:00:00Z",
-            "dateModified": "2026-02-12T10:00:00Z",
+            "dateModified": "2026-06-01T10:00:00Z",
             "author": { "@type": "Organization", "name": "MyBirdieBoard" },
             "publisher": { "@type": "Organization", "name": "MyBirdieBoard", "logo": { "@type": "ImageObject", "url": "https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" } },
             "mainEntityOfPage": { "@type": "WebPage", "@id": "https://mybirdieboard.com/blog/course-leaderboards" }

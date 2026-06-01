@@ -9,7 +9,7 @@ const DigitalGolfJournal = () => {
       description="Keep a digital golf journal to track rounds, review patterns, and improve your game. Learn how a golf logbook accelerates improvement."
       canonicalUrl="https://mybirdieboard.com/guides/digital-golf-journal"
       keywords="golf journal, golf round journal, digital golf logbook, golf diary, golf round tracker"
-      lastModified="2026-03-13T10:00:00Z"
+      lastModified="2026-06-01T10:00:00Z"
     >
       <div className="space-y-8">
         <section>

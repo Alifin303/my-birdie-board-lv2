@@ -27,7 +27,7 @@ export default function PuttsPerRound() {
       "logo": { "@type": "ImageObject", "url": "https://mybirdieboard.com/lovable-uploads/5c3a0a2c-ab7e-49e8-ab39-c9e3770cc0e7.png" }
     },
     "datePublished": "2026-02-07",
-    "dateModified": "2026-02-07",
+    "dateModified": "2026-06-01T10:00:00Z",
     "mainEntityOfPage": { "@type": "WebPage", "@id": "https://mybirdieboard.com/blog/putts-per-round" }
   };
 
