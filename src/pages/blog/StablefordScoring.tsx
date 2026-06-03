@@ -393,6 +393,9 @@ export default function StablefordScoring() {
             <section className="mb-10">
               <h2 className="text-2xl font-bold mb-4 text-foreground">Related Resources</h2>
               <div className="grid gap-4">
+                <Link to="/tools/stableford-calculator" className="text-primary hover:underline font-semibold">
+                  → Stableford Points Calculator (Free Interactive Tool)
+                </Link>
                 <Link to="/guides/golf-handicap-calculator" className="text-primary hover:underline">
                   → Golf Handicap Calculator Guide
                 </Link>

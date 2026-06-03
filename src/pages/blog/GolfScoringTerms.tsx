@@ -260,6 +260,9 @@ export default function GolfScoringTerms() {
             <p>
               <Link to="/blog/stableford-scoring" className="text-primary hover:underline">Stableford scoring</Link> is a points-based system where each hole score earns points relative to par. A bogey earns 1 point, par earns 2, birdie earns 3, and eagle earns 4. The advantage is that a blow-up hole only costs you zero points rather than adding a large number to your total.
             </p>
+            <p>
+              Want to calculate your own Stableford score? Try our free <Link to="/tools/stableford-calculator" className="text-primary hover:underline font-semibold">Stableford Points Calculator</Link> — enter your scores for all 18 holes and see your gross and net points instantly.
+            </p>
 
             <h2>How Scoring Terms Appear on Your Scorecard</h2>
             <p>
