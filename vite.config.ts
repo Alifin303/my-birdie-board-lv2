@@ -57,6 +57,9 @@ const prerenderRoutes = [
 
   // Compare
   '/compare/best-golf-score-tracking-apps',
+
+  // Tools
+  '/tools/stableford-calculator',
 ];
 
 // https://vitejs.dev/config/
