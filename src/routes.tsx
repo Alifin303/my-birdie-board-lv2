@@ -59,6 +59,9 @@ import GolfScoreTrackingForBeginners from '@/pages/guides/GolfScoreTrackingForBe
 // Compare pages - static imports for SSG
 import BestGolfScoreTrackingApps from '@/pages/compare/BestGolfScoreTrackingApps'
 
+// Tool pages - static imports for SSG
+import StablefordCalculator from '@/pages/tools/StablefordCalculator'
+
 // Client-side only pages (lazy-loaded, not pre-rendered)
 const Course = React.lazy(() => import('@/pages/Course'))
 const AuthRedirect = React.lazy(() => import('@/pages/AuthRedirect'))
@@ -143,6 +146,9 @@ export const routes: RouteRecord[] = [
 
   // Compare pages
   { path: '/compare/best-golf-score-tracking-apps', element: P(<BestGolfScoreTrackingApps />), errorElement: <RouteErrorFallback /> },
+
+  // Tool pages
+  { path: '/tools/stableford-calculator', element: P(<StablefordCalculator />), errorElement: <RouteErrorFallback /> },
 
   // ===== CLIENT-SIDE ONLY ROUTES (Not pre-rendered) =====
   { path: '/courses/:courseId', element: P(<LazyWrapper><Course /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
