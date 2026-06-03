@@ -59,6 +59,9 @@ import GolfScoreTrackingForBeginners from '@/pages/guides/GolfScoreTrackingForBe
 // Compare pages - static imports for SSG
 import BestGolfScoreTrackingApps from '@/pages/compare/BestGolfScoreTrackingApps'
 
+// Tool pages - static imports for SSG
+import StablefordCalculator from '@/pages/tools/StablefordCalculator'
+
 // Client-side only pages (lazy-loaded, not pre-rendered)
 const Course = React.lazy(() => import('@/pages/Course'))
 const AuthRedirect = React.lazy(() => import('@/pages/AuthRedirect'))
