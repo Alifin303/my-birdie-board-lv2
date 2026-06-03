@@ -147,6 +147,9 @@ export const routes: RouteRecord[] = [
   // Compare pages
   { path: '/compare/best-golf-score-tracking-apps', element: P(<BestGolfScoreTrackingApps />), errorElement: <RouteErrorFallback /> },
 
+  // Tool pages
+  { path: '/tools/stableford-calculator', element: P(<StablefordCalculator />), errorElement: <RouteErrorFallback /> },
+
   // ===== CLIENT-SIDE ONLY ROUTES (Not pre-rendered) =====
   { path: '/courses/:courseId', element: P(<LazyWrapper><Course /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
   { path: '/auth/callback', element: P(<LazyWrapper><AuthRedirect /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
