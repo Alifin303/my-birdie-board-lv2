@@ -60,6 +60,7 @@ const prerenderRoutes = [
 
   // Tools
   '/tools/stableford-calculator',
+  '/tools/handicap-calculator',
 ];
 
 // https://vitejs.dev/config/

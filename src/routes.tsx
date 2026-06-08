@@ -61,6 +61,7 @@ import BestGolfScoreTrackingApps from '@/pages/compare/BestGolfScoreTrackingApps
 
 // Tool pages - static imports for SSG
 import StablefordCalculator from '@/pages/tools/StablefordCalculator'
+import HandicapCalculator from '@/pages/tools/HandicapCalculator'
 
 // Client-side only pages (lazy-loaded, not pre-rendered)
 const Course = React.lazy(() => import('@/pages/Course'))
@@ -149,6 +150,7 @@ export const routes: RouteRecord[] = [
 
   // Tool pages
   { path: '/tools/stableford-calculator', element: P(<StablefordCalculator />), errorElement: <RouteErrorFallback /> },
+  { path: '/tools/handicap-calculator', element: P(<HandicapCalculator />), errorElement: <RouteErrorFallback /> },
 
   // ===== CLIENT-SIDE ONLY ROUTES (Not pre-rendered) =====
   { path: '/courses/:courseId', element: P(<LazyWrapper><Course /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
