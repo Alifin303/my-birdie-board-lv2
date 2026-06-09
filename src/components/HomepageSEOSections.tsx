@@ -1,5 +1,11 @@
 import { Upload, Award, BarChart2, Trophy, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 /**
  * Keyword-focused SEO content sections for the homepage.
@@ -151,39 +157,52 @@ export const HomepageSEOSections = () => {
           <h2 id="faq-seo-heading" className="text-3xl font-bold text-center mb-8">
             Golf Score Tracking FAQs
           </h2>
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Can I track golf scores without using my phone during a round?</h3>
-              <p className="text-muted-foreground">
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="phone">
+              <AccordionTrigger className="text-left text-lg font-semibold">
+                Can I track golf scores without using my phone during a round?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground text-base">
                 Yes — MyBirdieBoard is designed specifically for post-round score entry. Play your round distraction-free, then log your scores in seconds when you're done. No need to carry your phone on the course.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-2">How do I calculate my golf handicap?</h3>
-              <p className="text-muted-foreground">
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="handicap">
+              <AccordionTrigger className="text-left text-lg font-semibold">
+                How do I calculate my golf handicap?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground text-base">
                 MyBirdieBoard calculates your handicap automatically using the World Handicap System (WHS) formula. Just add your rounds and your handicap index updates after each one.{' '}
                 <Link to="/guides/golf-handicap-calculator" className="text-primary hover:underline">
                   Read our full handicap calculation guide
-                </Link>.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-2">What is the best way to track golf performance over time?</h3>
-              <p className="text-muted-foreground">
+                </Link>{' '}
+                or try our{' '}
+                <Link to="/tools/handicap-calculator" className="text-primary hover:underline">
+                  free WHS handicap calculator
+                </Link>
+                .
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="performance">
+              <AccordionTrigger className="text-left text-lg font-semibold">
+                What is the best way to track golf performance over time?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground text-base">
                 The best approach is consistent post-round tracking. MyBirdieBoard stores every round, visualizes scoring trends, and highlights where you're{' '}
                 <Link to="/guides/golf-performance-analytics" className="text-primary hover:underline">
                   gaining or losing strokes
                 </Link>{' '}
                 — giving you a clear picture of your progress.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Is MyBirdieBoard a golf score tracking app?</h3>
-              <p className="text-muted-foreground">
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="app">
+              <AccordionTrigger className="text-left text-lg font-semibold">
+                Is MyBirdieBoard a golf score tracking app?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground text-base">
                 Yes — MyBirdieBoard is a golf score tracker, handicap calculator, and performance analytics tool built for golfers who prefer to focus on the game during their round and record everything afterward.
-              </p>
-            </div>
-          </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       </section>
     </>

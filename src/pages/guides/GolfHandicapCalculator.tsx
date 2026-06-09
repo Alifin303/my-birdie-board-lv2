@@ -11,6 +11,19 @@ const GolfHandicapCalculator = () => {
       keywords="golf handicap generator, golf handicap calculator, how to calculate golf handicap, WHS handicap, handicap index, free handicap generator"
     >
       <div className="space-y-8">
+        <section className="not-prose bg-accent/10 border border-accent/30 rounded-lg p-6 text-center">
+          <h2 className="text-xl font-bold mb-2">Try our free WHS Handicap Calculator</h2>
+          <p className="text-muted-foreground mb-4">
+            Enter your recent rounds and we'll calculate your Handicap Index instantly using the official World Handicap System formula.
+          </p>
+          <Link
+            to="/tools/handicap-calculator"
+            className="inline-block bg-accent hover:bg-accent/90 text-white font-semibold px-6 py-3 rounded-md"
+          >
+            Open the Handicap Calculator →
+          </Link>
+        </section>
+
         <section>
           <h2 className="text-2xl font-bold mb-4">What is a Golf Handicap? (And Why You Need a Handicap Generator)</h2>
           <p className="text-muted-foreground mb-4">
