@@ -24,7 +24,7 @@ const GolfHandicapCalculator = () => {
           </Link>
         </section>
 
-
+        <section>
           <h2 className="text-2xl font-bold mb-4">What is a Golf Handicap? (And Why You Need a Handicap Generator)</h2>
           <p className="text-muted-foreground mb-4">
             A golf handicap is a numerical measure of a golfer's playing ability, allowing players of different 
