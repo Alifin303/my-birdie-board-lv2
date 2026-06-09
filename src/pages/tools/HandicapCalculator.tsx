@@ -18,6 +18,7 @@ import {
 
 type RoundRow = {
   score: number | "";
+  par: number | "";
   rating: number | "";
   slope: number | "";
   holes: 9 | 18;
@@ -25,6 +26,7 @@ type RoundRow = {
 
 const emptyRow = (): RoundRow => ({
   score: "",
+  par: 72,
   rating: 72.0,
   slope: 113,
   holes: 18,
