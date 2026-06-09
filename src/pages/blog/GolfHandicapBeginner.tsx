@@ -200,9 +200,11 @@ export default function GolfHandicapBeginner() {
               <ul className="space-y-2 text-sm">
                 <li><Link to="/blog/understanding-golf-handicap-system" className="text-primary hover:underline">Understanding the Golf Handicap System (Advanced)</Link></li>
                 <li><Link to="/guides/golf-handicap-calculator" className="text-primary hover:underline">Golf Handicap Calculator Guide</Link></li>
+                <li><Link to="/tools/handicap-calculator" className="text-primary hover:underline font-medium">Free WHS Handicap Calculator</Link></li>
                 <li><Link to="/blog/stableford-scoring" className="text-primary hover:underline">What is Stableford Scoring?</Link></li>
                 <li><Link to="/blog/golf-stats-to-track" className="text-primary hover:underline">Golf Stats You Should Track</Link></li>
                 <li><Link to="/blog/how-to-break-100" className="text-primary hover:underline">How to Break 100 in Golf</Link></li>
+              </ul>
               </ul>
             </div>
 
