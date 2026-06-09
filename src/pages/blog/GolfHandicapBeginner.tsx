@@ -117,6 +117,10 @@ export default function GolfHandicapBeginner() {
             <Card className="my-4 bg-muted/50">
               <CardContent className="p-6 text-center">
                 <p className="text-lg font-mono font-semibold">Score Differential = (113 ÷ Slope Rating) × (Adjusted Gross Score − Course Rating)</p>
+                <p className="text-sm text-muted-foreground mt-3">
+                  Want to skip the math? Try our free{' '}
+                  <Link to="/tools/handicap-calculator" className="text-primary hover:underline">handicap calculator</Link>.
+                </p>
               </CardContent>
             </Card>
             <ul>
