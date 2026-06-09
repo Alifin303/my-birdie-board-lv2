@@ -1,5 +1,11 @@
 import { Upload, Award, BarChart2, Trophy, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 /**
  * Keyword-focused SEO content sections for the homepage.
