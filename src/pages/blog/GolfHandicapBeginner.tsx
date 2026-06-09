@@ -205,7 +205,6 @@ export default function GolfHandicapBeginner() {
                 <li><Link to="/blog/golf-stats-to-track" className="text-primary hover:underline">Golf Stats You Should Track</Link></li>
                 <li><Link to="/blog/how-to-break-100" className="text-primary hover:underline">How to Break 100 in Golf</Link></li>
               </ul>
-              </ul>
             </div>
 
             <div className="mt-12 text-center not-prose">
