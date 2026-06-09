@@ -39,9 +39,11 @@ const GolfHandicapCalculator = () => {
             <Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline mx-1">
               complete guide on how to track golf scores
             </Link>
-            before diving into handicap calculations. Or jump straight into MyBirdieBoard's free{' '}
+            before diving into handicap calculations. Or jump straight into our free{' '}
+            <Link to="/tools/handicap-calculator" className="text-primary hover:underline">WHS handicap calculator</Link>{' '}
+            to see your index instantly — then use MyBirdieBoard's free{' '}
             <Link to="/" className="text-primary hover:underline">golf score tracker</Link>{' '}
-            which calculates your handicap automatically.
+            which calculates your handicap automatically after every round.
           </p>
         </section>
 

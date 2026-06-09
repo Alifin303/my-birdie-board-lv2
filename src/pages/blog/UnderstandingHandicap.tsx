@@ -98,7 +98,7 @@ const UnderstandingHandicap = () => {
 
           <h2>How is a Handicap Calculated?</h2>
           <p>
-            Your Handicap Index is calculated using your best 8 scores from your most recent 20 rounds. For a step-by-step walkthrough, see our <Link to="/guides/golf-handicap-calculator" className="text-primary hover:underline">golf handicap calculator guide</Link>. Here's the process:
+            Your Handicap Index is calculated using your best 8 scores from your most recent 20 rounds. For a step-by-step walkthrough, see our <Link to="/guides/golf-handicap-calculator" className="text-primary hover:underline">golf handicap calculator guide</Link>, or try our free <Link to="/tools/handicap-calculator" className="text-primary hover:underline">WHS handicap calculator</Link> to compute yours instantly. Here's the process:
           </p>
 
           <ol>
