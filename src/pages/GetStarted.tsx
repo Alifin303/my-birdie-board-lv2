@@ -304,7 +304,6 @@ const GetStarted = () => {
                 </p>
                 <ul className="space-y-3 mb-6">
                   {[
-                   "Track up to 4 rounds",
                     "Score progression chart",
                     "Stableford scoring",
                     "Course search",
