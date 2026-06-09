@@ -302,11 +302,12 @@ const HandicapCalculator = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-12">#</TableHead>
-                        <TableHead className="min-w-[110px]">Score</TableHead>
-                        <TableHead className="min-w-[120px]">Rating</TableHead>
-                        <TableHead className="min-w-[110px]">Slope</TableHead>
-                        <TableHead className="min-w-[90px]">Holes</TableHead>
-                        <TableHead className="text-right min-w-[90px]">
+                        <TableHead className="min-w-[100px]">Score</TableHead>
+                        <TableHead className="min-w-[90px]">Par</TableHead>
+                        <TableHead className="min-w-[110px]">Rating</TableHead>
+                        <TableHead className="min-w-[100px]">Slope</TableHead>
+                        <TableHead className="min-w-[80px]">Holes</TableHead>
+                        <TableHead className="text-right min-w-[110px]">
                           Differential
                         </TableHead>
                         <TableHead className="w-12"></TableHead>
@@ -329,6 +330,10 @@ const HandicapCalculator = () => {
                                   10,
                               ) / 10
                             : null;
+                        const toPar =
+                          r.score !== "" && r.par !== "" && Number(r.par) > 0
+                            ? Number(r.score) - Number(r.par)
+                            : null;
                         const isUsed = calc.usedIdxs.includes(i);
                         return (
                           <TableRow
@@ -347,6 +352,27 @@ const HandicapCalculator = () => {
                                 value={r.score}
                                 onChange={(e) =>
                                   updateRound(i, "score", e.target.value)
+                                }
+                                className="h-9"
+                              />
+                              {toPar !== null && (
+                                <p className="text-[10px] text-muted-foreground mt-1 tabular-nums">
+                                  {toPar === 0
+                                    ? "level par"
+                                    : toPar > 0
+                                      ? `+${toPar} to par`
+                                      : `${toPar} to par`}
+                                </p>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Input
+                                type="number"
+                                min={27}
+                                max={80}
+                                value={r.par}
+                                onChange={(e) =>
+                                  updateRound(i, "par", e.target.value)
                                 }
                                 className="h-9"
                               />
