@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Head } from "vite-react-ssg";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams, Link } from "react-router-dom";
@@ -14,6 +14,11 @@ import { LeaderboardBanner } from "@/components/dashboard/LeaderboardBanner";
 import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
 import { useToast } from "@/hooks/use-toast";
 import { clearSubscriptionCache } from "@/integrations/supabase/subscription/subscription-utils";
+import { Button } from "@/components/ui/button";
+import { MapPin } from "lucide-react";
+
+const CoursesPlayedMap = lazy(() => import("@/components/dashboard/CoursesPlayedMap"));
+
 
 interface Round {
   id: number;
@@ -56,6 +61,7 @@ export default function Dashboard() {
   const [roundFilter, setRoundFilter] = useState<'all' | '9hole' | '18hole'>('all');
   const [scoreMode, setScoreMode] = useState<'stroke' | 'stableford'>('stroke');
   const [processingStripeSession, setProcessingStripeSession] = useState(false);
+  const [isMapOpen, setIsMapOpen] = useState(false);
   
   const sessionId = searchParams.get('session_id');
   const subscriptionStatus = searchParams.get('subscription_status');
@@ -355,7 +361,19 @@ export default function Dashboard() {
               /> 
             : (
               <>
-                <h2 className="text-xl sm:text-2xl font-semibold text-primary">Your Courses</h2>
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <h2 className="text-xl sm:text-2xl font-semibold text-primary">Your Courses</h2>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsMapOpen(true)}
+                    disabled={!userRounds || userRounds.length === 0}
+                    className="gap-1.5"
+                  >
+                    <MapPin className="h-4 w-4" />
+                    View Map
+                  </Button>
+                </div>
                 <CourseStatsTable 
                   userRounds={userRounds}
                   scoreType={scoreType}
@@ -394,6 +412,26 @@ export default function Dashboard() {
         onOpenChange={setIsModalOpen}
         handicapIndex={profile?.handicap || 0}
       />
+
+      {isMapOpen && (
+        <Suspense fallback={null}>
+          <CoursesPlayedMap
+            open={isMapOpen}
+            onOpenChange={setIsMapOpen}
+            userRounds={(userRounds || []).map((r) => ({
+              course_id: (r as any).course_id ?? r.courses?.id ?? 0,
+              courses: r.courses
+                ? {
+                    id: r.courses.id,
+                    name: r.courses.name,
+                    city: r.courses.city,
+                    state: r.courses.state,
+                  }
+                : null,
+            }))}
+          />
+        </Suspense>
+      )}
     </div>
     </>
   );

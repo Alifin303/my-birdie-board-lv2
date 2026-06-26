@@ -139,6 +139,8 @@ export async function insertCourse(courseData: {
   city: string;
   state: string;
   user_id: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }) {
   try {
     const { data, error } = await supabase

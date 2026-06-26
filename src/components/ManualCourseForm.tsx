@@ -46,6 +46,8 @@ export function ManualCourseForm({
         name: existingCourse.name.replace(' [User added course]', ''),
         city: existingCourse.city || '',
         state: existingCourse.state || '',
+        latitude: existingCourse.latitude ?? null,
+        longitude: existingCourse.longitude ?? null,
         tees: existingCourse.tees || [createDefaultTee()]
       };
     }
@@ -54,6 +56,8 @@ export function ManualCourseForm({
       name: '',
       city: '',
       state: '',
+      latitude: null,
+      longitude: null,
       tees: [createDefaultTee()]
     };
   });
@@ -126,6 +130,8 @@ export function ManualCourseForm({
                   name: existingCourse.name.replace(' [User added course]', ''),
                   city: existingCourse.city || '',
                   state: existingCourse.state || '',
+                  latitude: existingCourse.latitude ?? null,
+                  longitude: existingCourse.longitude ?? null,
                   tees: teesWithHoles
                 });
                 setCurrentTeeIndex(0);
@@ -155,6 +161,8 @@ export function ManualCourseForm({
                 name: existingCourse.name.replace(' [User added course]', ''),
                 city: existingCourse.city || '',
                 state: existingCourse.state || '',
+                latitude: existingCourse.latitude ?? null,
+                longitude: existingCourse.longitude ?? null,
                 tees: tees
               });
               
@@ -168,6 +176,8 @@ export function ManualCourseForm({
                 name: existingCourse.name.replace(' [User added course]', ''),
                 city: existingCourse.city || '',
                 state: existingCourse.state || '',
+                latitude: existingCourse.latitude ?? null,
+                longitude: existingCourse.longitude ?? null,
                 tees: [createDefaultTee()]
               });
             }
@@ -178,6 +188,8 @@ export function ManualCourseForm({
               name: existingCourse.name.replace(' [User added course]', ''),
               city: existingCourse.city || '',
               state: existingCourse.state || '',
+              latitude: existingCourse.latitude ?? null,
+              longitude: existingCourse.longitude ?? null,
               tees: [createDefaultTee()]
             });
           }
@@ -190,6 +202,8 @@ export function ManualCourseForm({
           name: '',
           city: '',
           state: '',
+          latitude: null,
+          longitude: null,
           tees: [createDefaultTee()]
         });
         setCurrentTeeIndex(0);
@@ -396,7 +410,9 @@ export function ManualCourseForm({
         name: formattedName,
         city: formData.city,
         state: formData.state,
-        api_course_id: null
+        api_course_id: null,
+        latitude: formData.latitude ?? null,
+        longitude: formData.longitude ?? null,
       };
       
       let courseId: number;
@@ -583,6 +599,7 @@ export function ManualCourseForm({
           <CourseInformation 
             formData={formData}
             handleInputChange={handleInputChange}
+            setCoords={(lat, lng) => setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }))}
             isEditMode={isEditMode}
           />
           
