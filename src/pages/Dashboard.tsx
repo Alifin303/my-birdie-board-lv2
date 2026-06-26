@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Head } from "vite-react-ssg";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams, Link } from "react-router-dom";
@@ -14,6 +14,11 @@ import { LeaderboardBanner } from "@/components/dashboard/LeaderboardBanner";
 import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
 import { useToast } from "@/hooks/use-toast";
 import { clearSubscriptionCache } from "@/integrations/supabase/subscription/subscription-utils";
+import { Button } from "@/components/ui/button";
+import { MapPin } from "lucide-react";
+
+const CoursesPlayedMap = lazy(() => import("@/components/dashboard/CoursesPlayedMap"));
+
 
 interface Round {
   id: number;
