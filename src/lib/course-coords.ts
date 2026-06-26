@@ -19,22 +19,10 @@ export async function fetchAndStoreCoordsFromApi(
   courseId: number,
   apiCourseId: string
 ): Promise<{ latitude: number; longitude: number } | null> {
-  try {
-    const { data, error } = await supabase.functions.invoke('golf-course-api', {
-      method: 'GET',
-      // edge function reads from URL search params via the proxy
-      body: undefined,
-      headers: {},
-    } as any);
-    // supabase-js doesn't expose query params for invoke; fall back to raw fetch
-    if (error || !data) {
-      return await rawFetchAndStore(courseId, apiCourseId);
-    }
-    return null;
-  } catch {
-    return await rawFetchAndStore(courseId, apiCourseId);
-  }
+  return rawFetchAndStore(courseId, apiCourseId);
 }
+
+
 
 async function rawFetchAndStore(
   courseId: number,
