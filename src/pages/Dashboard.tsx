@@ -61,6 +61,7 @@ export default function Dashboard() {
   const [roundFilter, setRoundFilter] = useState<'all' | '9hole' | '18hole'>('all');
   const [scoreMode, setScoreMode] = useState<'stroke' | 'stableford'>('stroke');
   const [processingStripeSession, setProcessingStripeSession] = useState(false);
+  const [isMapOpen, setIsMapOpen] = useState(false);
   
   const sessionId = searchParams.get('session_id');
   const subscriptionStatus = searchParams.get('subscription_status');
