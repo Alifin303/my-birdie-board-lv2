@@ -46,6 +46,8 @@ export function ManualCourseForm({
         name: existingCourse.name.replace(' [User added course]', ''),
         city: existingCourse.city || '',
         state: existingCourse.state || '',
+        latitude: existingCourse.latitude ?? null,
+        longitude: existingCourse.longitude ?? null,
         tees: existingCourse.tees || [createDefaultTee()]
       };
     }
@@ -54,6 +56,8 @@ export function ManualCourseForm({
       name: '',
       city: '',
       state: '',
+      latitude: null,
+      longitude: null,
       tees: [createDefaultTee()]
     };
   });
