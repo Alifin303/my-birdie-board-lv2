@@ -361,7 +361,19 @@ export default function Dashboard() {
               /> 
             : (
               <>
-                <h2 className="text-xl sm:text-2xl font-semibold text-primary">Your Courses</h2>
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <h2 className="text-xl sm:text-2xl font-semibold text-primary">Your Courses</h2>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsMapOpen(true)}
+                    disabled={!userRounds || userRounds.length === 0}
+                    className="gap-1.5"
+                  >
+                    <MapPin className="h-4 w-4" />
+                    View Map
+                  </Button>
+                </div>
                 <CourseStatsTable 
                   userRounds={userRounds}
                   scoreType={scoreType}
