@@ -26,6 +26,8 @@ export interface ManualCourseData {
   name: string;
   city: string;
   state: string;
+  latitude?: number | null;
+  longitude?: number | null;
   tees: TeeData[];
 }
 
