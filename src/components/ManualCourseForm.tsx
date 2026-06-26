@@ -410,7 +410,9 @@ export function ManualCourseForm({
         name: formattedName,
         city: formData.city,
         state: formData.state,
-        api_course_id: null
+        api_course_id: null,
+        latitude: formData.latitude ?? null,
+        longitude: formData.longitude ?? null,
       };
       
       let courseId: number;
