@@ -412,6 +412,26 @@ export default function Dashboard() {
         onOpenChange={setIsModalOpen}
         handicapIndex={profile?.handicap || 0}
       />
+
+      {isMapOpen && (
+        <Suspense fallback={null}>
+          <CoursesPlayedMap
+            open={isMapOpen}
+            onOpenChange={setIsMapOpen}
+            userRounds={(userRounds || []).map((r) => ({
+              course_id: (r as any).course_id ?? r.courses?.id ?? 0,
+              courses: r.courses
+                ? {
+                    id: r.courses.id,
+                    name: r.courses.name,
+                    city: r.courses.city,
+                    state: r.courses.state,
+                  }
+                : null,
+            }))}
+          />
+        </Suspense>
+      )}
     </div>
     </>
   );
