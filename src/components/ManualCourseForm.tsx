@@ -599,6 +599,7 @@ export function ManualCourseForm({
           <CourseInformation 
             formData={formData}
             handleInputChange={handleInputChange}
+            setCoords={(lat, lng) => setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }))}
             isEditMode={isEditMode}
           />
           
