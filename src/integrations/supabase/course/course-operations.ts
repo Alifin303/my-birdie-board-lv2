@@ -2,6 +2,7 @@
 import { supabase } from '../core/client';
 import { findCourseByApiId, findCourseByName, insertCourse, getCourseMetadataFromLocalStorage } from '../course/course-queries';
 import { parseCourseName } from '../utils/course-utils';
+import { fetchAndStoreCoordsFromApi } from '@/lib/course-coords';
 
 // This function finds or creates a course by the API course ID
 export async function findOrCreateCourseByApiId(
