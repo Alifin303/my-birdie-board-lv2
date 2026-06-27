@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Plus, Save } from "lucide-react";
+import { ArrowLeft, Plus, Save, Download } from "lucide-react";
 import { toast } from "sonner";
 import { TeeEditor } from "./TeeEditor";
+import { LocationPicker } from "@/components/map/LocationPicker";
+import { fetchAndStoreCoordsFromApi } from "@/lib/course-coords";
 
 interface Course {
   id: number;
@@ -15,6 +17,8 @@ interface Course {
   state: string | null;
   api_course_id: string | null;
   user_id: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 interface Tee {
