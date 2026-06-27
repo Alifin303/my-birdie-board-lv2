@@ -229,11 +229,14 @@ export function CourseManagement() {
                         <ChevronRight className="h-4 w-4 text-muted-foreground" />
                       )}
                       <div className="flex-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="font-semibold">{course.name}</h3>
                           {!course.api_course_id && (
                             <Badge variant="secondary">User Added</Badge>
                           )}
+                          {course.latitude == null || course.longitude == null ? (
+                            <Badge variant="outline" className="text-amber-600 border-amber-600">No pin</Badge>
+                          ) : null}
                         </div>
                         <p className="text-sm text-muted-foreground">
                           {course.city && course.state
