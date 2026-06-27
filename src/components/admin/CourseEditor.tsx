@@ -73,7 +73,9 @@ export function CourseEditor({ course, onBack }: CourseEditorProps) {
         .update({
           name: courseData.name,
           city: courseData.city,
-          state: courseData.state
+          state: courseData.state,
+          latitude: courseData.latitude ?? null,
+          longitude: courseData.longitude ?? null,
         })
         .eq('id', course.id);
 
@@ -82,6 +84,26 @@ export function CourseEditor({ course, onBack }: CourseEditorProps) {
     } catch (error) {
       console.error('Error updating course:', error);
       toast.error('Failed to update course');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFetchFromApi = async () => {
+    if (!course.api_course_id) return;
+    setLoading(true);
+    try {
+      const result = await fetchAndStoreCoordsFromApi(course.id, course.api_course_id);
+      if (result) {
+        setCourseData((prev) => ({
+          ...prev,
+          latitude: result.latitude,
+          longitude: result.longitude,
+        }));
+        toast.success('Coordinates pulled from API');
+      } else {
+        toast.error('Could not get coordinates from API for this course');
+      }
     } finally {
       setLoading(false);
     }
