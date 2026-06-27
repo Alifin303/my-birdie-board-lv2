@@ -36,10 +36,44 @@ export function CourseManagement() {
   const [expandedCourseId, setExpandedCourseId] = useState<number | null>(null);
   const [playersByCourse, setPlayersByCourse] = useState<Record<number, CoursePlayer[]>>({});
   const [playersLoading, setPlayersLoading] = useState<Record<number, boolean>>({});
+  const [backfilling, setBackfilling] = useState(false);
+  const [backfillProgress, setBackfillProgress] = useState<{ done: number; total: number; updated: number } | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchCourses();
   }, []);
+
+  const handleBackfillCoords = async () => {
+    const targets = courses.filter(
+      (c) => c.api_course_id && (c.latitude == null || c.longitude == null)
+    );
+    if (targets.length === 0) {
+      toast({ title: "Nothing to backfill", description: "All API courses already have coordinates." });
+      return;
+    }
+    setBackfilling(true);
+    setBackfillProgress({ done: 0, total: targets.length, updated: 0 });
+    let updated = 0;
+    for (let i = 0; i < targets.length; i++) {
+      const c = targets[i];
+      try {
+        const result = await fetchAndStoreCoordsFromApi(c.id, c.api_course_id!);
+        if (result) updated++;
+      } catch (e) {
+        console.warn("Backfill failed for", c.id, e);
+      }
+      setBackfillProgress({ done: i + 1, total: targets.length, updated });
+      // Small delay to avoid hammering the API
+      await new Promise((r) => setTimeout(r, 150));
+    }
+    setBackfilling(false);
+    toast({
+      title: "Backfill complete",
+      description: `Updated ${updated} of ${targets.length} courses.`,
+    });
+    fetchCourses();
+  };
 
   const fetchCourses = async () => {
     try {
