@@ -170,8 +170,26 @@ export function CourseManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center gap-2 flex-wrap">
         <h2 className="text-2xl font-bold">Course Management</h2>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleBackfillCoords}
+          disabled={backfilling || loading}
+        >
+          {backfilling ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Backfilling{backfillProgress ? ` (${backfillProgress.done}/${backfillProgress.total})` : '...'}
+            </>
+          ) : (
+            <>
+              <MapPin className="h-4 w-4 mr-2" />
+              Backfill missing locations
+            </>
+          )}
+        </Button>
       </div>
 
       <Card>
