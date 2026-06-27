@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Loader2, MapPin, X } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { ManualCourseData } from "./types";
-import { geocodeWithNominatim } from "@/lib/course-coords";
-import { useToast } from "@/hooks/use-toast";
+import { LocationPicker } from "@/components/map/LocationPicker";
+
+interface CourseInformationProps {
+  formData: ManualCourseData;
+  handleInputChange: (field: keyof ManualCourseData, value: string) => void;
+  setCoords?: (lat: number | null, lng: number | null) => void;
+  isEditMode: boolean;
+}
 
 interface CourseInformationProps {
   formData: ManualCourseData;
