@@ -70,7 +70,14 @@ export async function findOrCreateCourseByApiId(
       state: state || '',
       user_id: userId || null
     });
-    
+
+    // Best-effort: backfill lat/lng from the Golf Course API
+    if (newCourseId && apiCourseId) {
+      fetchAndStoreCoordsFromApi(newCourseId, apiCourseId).catch((err) =>
+        console.warn('Failed to backfill coords for new course', err)
+      );
+    }
+
     return newCourseId;
   } catch (error) {
     console.error('Error in findOrCreateCourseByApiId:', error);
