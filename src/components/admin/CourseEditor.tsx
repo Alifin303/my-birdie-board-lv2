@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Plus, Save } from "lucide-react";
+import { ArrowLeft, Plus, Save, Download } from "lucide-react";
 import { toast } from "sonner";
 import { TeeEditor } from "./TeeEditor";
+import { LocationPicker } from "@/components/map/LocationPicker";
+import { fetchAndStoreCoordsFromApi } from "@/lib/course-coords";
 
 interface Course {
   id: number;
@@ -15,6 +17,8 @@ interface Course {
   state: string | null;
   api_course_id: string | null;
   user_id: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 interface Tee {
@@ -69,7 +73,9 @@ export function CourseEditor({ course, onBack }: CourseEditorProps) {
         .update({
           name: courseData.name,
           city: courseData.city,
-          state: courseData.state
+          state: courseData.state,
+          latitude: courseData.latitude ?? null,
+          longitude: courseData.longitude ?? null,
         })
         .eq('id', course.id);
 
@@ -78,6 +84,26 @@ export function CourseEditor({ course, onBack }: CourseEditorProps) {
     } catch (error) {
       console.error('Error updating course:', error);
       toast.error('Failed to update course');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFetchFromApi = async () => {
+    if (!course.api_course_id) return;
+    setLoading(true);
+    try {
+      const result = await fetchAndStoreCoordsFromApi(course.id, course.api_course_id);
+      if (result) {
+        setCourseData((prev) => ({
+          ...prev,
+          latitude: result.latitude,
+          longitude: result.longitude,
+        }));
+        toast.success('Coordinates pulled from API');
+      } else {
+        toast.error('Could not get coordinates from API for this course');
+      }
     } finally {
       setLoading(false);
     }
@@ -155,6 +181,40 @@ export function CourseEditor({ course, onBack }: CourseEditorProps) {
           </Button>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Location</CardTitle>
+          {course.api_course_id && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleFetchFromApi}
+              disabled={loading}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Pull from API
+            </Button>
+          )}
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <LocationPicker
+            latitude={courseData.latitude ?? null}
+            longitude={courseData.longitude ?? null}
+            onChange={(lat, lng) =>
+              setCourseData((prev) => ({ ...prev, latitude: lat, longitude: lng }))
+            }
+            defaultSearch={[courseData.name, courseData.city, courseData.state]
+              .filter(Boolean)
+              .join(', ')}
+          />
+          <Button onClick={handleSaveCourse} disabled={loading}>
+            <Save className="h-4 w-4 mr-2" />
+            Save Location
+          </Button>
+        </CardContent>
+      </Card>
+
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">

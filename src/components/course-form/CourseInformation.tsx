@@ -1,10 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Loader2, MapPin, X } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { ManualCourseData } from "./types";
-import { geocodeWithNominatim } from "@/lib/course-coords";
-import { useToast } from "@/hooks/use-toast";
+import { LocationPicker } from "@/components/map/LocationPicker";
 
 interface CourseInformationProps {
   formData: ManualCourseData;
@@ -19,45 +17,6 @@ export function CourseInformation({
   setCoords,
   isEditMode,
 }: CourseInformationProps) {
-  const [locating, setLocating] = useState(false);
-  const { toast } = useToast();
-
-  const handleFindLocation = async () => {
-    const query = [formData.name, formData.city, formData.state]
-      .filter(Boolean)
-      .join(", ");
-    if (!query.trim()) {
-      toast({
-        title: "Enter a name or city first",
-        description: "We need at least a course name or city to search.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setLocating(true);
-    try {
-      const result = await geocodeWithNominatim(query);
-      if (!result) {
-        toast({
-          title: "Couldn't find that location",
-          description: "Try adding the city or refining the course name.",
-          variant: "destructive",
-        });
-        return;
-      }
-      setCoords?.(result.latitude, result.longitude);
-      toast({
-        title: "Location found",
-        description: result.displayName,
-      });
-    } finally {
-      setLocating(false);
-    }
-  };
-
-  const hasCoords =
-    formData.latitude != null && formData.longitude != null;
-
   return (
     <div className="space-y-4">
       <div>
@@ -116,48 +75,22 @@ export function CourseInformation({
 
       {setCoords && (
         <div className="rounded-md border bg-muted/30 p-3 space-y-2">
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <MapPin className="h-4 w-4 text-primary" />
-              Location for map pin
-            </div>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={handleFindLocation}
-                disabled={locating}
-              >
-                {locating ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
-                ) : null}
-                {hasCoords ? "Re-search" : "Find on map"}
-              </Button>
-              {hasCoords && (
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setCoords(null, null)}
-                >
-                  <X className="h-3.5 w-3.5" />
-                </Button>
-              )}
-            </div>
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <MapPin className="h-4 w-4 text-primary" />
+            Location for map pin
           </div>
-          {hasCoords ? (
-            <p className="text-xs text-muted-foreground">
-              Pinned at {formData.latitude!.toFixed(4)},{" "}
-              {formData.longitude!.toFixed(4)}. This is used to show the course on
-              your map.
-            </p>
-          ) : (
-            <p className="text-xs text-muted-foreground">
-              Optional. Click "Find on map" to look up coordinates from the course
-              name and city so it appears on your Courses Played map.
-            </p>
-          )}
+          <p className="text-xs text-muted-foreground">
+            Search by name, postcode or city — or click anywhere on the map to drop a pin. Drag the pin to fine-tune.
+          </p>
+          <LocationPicker
+            latitude={formData.latitude ?? null}
+            longitude={formData.longitude ?? null}
+            onChange={(lat, lng) => setCoords(lat, lng)}
+            defaultSearch={[formData.name, formData.city, formData.state]
+              .filter(Boolean)
+              .join(", ")}
+            height={260}
+          />
         </div>
       )}
     </div>

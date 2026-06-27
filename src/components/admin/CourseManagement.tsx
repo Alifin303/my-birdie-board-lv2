@@ -4,8 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Plus, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
+import { Edit, ChevronRight, ChevronDown, Loader2, MapPin } from "lucide-react";
 import { CourseEditor } from "./CourseEditor";
+import { fetchAndStoreCoordsFromApi } from "@/lib/course-coords";
+import { useToast } from "@/hooks/use-toast";
 
 interface CoursePlayer {
   user_id: string;
@@ -22,6 +24,8 @@ interface Course {
   api_course_id: string | null;
   user_id: string | null;
   created_at: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 export function CourseManagement() {
@@ -32,10 +36,44 @@ export function CourseManagement() {
   const [expandedCourseId, setExpandedCourseId] = useState<number | null>(null);
   const [playersByCourse, setPlayersByCourse] = useState<Record<number, CoursePlayer[]>>({});
   const [playersLoading, setPlayersLoading] = useState<Record<number, boolean>>({});
+  const [backfilling, setBackfilling] = useState(false);
+  const [backfillProgress, setBackfillProgress] = useState<{ done: number; total: number; updated: number } | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchCourses();
   }, []);
+
+  const handleBackfillCoords = async () => {
+    const targets = courses.filter(
+      (c) => c.api_course_id && (c.latitude == null || c.longitude == null)
+    );
+    if (targets.length === 0) {
+      toast({ title: "Nothing to backfill", description: "All API courses already have coordinates." });
+      return;
+    }
+    setBackfilling(true);
+    setBackfillProgress({ done: 0, total: targets.length, updated: 0 });
+    let updated = 0;
+    for (let i = 0; i < targets.length; i++) {
+      const c = targets[i];
+      try {
+        const result = await fetchAndStoreCoordsFromApi(c.id, c.api_course_id!);
+        if (result) updated++;
+      } catch (e) {
+        console.warn("Backfill failed for", c.id, e);
+      }
+      setBackfillProgress({ done: i + 1, total: targets.length, updated });
+      // Small delay to avoid hammering the API
+      await new Promise((r) => setTimeout(r, 150));
+    }
+    setBackfilling(false);
+    toast({
+      title: "Backfill complete",
+      description: `Updated ${updated} of ${targets.length} courses.`,
+    });
+    fetchCourses();
+  };
 
   const fetchCourses = async () => {
     try {
@@ -132,8 +170,26 @@ export function CourseManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center gap-2 flex-wrap">
         <h2 className="text-2xl font-bold">Course Management</h2>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleBackfillCoords}
+          disabled={backfilling || loading}
+        >
+          {backfilling ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Backfilling{backfillProgress ? ` (${backfillProgress.done}/${backfillProgress.total})` : '...'}
+            </>
+          ) : (
+            <>
+              <MapPin className="h-4 w-4 mr-2" />
+              Backfill missing locations
+            </>
+          )}
+        </Button>
       </div>
 
       <Card>
@@ -173,11 +229,14 @@ export function CourseManagement() {
                         <ChevronRight className="h-4 w-4 text-muted-foreground" />
                       )}
                       <div className="flex-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="font-semibold">{course.name}</h3>
                           {!course.api_course_id && (
                             <Badge variant="secondary">User Added</Badge>
                           )}
+                          {course.latitude == null || course.longitude == null ? (
+                            <Badge variant="outline" className="text-amber-600 border-amber-600">No pin</Badge>
+                          ) : null}
                         </div>
                         <p className="text-sm text-muted-foreground">
                           {course.city && course.state

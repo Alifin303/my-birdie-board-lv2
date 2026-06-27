@@ -2,6 +2,7 @@
 import { supabase } from '../core/client';
 import { findCourseByApiId, findCourseByName, insertCourse, getCourseMetadataFromLocalStorage } from '../course/course-queries';
 import { parseCourseName } from '../utils/course-utils';
+import { fetchAndStoreCoordsFromApi } from '@/lib/course-coords';
 
 // This function finds or creates a course by the API course ID
 export async function findOrCreateCourseByApiId(
@@ -69,7 +70,14 @@ export async function findOrCreateCourseByApiId(
       state: state || '',
       user_id: userId || null
     });
-    
+
+    // Best-effort: backfill lat/lng from the Golf Course API
+    if (newCourseId && apiCourseId) {
+      fetchAndStoreCoordsFromApi(newCourseId, apiCourseId).catch((err) =>
+        console.warn('Failed to backfill coords for new course', err)
+      );
+    }
+
     return newCourseId;
   } catch (error) {
     console.error('Error in findOrCreateCourseByApiId:', error);
@@ -164,6 +172,14 @@ export async function ensureCourseExists(
       user_id: userId || null
     };
     
+    const maybeBackfillCoords = (id: number) => {
+      if (id && apiCourseId) {
+        fetchAndStoreCoordsFromApi(id, apiCourseId).catch((err) =>
+          console.warn('Failed to backfill coords for course', err)
+        );
+      }
+    };
+
     // If we have a numeric course ID that's not from database sequence, use it explicitly
     if (numericCourseId && !isNaN(numericCourseId) && numericCourseId > 0) {
       try {
@@ -177,19 +193,23 @@ export async function ensureCourseExists(
           console.error('Error upserting course with ID:', error);
           // Fall back to regular insert
           const newCourseId = await insertCourse(courseData);
+          maybeBackfillCoords(newCourseId);
           return newCourseId;
         }
         
+        maybeBackfillCoords(data.id);
         return data.id;
       } catch (error) {
         console.error('Error in upsert:', error);
         // Fall back to regular insert
         const newCourseId = await insertCourse(courseData);
+        maybeBackfillCoords(newCourseId);
         return newCourseId;
       }
     } else {
       // Regular insert without specified ID
       const newCourseId = await insertCourse(courseData);
+      maybeBackfillCoords(newCourseId);
       return newCourseId;
     }
   } catch (error) {
