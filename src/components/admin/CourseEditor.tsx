@@ -184,6 +184,40 @@ export function CourseEditor({ course, onBack }: CourseEditorProps) {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Location</CardTitle>
+          {course.api_course_id && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleFetchFromApi}
+              disabled={loading}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Pull from API
+            </Button>
+          )}
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <LocationPicker
+            latitude={courseData.latitude ?? null}
+            longitude={courseData.longitude ?? null}
+            onChange={(lat, lng) =>
+              setCourseData((prev) => ({ ...prev, latitude: lat, longitude: lng }))
+            }
+            defaultSearch={[courseData.name, courseData.city, courseData.state]
+              .filter(Boolean)
+              .join(', ')}
+          />
+          <Button onClick={handleSaveCourse} disabled={loading}>
+            <Save className="h-4 w-4 mr-2" />
+            Save Location
+          </Button>
+        </CardContent>
+      </Card>
+
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Tees</CardTitle>
           <Button size="sm" onClick={() => setShowAddTee(true)}>
             <Plus className="h-4 w-4 mr-2" />
