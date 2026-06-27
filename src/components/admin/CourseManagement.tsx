@@ -4,8 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Plus, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
+import { Edit, ChevronRight, ChevronDown, Loader2, MapPin } from "lucide-react";
 import { CourseEditor } from "./CourseEditor";
+import { fetchAndStoreCoordsFromApi } from "@/lib/course-coords";
+import { useToast } from "@/hooks/use-toast";
 
 interface CoursePlayer {
   user_id: string;
