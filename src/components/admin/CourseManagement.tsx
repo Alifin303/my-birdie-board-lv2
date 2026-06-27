@@ -24,6 +24,8 @@ interface Course {
   api_course_id: string | null;
   user_id: string | null;
   created_at: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 export function CourseManagement() {
