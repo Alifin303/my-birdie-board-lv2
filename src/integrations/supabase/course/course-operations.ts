@@ -172,6 +172,14 @@ export async function ensureCourseExists(
       user_id: userId || null
     };
     
+    const maybeBackfillCoords = (id: number) => {
+      if (id && apiCourseId) {
+        fetchAndStoreCoordsFromApi(id, apiCourseId).catch((err) =>
+          console.warn('Failed to backfill coords for course', err)
+        );
+      }
+    };
+
     // If we have a numeric course ID that's not from database sequence, use it explicitly
     if (numericCourseId && !isNaN(numericCourseId) && numericCourseId > 0) {
       try {
@@ -185,19 +193,23 @@ export async function ensureCourseExists(
           console.error('Error upserting course with ID:', error);
           // Fall back to regular insert
           const newCourseId = await insertCourse(courseData);
+          maybeBackfillCoords(newCourseId);
           return newCourseId;
         }
         
+        maybeBackfillCoords(data.id);
         return data.id;
       } catch (error) {
         console.error('Error in upsert:', error);
         // Fall back to regular insert
         const newCourseId = await insertCourse(courseData);
+        maybeBackfillCoords(newCourseId);
         return newCourseId;
       }
     } else {
       // Regular insert without specified ID
       const newCourseId = await insertCourse(courseData);
+      maybeBackfillCoords(newCourseId);
       return newCourseId;
     }
   } catch (error) {
