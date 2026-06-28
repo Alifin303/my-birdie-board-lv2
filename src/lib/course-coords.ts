@@ -41,9 +41,15 @@ async function rawFetchAndStore(
     });
     if (!res.ok) return null;
     const json = await res.json();
-    const lat = json?.location?.latitude;
-    const lng = json?.location?.longitude;
-    if (typeof lat !== "number" || typeof lng !== "number") return null;
+    // API returns { course: { location: { latitude, longitude } } }
+    // Fall back to top-level location for robustness.
+    const loc = json?.course?.location ?? json?.location;
+    const lat = loc?.latitude;
+    const lng = loc?.longitude;
+    if (typeof lat !== "number" || typeof lng !== "number") {
+      console.warn("No coords in API response for course", courseId, json);
+      return null;
+    }
 
     await supabase
       .from("courses")
