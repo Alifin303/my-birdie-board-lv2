@@ -16,11 +16,12 @@ import Blog from '@/pages/Blog'
 import Demo from '@/pages/Demo'
 import GetStarted from '@/pages/GetStarted'
 import PrivacyPolicy from '@/pages/PrivacyPolicy'
+import Pricing from '@/pages/Pricing'
 import NotFound from '@/pages/NotFound'
 
 // Blog pages - static imports for SSG
 import GolfScoreTrackingTips from '@/pages/blog/GolfScoreTrackingTips'
-import BestGolfClubsBeginners from '@/pages/blog/BestGolfClubsBeginners'
+import DropShotsOffHandicap from '@/pages/blog/DropShotsOffHandicap'
 import ImproveGolfSwing from '@/pages/blog/ImproveGolfSwing'
 import CourseManagementTips from '@/pages/blog/CourseManagementTips'
 import UnderstandingHandicap from '@/pages/blog/UnderstandingHandicap'
@@ -106,10 +107,11 @@ export const routes: RouteRecord[] = [
   { path: '/demo', element: P(<Demo />), errorElement: <RouteErrorFallback /> },
   { path: '/get-started', element: P(<GetStarted />), errorElement: <RouteErrorFallback /> },
   { path: '/privacy', element: P(<PrivacyPolicy />), errorElement: <RouteErrorFallback /> },
+  { path: '/pricing', element: P(<Pricing />), errorElement: <RouteErrorFallback /> },
 
   // Blog pages
   { path: '/blog/golf-score-tracking-tips', element: P(<GolfScoreTrackingTips />), errorElement: <RouteErrorFallback /> },
-  { path: '/blog/best-golf-clubs-for-beginners', element: P(<BestGolfClubsBeginners />), errorElement: <RouteErrorFallback /> },
+  { path: '/blog/how-to-drop-shots-off-handicap', element: P(<DropShotsOffHandicap />), errorElement: <RouteErrorFallback /> },
   { path: '/blog/improve-your-golf-swing', element: P(<ImproveGolfSwing />), errorElement: <RouteErrorFallback /> },
   { path: '/blog/course-management-tips', element: P(<CourseManagementTips />), errorElement: <RouteErrorFallback /> },
   { path: '/blog/understanding-golf-handicap-system', element: P(<UnderstandingHandicap />), errorElement: <RouteErrorFallback /> },

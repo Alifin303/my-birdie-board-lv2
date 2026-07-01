@@ -1,44 +1,58 @@
-## Goal
-Add a "View Map" button on the dashboard that opens a map with a pin on every course the user has played a round at.
+## SEO Improvement Plan
 
-## Answers to your questions
+Here's how I'd tackle the review, grouped by what I can build vs. what's off-platform (outreach). I'll focus on the code changes we can ship immediately.
 
-**1. Free map API?** Yes — **Leaflet + OpenStreetMap tiles** is the standard free option: no API key, no billing, no quota for normal app usage, MIT licensed. It's what we should use. (Google Maps / Mapbox would need an account + key and start charging at volume — overkill here.)
+### 1. Fix critical on-page issues
 
-**2. Does the Golf Course API give us coordinates?** Yes — better than a postcode. Every course detail response includes `location.latitude` and `location.longitude` (plus `address`, `city`, `state`, `country`). So for any API-sourced course we can store exact lat/lng directly and skip geocoding entirely.
+**Homepage H1/H2 duplication**
+- In `src/pages/Index.tsx`, keep the H1 as-is and replace the duplicate H2 with a supporting subheadline (e.g. *"Log rounds after you play, track your handicap, and see your game improve — no GPS, no distractions."*).
 
-**3. User-added courses?** We do need a way to locate them. Rather than a postcode field (which would still require geocoding), the cleanest UX is: on the manual course form, let the user **search an address / drop a pin on a small map** and we store `latitude` + `longitude` directly. Postcode alone is fine as a fallback but less accurate (especially in the US where ZIPs cover wide areas) and forces us to run a geocoder.
+**Add structured data (schema markup)**
+- Add `FAQPage` JSON-LD to the homepage FAQ accordion (mirrors the visible Q&As).
+- Add `SoftwareApplication` JSON-LD to the homepage with price (£2.99), category, and — if we're comfortable — an `aggregateRating` block. I'll flag this and ask before adding ratings we can't substantiate.
+- The blog posts already use `Article` schema via `GuideLayout`; I'll audit and confirm.
 
-## Plan
+**Refresh stale 2024 references**
+- Rename "Best Golf Score Apps 2024" → "Best Golf Score Apps 2026" across title, H1, meta, and body copy in `src/pages/guides/BestGolfScoreApps.tsx` and any internal links / SEO map entries.
+- Grep the codebase for other lingering "2024/2025" references in titles and update.
 
-### 1. Database
-Add `latitude` and `longitude` (numeric, nullable) to `public.courses`. Migration only — no data movement.
+### 2. Quick wins
 
-### 2. Backfill existing courses
-- Extend the `golf-course-api` edge function (or a small one-off script) so when we fetch a course we persist `latitude`/`longitude` into `courses`.
-- For the ~existing courses already in the DB without coords, run a one-off backfill that re-fetches each by `api_course_id` and writes the coords. Anything that can't be resolved stays null and just won't appear on the map.
+**New `/pricing` page**
+- Create `src/pages/Pricing.tsx` with Free vs Pro (£2.99/mo) comparison, FAQ, and CTAs. Add to `SiteHeader`, `SiteFooter`, `routes.tsx`, `route-seo-map.ts`, and the sitemap generator.
 
-### 3. Capture coords on new courses
-- **API-sourced courses:** when saved, write `latitude`/`longitude` from the API response (already in `CourseDataService`).
-- **User-added courses:** add an address search box + draggable pin to `ManualCourseForm` (Leaflet + Nominatim search, both free). Store the resulting lat/lng. No postcode field needed.
+**Expand site navigation**
+- Update `src/components/SiteHeader.tsx` to include: Features (anchor to homepage section or new page), Pricing, Blog, Guides, About — plus Log In. Mobile: collapse into a sheet menu.
 
-### 4. Map UI
-- New component `src/components/dashboard/CoursesPlayedMap.tsx` using `react-leaflet` + `leaflet`.
-- Trigger: a "View Map" button next to the "Your Courses" heading on the dashboard.
-- Opens a Dialog containing the map: one marker per distinct course the user has played, popup shows course name, club, city, and rounds played, click → existing course detail flow.
-- Auto-fit bounds to the user's pins; empty state if no coords resolved.
+**Social proof tightening**
+- Replace "1,000+ golfers" on the homepage with a more specific, defensible line. I'll propose 2–3 options for you to pick from before shipping (e.g. rounds logged, countries, etc.).
+- Testimonials: I can restructure the component to support photo + full name + specific metric fields, but I'll need you to supply real testimonials. In the meantime I'll reduce from 6 generic ones to 2–3 stronger ones, or hide the section until we have real quotes — your call.
 
-### 5. SSR / perf
-Leaflet touches `window`, so the map component is dynamically imported and rendered client-side only (consistent with our existing SSR guards). Dialog is lazy-loaded so the dashboard bundle is unaffected for users who never open it.
+**Off-brand blog post**
+- Retire `BestGolfClubsBeginners.tsx`: 301 redirect to a replacement post more aligned with tracking (e.g. *"How to Drop 5 Shots Off Your Handicap Using Stats"*) via `_redirects`, and remove from the blog index + sitemap.
 
-## Technical notes
-- Packages: `leaflet`, `react-leaflet`, `@types/leaflet`. Tiles from `https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png` with the required OSM attribution string.
-- Nominatim usage policy: include a descriptive `User-Agent`/`Referer`, debounce input (≥1 req/sec), cache results — fine for our scale.
-- Coords are non-sensitive public data; no RLS changes needed beyond existing `courses` policies.
+### 3. Longer-term traffic growth (code)
 
-## Out of scope (for now)
-- Heatmaps / clustering (can add `leaflet.markercluster` later if a user has 50+ courses).
-- Showing other users' courses on the map.
-- A public "all courses" map.
+**"How to improve your golf handicap" cluster**
+- New blog post: *"How to Drop 5 Shots Off Your Handicap in One Season"* with internal links to the handicap calculator and stats guides.
+- Follow-up ideas (write later): *"7 Stats That Predict Handicap Improvement"*, *"Handicap Plateau: Why You're Stuck and How to Break Through"*.
 
-Want me to proceed with this, or would you prefer a postcode field on manual courses instead of the pin-drop UX?
+**Handicap calculator page**
+- Already built at `/tools/handicap-calculator`. I'll double-check it's in the main nav / footer / sitemap and linked prominently from the homepage so it acts as the link magnet the reviewer described.
+
+### 4. Off-platform (no code — for your action)
+
+- Outreach to Golf Insider, Wicked Smart Golf, MyGolfSpy, etc. for inclusion in 2026 roundups.
+- Reddit r/golf, Golf Monthly UK contributor pitches, HARO responses.
+- Collect real testimonials with photos + specific handicap improvements.
+
+---
+
+### Questions before I build
+
+1. **Testimonials**: reduce to fewer generic ones for now, or hide the section entirely until you supply real quotes?
+2. **Social proof number**: got a real metric I can use (total rounds logged, sign-ups, countries), or should I pick something conservative and defensible?
+3. **`SoftwareApplication` schema**: OK to include an `aggregateRating` with a plausible early-stage rating, or leave it out until we have real reviews? (Google can penalise fabricated ratings — I'd recommend leaving it out.)
+4. **Off-brand blog post**: redirect `BestGolfClubsBeginners` to a new handicap-improvement post, or just remove it?
+
+Once you answer those I'll implement in a single build pass.

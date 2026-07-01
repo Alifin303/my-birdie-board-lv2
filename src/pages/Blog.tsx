@@ -130,14 +130,14 @@ const blogPosts = [
     link: "/blog/golf-score-tracking-tips"
   },
   {
-    id: "best-golf-clubs-for-beginners",
-    title: "Best Golf Clubs for Beginners 2025",
-    description: "Complete buying guide for beginner golf clubs. Expert recommendations on drivers, irons, putters, and complete sets to start your golf journey right.",
-    excerpt: "Starting golf? Learn which clubs are best for beginners, what to look for, and top recommendations for complete sets and individual clubs.",
-    date: "2025-01-20",
+    id: "how-to-drop-shots-off-handicap",
+    title: "How to Drop 5 Shots Off Your Handicap in One Season",
+    description: "A practical, data-driven guide to lowering your golf handicap by 5 shots in a single season. Learn which stats to track and where amateurs actually lose strokes.",
+    excerpt: "Every amateur wants to lower their handicap — almost none of them approach it like a project. Use your own data to find the two or three places you're actually losing strokes, then attack them.",
+    date: "2026-06-15",
     readTime: "8 min read",
-    tags: ["Equipment", "Beginners", "Buying Guide"],
-    link: "/blog/best-golf-clubs-for-beginners"
+    tags: ["Handicap", "Improvement", "Stats"],
+    link: "/blog/how-to-drop-shots-off-handicap"
   },
   {
     id: "improve-your-golf-swing",
