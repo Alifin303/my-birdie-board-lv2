@@ -1,4 +1,7 @@
 
+# 301 redirects for retired/renamed content (must come before SPA fallback)
+/blog/best-golf-clubs-for-beginners   /blog/how-to-drop-shots-off-handicap   301
+
 # SPA fallback for client-side only routes (not pre-rendered by SSG)
 # SSG-rendered pages (/, /about, /faq, /blog/*, /guides/*, etc.) are served
 # directly as static HTML files by Netlify — no redirect needed.
@@ -12,3 +15,4 @@
 
 # Final SPA fallback — only fires if no static file exists at the path
 /*                  /index.html        200
+

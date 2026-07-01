@@ -68,6 +68,12 @@ export const routeSEOMap: Record<string, RouteSEO> = {
     keywords: 'MyBirdieBoard privacy policy, golf app privacy, golf data protection, user data security',
   },
 
+  '/pricing': {
+    title: 'Pricing — Free & Pro Plans | MyBirdieBoard',
+    description: 'Simple, honest golf score tracker pricing. Free forever plan for logging rounds and tracking your handicap. Pro at £2.99/month for WHS calculation and advanced analytics.',
+    keywords: 'mybirdieboard pricing, golf tracker pricing, golf app free vs paid, golf handicap app price',
+  },
+
   // ===== Blog posts =====
   '/blog/golf-score-tracking-tips': {
     title: '10 Essential Golf Score Tracking Tips for Better Performance | MyBirdieBoard',
@@ -75,10 +81,10 @@ export const routeSEOMap: Record<string, RouteSEO> = {
     keywords: 'golf score tracking tips, golf performance tracking, digital golf scorecard, golf statistics, golf improvement',
     ogType: 'article',
   },
-  '/blog/best-golf-clubs-for-beginners': {
-    title: 'Best Golf Clubs for Beginners 2025 - Complete Buying Guide | MyBirdieBoard',
-    description: 'Discover the best golf clubs for beginners in 2025. Expert recommendations on drivers, irons, putters, and complete sets to start your golf journey right.',
-    keywords: 'best golf clubs for beginners, beginner golf clubs, golf equipment, golf club sets, starter golf clubs',
+  '/blog/how-to-drop-shots-off-handicap': {
+    title: 'How to Drop 5 Shots Off Your Handicap in One Season | MyBirdieBoard',
+    description: 'A practical, data-driven guide to lowering your golf handicap by 5 shots in a single season. Learn which stats to track and where amateurs actually lose strokes.',
+    keywords: 'how to lower golf handicap, drop shots off handicap, improve golf handicap, lower handicap fast, golf improvement plan',
     ogType: 'article',
   },
   '/blog/improve-your-golf-swing': {
