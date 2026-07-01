@@ -16,10 +16,11 @@ const prerenderRoutes = [
   '/demo',
   '/privacy',
   '/get-started',
+  '/pricing',
 
   // Blog posts
   '/blog/golf-score-tracking-tips',
-  '/blog/best-golf-clubs-for-beginners',
+  '/blog/how-to-drop-shots-off-handicap',
   '/blog/improve-your-golf-swing',
   '/blog/course-management-tips',
   '/blog/understanding-golf-handicap-system',
