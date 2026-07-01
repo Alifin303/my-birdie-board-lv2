@@ -119,7 +119,7 @@ export const MainContent = ({
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center text-left md:text-left px-[16px] py-px my-0">
         <div className="max-w-5xl animate-fade-in mb-4 px-4 mx-auto">
           <h2 id="hero-heading" className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2 drop-shadow-lg my-[50px] text-center md:text-4xl">
-            Golf Score Tracker & Handicap Tracking Without On-Course Distractions
+            Log rounds after you play, track your handicap, and see your game improve.
           </h2>
           <p className="text-lg sm:text-xl text-white/90 text-center mb-4 drop-shadow-md md:text-2xl">
             MyBirdieBoard is a golf score tracker designed for players who want to focus on the course, not their phone. Log your rounds after you play, track your golf handicap automatically, and build a complete history of your performance over time.
@@ -129,7 +129,7 @@ export const MainContent = ({
               Track your scores after you play — no phone on the course, no mid-round distractions. Just pure golf, and a permanent digital record of your journey, progress, and legacy.
             </h3>
             <p className="text-xs text-white/80 mb-6 italic text-center sm:text-lg">
-              Trusted by 1,000+ golfers tracking their progress the distraction-free way.
+              Built for golfers who want a focused, distraction-free round — and a permanent digital record afterwards.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 mb-4 justify-center items-center">
