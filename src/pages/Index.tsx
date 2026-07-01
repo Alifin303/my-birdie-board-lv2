@@ -146,16 +146,24 @@ const Index = () => {
                     fetchPriority="high"
                   />
                 </Link>
-                <Button onClick={() => setShowLoginDialog(true)} variant="ghost" className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all text-xs sm:text-sm py-1" aria-label="Log in to your account">
-                  <User className="mr-1 h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
-                  Log In
-                </Button>
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <div className="hidden md:flex items-center gap-1 mr-2">
+                    <Link to="/pricing" className="text-white/90 hover:text-white text-sm font-medium px-3 py-2 rounded hover:bg-white/10 transition-colors">Pricing</Link>
+                    <Link to="/blog" className="text-white/90 hover:text-white text-sm font-medium px-3 py-2 rounded hover:bg-white/10 transition-colors">Blog</Link>
+                    <Link to="/guides" className="text-white/90 hover:text-white text-sm font-medium px-3 py-2 rounded hover:bg-white/10 transition-colors">Guides</Link>
+                    <Link to="/about" className="text-white/90 hover:text-white text-sm font-medium px-3 py-2 rounded hover:bg-white/10 transition-colors">About</Link>
+                  </div>
+                  <Button onClick={() => setShowLoginDialog(true)} variant="ghost" className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all text-xs sm:text-sm py-1" aria-label="Log in to your account">
+                    <User className="mr-1 h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
+                    Log In
+                  </Button>
+                </div>
               </nav>
             </div>
           </header>
           
           <main className="relative z-[1] pt-24 sm:pt-28 md:pt-36 w-full text-center sm:text-left">
-            <h1 className="sr-only">Golf Score Tracker & Handicap Tracking Without On-Course Distractions</h1>
+            <h1 className="sr-only">MyBirdieBoard — Post-round golf score tracker, handicap calculator, and performance analytics</h1>
             <MainContent onStartSignup={handleStartSignup} />
             
             {/* Add the UserReviews component */}
