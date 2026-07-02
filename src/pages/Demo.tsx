@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { SEOHead } from '@/components/SEOHead';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,11 +6,19 @@ import { SignUpDialog } from '@/components/SignUpDialog';
 import { LoginDialog } from '@/components/LoginDialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { UserPlus, ArrowLeft, CalendarDays, Trophy, Flag, TrendingUp, Hash } from 'lucide-react';
+import { UserPlus, ArrowLeft, CalendarDays, Trophy, Flag, TrendingUp, Hash, MapPin, Globe2, Route, Sparkles } from 'lucide-react';
 import ScoreProgressionChart from '@/components/dashboard/ScoreProgressionChart';
 import { DetailedStats } from '@/components/dashboard/DetailedStats';
 import { AdvancedStats } from '@/components/dashboard/AdvancedStats';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+const DemoCoursesMap = lazy(() => import('@/components/dashboard/DemoCoursesMap'));
+
+const demoMapCourses = [
+  { id: 1, name: 'Pine Valley Golf Club', city: 'Pine Valley', state: 'NJ', latitude: 39.7857, longitude: -74.9702, roundCount: 2 },
+  { id: 2, name: 'Augusta National Golf Club', city: 'Augusta', state: 'GA', latitude: 33.5021, longitude: -82.0232, roundCount: 1 },
+  { id: 3, name: 'Pebble Beach Golf Links', city: 'Pebble Beach', state: 'CA', latitude: 36.5674, longitude: -121.9496, roundCount: 1 },
+  { id: 4, name: 'St Andrews Old Course', city: 'St Andrews', state: 'Scotland', latitude: 56.3436, longitude: -2.8036, roundCount: 1 },
+];
 const Demo = () => {
   const [showSignupDialog, setShowSignupDialog] = useState(false);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
@@ -374,6 +382,46 @@ const Demo = () => {
                       </tr>)}
                   </tbody>
                 </table>
+              </div>
+            </div>
+
+            {/* Courses Played Map */}
+            <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6 space-y-4">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-semibold text-primary flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    Your Golf Map
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Every course you play gets pinned to a world map — a visual scrapbook of your golfing journey.
+                  </p>
+                </div>
+                <Badge variant="secondary" className="bg-accent/20 text-accent-foreground">
+                  <Sparkles className="h-3 w-3 mr-1" /> New feature
+                </Badge>
+              </div>
+
+              <Suspense fallback={<div className="h-[420px] w-full rounded-lg border bg-muted animate-pulse" />}>
+                <DemoCoursesMap courses={demoMapCourses} />
+              </Suspense>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                <div className="rounded-lg border bg-background p-3">
+                  <Globe2 className="h-5 w-5 text-primary mb-1" />
+                  <p className="text-sm font-semibold">Build your golfing passport</p>
+                  <p className="text-xs text-muted-foreground">See every club you've played at, from your local muni to bucket-list links.</p>
+                </div>
+                <div className="rounded-lg border bg-background p-3">
+                  <Route className="h-5 w-5 text-primary mb-1" />
+                  <p className="text-sm font-semibold">Plan golf trips smarter</p>
+                  <p className="text-xs text-muted-foreground">Spot gaps on the map and find new courses to add to your list.</p>
+                </div>
+                <div className="rounded-lg border bg-background p-3">
+                  <MapPin className="h-5 w-5 text-primary mb-1" />
+                  <p className="text-sm font-semibold">Auto-located courses</p>
+                  <p className="text-xs text-muted-foreground">Pins are added automatically when you log a round — or drop your own for hidden gems.</p>
+                </div>
               </div>
             </div>
 
