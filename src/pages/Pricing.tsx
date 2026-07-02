@@ -33,9 +33,8 @@ const Pricing = () => {
     "Unlimited rounds — build your full golf history",
     "Automatic WHS handicap calculation",
     "Score progression charts & trends",
-    "Best-of-8 differential breakdown",
-    "Priority support",
   ];
+
 
   const faqs = [
     {
