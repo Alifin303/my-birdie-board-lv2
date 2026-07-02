@@ -6,7 +6,7 @@ import { SignUpDialog } from "@/components/SignUpDialog";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Check, X, User } from "lucide-react";
+import { Check, User } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { BreadcrumbNav } from "@/components/BreadcrumbNav";
 import {
@@ -21,8 +21,7 @@ const Pricing = () => {
   const [showLogin, setShowLogin] = useState(false);
 
   const freeFeatures = [
-    "Log unlimited rounds after you play",
-    "Automatic handicap tracking (personal)",
+    "Log up to 4 rounds to try it out",
     "Detailed stats: fairways, greens, putts",
     "Course leaderboards",
     "Round history & scorecards",
@@ -31,8 +30,8 @@ const Pricing = () => {
 
   const proFeatures = [
     "Everything in Free",
-    "Official WHS handicap calculation",
-    "Advanced performance analytics",
+    "Unlimited rounds — build your full golf history",
+    "Automatic WHS handicap calculation",
     "Score progression charts & trends",
     "Best-of-8 differential breakdown",
     "Priority support",
@@ -40,20 +39,24 @@ const Pricing = () => {
 
   const faqs = [
     {
-      q: "Is MyBirdieBoard really free?",
-      a: "Yes. The Free plan lets you log rounds, track your handicap, and view course leaderboards at no cost — no credit card required.",
+      q: "What's the difference between Free and Pro?",
+      a: "Free lets you try MyBirdieBoard with up to 4 rounds so you can see how it works. Pro unlocks unlimited rounds and automatic WHS handicap calculation — which needs a rolling history of your scores to stay accurate.",
     },
     {
-      q: "What do I get by upgrading to Pro?",
-      a: "Pro (£2.99/month) unlocks official WHS handicap calculation, advanced performance analytics, and progression charts to help you improve faster.",
+      q: "Why does the free plan cap at 4 rounds?",
+      a: "Four rounds is enough to get a feel for the app, your scorecards, and the stats. Beyond that, tracking becomes most useful when it's continuous — which is what Pro is built for.",
     },
     {
       q: "Can I cancel any time?",
-      a: "Absolutely. Pro is a rolling monthly subscription — cancel from your account settings and you'll keep access until the end of the billing period.",
+      a: "Yes. Pro is a rolling monthly subscription — cancel from your account settings and you'll keep access until the end of the billing period.",
     },
     {
       q: "Do I need to use my phone on the course?",
       a: "No. MyBirdieBoard is designed for post-round entry. Play distraction-free and log your scores afterwards.",
+    },
+    {
+      q: "What happens to my rounds if I don't upgrade?",
+      a: "Your first 4 rounds stay in your account. You just won't be able to add new ones or unlock the handicap tracking until you upgrade to Pro.",
     },
     {
       q: "What payment methods do you accept?",
@@ -101,7 +104,7 @@ const Pricing = () => {
     <>
       <SEOHead
         title="Pricing — Free & Pro Plans | MyBirdieBoard"
-        description="Simple, honest golf score tracker pricing. Free forever plan for logging rounds and tracking your handicap. Pro at £2.99/month for WHS calculation and advanced analytics."
+        description="Try MyBirdieBoard free for your first 4 rounds. Upgrade to Pro at £2.99/month for unlimited rounds and automatic WHS handicap calculation."
         canonicalPath="/pricing"
         keywords="mybirdieboard pricing, golf tracker pricing, golf app free vs paid, golf handicap app price"
       >
@@ -131,7 +134,7 @@ const Pricing = () => {
               <div className="mt-6 text-center max-w-3xl mx-auto">
                 <h1 className="text-4xl sm:text-5xl font-bold mb-4">Simple, honest pricing</h1>
                 <p className="text-lg text-white/90">
-                  Start tracking your rounds for free. Upgrade when you want official WHS handicap calculation and deeper analytics.
+                  Try it free. Upgrade to Pro when you're ready to track every round and get your automatic WHS handicap.
                 </p>
               </div>
             </div>
@@ -142,7 +145,7 @@ const Pricing = () => {
               <Card className="p-8 flex flex-col">
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold mb-2">Free</h2>
-                  <p className="text-muted-foreground">Everything you need to start tracking</p>
+                  <p className="text-muted-foreground">A taste of the full experience</p>
                 </div>
                 <div className="mb-6">
                   <span className="text-4xl font-bold">£0</span>
@@ -155,10 +158,6 @@ const Pricing = () => {
                       <span>{f}</span>
                     </li>
                   ))}
-                  <li className="flex items-start gap-2 text-muted-foreground">
-                    <X className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                    <span>Official WHS handicap calculation</span>
-                  </li>
                 </ul>
                 <Button size="lg" variant="outline" onClick={() => setShowSignup(true)}>
                   Get started free
@@ -171,7 +170,7 @@ const Pricing = () => {
                 </div>
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold mb-2">Pro</h2>
-                  <p className="text-muted-foreground">Serious about lowering your handicap</p>
+                  <p className="text-muted-foreground">Unlimited tracking with automatic handicap</p>
                 </div>
                 <div className="mb-6">
                   <span className="text-4xl font-bold">£2.99</span>
@@ -192,7 +191,7 @@ const Pricing = () => {
             </div>
 
             <p className="text-center text-sm text-muted-foreground mt-8">
-              Cancel any time. No credit card required for the Free plan.
+              Cancel any time. No credit card required to get started.
             </p>
           </section>
 
