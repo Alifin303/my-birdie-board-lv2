@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { SEOHead } from '@/components/SEOHead';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,11 +6,19 @@ import { SignUpDialog } from '@/components/SignUpDialog';
 import { LoginDialog } from '@/components/LoginDialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { UserPlus, ArrowLeft, CalendarDays, Trophy, Flag, TrendingUp, Hash } from 'lucide-react';
+import { UserPlus, ArrowLeft, CalendarDays, Trophy, Flag, TrendingUp, Hash, MapPin, Globe2, Route, Sparkles } from 'lucide-react';
 import ScoreProgressionChart from '@/components/dashboard/ScoreProgressionChart';
 import { DetailedStats } from '@/components/dashboard/DetailedStats';
 import { AdvancedStats } from '@/components/dashboard/AdvancedStats';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+const DemoCoursesMap = lazy(() => import('@/components/dashboard/DemoCoursesMap'));
+
+const demoMapCourses = [
+  { id: 1, name: 'Pine Valley Golf Club', city: 'Pine Valley', state: 'NJ', latitude: 39.7857, longitude: -74.9702, roundCount: 2 },
+  { id: 2, name: 'Augusta National Golf Club', city: 'Augusta', state: 'GA', latitude: 33.5021, longitude: -82.0232, roundCount: 1 },
+  { id: 3, name: 'Pebble Beach Golf Links', city: 'Pebble Beach', state: 'CA', latitude: 36.5674, longitude: -121.9496, roundCount: 1 },
+  { id: 4, name: 'St Andrews Old Course', city: 'St Andrews', state: 'Scotland', latitude: 56.3436, longitude: -2.8036, roundCount: 1 },
+];
 const Demo = () => {
   const [showSignupDialog, setShowSignupDialog] = useState(false);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
