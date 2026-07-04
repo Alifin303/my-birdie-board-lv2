@@ -171,6 +171,12 @@ export const routeSEOMap: Record<string, RouteSEO> = {
     keywords: 'Journal 18, Journal 18 digital companion, golf tracking app, golf journaling, digital golf journal, post-round golf tracking',
     ogType: 'article',
   },
+  '/blog/track-golf-courses-played': {
+    title: 'Build Your Golf Bucket List: Track Every Course You\'ve Played | MyBirdieBoard',
+    description: 'Turn every round into a pin on your personal golf map. Learn how to track the courses you\'ve played, build a golf bucket list, and keep a lifelong record of your golf travels.',
+    keywords: 'golf courses played map, track golf courses played, golf bucket list, golf travel log, golf passport, courses played tracker',
+    ogType: 'article',
+  },
 
   // ===== Guide pages =====
   '/guides/how-to-track-golf-scores': {

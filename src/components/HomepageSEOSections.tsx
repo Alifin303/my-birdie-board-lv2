@@ -1,4 +1,4 @@
-import { Upload, Award, BarChart2, Trophy, Users } from 'lucide-react';
+import { Upload, Award, BarChart2, Trophy, Users, MapPin, Globe2, Route } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   Accordion,
@@ -124,6 +124,67 @@ export const HomepageSEOSections = () => {
               <span>Golfers serious about tracking improvement over time</span>
             </li>
           </ul>
+        </div>
+      </section>
+
+      {/* Section – Golf Course Map (new marketing feature block) */}
+      <section aria-labelledby="course-map-heading" className="py-16 bg-background">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 text-sm font-semibold text-primary mb-3">
+                <MapPin className="h-4 w-4" aria-hidden="true" />
+                New: Your Golf Course Map
+              </div>
+              <h2 id="course-map-heading" className="text-3xl font-bold mb-4">
+                Every Course You've Ever Played, on One Map
+              </h2>
+              <p className="text-muted-foreground text-lg leading-relaxed mb-4">
+                Your rounds don't just live in a spreadsheet — they live on a world map. Every time you log a round, MyBirdieBoard drops a pin on the course, building your own personal golf passport as you play.
+              </p>
+              <p className="text-muted-foreground text-lg leading-relaxed mb-6">
+                Look back at the courses you've conquered, the trips you've taken, and the layouts you keep going back to. It's the kind of long-term golf memory a paper scorecard could never keep.
+              </p>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-start gap-3">
+                  <Globe2 className="h-5 w-5 text-primary flex-shrink-0 mt-1" aria-hidden="true" />
+                  <span className="text-muted-foreground"><strong className="text-foreground">Auto-mapped:</strong> every course you log is pinned automatically — no setup, no manual entry.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Route className="h-5 w-5 text-primary flex-shrink-0 mt-1" aria-hidden="true" />
+                  <span className="text-muted-foreground"><strong className="text-foreground">Golf bucket list:</strong> see where you've played and where you still want to go.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Trophy className="h-5 w-5 text-primary flex-shrink-0 mt-1" aria-hidden="true" />
+                  <span className="text-muted-foreground"><strong className="text-foreground">Round counts per pin:</strong> spot your home course and your favourites at a glance.</span>
+                </li>
+              </ul>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  to="/demo"
+                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-md font-medium hover:bg-primary/90 transition-colors"
+                >
+                  See the map in the demo
+                </Link>
+                <Link
+                  to="/blog/track-golf-courses-played"
+                  className="inline-flex items-center gap-2 border border-input px-5 py-2.5 rounded-md font-medium hover:bg-muted transition-colors"
+                >
+                  Read: Build your golf bucket list
+                </Link>
+              </div>
+            </div>
+            <div className="relative rounded-xl overflow-hidden border bg-muted/30 aspect-[4/3] flex items-center justify-center">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,hsl(var(--primary)/0.15),transparent_50%),radial-gradient(circle_at_70%_60%,hsl(var(--primary)/0.1),transparent_50%)]" aria-hidden="true" />
+              <div className="relative text-center px-6">
+                <Globe2 className="h-16 w-16 text-primary mx-auto mb-4" aria-hidden="true" />
+                <p className="font-semibold text-lg mb-1">Your golf passport</p>
+                <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                  A live map of every course you've played, updated automatically with every round.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
