@@ -25,6 +25,7 @@ const Pricing = () => {
     "Detailed stats: fairways, greens, putts",
     "Course leaderboards",
     "Round history & scorecards",
+    "World map of every course you've played",
     "Access to all golf courses",
   ];
 

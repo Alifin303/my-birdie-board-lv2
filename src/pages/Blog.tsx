@@ -10,6 +10,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 const blogPosts = [
   {
+    id: "track-golf-courses-played",
+    title: "Build Your Golf Bucket List: Track Every Course You've Played",
+    description: "Turn every round into a pin on your personal golf map. Learn how to track the courses you've played, build a golf bucket list, and keep a lifelong record of your golf travels.",
+    excerpt: "Ask any golfer how many courses they've played and you'll get a shrug. Your golf map fixes that — every round becomes a pin, automatically.",
+    date: "2026-07-04",
+    readTime: "7 min read",
+    tags: ["Golf Travel", "Features", "Golf Bucket List"],
+    link: "/blog/track-golf-courses-played"
+  },
+  {
     id: "journal-18-meets-mybirdieboard",
     title: "Journal 18 Meets MyBirdieBoard: The Perfect Golf Tracking System",
     description: "Use Journal 18 on the course to capture your round, then transfer it to MyBirdieBoard for a complete digital archive. The perfect golf tracking system combining physical journaling with digital insights.",
