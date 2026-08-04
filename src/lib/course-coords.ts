@@ -41,13 +41,41 @@ async function rawFetchAndStore(
     });
     if (!res.ok) return null;
     const json = await res.json();
-    // API returns { course: { location: { latitude, longitude } } }
-    // Fall back to top-level location for robustness.
-    const loc = json?.course?.location ?? json?.location;
-    const lat = loc?.latitude;
-    const lng = loc?.longitude;
+    const course = json?.course ?? json;
+    const loc = course?.location ?? {};
+
+    let lat = typeof loc.latitude === "number" ? loc.latitude : null;
+    let lng = typeof loc.longitude === "number" ? loc.longitude : null;
+
+    // The Golf Course API rarely returns coordinates — fall back to geocoding
+    // the address (or club name + city/state/country) via Nominatim.
+    if (lat == null || lng == null) {
+      const clubName = [course?.club_name, course?.course_name]
+        .filter(Boolean)
+        .filter((v, i, a) => a.indexOf(v) === i)
+        .join(" ");
+      const place = [loc.city, loc.state, loc.country]
+        .filter((v: string) => v && v !== "Unknown")
+        .join(", ");
+
+      const candidates = [
+        loc.address,
+        [clubName, place].filter(Boolean).join(", "),
+        clubName,
+      ].filter((q): q is string => !!q && q.trim().length > 2);
+
+      for (const q of candidates) {
+        const hit = await geocodeWithNominatim(q);
+        if (hit) {
+          lat = hit.latitude;
+          lng = hit.longitude;
+          break;
+        }
+      }
+    }
+
     if (typeof lat !== "number" || typeof lng !== "number") {
-      console.warn("No coords in API response for course", courseId, json);
+      console.warn("No coords resolvable for course", courseId, course);
       return null;
     }
 
@@ -63,6 +91,18 @@ async function rawFetchAndStore(
   }
 }
 
+
+// Nominatim allows ~1 request/second — serialise and throttle calls.
+let geocodeQueue: Promise<unknown> = Promise.resolve();
+function throttle<T>(fn: () => Promise<T>): Promise<T> {
+  const run = geocodeQueue.then(fn, fn);
+  geocodeQueue = run.then(
+    () => new Promise((r) => setTimeout(r, 1100)),
+    () => new Promise((r) => setTimeout(r, 1100))
+  );
+  return run;
+}
+
 /**
  * Geocode a free-text query using OpenStreetMap Nominatim.
  * Returns the first match's lat/lng + display name.
@@ -71,23 +111,24 @@ export async function geocodeWithNominatim(
   query: string
 ): Promise<{ latitude: number; longitude: number; displayName: string } | null> {
   if (!query.trim()) return null;
-  try {
-    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(
-      query
-    )}`;
-    const res = await fetch(url, {
-      headers: { "Accept-Language": "en" },
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!Array.isArray(data) || data.length === 0) return null;
-    const hit = data[0];
-    const lat = parseFloat(hit.lat);
-    const lng = parseFloat(hit.lon);
-    if (isNaN(lat) || isNaN(lng)) return null;
-    return { latitude: lat, longitude: lng, displayName: hit.display_name };
-  } catch (e) {
-    console.error("geocodeWithNominatim failed", e);
-    return null;
-  }
+  return throttle(async () => {
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(
+        query
+      )}`;
+      const res = await fetch(url, { headers: { "Accept-Language": "en" } });
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) return null;
+      const hit = data[0];
+      const lat = parseFloat(hit.lat);
+      const lng = parseFloat(hit.lon);
+      if (isNaN(lat) || isNaN(lng)) return null;
+      return { latitude: lat, longitude: lng, displayName: hit.display_name };
+    } catch (e) {
+      console.error("geocodeWithNominatim failed", e);
+      return null;
+    }
+  });
 }
+
