@@ -112,23 +112,23 @@ export async function geocodeWithNominatim(
 ): Promise<{ latitude: number; longitude: number; displayName: string } | null> {
   if (!query.trim()) return null;
   return throttle(async () => {
-
-    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(
-      query
-    )}`;
-    const res = await fetch(url, {
-      headers: { "Accept-Language": "en" },
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!Array.isArray(data) || data.length === 0) return null;
-    const hit = data[0];
-    const lat = parseFloat(hit.lat);
-    const lng = parseFloat(hit.lon);
-    if (isNaN(lat) || isNaN(lng)) return null;
-    return { latitude: lat, longitude: lng, displayName: hit.display_name };
-  } catch (e) {
-    console.error("geocodeWithNominatim failed", e);
-    return null;
-  }
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(
+        query
+      )}`;
+      const res = await fetch(url, { headers: { "Accept-Language": "en" } });
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) return null;
+      const hit = data[0];
+      const lat = parseFloat(hit.lat);
+      const lng = parseFloat(hit.lon);
+      if (isNaN(lat) || isNaN(lng)) return null;
+      return { latitude: lat, longitude: lng, displayName: hit.display_name };
+    } catch (e) {
+      console.error("geocodeWithNominatim failed", e);
+      return null;
+    }
+  });
 }
+
