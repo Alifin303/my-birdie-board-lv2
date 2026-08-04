@@ -92,6 +92,17 @@ async function rawFetchAndStore(
 }
 
 
+// Nominatim allows ~1 request/second — serialise and throttle calls.
+let geocodeQueue: Promise<unknown> = Promise.resolve();
+function throttle<T>(fn: () => Promise<T>): Promise<T> {
+  const run = geocodeQueue.then(fn, fn);
+  geocodeQueue = run.then(
+    () => new Promise((r) => setTimeout(r, 1100)),
+    () => new Promise((r) => setTimeout(r, 1100))
+  );
+  return run;
+}
+
 /**
  * Geocode a free-text query using OpenStreetMap Nominatim.
  * Returns the first match's lat/lng + display name.
@@ -100,7 +111,8 @@ export async function geocodeWithNominatim(
   query: string
 ): Promise<{ latitude: number; longitude: number; displayName: string } | null> {
   if (!query.trim()) return null;
-  try {
+  return throttle(async () => {
+
     const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(
       query
     )}`;
