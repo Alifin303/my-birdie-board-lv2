@@ -12,84 +12,33 @@ export interface CourseCoord {
 }
 
 /**
- * Fetch coordinates from the Golf Course API for a course with an api_course_id,
- * persist them to the DB, and return the lat/lng.
+ * Resolve coordinates for a course via the `course-coords` edge function
+ * (Golf Course API first, then server-side Nominatim geocoding) and persist
+ * them with elevated privileges. Returns the lat/lng if found.
  */
 export async function fetchAndStoreCoordsFromApi(
   courseId: number,
-  apiCourseId: string
-): Promise<{ latitude: number; longitude: number } | null> {
-  return rawFetchAndStore(courseId, apiCourseId);
-}
-
-
-
-async function rawFetchAndStore(
-  courseId: number,
-  apiCourseId: string
+  apiCourseId?: string | null
 ): Promise<{ latitude: number; longitude: number } | null> {
   try {
-    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-    const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-    if (!projectId || !anonKey) return null;
-
-    const url = `https://${projectId}.supabase.co/functions/v1/golf-course-api?action=course&id=${encodeURIComponent(
-      apiCourseId
-    )}`;
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${anonKey}`, apikey: anonKey },
+    const { data, error } = await supabase.functions.invoke("course-coords", {
+      body: { courseId, apiCourseId: apiCourseId || undefined },
     });
-    if (!res.ok) return null;
-    const json = await res.json();
-    const course = json?.course ?? json;
-    const loc = course?.location ?? {};
-
-    let lat = typeof loc.latitude === "number" ? loc.latitude : null;
-    let lng = typeof loc.longitude === "number" ? loc.longitude : null;
-
-    // The Golf Course API rarely returns coordinates — fall back to geocoding
-    // the address (or club name + city/state/country) via Nominatim.
-    if (lat == null || lng == null) {
-      const clubName = [course?.club_name, course?.course_name]
-        .filter(Boolean)
-        .filter((v, i, a) => a.indexOf(v) === i)
-        .join(" ");
-      const place = [loc.city, loc.state, loc.country]
-        .filter((v: string) => v && v !== "Unknown")
-        .join(", ");
-
-      const candidates = [
-        loc.address,
-        [clubName, place].filter(Boolean).join(", "),
-        clubName,
-      ].filter((q): q is string => !!q && q.trim().length > 2);
-
-      for (const q of candidates) {
-        const hit = await geocodeWithNominatim(q);
-        if (hit) {
-          lat = hit.latitude;
-          lng = hit.longitude;
-          break;
-        }
-      }
-    }
-
-    if (typeof lat !== "number" || typeof lng !== "number") {
-      console.warn("No coords resolvable for course", courseId, course);
+    if (error) {
+      console.warn("course-coords failed", error.message);
       return null;
     }
-
-    await supabase
-      .from("courses")
-      .update({ latitude: lat, longitude: lng })
-      .eq("id", courseId);
-
-    return { latitude: lat, longitude: lng };
+    if (typeof data?.latitude === "number" && typeof data?.longitude === "number") {
+      return { latitude: data.latitude, longitude: data.longitude };
+    }
+    console.warn("course-coords returned no location", data);
+    return null;
   } catch (e) {
-    console.error("rawFetchAndStore failed", e);
+    console.error("fetchAndStoreCoordsFromApi failed", e);
     return null;
   }
 }
+
 
 
 // Nominatim allows ~1 request/second — serialise and throttle calls.
