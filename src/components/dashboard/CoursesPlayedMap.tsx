@@ -123,13 +123,14 @@ export default function CoursesPlayedMap({
         });
         if (!cancelled) setCourses(initial);
 
-        // Backfill missing coords from the Golf Course API where possible
+        // Backfill missing coords (Golf Course API, then geocoding) server-side
         const missing = initial.filter(
-          (c) => (c.latitude == null || c.longitude == null) && c.api_course_id
+          (c) => c.latitude == null || c.longitude == null
         );
         for (const c of missing) {
           if (cancelled) return;
-          const coords = await fetchAndStoreCoordsFromApi(c.id, c.api_course_id!);
+          const coords = await fetchAndStoreCoordsFromApi(c.id, c.api_course_id);
+
           if (coords && !cancelled) {
             setCourses((prev) =>
               prev.map((p) =>
