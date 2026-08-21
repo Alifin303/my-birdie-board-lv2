@@ -3,7 +3,6 @@ import React, { useEffect } from "react";
 import { SEOHead } from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const faqItems = [{
   id: "item-1",
@@ -134,24 +133,30 @@ export default function FAQ() {
             </section>
             
             <section itemScope itemType="https://schema.org/FAQPage">
-              <Accordion type="single" collapsible className="mb-12">
-                {faqItems.map(item => 
-                  <AccordionItem 
-                    key={item.id} 
-                    value={item.id} 
-                    itemScope 
-                    itemProp="mainEntity" 
+              <div className="mb-12">
+                {faqItems.map(item => (
+                  <details
+                    key={item.id}
+                    className="group border-b border-border last:border-b-0"
+                    itemScope
+                    itemProp="mainEntity"
                     itemType="https://schema.org/Question"
                   >
-                    <AccordionTrigger className="text-lg font-medium text-left" itemProp="name">
-                      {item.question}
-                    </AccordionTrigger>
-                    <AccordionContent 
-                      itemScope 
-                      itemProp="acceptedAnswer" 
+                    <summary className="flex cursor-pointer list-none items-center justify-between py-4 text-lg font-medium text-foreground [&::-webkit-details-marker]:hidden">
+                      <span itemProp="name">{item.question}</span>
+                      <span className="ml-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="m6 9 6 6 6-6" />
+                        </svg>
+                      </span>
+                    </summary>
+                    <div
+                      className="pb-6 text-muted-foreground"
+                      itemScope
+                      itemProp="acceptedAnswer"
                       itemType="https://schema.org/Answer"
                     >
-                      <div className="text-muted-foreground" itemProp="text">
+                      <div itemProp="text">
                         {item.answer}
                         {item.id === "item-4" && (
                           <p className="mt-2">
@@ -168,10 +173,10 @@ export default function FAQ() {
                           </p>
                         )}
                       </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                )}
-              </Accordion>
+                    </div>
+                  </details>
+                ))}
+              </div>
             </section>
             
             {/* Enhanced related links section */}
