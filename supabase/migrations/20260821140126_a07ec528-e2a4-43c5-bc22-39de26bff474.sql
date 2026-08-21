@@ -1,0 +1,1 @@
+UPDATE public.courses SET latitude = 51.7609516, longitude = -0.146407 WHERE id = 147;
