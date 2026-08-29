@@ -155,11 +155,11 @@ const Pricing = () => {
               <Card className="p-8 flex flex-col">
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold mb-2">Free</h2>
-                  <p className="text-muted-foreground">A taste of the full experience</p>
+                  <p className="text-muted-foreground">Your first 4 rounds, no card required</p>
                 </div>
                 <div className="mb-6">
                   <span className="text-4xl font-bold">£0</span>
-                  <span className="text-muted-foreground">/forever</span>
+                  <span className="text-muted-foreground">/up to 4 rounds</span>
                 </div>
                 <ul className="space-y-3 mb-8 flex-1">
                   {freeFeatures.map((f) => (
