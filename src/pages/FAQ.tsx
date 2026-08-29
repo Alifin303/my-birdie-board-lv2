@@ -39,7 +39,7 @@ const faqItems = [{
 }, {
   id: "item-9",
   question: "Can I cancel my subscription?",
-  answer: "Yes! You can cancel anytime. If you cancel mid-billing cycle, you'll still have access until your next billing date."
+  answer: "Yes! You can cancel anytime, including during the 30-day free trial, and you won't be charged again. You keep full access until the end of your current period. After that, if your account holds 5 or more rounds, you'll need to resubscribe to view your round history again — including your first 4 rounds. Nothing is deleted: your rounds are waiting for you whenever you come back."
 }, {
   id: "item-10",
   question: "How do I add a new golf course that isn't listed?",
