@@ -21,7 +21,8 @@ const Pricing = () => {
   const [showLogin, setShowLogin] = useState(false);
 
   const freeFeatures = [
-    "Log up to 4 rounds to try it out",
+    "Free account — no card required",
+    "Up to 4 rounds, always viewable",
     "Detailed stats: fairways, greens, putts",
     "Course leaderboards",
     "Round history & scorecards",
@@ -31,6 +32,7 @@ const Pricing = () => {
 
   const proFeatures = [
     "Everything in Free",
+    "30-day free trial — no charge during the trial",
     "Unlimited rounds — build your full golf history",
     "Automatic WHS handicap calculation",
     "Score progression charts & trends",
@@ -40,23 +42,31 @@ const Pricing = () => {
   const faqs = [
     {
       q: "What's the difference between Free and Pro?",
-      a: "Free lets you try MyBirdieBoard with up to 4 rounds so you can see how it works. Pro unlocks unlimited rounds and automatic WHS handicap calculation — which needs a rolling history of your scores to stay accurate.",
+      a: "Free is a 4-round account: create it without a card, log up to 4 rounds, and view them whenever you like. Pro (£2.99/month, 30-day free trial) is for golfers who want to keep going — unlimited rounds and automatic WHS handicap calculation, which needs a rolling history of scores to stay accurate.",
     },
     {
-      q: "Why does the free plan cap at 4 rounds?",
-      a: "Four rounds is enough to get a feel for the app, your scorecards, and the stats. Beyond that, tracking becomes most useful when it's continuous — which is what Pro is built for.",
+      q: "What happens the moment I add a 5th round?",
+      a: "Your account switches from the free 4-round tier to the subscription tier. From that point, an active Pro subscription is required to view any of your rounds when you log in — including the original 4, not just the rounds beyond 4. The 30-day free trial covers this, so you can add a 5th round and see your handicap without being charged during those 30 days.",
+    },
+    {
+      q: "Why is the free tier capped at 4 rounds?",
+      a: "Four rounds is enough to see your scorecards, stats and leaderboards and decide whether MyBirdieBoard is for you. Beyond that, tracking is only genuinely useful when it's continuous — a full, ongoing history is what Pro pays for.",
+    },
+    {
+      q: "What happens to my rounds if I don't subscribe after the trial?",
+      a: "Nothing is deleted. Your rounds stay safely in your account. But because the account holds 5 or more rounds, you'll need an active subscription to view your round history again — including your first 4 rounds. Resubscribe at any time and everything is exactly as you left it.",
+    },
+    {
+      q: "How long is the free trial?",
+      a: "30 days. You can cancel any time before it ends and you won't be charged. There is no 7-day trial — the trial is 30 days.",
     },
     {
       q: "Can I cancel any time?",
-      a: "Yes. Pro is a rolling monthly subscription — cancel from your account settings and you'll keep access until the end of the billing period.",
+      a: "Yes. Pro is a rolling monthly subscription — cancel from your account settings and you'll keep access until the end of the current period.",
     },
     {
       q: "Do I need to use my phone on the course?",
       a: "No. MyBirdieBoard is designed for post-round entry. Play distraction-free and log your scores afterwards.",
-    },
-    {
-      q: "What happens to my rounds if I don't upgrade?",
-      a: "Your first 4 rounds stay in your account. You just won't be able to add new ones or unlock the handicap tracking until you upgrade to Pro.",
     },
     {
       q: "What payment methods do you accept?",
