@@ -312,6 +312,25 @@ export function AddRoundModal({ open, onOpenChange, handicapIndex = 0 }: AddRoun
           >
             <X className="h-4 w-4" />
           </button>
+          {!hasSubscription && remainingRounds <= 1 && (
+            <div
+              role="alert"
+              className="mt-6 mb-4 rounded-lg border-2 border-destructive/40 bg-destructive/5 p-4"
+            >
+              <h3 className="font-semibold flex items-start gap-2 mb-2">
+                <Lock className="h-4 w-4 text-destructive flex-shrink-0 mt-1" aria-hidden="true" />
+                This is your last free round — please read before you save
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Free accounts can hold up to {FREE_ROUND_LIMIT} rounds and view them forever. As soon as your
+                account reaches {FREE_ROUND_LIMIT + 1} rounds, you'll need an active Pro subscription
+                (£2.99/month) to view <strong className="text-foreground">any</strong> of your rounds when you log
+                in — including your first {FREE_ROUND_LIMIT}, not just the new ones. Pro starts with a 30-day free
+                trial, so you won't be charged during those 30 days, and nothing is ever deleted if you don't
+                continue.
+              </p>
+            </div>
+          )}
           {currentStep === 'search' ? (
             <SearchStep 
               searchQuery={searchQuery}
