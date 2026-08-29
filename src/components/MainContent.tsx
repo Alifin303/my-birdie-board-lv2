@@ -138,7 +138,7 @@ export const MainContent = ({
                 <span className="text-sm sm:text-base md:text-lg">Start Tracking My Rounds</span>
               </Button>
               <Link to="/demo" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" data-id="cta_hero_watch_demo" aria-label="See how MyBirdieBoard works" className="bg-white/10 hover:bg-white/20 text-white border-white/30 px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 w-full text-right">
+                <Button size="lg" variant="secondary" data-id="cta_hero_watch_demo" aria-label="See how MyBirdieBoard works" className="text-lg px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 w-full sm:w-auto justify-center border-2 border-secondary-foreground/20">
                   <BarChart2 className="mr-2 h-5 w-5 flex-shrink-0" />
                   <span className="text-sm sm:text-base md:text-lg">See How It Works</span>
                 </Button>
@@ -305,7 +305,7 @@ export const MainContent = ({
               <span className="text-sm sm:text-base">Start Free</span>
             </Button>
             <Link to="/demo" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white border-white/30 px-8 h-auto py-3 shadow-lg transition-all duration-300 w-full" aria-label="View demo dashboard">
+              <Button size="lg" variant="secondary" className="px-8 h-auto py-3 shadow-lg transition-all duration-300 w-full justify-center border-2 border-secondary-foreground/20" aria-label="View demo dashboard">
                 <BarChart2 className="mr-2 h-4 w-4 flex-shrink-0" />
                 <span className="text-sm sm:text-base">Try Demo</span>
               </Button>

@@ -6,7 +6,7 @@ import { SignUpDialog } from "@/components/SignUpDialog";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Check, User } from "lucide-react";
+import { AlertTriangle, Check, User } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { BreadcrumbNav } from "@/components/BreadcrumbNav";
 import {
@@ -21,7 +21,8 @@ const Pricing = () => {
   const [showLogin, setShowLogin] = useState(false);
 
   const freeFeatures = [
-    "Log up to 4 rounds to try it out",
+    "Free account — no card required",
+    "Up to 4 rounds, always viewable",
     "Detailed stats: fairways, greens, putts",
     "Course leaderboards",
     "Round history & scorecards",
@@ -31,6 +32,7 @@ const Pricing = () => {
 
   const proFeatures = [
     "Everything in Free",
+    "30-day free trial — no charge during the trial",
     "Unlimited rounds — build your full golf history",
     "Automatic WHS handicap calculation",
     "Score progression charts & trends",
@@ -40,23 +42,31 @@ const Pricing = () => {
   const faqs = [
     {
       q: "What's the difference between Free and Pro?",
-      a: "Free lets you try MyBirdieBoard with up to 4 rounds so you can see how it works. Pro unlocks unlimited rounds and automatic WHS handicap calculation — which needs a rolling history of your scores to stay accurate.",
+      a: "Free is a 4-round account: create it without a card, log up to 4 rounds, and view them whenever you like. Pro (£2.99/month, 30-day free trial) is for golfers who want to keep going — unlimited rounds and automatic WHS handicap calculation, which needs a rolling history of scores to stay accurate.",
     },
     {
-      q: "Why does the free plan cap at 4 rounds?",
-      a: "Four rounds is enough to get a feel for the app, your scorecards, and the stats. Beyond that, tracking becomes most useful when it's continuous — which is what Pro is built for.",
+      q: "What happens the moment I add a 5th round?",
+      a: "Your account switches from the free 4-round tier to the subscription tier. From that point, an active Pro subscription is required to view any of your rounds when you log in — including the original 4, not just the rounds beyond 4. The 30-day free trial covers this, so you can add a 5th round and see your handicap without being charged during those 30 days.",
+    },
+    {
+      q: "Why is the free tier capped at 4 rounds?",
+      a: "Four rounds is enough to see your scorecards, stats and leaderboards and decide whether MyBirdieBoard is for you. Beyond that, tracking is only genuinely useful when it's continuous — a full, ongoing history is what Pro pays for.",
+    },
+    {
+      q: "What happens to my rounds if I don't subscribe after the trial?",
+      a: "Nothing is deleted. Your rounds stay safely in your account. But because the account holds 5 or more rounds, you'll need an active subscription to view your round history again — including your first 4 rounds. Resubscribe at any time and everything is exactly as you left it.",
+    },
+    {
+      q: "How long is the free trial?",
+      a: "30 days. You can cancel any time before it ends and you won't be charged. There is no 7-day trial — the trial is 30 days.",
     },
     {
       q: "Can I cancel any time?",
-      a: "Yes. Pro is a rolling monthly subscription — cancel from your account settings and you'll keep access until the end of the billing period.",
+      a: "Yes. Pro is a rolling monthly subscription — cancel from your account settings and you'll keep access until the end of the current period.",
     },
     {
       q: "Do I need to use my phone on the course?",
       a: "No. MyBirdieBoard is designed for post-round entry. Play distraction-free and log your scores afterwards.",
-    },
-    {
-      q: "What happens to my rounds if I don't upgrade?",
-      a: "Your first 4 rounds stay in your account. You just won't be able to add new ones or unlock the handicap tracking until you upgrade to Pro.",
     },
     {
       q: "What payment methods do you accept?",
@@ -133,8 +143,8 @@ const Pricing = () => {
               <BreadcrumbNav />
               <div className="mt-6 text-center max-w-3xl mx-auto">
                 <h1 className="text-4xl sm:text-5xl font-bold mb-4">Simple, honest pricing</h1>
-                <p className="text-lg text-white/90">
-                  Try it free. Upgrade to Pro when you're ready to track every round and get your automatic WHS handicap.
+                <p className="text-lg text-primary-foreground/90">
+                  Start free with 4 rounds, no card needed. Go past 4 rounds and Pro keeps your whole history — and your handicap — open, with a 30-day free trial first.
                 </p>
               </div>
             </div>
@@ -145,11 +155,11 @@ const Pricing = () => {
               <Card className="p-8 flex flex-col">
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold mb-2">Free</h2>
-                  <p className="text-muted-foreground">A taste of the full experience</p>
+                  <p className="text-muted-foreground">Your first 4 rounds, no card required</p>
                 </div>
                 <div className="mb-6">
                   <span className="text-4xl font-bold">£0</span>
-                  <span className="text-muted-foreground">/forever</span>
+                  <span className="text-muted-foreground">/up to 4 rounds</span>
                 </div>
                 <ul className="space-y-3 mb-8 flex-1">
                   {freeFeatures.map((f) => (
@@ -170,11 +180,11 @@ const Pricing = () => {
                 </div>
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold mb-2">Pro</h2>
-                  <p className="text-muted-foreground">Unlimited tracking with automatic handicap</p>
+                  <p className="text-muted-foreground">From your 5th round onwards</p>
                 </div>
                 <div className="mb-6">
                   <span className="text-4xl font-bold">£2.99</span>
-                  <span className="text-muted-foreground">/month</span>
+                  <span className="text-muted-foreground">/month after a 30-day free trial</span>
                 </div>
                 <ul className="space-y-3 mb-8 flex-1">
                   {proFeatures.map((f) => (
@@ -190,8 +200,31 @@ const Pricing = () => {
               </Card>
             </div>
 
+            <div className="max-w-4xl mx-auto mt-10">
+              <div className="rounded-lg border-2 border-primary/40 bg-primary/5 p-6">
+                <h2 className="text-xl font-bold mb-3 flex items-start gap-2">
+                  <AlertTriangle className="h-5 w-5 text-primary flex-shrink-0 mt-1" aria-hidden="true" />
+                  Please read: what happens when you add a 5th round
+                </h2>
+                <ul className="space-y-2 text-sm sm:text-base text-foreground/90">
+                  <li>
+                    <strong>4 rounds or fewer:</strong> your account is free forever and you can always log in and view those rounds. No card, no subscription, no time limit.
+                  </li>
+                  <li>
+                    <strong>5 rounds or more:</strong> your account needs an active Pro subscription to view <strong>any</strong> of your rounds when you log in — including the original 4, not just the rounds beyond 4.
+                  </li>
+                  <li>
+                    <strong>The 30-day free trial</strong> lets you add that 5th round and see your handicap without being charged during those 30 days. Cancel before it ends and you pay nothing.
+                  </li>
+                  <li>
+                    <strong>Nothing is ever deleted.</strong> If a subscription lapses, your rounds are kept — they become visible again the moment you resubscribe.
+                  </li>
+                </ul>
+              </div>
+            </div>
+
             <p className="text-center text-sm text-muted-foreground mt-8">
-              Cancel any time. No credit card required to get started.
+              Cancel any time. No credit card required to create your account.
             </p>
           </section>
 

@@ -23,7 +23,7 @@ const faqItems = [{
 }, {
   id: "item-5",
   question: "How much does MyBirdieBoard cost?",
-  answer: "MyBirdieBoard offers a free tier that lets you track up to 4 rounds — perfect for trying out the app. For unlimited rounds and full access to all features, the Pro plan costs just £2.99 per month (cancel anytime). The price is shown in GBP but will be converted to your local currency at checkout. Plus, Pro subscribers get a 30-day free trial — cancel before the trial ends if it's not for you, and you won't be charged."
+  answer: "Creating an account is free and no card is required. While your account has 4 rounds or fewer, you can always log in and view those rounds — free, forever. The moment you add a 5th round, your account needs an active Pro subscription (£2.99 per month) to view any of your rounds on login, including the original 4. Pro starts with a 30-day free trial, so you can add your 5th round and see your handicap without being charged during those 30 days. The price is shown in GBP but is converted to your local currency at checkout."
 }, {
   id: "item-6",
   question: "Why should I use MyBirdieBoard instead of a notebook or spreadsheet?",
@@ -39,7 +39,7 @@ const faqItems = [{
 }, {
   id: "item-9",
   question: "Can I cancel my subscription?",
-  answer: "Yes! You can cancel anytime. If you cancel mid-billing cycle, you'll still have access until your next billing date."
+  answer: "Yes! You can cancel anytime, including during the 30-day free trial, and you won't be charged again. You keep full access until the end of your current period. After that, if your account holds 5 or more rounds, you'll need to resubscribe to view your round history again — including your first 4 rounds. Nothing is deleted: your rounds are waiting for you whenever you come back."
 }, {
   id: "item-10",
   question: "How do I add a new golf course that isn't listed?",
