@@ -1,58 +1,59 @@
-## SEO Improvement Plan
+# SEO + conversion fixes
 
-Here's how I'd tackle the review, grouped by what I can build vs. what's off-platform (outreach). I'll focus on the code changes we can ship immediately.
+## 1. Accordion answers in the initial DOM (site-wide)
 
-### 1. Fix critical on-page issues
+Current state: `/faq` was already converted to native `<details>`/`<summary>`, so its answers are in the HTML. The shared Radix accordion (`src/components/ui/accordion.tsx`) still unmounts closed content, and it is used on **/pricing** (`src/pages/Pricing.tsx`) and the **homepage FAQ section** (`src/components/HomepageSEOSections.tsx`).
 
-**Homepage H1/H2 duplication**
-- In `src/pages/Index.tsx`, keep the H1 as-is and replace the duplicate H2 with a supporting subheadline (e.g. *"Log rounds after you play, track your handicap, and see your game improve — no GPS, no distractions."*).
+Change: rewrite `AccordionContent` to always render its children with `forceMount`, hiding the closed state with CSS (grid-rows/opacity transition) instead of unmounting.
 
-**Add structured data (schema markup)**
-- Add `FAQPage` JSON-LD to the homepage FAQ accordion (mirrors the visible Q&As).
-- Add `SoftwareApplication` JSON-LD to the homepage with price (£2.99), category, and — if we're comfortable — an `aggregateRating` block. I'll flag this and ask before adding ratings we can't substantiate.
-- The blog posts already use `Article` schema via `GuideLayout`; I'll audit and confirm.
+```diff
+ const AccordionContent = React.forwardRef<...>(({ className, children, ...props }, ref) => (
+   <AccordionPrimitive.Content
+     ref={ref}
++    forceMount
+-    className="overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
++    className="overflow-hidden text-sm grid transition-all duration-200
++               data-[state=closed]:grid-rows-[0fr] data-[state=closed]:opacity-0
++               data-[state=open]:grid-rows-[1fr] data-[state=open]:opacity-100"
+   >
+-    <div className={cn("pb-4 pt-0", className)}>{children}</div>
++    <div className="min-h-0 overflow-hidden">
++      <div className={cn("pb-4 pt-0", className)}>{children}</div>
++    </div>
+   </AccordionPrimitive.Content>
+ ))
+```
 
-**Refresh stale 2024 references**
-- Rename "Best Golf Score Apps 2024" → "Best Golf Score Apps 2026" across title, H1, meta, and body copy in `src/pages/guides/BestGolfScoreApps.tsx` and any internal links / SEO map entries.
-- Grep the codebase for other lingering "2024/2025" references in titles and update.
+This one edit covers every instance (pricing FAQ, homepage FAQ, and any other accordion). `/faq` already renders in the DOM via `<details>`. I'll verify all three pages with a headless browser check of the server-rendered HTML.
 
-### 2. Quick wins
+## 2. FAQPage schema on /faq
 
-**New `/pricing` page**
-- Create `src/pages/Pricing.tsx` with Free vs Pro (£2.99/mo) comparison, FAQ, and CTAs. Add to `SiteHeader`, `SiteFooter`, `routes.tsx`, `route-seo-map.ts`, and the sitemap generator.
+Already present: `src/pages/FAQ.tsx` builds FAQPage JSON-LD from the same `faqItems` array that renders the visible answers, so the text matches exactly. Once the answer copy in section 3 changes, the schema updates automatically. No structural change needed — I'll re-verify the built HTML contains 11 `Question` entries.
 
-**Expand site navigation**
-- Update `src/components/SiteHeader.tsx` to include: Features (anchor to homepage section or new page), Pricing, Blog, Guides, About — plus Log In. Mobile: collapse into a sheet menu.
+## 3. Honest free / trial / paywall messaging
 
-**Social proof tightening**
-- Replace "1,000+ golfers" on the homepage with a more specific, defensible line. I'll propose 2–3 options for you to pick from before shipping (e.g. rounds logged, countries, etc.).
-- Testimonials: I can restructure the component to support photo + full name + specific metric fields, but I'll need you to supply real testimonials. In the meantime I'll reduce from 6 generic ones to 2–3 stronger ones, or hide the section until we have real quotes — your call.
+The model to describe everywhere:
+- Free account, no card. 4 rounds or fewer: always viewable, forever.
+- Adding a 5th round means an active Pro subscription (£2.99/mo) is required to view **any** rounds — including the original 4.
+- 30-day free Pro trial lets you add round 5+ and see your handicap with no charge during the trial.
 
-**Off-brand blog post**
-- Retire `BestGolfClubsBeginners.tsx`: 301 redirect to a replacement post more aligned with tracking (e.g. *"How to Drop 5 Shots Off Your Handicap Using Stats"*) via `_redirects`, and remove from the blog index + sitemap.
+Files and edits:
+- **`src/pages/Pricing.tsx`** — rewrite feature lists, add a prominent callout box under the plan cards ("What happens when you add a 5th round"), and rewrite the pricing FAQ answers (trial length, what happens if you don't upgrade, what happens if you cancel). Product/FAQ JSON-LD on the page is generated from the same copy, so it stays in sync.
+- **`src/components/add-round/AddRoundModal.tsx`** — add an unmissable notice shown *before* the 5th round is saved: a warning panel on the limit dialog stating that with 5+ rounds an active subscription is required to view all round history, including the first 4. Copy also updated to reference the 30-day trial.
+- **`src/pages/Checkout.tsx`** — add the same one-line disclosure above the trial CTA.
+- **`src/pages/FAQ.tsx`** — rewrite Q5 ("How much does MyBirdieBoard cost?") and Q9 ("Can I cancel my subscription?"), and add nothing new, so the 11-item schema stays at 11 items with accurate text.
+- **`src/pages/GetStarted.tsx`** — align the free/upgrade copy with the same wording.
 
-### 3. Longer-term traffic growth (code)
+### Decision needed: testimonials
 
-**"How to improve your golf handicap" cluster**
-- New blog post: *"How to Drop 5 Shots Off Your Handicap in One Season"* with internal links to the handicap calculator and stats guides.
-- Follow-up ideas (write later): *"7 Stats That Predict Handicap Improvement"*, *"Handicap Plateau: Why You're Stuck and How to Break Through"*.
+`src/components/UserReviews.tsx` holds 6 quotes (James R., Sarah L., Tom B., Mark T., Rachel D., Chris M.). They read as placeholder marketing copy with generic initials and round-number dates — I have no record in the codebase of them coming from real users, and they also power `Review`/`aggregateRating` schema.
 
-**Handicap calculator page**
-- Already built at `/tools/handicap-calculator`. I'll double-check it's in the main nav / footer / sitemap and linked prominently from the homepage so it acts as the link magnet the reviewer described.
+Options for Rachel D.:
+- (a) Change "7-day free trial" to "30-day free trial" — smallest edit.
+- (b) Replace the quote with one that doesn't mention a trial at all.
 
-### 4. Off-platform (no code — for your action)
+Tell me which, and confirm whether these are real quotes. If they're placeholders, I'd also recommend removing the review `aggregateRating` schema, since fabricated review markup is a Google policy violation.
 
-- Outreach to Golf Insider, Wicked Smart Golf, MyGolfSpy, etc. for inclusion in 2026 roundups.
-- Reddit r/golf, Golf Monthly UK contributor pitches, HARO responses.
-- Collect real testimonials with photos + specific handicap improvements.
+## 4. Demo CTA prominence
 
----
-
-### Questions before I build
-
-1. **Testimonials**: reduce to fewer generic ones for now, or hide the section entirely until you supply real quotes?
-2. **Social proof number**: got a real metric I can use (total rounds logged, sign-ups, countries), or should I pick something conservative and defensible?
-3. **`SoftwareApplication` schema**: OK to include an `aggregateRating` with a plausible early-stage rating, or leave it out until we have real reviews? (Google can penalise fabricated ratings — I'd recommend leaving it out.)
-4. **Off-brand blog post**: redirect `BestGolfClubsBeginners` to a new handicap-improvement post, or just remove it?
-
-Once you answer those I'll implement in a single build pass.
+`src/components/MainContent.tsx` hero: the "See How It Works" button is `variant="outline"` with `bg-white/10` and a `text-right` class that misaligns it. Change to a solid high-contrast secondary button (white background, primary text), matching the primary CTA's size/padding, centred content, full width on mobile. Same treatment for the "Try Demo" button in the lower CTA strip.
