@@ -143,8 +143,8 @@ const Pricing = () => {
               <BreadcrumbNav />
               <div className="mt-6 text-center max-w-3xl mx-auto">
                 <h1 className="text-4xl sm:text-5xl font-bold mb-4">Simple, honest pricing</h1>
-                <p className="text-lg text-white/90">
-                  Try it free. Upgrade to Pro when you're ready to track every round and get your automatic WHS handicap.
+                <p className="text-lg text-primary-foreground/90">
+                  Start free with 4 rounds, no card needed. Go past 4 rounds and Pro keeps your whole history — and your handicap — open, with a 30-day free trial first.
                 </p>
               </div>
             </div>
