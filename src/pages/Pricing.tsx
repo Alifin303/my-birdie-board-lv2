@@ -180,11 +180,11 @@ const Pricing = () => {
                 </div>
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold mb-2">Pro</h2>
-                  <p className="text-muted-foreground">Unlimited tracking with automatic handicap</p>
+                  <p className="text-muted-foreground">From your 5th round onwards</p>
                 </div>
                 <div className="mb-6">
                   <span className="text-4xl font-bold">£2.99</span>
-                  <span className="text-muted-foreground">/month</span>
+                  <span className="text-muted-foreground">/month after a 30-day free trial</span>
                 </div>
                 <ul className="space-y-3 mb-8 flex-1">
                   {proFeatures.map((f) => (
@@ -200,8 +200,31 @@ const Pricing = () => {
               </Card>
             </div>
 
+            <div className="max-w-4xl mx-auto mt-10">
+              <div className="rounded-lg border-2 border-primary/40 bg-primary/5 p-6">
+                <h2 className="text-xl font-bold mb-3 flex items-start gap-2">
+                  <AlertTriangle className="h-5 w-5 text-primary flex-shrink-0 mt-1" aria-hidden="true" />
+                  Please read: what happens when you add a 5th round
+                </h2>
+                <ul className="space-y-2 text-sm sm:text-base text-foreground/90">
+                  <li>
+                    <strong>4 rounds or fewer:</strong> your account is free forever and you can always log in and view those rounds. No card, no subscription, no time limit.
+                  </li>
+                  <li>
+                    <strong>5 rounds or more:</strong> your account needs an active Pro subscription to view <strong>any</strong> of your rounds when you log in — including the original 4, not just the rounds beyond 4.
+                  </li>
+                  <li>
+                    <strong>The 30-day free trial</strong> lets you add that 5th round and see your handicap without being charged during those 30 days. Cancel before it ends and you pay nothing.
+                  </li>
+                  <li>
+                    <strong>Nothing is ever deleted.</strong> If a subscription lapses, your rounds are kept — they become visible again the moment you resubscribe.
+                  </li>
+                </ul>
+              </div>
+            </div>
+
             <p className="text-center text-sm text-muted-foreground mt-8">
-              Cancel any time. No credit card required to get started.
+              Cancel any time. No credit card required to create your account.
             </p>
           </section>
 
