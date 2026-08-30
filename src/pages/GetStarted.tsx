@@ -300,11 +300,12 @@ const GetStarted = () => {
               <Card className="p-6 border-2 border-border">
                 <h3 className="text-lg font-bold text-card-foreground mb-1">Free</h3>
                 <p className="text-3xl font-bold text-card-foreground mb-4">
-                  £0<span className="text-base font-normal text-muted-foreground">/month</span>
+                  £0<span className="text-base font-normal text-muted-foreground">/up to 4 rounds</span>
                 </p>
                 <ul className="space-y-3 mb-6">
                   {[
-                    "Score progression chart",
+                    "No card required",
+                    "Up to 4 rounds, always viewable",
                     "Stableford scoring",
                     "Course search",
                     "Detailed stats (putts, GIR, fairways)",
@@ -332,11 +333,12 @@ const GetStarted = () => {
                 </div>
                 <h3 className="text-lg font-bold text-card-foreground mb-1">Pro</h3>
                 <p className="text-3xl font-bold text-card-foreground mb-4">
-                  £2.99<span className="text-base font-normal text-muted-foreground">/month</span>
+                  £2.99<span className="text-base font-normal text-muted-foreground">/month after 30-day free trial</span>
                 </p>
                 <ul className="space-y-3 mb-6">
                   {[
-                   "Unlimited round tracking",
+                    "30-day free trial — no charge during the trial",
+                    "Unlimited round tracking",
                     "Handicap calculation",
                     "Score milestones & achievements",
                     "Full round history",
@@ -352,6 +354,12 @@ const GetStarted = () => {
                 </Button>
               </Card>
             </div>
+            <p className="mt-6 text-sm text-muted-foreground max-w-2xl mx-auto text-center">
+              Worth knowing: free accounts hold up to 4 rounds and can view them forever. The moment your account
+              reaches 5 rounds, an active Pro subscription is needed to view any of your rounds — including the first
+              4. The 30-day free trial covers this, and nothing is ever deleted.{" "}
+              <Link to="/pricing" className="underline underline-offset-4">See full pricing details</Link>.
+            </p>
           </div>
         </section>
 

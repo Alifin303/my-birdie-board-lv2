@@ -170,6 +170,16 @@ export default function Checkout() {
                   </li>
                 </ul>
               </div>
+
+              <div role="alert" className="rounded-lg border-2 border-destructive/40 bg-destructive/5 p-4 mb-6 text-sm">
+                <p className="font-semibold mb-1">Before you continue</p>
+                <p className="text-muted-foreground">
+                  Free accounts can hold up to 4 rounds and view them forever. Once your account has 5 or more
+                  rounds, an active subscription is required to view <strong className="text-foreground">any</strong>{" "}
+                  of your round history when you log in — including your first 4. Nothing is deleted if you cancel;
+                  your rounds reappear whenever you resubscribe.
+                </p>
+              </div>
               
               <Button onClick={handleCreateCheckout} disabled={isLoading || !user} className="w-full bg-accent hover:bg-accent/90 text-white py-6 text-lg mb-3">
                 {isLoading ? <>
