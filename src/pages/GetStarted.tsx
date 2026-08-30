@@ -300,11 +300,12 @@ const GetStarted = () => {
               <Card className="p-6 border-2 border-border">
                 <h3 className="text-lg font-bold text-card-foreground mb-1">Free</h3>
                 <p className="text-3xl font-bold text-card-foreground mb-4">
-                  £0<span className="text-base font-normal text-muted-foreground">/month</span>
+                  £0<span className="text-base font-normal text-muted-foreground">/up to 4 rounds</span>
                 </p>
                 <ul className="space-y-3 mb-6">
                   {[
-                    "Score progression chart",
+                    "No card required",
+                    "Up to 4 rounds, always viewable",
                     "Stableford scoring",
                     "Course search",
                     "Detailed stats (putts, GIR, fairways)",
