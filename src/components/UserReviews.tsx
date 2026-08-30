@@ -45,7 +45,7 @@ export const UserReviews = () => {
     {
       rating: 5,
       author: "Rachel D.",
-      text: "I signed up for the 7-day free trial and was hooked immediately. Seeing my progress in real-time keeps me motivated to play better golf!",
+      text: "I signed up and was hooked immediately. Seeing my progress in real-time keeps me motivated to play better golf!",
       datePublished: "2024-03-22"
     },
     {
