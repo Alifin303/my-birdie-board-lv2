@@ -188,6 +188,18 @@ const BestGolfScoreTrackingApps = () => {
             and log your next round in seconds.
           </p>
         </section>
+
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Related Resources</h2>
+          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+            <li><Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline">How to Track Golf Scores</Link></li>
+            <li><Link to="/guides/golf-statistics-tracker" className="text-primary hover:underline">Golf Statistics Tracker</Link></li>
+            <li><Link to="/guides/golf-performance-analytics" className="text-primary hover:underline">Golf Performance Analytics</Link></li>
+            <li><Link to="/guides/golf-score-tracking-for-beginners" className="text-primary hover:underline">Golf Score Tracking for Beginners</Link></li>
+            <li><Link to="/guides/golf-score-tracker-vs-gps-apps" className="text-primary hover:underline">Score Trackers vs GPS Apps</Link></li>
+          </ul>
+        </section>
+
       </div>
     </GuideLayout>
   );
