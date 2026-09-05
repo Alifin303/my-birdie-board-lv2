@@ -191,12 +191,6 @@ export const routeSEOMap: Record<string, RouteSEO> = {
     keywords: 'golf handicap generator, golf handicap calculator, how to calculate golf handicap, WHS handicap, handicap index, free handicap generator',
     ogType: 'article',
   },
-  '/compare/best-golf-score-tracking-apps': {
-    title: 'Best Golf Score Apps 2026 | MyBirdieBoard',
-    description: 'Compare the best golf score tracking apps in 2026. Features, pricing, and which app is right for your game.',
-    keywords: 'best golf score apps, golf score tracking apps, golf apps 2026, golf handicap apps',
-    ogType: 'article',
-  },
   '/guides/golf-performance-analytics': {
     title: 'Golf Performance Analytics Guide | MyBirdieBoard',
     description: 'Use data to improve your golf game. Learn to analyze stats, identify weaknesses, and track progress.',
