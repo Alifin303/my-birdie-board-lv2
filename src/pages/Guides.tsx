@@ -31,12 +31,7 @@ const guides = [
     link: "/guides/golf-handicap-calculator",
   },
   {
-    title: "Best Golf Score Tracking Apps",
-    description: "Compare the top golf score tracking apps. Features, pricing, and which app is right for your game.",
-    icon: Target,
-    link: "/compare/best-golf-score-tracking-apps",
-  },
-  {
+
     title: "Golf Apps Without Phone During Round",
     description: "Discover golf tracking apps that don't require your phone during play. Post-round logging for distraction-free golf.",
     icon: Smartphone,
