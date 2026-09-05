@@ -124,7 +124,7 @@ const GolfHandicapCalculator = () => {
           <p className="text-muted-foreground mb-4">
             While learning the manual method is important, a golf handicap generator does the heavy lifting for you — 
             calculating differentials, selecting your best scores, and updating your index after every round. The
-            <Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline mx-1">
+            <Link to="/compare/best-golf-score-tracking-apps" className="text-primary hover:underline mx-1">
               best golf score tracking apps
             </Link>
             include built-in handicap calculators.
@@ -205,7 +205,7 @@ const GolfHandicapCalculator = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline">
+                  <Link to="/compare/best-golf-score-tracking-apps" className="text-primary hover:underline">
                     Best Golf Score Apps for Handicap Tracking
                   </Link>
                 </li>

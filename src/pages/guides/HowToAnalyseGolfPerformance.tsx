@@ -124,7 +124,7 @@ const HowToAnalyseGolfPerformance = () => {
             <li><strong>Simplicity:</strong> If the tool is too complex, you won't use it consistently</li>
           </ul>
           <p className="text-muted-foreground mb-4">
-            <Link to="/" className="text-primary hover:underline">MyBirdieBoard</Link> provides all of these features in a clean, focused interface. It's built for golfers who want analysis without the complexity of tour-level platforms. For a comparison of available tools, see our <Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline">best golf score tracking apps guide</Link>.
+            <Link to="/" className="text-primary hover:underline">MyBirdieBoard</Link> provides all of these features in a clean, focused interface. It's built for golfers who want analysis without the complexity of tour-level platforms. For a comparison of available tools, see our <Link to="/compare/best-golf-score-tracking-apps" className="text-primary hover:underline">best golf score tracking apps guide</Link>.
           </p>
         </section>
 

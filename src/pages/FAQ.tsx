@@ -197,7 +197,7 @@ export default function FAQ() {
                       </Link>
                     </li>
                     <li>
-                      <Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline">
+                      <Link to="/compare/best-golf-score-tracking-apps" className="text-primary hover:underline">
                         Best Golf Score Apps Comparison
                       </Link>
                     </li>

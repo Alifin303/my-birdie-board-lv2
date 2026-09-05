@@ -201,7 +201,7 @@ export default function PlayingWithoutPhone() {
               That's exactly why <Link to="/" className="text-primary hover:underline font-semibold">MyBirdieBoard</Link> was built — as a dedicated post-round golf tracking tool.
             </p>
             <p>
-              It's designed specifically for post-round tracking — so your phone stays in your pocket on the course, but every round still gets saved, organized, and remembered afterward. You can compare your progress using the <Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline">best golf score tracking apps</Link> available.
+              It's designed specifically for post-round tracking — so your phone stays in your pocket on the course, but every round still gets saved, organized, and remembered afterward. You can compare your progress using the <Link to="/compare/best-golf-score-tracking-apps" className="text-primary hover:underline">best golf score tracking apps</Link> available.
             </p>
             <Card className="my-6 bg-primary/5 border-primary/20">
               <CardContent className="pt-6 space-y-2">
@@ -257,7 +257,7 @@ export default function PlayingWithoutPhone() {
                 <li><Link to="/blog/golf-stats-to-track" className="text-primary hover:underline">Golf Stats You Should Track to Improve</Link></li>
                 <li><Link to="/blog/course-management-tips" className="text-primary hover:underline">Golf Course Management Tips</Link></li>
                 <li><Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline">How to Track Golf Scores (Guide)</Link></li>
-                <li><Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline">Best Golf Score Tracking Apps</Link></li>
+                <li><Link to="/compare/best-golf-score-tracking-apps" className="text-primary hover:underline">Best Golf Score Tracking Apps</Link></li>
               </ul>
             </div>
 

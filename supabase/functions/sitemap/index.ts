@@ -38,7 +38,6 @@ const routes: { path: string; priority: string; changefreq: string }[] = [
   // Guides
   { path: '/guides/how-to-track-golf-scores', priority: '0.8', changefreq: 'monthly' },
   { path: '/guides/golf-handicap-calculator', priority: '0.8', changefreq: 'monthly' },
-  { path: '/guides/best-golf-score-tracking-apps', priority: '0.8', changefreq: 'monthly' },
   { path: '/guides/golf-performance-analytics', priority: '0.8', changefreq: 'monthly' },
   { path: '/guides/golf-statistics-tracker', priority: '0.8', changefreq: 'monthly' },
   { path: '/guides/golf-performance-metrics', priority: '0.8', changefreq: 'monthly' },

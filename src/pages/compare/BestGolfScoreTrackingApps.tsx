@@ -19,6 +19,30 @@ const BestGolfScoreTrackingApps = () => {
         </section>
 
         <section>
+          <h2 className="text-2xl font-bold mb-4">What Makes a Good Golf Score Tracker</h2>
+          <p className="text-muted-foreground mb-4">
+            A good golf score tracker does three things well: it makes entering scores easy, it calculates meaningful statistics automatically, and it stores your data permanently so you can track progress over time. Everything else is secondary.
+          </p>
+          <h3 className="text-xl font-semibold mb-3">Essential Features</h3>
+          <ul className="list-disc pl-6 space-y-2 text-muted-foreground mb-6">
+            <li><strong>Fast score entry:</strong> If it takes more than 2–3 minutes to log a round, you'll stop using it</li>
+            <li><strong>Handicap calculation:</strong> Official WHS-compliant index computation from your scores</li>
+            <li><strong>Course database:</strong> A comprehensive library of courses with ratings and slope values</li>
+            <li><strong>Scoring trends:</strong> Visual charts showing your performance over time</li>
+            <li><strong>Round history:</strong> A permanent, searchable record of every round you've played</li>
+          </ul>
+          <h3 className="text-xl font-semibold mb-3">Nice-to-Have Features</h3>
+          <ul className="list-disc pl-6 space-y-2 text-muted-foreground mb-6">
+            <li>Course-specific performance breakdowns</li>
+            <li>Leaderboards and social features</li>
+            <li>Stableford and match play scoring</li>
+            <li>Performance milestones and achievements</li>
+          </ul>
+        </section>
+
+
+
+        <section>
           <h2 className="text-2xl font-bold mb-4">Category 1: On-Course GPS Golf Apps</h2>
           <p className="text-muted-foreground mb-4">
             GPS-based golf apps are the most popular category. They provide real-time yardages, aerial course maps, shot tracking, and live scoring. You use them during your round — typically on your phone or a smartwatch.
@@ -118,6 +142,18 @@ const BestGolfScoreTrackingApps = () => {
         </section>
 
         <section>
+          <h2 className="text-2xl font-bold mb-4">Apps That Track Your Handicap</h2>
+          <p className="text-muted-foreground mb-4">
+            Most modern golf apps calculate a handicap index, but the accuracy and methodology vary. Look for apps that use official World Handicap System (WHS) calculations with proper course rating and slope adjustments. Some apps use simplified formulas that produce approximate results — fine for casual tracking, but not suitable if you need an official index.
+          </p>
+          <p className="text-muted-foreground mb-4">
+            MyBirdieBoard calculates your handicap using official WHS methodology, pulling course ratings and slope values from its database, and your handicap updates automatically with each round you enter. For more on how the maths works, see our <Link to="/guides/golf-handicap-calculator" className="text-primary hover:underline">handicap calculator guide</Link>.
+          </p>
+        </section>
+
+
+
+        <section>
           <h2 className="text-2xl font-bold mb-4">Quick Comparison</h2>
           <div className="overflow-x-auto mb-6">
             <table className="w-full text-sm text-left">
@@ -164,6 +200,18 @@ const BestGolfScoreTrackingApps = () => {
             and log your next round in seconds.
           </p>
         </section>
+
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Related Resources</h2>
+          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+            <li><Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline">How to Track Golf Scores</Link></li>
+            <li><Link to="/guides/golf-statistics-tracker" className="text-primary hover:underline">Golf Statistics Tracker</Link></li>
+            <li><Link to="/guides/golf-performance-analytics" className="text-primary hover:underline">Golf Performance Analytics</Link></li>
+            <li><Link to="/guides/golf-score-tracking-for-beginners" className="text-primary hover:underline">Golf Score Tracking for Beginners</Link></li>
+            <li><Link to="/guides/golf-score-tracker-vs-gps-apps" className="text-primary hover:underline">Score Trackers vs GPS Apps</Link></li>
+          </ul>
+        </section>
+
       </div>
     </GuideLayout>
   );

@@ -119,7 +119,7 @@ const GolfPerformanceAnalyticsExplained = () => {
             <Link to="/" className="text-primary hover:underline">MyBirdieBoard</Link> provides all of these features in a clean, focused interface. Enter your scores after each round, and the analytics are generated automatically. No manual charting, no spreadsheets — just insights from your data.
           </p>
           <p className="text-muted-foreground mb-4">
-            For a comparison of available tools, see our <Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline">best golf score tracking apps guide</Link>.
+            For a comparison of available tools, see our <Link to="/compare/best-golf-score-tracking-apps" className="text-primary hover:underline">best golf score tracking apps guide</Link>.
           </p>
         </section>
 

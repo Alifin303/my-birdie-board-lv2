@@ -19,11 +19,12 @@ const GUIDE_CROSS_LINKS: Record<string, RelatedGuide[]> = {
     { to: '/guides/golf-statistics-tracker', label: 'Golf Statistics Tracker' },
     { to: '/guides/how-to-improve-at-golf-using-data', label: 'How to Improve Using Data' },
   ],
-  '/guides/best-golf-score-tracking-apps': [
+  '/guides/golf-score-tracker-vs-gps-apps': [
     { to: '/guides/how-to-track-golf-scores', label: 'How to Track Golf Scores' },
     { to: '/guides/choosing-the-right-golf-score-tracker', label: 'Choosing the Right Golf Score Tracker' },
     { to: '/compare/best-golf-score-tracking-apps', label: 'Best Golf Score Tracking Apps Comparison' },
   ],
+
   '/guides/golf-performance-analytics': [
     { to: '/guides/golf-statistics-tracker', label: 'Golf Statistics Tracker' },
     { to: '/guides/golf-performance-metrics', label: 'The Ultimate Guide to Golf Performance Metrics' },

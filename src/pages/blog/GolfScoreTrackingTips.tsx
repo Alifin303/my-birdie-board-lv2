@@ -99,7 +99,7 @@ export default function GolfScoreTrackingTips() {
             <p>While your total score is important, tracking additional statistics like fairways hit, greens in regulation, and putts per hole provides deeper insights into your performance. <Link to="/guides/golf-statistics-tracker" className="text-primary hover:underline">Learn more about essential golf statistics</Link>.</p>
 
             <h2>2. Use Digital Golf Score Tracking</h2>
-            <p>Digital scorecards offer advantages over paper cards, including automatic calculations, weather tracking, and long-term data storage. <Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline">Compare the best golf score tracking apps</Link> to find the right solution.</p>
+            <p>Digital scorecards offer advantages over paper cards, including automatic calculations, weather tracking, and long-term data storage. <Link to="/compare/best-golf-score-tracking-apps" className="text-primary hover:underline">Compare the best golf score tracking apps</Link> to find the right solution.</p>
 
             <h2>3. Record Course Conditions</h2>
             <p>Weather, course conditions, and pin positions significantly impact your score. Tracking these variables helps you understand when your good (or bad) scores were influenced by external factors.</p>
