@@ -131,7 +131,6 @@ export const routes: RouteRecord[] = [
   // Guide pages
   { path: '/guides/how-to-track-golf-scores', element: P(<HowToTrackGolfScores />), errorElement: <RouteErrorFallback /> },
   { path: '/guides/golf-handicap-calculator', element: P(<GolfHandicapCalculator />), errorElement: <RouteErrorFallback /> },
-  { path: '/compare/best-golf-score-tracking-apps', element: P(<BestGolfScoreApps />), errorElement: <RouteErrorFallback /> },
   { path: '/guides/golf-performance-analytics', element: P(<GolfPerformanceAnalytics />), errorElement: <RouteErrorFallback /> },
   { path: '/guides/golf-statistics-tracker', element: P(<GolfStatisticsTracker />), errorElement: <RouteErrorFallback /> },
   { path: '/guides/golf-performance-metrics', element: P(<GolfPerformanceMetrics />), errorElement: <RouteErrorFallback /> },

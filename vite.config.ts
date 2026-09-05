@@ -40,7 +40,6 @@ const prerenderRoutes = [
   // Guides
   '/guides/how-to-track-golf-scores',
   '/guides/golf-handicap-calculator',
-  '/guides/best-golf-score-tracking-apps',
   '/guides/golf-performance-analytics',
   '/guides/golf-statistics-tracker',
   '/guides/golf-performance-metrics',
