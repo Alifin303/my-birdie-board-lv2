@@ -142,6 +142,18 @@ const BestGolfScoreTrackingApps = () => {
         </section>
 
         <section>
+          <h2 className="text-2xl font-bold mb-4">Apps That Track Your Handicap</h2>
+          <p className="text-muted-foreground mb-4">
+            Most modern golf apps calculate a handicap index, but the accuracy and methodology vary. Look for apps that use official World Handicap System (WHS) calculations with proper course rating and slope adjustments. Some apps use simplified formulas that produce approximate results — fine for casual tracking, but not suitable if you need an official index.
+          </p>
+          <p className="text-muted-foreground mb-4">
+            MyBirdieBoard calculates your handicap using official WHS methodology, pulling course ratings and slope values from its database, and your handicap updates automatically with each round you enter. For more on how the maths works, see our <Link to="/guides/golf-handicap-calculator" className="text-primary hover:underline">handicap calculator guide</Link>.
+          </p>
+        </section>
+
+
+
+        <section>
           <h2 className="text-2xl font-bold mb-4">Quick Comparison</h2>
           <div className="overflow-x-auto mb-6">
             <table className="w-full text-sm text-left">
