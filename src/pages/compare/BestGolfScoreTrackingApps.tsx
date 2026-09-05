@@ -19,6 +19,30 @@ const BestGolfScoreTrackingApps = () => {
         </section>
 
         <section>
+          <h2 className="text-2xl font-bold mb-4">What Makes a Good Golf Score Tracker</h2>
+          <p className="text-muted-foreground mb-4">
+            A good golf score tracker does three things well: it makes entering scores easy, it calculates meaningful statistics automatically, and it stores your data permanently so you can track progress over time. Everything else is secondary.
+          </p>
+          <h3 className="text-xl font-semibold mb-3">Essential Features</h3>
+          <ul className="list-disc pl-6 space-y-2 text-muted-foreground mb-6">
+            <li><strong>Fast score entry:</strong> If it takes more than 2–3 minutes to log a round, you'll stop using it</li>
+            <li><strong>Handicap calculation:</strong> Official WHS-compliant index computation from your scores</li>
+            <li><strong>Course database:</strong> A comprehensive library of courses with ratings and slope values</li>
+            <li><strong>Scoring trends:</strong> Visual charts showing your performance over time</li>
+            <li><strong>Round history:</strong> A permanent, searchable record of every round you've played</li>
+          </ul>
+          <h3 className="text-xl font-semibold mb-3">Nice-to-Have Features</h3>
+          <ul className="list-disc pl-6 space-y-2 text-muted-foreground mb-6">
+            <li>Course-specific performance breakdowns</li>
+            <li>Leaderboards and social features</li>
+            <li>Stableford and match play scoring</li>
+            <li>Performance milestones and achievements</li>
+          </ul>
+        </section>
+
+
+
+        <section>
           <h2 className="text-2xl font-bold mb-4">Category 1: On-Course GPS Golf Apps</h2>
           <p className="text-muted-foreground mb-4">
             GPS-based golf apps are the most popular category. They provide real-time yardages, aerial course maps, shot tracking, and live scoring. You use them during your round — typically on your phone or a smartwatch.
