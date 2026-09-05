@@ -95,7 +95,7 @@ export const GuideLayout = ({
                   <div className="flex flex-wrap justify-center gap-4 text-sm">
                     <Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline">Score Tracking Guide</Link>
                     <Link to="/guides/golf-handicap-calculator" className="text-primary hover:underline">Handicap Calculator</Link>
-                    <Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline">Best Golf Apps</Link>
+                    <Link to="/compare/best-golf-score-tracking-apps" className="text-primary hover:underline">Best Golf Apps</Link>
                     <Link to="/blog" className="text-primary hover:underline">Golf Blog</Link>
                   </div>
                 </div>

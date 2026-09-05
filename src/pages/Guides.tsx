@@ -34,7 +34,7 @@ const guides = [
     title: "Best Golf Score Tracking Apps",
     description: "Compare the top golf score tracking apps. Features, pricing, and which app is right for your game.",
     icon: Target,
-    link: "/guides/best-golf-score-tracking-apps",
+    link: "/compare/best-golf-score-tracking-apps",
   },
   {
     title: "Golf Apps Without Phone During Round",

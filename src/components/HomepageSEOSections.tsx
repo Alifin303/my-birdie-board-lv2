@@ -91,7 +91,7 @@ export const HomepageSEOSections = () => {
               </div>
               <p className="text-muted-foreground">
                 Compare rounds, track personal records, and see how you stack up.{' '}
-                <Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline">
+                <Link to="/compare/best-golf-score-tracking-apps" className="text-primary hover:underline">
                   See how we compare to other golf score apps
                 </Link>.
               </p>

@@ -41,7 +41,6 @@ import TrackGolfCoursesPlayed from '@/pages/blog/TrackGolfCoursesPlayed'
 // Guide pages - static imports for SSG
 import HowToTrackGolfScores from '@/pages/guides/HowToTrackGolfScores'
 import GolfHandicapCalculator from '@/pages/guides/GolfHandicapCalculator'
-import BestGolfScoreApps from '@/pages/guides/BestGolfScoreApps'
 import GolfPerformanceAnalytics from '@/pages/guides/GolfPerformanceAnalytics'
 import GolfStatisticsTracker from '@/pages/guides/GolfStatisticsTracker'
 import GolfPerformanceMetrics from '@/pages/guides/GolfPerformanceMetrics'
@@ -132,7 +131,7 @@ export const routes: RouteRecord[] = [
   // Guide pages
   { path: '/guides/how-to-track-golf-scores', element: P(<HowToTrackGolfScores />), errorElement: <RouteErrorFallback /> },
   { path: '/guides/golf-handicap-calculator', element: P(<GolfHandicapCalculator />), errorElement: <RouteErrorFallback /> },
-  { path: '/guides/best-golf-score-tracking-apps', element: P(<BestGolfScoreApps />), errorElement: <RouteErrorFallback /> },
+  { path: '/compare/best-golf-score-tracking-apps', element: P(<BestGolfScoreApps />), errorElement: <RouteErrorFallback /> },
   { path: '/guides/golf-performance-analytics', element: P(<GolfPerformanceAnalytics />), errorElement: <RouteErrorFallback /> },
   { path: '/guides/golf-statistics-tracker', element: P(<GolfStatisticsTracker />), errorElement: <RouteErrorFallback /> },
   { path: '/guides/golf-performance-metrics', element: P(<GolfPerformanceMetrics />), errorElement: <RouteErrorFallback /> },

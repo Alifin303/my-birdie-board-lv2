@@ -296,7 +296,7 @@ export default function Blog() {
                   <ul className="space-y-2 text-sm">
                     <li><Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline">How to Track Golf Scores</Link></li>
                     <li><Link to="/guides/golf-handicap-calculator" className="text-primary hover:underline">Golf Handicap Calculator Guide</Link></li>
-                    <li><Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline">Best Golf Score Apps</Link></li>
+                    <li><Link to="/compare/best-golf-score-tracking-apps" className="text-primary hover:underline">Best Golf Score Apps</Link></li>
                     <li><Link to="/guides/golf-performance-analytics" className="text-primary hover:underline">Golf Performance Analytics</Link></li>
                   </ul>
                 </div>

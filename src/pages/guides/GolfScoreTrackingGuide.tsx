@@ -180,7 +180,7 @@ const GolfScoreTrackingGuide = () => {
             <li><Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline">How to Track Golf Scores</Link></li>
             <li><Link to="/guides/golf-statistics-tracker" className="text-primary hover:underline">Golf Statistics Tracker</Link></li>
             <li><Link to="/guides/golf-performance-analytics" className="text-primary hover:underline">Golf Performance Analytics</Link></li>
-            <li><Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline">Best Golf Score Tracking Apps</Link></li>
+            <li><Link to="/compare/best-golf-score-tracking-apps" className="text-primary hover:underline">Best Golf Score Tracking Apps</Link></li>
             <li><Link to="/guides/golf-score-tracking-for-beginners" className="text-primary hover:underline">Golf Score Tracking for Beginners</Link></li>
           </ul>
         </section>

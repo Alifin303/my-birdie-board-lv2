@@ -159,7 +159,7 @@ const GolfScoreTrackerVsGpsApps = () => {
           <h2 className="text-2xl font-bold mb-4">Related Resources</h2>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
             <li><Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline">How to Track Golf Scores</Link></li>
-            <li><Link to="/guides/best-golf-score-tracking-apps" className="text-primary hover:underline">Best Golf Score Tracking Apps</Link></li>
+            <li><Link to="/compare/best-golf-score-tracking-apps" className="text-primary hover:underline">Best Golf Score Tracking Apps</Link></li>
             <li><Link to="/guides/golf-statistics-tracker" className="text-primary hover:underline">Golf Statistics Tracker</Link></li>
             <li><Link to="/guides/golf-apps-without-phone-during-round" className="text-primary hover:underline">Golf Apps Without Phone During Round</Link></li>
           </ul>
