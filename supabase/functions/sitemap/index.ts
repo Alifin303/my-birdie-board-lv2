@@ -34,6 +34,7 @@ const routes: { path: string; priority: string; changefreq: string }[] = [
   { path: '/blog/course-leaderboards', priority: '0.6', changefreq: 'monthly' },
   { path: '/blog/golf-scoring-terms', priority: '0.7', changefreq: 'monthly' },
   { path: '/blog/what-is-a-good-golf-score', priority: '0.7', changefreq: 'monthly' },
+  { path: '/blog/nomadic-golfer-scoring-guide', priority: '0.7', changefreq: 'monthly' },
 
   // Guides
   { path: '/guides/how-to-track-golf-scores', priority: '0.8', changefreq: 'monthly' },
