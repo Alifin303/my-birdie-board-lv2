@@ -37,6 +37,7 @@ import GolfScoringTerms from '@/pages/blog/GolfScoringTerms'
 import WhatIsAGoodGolfScore from '@/pages/blog/WhatIsAGoodGolfScore'
 import Journal18MeetsBirdieBoard from '@/pages/blog/Journal18MeetsBirdieBoard'
 import TrackGolfCoursesPlayed from '@/pages/blog/TrackGolfCoursesPlayed'
+import NomadicGolferScoringGuide from '@/pages/blog/NomadicGolferScoringGuide'
 
 // Guide pages - static imports for SSG
 import HowToTrackGolfScores from '@/pages/guides/HowToTrackGolfScores'
@@ -127,6 +128,7 @@ export const routes: RouteRecord[] = [
   { path: '/blog/what-is-a-good-golf-score', element: P(<WhatIsAGoodGolfScore />), errorElement: <RouteErrorFallback /> },
   { path: '/blog/journal-18-meets-mybirdieboard', element: P(<Journal18MeetsBirdieBoard />), errorElement: <RouteErrorFallback /> },
   { path: '/blog/track-golf-courses-played', element: P(<TrackGolfCoursesPlayed />), errorElement: <RouteErrorFallback /> },
+  { path: '/blog/nomadic-golfer-scoring-guide', element: P(<NomadicGolferScoringGuide />), errorElement: <RouteErrorFallback /> },
 
   // Guide pages
   { path: '/guides/how-to-track-golf-scores', element: P(<HowToTrackGolfScores />), errorElement: <RouteErrorFallback /> },
