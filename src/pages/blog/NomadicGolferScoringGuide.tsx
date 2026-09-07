@@ -85,7 +85,7 @@ export default function NomadicGolferScoringGuide() {
               </div>
             </div>
 
-            <div className="prose prose-lg max-w-none dark:prose-invert">
+            <div className="prose prose-lg max-w-none dark:prose-invert space-y-4 text-muted-foreground">
               <p>
                 More golfers than ever don't belong to a single club. They play wherever a tee time is available — a
                 different course most weekends, sometimes a different course every round. In the golf industry, this
@@ -98,7 +98,7 @@ export default function NomadicGolferScoringGuide() {
                 having a home club, and nomadic golfers don't have one.</strong>
               </p>
 
-              <h2>Why traditional score tracking assumes you belong somewhere</h2>
+              <h2 className="text-2xl font-bold text-foreground mt-10 mb-3">Why traditional score tracking assumes you belong somewhere</h2>
               <p>
                 Clubs have historically been the backbone of golf record-keeping. Your home club posted your scores,
                 tracked your handicap, and kept a running history of how you played there. Move between courses instead
@@ -117,7 +117,7 @@ export default function NomadicGolferScoringGuide() {
                 different courses, and most of your history simply disappears.
               </p>
 
-              <h2>The real challenge: fragmentation, not lack of data</h2>
+              <h2 className="text-2xl font-bold text-foreground mt-10 mb-3">The real challenge: fragmentation, not lack of data</h2>
               <p>
                 This is the part that's specific to nomadic golfers. A club member's data naturally accumulates in one
                 place, because they keep returning to the same course, the same leaderboard, the same community. A
@@ -125,7 +125,7 @@ export default function NomadicGolferScoringGuide() {
                 connecting them.
               </p>
               <p>That fragmentation makes it hard to answer questions a club member takes for granted:</p>
-              <ul>
+              <ul className="list-disc pl-6 space-y-2">
                 <li>Is my handicap actually trending down, or does it just feel that way?</li>
                 <li>Which of the courses I've played have I played best?</li>
                 <li>How many rounds have I actually logged this year, and where?</li>
@@ -136,9 +136,9 @@ export default function NomadicGolferScoringGuide() {
                 not the course you happened to play at.
               </p>
 
-              <h2>How to actually track scores and handicap as a nomadic golfer</h2>
+              <h2 className="text-2xl font-bold text-foreground mt-10 mb-3">How to actually track scores and handicap as a nomadic golfer</h2>
 
-              <h3>1. Separate "official handicap" from "personal record."</h3>
+              <h3 className="text-xl font-semibold text-foreground mt-6 mb-2">1. Separate "official handicap" from "personal record."</h3>
               <p>
                 An official handicap (through a national scheme, if you want one) tells you your standing for
                 competitive purposes. It won't, on its own, tell you the story of your golf — where you've played, how
@@ -149,7 +149,7 @@ export default function NomadicGolferScoringGuide() {
                 <Link to="/tools/handicap-calculator" className="text-primary hover:underline">handicap calculator tool</Link>.
               </p>
 
-              <h3>2. Log every round somewhere that isn't tied to a single course.</h3>
+              <h3 className="text-xl font-semibold text-foreground mt-6 mb-2">2. Log every round somewhere that isn't tied to a single course.</h3>
               <p>
                 The fix for fragmentation is simple in principle: keep one record that travels with you, independent of
                 whichever course you played that week. A notebook works. A spreadsheet works. The important thing is
@@ -158,7 +158,7 @@ export default function NomadicGolferScoringGuide() {
                 does the same job without the risk of losing the notebook.
               </p>
 
-              <h3>3. Do it after the round, not during it.</h3>
+              <h3 className="text-xl font-semibold text-foreground mt-6 mb-2">3. Do it after the round, not during it.</h3>
               <p>
                 This matters more for nomadic golfers than club members. When you're playing a new-to-you course,
                 you're already navigating unfamiliar holes, unfamiliar pin positions, unfamiliar pace of play. Adding
@@ -169,7 +169,7 @@ export default function NomadicGolferScoringGuide() {
                 freshest.
               </p>
 
-              <h3>4. Make the record visual, not just numerical.</h3>
+              <h3 className="text-xl font-semibold text-foreground mt-6 mb-2">4. Make the record visual, not just numerical.</h3>
               <p>
                 A single running handicap number doesn't capture much. What does help is being able to look back and
                 see <em>where</em> you played — a{" "}
@@ -178,12 +178,12 @@ export default function NomadicGolferScoringGuide() {
                 meaningful record than the scores themselves.
               </p>
 
-              <h2>Where MyBirdieBoard fits in</h2>
+              <h2 className="text-2xl font-bold text-foreground mt-10 mb-3">Where MyBirdieBoard fits in</h2>
               <p>
                 This is genuinely the exact problem <Link to="/" className="text-primary hover:underline">MyBirdieBoard</Link>{" "}
                 was built around — not for nomadic golfers specifically, but the fit turns out to be close to perfect.
               </p>
-              <ul>
+              <ul className="list-disc pl-6 space-y-2">
                 <li>
                   <strong>Your record isn't tied to a course.</strong> Every round you log becomes part of one running
                   history that's yours, regardless of where you played it — which solves the fragmentation problem
