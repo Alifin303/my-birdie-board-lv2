@@ -36,6 +36,7 @@ const prerenderRoutes = [
   '/blog/what-is-a-good-golf-score',
   '/blog/journal-18-meets-mybirdieboard',
   '/blog/track-golf-courses-played',
+  '/blog/nomadic-golfer-scoring-guide',
 
   // Guides
   '/guides/how-to-track-golf-scores',

@@ -172,6 +172,7 @@ export default function TrackGolfCoursesPlayed() {
                 <li><Link to="/blog/course-leaderboards" className="text-primary hover:underline">Golf Course Leaderboards: Compete Without Playing Together</Link></li>
                 <li><Link to="/blog/journal-18-meets-mybirdieboard" className="text-primary hover:underline">Journal 18 Meets MyBirdieBoard: The Perfect Golf Tracking System</Link></li>
                 <li><Link to="/guides/digital-golf-journal" className="text-primary hover:underline">Guide: Keeping a Digital Golf Journal</Link></li>
+                <li><Link to="/blog/nomadic-golfer-scoring-guide" className="text-primary hover:underline">The Nomadic Golfer's Guide to Tracking Scores and Handicap</Link></li>
               </ul>
             </div>
 

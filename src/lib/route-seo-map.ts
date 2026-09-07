@@ -171,6 +171,12 @@ export const routeSEOMap: Record<string, RouteSEO> = {
     keywords: 'Journal 18, Journal 18 digital companion, golf tracking app, golf journaling, digital golf journal, post-round golf tracking',
     ogType: 'article',
   },
+  '/blog/nomadic-golfer-scoring-guide': {
+    title: 'The Nomadic Golfer\'s Guide to Tracking Scores and Handicap (Without a Home Club)',
+    description: 'No home club, no problem. Here\'s how nomadic golfers can keep an accurate handicap and a real record of every course they\'ve played.',
+    keywords: 'nomadic golfer, golf handicap without club membership, iGolf handicap, OpenPlay handicap, track golf scores without home club',
+    ogType: 'article',
+  },
   '/blog/track-golf-courses-played': {
     title: 'Build Your Golf Bucket List: Track Every Course You\'ve Played | MyBirdieBoard',
     description: 'Turn every round into a pin on your personal golf map. Learn how to track the courses you\'ve played, build a golf bucket list, and keep a lifelong record of your golf travels.',

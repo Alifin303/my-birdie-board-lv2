@@ -258,6 +258,7 @@ export default function PlayingWithoutPhone() {
                 <li><Link to="/blog/course-management-tips" className="text-primary hover:underline">Golf Course Management Tips</Link></li>
                 <li><Link to="/guides/how-to-track-golf-scores" className="text-primary hover:underline">How to Track Golf Scores (Guide)</Link></li>
                 <li><Link to="/compare/best-golf-score-tracking-apps" className="text-primary hover:underline">Best Golf Score Tracking Apps</Link></li>
+                <li><Link to="/blog/nomadic-golfer-scoring-guide" className="text-primary hover:underline">The Nomadic Golfer's Guide to Tracking Scores and Handicap</Link></li>
               </ul>
             </div>
 

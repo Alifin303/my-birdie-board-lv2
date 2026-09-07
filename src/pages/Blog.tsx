@@ -10,6 +10,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 const blogPosts = [
   {
+    id: "nomadic-golfer-scoring-guide",
+    title: "The Nomadic Golfer's Guide to Tracking Scores and Handicap (Without a Home Club)",
+    description: "No home club, no problem. Here's how nomadic golfers can keep an accurate handicap and a real record of every course they've played.",
+    excerpt: "More golfers than ever play a different course every weekend. Here's how to keep an accurate handicap and a real record of your golf without a home club.",
+    date: "2026-09-07",
+    readTime: "6 min read",
+    tags: ["Post-Round Tracking", "Handicap"],
+    link: "/blog/nomadic-golfer-scoring-guide"
+  },
+  {
     id: "track-golf-courses-played",
     title: "Build Your Golf Bucket List: Track Every Course You've Played",
     description: "Turn every round into a pin on your personal golf map. Learn how to track the courses you've played, build a golf bucket list, and keep a lifelong record of your golf travels.",
