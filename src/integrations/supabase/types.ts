@@ -358,6 +358,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_public_courses: {
+        Args: never
+        Returns: {
+          average_score: number
+          city: string
+          id: number
+          latitude: number
+          longitude: number
+          name: string
+          par: number
+          rounds_count: number
+          state: string
+          tee_count: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

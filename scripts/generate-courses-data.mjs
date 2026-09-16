@@ -46,33 +46,12 @@ async function main() {
     return;
   }
 
-  const courses = await rest('courses?select=id,name,city,state,latitude,longitude&order=name.asc&limit=5000');
-  const tees = await rest('course_tees?select=course_id,par,yards,name&limit=20000');
-  const rounds = await rest('rounds?select=course_id,gross_score,holes_played&limit=100000');
-
-  const teesByCourse = new Map();
-  for (const t of tees) {
-    if (!teesByCourse.has(t.course_id)) teesByCourse.set(t.course_id, []);
-    teesByCourse.get(t.course_id).push(t);
-  }
-
-  const roundsByCourse = new Map();
-  for (const r of rounds) {
-    if (!roundsByCourse.has(r.course_id)) roundsByCourse.set(r.course_id, []);
-    roundsByCourse.get(r.course_id).push(r);
-  }
+  const courses = await rest('rpc/get_public_courses');
 
   const data = courses.map((c) => {
-    const courseTees = teesByCourse.get(c.id) || [];
-    const pars = courseTees.map((t) => t.par).filter((p) => typeof p === 'number' && p > 0);
-    const par = pars.length ? Math.round(pars.reduce((a, b) => a + b, 0) / pars.length) : null;
-
-    const courseRounds = roundsByCourse.get(c.id) || [];
-    const holesSet = courseRounds.map((r) => r.holes_played).filter(Boolean);
-    const holes = par && par <= 40 ? 9 : par ? 18 : holesSet.includes(9) && !holesSet.includes(18) ? 9 : holesSet.length ? 18 : null;
-
-    const scores = courseRounds.map((r) => r.gross_score).filter((s) => typeof s === 'number' && s > 0);
-    const averageScore = scores.length ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10 : null;
+    const par = typeof c.par === 'number' && c.par > 0 ? c.par : null;
+    const holes = par ? (par <= 40 ? 9 : 18) : null;
+    const avg = c.average_score === null || c.average_score === undefined ? null : Number(c.average_score);
 
     return {
       id: c.id,
@@ -83,9 +62,9 @@ async function main() {
       longitude: c.longitude ?? null,
       par,
       holes,
-      teeCount: courseTees.length,
-      roundsCount: courseRounds.length,
-      averageScore,
+      teeCount: c.tee_count ?? 0,
+      roundsCount: c.rounds_count ?? 0,
+      averageScore: avg,
     };
   });
 
