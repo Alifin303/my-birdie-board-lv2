@@ -61,12 +61,14 @@ import GolfScoreTrackingForBeginners from '@/pages/guides/GolfScoreTrackingForBe
 // Compare pages - static imports for SSG
 import BestGolfScoreTrackingApps from '@/pages/compare/BestGolfScoreTrackingApps'
 
+// Course detail pages - static import so they can be pre-rendered
+import Course from '@/pages/Course'
+
 // Tool pages - static imports for SSG
 import StablefordCalculator from '@/pages/tools/StablefordCalculator'
 import HandicapCalculator from '@/pages/tools/HandicapCalculator'
 
 // Client-side only pages (lazy-loaded, not pre-rendered)
-const Course = React.lazy(() => import('@/pages/Course'))
 const AuthRedirect = React.lazy(() => import('@/pages/AuthRedirect'))
 const AuthConfirm = React.lazy(() => import('@/pages/AuthConfirm'))
 const ResetPassword = React.lazy(() => import('@/pages/ResetPassword'))
@@ -156,8 +158,10 @@ export const routes: RouteRecord[] = [
   { path: '/tools/stableford-calculator', element: P(<StablefordCalculator />), errorElement: <RouteErrorFallback /> },
   { path: '/tools/handicap-calculator', element: P(<HandicapCalculator />), errorElement: <RouteErrorFallback /> },
 
+  // Course detail pages (pre-rendered per course)
+  { path: '/courses/:courseId', element: P(<Course />), errorElement: <RouteErrorFallback /> },
+
   // ===== CLIENT-SIDE ONLY ROUTES (Not pre-rendered) =====
-  { path: '/courses/:courseId', element: P(<LazyWrapper><Course /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
   { path: '/auth/callback', element: P(<LazyWrapper><AuthRedirect /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
   { path: '/auth/confirm', element: P(<LazyWrapper><AuthConfirm /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
   { path: '/auth/reset-password', element: P(<LazyWrapper><ResetPassword /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
