@@ -10,6 +10,8 @@
  * IMPORTANT: Keep this map in sync with the SEOHead props in each page component.
  */
 
+import { getStaticCourse, courseLocation, courseTitle, courseDescription } from './course-seo';
+
 const SITE_URL = 'https://mybirdieboard.com';
 const OG_IMAGE = `${SITE_URL}/og-image.png`;
 
@@ -247,10 +249,28 @@ export const routeSEOMap: Record<string, RouteSEO> = {
  * Generate the full HTML meta tag string for a given route path.
  * Used by the SSG `onPageRendered` hook to inject into <head>.
  */
+/**
+ * Per-course SEO for /courses/<id> routes, generated from the build-time
+ * course snapshot so each course page gets its own title, description and
+ * self-referencing canonical URL.
+ */
+function getCourseSEO(routePath: string): RouteSEO | undefined {
+  const match = routePath.match(/^\/courses\/(\d+)$/);
+  if (!match) return undefined;
+  const course = getStaticCourse(match[1]);
+  if (!course) return undefined;
+  const location = courseLocation(course);
+  return {
+    title: courseTitle(course.name),
+    description: courseDescription(course.name),
+    keywords: `${course.name} golf course${location ? `, golf in ${location}` : ''}, golf scorecard, golf score tracker`,
+  };
+}
+
 export function generateMetaTagsHTML(routePath: string): string {
   // Normalize: strip trailing slashes (except root) before lookup
   const normalized = routePath === '/' ? '/' : routePath.replace(/\/+$/, '');
-  const seo = routeSEOMap[normalized];
+  const seo = routeSEOMap[normalized] ?? getCourseSEO(normalized);
   if (!seo) return '';
 
   const normalizedPath = normalized === '/' ? '/' : normalized.replace(/\/+$/, '');
