@@ -4,14 +4,13 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { SEOHead } from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
-import { staticCourses } from "@/lib/course-seo";
+import { courseDisplayName, staticCourses } from "@/lib/course-seo";
 
 interface Course {
   id: number;
   name: string;
   city?: string;
   state?: string;
-  roundsCount?: number;
 }
 
 const initialCourses: Course[] = staticCourses.map((c) => ({
@@ -19,7 +18,6 @@ const initialCourses: Course[] = staticCourses.map((c) => ({
   name: c.name,
   city: c.city ?? undefined,
   state: c.state ?? undefined,
-  roundsCount: c.roundsCount,
 }));
 
 const Courses = () => {
@@ -43,7 +41,6 @@ const Courses = () => {
             name: c.name,
             city: c.city ?? undefined,
             state: c.state ?? undefined,
-            roundsCount: c.rounds_count ?? 0,
           }))
         );
       } catch (error) {
@@ -64,7 +61,7 @@ const Courses = () => {
     <>
       <SEOHead
         title="Golf Courses Directory | MyBirdieBoard"
-        description="Browse golf courses with player stats and leaderboards. Find courses by location and compare your scores with other golfers."
+        description="Browse golf courses by location, view course details, and try an interactive scorecard with MyBirdieBoard."
       >
         <link rel="alternate" hrefLang="en" href="https://mybirdieboard.com/courses" />
         <link rel="alternate" hrefLang="en-us" href="https://mybirdieboard.com/courses" />
@@ -81,9 +78,15 @@ const Courses = () => {
             Golf Courses
           </h1>
           
+          <p className="text-center mb-3 text-muted-foreground max-w-2xl mx-auto">
+            Browse golf courses where players have tracked rounds on MyBirdieBoard. Select a course to view its details and scorecard.
+          </p>
           <p className="text-center mb-8 text-muted-foreground max-w-2xl mx-auto">
-            Browse golf courses where players have tracked rounds on MyBirdieBoard. Click on a course to view detailed statistics, 
-            historical scores, and course information.
+            Don&apos;t see your course?{" "}
+            <Link to="/get-started" className="font-medium text-primary underline underline-offset-4">
+              Add it in seconds when you log your first round
+            </Link>
+            .
           </p>
           
           {loading ? (
@@ -99,19 +102,14 @@ const Courses = () => {
               {courses.map((course) => (
                 <div key={course.id} className="bg-card rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                   <Link to={`/courses/${course.id}`} className="block p-6">
-                    <h2 className="text-xl font-semibold mb-2 line-clamp-2">{course.name}</h2>
+                    <h2 className="text-xl font-semibold mb-2 line-clamp-2">{courseDisplayName(course.name)}</h2>
                     
                     {(course.city || course.state) && (
-                      <p className="text-muted-foreground mb-4">
+                      <p className="text-muted-foreground">
                         {[course.city, course.state].filter(Boolean).join(", ")}
                       </p>
                     )}
                     
-                    {course.roundsCount !== undefined && (
-                      <p className="text-sm">
-                        <span className="font-medium">{course.roundsCount}</span> {course.roundsCount === 1 ? 'round' : 'rounds'} played
-                      </p>
-                    )}
                   </Link>
                 </div>
               ))}

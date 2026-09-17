@@ -10,7 +10,7 @@
  * IMPORTANT: Keep this map in sync with the SEOHead props in each page component.
  */
 
-import { getStaticCourse, courseLocation, courseTitle, courseDescription } from './course-seo';
+import { getStaticCourse, courseDisplayName, courseLocation, courseTitle, courseDescription } from './course-seo';
 
 const SITE_URL = 'https://mybirdieboard.com';
 const OG_IMAGE = `${SITE_URL}/og-image.png`;
@@ -260,10 +260,11 @@ function getCourseSEO(routePath: string): RouteSEO | undefined {
   const course = getStaticCourse(match[1]);
   if (!course) return undefined;
   const location = courseLocation(course);
+  const displayName = courseDisplayName(course.name);
   return {
     title: courseTitle(course.name),
     description: courseDescription(course.name),
-    keywords: `${course.name} golf course${location ? `, golf in ${location}` : ''}, golf scorecard, golf score tracker`,
+    keywords: `${displayName} golf course${location ? `, golf in ${location}` : ''}, golf scorecard, golf score tracker`,
   };
 }
 

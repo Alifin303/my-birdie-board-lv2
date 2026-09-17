@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Head } from "vite-react-ssg";
 import { supabase } from "@/integrations/supabase/client";
+import { CourseScorecard } from "@/components/course/CourseScorecard";
 import {
   getStaticCourse,
   courseLocation,
   courseTitle,
   courseDescription,
+  courseDisplayName,
   MIN_ROUNDS_FOR_AGGREGATE,
   type StaticCourse,
 } from "@/lib/course-seo";
@@ -88,6 +90,7 @@ const Course = () => {
   }
 
   const location = courseLocation(course);
+  const displayName = courseDisplayName(course.name);
   const canonical = `${SITE_URL}/courses/${course.id}`;
   const title = courseTitle(course.name);
   const description = courseDescription(course.name);
@@ -97,7 +100,7 @@ const Course = () => {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "GolfCourse",
-    name: course.name,
+    name: displayName,
     url: canonical,
     description,
     ...(location && {
@@ -141,10 +144,10 @@ const Course = () => {
               Golf courses
             </Link>
             <span className="mx-2">/</span>
-            <span>{course.name}</span>
+             <span>{displayName}</span>
           </nav>
 
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3">{course.name}</h1>
+           <h1 className="text-3xl sm:text-4xl font-bold mb-3">{displayName}</h1>
 
           {location && (
             <p className="text-lg text-muted-foreground mb-8">{location}</p>
@@ -176,9 +179,18 @@ const Course = () => {
             )}
           </div>
 
+           {course.holes && (
+             <CourseScorecard
+               key={`${course.id}-${course.holes}`}
+               courseName={displayName}
+               holeCount={course.holes}
+               coursePar={course.par}
+             />
+           )}
+
           <section className="bg-card rounded-lg shadow-sm p-6 mb-10">
             <h2 className="text-xl font-semibold mb-2">
-              Log a round at {course.name}
+               Log a round at {displayName}
             </h2>
             <p className="text-muted-foreground mb-5">
               Record your score after you play, track your handicap automatically, and
@@ -188,7 +200,7 @@ const Course = () => {
               to="/get-started"
               className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-3 text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
             >
-              Log a round at {course.name}
+               Log a round at {displayName}
             </Link>
           </section>
 
