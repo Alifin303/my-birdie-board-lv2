@@ -442,7 +442,10 @@ export default function Dashboard() {
             : (
               <Collapsible open={coursesOpen} onOpenChange={setCoursesOpen} className="space-y-3 sm:space-y-4">
                 <div className="flex items-center justify-between gap-2">
-                  <h2 className="text-xl sm:text-2xl font-semibold text-primary">Your Courses</h2>
+                  <h2 className="text-xl sm:text-2xl font-semibold text-primary flex items-center gap-2">
+                    <Flag className="h-5 w-5 text-primary" />
+                    Your Courses
+                  </h2>
                   <CollapsibleTrigger asChild>
                     <CollapseToggle open={coursesOpen} label="your courses" />
                   </CollapsibleTrigger>
