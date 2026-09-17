@@ -89,7 +89,7 @@ function isLadderTier(ladder: Ladder, value: number): boolean {
 }
 const SCORE_MILESTONES = [120, 110, 100, 90, 80, 70];
 const STABLEFORD_MILESTONES = [20, 25, 30, 32, 34, 36, 38, 40];
-const HOME_COURSE_MILESTONES = [5, 10, 25];
+const HOME_COURSE_LADDER: Ladder = { base: [5, 10, 25, 50], step: 25 };
 const PUTTS_MILESTONES = [30, 28, 26, 24];
 const HANDICAP_MILESTONES = [20, 15, 10, 5];
 const HANDICAP_DROP_MILESTONES = [5, 10];
@@ -281,7 +281,7 @@ function analyse(rounds: Round[]): { milestones: Milestone[]; counters: Counters
       const plays = (coursePlayCount.get(courseId) || 0) + 1;
       coursePlayCount.set(courseId, plays);
       counters.maxRoundsOneCourse = Math.max(counters.maxRoundsOneCourse, plays);
-      if (HOME_COURSE_MILESTONES.includes(plays)) {
+      if (isLadderTier(HOME_COURSE_LADDER, plays)) {
         milestones.push({
           id: `home-course-${courseId}-${plays}`,
           type: 'home_course',
@@ -578,7 +578,7 @@ export function getMilestoneProgress(
   addCountSeries('course', ladderTiers(COURSE_LADDER, counters.courses), counters.courses, (t) => `course-${t}`, (t) => (t === 1 ? 'First Course' : `${getOrdinal(t)} Course`), 'course');
 
   // Home course
-  const nextHome = HOME_COURSE_MILESTONES.find((t) => counters.maxRoundsOneCourse < t);
+  const nextHome = ladderTiers(HOME_COURSE_LADDER, counters.maxRoundsOneCourse).find((t) => counters.maxRoundsOneCourse < t);
   if (nextHome !== undefined) {
     const remaining = nextHome - counters.maxRoundsOneCourse;
     locked.push({
