@@ -60,14 +60,36 @@ interface Round {
   handicap_at_posting?: number;
 }
 
-const BIRDIE_MILESTONES = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 75, 100, 150, 200, 250, 500];
-const EAGLE_MILESTONES = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 75, 100];
-const HOLE_IN_ONE_MILESTONES = [1, 5, 10, 15, 20, 25];
-const ROUND_MILESTONES = [1, 5, 10, 25, 50, 100, 250, 500];
-const COURSE_MILESTONES = [1, 5, 10, 25, 50, 100];
+// Count-based ladders never run out: once the fixed tiers are exhausted they
+// keep extending in fixed steps, so there is always a next trophy to chase.
+interface Ladder {
+  base: number[];
+  step: number;
+}
+
+const BIRDIE_LADDER: Ladder = { base: [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 75, 100], step: 50 };
+const EAGLE_LADDER: Ladder = { base: [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 75, 100], step: 25 };
+const HOLE_IN_ONE_LADDER: Ladder = { base: [1, 5, 10, 15, 20, 25], step: 5 };
+const ROUND_LADDER: Ladder = { base: [1, 5, 10, 25, 50, 100, 250, 500], step: 100 };
+const COURSE_LADDER: Ladder = { base: [1, 5, 10, 25, 50, 100], step: 25 };
+
+/** Tiers for a ladder, extended far enough to always sit ahead of `current`. */
+function ladderTiers(ladder: Ladder, current: number): number[] {
+  const tiers = [...ladder.base];
+  let next = tiers[tiers.length - 1];
+  while (next <= current + ladder.step) {
+    next += ladder.step;
+    tiers.push(next);
+  }
+  return tiers;
+}
+
+function isLadderTier(ladder: Ladder, value: number): boolean {
+  return ladderTiers(ladder, value).includes(value);
+}
 const SCORE_MILESTONES = [120, 110, 100, 90, 80, 70];
 const STABLEFORD_MILESTONES = [20, 25, 30, 32, 34, 36, 38, 40];
-const HOME_COURSE_MILESTONES = [5, 10, 25];
+const HOME_COURSE_LADDER: Ladder = { base: [5, 10, 25, 50], step: 25 };
 const PUTTS_MILESTONES = [30, 28, 26, 24];
 const HANDICAP_MILESTONES = [20, 15, 10, 5];
 const HANDICAP_DROP_MILESTONES = [5, 10];
@@ -163,7 +185,7 @@ function analyse(rounds: Round[]): { milestones: Milestone[]; counters: Counters
 
         if (strokes === 1) {
           counters.aces++;
-          if (HOLE_IN_ONE_MILESTONES.includes(counters.aces)) {
+          if (isLadderTier(HOLE_IN_ONE_LADDER, counters.aces)) {
             milestones.push({
               id: `hole-in-one-${counters.aces}`,
               type: 'hole_in_one',
@@ -178,7 +200,7 @@ function analyse(rounds: Round[]): { milestones: Milestone[]; counters: Counters
 
         if (diff <= -2 && strokes !== 1) {
           counters.eagles++;
-          if (EAGLE_MILESTONES.includes(counters.eagles)) {
+          if (isLadderTier(EAGLE_LADDER, counters.eagles)) {
             milestones.push({
               id: `eagle-${counters.eagles}`,
               type: 'eagle',
@@ -193,7 +215,7 @@ function analyse(rounds: Round[]): { milestones: Milestone[]; counters: Counters
 
         if (diff === -1) {
           counters.birdies++;
-          if (BIRDIE_MILESTONES.includes(counters.birdies)) {
+          if (isLadderTier(BIRDIE_LADDER, counters.birdies)) {
             milestones.push({
               id: `birdie-${counters.birdies}`,
               type: 'birdie',
@@ -226,7 +248,7 @@ function analyse(rounds: Round[]): { milestones: Milestone[]; counters: Counters
     // ---- Rounds played -----------------------------------------------
     const roundNumber = index + 1;
     counters.rounds = roundNumber;
-    if (ROUND_MILESTONES.includes(roundNumber)) {
+    if (isLadderTier(ROUND_LADDER, roundNumber)) {
       milestones.push({
         id: `round-${roundNumber}`,
         type: 'round',
@@ -242,7 +264,7 @@ function analyse(rounds: Round[]): { milestones: Milestone[]; counters: Counters
       if (!coursesVisited.has(courseId)) {
         coursesVisited.add(courseId);
         const courseCount = coursesVisited.size;
-        if (COURSE_MILESTONES.includes(courseCount)) {
+        if (isLadderTier(COURSE_LADDER, courseCount)) {
           milestones.push({
             id: `course-${courseCount}`,
             type: 'course',
@@ -259,7 +281,7 @@ function analyse(rounds: Round[]): { milestones: Milestone[]; counters: Counters
       const plays = (coursePlayCount.get(courseId) || 0) + 1;
       coursePlayCount.set(courseId, plays);
       counters.maxRoundsOneCourse = Math.max(counters.maxRoundsOneCourse, plays);
-      if (HOME_COURSE_MILESTONES.includes(plays)) {
+      if (isLadderTier(HOME_COURSE_LADDER, plays)) {
         milestones.push({
           id: `home-course-${courseId}-${plays}`,
           type: 'home_course',
@@ -549,14 +571,14 @@ export function getMilestoneProgress(
     });
   };
 
-  addCountSeries('birdie', BIRDIE_MILESTONES, counters.birdies, (t) => `birdie-${t}`, (t) => (t === 1 ? 'First Birdie' : `${getOrdinal(t)} Birdie`), 'birdie');
-  addCountSeries('eagle', EAGLE_MILESTONES, counters.eagles, (t) => `eagle-${t}`, (t) => (t === 1 ? 'First Eagle' : `${getOrdinal(t)} Eagle`), 'eagle');
-  addCountSeries('hole_in_one', HOLE_IN_ONE_MILESTONES, counters.aces, (t) => `hole-in-one-${t}`, (t) => (t === 1 ? 'First Hole-in-One!' : `${getOrdinal(t)} Hole-in-One`), 'ace');
-  addCountSeries('round', ROUND_MILESTONES, counters.rounds, (t) => `round-${t}`, (t) => (t === 1 ? 'First Round' : `${getOrdinal(t)} Round`), 'round');
-  addCountSeries('course', COURSE_MILESTONES, counters.courses, (t) => `course-${t}`, (t) => (t === 1 ? 'First Course' : `${getOrdinal(t)} Course`), 'course');
+  addCountSeries('birdie', ladderTiers(BIRDIE_LADDER, counters.birdies), counters.birdies, (t) => `birdie-${t}`, (t) => (t === 1 ? 'First Birdie' : `${getOrdinal(t)} Birdie`), 'birdie');
+  addCountSeries('eagle', ladderTiers(EAGLE_LADDER, counters.eagles), counters.eagles, (t) => `eagle-${t}`, (t) => (t === 1 ? 'First Eagle' : `${getOrdinal(t)} Eagle`), 'eagle');
+  addCountSeries('hole_in_one', ladderTiers(HOLE_IN_ONE_LADDER, counters.aces), counters.aces, (t) => `hole-in-one-${t}`, (t) => (t === 1 ? 'First Hole-in-One!' : `${getOrdinal(t)} Hole-in-One`), 'ace');
+  addCountSeries('round', ladderTiers(ROUND_LADDER, counters.rounds), counters.rounds, (t) => `round-${t}`, (t) => (t === 1 ? 'First Round' : `${getOrdinal(t)} Round`), 'round');
+  addCountSeries('course', ladderTiers(COURSE_LADDER, counters.courses), counters.courses, (t) => `course-${t}`, (t) => (t === 1 ? 'First Course' : `${getOrdinal(t)} Course`), 'course');
 
   // Home course
-  const nextHome = HOME_COURSE_MILESTONES.find((t) => counters.maxRoundsOneCourse < t);
+  const nextHome = ladderTiers(HOME_COURSE_LADDER, counters.maxRoundsOneCourse).find((t) => counters.maxRoundsOneCourse < t);
   if (nextHome !== undefined) {
     const remaining = nextHome - counters.maxRoundsOneCourse;
     locked.push({

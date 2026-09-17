@@ -126,7 +126,7 @@ export default function Milestones() {
             <p className="text-muted-foreground mt-1">
               {isLoading
                 ? "Loading your achievements…"
-                : `${progress.unlocked.length} of ${progress.totalCount} milestones unlocked`}
+                : `${progress.unlocked.length} ${progress.unlocked.length === 1 ? "milestone" : "milestones"} unlocked — and there's always another to chase`}
             </p>
           </div>
 
