@@ -1,4 +1,5 @@
 
+import { courseDisplayName } from "@/lib/course-seo";
 import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -493,7 +494,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
               {isEditing ? (
                 "Edit your round details"
               ) : (
-                <>Details for your round at {round.courses?.clubName} - {round.courses?.courseName} ({round.tee_name || "Standard"})</>
+                <>Details for your round at {courseDisplayName(round.courses?.clubName && round.courses?.courseName && round.courses.clubName !== round.courses.courseName ? `${round.courses.clubName} - ${round.courses.courseName}` : round.courses?.courseName || round.courses?.clubName || '')} ({round.tee_name || "Standard"})</>
               )}
             </DialogDescription>
           </div>

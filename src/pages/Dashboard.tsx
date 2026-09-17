@@ -1,3 +1,4 @@
+import { courseDisplayName } from "@/lib/course-seo";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Head } from "vite-react-ssg";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -191,7 +192,7 @@ export default function Dashboard() {
         let parsedNames = { clubName: "Unknown Club", courseName: "Unknown Course" };
         
         if (round.courses && round.courses.name) {
-          parsedNames = parseCourseName(round.courses.name);
+          parsedNames = parseCourseName(courseDisplayName(round.courses.name));
         }
         
         return {

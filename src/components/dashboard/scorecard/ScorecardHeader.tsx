@@ -1,4 +1,5 @@
 
+import { courseDisplayName } from "@/lib/course-seo";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -28,7 +29,9 @@ export const ScorecardHeader = ({
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
       <div>
         <h3 className="text-lg font-medium">
-          {round.courses?.clubName} - {round.courses?.courseName}
+          {courseDisplayName(round.courses?.clubName && round.courses?.courseName && round.courses.clubName !== round.courses.courseName
+            ? `${round.courses.clubName} - ${round.courses.courseName}`
+            : round.courses?.courseName || round.courses?.clubName || '')}
         </h3>
         <div className="flex items-center text-sm text-muted-foreground gap-2">
           {isEditing ? (

@@ -1,4 +1,5 @@
 
+import { courseDisplayName } from "@/lib/course-seo";
 import React from 'react';
 import { GolfCourse } from '@/services/golfCourseApi';
 import { parseCourseName } from '@/integrations/supabase/client';
@@ -61,8 +62,8 @@ export const SearchResults = ({
               }}
             >
               <div className="font-medium">{course.isUserAdded 
-                ? parseCourseName(course.name || '').clubName 
-                : course.club_name}
+                ? parseCourseName(courseDisplayName(course.name || '')).clubName 
+                : courseDisplayName(course.club_name || '')}
               </div>
               <div className="text-sm text-gray-600">
                 {course.isUserAdded 

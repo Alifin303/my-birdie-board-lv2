@@ -1,3 +1,4 @@
+import { courseDisplayName } from "@/lib/course-seo";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, MapPin } from "lucide-react";
@@ -77,7 +78,7 @@ export default function CoursesPlayedMap({
       else
         map.set(r.course_id, {
           count: 1,
-          name: r.courses?.name || `Course ${r.course_id}`,
+          name: r.courses?.name ? courseDisplayName(r.courses.name) : `Course ${r.course_id}`,
         });
     }
     return Array.from(map.entries()).map(([id, v]) => ({ id, ...v }));

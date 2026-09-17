@@ -1,4 +1,5 @@
 
+import { courseDisplayName } from "@/lib/course-seo";
 import React, { useState, KeyboardEvent } from "react";
 import { DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -97,7 +98,7 @@ export const SearchStep: React.FC<SearchStepProps> = ({
               {searchResults.map(course => <div key={course.id.toString()} className="flex justify-between items-center px-2 sm:px-4 py-2 sm:py-3 hover:bg-muted cursor-pointer" onClick={() => handleCourseSelect(course)}>
                   <div>
                     <p className="font-medium text-sm sm:text-base">
-                      {course.clubName !== course.name ? `${course.clubName} - ${course.name}` : course.name}
+                      {courseDisplayName(course.clubName !== course.name ? `${course.clubName} - ${course.name}` : course.name)}
                     </p>
                     <p className="text-xs sm:text-sm text-muted-foreground">
                       {course.city}{course.state ? `, ${course.state}` : ''}
