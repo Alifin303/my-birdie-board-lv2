@@ -155,7 +155,7 @@ const ScoreProgressionChart = ({
     <div className="w-full">
       <div className="flex flex-col gap-3 mb-4">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-medium">Score Progression Over Time</h3>
+          <h2 className="text-xl sm:text-2xl font-semibold text-primary">Score Progression Over Time</h2>
           <CollapsibleTrigger asChild>
             <CollapseToggle open={isOpen} label="score progression" />
           </CollapsibleTrigger>

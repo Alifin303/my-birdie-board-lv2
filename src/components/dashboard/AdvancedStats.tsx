@@ -1,16 +1,16 @@
 
-import { useState } from "react";
-import { 
+import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger
 } from "@/components/ui/collapsible";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Target, Circle, AlertCircle, Info, TreeDeciduous } from "lucide-react";
+import { Target, Circle, AlertCircle, Info, TreeDeciduous } from "lucide-react";
 import { Round } from "./types";
 import { calculateGIRPercentage } from "@/components/add-round/utils/scoreUtils";
 import { StatsLineChart } from "./StatsLineChart";
+import { CollapseToggle } from "./CollapseToggle";
+import { useCollapsibleSection } from "@/hooks/use-collapsible-section";
 
 interface AdvancedStatsProps {
   userRounds: Round[] | undefined;
@@ -18,7 +18,8 @@ interface AdvancedStatsProps {
 }
 
 export const AdvancedStats = ({ userRounds, isLoading }: AdvancedStatsProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useCollapsibleSection("advanced-stats");
+
   
   if (isLoading) {
     return null;
@@ -54,14 +55,7 @@ export const AdvancedStats = ({ userRounds, isLoading }: AdvancedStatsProps) => 
       <div className="flex justify-between items-center">
         <h2 className="text-xl sm:text-2xl font-semibold text-primary">Advanced Statistics</h2>
         <CollapsibleTrigger asChild>
-          <Button variant="ghost" size="sm">
-            {isOpen ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-            <span className="sr-only">Toggle advanced stats</span>
-          </Button>
+          <CollapseToggle open={isOpen} label="advanced statistics" />
         </CollapsibleTrigger>
       </div>
       
