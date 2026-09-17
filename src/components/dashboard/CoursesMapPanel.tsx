@@ -297,12 +297,6 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
           />
           On your bucket list
         </span>
-        {withoutCoords.length > 0 && !loading && (
-          <span>
-            {withoutCoords.length} course{withoutCoords.length === 1 ? "" : "s"} not shown — no location
-            on file.
-          </span>
-        )}
       </div>
     </div>
   );
