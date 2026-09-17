@@ -6,7 +6,6 @@ import { SignUpDialog } from "@/components/SignUpDialog";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { GOLFER_COUNT_LABEL } from "@/lib/site-stats";
 import { AlertTriangle, Check, ChevronDown, User } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { BreadcrumbNav } from "@/components/BreadcrumbNav";
@@ -235,7 +234,7 @@ const Pricing = () => {
           <section className="container mx-auto px-4 py-16 text-center">
             <h2 className="text-3xl font-bold mb-4">Ready to track your golf?</h2>
             <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-              Join {GOLFER_COUNT_LABEL} golfers using MyBirdieBoard to log rounds, calculate handicaps, and see real improvement over time.
+              Join golfers using MyBirdieBoard to log rounds, calculate handicaps, and see real improvement over time.
             </p>
             <Button size="lg" onClick={() => setShowSignup(true)}>
               Create your free account

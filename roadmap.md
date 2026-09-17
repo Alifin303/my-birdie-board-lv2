@@ -9,6 +9,7 @@
 - [x] Preserve the simple scorecard fallback where complete hole-par data is unavailable.
 - [x] Ensure all six pricing FAQ answers exist in the initial page content.
 - [x] Make course-directory cleanup explicit and retain its first-round prompt.
-- [x] Share the “1,000+ golfers” figure across public conversion pages.
+- [x] Remove the unsupported “1,000+ golfers” claim from every public page.
 - [x] Remove stale years from Best Golf Score Apps copy and metadata.
 - [x] Verify all four fixes in the rendered pages.
+- [ ] Verify the generic golfer copy on pricing, get-started, and homepage, then publish it live.
