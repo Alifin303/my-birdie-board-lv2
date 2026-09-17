@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, PlusCircle } from "lucide-react";
-import { searchForCourses } from "@/components/course-selector/CourseDataService";
+import { searchAllCourses, CourseSearchResult } from "@/lib/course-search";
 import { useToast } from "@/hooks/use-toast";
 import { GolfCourse } from "@/services/golfCourseApi";
 import { courseDisplayName } from "@/lib/course-seo";
@@ -15,10 +15,10 @@ interface AddToBucketListDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function resultName(course: GolfCourse) {
+function resultName(course: CourseSearchResult) {
   const raw =
     course.name ||
-    [course.club_name, course.course_name].filter(Boolean).join(" - ") ||
+    [course.clubName, course.name].filter(Boolean).join(" - ") ||
     "Unknown course";
   return courseDisplayName(raw);
 }
@@ -27,7 +27,7 @@ export function AddToBucketListDialog({ open, onOpenChange }: AddToBucketListDia
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [searched, setSearched] = useState(false);
-  const [results, setResults] = useState<GolfCourse[]>([]);
+  const [results, setResults] = useState<CourseSearchResult[]>([]);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [manualCourseOpen, setManualCourseOpen] = useState(false);
   const { toast } = useToast();
@@ -41,7 +41,7 @@ export function AddToBucketListDialog({ open, onOpenChange }: AddToBucketListDia
     }
     setIsSearching(true);
     try {
-      setResults(await searchForCourses(query));
+      setResults(await searchAllCourses(query));
       setSearched(true);
     } catch (e) {
       console.error("Bucket list search failed", e);
@@ -64,10 +64,19 @@ export function AddToBucketListDialog({ open, onOpenChange }: AddToBucketListDia
     }
   }, [open]);
 
-  const handleAdd = async (course: GolfCourse) => {
+  const handleAdd = async (course: CourseSearchResult) => {
     setPendingId(String(course.id));
     try {
-      await addCourse.mutateAsync(course);
+      await addCourse.mutateAsync({
+        id: course.id,
+        name: course.name,
+        club_name: course.clubName,
+        course_name: course.name,
+        city: course.city,
+        state: course.state,
+        isApiCourse: course.isApiCourse,
+        apiCourseId: course.apiCourseId,
+      } as unknown as GolfCourse);
       toast({
         title: "Added to your bucket list",
         description: `${resultName(course)} is on your list.`,
@@ -191,11 +200,9 @@ export function AddToBucketListDialog({ open, onOpenChange }: AddToBucketListDia
                     >
                       <div className="min-w-0">
                         <p className="text-sm font-medium truncate">{resultName(course)}</p>
-                        {(course.city || course.location?.city || course.state || course.location?.state) && (
+                        {(course.city || course.state) && (
                           <p className="text-xs text-muted-foreground truncate">
-                            {[course.city || course.location?.city, course.state || course.location?.state]
-                              .filter(Boolean)
-                              .join(", ")}
+                            {[course.city, course.state].filter(Boolean).join(", ")}
                           </p>
                         )}
                       </div>
