@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from './ui/button';
-import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle, UserPlus } from 'lucide-react';
+import { ArrowRight, MapPin, ClipboardList, TrendingUp, Medal, BarChart2, HelpCircle, UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from './ui/card';
 import { GOLFER_COUNT_LABEL } from '@/lib/site-stats';
@@ -96,7 +96,7 @@ export const MainContent = ({
                 <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
                   <CardContent className="p-3 flex flex-col h-full bg-stone-200 rounded-xl">
                     <div className="rounded-full p-2 w-fit mb-2 bg-[2f4c3d] bg-secondary-foreground">
-                      <Upload className="h-4 w-4 text-white" aria-hidden="true" />
+                      <MapPin className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
                     <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Your Personal Golf Passport</h3>
                     <p className="mb-2 text-xs text-secondary-foreground">Every round drops a pin on your own course map — building a visual record of everywhere you've played, season after season. It's the kind of long-term golf memory a scorecard alone could never keep.</p>
@@ -111,7 +111,7 @@ export const MainContent = ({
                 <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
                   <CardContent className="p-3 flex flex-col h-full bg-stone-200 rounded-xl">
                     <div className="rounded-full p-2 w-fit mb-2 bg-secondary-foreground bg-[2f4c3d]">
-                      <BarChart2 className="h-4 w-4 text-white" aria-hidden="true" />
+                      <ClipboardList className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
                     <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Log Any Round, Your Way</h3>
                     <p className="mb-2 text-xs text-secondary-foreground">Full support for stroke play and Stableford scoring, plus advanced stats like putts, penalties, and greens in regulation — logged in seconds after you play, no phone needed on the course.</p>
@@ -126,7 +126,7 @@ export const MainContent = ({
                 <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
                   <CardContent className="p-3 flex flex-col h-full bg-stone-200 rounded-xl">
                     <div className="rounded-full p-2 w-fit mb-2 bg-secondary-foreground">
-                      <Award className="h-4 w-4 text-white" aria-hidden="true" />
+                      <TrendingUp className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
                     <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Automatic WHS Handicap</h3>
                     <p className="mb-2 text-xs text-secondary-foreground">Your handicap index updates automatically using the World Handicap System as you add rounds — a true, current picture of your game, no manual calculation required.</p>
@@ -141,7 +141,7 @@ export const MainContent = ({
                 <Card className="bg-white/10 backdrop-blur-md border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
                   <CardContent className="p-3 flex flex-col h-full bg-stone-200 rounded-xl">
                     <div className="rounded-full p-2 w-fit mb-2 bg-[2f4c3d] bg-secondary-foreground">
-                      <Trophy className="h-4 w-4 text-white" aria-hidden="true" />
+                      <Medal className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
                     <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Gross and Net Leaderboards, Every Course</h3>
                     <p className="mb-2 text-xs text-secondary-foreground">See exactly where you rank — gross and net — at every course you've played, not just your home club.</p>
