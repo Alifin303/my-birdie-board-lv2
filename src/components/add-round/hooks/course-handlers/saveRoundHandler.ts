@@ -6,6 +6,7 @@ import { getCourseTeesByIdFromDatabase, saveCourseTeesToDatabase } from "@/integ
 import { calculateNetScore } from "@/integrations/supabase";
 import { calculateGrossStableford, calculateNetStableford } from "@/utils/stablefordCalculator";
 import { calculateCourseHandicap } from "@/integrations/supabase/handicap/handicap-calculator";
+import { crossOffBucketList } from "@/lib/bucket-list";
 
 export function createSaveRoundHandler({
   selectedCourse,
