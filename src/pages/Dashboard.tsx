@@ -17,6 +17,8 @@ import { useToast } from "@/hooks/use-toast";
 import { clearSubscriptionCache } from "@/integrations/supabase/subscription/subscription-utils";
 import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
+import { isSubscriptionValid } from "@/integrations/supabase/subscription/subscription-utils";
+import { HandicapUnlockNudge } from "@/components/dashboard/HandicapUnlockNudge";
 
 const CoursesPlayedMap = lazy(() => import("@/components/dashboard/CoursesPlayedMap"));
 
@@ -286,6 +288,11 @@ export default function Dashboard() {
           />
         </div>
         
+        <HandicapUnlockNudge
+          roundCount={userRounds?.length || 0}
+          hasValidSubscription={subscription ? isSubscriptionValid(subscription) : false}
+        />
+
         {!selectedCourseId && (
           <>
             <div className="bg-white/90 rounded-lg shadow-md">

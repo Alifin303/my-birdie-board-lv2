@@ -74,6 +74,7 @@ const AuthConfirm = React.lazy(() => import('@/pages/AuthConfirm'))
 const ResetPassword = React.lazy(() => import('@/pages/ResetPassword'))
 const Checkout = React.lazy(() => import('@/pages/Checkout'))
 const Dashboard = React.lazy(() => import('@/pages/Dashboard'))
+const MilestonesPage = React.lazy(() => import('@/pages/Milestones'))
 const Admin = React.lazy(() => import('@/pages/Admin'))
 
 import { ProtectedRoute } from '@/components/ProtectedRoute'
@@ -167,6 +168,7 @@ export const routes: RouteRecord[] = [
   { path: '/auth/reset-password', element: P(<LazyWrapper><ResetPassword /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
   { path: '/checkout', element: P(<LazyWrapper><Checkout /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
   { path: '/dashboard', element: P(<ProtectedRoute><LazyWrapper><Dashboard /></LazyWrapper></ProtectedRoute>), errorElement: <RouteErrorFallback /> },
+  { path: '/milestones', element: P(<ProtectedRoute><LazyWrapper><MilestonesPage /></LazyWrapper></ProtectedRoute>), errorElement: <RouteErrorFallback /> },
   { path: '/admin', element: P(<LazyWrapper><Admin /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
 
   // Redirects

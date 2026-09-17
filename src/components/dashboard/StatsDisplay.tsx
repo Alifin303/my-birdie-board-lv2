@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { HandicapCard } from "./HandicapCard";
 import { MilestonesDialog } from "./MilestonesDialog";
+import { Link } from "react-router-dom";
 
 type RoundFilter = 'all' | '9hole' | '18hole';
 type ScoreMode = 'stroke' | 'stableford';
@@ -384,8 +385,14 @@ export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTy
       )}
 
       {userRounds && userRounds.length > 0 && (
-        <div className="mt-2">
+        <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
           <MilestonesDialog rounds={userRounds} />
+          <Button asChild variant="outline" size="sm" className="gap-2">
+            <Link to="/milestones">
+              <Trophy className="h-4 w-4" />
+              Trophy Case
+            </Link>
+          </Button>
         </div>
       )}
 
