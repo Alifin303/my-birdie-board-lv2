@@ -2,7 +2,7 @@
  * Helpers for per-course SEO metadata and static course facts.
  * The snapshot is generated at build time by scripts/generate-courses-data.mjs.
  */
-import coursesData from '@/data/courses-static.json';
+import coursesData from '../data/courses-static.json';
 
 export interface StaticCourse {
   id: number;

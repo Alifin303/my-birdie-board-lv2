@@ -59,6 +59,30 @@ const routes: { path: string; priority: string; changefreq: string }[] = [
   { path: '/compare/best-golf-score-tracking-apps', priority: '0.8', changefreq: 'monthly' },
 ];
 
+async function getCourseRoutes(): Promise<{ path: string; priority: string; changefreq: string }[]> {
+  try {
+    const url = Deno.env.get('SUPABASE_URL');
+    const key = Deno.env.get('SUPABASE_ANON_KEY');
+    if (!url || !key) return [];
+
+    const res = await fetch(`${url}/rest/v1/rpc/get_public_courses`, {
+      headers: { apikey: key, Authorization: `Bearer ${key}` },
+    });
+    if (!res.ok) return [];
+    const courses = await res.json();
+    if (!Array.isArray(courses)) return [];
+
+    return courses.map((c: { id: number }) => ({
+      path: `/courses/${c.id}`,
+      priority: '0.5',
+      changefreq: 'weekly',
+    }));
+  } catch (e) {
+    console.error('Failed to load course routes for sitemap:', e);
+    return [];
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -66,8 +90,9 @@ serve(async (req) => {
 
   try {
     const currentDate = new Date().toISOString().split('T')[0];
+    const allRoutes = [...routes, ...(await getCourseRoutes())];
 
-    const urls = routes.map(r => {
+    const urls = allRoutes.map(r => {
       const loc = r.path === '/' ? `${SITE_URL}/` : `${SITE_URL}${r.path}`;
       return `  <url>
     <loc>${loc}</loc>

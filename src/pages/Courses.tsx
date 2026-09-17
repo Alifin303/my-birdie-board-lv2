@@ -1,8 +1,10 @@
 
+
 import { useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { SEOHead } from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
+import { staticCourses } from "@/lib/course-seo";
 
 interface Course {
   id: number;
@@ -12,82 +14,51 @@ interface Course {
   roundsCount?: number;
 }
 
+const initialCourses: Course[] = staticCourses.map((c) => ({
+  id: c.id,
+  name: c.name,
+  city: c.city ?? undefined,
+  state: c.state ?? undefined,
+  roundsCount: c.roundsCount,
+}));
+
 const Courses = () => {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [shouldRedirect, setShouldRedirect] = useState(false);
-  const [isBot, setIsBot] = useState(false);
-  
+  // Rendered from the build-time snapshot so every course link is in the
+  // initial HTML, then refreshed with live data on the client.
+  const [courses, setCourses] = useState<Course[]>(initialCourses);
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
-    // SSR-safe check for navigator
-    if (typeof window === "undefined" || typeof navigator === "undefined") {
-      return;
-    }
-    
-    const botPattern = /bot|googlebot|crawler|spider|robot|crawling/i;
-    const isSearchEngine = botPattern.test(navigator.userAgent);
-    setIsBot(isSearchEngine);
-    
-    if (!isSearchEngine) {
-      const timer = setTimeout(() => {
-        setShouldRedirect(true);
-      }, 100);
-      
-      return () => clearTimeout(timer);
-    }
-  }, []);
-  
-  useEffect(() => {
+    let cancelled = false;
+
     const fetchCourses = async () => {
       try {
         setLoading(true);
-        
-        const { data, error } = await supabase
-          .from('courses')
-          .select('id, name, city, state')
-          .order('name');
-          
-        if (error) throw error;
-        
-        if (data) {
-          const courseIds = data.map(course => course.id);
-          
-          if (courseIds.length > 0) {
-            const coursesWithCounts = await Promise.all(
-              data.map(async (course) => {
-                const { count, error: countError } = await supabase
-                  .from('rounds')
-                  .select('*', { count: 'exact', head: true })
-                  .eq('course_id', course.id);
-                  
-                return {
-                  ...course,
-                  roundsCount: countError ? 0 : (count || 0)
-                };
-              })
-            );
-            
-            setCourses(coursesWithCounts);
-          } else {
-            setCourses([]);
-          }
-        }
+        const { data, error } = await (supabase as any).rpc("get_public_courses");
+        if (error || cancelled || !Array.isArray(data)) return;
+
+        setCourses(
+          data.map((c: any) => ({
+            id: c.id,
+            name: c.name,
+            city: c.city ?? undefined,
+            state: c.state ?? undefined,
+            roundsCount: c.rounds_count ?? 0,
+          }))
+        );
       } catch (error) {
         console.error("Error fetching courses:", error);
-        setCourses([]);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
-    
-    if (isBot || !shouldRedirect) {
-      fetchCourses();
-    }
-  }, [isBot, shouldRedirect]);
+
+    fetchCourses();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   
-  if (shouldRedirect && !isBot) {
-    return <Navigate to="/" replace />;
-  }
   
   return (
     <>
