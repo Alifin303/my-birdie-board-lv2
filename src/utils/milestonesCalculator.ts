@@ -1,3 +1,5 @@
+import { courseDisplayName } from '@/lib/course-seo';
+
 export type MilestoneType =
   | 'birdie'
   | 'eagle'
