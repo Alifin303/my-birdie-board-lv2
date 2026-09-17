@@ -423,8 +423,10 @@ function analyse(rounds: Round[]): { milestones: Milestone[]; counters: Counters
     }
 
     // ---- Handicap --------------------------------------------------------
+    // Handicap milestones only exist once the player has 5+ rounds — that's
+    // when the WHS handicap is first calculated. `index` is 0-based.
     const handicap = round.handicap_at_posting;
-    if (typeof handicap === 'number' && !Number.isNaN(handicap)) {
+    if (index >= 4 && typeof handicap === 'number' && !Number.isNaN(handicap)) {
       counters.currentHandicap = handicap;
 
       if (counters.firstHandicap === null) {
