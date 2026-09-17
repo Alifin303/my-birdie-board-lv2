@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, PlusCircle } from "lucide-react";
 import { searchForCourses } from "@/components/course-selector/CourseDataService";
-import { useDebounce } from "@/hooks/use-debounce";
 import { useToast } from "@/hooks/use-toast";
 import { GolfCourse } from "@/services/golfCourseApi";
 import { courseDisplayName } from "@/lib/course-seo";
@@ -31,10 +30,8 @@ export function AddToBucketListDialog({ open, onOpenChange }: AddToBucketListDia
   const [results, setResults] = useState<GolfCourse[]>([]);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [manualCourseOpen, setManualCourseOpen] = useState(false);
-  const debouncedQuery = useDebounce(searchQuery, 500);
   const { toast } = useToast();
   const { addCourse } = useBucketList();
-  const lastAutoSearch = useRef("");
 
   const runSearch = useCallback(async (query: string) => {
     if (!query.trim()) {
@@ -58,21 +55,12 @@ export function AddToBucketListDialog({ open, onOpenChange }: AddToBucketListDia
     }
   }, [toast]);
 
-  // Auto-search as the user types (debounced), skipping the search the
-  // explicit button/Enter already triggered.
-  useEffect(() => {
-    if (!debouncedQuery.trim() || debouncedQuery === lastAutoSearch.current) return;
-    lastAutoSearch.current = debouncedQuery;
-    runSearch(debouncedQuery);
-  }, [debouncedQuery, runSearch]);
-
   useEffect(() => {
     if (!open) {
       setSearchQuery("");
       setResults([]);
       setSearched(false);
       setManualCourseOpen(false);
-      lastAutoSearch.current = "";
     }
   }, [open]);
 
