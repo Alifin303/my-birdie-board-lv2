@@ -6,7 +6,7 @@ const storageKey = (key: string) => `bb-collapse:${key}`;
  * Collapsible section state that remembers open/closed between visits.
  * SSR-safe: defaults to `defaultOpen` when window is unavailable.
  */
-export function useCollapsibleSection(key: string, defaultOpen = true) {
+export function useCollapsibleSection(key: string, defaultOpen = false) {
   const [open, setOpen] = useState<boolean>(() => {
     if (typeof window === "undefined") return defaultOpen;
     try {
