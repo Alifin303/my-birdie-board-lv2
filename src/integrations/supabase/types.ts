@@ -38,6 +38,35 @@ export type Database = {
         }
         Relationships: []
       }
+      bucket_list: {
+        Row: {
+          added_at: string
+          course_id: number
+          id: string
+          user_id: string
+        }
+        Insert: {
+          added_at?: string
+          course_id: number
+          id?: string
+          user_id: string
+        }
+        Update: {
+          added_at?: string
+          course_id?: number
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bucket_list_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       complimentary_accounts: {
         Row: {
           created_at: string
