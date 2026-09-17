@@ -441,6 +441,12 @@ export default function Dashboard() {
             )
           }
         </div>
+
+        {!selectedCourseId && (
+          <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
+            <BucketList playedCourseIds={playedCourseIds} />
+          </div>
+        )}
       </div>
     );
   };
