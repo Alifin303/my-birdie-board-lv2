@@ -15,7 +15,7 @@ import { LeaderboardBanner } from "@/components/dashboard/LeaderboardBanner";
 import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
 import { useToast } from "@/hooks/use-toast";
 import { clearSubscriptionCache } from "@/integrations/supabase/subscription/subscription-utils";
-import { MapPin } from "lucide-react";
+import { MapPin, Flag } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CollapseToggle } from "@/components/dashboard/CollapseToggle";
 import { useCollapsibleSection } from "@/hooks/use-collapsible-section";
