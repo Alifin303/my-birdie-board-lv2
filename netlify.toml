@@ -1,5 +1,5 @@
 [build]
-  command = "npx vite-react-ssg build"
+  command = "node scripts/generate-courses-data.mjs && npx vite-react-ssg build"
   publish = "dist"
 
 [build.environment]
