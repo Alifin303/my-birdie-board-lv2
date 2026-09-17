@@ -65,9 +65,18 @@ function FitBounds({ courses }: { courses: MapCourse[] }) {
   return null;
 }
 
+type MapFilter = "all" | "played" | "bucket";
+
+const FILTER_OPTIONS: Array<{ value: MapFilter; label: string }> = [
+  { value: "played", label: "Played" },
+  { value: "bucket", label: "Bucket list" },
+  { value: "all", label: "All" },
+];
+
 export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: CoursesMapPanelProps) {
   const [loading, setLoading] = useState(false);
   const [courses, setCourses] = useState<MapCourse[]>([]);
+  const [filter, setFilter] = useState<MapFilter>("all");
   const fetchedRef = useRef<string>("");
 
   // Unique played courses with round counts
