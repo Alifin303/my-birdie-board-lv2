@@ -68,7 +68,27 @@ export default function Dashboard() {
   const [roundFilter, setRoundFilter] = useState<'all' | '9hole' | '18hole'>('all');
   const [scoreMode, setScoreMode] = useState<'stroke' | 'stableford'>('stroke');
   const [processingStripeSession, setProcessingStripeSession] = useState(false);
-  const [isMapOpen, setIsMapOpen] = useState(false);
+  const [crossedMilestone, setCrossedMilestone] = useState<Milestone | null>(null);
+  const { bucketList } = useBucketList();
+
+  // Celebrate when a round is logged at a bucket-list course.
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<BucketListCrossedDetail>).detail;
+      if (!detail) return;
+      const name = courseDisplayName(detail.courseName);
+      setCrossedMilestone({
+        id: `bucket-${detail.courseId}-${Date.now()}`,
+        type: 'bucket_list',
+        title: `Crossed off your bucket list: ${name}!`,
+        description: `You've now played ${name} — it's moved into Your Courses.`,
+        date: new Date().toISOString(),
+      });
+    };
+    window.addEventListener(BUCKET_LIST_CROSSED_EVENT, handler);
+    return () => window.removeEventListener(BUCKET_LIST_CROSSED_EVENT, handler);
+  }, []);
+  
   
   const sessionId = searchParams.get('session_id');
   const subscriptionStatus = searchParams.get('subscription_status');
