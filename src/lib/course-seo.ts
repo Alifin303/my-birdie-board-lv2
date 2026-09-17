@@ -13,6 +13,7 @@ export interface StaticCourse {
   longitude: number | null;
   par: number | null;
   holes: number | null;
+  holePars: number[] | null;
   teeCount: number;
   roundsCount: number;
   averageScore: number | null;
@@ -40,12 +41,16 @@ function comparableCourseWords(value: string): string[] {
 
 /** Removes source IDs and clearly redundant suffixes for display only. */
 export function courseDisplayName(name: string): string {
-  const withoutIds = name.replace(/\s*\(\d+\)/g, '').replace(/\s+/g, ' ').trim();
-  const separatorIndex = withoutIds.indexOf(' - ');
-  if (separatorIndex === -1) return withoutIds;
+  const withoutSystemLabels = name
+    .replace(/\s*\(\d+\)/g, '')
+    .replace(/\s*\[\s*(?:user[\s_-]*added(?:\s+course)?|system(?:\s+label)?|custom(?:\s+course)?|manually?[\s_-]*added(?:\s+course)?)\s*\]/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const separatorIndex = withoutSystemLabels.indexOf(' - ');
+  if (separatorIndex === -1) return withoutSystemLabels;
 
-  const primaryName = withoutIds.slice(0, separatorIndex).trim();
-  const suffix = withoutIds.slice(separatorIndex + 3).trim();
+  const primaryName = withoutSystemLabels.slice(0, separatorIndex).trim();
+  const suffix = withoutSystemLabels.slice(separatorIndex + 3).trim();
   if (!suffix) return primaryName;
 
   const primaryWords = comparableCourseWords(primaryName);
