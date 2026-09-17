@@ -318,6 +318,14 @@ export function createSaveRoundHandler({
         // Don't fail the round save if handicap update fails
       }
       
+      // If this course was on the user's bucket list, cross it off automatically.
+      try {
+        await crossOffBucketList(session.user.id, dbCourseId);
+      } catch (bucketError) {
+        console.error("Error updating bucket list:", bucketError);
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['bucketList'] });
       queryClient.invalidateQueries({ queryKey: ['userRounds'] });
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       queryClient.invalidateQueries({ queryKey: ['handicapRounds'] });
