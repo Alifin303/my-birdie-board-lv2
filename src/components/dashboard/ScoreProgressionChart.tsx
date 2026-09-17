@@ -4,6 +4,9 @@ import { format } from "date-fns";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Switch } from "@/components/ui/switch";
 import { Hash, Target, TrendingUp } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { CollapseToggle } from "./CollapseToggle";
+import { useCollapsibleSection } from "@/hooks/use-collapsible-section";
 
 interface Round {
   id: number;
@@ -42,6 +45,7 @@ const ScoreProgressionChart = ({
   const [showParLine, setShowParLine] = useState(false);
   const [holeFilter, setHoleFilter] = useState<'all' | '9' | '18'>('all');
   const [internalScoreMode, setInternalScoreMode] = useState<ScoreMode>('stroke');
+  const [isOpen, setIsOpen] = useCollapsibleSection("score-progression");
   
   // Use external scoreMode if provided, otherwise use internal state
   const scoreMode = externalScoreMode ?? internalScoreMode;
@@ -147,11 +151,17 @@ const ScoreProgressionChart = ({
   const { dataKey, tooltipLabel, tooltipFormat } = getDataConfig();
 
   return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
     <div className="w-full">
       <div className="flex flex-col gap-3 mb-4">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-medium">Score Progression Over Time</h3>
+          <CollapsibleTrigger asChild>
+            <CollapseToggle open={isOpen} label="score progression" />
+          </CollapsibleTrigger>
         </div>
+
+        <CollapsibleContent>
         
         {/* Score Type & Mode Toggles */}
         <div className="flex flex-wrap justify-center gap-4">
@@ -297,7 +307,9 @@ const ScoreProgressionChart = ({
           </LineChart>
         </ResponsiveContainer>
       </div>
+      </CollapsibleContent>
     </div>
+    </Collapsible>
   );
 };
 
