@@ -19,7 +19,7 @@ export function HandicapUnlockNudge({ roundCount, hasValidSubscription }: Handic
   const percent = Math.round((roundCount / target) * 100);
 
   return (
-    <div className="rounded-lg border border-accent/40 bg-accent/5 p-4 sm:p-5">
+    <div className="rounded-lg border bg-card p-4 sm:p-5 shadow-sm">
       <div className="flex items-start gap-3">
         <div className="text-2xl" aria-hidden="true">
           <Trophy className="h-6 w-6 text-accent" />
