@@ -16,6 +16,9 @@ import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
 import { useToast } from "@/hooks/use-toast";
 import { clearSubscriptionCache } from "@/integrations/supabase/subscription/subscription-utils";
 import { MapPin } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { CollapseToggle } from "@/components/dashboard/CollapseToggle";
+import { useCollapsibleSection } from "@/hooks/use-collapsible-section";
 import { isSubscriptionValid } from "@/integrations/supabase/subscription/subscription-utils";
 import { HandicapUnlockNudge } from "@/components/dashboard/HandicapUnlockNudge";
 import { BucketList } from "@/components/dashboard/BucketList";
@@ -70,6 +73,8 @@ export default function Dashboard() {
   const [processingStripeSession, setProcessingStripeSession] = useState(false);
   const [crossedMilestone, setCrossedMilestone] = useState<Milestone | null>(null);
   const { bucketList } = useBucketList();
+  const [mapOpen, setMapOpen] = useCollapsibleSection("golf-map");
+  const [coursesOpen, setCoursesOpen] = useCollapsibleSection("your-courses");
 
   // Celebrate when a round is logged at a bucket-list course.
   useEffect(() => {
@@ -395,31 +400,38 @@ export default function Dashboard() {
               handicapIndex={handicapFromProfile}
             />
 
-            <div className="space-y-3 sm:space-y-4 bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-semibold text-primary flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-primary" />
-                  Your Golf Map
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Every course you've played, plus the ones still on your bucket list.
-                </p>
-              </div>
-              <Suspense
-                fallback={
-                  <div className="h-[420px] sm:h-[520px] w-full animate-pulse rounded-lg border bg-muted" />
-                }
-              >
-                <CoursesMapPanel
-                  userRounds={mapRounds}
-                  bucketCourses={bucketList}
-                />
-              </Suspense>
+            <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
+              <Collapsible open={mapOpen} onOpenChange={setMapOpen} className="space-y-3 sm:space-y-4">
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className="text-xl sm:text-2xl font-semibold text-primary flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    Your Golf Map
+                  </h2>
+                  <CollapsibleTrigger asChild>
+                    <CollapseToggle open={mapOpen} label="your golf map" />
+                  </CollapsibleTrigger>
+                </div>
+                <CollapsibleContent className="space-y-3 sm:space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Every course you've played, plus the ones still on your bucket list.
+                  </p>
+                  <Suspense
+                    fallback={
+                      <div className="h-[420px] sm:h-[520px] w-full animate-pulse rounded-lg border bg-muted" />
+                    }
+                  >
+                    <CoursesMapPanel
+                      userRounds={mapRounds}
+                      bucketCourses={bucketList}
+                    />
+                  </Suspense>
+                </CollapsibleContent>
+              </Collapsible>
             </div>
           </>
         )}
         
-        <div className="space-y-3 sm:space-y-4 bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
+        <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
           {selectedCourseId 
             ? <CourseRoundHistory 
                 userRounds={userRounds} 
@@ -428,16 +440,23 @@ export default function Dashboard() {
                 handicapIndex={handicapFromProfile}
               /> 
             : (
-              <>
-                <h2 className="text-xl sm:text-2xl font-semibold text-primary">Your Courses</h2>
-                <CourseStatsTable 
-                  userRounds={userRounds}
-                  scoreType={scoreType}
-                  calculateCourseStats={calculateCourseStats}
-                  onCourseClick={(courseId) => setSelectedCourseId(courseId)}
-                  handicapIndex={handicapFromProfile}
-                />
-              </>
+              <Collapsible open={coursesOpen} onOpenChange={setCoursesOpen} className="space-y-3 sm:space-y-4">
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className="text-xl sm:text-2xl font-semibold text-primary">Your Courses</h2>
+                  <CollapsibleTrigger asChild>
+                    <CollapseToggle open={coursesOpen} label="your courses" />
+                  </CollapsibleTrigger>
+                </div>
+                <CollapsibleContent className="space-y-3 sm:space-y-4">
+                  <CourseStatsTable 
+                    userRounds={userRounds}
+                    scoreType={scoreType}
+                    calculateCourseStats={calculateCourseStats}
+                    onCourseClick={(courseId) => setSelectedCourseId(courseId)}
+                    handicapIndex={handicapFromProfile}
+                  />
+                </CollapsibleContent>
+              </Collapsible>
             )
           }
         </div>
