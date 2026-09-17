@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, PlusCircle } from "lucide-react";
-import { searchForCourses } from "@/components/course-selector/CourseDataService";
+import { searchAllCourses, CourseSearchResult } from "@/lib/course-search";
 import { useToast } from "@/hooks/use-toast";
 import { GolfCourse } from "@/services/golfCourseApi";
 import { courseDisplayName } from "@/lib/course-seo";
