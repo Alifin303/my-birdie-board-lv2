@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { HandicapCard } from "./HandicapCard";
 import { MilestonesDialog } from "./MilestonesDialog";
+import { Link } from "react-router-dom";
 
 type RoundFilter = 'all' | '9hole' | '18hole';
 type ScoreMode = 'stroke' | 'stableford';
