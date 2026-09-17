@@ -168,7 +168,9 @@ function analyse(rounds: Round[]): { milestones: Milestone[]; counters: Counters
     const holes = normaliseHoleScores(round.hole_scores);
     const holesPlayed = round.holes_played || 18;
     const courseId = round.course_id || round.courses?.id;
-    const courseName = round.courses?.name;
+    const courseName = round.courses?.name
+      ? courseDisplayName(round.courses.name)
+      : undefined;
 
     // ---- Hole-level achievements -------------------------------------
     let roundPutts = 0;
