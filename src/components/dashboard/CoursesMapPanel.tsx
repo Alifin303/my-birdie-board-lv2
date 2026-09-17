@@ -228,9 +228,13 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
         )}
       </div>
       <div className="relative h-[420px] sm:h-[520px] w-full overflow-hidden rounded-lg border bg-muted">
-        {courses.length === 0 && !loading ? (
+        {visibleCourses.length === 0 && !loading ? (
           <div className="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground">
-            Log a round or add a bucket-list course to start building your map.
+            {filter === "bucket"
+              ? "No bucket-list courses yet — add one from your bucket list section."
+              : filter === "played"
+                ? "No courses played yet — log a round to drop your first pin."
+                : "Log a round or add a bucket-list course to start building your map."}
           </div>
         ) : (
           <MapContainer
