@@ -187,8 +187,10 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
     };
   }, [signature, courseSummaries, bucketOnly]);
 
-  const withCoords = courses.filter((c) => c.latitude != null && c.longitude != null);
-  const withoutCoords = courses.filter((c) => c.latitude == null || c.longitude == null);
+  const visibleCourses =
+    filter === "all" ? courses : courses.filter((c) => c.kind === filter);
+  const withCoords = visibleCourses.filter((c) => c.latitude != null && c.longitude != null);
+  const withoutCoords = visibleCourses.filter((c) => c.latitude == null || c.longitude == null);
 
   const initialCenter: [number, number] = withCoords[0]
     ? [withCoords[0].latitude as number, withCoords[0].longitude as number]
