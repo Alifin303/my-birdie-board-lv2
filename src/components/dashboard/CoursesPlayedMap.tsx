@@ -77,7 +77,7 @@ export default function CoursesPlayedMap({
       else
         map.set(r.course_id, {
           count: 1,
-          name: r.courses?.name || `Course ${r.course_id}`,
+          name: r.courses?.name ? courseDisplayName(r.courses.name) : `Course ${r.course_id}`,
         });
     }
     return Array.from(map.entries()).map(([id, v]) => ({ id, ...v }));

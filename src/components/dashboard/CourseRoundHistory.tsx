@@ -99,9 +99,9 @@ export const CourseRoundHistory = ({
     clubName = courseRounds[0].courses.clubName || "Unknown Club";
   }
   
-  const displayName = clubName !== courseName 
+  const displayName = courseDisplayName(clubName !== courseName 
     ? `${clubName} - ${courseName}`
-    : courseName;
+    : courseName);
   
   const availableYears = getAvailableYears(courseRounds);
   const availableMonths = getAvailableMonths(courseRounds, periodType, currentDate);

@@ -171,9 +171,9 @@ export const CourseStatsTable = ({
                 >
                   <Flag className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0 mt-0.5" />
                   <span className="break-words line-clamp-2 sm:line-clamp-none">
-                    {courseStat.clubName !== courseStat.courseName 
+                    {courseDisplayName(courseStat.clubName !== courseStat.courseName 
                       ? `${courseStat.clubName} - ${courseStat.courseName}`
-                      : courseStat.courseName}
+                      : courseStat.courseName)}
                   </span>
                 </button>
                 <p className="text-xs text-muted-foreground mt-0.5 pl-4 break-words">

@@ -84,7 +84,7 @@ export const HandicapCard = ({ open, onOpenChange, userName, handicap, userId }:
             id: round.id,
             date: round.date,
             gross_score: round.gross_score,
-            course_name: round.courses?.name || 'Unknown Course',
+            course_name: round.courses?.name ? courseDisplayName(round.courses.name) : 'Unknown Course',
             tee_name: round.tee_name || 'Unknown Tee',
             slope: teeData.slope || 113,
             rating: teeData.rating || 72,

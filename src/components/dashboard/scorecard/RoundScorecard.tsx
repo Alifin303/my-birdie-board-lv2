@@ -501,7 +501,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
             {isEditing ? (
               "Edit your round details"
             ) : (
-              <>Details for your round at {round.courses?.clubName} - {round.courses?.courseName} ({round.tee_name || "Standard"})</>
+              <>Details for your round at {courseDisplayName(round.courses?.clubName && round.courses?.courseName && round.courses.clubName !== round.courses.courseName ? `${round.courses.clubName} - ${round.courses.courseName}` : round.courses?.courseName || round.courses?.clubName || '')} ({round.tee_name || "Standard"})</>
             )}
           </DialogDescription>
           <DialogClose className="absolute right-4 top-4 rounded-sm opacity-80 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">

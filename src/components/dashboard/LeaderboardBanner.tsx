@@ -33,9 +33,9 @@ export const LeaderboardBanner = ({ userRounds, handicapIndex }: LeaderboardBann
       if (round.courses && !courseMap.has(round.courses.id)) {
         const clubName = round.courses.clubName || "Unknown Club";
         const courseName = round.courses.courseName || "Unknown Course";
-        const displayName = clubName !== courseName
+        const displayName = courseDisplayName(clubName !== courseName
           ? `${clubName} - ${courseName}`
-          : courseName;
+          : courseName);
         courseMap.set(round.courses.id, { id: round.courses.id, displayName });
       }
     });

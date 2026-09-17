@@ -274,7 +274,7 @@ export const ScorecardStep: React.FC<ScorecardStepProps> = ({
   return <div>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-semibold">{selectedCourse.clubName !== selectedCourse.name ? `${selectedCourse.clubName} - ${selectedCourse.name}` : selectedCourse.name}
+          <h2 className="text-lg font-semibold">{courseDisplayName(selectedCourse.clubName !== selectedCourse.name ? `${selectedCourse.clubName} - ${selectedCourse.name}` : selectedCourse.name)}
           </h2>
           <p className="text-sm text-muted-foreground">
             {selectedCourse.city}{selectedCourse.state ? `, ${selectedCourse.state}` : ''}

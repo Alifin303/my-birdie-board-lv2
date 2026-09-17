@@ -191,7 +191,7 @@ export default function Dashboard() {
         let parsedNames = { clubName: "Unknown Club", courseName: "Unknown Course" };
         
         if (round.courses && round.courses.name) {
-          parsedNames = parseCourseName(round.courses.name);
+          parsedNames = parseCourseName(courseDisplayName(round.courses.name));
         }
         
         return {

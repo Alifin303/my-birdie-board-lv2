@@ -61,8 +61,8 @@ export const SearchResults = ({
               }}
             >
               <div className="font-medium">{course.isUserAdded 
-                ? parseCourseName(course.name || '').clubName 
-                : course.club_name}
+                ? parseCourseName(courseDisplayName(course.name || '')).clubName 
+                : courseDisplayName(course.club_name || '')}
               </div>
               <div className="text-sm text-gray-600">
                 {course.isUserAdded 
