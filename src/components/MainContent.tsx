@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from './ui/button';
 import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle, UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from './ui/card';
-import { FeatureInfoModal, FeatureInfo } from './FeatureInfoModal';
 import { GOLFER_COUNT_LABEL } from '@/lib/site-stats';
 interface MainContentProps {
   onStartSignup: () => void;
@@ -11,111 +10,6 @@ interface MainContentProps {
 export const MainContent = ({
   onStartSignup
 }: MainContentProps) => {
-  const [selectedFeature, setSelectedFeature] = useState<FeatureInfo | null>(null);
-  const featureInfo: Record<string, FeatureInfo> = {
-    scorecards: {
-      title: "Upload & Store Your Scorecards",
-      icon: <Upload className="h-3 w-3 sm:h-4 sm:w-4 text-white" aria-hidden="true" />,
-      description: <div className="space-y-4 pt-2">
-          <p>Never lose track of your rounds again! With MyBirdieBoard, you can upload your scorecards effortlessly and keep a complete history of every round you play. Whether you're tracking personal bests or looking for trends in your game, your entire golf journey is stored in one place.</p>
-          
-          <ul className="space-y-2">
-            <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
-              <span className="flex-1">Log every round played</span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
-              <span className="flex-1">View past performances anytime</span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
-              <span className="flex-1">Keep all your scores safe and organized</span>
-            </li>
-          </ul>
-          
-          <p className="font-medium">Start tracking today and take control of your game!</p>
-        </div>
-    },
-    progress: {
-      title: "Visual Progress Tracking",
-      icon: <BarChart2 className="h-3 w-3 sm:h-4 sm:w-4 text-white" aria-hidden="true" />,
-      description: <div className="space-y-4 pt-2">
-          <p>See your improvement in real-time! MyBirdieBoard gives you in-depth insights into your game with easy-to-read charts and graphs. Spot trends, analyze your strengths, and identify areas to improve so you can play smarter, not harder.</p>
-          
-          <ul className="space-y-2">
-            <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
-              <span className="flex-1">Track scoring trends over time</span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
-              <span className="flex-1">Identify your strongest and weakest holes</span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
-              <span className="flex-1">Set goals and measure your progress</span>
-            </li>
-          </ul>
-          
-          <p className="font-medium">Know your game. Improve your game.</p>
-        </div>
-    },
-    handicap: {
-      title: "Handicap Generator",
-      icon: <Award className="h-3 w-3 sm:h-4 sm:w-4 text-white" aria-hidden="true" />,
-      description: <div className="space-y-4 pt-2">
-          <p>Get a reliable, data-driven handicap that reflects your true skill level. MyBirdieBoard calculates your handicap using official methods, so you always have an accurate measure of your performance—perfect for friendly competition or self-improvement.</p>
-          
-          <ul className="space-y-2">
-            <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
-              <span className="flex-1">Automatically updated after each round</span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
-              <span className="flex-1">See how your handicap improves over time</span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
-              <span className="flex-1">Play on a level field with golfers of all skill levels</span>
-            </li>
-          </ul>
-          
-          <p className="font-medium">Start tracking your handicap today!</p>
-        </div>
-    },
-    leaderboards: {
-      title: "Course Leaderboards",
-      icon: <Trophy className="h-3 w-3 sm:h-4 sm:w-4 text-white" aria-hidden="true" />,
-      description: <div className="space-y-4 pt-2">
-          <p>Golf is better with a little competition! MyBirdieBoard's Course Leaderboards let you compare your scores with other golfers at the same course—whether you play together or not. Climb the rankings, challenge your friends, and set new personal bests.</p>
-          
-          <ul className="space-y-2">
-            <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
-              <span className="flex-1">View leaderboard rankings by course</span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
-              <span className="flex-1">Compare gross and net scores</span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-accent mr-2 flex-shrink-0 w-5">🔹</span>
-              <span className="flex-1">Challenge friends, even if you're not playing together</span>
-            </li>
-          </ul>
-          
-          <p className="font-medium">Who will top the leaderboard? Join today and find out!</p>
-        </div>
-    }
-  };
-  const handleOpenFeatureInfo = (feature: FeatureInfo) => {
-    setSelectedFeature(feature);
-  };
-  const handleCloseFeatureInfo = () => {
-    setSelectedFeature(null);
-  };
   return <div className="w-full mx-auto flex flex-col justify-between min-h-screen">
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center text-left md:text-left px-[16px] py-px my-0">
         <div className="max-w-5xl animate-fade-in mb-4 px-4 mx-auto">
@@ -204,12 +98,12 @@ export const MainContent = ({
                     <div className="rounded-full p-2 w-fit mb-2 bg-[2f4c3d] bg-secondary-foreground">
                       <Upload className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
-                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Never Lose a Round Again</h3>
-                    <p className="mb-2 text-xs text-secondary-foreground">Save your scores in seconds after you play — no more lost scorecards, no forgotten rounds.</p>
+                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Your Personal Golf Passport</h3>
+                    <p className="mb-2 text-xs text-secondary-foreground">Every round drops a pin on your own course map — building a visual record of everywhere you've played, season after season. It's the kind of long-term golf memory a scorecard alone could never keep.</p>
                     <div className="mt-auto pt-1">
-                      <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.scorecards)} aria-label="Learn more about round archives" className="p-0 text-xs text-secondary-foreground">
-                        Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
-                      </Button>
+                      <Link to="/demo" aria-label="See your golf map in the demo" className="p-0 text-xs text-secondary-foreground hover:underline inline-flex items-center">
+                        See your golf map <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
+                      </Link>
                     </div>
                   </CardContent>
                 </Card>
@@ -219,12 +113,12 @@ export const MainContent = ({
                     <div className="rounded-full p-2 w-fit mb-2 bg-secondary-foreground bg-[2f4c3d]">
                       <BarChart2 className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
-                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">See exactly where you're gaining and losing strokes</h3>
-                    <p className="mb-2 text-xs text-secondary-foreground">Clear charts show trends, so you know what to practice next.</p>
+                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Log Any Round, Your Way</h3>
+                    <p className="mb-2 text-xs text-secondary-foreground">Full support for stroke play and Stableford scoring, plus advanced stats like putts, penalties, and greens in regulation — logged in seconds after you play, no phone needed on the course.</p>
                     <div className="mt-auto pt-1">
-                      <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.progress)} aria-label="Learn more about progress analytics" className="p-0 text-xs text-secondary-foreground">
-                        Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
-                      </Button>
+                      <Link to="/guides/how-to-track-golf-scores" aria-label="See how scoring works" className="p-0 text-xs text-secondary-foreground hover:underline inline-flex items-center">
+                        See how scoring works <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
+                      </Link>
                     </div>
                   </CardContent>
                 </Card>
@@ -234,12 +128,12 @@ export const MainContent = ({
                     <div className="rounded-full p-2 w-fit mb-2 bg-secondary-foreground">
                       <Award className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
-                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Track Real Improvement Over Time</h3>
-                    <p className="mb-2 text-xs text-secondary-foreground">Your handicap updates automatically as you add rounds, giving you a true picture of your progress.</p>
+                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Automatic WHS Handicap</h3>
+                    <p className="mb-2 text-xs text-secondary-foreground">Your handicap index updates automatically using the World Handicap System as you add rounds — a true, current picture of your game, no manual calculation required.</p>
                     <div className="mt-auto pt-1 bg-transparent">
-                      <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.handicap)} aria-label="Learn more about handicap tracking" className="p-0 text-xs text-secondary-foreground">
-                        Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
-                      </Button>
+                      <Link to="/guides/golf-handicap-calculator" aria-label="Learn how handicap tracking works" className="p-0 text-xs text-secondary-foreground hover:underline inline-flex items-center">
+                        Learn how handicap tracking works <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
+                      </Link>
                     </div>
                   </CardContent>
                 </Card>
@@ -249,12 +143,12 @@ export const MainContent = ({
                     <div className="rounded-full p-2 w-fit mb-2 bg-[2f4c3d] bg-secondary-foreground">
                       <Trophy className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
-                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">See Where You Stack Up</h3>
-                    <p className="mb-2 text-xs text-secondary-foreground">See your ranking at your home course and track your climb up the leaderboard.</p>
+                    <h3 className="text-sm font-bold mb-2 text-secondary-foreground">Gross and Net Leaderboards, Every Course</h3>
+                    <p className="mb-2 text-xs text-secondary-foreground">See exactly where you rank — gross and net — at every course you've played, not just your home club.</p>
                     <div className="mt-auto pt-1">
-                      <Button variant="link" onClick={() => handleOpenFeatureInfo(featureInfo.leaderboards)} aria-label="Learn more about leaderboards" className="p-0 text-xs text-secondary-foreground">
-                        Learn More <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
-                      </Button>
+                      <Link to="/blog/course-leaderboards" aria-label="See leaderboards in action" className="p-0 text-xs text-secondary-foreground hover:underline inline-flex items-center">
+                        See leaderboards in action <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
+                      </Link>
                     </div>
                   </CardContent>
                 </Card>
@@ -321,6 +215,6 @@ export const MainContent = ({
         </div>
       </section>
 
-      <FeatureInfoModal isOpen={!!selectedFeature} onClose={handleCloseFeatureInfo} feature={selectedFeature} />
+      
     </div>;
 };
