@@ -60,11 +60,33 @@ interface Round {
   handicap_at_posting?: number;
 }
 
-const BIRDIE_MILESTONES = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 75, 100, 150, 200, 250, 500];
-const EAGLE_MILESTONES = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 75, 100];
-const HOLE_IN_ONE_MILESTONES = [1, 5, 10, 15, 20, 25];
-const ROUND_MILESTONES = [1, 5, 10, 25, 50, 100, 250, 500];
-const COURSE_MILESTONES = [1, 5, 10, 25, 50, 100];
+// Count-based ladders never run out: once the fixed tiers are exhausted they
+// keep extending in fixed steps, so there is always a next trophy to chase.
+interface Ladder {
+  base: number[];
+  step: number;
+}
+
+const BIRDIE_LADDER: Ladder = { base: [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 75, 100], step: 50 };
+const EAGLE_LADDER: Ladder = { base: [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 75, 100], step: 25 };
+const HOLE_IN_ONE_LADDER: Ladder = { base: [1, 5, 10, 15, 20, 25], step: 5 };
+const ROUND_LADDER: Ladder = { base: [1, 5, 10, 25, 50, 100, 250, 500], step: 100 };
+const COURSE_LADDER: Ladder = { base: [1, 5, 10, 25, 50, 100], step: 25 };
+
+/** Tiers for a ladder, extended far enough to always sit ahead of `current`. */
+function ladderTiers(ladder: Ladder, current: number): number[] {
+  const tiers = [...ladder.base];
+  let next = tiers[tiers.length - 1];
+  while (next <= current + ladder.step) {
+    next += ladder.step;
+    tiers.push(next);
+  }
+  return tiers;
+}
+
+function isLadderTier(ladder: Ladder, value: number): boolean {
+  return ladderTiers(ladder, value).includes(value);
+}
 const SCORE_MILESTONES = [120, 110, 100, 90, 80, 70];
 const STABLEFORD_MILESTONES = [20, 25, 30, 32, 34, 36, 38, 40];
 const HOME_COURSE_MILESTONES = [5, 10, 25];
