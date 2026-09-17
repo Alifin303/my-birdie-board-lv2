@@ -14,7 +14,8 @@ export type MilestoneType =
   | 'course_best'
   | 'putts'
   | 'clean_card'
-  | 'gir';
+  | 'gir'
+  | 'bucket_list';
 
 export interface Milestone {
   id: string;
@@ -765,6 +766,7 @@ export function getMilestoneIcon(type: MilestoneType): string {
     case 'putts': return '🥅';
     case 'clean_card': return '🧼';
     case 'gir': return '🎪';
+    case 'bucket_list': return '🗺️';
     default: return '✨';
   }
 }
@@ -785,6 +787,7 @@ export function getMilestoneLabel(type: MilestoneType): string {
     case 'putts': return 'Putting';
     case 'clean_card': return 'Clean Cards';
     case 'gir': return 'Greens in Regulation';
+    case 'bucket_list': return 'Bucket List';
     default: return 'Other';
   }
 }

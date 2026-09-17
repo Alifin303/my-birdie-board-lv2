@@ -15,12 +15,16 @@ import { LeaderboardBanner } from "@/components/dashboard/LeaderboardBanner";
 import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
 import { useToast } from "@/hooks/use-toast";
 import { clearSubscriptionCache } from "@/integrations/supabase/subscription/subscription-utils";
-import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
 import { isSubscriptionValid } from "@/integrations/supabase/subscription/subscription-utils";
 import { HandicapUnlockNudge } from "@/components/dashboard/HandicapUnlockNudge";
+import { BucketList } from "@/components/dashboard/BucketList";
+import { useBucketList } from "@/hooks/use-bucket-list";
+import { ShareMilestoneDialog } from "@/components/milestones/ShareMilestoneDialog";
+import { Milestone } from "@/utils/milestonesCalculator";
+import { BUCKET_LIST_CROSSED_EVENT, BucketListCrossedDetail } from "@/lib/bucket-list";
 
-const CoursesPlayedMap = lazy(() => import("@/components/dashboard/CoursesPlayedMap"));
+const CoursesMapPanel = lazy(() => import("@/components/dashboard/CoursesMapPanel"));
 
 
 interface Round {
@@ -64,7 +68,27 @@ export default function Dashboard() {
   const [roundFilter, setRoundFilter] = useState<'all' | '9hole' | '18hole'>('all');
   const [scoreMode, setScoreMode] = useState<'stroke' | 'stableford'>('stroke');
   const [processingStripeSession, setProcessingStripeSession] = useState(false);
-  const [isMapOpen, setIsMapOpen] = useState(false);
+  const [crossedMilestone, setCrossedMilestone] = useState<Milestone | null>(null);
+  const { bucketList } = useBucketList();
+
+  // Celebrate when a round is logged at a bucket-list course.
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<BucketListCrossedDetail>).detail;
+      if (!detail) return;
+      const name = courseDisplayName(detail.courseName);
+      setCrossedMilestone({
+        id: `bucket-${detail.courseId}-${Date.now()}`,
+        type: 'bucket_list',
+        title: `Crossed off your bucket list: ${name}!`,
+        description: `You've now played ${name} — it's moved into Your Courses.`,
+        date: new Date().toISOString(),
+      });
+    };
+    window.addEventListener(BUCKET_LIST_CROSSED_EVENT, handler);
+    return () => window.removeEventListener(BUCKET_LIST_CROSSED_EVENT, handler);
+  }, []);
+  
   
   const sessionId = searchParams.get('session_id');
   const subscriptionStatus = searchParams.get('subscription_status');
@@ -241,6 +265,20 @@ export default function Dashboard() {
     }
   }, [isModalOpen, queryClient]);
 
+  const mapRounds = (userRounds || []).map((r) => ({
+    course_id: (r as any).course_id ?? r.courses?.id ?? 0,
+    courses: r.courses
+      ? {
+          id: r.courses.id,
+          name: r.courses.name,
+          city: r.courses.city ?? null,
+          state: r.courses.state ?? null,
+        }
+      : null,
+  }));
+
+  const playedCourseIds = Array.from(new Set(mapRounds.map((r) => r.course_id).filter(Boolean)));
+
   const renderDashboard = () => {
     if (processingStripeSession) {
       return (
@@ -356,6 +394,28 @@ export default function Dashboard() {
               userRounds={userRounds}
               handicapIndex={handicapFromProfile}
             />
+
+            <div className="space-y-3 sm:space-y-4 bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-semibold text-primary flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  Your Golf Map
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Every course you've played, plus the ones still on your bucket list.
+                </p>
+              </div>
+              <Suspense
+                fallback={
+                  <div className="h-[420px] sm:h-[520px] w-full animate-pulse rounded-lg border bg-muted" />
+                }
+              >
+                <CoursesMapPanel
+                  userRounds={mapRounds}
+                  bucketCourses={bucketList}
+                />
+              </Suspense>
+            </div>
           </>
         )}
         
@@ -369,19 +429,7 @@ export default function Dashboard() {
               /> 
             : (
               <>
-                <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <h2 className="text-xl sm:text-2xl font-semibold text-primary">Your Courses</h2>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsMapOpen(true)}
-                    disabled={!userRounds || userRounds.length === 0}
-                    className="gap-1.5"
-                  >
-                    <MapPin className="h-4 w-4" />
-                    View Map
-                  </Button>
-                </div>
+                <h2 className="text-xl sm:text-2xl font-semibold text-primary">Your Courses</h2>
                 <CourseStatsTable 
                   userRounds={userRounds}
                   scoreType={scoreType}
@@ -393,6 +441,12 @@ export default function Dashboard() {
             )
           }
         </div>
+
+        {!selectedCourseId && (
+          <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
+            <BucketList playedCourseIds={playedCourseIds} />
+          </div>
+        )}
       </div>
     );
   };
@@ -421,25 +475,13 @@ export default function Dashboard() {
         handicapIndex={profile?.handicap || 0}
       />
 
-      {isMapOpen && (
-        <Suspense fallback={null}>
-          <CoursesPlayedMap
-            open={isMapOpen}
-            onOpenChange={setIsMapOpen}
-            userRounds={(userRounds || []).map((r) => ({
-              course_id: (r as any).course_id ?? r.courses?.id ?? 0,
-              courses: r.courses
-                ? {
-                    id: r.courses.id,
-                    name: r.courses.name,
-                    city: r.courses.city,
-                    state: r.courses.state,
-                  }
-                : null,
-            }))}
-          />
-        </Suspense>
-      )}
+      <ShareMilestoneDialog
+        milestone={crossedMilestone}
+        open={!!crossedMilestone}
+        onOpenChange={(open) => {
+          if (!open) setCrossedMilestone(null);
+        }}
+      />
     </div>
     </>
   );
