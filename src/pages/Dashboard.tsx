@@ -23,7 +23,6 @@ import { useBucketList } from "@/hooks/use-bucket-list";
 import { ShareMilestoneDialog } from "@/components/milestones/ShareMilestoneDialog";
 import { Milestone } from "@/utils/milestonesCalculator";
 import { BUCKET_LIST_CROSSED_EVENT, BucketListCrossedDetail } from "@/lib/bucket-list";
-import { courseDisplayName } from "@/lib/course-seo";
 
 const CoursesMapPanel = lazy(() => import("@/components/dashboard/CoursesMapPanel"));
 
