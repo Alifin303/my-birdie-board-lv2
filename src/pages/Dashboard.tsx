@@ -1,3 +1,4 @@
+import { courseDisplayName } from "@/lib/course-seo";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Head } from "vite-react-ssg";
 import { useQuery, useQueryClient } from "@tanstack/react-query";

@@ -1,4 +1,5 @@
 
+import { courseDisplayName } from "@/lib/course-seo";
 import { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown, Flag } from "lucide-react";
 import { CourseStats, Round } from "./types";

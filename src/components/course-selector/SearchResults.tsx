@@ -1,4 +1,5 @@
 
+import { courseDisplayName } from "@/lib/course-seo";
 import React from 'react';
 import { GolfCourse } from '@/services/golfCourseApi';
 import { parseCourseName } from '@/integrations/supabase/client';

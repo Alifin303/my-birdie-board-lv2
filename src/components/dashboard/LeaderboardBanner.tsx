@@ -1,3 +1,4 @@
+import { courseDisplayName } from "@/lib/course-seo";
 import { useState, useMemo } from "react";
 import { Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";

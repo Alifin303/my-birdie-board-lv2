@@ -1,3 +1,4 @@
+import { courseDisplayName } from "@/lib/course-seo";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, MapPin } from "lucide-react";

@@ -1,3 +1,4 @@
+import { courseDisplayName } from "@/lib/course-seo";
 import React, { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
