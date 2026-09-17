@@ -250,7 +250,9 @@ const ScoreProgressionChart = ({
             </div>
           )}
         </div>
+        </CollapsibleContent>
       </div>
+      <CollapsibleContent>
       <div className="h-80 mb-2">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
