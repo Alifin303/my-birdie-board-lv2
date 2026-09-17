@@ -160,6 +160,9 @@ const ScoreProgressionChart = ({
             <CollapseToggle open={isOpen} label="score progression" />
           </CollapsibleTrigger>
         </div>
+        <p className="text-sm sm:text-base text-foreground font-medium">
+          See how your scores have changed round by round — switch between gross and net, stroke or Stableford, and 9 or 18 holes.
+        </p>
 
         <CollapsibleContent>
         

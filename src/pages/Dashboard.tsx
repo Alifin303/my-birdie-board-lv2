@@ -411,10 +411,11 @@ export default function Dashboard() {
                     <CollapseToggle open={mapOpen} label="your golf map" />
                   </CollapsibleTrigger>
                 </div>
+                <p className="text-sm sm:text-base text-foreground font-medium">
+                  Every course you've played, plus the ones still on your bucket list.
+                </p>
                 <CollapsibleContent className="space-y-3 sm:space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    Every course you've played, plus the ones still on your bucket list.
-                  </p>
+
                   <Suspense
                     fallback={
                       <div className="h-[420px] sm:h-[520px] w-full animate-pulse rounded-lg border bg-muted" />
@@ -450,7 +451,11 @@ export default function Dashboard() {
                     <CollapseToggle open={coursesOpen} label="your courses" />
                   </CollapsibleTrigger>
                 </div>
+                <p className="text-sm sm:text-base text-foreground font-medium">
+                  Every course you've logged a round at, with your scoring record at each one.
+                </p>
                 <CollapsibleContent className="space-y-3 sm:space-y-4">
+
                   <CourseStatsTable 
                     userRounds={userRounds}
                     scoreType={scoreType}

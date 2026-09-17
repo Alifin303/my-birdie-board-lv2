@@ -38,6 +38,9 @@ export function BucketList({ playedCourseIds }: BucketListProps) {
           </CollapsibleTrigger>
         </div>
       </div>
+      <p className="text-sm sm:text-base text-foreground font-medium">
+        Courses you'd love to play one day — each shows as a red pin on your map until you log a round there.
+      </p>
 
       <CollapsibleContent className="space-y-3 sm:space-y-4">
 

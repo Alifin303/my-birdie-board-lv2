@@ -58,6 +58,9 @@ export const AdvancedStats = ({ userRounds, isLoading }: AdvancedStatsProps) => 
           <CollapseToggle open={isOpen} label="advanced statistics" />
         </CollapsibleTrigger>
       </div>
+      <p className="mt-1 text-sm sm:text-base text-foreground font-medium">
+        A closer look at your game — putting, greens in regulation, fairways hit and penalties, from the details you track with each round.
+      </p>
       
       <CollapsibleContent className="mt-4">
         {hasAdvancedStats ? (
