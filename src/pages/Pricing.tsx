@@ -6,15 +6,10 @@ import { SignUpDialog } from "@/components/SignUpDialog";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { AlertTriangle, Check, User } from "lucide-react";
+import { GOLFER_COUNT_LABEL } from "@/lib/site-stats";
+import { AlertTriangle, Check, ChevronDown, User } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { BreadcrumbNav } from "@/components/BreadcrumbNav";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 
 const Pricing = () => {
   const [showSignup, setShowSignup] = useState(false);
@@ -45,20 +40,8 @@ const Pricing = () => {
       a: "Free is a 4-round account: create it without a card, log up to 4 rounds, and view them whenever you like. Pro (£2.99/month, 30-day free trial) is for golfers who want to keep going — unlimited rounds and automatic WHS handicap calculation, which needs a rolling history of scores to stay accurate.",
     },
     {
-      q: "What happens the moment I add a 5th round?",
-      a: "Your account switches from the free 4-round tier to the subscription tier. From that point, an active Pro subscription is required to view any of your rounds when you log in — including the original 4, not just the rounds beyond 4. The 30-day free trial covers this, so you can add a 5th round and see your handicap without being charged during those 30 days.",
-    },
-    {
-      q: "Why is the free tier capped at 4 rounds?",
+      q: "Why does the free plan cap at 4 rounds?",
       a: "Four rounds is enough to see your scorecards, stats and leaderboards and decide whether MyBirdieBoard is for you. Beyond that, tracking is only genuinely useful when it's continuous — a full, ongoing history is what Pro pays for.",
-    },
-    {
-      q: "What happens to my rounds if I don't subscribe after the trial?",
-      a: "Nothing is deleted. Your rounds stay safely in your account. But because the account holds 5 or more rounds, you'll need an active subscription to view your round history again — including your first 4 rounds. Resubscribe at any time and everything is exactly as you left it.",
-    },
-    {
-      q: "How long is the free trial?",
-      a: "30 days. You can cancel any time before it ends and you won't be charged. There is no 7-day trial — the trial is 30 days.",
     },
     {
       q: "Can I cancel any time?",
@@ -67,6 +50,10 @@ const Pricing = () => {
     {
       q: "Do I need to use my phone on the course?",
       a: "No. MyBirdieBoard is designed for post-round entry. Play distraction-free and log your scores afterwards.",
+    },
+    {
+      q: "What happens to my rounds if I don't upgrade?",
+      a: "Nothing is deleted. Your rounds stay safely in your account. If your account reaches 5 or more rounds, you'll need an active Pro subscription to view your round history again — including your first 4 rounds. Resubscribe at any time and everything will be exactly as you left it.",
     },
     {
       q: "What payment methods do you accept?",
@@ -231,21 +218,24 @@ const Pricing = () => {
           <section className="bg-muted/30 py-12">
             <div className="container mx-auto px-4 max-w-3xl">
               <h2 className="text-3xl font-bold text-center mb-8">Pricing FAQ</h2>
-              <Accordion type="single" collapsible className="w-full">
-                {faqs.map((f, i) => (
-                  <AccordionItem key={i} value={`item-${i}`}>
-                    <AccordionTrigger className="text-left">{f.q}</AccordionTrigger>
-                    <AccordionContent>{f.a}</AccordionContent>
-                  </AccordionItem>
+              <div className="w-full">
+                {faqs.map((f) => (
+                  <details key={f.q} className="group border-b border-border last:border-b-0">
+                    <summary className="flex cursor-pointer list-none items-center justify-between py-4 text-left font-medium text-foreground [&::-webkit-details-marker]:hidden">
+                      <span>{f.q}</span>
+                      <ChevronDown className="ml-4 h-4 w-4 shrink-0 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+                    </summary>
+                    <div className="pb-6 text-muted-foreground">{f.a}</div>
+                  </details>
                 ))}
-              </Accordion>
+              </div>
             </div>
           </section>
 
           <section className="container mx-auto px-4 py-16 text-center">
             <h2 className="text-3xl font-bold mb-4">Ready to track your golf?</h2>
             <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-              Join golfers using MyBirdieBoard to log rounds, calculate handicaps, and see real improvement over time.
+              Join {GOLFER_COUNT_LABEL} golfers using MyBirdieBoard to log rounds, calculate handicaps, and see real improvement over time.
             </p>
             <Button size="lg" onClick={() => setShowSignup(true)}>
               Create your free account

@@ -8,14 +8,14 @@ import { courseDisplayName, staticCourses } from "@/lib/course-seo";
 
 interface Course {
   id: number;
-  name: string;
+  displayName: string;
   city?: string;
   state?: string;
 }
 
 const initialCourses: Course[] = staticCourses.map((c) => ({
   id: c.id,
-  name: c.name,
+  displayName: courseDisplayName(c.name),
   city: c.city ?? undefined,
   state: c.state ?? undefined,
 }));
@@ -38,7 +38,7 @@ const Courses = () => {
         setCourses(
           data.map((c: any) => ({
             id: c.id,
-            name: c.name,
+            displayName: courseDisplayName(c.name),
             city: c.city ?? undefined,
             state: c.state ?? undefined,
           }))
@@ -102,7 +102,7 @@ const Courses = () => {
               {courses.map((course) => (
                 <div key={course.id} className="bg-card rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                   <Link to={`/courses/${course.id}`} className="block p-6">
-                    <h2 className="text-xl font-semibold mb-2 line-clamp-2">{courseDisplayName(course.name)}</h2>
+                    <h2 className="text-xl font-semibold mb-2 line-clamp-2">{course.displayName}</h2>
                     
                     {(course.city || course.state) && (
                       <p className="text-muted-foreground">

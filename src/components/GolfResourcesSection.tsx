@@ -29,7 +29,7 @@ export const GolfResourcesSection = () => {
     },
     {
       title: "Best Golf Score Apps",
-      description: "Compare the top golf score tracking apps of 2024",
+      description: "Compare the top golf score tracking apps",
       icon: Target,
       link: "/compare/best-golf-score-tracking-apps",
       keywords: "golf apps, score tracking apps"

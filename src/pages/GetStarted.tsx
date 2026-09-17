@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { SignUpDialog } from "@/components/SignUpDialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { GOLFER_COUNT_LABEL } from "@/lib/site-stats";
 import {
   BarChart3,
   Target,
@@ -71,7 +72,7 @@ const GetStarted = () => {
           <div className="relative max-w-5xl mx-auto px-4 py-16 sm:py-24 text-center">
             <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium mb-6">
               <Trophy className="h-4 w-4" />
-              Trusted by 1,000+ golfers
+              Trusted by {GOLFER_COUNT_LABEL} golfers
             </div>
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6 tracking-tight">
               Track Your Golf Scores.
@@ -370,7 +371,7 @@ const GetStarted = () => {
               Ready to Take Your Game Seriously?
             </h2>
             <p className="text-lg text-primary-foreground/85 mb-8 max-w-xl mx-auto leading-relaxed">
-              Join 1,000+ golfers who are tracking their scores, lowering their
+              Join {GOLFER_COUNT_LABEL} golfers who are tracking their scores, lowering their
               handicaps, and competing with friends — all without distractions on the
               course.
             </p>

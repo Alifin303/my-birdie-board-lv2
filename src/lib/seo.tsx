@@ -168,7 +168,7 @@ export const SEO_PAGES = {
     description: "Complete guide to tracking golf scores effectively. Digital vs paper, best practices, and improvement tips.",
   },
   bestApps: {
-    title: "Best Golf Score Apps 2025 | MyBirdieBoard",
+    title: "Best Golf Score Apps | MyBirdieBoard",
     description: "Compare the best golf score tracking apps. Features, pricing, and which app is right for your game.",
   },
   analytics: {

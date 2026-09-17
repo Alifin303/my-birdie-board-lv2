@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 const BestGolfScoreTrackingApps = () => {
   return (
     <GuideLayout
-      title="Best Golf Score Tracking Apps (And Which One Is Right for You) | MyBirdieBoard"
+      title="Best Golf Score Apps | MyBirdieBoard"
       description="Compare the best golf score tracking apps. From GPS-based tools to post-round trackers, find the right app for how you actually play golf."
       canonicalUrl="https://mybirdieboard.com/compare/best-golf-score-tracking-apps"
       keywords="best golf score tracking apps, golf score app, golf tracker app, golf handicap app, golfshake alternative, post round golf tracker"
