@@ -15,12 +15,17 @@ import { LeaderboardBanner } from "@/components/dashboard/LeaderboardBanner";
 import { calculateStats, calculateCourseStats } from "@/utils/statsCalculator";
 import { useToast } from "@/hooks/use-toast";
 import { clearSubscriptionCache } from "@/integrations/supabase/subscription/subscription-utils";
-import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
 import { isSubscriptionValid } from "@/integrations/supabase/subscription/subscription-utils";
 import { HandicapUnlockNudge } from "@/components/dashboard/HandicapUnlockNudge";
+import { BucketList } from "@/components/dashboard/BucketList";
+import { useBucketList } from "@/hooks/use-bucket-list";
+import { ShareMilestoneDialog } from "@/components/milestones/ShareMilestoneDialog";
+import { Milestone } from "@/utils/milestonesCalculator";
+import { BUCKET_LIST_CROSSED_EVENT, BucketListCrossedDetail } from "@/lib/bucket-list";
+import { courseDisplayName } from "@/lib/course-seo";
 
-const CoursesPlayedMap = lazy(() => import("@/components/dashboard/CoursesPlayedMap"));
+const CoursesMapPanel = lazy(() => import("@/components/dashboard/CoursesMapPanel"));
 
 
 interface Round {
