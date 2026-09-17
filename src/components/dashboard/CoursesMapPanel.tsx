@@ -198,6 +198,35 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
 
   return (
     <div className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div
+          className="inline-flex rounded-md border p-0.5"
+          role="group"
+          aria-label="Filter map pins"
+        >
+          {FILTER_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setFilter(opt.value)}
+              aria-pressed={filter === opt.value}
+              className={`rounded-[5px] px-3 py-1.5 text-xs font-medium transition-colors ${
+                filter === opt.value
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        {withoutCoords.length > 0 && !loading && (
+          <span className="text-xs text-muted-foreground">
+            {withoutCoords.length} course{withoutCoords.length === 1 ? "" : "s"} not shown — no
+            location on file.
+          </span>
+        )}
+      </div>
       <div className="relative h-[420px] sm:h-[520px] w-full overflow-hidden rounded-lg border bg-muted">
         {courses.length === 0 && !loading ? (
           <div className="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground">
