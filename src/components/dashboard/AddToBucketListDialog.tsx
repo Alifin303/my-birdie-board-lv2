@@ -55,21 +55,12 @@ export function AddToBucketListDialog({ open, onOpenChange }: AddToBucketListDia
     }
   }, [toast]);
 
-  // Auto-search as the user types (debounced), skipping the search the
-  // explicit button/Enter already triggered.
-  useEffect(() => {
-    if (!debouncedQuery.trim() || debouncedQuery === lastAutoSearch.current) return;
-    lastAutoSearch.current = debouncedQuery;
-    runSearch(debouncedQuery);
-  }, [debouncedQuery, runSearch]);
-
   useEffect(() => {
     if (!open) {
       setSearchQuery("");
       setResults([]);
       setSearched(false);
       setManualCourseOpen(false);
-      lastAutoSearch.current = "";
     }
   }, [open]);
 
