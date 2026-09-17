@@ -12,6 +12,100 @@ interface CourseScorecardProps {
 
 const formatToPar = (difference: number) => difference === 0 ? "E" : difference > 0 ? `+${difference}` : `${difference}`;
 
+interface ScorecardNineProps {
+  title: string;
+  startIndex: number;
+  pars: number[];
+  scores: string[];
+  updateScore: (index: number, value: string) => void;
+}
+
+const ScorecardNine = ({ title, startIndex, pars, scores, updateScore }: ScorecardNineProps) => {
+  const sectionScores = scores.slice(startIndex, startIndex + pars.length);
+  const totalPar = pars.reduce((total, par) => total + par, 0);
+  const totalScore = sectionScores.reduce(
+    (total, score) => total + (Number.parseInt(score, 10) || 0),
+    0
+  );
+
+  return (
+    <div>
+      <h3 className="mb-2 font-medium text-primary">{title}</h3>
+      <div className="overflow-x-auto rounded-md border border-border shadow-sm">
+        <table className="w-full min-w-[640px] border-collapse">
+          <thead>
+            <tr className="border-b border-border bg-secondary/20">
+              <th scope="col" className="w-16 px-2 py-2 text-left text-sm font-medium text-primary">
+                Hole
+              </th>
+              {pars.map((_, index) => (
+                <th
+                  key={`hole-${startIndex + index + 1}`}
+                  scope="col"
+                  className="px-1 py-2 text-center text-sm font-medium text-primary"
+                >
+                  {startIndex + index + 1}
+                </th>
+              ))}
+              <th scope="col" className="w-16 px-2 py-2 text-center text-sm font-medium text-primary">
+                Total
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="border-b border-border">
+              <th scope="row" className="px-2 py-2 text-left text-sm font-medium text-primary">
+                Par
+              </th>
+              {pars.map((par, index) => (
+                <td key={`par-${startIndex + index + 1}`} className="px-1 py-2 text-center">
+                  <span className="mx-auto flex h-7 w-7 items-center justify-center rounded-md border border-secondary/60 bg-secondary/40 font-medium text-primary">
+                    {par}
+                  </span>
+                </td>
+              ))}
+              <td className="px-2 py-2 text-center font-medium text-primary">{totalPar}</td>
+            </tr>
+            <tr>
+              <th scope="row" className="px-2 py-2 text-left text-sm font-medium text-primary">
+                Score
+              </th>
+              {pars.map((par, index) => {
+                const scoreIndex = startIndex + index;
+                const score = scores[scoreIndex] ?? "";
+                const strokes = Number.parseInt(score, 10);
+                const difference = strokes > 0 ? strokes - par : null;
+
+                return (
+                  <td key={`score-${scoreIndex + 1}`} className="px-1 py-2 text-center align-top">
+                    <Input
+                      id={`course-hole-${scoreIndex + 1}`}
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      max={20}
+                      value={score}
+                      onChange={(event) => updateScore(scoreIndex, event.target.value)}
+                      className="score-input mx-auto h-8 w-10 px-1 text-center"
+                      aria-label={`Score for hole ${scoreIndex + 1}`}
+                    />
+                    {difference !== null && (
+                      <span className={`mx-auto mt-1 flex h-6 min-w-6 items-center justify-center rounded-full px-1 text-xs font-semibold ${difference > 0 ? "bg-destructive/10 text-destructive" : difference < 0 ? "bg-success/20 text-success" : "bg-secondary/40 text-primary"}`}>
+                        {formatToPar(difference)}
+                      </span>
+                    )}
+                  </td>
+                );
+              })}
+              <td className="px-2 py-2 text-center align-top font-medium text-primary">{totalScore}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
 export const CourseScorecard = ({ courseName, holeCount, coursePar, holePars }: CourseScorecardProps) => {
   const [scores, setScores] = useState<string[]>(() => Array(holeCount).fill(""));
   const hasCompletePars = holePars?.length === holeCount && holePars.every((par) => par >= 2 && par <= 6);
@@ -56,42 +150,47 @@ export const CourseScorecard = ({ courseName, holeCount, coursePar, holePars }: 
         </div>
       </div>
 
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-        {Array.from({ length: holeCount }, (_, index) => {
-          const par = hasCompletePars ? holePars[index] : null;
-          const strokes = Number.parseInt(scores[index] ?? "", 10);
-          const difference = par && strokes > 0 ? strokes - par : null;
-
-          return (
-          <div key={index} className="text-center min-h-[108px]">
-            <label htmlFor={`course-hole-${index + 1}`} className="block text-sm font-medium mb-1">
-              Hole {index + 1}
-            </label>
-            {par && (
-              <span className="inline-flex items-center justify-center min-w-8 h-6 px-2 mb-2 rounded-md border border-secondary/60 bg-secondary/40 text-xs font-medium text-primary">
-                Par {par}
-              </span>
-            )}
-            <Input
-              id={`course-hole-${index + 1}`}
-              type="number"
-              inputMode="numeric"
-              min={1}
-              max={20}
-              value={scores[index] ?? ""}
-              onChange={(event) => updateScore(index, event.target.value)}
-              className="score-input text-center"
-              aria-label={`Score for hole ${index + 1}`}
+      {hasCompletePars ? (
+        <div className="space-y-6">
+          <ScorecardNine
+            title="Front Nine"
+            startIndex={0}
+            pars={holePars.slice(0, Math.min(9, holeCount))}
+            scores={scores}
+            updateScore={updateScore}
+          />
+          {holeCount > 9 && (
+            <ScorecardNine
+              title="Back Nine"
+              startIndex={9}
+              pars={holePars.slice(9, 18)}
+              scores={scores}
+              updateScore={updateScore}
             />
-            {difference !== null && (
-              <span className={`inline-flex items-center justify-center min-w-7 h-7 mt-2 rounded-full text-xs font-semibold ${difference > 0 ? "bg-destructive/10 text-destructive" : difference < 0 ? "bg-success/20 text-success" : "bg-secondary/40 text-primary"}`}>
-                {formatToPar(difference)}
-              </span>
-            )}
-          </div>
-          );
-        })}
-      </div>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+          {Array.from({ length: holeCount }, (_, index) => (
+            <div key={index} className="text-center">
+              <label htmlFor={`course-hole-${index + 1}`} className="mb-1 block text-sm font-medium">
+                Hole {index + 1}
+              </label>
+              <Input
+                id={`course-hole-${index + 1}`}
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={20}
+                value={scores[index] ?? ""}
+                onChange={(event) => updateScore(index, event.target.value)}
+                className="score-input text-center"
+                aria-label={`Score for hole ${index + 1}`}
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       {hasScore && (
         <div className="mt-6 bg-secondary p-5 rounded-lg text-center">
