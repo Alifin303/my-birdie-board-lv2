@@ -265,6 +265,20 @@ export default function Dashboard() {
     }
   }, [isModalOpen, queryClient]);
 
+  const mapRounds = (userRounds || []).map((r) => ({
+    course_id: (r as any).course_id ?? r.courses?.id ?? 0,
+    courses: r.courses
+      ? {
+          id: r.courses.id,
+          name: r.courses.name,
+          city: r.courses.city ?? null,
+          state: r.courses.state ?? null,
+        }
+      : null,
+  }));
+
+  const playedCourseIds = Array.from(new Set(mapRounds.map((r) => r.course_id).filter(Boolean)));
+
   const renderDashboard = () => {
     if (processingStripeSession) {
       return (
