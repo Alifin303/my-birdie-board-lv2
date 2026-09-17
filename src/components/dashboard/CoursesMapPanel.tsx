@@ -65,9 +65,18 @@ function FitBounds({ courses }: { courses: MapCourse[] }) {
   return null;
 }
 
+type MapFilter = "all" | "played" | "bucket";
+
+const FILTER_OPTIONS: Array<{ value: MapFilter; label: string }> = [
+  { value: "played", label: "Played" },
+  { value: "bucket", label: "Bucket list" },
+  { value: "all", label: "All" },
+];
+
 export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: CoursesMapPanelProps) {
   const [loading, setLoading] = useState(false);
   const [courses, setCourses] = useState<MapCourse[]>([]);
+  const [filter, setFilter] = useState<MapFilter>("all");
   const fetchedRef = useRef<string>("");
 
   // Unique played courses with round counts
@@ -178,8 +187,10 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
     };
   }, [signature, courseSummaries, bucketOnly]);
 
-  const withCoords = courses.filter((c) => c.latitude != null && c.longitude != null);
-  const withoutCoords = courses.filter((c) => c.latitude == null || c.longitude == null);
+  const visibleCourses =
+    filter === "all" ? courses : courses.filter((c) => c.kind === filter);
+  const withCoords = visibleCourses.filter((c) => c.latitude != null && c.longitude != null);
+  const withoutCoords = visibleCourses.filter((c) => c.latitude == null || c.longitude == null);
 
   const initialCenter: [number, number] = withCoords[0]
     ? [withCoords[0].latitude as number, withCoords[0].longitude as number]
@@ -187,10 +198,43 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
 
   return (
     <div className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div
+          className="inline-flex rounded-md border p-0.5"
+          role="group"
+          aria-label="Filter map pins"
+        >
+          {FILTER_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setFilter(opt.value)}
+              aria-pressed={filter === opt.value}
+              className={`rounded-[5px] px-3 py-1.5 text-xs font-medium transition-colors ${
+                filter === opt.value
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        {withoutCoords.length > 0 && !loading && (
+          <span className="text-xs text-muted-foreground">
+            {withoutCoords.length} course{withoutCoords.length === 1 ? "" : "s"} not shown — no
+            location on file.
+          </span>
+        )}
+      </div>
       <div className="relative h-[420px] sm:h-[520px] w-full overflow-hidden rounded-lg border bg-muted">
-        {courses.length === 0 && !loading ? (
+        {visibleCourses.length === 0 && !loading ? (
           <div className="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground">
-            Log a round or add a bucket-list course to start building your map.
+            {filter === "bucket"
+              ? "No bucket-list courses yet — add one from your bucket list section."
+              : filter === "played"
+                ? "No courses played yet — log a round to drop your first pin."
+                : "Log a round or add a bucket-list course to start building your map."}
           </div>
         ) : (
           <MapContainer
@@ -253,12 +297,6 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
           />
           On your bucket list
         </span>
-        {withoutCoords.length > 0 && !loading && (
-          <span>
-            {withoutCoords.length} course{withoutCoords.length === 1 ? "" : "s"} not shown — no location
-            on file.
-          </span>
-        )}
       </div>
     </div>
   );
