@@ -185,7 +185,7 @@ function analyse(rounds: Round[]): { milestones: Milestone[]; counters: Counters
 
         if (strokes === 1) {
           counters.aces++;
-          if (HOLE_IN_ONE_MILESTONES.includes(counters.aces)) {
+          if (isLadderTier(HOLE_IN_ONE_LADDER, counters.aces)) {
             milestones.push({
               id: `hole-in-one-${counters.aces}`,
               type: 'hole_in_one',
@@ -200,7 +200,7 @@ function analyse(rounds: Round[]): { milestones: Milestone[]; counters: Counters
 
         if (diff <= -2 && strokes !== 1) {
           counters.eagles++;
-          if (EAGLE_MILESTONES.includes(counters.eagles)) {
+          if (isLadderTier(EAGLE_LADDER, counters.eagles)) {
             milestones.push({
               id: `eagle-${counters.eagles}`,
               type: 'eagle',
@@ -215,7 +215,7 @@ function analyse(rounds: Round[]): { milestones: Milestone[]; counters: Counters
 
         if (diff === -1) {
           counters.birdies++;
-          if (BIRDIE_MILESTONES.includes(counters.birdies)) {
+          if (isLadderTier(BIRDIE_LADDER, counters.birdies)) {
             milestones.push({
               id: `birdie-${counters.birdies}`,
               type: 'birdie',
@@ -248,7 +248,7 @@ function analyse(rounds: Round[]): { milestones: Milestone[]; counters: Counters
     // ---- Rounds played -----------------------------------------------
     const roundNumber = index + 1;
     counters.rounds = roundNumber;
-    if (ROUND_MILESTONES.includes(roundNumber)) {
+    if (isLadderTier(ROUND_LADDER, roundNumber)) {
       milestones.push({
         id: `round-${roundNumber}`,
         type: 'round',
@@ -264,7 +264,7 @@ function analyse(rounds: Round[]): { milestones: Milestone[]; counters: Counters
       if (!coursesVisited.has(courseId)) {
         coursesVisited.add(courseId);
         const courseCount = coursesVisited.size;
-        if (COURSE_MILESTONES.includes(courseCount)) {
+        if (isLadderTier(COURSE_LADDER, courseCount)) {
           milestones.push({
             id: `course-${courseCount}`,
             type: 'course',
@@ -571,11 +571,11 @@ export function getMilestoneProgress(
     });
   };
 
-  addCountSeries('birdie', BIRDIE_MILESTONES, counters.birdies, (t) => `birdie-${t}`, (t) => (t === 1 ? 'First Birdie' : `${getOrdinal(t)} Birdie`), 'birdie');
-  addCountSeries('eagle', EAGLE_MILESTONES, counters.eagles, (t) => `eagle-${t}`, (t) => (t === 1 ? 'First Eagle' : `${getOrdinal(t)} Eagle`), 'eagle');
-  addCountSeries('hole_in_one', HOLE_IN_ONE_MILESTONES, counters.aces, (t) => `hole-in-one-${t}`, (t) => (t === 1 ? 'First Hole-in-One!' : `${getOrdinal(t)} Hole-in-One`), 'ace');
-  addCountSeries('round', ROUND_MILESTONES, counters.rounds, (t) => `round-${t}`, (t) => (t === 1 ? 'First Round' : `${getOrdinal(t)} Round`), 'round');
-  addCountSeries('course', COURSE_MILESTONES, counters.courses, (t) => `course-${t}`, (t) => (t === 1 ? 'First Course' : `${getOrdinal(t)} Course`), 'course');
+  addCountSeries('birdie', ladderTiers(BIRDIE_LADDER, counters.birdies), counters.birdies, (t) => `birdie-${t}`, (t) => (t === 1 ? 'First Birdie' : `${getOrdinal(t)} Birdie`), 'birdie');
+  addCountSeries('eagle', ladderTiers(EAGLE_LADDER, counters.eagles), counters.eagles, (t) => `eagle-${t}`, (t) => (t === 1 ? 'First Eagle' : `${getOrdinal(t)} Eagle`), 'eagle');
+  addCountSeries('hole_in_one', ladderTiers(HOLE_IN_ONE_LADDER, counters.aces), counters.aces, (t) => `hole-in-one-${t}`, (t) => (t === 1 ? 'First Hole-in-One!' : `${getOrdinal(t)} Hole-in-One`), 'ace');
+  addCountSeries('round', ladderTiers(ROUND_LADDER, counters.rounds), counters.rounds, (t) => `round-${t}`, (t) => (t === 1 ? 'First Round' : `${getOrdinal(t)} Round`), 'round');
+  addCountSeries('course', ladderTiers(COURSE_LADDER, counters.courses), counters.courses, (t) => `course-${t}`, (t) => (t === 1 ? 'First Course' : `${getOrdinal(t)} Course`), 'course');
 
   // Home course
   const nextHome = HOME_COURSE_MILESTONES.find((t) => counters.maxRoundsOneCourse < t);
