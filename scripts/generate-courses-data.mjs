@@ -40,6 +40,36 @@ async function rest(path) {
   return res.json();
 }
 
+async function restAll(path, pageSize = 1000) {
+  const rows = [];
+  for (let offset = 0; ; offset += pageSize) {
+    const separator = path.includes('?') ? '&' : '?';
+    const page = await rest(`${path}${separator}limit=${pageSize}&offset=${offset}`);
+    rows.push(...page);
+    if (page.length < pageSize) return rows;
+  }
+}
+
+function selectCompleteHolePars(tees, holesByTee, expectedHoleCount, coursePar) {
+  if (!expectedHoleCount) return null;
+
+  const candidates = tees
+    .map((tee) => {
+      const holes = (holesByTee.get(tee.id) || [])
+        .filter((hole) => Number.isInteger(hole.hole_number) && Number.isInteger(hole.par))
+        .sort((a, b) => a.hole_number - b.hole_number);
+      const isComplete = holes.length === expectedHoleCount
+        && holes.every((hole, index) => hole.hole_number === index + 1 && hole.par >= 2 && hole.par <= 6);
+      if (!isComplete) return null;
+      const pars = holes.map((hole) => hole.par);
+      return { pars, total: pars.reduce((sum, par) => sum + par, 0), teePar: tee.par };
+    })
+    .filter(Boolean);
+
+  if (candidates.length === 0) return null;
+  return (candidates.find((candidate) => candidate.total === coursePar || candidate.teePar === coursePar) || candidates[0]).pars;
+}
+
 async function main() {
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     console.warn('⚠️  Supabase env vars missing — keeping existing courses snapshot.');
@@ -47,10 +77,26 @@ async function main() {
   }
 
   const courses = await rest('rpc/get_public_courses');
+  const tees = await restAll('course_tees?select=id,course_id,par');
+  const holes = await restAll('course_holes?select=tee_id,hole_number,par&order=hole_number.asc');
+  const teesByCourse = new Map();
+  const holesByTee = new Map();
+
+  for (const tee of tees) {
+    const courseTees = teesByCourse.get(tee.course_id) || [];
+    courseTees.push(tee);
+    teesByCourse.set(tee.course_id, courseTees);
+  }
+  for (const hole of holes) {
+    const teeHoles = holesByTee.get(hole.tee_id) || [];
+    teeHoles.push(hole);
+    holesByTee.set(hole.tee_id, teeHoles);
+  }
 
   const data = courses.map((c) => {
     const par = typeof c.par === 'number' && c.par > 0 ? c.par : null;
     const holes = par ? (par <= 40 ? 9 : 18) : null;
+    const holePars = selectCompleteHolePars(teesByCourse.get(c.id) || [], holesByTee, holes, par);
     const avg = c.average_score === null || c.average_score === undefined ? null : Number(c.average_score);
 
     return {
@@ -62,6 +108,7 @@ async function main() {
       longitude: c.longitude ?? null,
       par,
       holes,
+      holePars,
       teeCount: c.tee_count ?? 0,
       roundsCount: c.rounds_count ?? 0,
       averageScore: avg,

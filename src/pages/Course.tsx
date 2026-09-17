@@ -15,6 +15,24 @@ import {
 
 const SITE_URL = "https://mybirdieboard.com";
 
+interface PublicTeeWithHoles {
+  par: number | null;
+  course_holes: Array<{ hole_number: number; par: number }> | null;
+}
+
+function selectCompleteHolePars(tees: PublicTeeWithHoles[], expectedCount: number | null, coursePar: number | null) {
+  if (!expectedCount) return null;
+  const candidates = tees.flatMap((tee) => {
+    const holes = [...(tee.course_holes ?? [])].sort((a, b) => a.hole_number - b.hole_number);
+    const complete = holes.length === expectedCount
+      && holes.every((hole, index) => hole.hole_number === index + 1 && hole.par >= 2 && hole.par <= 6);
+    if (!complete) return [];
+    const pars = holes.map((hole) => hole.par);
+    return [{ pars, total: pars.reduce((sum, par) => sum + par, 0), teePar: tee.par }];
+  });
+  return (candidates.find((candidate) => candidate.total === coursePar || candidate.teePar === coursePar) ?? candidates[0])?.pars ?? null;
+}
+
 const Course = () => {
   const { courseId } = useParams<{ courseId: string }>();
   // Render immediately from the build-time snapshot so the course facts
@@ -42,6 +60,15 @@ const Course = () => {
         if (error || cancelled || !Array.isArray(data)) return;
         const row = data.find((c: any) => c.id === numericId);
         if (!row) return;
+        const inferredHoleCount = row.par ? (row.par <= 40 ? 9 : 18) : null;
+        const { data: tees } = await supabase
+          .from("course_tees")
+          .select("par, course_holes(hole_number, par)")
+          .eq("course_id", numericId);
+        const holePars = Array.isArray(tees)
+          ? selectCompleteHolePars(tees as PublicTeeWithHoles[], inferredHoleCount, row.par ?? null)
+          : null;
+
         setCourse({
           id: row.id,
           name: row.name,
@@ -50,7 +77,8 @@ const Course = () => {
           latitude: row.latitude ?? null,
           longitude: row.longitude ?? null,
           par: row.par ?? null,
-          holes: row.par ? (row.par <= 40 ? 9 : 18) : null,
+          holes: inferredHoleCount,
+          holePars,
           teeCount: row.tee_count ?? 0,
           roundsCount: row.rounds_count ?? 0,
           averageScore: row.average_score === null || row.average_score === undefined ? null : Number(row.average_score),
@@ -185,6 +213,7 @@ const Course = () => {
                courseName={displayName}
                holeCount={course.holes}
                coursePar={course.par}
+               holePars={course.holePars}
              />
            )}
 
