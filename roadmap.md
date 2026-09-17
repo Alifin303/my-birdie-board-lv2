@@ -12,4 +12,4 @@
 - [x] Remove the unsupported “1,000+ golfers” claim from every public page.
 - [x] Remove stale years from Best Golf Score Apps copy and metadata.
 - [x] Verify all four fixes in the rendered pages.
-- [ ] Verify the generic golfer copy on pricing, get-started, and homepage, then publish it live.
+- [x] Verify the generic golfer copy on pricing, get-started, and homepage, then publish it live.
