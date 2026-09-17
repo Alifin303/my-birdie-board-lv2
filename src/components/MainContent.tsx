@@ -4,6 +4,7 @@ import { ArrowRight, Upload, BarChart2, Award, Trophy, HelpCircle, UserPlus } fr
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from './ui/card';
 import { FeatureInfoModal, FeatureInfo } from './FeatureInfoModal';
+import { GOLFER_COUNT_LABEL } from '@/lib/site-stats';
 interface MainContentProps {
   onStartSignup: () => void;
 }
@@ -297,7 +298,7 @@ export const MainContent = ({
             Start Tracking Your Golf Scores the Smarter Way
           </h2>
           <p className="text-white/80 text-sm sm:text-base mb-4">
-            Join golfers using MyBirdieBoard as their go-to golf score tracker, handicap tracking tool, and performance history archive.
+            Join {GOLFER_COUNT_LABEL} golfers using MyBirdieBoard as their go-to golf score tracker, handicap tracking tool, and performance history archive.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button size="lg" onClick={onStartSignup} data-id="cta_strip_start_free" aria-label="Start free with MyBirdieBoard" className="text-accent-foreground text-base px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground w-full sm:w-auto">
