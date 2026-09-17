@@ -360,6 +360,28 @@ export default function Dashboard() {
               userRounds={userRounds}
               handicapIndex={handicapFromProfile}
             />
+
+            <div className="space-y-3 sm:space-y-4 bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-semibold text-primary flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  Your Golf Map
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Every course you've played, plus the ones still on your bucket list.
+                </p>
+              </div>
+              <Suspense
+                fallback={
+                  <div className="h-[420px] sm:h-[520px] w-full animate-pulse rounded-lg border bg-muted" />
+                }
+              >
+                <CoursesMapPanel
+                  userRounds={mapRounds}
+                  bucketCourses={bucketList}
+                />
+              </Suspense>
+            </div>
           </>
         )}
         
@@ -373,19 +395,7 @@ export default function Dashboard() {
               /> 
             : (
               <>
-                <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <h2 className="text-xl sm:text-2xl font-semibold text-primary">Your Courses</h2>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsMapOpen(true)}
-                    disabled={!userRounds || userRounds.length === 0}
-                    className="gap-1.5"
-                  >
-                    <MapPin className="h-4 w-4" />
-                    View Map
-                  </Button>
-                </div>
+                <h2 className="text-xl sm:text-2xl font-semibold text-primary">Your Courses</h2>
                 <CourseStatsTable 
                   userRounds={userRounds}
                   scoreType={scoreType}
