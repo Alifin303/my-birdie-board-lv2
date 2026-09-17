@@ -200,9 +200,6 @@ const Course = () => {
                   Average score
                 </h2>
                 <p className="text-2xl font-bold">{course.averageScore}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Across {course.roundsCount} logged rounds
-                </p>
               </div>
             )}
           </div>
