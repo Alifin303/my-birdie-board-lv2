@@ -481,7 +481,7 @@ export const DashboardHeader = ({
           </div>
         </div>
         <div className="flex items-center gap-2 self-end sm:self-auto">
-          <ModeToggle />
+          <ModeToggle showLabel />
           <Button onClick={onAddRound} className="text-sm sm:text-base px-3 sm:px-4" size="sm" title="Add a New Round">
             Add a New Round
           </Button>
