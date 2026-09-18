@@ -387,7 +387,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
                   <TableCell className="text-right">{user.handicap?.toFixed(1) || 'N/A'}</TableCell>
                   <TableCell className="text-right">{user.roundsCount}</TableCell>
                   <TableCell className="text-right">{user.coursesCount}</TableCell>
-                  <TableCell>{getPlanBadge(user.plan)}</TableCell>
+                  <TableCell>{getPlanBadge(user.plan, user.planEndsAt)}</TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
