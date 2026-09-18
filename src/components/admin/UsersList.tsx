@@ -21,7 +21,7 @@ import { Search, Eye, ChevronUp, ChevronDown } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
-type UserPlan = "Free" | "Premium" | "Trialing" | "Complimentary";
+type UserPlan = "Free" | "Premium" | "Cancelling" | "Trialing" | "Complimentary";
 
 interface User {
   id: string;
