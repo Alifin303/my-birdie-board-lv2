@@ -134,9 +134,15 @@ export const buildHandicapBreakdown = (rounds: HandicapRoundInput[]): HandicapBr
 
 /**
  * Replays a player's rounds chronologically and returns the handicap index
- * that would have been in force after each round (null until 3 rounds are in).
+ * that would have been in force after each round.
+ *
+ * An index only appears once the player has 5 rounds — matching the app's
+ * official handicap gate (free tier allows 4 rounds, the 5th unlocks the
+ * handicap) — even though the WHS table itself supports 3-round records.
  * Keys the result by round id so it can be joined back onto the entries.
  */
+export const MIN_ROUNDS_FOR_INDEX = 5;
+
 export const buildHandicapProgression = (
   rounds: HandicapRoundInput[]
 ): Map<number, number | null> => {
@@ -154,6 +160,11 @@ export const buildHandicapProgression = (
 
     // Only the most recent 20 scores ever count towards the index
     const window = record.slice(-MAX_SCORING_RECORD);
+    // Hide the index line until the player has reached the 5-round gate
+    if (record.length < MIN_ROUNDS_FOR_INDEX) {
+      result.set(round.id, null);
+      continue;
+    }
     const selection = getWhsSelection(window.length);
     if (!selection) {
       result.set(round.id, null);
