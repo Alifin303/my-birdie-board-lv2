@@ -3,6 +3,7 @@ import { Stats, Round } from "./types";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { HandicapCard } from "./HandicapCard";
+import { HandicapCalculationDialog } from "./HandicapCalculationDialog";
 
 import { Link } from "react-router-dom";
 
@@ -283,6 +284,7 @@ export const MainStats = ({
 export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTypeChange, calculateStats, handicapIndex, profileHandicap, userName, userId }: StatsDisplayProps) => {
   const roundsKey = userRounds ? `rounds-${userRounds.length}` : 'no-rounds';
   const [showHandicapCard, setShowHandicapCard] = useState(false);
+  const [showHandicapCalc, setShowHandicapCalc] = useState(false);
   
   useEffect(() => {
     console.log("[HandicapCircle] Rounds data changed, handicap info:", { 
@@ -375,13 +377,20 @@ export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTy
       </div>
       
       {hasHandicap && userName && userId && (
-        <Button 
-          onClick={() => setShowHandicapCard(true)}
-          variant="outline"
-          className="mt-4"
-        >
-          Show Handicap Card
-        </Button>
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+          <Button 
+            onClick={() => setShowHandicapCard(true)}
+            variant="outline"
+          >
+            Show Handicap Card
+          </Button>
+          <Button
+            onClick={() => setShowHandicapCalc(true)}
+            variant="outline"
+          >
+            Show Handicap Calculation
+          </Button>
+        </div>
       )}
 
       {userRounds && userRounds.length > 0 && (
