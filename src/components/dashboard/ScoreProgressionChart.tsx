@@ -5,7 +5,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Switch } from "@/components/ui/switch";
 import { Hash, Target, TrendingUp, Calculator } from "lucide-react";
 import { useHandicapBreakdown } from "@/hooks/use-handicap-breakdown";
-import { formatDifferential, MAX_SCORING_RECORD } from "@/lib/whs";
+import { formatDifferential, MAX_SCORING_RECORD, buildHandicapProgression } from "@/lib/whs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CollapseToggle } from "./CollapseToggle";
 import { useCollapsibleSection } from "@/hooks/use-collapsible-section";
@@ -62,12 +62,14 @@ const ScoreProgressionChart = ({
   );
   const handicapChartData = useMemo(() => {
     if (!breakdown?.entries?.length) return [] as any[];
+    const progression = buildHandicapProgression(breakdown.entries);
     return [...breakdown.entries]
       .reverse()
       .map((entry) => ({
         date: format(new Date(entry.date), 'MMM d, yyyy'),
         differential: Number(entry.differential.toFixed(1)),
         counting: entry.counting,
+        indexAfter: progression.get(entry.id) ?? null,
       }));
   }, [breakdown]);
   const [chartData, setChartData] = useState<any[]>([]);
