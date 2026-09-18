@@ -63,6 +63,8 @@
     --border: 150 8% 25%;
     --input: 150 8% 25%;
     --ring: 143 38% 62%;
+  }
+
   /* Scoped light-theme tokens: applied to content that must stay readable on a
      white background in dark mode (e.g. downloadable cards rendered to image). */
   .always-light {
