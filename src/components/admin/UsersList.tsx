@@ -261,6 +261,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
               <SelectItem value="handicap">Handicap</SelectItem>
               <SelectItem value="rounds">Rounds</SelectItem>
               <SelectItem value="courses">Courses</SelectItem>
+              <SelectItem value="plan">Plan</SelectItem>
             </SelectContent>
           </Select>
           
@@ -318,6 +319,12 @@ export function UsersList({ onUserSelect }: UsersListProps) {
                 onClick={() => handleSort('courses')}
               >
                 Courses {renderSortIcon('courses')}
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer"
+                onClick={() => handleSort('plan')}
+              >
+                Plan {renderSortIcon('plan')}
               </TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
