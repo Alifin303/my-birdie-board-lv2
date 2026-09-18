@@ -62,6 +62,14 @@ const About = () => {
               <p className="text-lg sm:text-xl font-medium">Your digital golf journal — built for golfers who want to track, reflect, and improve.</p>
 
               <section>
+                <h2 className="text-xl sm:text-2xl font-semibold mb-3">My Story</h2>
+                <p>I used to track my rounds with a mobile app paired to my smartwatch. It worked, but looking back at my progress was a mess — just one long list of every round, with no easy way to see how I'd actually played at a specific course. My phone battery took a hit every round too.</p>
+                <p className="mt-3">So I started keeping my own spreadsheet, organised by course, so I could see how far I'd come — especially useful after a bad round, when a bit of perspective helps more than anything.</p>
+                <p className="mt-3">That spreadsheet became the idea for MyBirdieBoard. I wanted something cloud-based I could check from anywhere, showing my progress both overall and course-by-course. <Link to="/blog/nomadic-golfer-scoring-guide" className="underline hover:text-white/80" aria-label="Read the nomadic golfer's guide to tracking scores without a home club">I've never belonged to a club</Link>, so I'd never had a proper handicap either — I wanted a guideline I could actually trust. And more than anything, I wanted a kind of memory book: every course I've played, where it is, and how I got on there.</p>
+                <p className="mt-3">These days I play with just a rangefinder and a paper scorecard — no phone in hand for the whole round. It's a side effect I didn't expect: a proper cut-off from the outside world, and a chance to clear my head for a few hours. MyBirdieBoard is what I built to keep that feeling, without losing the record afterwards.</p>
+              </section>
+
+              <section>
                 <h2 className="text-xl sm:text-2xl font-semibold mb-3">Our Mission</h2>
                 <p>Every round of golf tells a story — the clutch birdie, the double on 18, the near-miss personal best. But paper scorecards get lost, and most apps pull your attention away mid-round.</p>
                 <p className="mt-3">MyBirdieBoard was built on a simple belief: <strong>golf should be played with focus</strong>. That's why we created the only score tracker designed to be used <em>after</em> you play — so you can stay present on the course and still keep a powerful digital record of every round.</p>
