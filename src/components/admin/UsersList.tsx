@@ -146,7 +146,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
               ...profile,
               roundsCount: roundsCount || 0,
               coursesCount: uniqueCourseIds.size,
-              plan: determinePlan(profile, subsByUser.get(profile.id), complimentaryEmails),
+              ...determinePlan(profile, subsByUser.get(profile.id), complimentaryEmails),
             };
           })
         );
