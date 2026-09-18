@@ -35,6 +35,17 @@ interface ScoreProgressionChartProps {
 
 type ScoreMode = 'stroke' | 'stableford';
 
+// Theme-aware tooltip styling so the box follows dark mode
+// (Recharts defaults to a white box with inherited light text otherwise).
+const tooltipContentStyle = {
+  backgroundColor: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
+  borderRadius: "8px",
+  color: "hsl(var(--foreground))",
+};
+const tooltipLabelStyle = { color: "hsl(var(--foreground))", fontWeight: 500 };
+const tooltipItemStyle = { color: "hsl(var(--foreground))" };
+
 const ScoreProgressionChart = ({ 
   rounds, 
   scoreType,
