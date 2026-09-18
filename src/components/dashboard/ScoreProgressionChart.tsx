@@ -199,22 +199,42 @@ const ScoreProgressionChart = ({
           <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg shadow-md border border-border">
             <button 
               onClick={() => { setHandicapView(false); handleScoreModeChange('stroke'); }} 
-              className={`px-4 py-1.5 rounded-md text-sm font-medium min-w-[90px] flex items-center justify-center gap-1.5 transition-colors ${scoreMode === 'stroke' ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted'}`}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium min-w-[90px] flex items-center justify-center gap-1.5 transition-colors ${!handicapView && scoreMode === 'stroke' ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted'}`}
             >
               <Hash className="h-4 w-4" />
               Stroke
             </button>
             <button 
-              onClick={() => handleScoreModeChange('stableford')} 
-              className={`px-4 py-1.5 rounded-md text-sm font-medium min-w-[90px] flex items-center justify-center gap-1.5 transition-colors ${scoreMode === 'stableford' ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted'}`}
+              onClick={() => { setHandicapView(false); handleScoreModeChange('stableford'); }} 
+              className={`px-4 py-1.5 rounded-md text-sm font-medium min-w-[90px] flex items-center justify-center gap-1.5 transition-colors ${!handicapView && scoreMode === 'stableford' ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted'}`}
             >
               <TrendingUp className="h-4 w-4" />
               Stableford
             </button>
+            {userId && (
+              <button
+                onClick={() => setHandicapView(true)}
+                className={`px-4 py-1.5 rounded-md text-sm font-medium min-w-[90px] flex items-center justify-center gap-1.5 transition-colors ${handicapView ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted'}`}
+              >
+                <Calculator className="h-4 w-4" />
+                Handicap
+              </button>
+            )}
           </div>
         </div>
         
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+        {handicapView && (
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs sm:text-sm">
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#16a34a]" /> Counts towards your handicap
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#94a3b8]" /> Not used
+            </span>
+          </div>
+        )}
+
+        <div className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 ${handicapView ? 'hidden' : ''}`}>
           <ToggleGroup 
             type="single" 
             value={holeFilter} 
