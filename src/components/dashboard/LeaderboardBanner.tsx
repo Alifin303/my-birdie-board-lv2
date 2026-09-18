@@ -68,7 +68,7 @@ export const LeaderboardBanner = ({ userRounds, handicapIndex }: LeaderboardBann
 
   return (
     <>
-      <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
+      <div className="bg-card/95 text-card-foreground rounded-lg shadow-md p-4 sm:p-6">
         <h2 className="text-xl sm:text-2xl font-semibold text-primary">Course Leaderboards</h2>
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-2">
           <p className="text-sm sm:text-base text-foreground font-medium">

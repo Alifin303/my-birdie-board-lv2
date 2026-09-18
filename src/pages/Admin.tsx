@@ -14,6 +14,7 @@ import { AdminAnalytics } from "@/components/admin/analytics/AdminAnalytics";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ModeToggle } from "@/components/ModeToggle";
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -90,9 +91,12 @@ export default function Admin() {
       
       <div className="min-h-screen bg-background">
         <div className="container mx-auto py-8 px-4">
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
             <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-            <Button onClick={() => navigate('/')}>Return to Site</Button>
+            <div className="flex items-center gap-2">
+              <ModeToggle showLabel />
+              <Button onClick={() => navigate('/')}>Return to Site</Button>
+            </div>
           </div>
           
           {selectedUserId ? (

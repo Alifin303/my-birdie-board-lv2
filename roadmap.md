@@ -13,3 +13,4 @@
 - [x] Remove stale years from Best Golf Score Apps copy and metadata.
 - [x] Verify all four fixes in the rendered pages.
 - [x] Verify the generic golfer copy on pricing, get-started, and homepage, then publish it live.
+- [x] Add persistent dark-mode toggles to the dashboard and admin pages.

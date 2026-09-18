@@ -287,7 +287,7 @@ export default function Dashboard() {
   const renderDashboard = () => {
     if (processingStripeSession) {
       return (
-        <div className="flex flex-col items-center justify-center py-20 space-y-6 animate-fade-in bg-white/90 rounded-lg shadow-md p-8">
+        <div className="flex flex-col items-center justify-center py-20 space-y-6 animate-fade-in bg-card/95 text-card-foreground rounded-lg shadow-md p-8">
           <div className="w-20 h-20 relative">
             <div className="absolute inset-0 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
             <div className="absolute inset-2 flex items-center justify-center">
@@ -306,7 +306,7 @@ export default function Dashboard() {
     }
 
     if (profileLoading || !profile) {
-      return <div className="flex justify-center py-10 bg-white/90 rounded-lg shadow-md p-8"><div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div></div>;
+      return <div className="flex justify-center py-10 bg-card/95 text-card-foreground rounded-lg shadow-md p-8"><div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div></div>;
     }
     
     const subscriptionStatus = subscription?.status || "none";
@@ -322,7 +322,7 @@ export default function Dashboard() {
     
     return (
       <div className="space-y-4 sm:space-y-6 md:space-y-8 animate-fade-in">
-        <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
+        <div className="bg-card/95 text-card-foreground rounded-lg shadow-md p-4 sm:p-6">
           <DashboardHeader 
             profileData={profile} 
             onAddRound={handleOpenModal}
@@ -338,7 +338,7 @@ export default function Dashboard() {
 
         {!selectedCourseId && (
           <>
-            <div className="bg-white/90 rounded-lg shadow-md">
+            <div className="bg-card/95 text-card-foreground rounded-lg shadow-md">
               <MainStats 
                 userRounds={userRounds}
                 roundsLoading={roundsLoading}
@@ -354,14 +354,14 @@ export default function Dashboard() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-              <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
+              <div className="bg-card/95 text-card-foreground rounded-lg shadow-md p-4 sm:p-6">
                 <DetailedStats 
                   userRounds={userRounds}
                   isLoading={roundsLoading}
                 />
               </div>
               
-              <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6 flex flex-col items-center justify-center">
+              <div className="bg-card/95 text-card-foreground rounded-lg shadow-md p-4 sm:p-6 flex flex-col items-center justify-center">
                 <HandicapCircle 
                   userRounds={userRounds}
                   roundsLoading={roundsLoading}
@@ -377,7 +377,7 @@ export default function Dashboard() {
             </div>
             
             {/* New Score Progression Chart */}
-            <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
+            <div className="bg-card/95 text-card-foreground rounded-lg shadow-md p-4 sm:p-6">
               <ScoreProgressionChart 
                 rounds={userRounds || []}
                 scoreType={scoreType}
@@ -388,7 +388,7 @@ export default function Dashboard() {
               />
             </div>
             
-            <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
+            <div className="bg-card/95 text-card-foreground rounded-lg shadow-md p-4 sm:p-6">
               <AdvancedStats 
                 userRounds={userRounds}
                 isLoading={roundsLoading}
@@ -400,7 +400,7 @@ export default function Dashboard() {
               handicapIndex={handicapFromProfile}
             />
 
-            <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
+            <div className="bg-card/95 text-card-foreground rounded-lg shadow-md p-4 sm:p-6">
               <Collapsible open={mapOpen} onOpenChange={setMapOpen} className="space-y-3 sm:space-y-4">
                 <div className="flex items-center justify-between gap-2">
                   <h2 className="text-xl sm:text-2xl font-semibold text-primary flex items-center gap-2">
@@ -432,7 +432,7 @@ export default function Dashboard() {
           </>
         )}
         
-        <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
+        <div className="bg-card/95 text-card-foreground rounded-lg shadow-md p-4 sm:p-6">
           {selectedCourseId 
             ? <CourseRoundHistory 
                 userRounds={userRounds} 
@@ -470,7 +470,7 @@ export default function Dashboard() {
         </div>
 
         {!selectedCourseId && (
-          <div className="bg-white/90 rounded-lg shadow-md p-4 sm:p-6">
+          <div className="bg-card/95 text-card-foreground rounded-lg shadow-md p-4 sm:p-6">
             <BucketList playedCourseIds={playedCourseIds} />
           </div>
         )}
