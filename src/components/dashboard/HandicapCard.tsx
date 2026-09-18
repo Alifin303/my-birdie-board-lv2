@@ -1,11 +1,9 @@
-import { courseDisplayName } from "@/lib/course-seo";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import html2canvas from "html2canvas";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useHandicapBreakdown } from "@/hooks/use-handicap-breakdown";
 
 interface HandicapCardProps {
   open: boolean;
