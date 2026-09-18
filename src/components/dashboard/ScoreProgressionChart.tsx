@@ -178,7 +178,7 @@ const ScoreProgressionChart = ({
         {/* Score Type & Mode Toggles */}
         <div className="flex flex-wrap justify-center gap-4">
           {/* Gross/Net Toggle */}
-          {onScoreTypeChange && (
+          {onScoreTypeChange && !handicapView && (
             <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg shadow-md border border-border">
               <button 
                 onClick={() => onScoreTypeChange('gross')} 
@@ -195,10 +195,10 @@ const ScoreProgressionChart = ({
             </div>
           )}
           
-          {/* Score Mode Toggle (Stroke/Stableford) */}
+          {/* Score Mode Toggle (Stroke/Stableford/Handicap) */}
           <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg shadow-md border border-border">
             <button 
-              onClick={() => handleScoreModeChange('stroke')} 
+              onClick={() => { setHandicapView(false); handleScoreModeChange('stroke'); }} 
               className={`px-4 py-1.5 rounded-md text-sm font-medium min-w-[90px] flex items-center justify-center gap-1.5 transition-colors ${scoreMode === 'stroke' ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted'}`}
             >
               <Hash className="h-4 w-4" />
