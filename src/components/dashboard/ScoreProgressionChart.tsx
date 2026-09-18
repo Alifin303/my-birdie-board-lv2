@@ -380,6 +380,16 @@ const ScoreProgressionChart = ({
                       );
                     }}
                   />
+                  <Line
+                    type="monotone"
+                    dataKey="indexAfter"
+                    stroke="#f59e0b"
+                    strokeWidth={2.5}
+                    connectNulls
+                    dot={{ r: 3.5, fill: '#f59e0b', stroke: '#b45309' }}
+                    activeDot={{ r: 6 }}
+                    name="indexAfter"
+                  />
                 </LineChart>
               </ResponsiveContainer>
             )}
