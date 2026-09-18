@@ -5,6 +5,7 @@ import { Providers } from '@/components/Providers'
 import { AppErrorBoundary } from '@/components/AppErrorBoundary'
 import { LazyLoadErrorBoundary } from '@/components/LazyLoadErrorBoundary'
 import { RouteErrorFallback } from '@/components/RouteErrorFallback'
+import { ThemeProvider } from '@/components/ThemeProvider'
 
 // Static imports for SSG pre-rendered pages
 import Index from '@/pages/Index'
@@ -84,6 +85,12 @@ const P = (el: React.ReactNode) => (
   <AppErrorBoundary>
     <Providers>{el}</Providers>
   </AppErrorBoundary>
+)
+
+const ThemedPrivatePage = ({ children }: { children: React.ReactNode }) => (
+  <ThemeProvider defaultTheme="light" storageKey="mybirdieboard-theme">
+    {children}
+  </ThemeProvider>
 )
 
 // Wrapper for lazy-loaded components with error boundary for chunk failures
@@ -167,9 +174,9 @@ export const routes: RouteRecord[] = [
   { path: '/auth/confirm', element: P(<LazyWrapper><AuthConfirm /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
   { path: '/auth/reset-password', element: P(<LazyWrapper><ResetPassword /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
   { path: '/checkout', element: P(<LazyWrapper><Checkout /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
-  { path: '/dashboard', element: P(<ProtectedRoute><LazyWrapper><Dashboard /></LazyWrapper></ProtectedRoute>), errorElement: <RouteErrorFallback /> },
+  { path: '/dashboard', element: P(<ThemedPrivatePage><ProtectedRoute><LazyWrapper><Dashboard /></LazyWrapper></ProtectedRoute></ThemedPrivatePage>), errorElement: <RouteErrorFallback /> },
   { path: '/milestones', element: P(<ProtectedRoute><LazyWrapper><MilestonesPage /></LazyWrapper></ProtectedRoute>), errorElement: <RouteErrorFallback /> },
-  { path: '/admin', element: P(<LazyWrapper><Admin /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
+  { path: '/admin', element: P(<ThemedPrivatePage><LazyWrapper><Admin /></LazyWrapper></ThemedPrivatePage>), errorElement: <RouteErrorFallback /> },
 
   // Redirects
   { path: '/verify', element: <Navigate to="/auth/callback" replace /> },

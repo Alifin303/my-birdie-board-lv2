@@ -3,17 +3,25 @@ import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
 
-export function ModeToggle() {
+interface ModeToggleProps {
+  showLabel?: boolean;
+}
+
+export function ModeToggle({ showLabel = false }: ModeToggleProps) {
   const { theme, setTheme } = useTheme();
+  const isDark = theme === "dark";
 
   return (
     <Button
-      variant="ghost"
-      size="icon"
-      onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+      variant="outline"
+      size={showLabel ? "sm" : "icon"}
+      className={showLabel ? "gap-2" : undefined}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
-      {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-      <span className="sr-only">Toggle theme</span>
+      {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      {showLabel ? <span>{isDark ? "Light mode" : "Dark mode"}</span> : <span className="sr-only">Toggle theme</span>}
     </Button>
   );
 }

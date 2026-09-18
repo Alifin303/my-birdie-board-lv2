@@ -52,10 +52,11 @@ export function ThemeProvider({
         ? "dark"
         : "light";
       root.classList.add(systemTheme);
-      return;
+      return () => root.classList.remove("light", "dark");
     }
 
     root.classList.add(theme);
+    return () => root.classList.remove("light", "dark");
   }, [theme]);
 
   const value = {
