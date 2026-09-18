@@ -345,7 +345,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
           <TableBody>
             {filteredUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
+                <TableCell colSpan={8} className="text-center py-6 text-muted-foreground">
                   {searchTerm ? 'No users match your search.' : 'No users found.'}
                 </TableCell>
               </TableRow>
