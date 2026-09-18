@@ -21,7 +21,7 @@ import { Search, Eye, ChevronUp, ChevronDown } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
-type UserPlan = "Free" | "Premium" | "Trialing" | "Complimentary";
+type UserPlan = "Free" | "Premium" | "Cancelling" | "Trialing" | "Complimentary";
 
 interface User {
   id: string;
@@ -34,44 +34,49 @@ interface User {
   email: string;
   created_at: string;
   plan: UserPlan;
+  planEndsAt: string | null;
 }
 
 // Plan rank used for sorting (higher = further along the funnel)
 const PLAN_RANK: Record<UserPlan, number> = {
   Free: 0,
   Complimentary: 1,
-  Trialing: 2,
-  Premium: 3,
+  Cancelling: 2,
+  Trialing: 3,
+  Premium: 4,
 };
 
 const determinePlan = (
   profile: any,
   subscription: any,
   complimentaryEmails: Set<string>
-): UserPlan => {
+): { plan: UserPlan; planEndsAt: string | null } => {
   // Admin-granted complimentary access
-  if (subscription?.status === "complimentary") return "Complimentary";
+  if (subscription?.status === "complimentary") return { plan: "Complimentary", planEndsAt: null };
   if (profile.email && complimentaryEmails.has(profile.email.toLowerCase())) {
-    return "Complimentary";
+    return { plan: "Complimentary", planEndsAt: null };
   }
 
-  // Cancelled but still inside the paid period counts as Premium
-  const stillInPeriod =
-    subscription?.current_period_end &&
-    new Date(subscription.current_period_end) > new Date();
+  const periodEnd = subscription?.current_period_end || null;
+  const stillInPeriod = periodEnd && new Date(periodEnd) > new Date();
 
-  if (subscription?.status === "trialing") return "Trialing";
+  // Cancelled in Stripe but still inside the paid period — access until the end date
+  if (subscription && stillInPeriod &&
+    (subscription.cancel_at_period_end === true || subscription.status === "canceled")) {
+    return { plan: "Cancelling", planEndsAt: periodEnd };
+  }
+
+  if (subscription?.status === "trialing") return { plan: "Trialing", planEndsAt: periodEnd };
   if (
     subscription &&
     (subscription.status === "active" ||
       subscription.status === "paid" ||
-      (subscription.cancel_at_period_end === true && stillInPeriod) ||
       ((subscription.status === "incomplete" || subscription.status === "past_due") && stillInPeriod))
   ) {
-    return "Premium";
+    return { plan: "Premium", planEndsAt: periodEnd };
   }
 
-  return "Free";
+  return { plan: "Free", planEndsAt: null };
 };
 
 interface UsersListProps {
@@ -141,7 +146,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
               ...profile,
               roundsCount: roundsCount || 0,
               coursesCount: uniqueCourseIds.size,
-              plan: determinePlan(profile, subsByUser.get(profile.id), complimentaryEmails),
+              ...determinePlan(profile, subsByUser.get(profile.id), complimentaryEmails),
             };
           })
         );
@@ -229,12 +234,30 @@ export function UsersList({ onUserSelect }: UsersListProps) {
       : <ChevronDown className="h-4 w-4 inline ml-1" />;
   };
 
-  const getPlanBadge = (plan: UserPlan) => {
+  const getPlanBadge = (plan: UserPlan, planEndsAt: string | null) => {
+    const endLabel = planEndsAt ? new Date(planEndsAt).toLocaleDateString() : null;
+
     switch (plan) {
       case "Premium":
         return <Badge>Premium</Badge>;
+      case "Cancelling":
+        return (
+          <div className="flex flex-col items-start gap-0.5">
+            <Badge className="bg-amber-500/20 text-amber-700 border-amber-500/30">Cancelling</Badge>
+            {endLabel && (
+              <span className="text-xs text-muted-foreground">Ends {endLabel}</span>
+            )}
+          </div>
+        );
       case "Trialing":
-        return <Badge className="bg-blue-500/20 text-blue-600 border-blue-500/30">Trialing</Badge>;
+        return (
+          <div className="flex flex-col items-start gap-0.5">
+            <Badge className="bg-blue-500/20 text-blue-600 border-blue-500/30">Trialing</Badge>
+            {endLabel && (
+              <span className="text-xs text-muted-foreground">Ends {endLabel}</span>
+            )}
+          </div>
+        );
       case "Complimentary":
         return <Badge variant="secondary">Complimentary</Badge>;
       default:
@@ -364,7 +387,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
                   <TableCell className="text-right">{user.handicap?.toFixed(1) || 'N/A'}</TableCell>
                   <TableCell className="text-right">{user.roundsCount}</TableCell>
                   <TableCell className="text-right">{user.coursesCount}</TableCell>
-                  <TableCell>{getPlanBadge(user.plan)}</TableCell>
+                  <TableCell>{getPlanBadge(user.plan, user.planEndsAt)}</TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
