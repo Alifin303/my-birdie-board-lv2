@@ -83,22 +83,22 @@ export const HandicapCard = ({ open, onOpenChange, userName, handicap, userId }:
                   <div key={round.id} className="border rounded-lg p-4 space-y-2">
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="font-semibold">{round.course_name}</p>
+                        <p className="font-semibold">{round.courseName}</p>
                         <p className="text-sm text-muted-foreground">
                           {new Date(round.date).toLocaleDateString()}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-lg">{round.gross_score}</p>
+                        <p className="font-bold text-lg">{round.grossScore}</p>
                         <p className="text-xs text-muted-foreground">
-                          Diff: {round.scoreDifferential.toFixed(1)}
+                          Diff: {round.differential.toFixed(1)}
                         </p>
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-2 text-sm">
                       <div>
                         <p className="text-muted-foreground">Tee</p>
-                        <p className="font-medium">{round.tee_name}</p>
+                        <p className="font-medium">{round.teeName}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Slope</p>
