@@ -234,12 +234,30 @@ export function UsersList({ onUserSelect }: UsersListProps) {
       : <ChevronDown className="h-4 w-4 inline ml-1" />;
   };
 
-  const getPlanBadge = (plan: UserPlan) => {
+  const getPlanBadge = (plan: UserPlan, planEndsAt: string | null) => {
+    const endLabel = planEndsAt ? new Date(planEndsAt).toLocaleDateString() : null;
+
     switch (plan) {
       case "Premium":
         return <Badge>Premium</Badge>;
+      case "Cancelling":
+        return (
+          <div className="flex flex-col items-start gap-0.5">
+            <Badge className="bg-amber-500/20 text-amber-700 border-amber-500/30">Cancelling</Badge>
+            {endLabel && (
+              <span className="text-xs text-muted-foreground">Ends {endLabel}</span>
+            )}
+          </div>
+        );
       case "Trialing":
-        return <Badge className="bg-blue-500/20 text-blue-600 border-blue-500/30">Trialing</Badge>;
+        return (
+          <div className="flex flex-col items-start gap-0.5">
+            <Badge className="bg-blue-500/20 text-blue-600 border-blue-500/30">Trialing</Badge>
+            {endLabel && (
+              <span className="text-xs text-muted-foreground">Ends {endLabel}</span>
+            )}
+          </div>
+        );
       case "Complimentary":
         return <Badge variant="secondary">Complimentary</Badge>;
       default:
