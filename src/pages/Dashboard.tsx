@@ -385,6 +385,7 @@ export default function Dashboard() {
                 handicapIndex={handicapFromProfile}
                 scoreMode={scoreMode}
                 onScoreModeChange={setScoreMode}
+                userId={profile?.id}
               />
             </div>
             
