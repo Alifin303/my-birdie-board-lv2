@@ -70,18 +70,6 @@ const About = () => {
               </section>
 
               <section>
-                <h2 className="text-xl sm:text-2xl font-semibold mb-3">Our Mission</h2>
-                <p>Every round of golf tells a story — the clutch birdie, the double on 18, the near-miss personal best. But paper scorecards get lost, and most apps pull your attention away mid-round.</p>
-                <p className="mt-3">MyBirdieBoard was built on a simple belief: <strong>golf should be played with focus</strong>. That's why we created the only score tracker designed to be used <em>after</em> you play — so you can stay present on the course and still keep a powerful digital record of every round.</p>
-              </section>
-
-              <section>
-                <h2 className="text-xl sm:text-2xl font-semibold mb-3">Why We Built MyBirdieBoard</h2>
-                <p>We're golfers ourselves, and we were frustrated. We wanted a simple way to log rounds, track progress, and see how we stack up at our home courses — without the distractions of GPS features, swing tips, or mid-round notifications.</p>
-                <p className="mt-3">So we built MyBirdieBoard: a clean, focused platform that respects the way golf should be played — and still gives you the data you need to improve.</p>
-              </section>
-
-              <section>
                 <h2 className="text-xl sm:text-2xl font-semibold mb-3">What You Can Do With MyBirdieBoard</h2>
                 <ul className="space-y-2 sm:space-y-3">
                   <li className="flex items-start">
@@ -101,6 +89,10 @@ const About = () => {
                     <span><strong>Monitor your handicap</strong> — your index updates automatically as you add rounds, giving you a true picture of your progress.</span>
                   </li>
                   <li className="flex items-start">
+                    <span className="mr-2" aria-hidden="true">🗺️</span>
+                    <span><strong>Build your golf course map</strong> — every round drops a pin on your own personal map, creating a visual record of every course you've played.</span>
+                  </li>
+                  <li className="flex items-start">
                     <span className="mr-2" aria-hidden="true">📱</span>
                     <span><strong>Quick score entry</strong> — add your round in seconds after you play. Simple, fast, distraction-free.</span>
                   </li>
@@ -115,11 +107,7 @@ const About = () => {
 
               <section>
                 <h2 className="text-xl sm:text-2xl font-semibold mb-3">Your Golf Legacy Starts Here</h2>
-                <p>Every round you play is part of your story. MyBirdieBoard makes sure none of it gets lost.</p>
-                <p className="font-semibold mt-4">
-                  Ready to take control of your golf game?<br />
-                  Join MyBirdieBoard today. Your best round is yet to come.
-                </p>
+                <p>Every round you play is part of your story — don't let it get lost. Join MyBirdieBoard today and start building yours.</p>
               </section>
             </div>
 
