@@ -85,6 +85,9 @@
     --border: 220 13% 91%;
     --input: 220 13% 91%;
     --ring: 142 35% 23%;
+    /* color must be re-declared here: children without their own text color
+       inherit the computed value from body, which stays light in dark mode. */
+    color: hsl(var(--foreground));
   }
 }
 
