@@ -334,6 +334,9 @@ const ScoreProgressionChart = ({
                   />
                   <YAxis domain={['dataMin - 2', 'dataMax + 2']} tick={{ fontSize: 11 }} />
                   <Tooltip
+                    contentStyle={tooltipContentStyle}
+                    labelStyle={tooltipLabelStyle}
+                    itemStyle={tooltipItemStyle}
                     formatter={(value: any, _name, item: any) => [
                       `${formatDifferential(Number(value))}${item?.payload?.counting ? ' · counting' : ''}`,
                       'Differential',
