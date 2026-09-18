@@ -15,111 +15,11 @@ interface HandicapCardProps {
   userId: string;
 }
 
-interface RoundForHandicap {
-  id: number;
-  date: string;
-  gross_score: number;
-  course_name: string;
-  tee_name: string;
-  slope: number;
-  rating: number;
-  scoreDifferential: number;
-}
-
 export const HandicapCard = ({ open, onOpenChange, userName, handicap, userId }: HandicapCardProps) => {
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const { data: handicapRounds, isLoading } = useQuery({
-    queryKey: ['handicapRounds', userId, handicap],
-    queryFn: async () => {
-      console.log('Fetching handicap rounds for user:', userId, 'with handicap:', handicap);
-      // Fetch all rounds with course and tee information
-      const { data: rounds, error } = await supabase
-        .from('rounds')
-        .select(`
-          id,
-          date,
-          gross_score,
-          holes_played,
-          course_id,
-          courses:course_id(name),
-          tee_name,
-          tee_id
-        `)
-        .eq('user_id', userId)
-        .order('date', { ascending: false });
-
-      if (error) throw error;
-
-      console.log('Fetched rounds:', rounds);
-
-      // For each round, get the tee info (slope and rating)
-      const roundsWithTeeInfo = await Promise.all(
-        rounds.map(async (round) => {
-          if (!round.tee_id) {
-            console.log('Round missing tee_id:', round);
-            return null;
-          }
-
-          const { data: teeData } = await supabase
-            .from('course_tees')
-            .select('slope, rating, par')
-            .eq('course_id', round.course_id)
-            .eq('tee_id', round.tee_id)
-            .limit(1)
-            .single();
-
-          if (!teeData) {
-            console.log('No tee data found for tee_id:', round.tee_id);
-            return null;
-          }
-
-          // Calculate score differential
-          const adjustedScore = round.holes_played === 9 
-            ? (round.gross_score * 2) + 1 
-            : round.gross_score;
-          
-          const scoreDifferential = ((adjustedScore - (teeData.rating || 72)) * 113) / (teeData.slope || 113);
-
-          return {
-            id: round.id,
-            date: round.date,
-            gross_score: round.gross_score,
-            course_name: round.courses?.name ? courseDisplayName(round.courses.name) : 'Unknown Course',
-            tee_name: round.tee_name || 'Unknown Tee',
-            slope: teeData.slope || 113,
-            rating: teeData.rating || 72,
-            scoreDifferential,
-            holes_played: round.holes_played || 18
-          };
-        })
-      );
-
-      const validRounds = roundsWithTeeInfo.filter(r => r !== null) as RoundForHandicap[];
-      
-      console.log('Valid rounds with tee data:', validRounds.length);
-      
-      // Sort by score differential and take the best ones used for handicap
-      const sortedByDifferential = [...validRounds].sort((a, b) => a.scoreDifferential - b.scoreDifferential);
-      
-      // Determine how many rounds are used based on WHS
-      let roundsToUse = 0;
-      if (validRounds.length >= 20) roundsToUse = 8;
-      else if (validRounds.length >= 15) roundsToUse = 6;
-      else if (validRounds.length >= 10) roundsToUse = 4;
-      else if (validRounds.length >= 5) roundsToUse = 3;
-      else roundsToUse = 1;
-
-      console.log(`Using ${roundsToUse} out of ${validRounds.length} rounds`);
-      const selectedRounds = sortedByDifferential.slice(0, roundsToUse);
-      console.log('Selected rounds for handicap card:', selectedRounds);
-
-      return selectedRounds;
-    },
-    enabled: open,
-    refetchOnMount: true,
-    refetchOnWindowFocus: false
-  });
+  const { data: breakdown, isLoading } = useHandicapBreakdown(userId, open);
+  const handicapRounds = (breakdown?.entries ?? []).filter((entry) => entry.counting);
 
   const handleDownload = async () => {
     setIsDownloading(true);
