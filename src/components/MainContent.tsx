@@ -13,18 +13,11 @@ export const MainContent = ({
       <section aria-labelledby="hero-heading" className="flex-grow flex flex-col justify-center items-center text-left md:text-left px-[16px] py-px my-0">
         <div className="max-w-5xl animate-fade-in mb-4 px-4 mx-auto">
           <h2 id="hero-heading" className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2 drop-shadow-lg my-[50px] text-center md:text-4xl">
-            Log rounds after you play, track your handicap, and see your game improve.
+            Tired of your phone on the course?
           </h2>
-          <p className="text-lg sm:text-xl text-white/90 text-center mb-4 drop-shadow-md md:text-2xl">
-            MyBirdieBoard is a golf score tracker designed for players who want to focus on the course, not their phone. Log your rounds after you play, track your golf handicap automatically, and build a complete history of your performance over time.
+          <p className="text-lg sm:text-xl text-white/90 text-center mb-6 drop-shadow-md md:text-2xl">
+            Play with just a scorecard. Log it in seconds afterwards — and never lose another round.
           </p>
-          <div className="bg-black/35 backdrop-blur-sm px-4 py-4 rounded-lg">
-            <h3 className="text-base sm:text-lg text-white/95 font-medium mb-3 drop-shadow-md my-0 text-center md:text-2xl">
-              Track your scores after you play — no phone on the course, no mid-round distractions. Just pure golf, and a permanent digital record of your journey, progress, and legacy.
-            </h3>
-            <p className="text-xs text-white/80 mb-6 italic text-center sm:text-lg">
-              Built for golfers who want a focused, distraction-free round — and a permanent digital record afterwards.
-            </p>
             
             <div className="flex flex-col sm:flex-row gap-4 mb-4 justify-center items-center">
               <Button size="lg" onClick={onStartSignup} data-id="cta_hero_start_tracking" aria-label="Start tracking your golf rounds" className="text-accent-foreground text-lg px-6 sm:px-8 h-auto py-3 shadow-lg transition-all duration-300 bg-secondary-foreground w-full sm:w-auto">
@@ -40,8 +33,7 @@ export const MainContent = ({
             </div>
             
             
-            {/* Micro trust row */}
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-sm sm:text-base text-white/90 mt-4 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-sm sm:text-base text-white/90 mt-6 justify-center items-center">
               <div className="flex items-center gap-1.5">
                 <span className="text-accent-foreground">✓</span>
                 <span>No phone on the course</span>
@@ -55,23 +47,9 @@ export const MainContent = ({
                 <span>Your golf history, saved forever</span>
               </div>
             </div>
-          </div>
         </div>
       </section>
       
-      {/* Why MyBirdieBoard Exists */}
-      <section aria-labelledby="why-heading" className="w-full max-w-5xl mx-auto px-4 pb-6">
-        <h2 id="why-heading" className="text-2xl sm:text-3xl font-bold text-center text-white mb-4 drop-shadow-md">
-          Why MyBirdieBoard Exists
-        </h2>
-        <div className="text-sm sm:text-base text-white/90 text-center mb-6 bg-black/35 backdrop-blur-sm px-4 py-3 rounded-lg md:text-lg space-y-3">
-          <p>Golf is more than a game — it's a personal journey.</p>
-          <p>Keeping a complete history of your rounds is the best way to improve. MyBirdieBoard acts as your personal digital golf logbook, helping you track golf scores, monitor your handicap, and see long-term trends in your performance — all without using your phone on the course.</p>
-          <p>Paper scorecards get lost. Most apps pull your attention away mid-round.</p>
-          <p>MyBirdieBoard was built for golfers who want to stay present on the course — and still keep a powerful digital memory of every round once the day is done.</p>
-        </div>
-        <div className="w-24 h-0.5 bg-white/30 mx-auto mb-8"></div>
-      </section>
       
       <section aria-labelledby="features-heading" className="w-full max-w-5xl mx-auto px-4 pb-8">
         <h2 id="features-heading" className="text-2xl sm:text-3xl font-bold text-center text-white mb-4 drop-shadow-md">Key Features of MyBirdieBoard</h2>
@@ -155,6 +133,22 @@ export const MainContent = ({
             </div>
           </div>
         </div>
+      </section>
+      
+      {/* Why I Built MyBirdieBoard — founder teaser */}
+      <section aria-labelledby="why-heading" className="w-full max-w-5xl mx-auto px-4 pb-6">
+        <h2 id="why-heading" className="text-2xl sm:text-3xl font-bold text-center text-white mb-4 drop-shadow-md">
+          Why I Built MyBirdieBoard
+        </h2>
+        <div className="text-sm sm:text-base text-white/90 text-center mb-5 bg-black/35 backdrop-blur-sm px-4 py-3 rounded-lg md:text-lg">
+          <p>Built by a golfer who was tired of losing track of his rounds. No club membership, no idea of his real handicap, and a phone battery that died mid-round.</p>
+        </div>
+        <div className="text-center mb-6">
+          <Link to="/about" aria-label="Read the full founder story on the About page" className="inline-flex items-center text-accent-foreground font-semibold hover:underline">
+            Read the full story <ArrowRight className="ml-1 h-4 w-4" aria-hidden="true" />
+          </Link>
+        </div>
+        <div className="w-24 h-0.5 bg-white/30 mx-auto mb-8"></div>
       </section>
       
       {/* How It Works Strip */}
