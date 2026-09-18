@@ -141,6 +141,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
               ...profile,
               roundsCount: roundsCount || 0,
               coursesCount: uniqueCourseIds.size,
+              plan: determinePlan(profile, subsByUser.get(profile.id), complimentaryEmails),
             };
           })
         );
@@ -197,6 +198,9 @@ export function UsersList({ onUserSelect }: UsersListProps) {
           break;
         case 'courses':
           comparison = (a.coursesCount || 0) - (b.coursesCount || 0);
+          break;
+        case 'plan':
+          comparison = PLAN_RANK[a.plan] - PLAN_RANK[b.plan];
           break;
         default:
           comparison = 0;
