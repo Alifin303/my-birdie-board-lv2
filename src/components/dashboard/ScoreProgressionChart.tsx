@@ -285,6 +285,74 @@ const ScoreProgressionChart = ({
         </CollapsibleContent>
       </div>
       <CollapsibleContent>
+      {handicapView ? (
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">
+            Each point is a round's score differential. Green points are the lowest differentials from your
+            most recent {MAX_SCORING_RECORD} rounds — those are the ones your handicap index is built from.
+          </p>
+          <div className="h-80 mb-2">
+            {breakdownLoading ? (
+              <div className="flex h-full items-center justify-center">
+                <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+              </div>
+            ) : handicapChartData.length === 0 ? (
+              <div className="flex h-full items-center justify-center text-center text-muted-foreground">
+                We need rounds with course rating and slope data to show this.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={handicapChartData} margin={{ top: 5, right: 20, left: 10, bottom: 25 }}>
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 11 }}
+                    interval="preserveStartEnd"
+                    height={35}
+                    padding={{ left: 10, right: 10 }}
+                  />
+                  <YAxis domain={['dataMin - 2', 'dataMax + 2']} tick={{ fontSize: 11 }} />
+                  <Tooltip
+                    formatter={(value: any, _name, item: any) => [
+                      `${formatDifferential(Number(value))}${item?.payload?.counting ? ' · counting' : ''}`,
+                      'Differential',
+                    ]}
+                    labelFormatter={(label) => `Date: ${label}`}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="differential"
+                    stroke="#6366F1"
+                    strokeWidth={2}
+                    name="differential"
+                    activeDot={{ r: 6 }}
+                    dot={(props: any) => {
+                      const { cx, cy, payload, index } = props;
+                      return (
+                        <circle
+                          key={`dot-${index}`}
+                          cx={cx}
+                          cy={cy}
+                          r={payload.counting ? 6 : 3.5}
+                          fill={payload.counting ? '#16a34a' : '#94a3b8'}
+                          stroke={payload.counting ? '#166534' : '#94a3b8'}
+                          strokeWidth={payload.counting ? 2 : 1}
+                        />
+                      );
+                    }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+          {breakdown?.index != null && (
+            <p className="text-sm font-medium">
+              Handicap Index {formatDifferential(breakdown.index)} — the average of the lowest{' '}
+              {breakdown.selection?.count} of your last {breakdown.scoringRecordSize} rounds.
+            </p>
+          )}
+        </div>
+      ) : (
       <div className="h-80 mb-2">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
