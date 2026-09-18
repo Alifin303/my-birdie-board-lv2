@@ -5,7 +5,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Switch } from "@/components/ui/switch";
 import { Hash, Target, TrendingUp, Calculator } from "lucide-react";
 import { useHandicapBreakdown } from "@/hooks/use-handicap-breakdown";
-import { formatDifferential, MAX_SCORING_RECORD } from "@/lib/whs";
+import { formatDifferential, MAX_SCORING_RECORD, buildHandicapProgression } from "@/lib/whs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CollapseToggle } from "./CollapseToggle";
 import { useCollapsibleSection } from "@/hooks/use-collapsible-section";
@@ -62,12 +62,14 @@ const ScoreProgressionChart = ({
   );
   const handicapChartData = useMemo(() => {
     if (!breakdown?.entries?.length) return [] as any[];
+    const progression = buildHandicapProgression(breakdown.entries);
     return [...breakdown.entries]
       .reverse()
       .map((entry) => ({
         date: format(new Date(entry.date), 'MMM d, yyyy'),
         differential: Number(entry.differential.toFixed(1)),
         counting: entry.counting,
+        indexAfter: progression.get(entry.id) ?? null,
       }));
   }, [breakdown]);
   const [chartData, setChartData] = useState<any[]>([]);
@@ -252,6 +254,9 @@ const ScoreProgressionChart = ({
             <span className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-[#94a3b8]" /> Not used
             </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-0.5 w-4 bg-[#f59e0b]" /> Handicap index after round
+            </span>
           </div>
         )}
 
@@ -337,10 +342,20 @@ const ScoreProgressionChart = ({
                     contentStyle={tooltipContentStyle}
                     labelStyle={tooltipLabelStyle}
                     itemStyle={tooltipItemStyle}
-                    formatter={(value: any, _name, item: any) => [
-                      `${formatDifferential(Number(value))}${item?.payload?.counting ? ' · counting' : ''}`,
-                      'Differential',
-                    ]}
+                    formatter={(value: any, name: any, item: any) => {
+                      if (name === 'indexAfter') {
+                        return [
+                          item?.payload?.indexAfter != null
+                            ? formatDifferential(Number(item.payload.indexAfter))
+                            : '—',
+                          'Handicap index after round',
+                        ];
+                      }
+                      return [
+                        `${formatDifferential(Number(value))}${item?.payload?.counting ? ' · counting' : ''}`,
+                        'Differential',
+                      ];
+                    }}
                     labelFormatter={(label) => `Date: ${label}`}
                   />
                   <Line
@@ -364,6 +379,16 @@ const ScoreProgressionChart = ({
                         />
                       );
                     }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="indexAfter"
+                    stroke="#f59e0b"
+                    strokeWidth={2.5}
+                    connectNulls
+                    dot={{ r: 3.5, fill: '#f59e0b', stroke: '#b45309' }}
+                    activeDot={{ r: 6 }}
+                    name="indexAfter"
                   />
                 </LineChart>
               </ResponsiveContainer>

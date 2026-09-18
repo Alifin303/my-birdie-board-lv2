@@ -132,6 +132,41 @@ export const buildHandicapBreakdown = (rounds: HandicapRoundInput[]): HandicapBr
   };
 };
 
+/**
+ * Replays a player's rounds chronologically and returns the handicap index
+ * that would have been in force after each round (null until 3 rounds are in).
+ * Keys the result by round id so it can be joined back onto the entries.
+ */
+export const buildHandicapProgression = (
+  rounds: HandicapRoundInput[]
+): Map<number, number | null> => {
+  const chronological = [...rounds].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+
+  const result = new Map<number, number | null>();
+  const record: number[] = []; // differentials, oldest first
+
+  for (const round of chronological) {
+    const adjustedScore = round.holesPlayed === 9 ? round.grossScore * 2 + 1 : round.grossScore;
+    const rating = round.holesPlayed === 9 && round.rating < 50 ? round.rating * 2 : round.rating;
+    record.push(scoreDifferential(adjustedScore, rating || 72, round.slope || 113));
+
+    // Only the most recent 20 scores ever count towards the index
+    const window = record.slice(-MAX_SCORING_RECORD);
+    const selection = getWhsSelection(window.length);
+    if (!selection) {
+      result.set(round.id, null);
+      continue;
+    }
+    const best = [...window].sort((a, b) => a - b).slice(0, selection.count);
+    const average = best.reduce((sum, d) => sum + d, 0) / best.length;
+    result.set(round.id, Number(capIndex(average + selection.adjustment).toFixed(1)));
+  }
+
+  return result;
+};
+
 export const formatIndex = (value: number): string =>
   value < 0 ? `+${Math.abs(value).toFixed(1)}` : value.toFixed(1);
 
