@@ -229,6 +229,19 @@ export function UsersList({ onUserSelect }: UsersListProps) {
       : <ChevronDown className="h-4 w-4 inline ml-1" />;
   };
 
+  const getPlanBadge = (plan: UserPlan) => {
+    switch (plan) {
+      case "Premium":
+        return <Badge>Premium</Badge>;
+      case "Trialing":
+        return <Badge className="bg-blue-500/20 text-blue-600 border-blue-500/30">Trialing</Badge>;
+      case "Complimentary":
+        return <Badge variant="secondary">Complimentary</Badge>;
+      default:
+        return <Badge variant="outline" className="text-muted-foreground">Free</Badge>;
+    }
+  };
+
   if (loading) {
     return <UsersListSkeleton />;
   }
@@ -351,6 +364,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
                   <TableCell className="text-right">{user.handicap?.toFixed(1) || 'N/A'}</TableCell>
                   <TableCell className="text-right">{user.roundsCount}</TableCell>
                   <TableCell className="text-right">{user.coursesCount}</TableCell>
+                  <TableCell>{getPlanBadge(user.plan)}</TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
