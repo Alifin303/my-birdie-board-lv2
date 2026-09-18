@@ -34,44 +34,49 @@ interface User {
   email: string;
   created_at: string;
   plan: UserPlan;
+  planEndsAt: string | null;
 }
 
 // Plan rank used for sorting (higher = further along the funnel)
 const PLAN_RANK: Record<UserPlan, number> = {
   Free: 0,
   Complimentary: 1,
-  Trialing: 2,
-  Premium: 3,
+  Cancelling: 2,
+  Trialing: 3,
+  Premium: 4,
 };
 
 const determinePlan = (
   profile: any,
   subscription: any,
   complimentaryEmails: Set<string>
-): UserPlan => {
+): { plan: UserPlan; planEndsAt: string | null } => {
   // Admin-granted complimentary access
-  if (subscription?.status === "complimentary") return "Complimentary";
+  if (subscription?.status === "complimentary") return { plan: "Complimentary", planEndsAt: null };
   if (profile.email && complimentaryEmails.has(profile.email.toLowerCase())) {
-    return "Complimentary";
+    return { plan: "Complimentary", planEndsAt: null };
   }
 
-  // Cancelled but still inside the paid period counts as Premium
-  const stillInPeriod =
-    subscription?.current_period_end &&
-    new Date(subscription.current_period_end) > new Date();
+  const periodEnd = subscription?.current_period_end || null;
+  const stillInPeriod = periodEnd && new Date(periodEnd) > new Date();
 
-  if (subscription?.status === "trialing") return "Trialing";
+  // Cancelled in Stripe but still inside the paid period — access until the end date
+  if (subscription && stillInPeriod &&
+    (subscription.cancel_at_period_end === true || subscription.status === "canceled")) {
+    return { plan: "Cancelling", planEndsAt: periodEnd };
+  }
+
+  if (subscription?.status === "trialing") return { plan: "Trialing", planEndsAt: periodEnd };
   if (
     subscription &&
     (subscription.status === "active" ||
       subscription.status === "paid" ||
-      (subscription.cancel_at_period_end === true && stillInPeriod) ||
       ((subscription.status === "incomplete" || subscription.status === "past_due") && stillInPeriod))
   ) {
-    return "Premium";
+    return { plan: "Premium", planEndsAt: periodEnd };
   }
 
-  return "Free";
+  return { plan: "Free", planEndsAt: null };
 };
 
 interface UsersListProps {
