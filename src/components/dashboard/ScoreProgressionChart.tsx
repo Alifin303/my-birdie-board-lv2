@@ -41,8 +41,14 @@ const ScoreProgressionChart = ({
   onScoreTypeChange,
   handicapIndex = 0,
   scoreMode: externalScoreMode,
-  onScoreModeChange 
+  onScoreModeChange,
+  userId
 }: ScoreProgressionChartProps) => {
+  const [handicapView, setHandicapView] = useState(false);
+  const { data: breakdown, isLoading: breakdownLoading } = useHandicapBreakdown(
+    userId,
+    handicapView
+  );
   const [chartData, setChartData] = useState<any[]>([]);
   const [displayMode, setDisplayMode] = useState<'strokes' | 'to_par'>('strokes');
   const [showParLine, setShowParLine] = useState(false);
