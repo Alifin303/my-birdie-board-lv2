@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { format } from "date-fns";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Switch } from "@/components/ui/switch";
-import { Hash, Target, TrendingUp } from "lucide-react";
+import { Hash, Target, TrendingUp, Calculator } from "lucide-react";
+import { useHandicapBreakdown } from "@/hooks/use-handicap-breakdown";
+import { formatDifferential, MAX_SCORING_RECORD } from "@/lib/whs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CollapseToggle } from "./CollapseToggle";
 import { useCollapsibleSection } from "@/hooks/use-collapsible-section";
@@ -28,6 +30,7 @@ interface ScoreProgressionChartProps {
   handicapIndex?: number;
   scoreMode?: 'stroke' | 'stableford';
   onScoreModeChange?: (mode: 'stroke' | 'stableford') => void;
+  userId?: string;
 }
 
 type ScoreMode = 'stroke' | 'stableford';
@@ -38,8 +41,24 @@ const ScoreProgressionChart = ({
   onScoreTypeChange,
   handicapIndex = 0,
   scoreMode: externalScoreMode,
-  onScoreModeChange 
+  onScoreModeChange,
+  userId
 }: ScoreProgressionChartProps) => {
+  const [handicapView, setHandicapView] = useState(false);
+  const { data: breakdown, isLoading: breakdownLoading } = useHandicapBreakdown(
+    userId,
+    handicapView
+  );
+  const handicapChartData = useMemo(() => {
+    if (!breakdown?.entries?.length) return [] as any[];
+    return [...breakdown.entries]
+      .reverse()
+      .map((entry) => ({
+        date: format(new Date(entry.date), 'MMM d, yyyy'),
+        differential: Number(entry.differential.toFixed(1)),
+        counting: entry.counting,
+      }));
+  }, [breakdown]);
   const [chartData, setChartData] = useState<any[]>([]);
   const [displayMode, setDisplayMode] = useState<'strokes' | 'to_par'>('strokes');
   const [showParLine, setShowParLine] = useState(false);
@@ -169,7 +188,7 @@ const ScoreProgressionChart = ({
         {/* Score Type & Mode Toggles */}
         <div className="flex flex-wrap justify-center gap-4">
           {/* Gross/Net Toggle */}
-          {onScoreTypeChange && (
+          {onScoreTypeChange && !handicapView && (
             <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg shadow-md border border-border">
               <button 
                 onClick={() => onScoreTypeChange('gross')} 
@@ -186,26 +205,46 @@ const ScoreProgressionChart = ({
             </div>
           )}
           
-          {/* Score Mode Toggle (Stroke/Stableford) */}
+          {/* Score Mode Toggle (Stroke/Stableford/Handicap) */}
           <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg shadow-md border border-border">
             <button 
-              onClick={() => handleScoreModeChange('stroke')} 
-              className={`px-4 py-1.5 rounded-md text-sm font-medium min-w-[90px] flex items-center justify-center gap-1.5 transition-colors ${scoreMode === 'stroke' ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted'}`}
+              onClick={() => { setHandicapView(false); handleScoreModeChange('stroke'); }} 
+              className={`px-4 py-1.5 rounded-md text-sm font-medium min-w-[90px] flex items-center justify-center gap-1.5 transition-colors ${!handicapView && scoreMode === 'stroke' ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted'}`}
             >
               <Hash className="h-4 w-4" />
               Stroke
             </button>
             <button 
-              onClick={() => handleScoreModeChange('stableford')} 
-              className={`px-4 py-1.5 rounded-md text-sm font-medium min-w-[90px] flex items-center justify-center gap-1.5 transition-colors ${scoreMode === 'stableford' ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted'}`}
+              onClick={() => { setHandicapView(false); handleScoreModeChange('stableford'); }} 
+              className={`px-4 py-1.5 rounded-md text-sm font-medium min-w-[90px] flex items-center justify-center gap-1.5 transition-colors ${!handicapView && scoreMode === 'stableford' ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted'}`}
             >
               <TrendingUp className="h-4 w-4" />
               Stableford
             </button>
+            {userId && (
+              <button
+                onClick={() => setHandicapView(true)}
+                className={`px-4 py-1.5 rounded-md text-sm font-medium min-w-[90px] flex items-center justify-center gap-1.5 transition-colors ${handicapView ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted'}`}
+              >
+                <Calculator className="h-4 w-4" />
+                Handicap
+              </button>
+            )}
           </div>
         </div>
         
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+        {handicapView && (
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs sm:text-sm">
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#16a34a]" /> Counts towards your handicap
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#94a3b8]" /> Not used
+            </span>
+          </div>
+        )}
+
+        <div className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 ${handicapView ? 'hidden' : ''}`}>
           <ToggleGroup 
             type="single" 
             value={holeFilter} 
@@ -256,6 +295,74 @@ const ScoreProgressionChart = ({
         </CollapsibleContent>
       </div>
       <CollapsibleContent>
+      {handicapView ? (
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">
+            Each point is a round's score differential. Green points are the lowest differentials from your
+            most recent {MAX_SCORING_RECORD} rounds — those are the ones your handicap index is built from.
+          </p>
+          <div className="h-80 mb-2">
+            {breakdownLoading ? (
+              <div className="flex h-full items-center justify-center">
+                <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+              </div>
+            ) : handicapChartData.length === 0 ? (
+              <div className="flex h-full items-center justify-center text-center text-muted-foreground">
+                We need rounds with course rating and slope data to show this.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={handicapChartData} margin={{ top: 5, right: 20, left: 10, bottom: 25 }}>
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 11 }}
+                    interval="preserveStartEnd"
+                    height={35}
+                    padding={{ left: 10, right: 10 }}
+                  />
+                  <YAxis domain={['dataMin - 2', 'dataMax + 2']} tick={{ fontSize: 11 }} />
+                  <Tooltip
+                    formatter={(value: any, _name, item: any) => [
+                      `${formatDifferential(Number(value))}${item?.payload?.counting ? ' · counting' : ''}`,
+                      'Differential',
+                    ]}
+                    labelFormatter={(label) => `Date: ${label}`}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="differential"
+                    stroke="#6366F1"
+                    strokeWidth={2}
+                    name="differential"
+                    activeDot={{ r: 6 }}
+                    dot={(props: any) => {
+                      const { cx, cy, payload, index } = props;
+                      return (
+                        <circle
+                          key={`dot-${index}`}
+                          cx={cx}
+                          cy={cy}
+                          r={payload.counting ? 6 : 3.5}
+                          fill={payload.counting ? '#16a34a' : '#94a3b8'}
+                          stroke={payload.counting ? '#166534' : '#94a3b8'}
+                          strokeWidth={payload.counting ? 2 : 1}
+                        />
+                      );
+                    }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+          {breakdown?.index != null && (
+            <p className="text-sm font-medium">
+              Handicap Index {formatDifferential(breakdown.index)} — the average of the lowest{' '}
+              {breakdown.selection?.count} of your last {breakdown.scoringRecordSize} rounds.
+            </p>
+          )}
+        </div>
+      ) : (
       <div className="h-80 mb-2">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
@@ -312,6 +419,7 @@ const ScoreProgressionChart = ({
           </LineChart>
         </ResponsiveContainer>
       </div>
+      )}
       </CollapsibleContent>
     </div>
     </Collapsible>

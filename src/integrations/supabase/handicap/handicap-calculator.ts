@@ -1,3 +1,4 @@
+import { capIndex, getWhsSelection, MAX_SCORING_RECORD } from "@/lib/whs";
 
 /**
  * World Handicap System (WHS) Implementation
@@ -24,50 +25,31 @@
  * The current implementation provides accurate handicaps for most golfers but could be
  * enhanced with the missing features for tournament-level accuracy.
  */
+/**
+ * Calculates a WHS Handicap Index.
+ * @param scoreDifferentials Differentials ordered MOST RECENT FIRST.
+ */
 export const calculateHandicapIndex = (scoreDifferentials: number[], scores: number[] = [], holes: number[] = []): number => {
   if (!scoreDifferentials || scoreDifferentials.length === 0) return 0;
-  // Sort score differentials from best to worst (lowest to highest)
-  const sortedDifferentials = [...scoreDifferentials].sort((a, b) => a - b);
-  
-  // Log for debugging
-    console.log("Calculating handicap with score differentials:", sortedDifferentials);
-    console.log("Original scores:", scores);
-    console.log("Hole counts:", holes);
-    console.log("User rounds count:", scoreDifferentials.length);
-  
-  // Determine how many differentials to use based on available rounds
-  // Following the World Handicap System
-  let differentialsToUse = 0;
-  if (scoreDifferentials.length >= 20) differentialsToUse = 8;       // Use best 8 of 20
-  else if (scoreDifferentials.length >= 15) differentialsToUse = 6;  // Use best 6 of 15-19
-  else if (scoreDifferentials.length >= 10) differentialsToUse = 4;  // Use best 4 of 10-14
-  else if (scoreDifferentials.length >= 5) differentialsToUse = 3;   // Use best 3 of 5-9
-  else if (scoreDifferentials.length >= 3) differentialsToUse = 1;   // Use best differential if fewer than 5 rounds
-  else differentialsToUse = 1;                                       // Use best differential if fewer than 3 rounds
-  
-  // Take the best differentials based on the number we determined
-  const bestDifferentials = sortedDifferentials.slice(0, differentialsToUse);
-  console.log(`Using best ${differentialsToUse} differentials:`, bestDifferentials);
-  
-  // Calculate the average of best differentials
-  const averageDifferential = bestDifferentials.reduce((sum, diff) => sum + diff, 0) / bestDifferentials.length;
-  console.log("Average of best differentials:", averageDifferential);
-  
-  // Calculate handicap index as per WHS (average differential × 0.96)
-  let calculatedHandicap = averageDifferential * 0.96;
-  console.log("Raw calculated handicap:", calculatedHandicap);
-  
-  // Apply soft cap and hard cap adjustments (requires low handicap index tracking)
-  // For now, we'll implement basic capping - in a full system, you'd track the low handicap index
-  // calculatedHandicap = applyHandicapCaps(calculatedHandicap, lowHandicapIndex);
-  
-  // Cap the handicap at 54, which is the maximum allowed in the World Handicap System
-  // Allow for negative handicaps (plus handicaps) for exceptional players
-  const cappedHandicap = Math.min(54, Math.max(-5, calculatedHandicap));
-  console.log("Final handicap after cap:", cappedHandicap);
 
-  // Return the exact calculated value (don't round) to match Supabase's decimal storage
-  return cappedHandicap;
+  // WHS: only the most recent 20 acceptable scores form the scoring record
+  const scoringRecord = scoreDifferentials.slice(0, MAX_SCORING_RECORD);
+  const selection = getWhsSelection(scoringRecord.length);
+
+  if (!selection) {
+    // Fewer than 3 rounds: no index yet, fall back to the best differential
+    return capIndex(Math.min(...scoringRecord));
+  }
+
+  const bestDifferentials = [...scoringRecord]
+    .sort((a, b) => a - b)
+    .slice(0, selection.count);
+
+  const averageDifferential =
+    bestDifferentials.reduce((sum, diff) => sum + diff, 0) / bestDifferentials.length;
+
+  // WHS index = average of lowest differentials + table adjustment (no 0.96 multiplier)
+  return capIndex(averageDifferential + selection.adjustment);
 };
 
 /**
