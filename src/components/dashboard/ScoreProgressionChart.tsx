@@ -254,6 +254,9 @@ const ScoreProgressionChart = ({
             <span className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-[#94a3b8]" /> Not used
             </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-0.5 w-4 bg-[#f59e0b]" /> Handicap index after round
+            </span>
           </div>
         )}
 
@@ -339,10 +342,20 @@ const ScoreProgressionChart = ({
                     contentStyle={tooltipContentStyle}
                     labelStyle={tooltipLabelStyle}
                     itemStyle={tooltipItemStyle}
-                    formatter={(value: any, _name, item: any) => [
-                      `${formatDifferential(Number(value))}${item?.payload?.counting ? ' · counting' : ''}`,
-                      'Differential',
-                    ]}
+                    formatter={(value: any, name: any, item: any) => {
+                      if (name === 'indexAfter') {
+                        return [
+                          item?.payload?.indexAfter != null
+                            ? formatDifferential(Number(item.payload.indexAfter))
+                            : '—',
+                          'Handicap index after round',
+                        ];
+                      }
+                      return [
+                        `${formatDifferential(Number(value))}${item?.payload?.counting ? ' · counting' : ''}`,
+                        'Differential',
+                      ];
+                    }}
                     labelFormatter={(label) => `Date: ${label}`}
                   />
                   <Line
