@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { format } from "date-fns";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -49,6 +49,16 @@ const ScoreProgressionChart = ({
     userId,
     handicapView
   );
+  const handicapChartData = useMemo(() => {
+    if (!breakdown?.entries?.length) return [] as any[];
+    return [...breakdown.entries]
+      .reverse()
+      .map((entry) => ({
+        date: format(new Date(entry.date), 'MMM d, yyyy'),
+        differential: Number(entry.differential.toFixed(1)),
+        counting: entry.counting,
+      }));
+  }, [breakdown]);
   const [chartData, setChartData] = useState<any[]>([]);
   const [displayMode, setDisplayMode] = useState<'strokes' | 'to_par'>('strokes');
   const [showParLine, setShowParLine] = useState(false);
