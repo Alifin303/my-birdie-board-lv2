@@ -401,6 +401,9 @@ const ScoreProgressionChart = ({
               tick={{ fontSize: 11 }}
             />
             <Tooltip 
+              contentStyle={tooltipContentStyle}
+              labelStyle={tooltipLabelStyle}
+              itemStyle={tooltipItemStyle}
               formatter={(value, name) => {
                 if (name === 'par') {
                   return [displayMode === 'strokes' ? `Par ${value}` : 'Even Par', 'Par'];
