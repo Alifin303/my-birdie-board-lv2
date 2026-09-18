@@ -3,7 +3,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { format } from "date-fns";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Switch } from "@/components/ui/switch";
-import { Hash, Target, TrendingUp } from "lucide-react";
+import { Hash, Target, TrendingUp, Calculator } from "lucide-react";
+import { useHandicapBreakdown } from "@/hooks/use-handicap-breakdown";
+import { formatDifferential, MAX_SCORING_RECORD } from "@/lib/whs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CollapseToggle } from "./CollapseToggle";
 import { useCollapsibleSection } from "@/hooks/use-collapsible-section";
@@ -28,6 +30,7 @@ interface ScoreProgressionChartProps {
   handicapIndex?: number;
   scoreMode?: 'stroke' | 'stableford';
   onScoreModeChange?: (mode: 'stroke' | 'stableford') => void;
+  userId?: string;
 }
 
 type ScoreMode = 'stroke' | 'stableford';
