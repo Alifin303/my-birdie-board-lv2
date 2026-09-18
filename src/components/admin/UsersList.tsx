@@ -19,6 +19,9 @@ import {
 } from "@/components/ui/select";
 import { Search, Eye, ChevronUp, ChevronDown } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+
+type UserPlan = "Free" | "Premium" | "Trialing" | "Complimentary";
 
 interface User {
   id: string;
@@ -30,7 +33,46 @@ interface User {
   coursesCount: number;
   email: string;
   created_at: string;
+  plan: UserPlan;
 }
+
+// Plan rank used for sorting (higher = further along the funnel)
+const PLAN_RANK: Record<UserPlan, number> = {
+  Free: 0,
+  Complimentary: 1,
+  Trialing: 2,
+  Premium: 3,
+};
+
+const determinePlan = (
+  profile: any,
+  subscription: any,
+  complimentaryEmails: Set<string>
+): UserPlan => {
+  // Admin-granted complimentary access
+  if (subscription?.status === "complimentary") return "Complimentary";
+  if (profile.email && complimentaryEmails.has(profile.email.toLowerCase())) {
+    return "Complimentary";
+  }
+
+  // Cancelled but still inside the paid period counts as Premium
+  const stillInPeriod =
+    subscription?.current_period_end &&
+    new Date(subscription.current_period_end) > new Date();
+
+  if (subscription?.status === "trialing") return "Trialing";
+  if (
+    subscription &&
+    (subscription.status === "active" ||
+      subscription.status === "paid" ||
+      (subscription.cancel_at_period_end === true && stillInPeriod) ||
+      ((subscription.status === "incomplete" || subscription.status === "past_due") && stillInPeriod))
+  ) {
+    return "Premium";
+  }
+
+  return "Free";
+};
 
 interface UsersListProps {
   onUserSelect: (userId: string) => void;
@@ -55,6 +97,24 @@ export function UsersList({ onUserSelect }: UsersListProps) {
           .select('*, created_at');
           
         if (profilesError) throw profilesError;
+        
+        // Fetch all subscriptions and complimentary accounts in one go
+        const { data: subscriptions, error: subsError } = await supabase
+          .from('customer_subscriptions')
+          .select('user_id, status, cancel_at_period_end, current_period_end');
+          
+        if (subsError) throw subsError;
+        
+        const { data: complimentary, error: compError } = await supabase
+          .from('complimentary_accounts')
+          .select('email');
+          
+        if (compError) throw compError;
+        
+        const subsByUser = new Map((subscriptions || []).map((s: any) => [s.user_id, s]));
+        const complimentaryEmails = new Set(
+          (complimentary || []).map((c: any) => (c.email || '').toLowerCase()).filter(Boolean)
+        );
         
         // For each user, count their rounds and unique courses
         const usersWithStats = await Promise.all(
@@ -81,6 +141,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
               ...profile,
               roundsCount: roundsCount || 0,
               coursesCount: uniqueCourseIds.size,
+              plan: determinePlan(profile, subsByUser.get(profile.id), complimentaryEmails),
             };
           })
         );
@@ -138,6 +199,9 @@ export function UsersList({ onUserSelect }: UsersListProps) {
         case 'courses':
           comparison = (a.coursesCount || 0) - (b.coursesCount || 0);
           break;
+        case 'plan':
+          comparison = PLAN_RANK[a.plan] - PLAN_RANK[b.plan];
+          break;
         default:
           comparison = 0;
       }
@@ -163,6 +227,19 @@ export function UsersList({ onUserSelect }: UsersListProps) {
     return sortDirection === 'asc' 
       ? <ChevronUp className="h-4 w-4 inline ml-1" />
       : <ChevronDown className="h-4 w-4 inline ml-1" />;
+  };
+
+  const getPlanBadge = (plan: UserPlan) => {
+    switch (plan) {
+      case "Premium":
+        return <Badge>Premium</Badge>;
+      case "Trialing":
+        return <Badge className="bg-blue-500/20 text-blue-600 border-blue-500/30">Trialing</Badge>;
+      case "Complimentary":
+        return <Badge variant="secondary">Complimentary</Badge>;
+      default:
+        return <Badge variant="outline" className="text-muted-foreground">Free</Badge>;
+    }
   };
 
   if (loading) {
@@ -197,6 +274,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
               <SelectItem value="handicap">Handicap</SelectItem>
               <SelectItem value="rounds">Rounds</SelectItem>
               <SelectItem value="courses">Courses</SelectItem>
+              <SelectItem value="plan">Plan</SelectItem>
             </SelectContent>
           </Select>
           
@@ -255,13 +333,19 @@ export function UsersList({ onUserSelect }: UsersListProps) {
               >
                 Courses {renderSortIcon('courses')}
               </TableHead>
+              <TableHead 
+                className="cursor-pointer"
+                onClick={() => handleSort('plan')}
+              >
+                Plan {renderSortIcon('plan')}
+              </TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
+                <TableCell colSpan={8} className="text-center py-6 text-muted-foreground">
                   {searchTerm ? 'No users match your search.' : 'No users found.'}
                 </TableCell>
               </TableRow>
@@ -280,6 +364,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
                   <TableCell className="text-right">{user.handicap?.toFixed(1) || 'N/A'}</TableCell>
                   <TableCell className="text-right">{user.roundsCount}</TableCell>
                   <TableCell className="text-right">{user.coursesCount}</TableCell>
+                  <TableCell>{getPlanBadge(user.plan)}</TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
