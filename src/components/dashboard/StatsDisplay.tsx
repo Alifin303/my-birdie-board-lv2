@@ -405,13 +405,20 @@ export const HandicapCircle = ({ userRounds, roundsLoading, scoreType, onScoreTy
       )}
 
       {userName && userId && (
-        <HandicapCard
-          open={showHandicapCard}
-          onOpenChange={setShowHandicapCard}
-          userName={userName}
-          handicap={displayHandicap}
-          userId={userId}
-        />
+        <>
+          <HandicapCard
+            open={showHandicapCard}
+            onOpenChange={setShowHandicapCard}
+            userName={userName}
+            handicap={displayHandicap}
+            userId={userId}
+          />
+          <HandicapCalculationDialog
+            open={showHandicapCalc}
+            onOpenChange={setShowHandicapCalc}
+            userId={userId}
+          />
+        </>
       )}
     </div>
   );
