@@ -175,7 +175,7 @@ export const routes: RouteRecord[] = [
   { path: '/auth/reset-password', element: P(<LazyWrapper><ResetPassword /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
   { path: '/checkout', element: P(<LazyWrapper><Checkout /></LazyWrapper>), errorElement: <RouteErrorFallback /> },
   { path: '/dashboard', element: P(<ThemedPrivatePage><ProtectedRoute><LazyWrapper><Dashboard /></LazyWrapper></ProtectedRoute></ThemedPrivatePage>), errorElement: <RouteErrorFallback /> },
-  { path: '/milestones', element: P(<ProtectedRoute><LazyWrapper><MilestonesPage /></LazyWrapper></ProtectedRoute>), errorElement: <RouteErrorFallback /> },
+  { path: '/milestones', element: P(<ThemedPrivatePage><ProtectedRoute><LazyWrapper><MilestonesPage /></LazyWrapper></ProtectedRoute></ThemedPrivatePage>), errorElement: <RouteErrorFallback /> },
   { path: '/admin', element: P(<ThemedPrivatePage><LazyWrapper><Admin /></LazyWrapper></ThemedPrivatePage>), errorElement: <RouteErrorFallback /> },
 
   // Redirects
