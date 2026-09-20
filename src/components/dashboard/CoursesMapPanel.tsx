@@ -1,5 +1,4 @@
 import { courseDisplayName } from "@/lib/course-seo";
-import { continentForCountry } from "@/lib/geo-continents";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -201,26 +200,6 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
   const withCoords = visibleCourses.filter((c) => c.latitude != null && c.longitude != null);
   const withoutCoords = visibleCourses.filter((c) => c.latitude == null || c.longitude == null);
 
-  // Played-course stats: courses, countries, continents
-  const playedStats = useMemo(() => {
-    const played = courses.filter((c) => c.kind === "played");
-    const countries = new Set<string>();
-    const continents = new Set<string>();
-    for (const c of played) {
-      const code = c.country_code?.toUpperCase();
-      if (code) {
-        countries.add(code);
-        const continent = continentForCountry(code);
-        if (continent) continents.add(continent);
-      }
-    }
-    return {
-      courses: played.length,
-      countries: countries.size,
-      continents: continents.size,
-    };
-  }, [courses]);
-
   const initialCenter: [number, number] = withCoords[0]
     ? [withCoords[0].latitude as number, withCoords[0].longitude as number]
     : [54.5, -3];
@@ -328,25 +307,6 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
         </span>
       </div>
 
-      {playedStats.courses > 0 && (
-        <div className="grid grid-cols-3 gap-2 sm:gap-3">
-          {(
-            [
-              { value: playedStats.courses, label: "courses played" },
-              { value: playedStats.countries, label: playedStats.countries === 1 ? "country" : "countries" },
-              { value: playedStats.continents, label: playedStats.continents === 1 ? "continent" : "continents" },
-            ] as const
-          ).map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-lg border bg-card p-3 text-center shadow-sm"
-            >
-              <div className="text-2xl font-bold text-primary">{stat.value}</div>
-              <div className="text-xs text-muted-foreground">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
