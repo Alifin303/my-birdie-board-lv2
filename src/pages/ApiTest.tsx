@@ -21,7 +21,7 @@ const ApiTest = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<GolfCourse[]>([]);
-  const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [courseDetails, setCourseDetails] = useState<CourseDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [rawResponse, setRawResponse] = useState<string | null>(null);
@@ -141,7 +141,7 @@ This may be due to CORS restrictions, API unavailability, or network issues.`);
     }
   };
 
-  const handleGetDetails = async (courseId: number) => {
+  const handleGetDetails = async (courseId: string) => {
     setIsLoading(true);
     setError(null);
     setCourseDetails(null);
@@ -320,8 +320,8 @@ This may be due to CORS restrictions, API unavailability, or network issues.`);
               {searchResults.map((course) => (
                 <div 
                   key={`${course.id}`} 
-                  className={`p-4 hover:bg-muted cursor-pointer ${selectedCourseId === Number(course.id) ? 'bg-muted' : ''}`}
-                  onClick={() => handleGetDetails(Number(course.id))}
+                  className={`p-4 hover:bg-muted cursor-pointer ${selectedCourseId === String(course.id) ? 'bg-muted' : ''}`}
+                  onClick={() => handleGetDetails(String(course.id))}
                 >
                   <p className="font-medium">{course.club_name}</p>
                   <p className="text-sm">{course.course_name}</p>
