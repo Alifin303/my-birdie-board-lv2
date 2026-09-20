@@ -12,7 +12,7 @@ const UA = "MyBirdieBoard/1.0 (https://mybirdieboard.com)";
 
 async function geocode(query: string) {
   if (!query || query.trim().length < 3) return null;
-  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(
+  const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&q=${encodeURIComponent(
     query
   )}`;
   const res = await fetch(url, {
@@ -27,7 +27,12 @@ async function geocode(query: string) {
   const lat = parseFloat(data[0].lat);
   const lon = parseFloat(data[0].lon);
   if (isNaN(lat) || isNaN(lon)) return null;
-  return { latitude: lat, longitude: lon };
+  const address = data[0].address ?? {};
+  const countryName: string | undefined = address.country;
+  const countryCode: string | undefined = address.country_code
+    ? String(address.country_code).toUpperCase()
+    : undefined;
+  return { latitude: lat, longitude: lon, country: countryName, country_code: countryCode };
 }
 
 serve(async (req) => {
@@ -123,11 +128,16 @@ serve(async (req) => {
       if (hit) {
         const { error } = await supabase
           .from("courses")
-          .update({ latitude: hit.latitude, longitude: hit.longitude })
+          .update({
+            latitude: hit.latitude,
+            longitude: hit.longitude,
+            ...(hit.country ? { country: hit.country } : {}),
+            ...(hit.country_code ? { country_code: hit.country_code } : {}),
+          })
           .eq("id", courseId);
         if (error) console.log("update failed", error.message);
         return new Response(
-          JSON.stringify({ ...hit, source: "geocode", query: q }),
+          JSON.stringify({ latitude: hit.latitude, longitude: hit.longitude, source: "geocode", query: q }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
