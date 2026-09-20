@@ -2,7 +2,7 @@ import { searchCourses } from "@/services/golfCourseApi";
 import { searchCourses as searchDatabaseCourses } from "@/integrations/supabase/course/course-queries";
 
 export interface CourseSearchResult {
-  id: number;
+  id: number | string;
   name: string;
   clubName: string;
   city: string;
@@ -44,7 +44,7 @@ export async function searchAllCourses(query: string): Promise<CourseSearchResul
     apiCourses = apiResults
       .filter((course: any) => !knownApiIds.has(String(course.id)))
       .map((course: any) => ({
-        id: typeof course.id === "string" ? parseInt(course.id, 10) : course.id,
+        id: course.id,
         name: course.course_name || course.name || course.club_name || "",
         clubName: course.club_name || course.name || "",
         city: course.location?.city || "",

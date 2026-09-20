@@ -6,7 +6,7 @@ export interface HoleSelection {
 }
 
 export type SimplifiedGolfCourse = {
-  id: number;
+  id: number | string;
   name: string;
   clubName: string;
   city: string;
