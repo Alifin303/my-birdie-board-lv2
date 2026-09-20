@@ -189,6 +189,8 @@ export type Database = {
         Row: {
           api_course_id: string | null
           city: string | null
+          country: string | null
+          country_code: string | null
           created_at: string
           id: number
           latitude: number | null
@@ -201,6 +203,8 @@ export type Database = {
         Insert: {
           api_course_id?: string | null
           city?: string | null
+          country?: string | null
+          country_code?: string | null
           created_at?: string
           id?: number
           latitude?: number | null
@@ -213,6 +217,8 @@ export type Database = {
         Update: {
           api_course_id?: string | null
           city?: string | null
+          country?: string | null
+          country_code?: string | null
           created_at?: string
           id?: number
           latitude?: number | null
