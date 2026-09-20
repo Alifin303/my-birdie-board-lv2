@@ -134,8 +134,9 @@ export const convertToSimplifiedCourseDetail = (courseDetail: CourseDetail): Sim
     }));
   }
   
-  const courseId = typeof courseDetail.id === 'string' ? parseInt(courseDetail.id, 10) : 
-                   typeof courseDetail.id === 'number' ? courseDetail.id : 0;
+  const parsedCourseId = typeof courseDetail.id === 'string' ? parseInt(courseDetail.id, 10) :
+                         typeof courseDetail.id === 'number' ? courseDetail.id : 0;
+  const courseId = Number.isFinite(parsedCourseId) ? parsedCourseId : 0;
 
   const simplified: SimplifiedCourseDetail = {
     id: courseId,

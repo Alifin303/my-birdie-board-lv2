@@ -54,7 +54,7 @@ export function createSearchHandlers({
       const combinedResults = [
         ...userAddedCourses, 
         ...filteredApiResults.map(course => ({
-          id: typeof course.id === 'string' ? parseInt(course.id) : course.id,
+          id: course.id,
           name: course.course_name || (course as any).name || '',
           clubName: course.club_name || (course as any).name || '',
           city: course.location?.city || '',
