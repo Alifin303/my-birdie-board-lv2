@@ -327,6 +327,26 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
           On your bucket list
         </span>
       </div>
+
+      {playedStats.courses > 0 && (
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          {(
+            [
+              { value: playedStats.courses, label: "courses played" },
+              { value: playedStats.countries, label: playedStats.countries === 1 ? "country" : "countries" },
+              { value: playedStats.continents, label: playedStats.continents === 1 ? "continent" : "continents" },
+            ] as const
+          ).map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-lg border bg-card p-3 text-center shadow-sm"
+            >
+              <div className="text-2xl font-bold text-primary">{stat.value}</div>
+              <div className="text-xs text-muted-foreground">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
