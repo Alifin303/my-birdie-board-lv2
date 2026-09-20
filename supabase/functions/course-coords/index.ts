@@ -35,6 +35,21 @@ async function geocode(query: string) {
   return { latitude: lat, longitude: lon, country: countryName, country_code: countryCode };
 }
 
+async function reverseGeocode(lat: number, lon: number) {
+  const url = `https://nominatim.openstreetmap.org/reverse?format=json&zoom=5&addressdetails=1&lat=${lat}&lon=${lon}`;
+  const res = await fetch(url, {
+    headers: { "User-Agent": UA, "Accept-Language": "en", Accept: "application/json" },
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  const address = data?.address ?? {};
+  if (!address.country) return null;
+  return {
+    country: String(address.country),
+    country_code: address.country_code ? String(address.country_code).toUpperCase() : undefined,
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -87,9 +102,24 @@ serve(async (req) => {
             const course = json?.course ?? json;
             const loc = course?.location ?? {};
             if (typeof loc.latitude === "number" && typeof loc.longitude === "number") {
+              let apiCountry: string | undefined =
+                loc.country && loc.country !== "Unknown" ? String(loc.country) : undefined;
+              let apiCountryCode: string | undefined;
+              if (!apiCountry) {
+                const rev = await reverseGeocode(loc.latitude, loc.longitude).catch(() => null);
+                if (rev) {
+                  apiCountry = rev.country;
+                  apiCountryCode = rev.country_code;
+                }
+              }
               await supabase
                 .from("courses")
-                .update({ latitude: loc.latitude, longitude: loc.longitude })
+                .update({
+                  latitude: loc.latitude,
+                  longitude: loc.longitude,
+                  ...(apiCountry ? { country: apiCountry } : {}),
+                  ...(apiCountryCode ? { country_code: apiCountryCode } : {}),
+                })
                 .eq("id", courseId);
               return new Response(
                 JSON.stringify({ latitude: loc.latitude, longitude: loc.longitude, source: "api" }),
