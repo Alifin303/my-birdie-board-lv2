@@ -33,6 +33,8 @@ function pinIcon(kind: PinKind) {
 
 interface MapCourse extends CourseCoord {
   kind: PinKind;
+  country?: string | null;
+  country_code?: string | null;
 }
 
 export interface BucketCourseInput {
@@ -198,6 +200,26 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
     filter === "all" ? courses : courses.filter((c) => c.kind === filter);
   const withCoords = visibleCourses.filter((c) => c.latitude != null && c.longitude != null);
   const withoutCoords = visibleCourses.filter((c) => c.latitude == null || c.longitude == null);
+
+  // Played-course stats: courses, countries, continents
+  const playedStats = useMemo(() => {
+    const played = courses.filter((c) => c.kind === "played");
+    const countries = new Set<string>();
+    const continents = new Set<string>();
+    for (const c of played) {
+      const code = c.country_code?.toUpperCase();
+      if (code) {
+        countries.add(code);
+        const continent = continentForCountry(code);
+        if (continent) continents.add(continent);
+      }
+    }
+    return {
+      courses: played.length,
+      countries: countries.size,
+      continents: continents.size,
+    };
+  }, [courses]);
 
   const initialCenter: [number, number] = withCoords[0]
     ? [withCoords[0].latitude as number, withCoords[0].longitude as number]
