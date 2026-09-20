@@ -11,6 +11,8 @@ export interface BucketListCourse {
   latitude: number | null;
   longitude: number | null;
   api_course_id: string | null;
+  country: string | null;
+  country_code: string | null;
   added_at: string;
 }
 
@@ -26,7 +28,7 @@ export function useBucketList() {
       const { data, error } = await supabase
         .from("bucket_list")
         .select(
-          "course_id, added_at, courses:course_id(id, name, city, state, latitude, longitude, api_course_id)"
+          "course_id, added_at, courses:course_id(id, name, city, state, latitude, longitude, api_course_id, country, country_code)"
         )
         .eq("user_id", session.user.id)
         .order("added_at", { ascending: false });
@@ -43,6 +45,8 @@ export function useBucketList() {
           latitude: row.courses.latitude,
           longitude: row.courses.longitude,
           api_course_id: row.courses.api_course_id,
+          country: row.courses.country,
+          country_code: row.courses.country_code,
           added_at: row.added_at,
         }));
     },

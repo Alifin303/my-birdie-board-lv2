@@ -1,4 +1,5 @@
 import { courseDisplayName } from "@/lib/course-seo";
+import { continentForCountry } from "@/lib/geo-continents";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +33,8 @@ function pinIcon(kind: PinKind) {
 
 interface MapCourse extends CourseCoord {
   kind: PinKind;
+  country?: string | null;
+  country_code?: string | null;
 }
 
 export interface BucketCourseInput {
@@ -42,6 +45,8 @@ export interface BucketCourseInput {
   latitude: number | null;
   longitude: number | null;
   api_course_id: string | null;
+  country: string | null;
+  country_code: string | null;
 }
 
 interface CoursesMapPanelProps {
@@ -124,7 +129,7 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
         if (ids.length > 0) {
           const { data, error } = await supabase
             .from("courses")
-            .select("id, name, city, state, latitude, longitude, api_course_id")
+            .select("id, name, city, state, latitude, longitude, api_course_id, country, country_code")
             .in("id", ids);
           if (error) throw error;
           byId = new Map(data?.map((c) => [c.id, c]) || []);
@@ -140,6 +145,8 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
             latitude: c?.latitude ?? null,
             longitude: c?.longitude ?? null,
             api_course_id: c?.api_course_id ?? null,
+            country: c?.country ?? null,
+            country_code: c?.country_code ?? null,
             roundCount: s.count,
             kind: "played",
           };
@@ -153,6 +160,8 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
           latitude: c.latitude,
           longitude: c.longitude,
           api_course_id: c.api_course_id,
+          country: c.country ?? null,
+          country_code: c.country_code ?? null,
           roundCount: 0,
           kind: "bucket",
         }));
@@ -191,6 +200,26 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
     filter === "all" ? courses : courses.filter((c) => c.kind === filter);
   const withCoords = visibleCourses.filter((c) => c.latitude != null && c.longitude != null);
   const withoutCoords = visibleCourses.filter((c) => c.latitude == null || c.longitude == null);
+
+  // Played-course stats: courses, countries, continents
+  const playedStats = useMemo(() => {
+    const played = courses.filter((c) => c.kind === "played");
+    const countries = new Set<string>();
+    const continents = new Set<string>();
+    for (const c of played) {
+      const code = c.country_code?.toUpperCase();
+      if (code) {
+        countries.add(code);
+        const continent = continentForCountry(code);
+        if (continent) continents.add(continent);
+      }
+    }
+    return {
+      courses: played.length,
+      countries: countries.size,
+      continents: continents.size,
+    };
+  }, [courses]);
 
   const initialCenter: [number, number] = withCoords[0]
     ? [withCoords[0].latitude as number, withCoords[0].longitude as number]
@@ -298,6 +327,26 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
           On your bucket list
         </span>
       </div>
+
+      {playedStats.courses > 0 && (
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          {(
+            [
+              { value: playedStats.courses, label: "courses played" },
+              { value: playedStats.countries, label: playedStats.countries === 1 ? "country" : "countries" },
+              { value: playedStats.continents, label: playedStats.continents === 1 ? "continent" : "continents" },
+            ] as const
+          ).map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-lg border bg-card p-3 text-center shadow-sm"
+            >
+              <div className="text-2xl font-bold text-primary">{stat.value}</div>
+              <div className="text-xs text-muted-foreground">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
