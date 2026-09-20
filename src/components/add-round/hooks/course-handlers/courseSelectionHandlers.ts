@@ -45,7 +45,7 @@ export function createCourseSelectionHandlers({
       if (course.isUserAdded && !course.isApiCourse && !course.apiCourseId) {
         console.log("Loading user-added course:", course.id);
         
-        const courseDetail = await loadUserAddedCourseDetails(course.id);
+        const courseDetail = await loadUserAddedCourseDetails(Number(course.id));
         
         if (!courseDetail) {
           setDataLoadingError("Failed to load course details. Please try a different course or add a new one.");
@@ -115,7 +115,7 @@ export function createCourseSelectionHandlers({
       else {
         console.log("Loading course by ID:", course.id);
         
-        const courseDetail = await loadUserAddedCourseDetails(course.id);
+        const courseDetail = await loadUserAddedCourseDetails(Number(course.id));
         
         if (!courseDetail) {
           setDataLoadingError("Failed to load course details. Please try a different course or add a new one.");

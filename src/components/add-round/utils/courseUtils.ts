@@ -521,7 +521,7 @@ export const fetchUserAddedCourses = async (query: string): Promise<SimplifiedGo
 
 export const enhanceCourseResults = (courses: SimplifiedGolfCourse[]): SimplifiedGolfCourse[] => {
   return courses.map(course => {
-    const metadata = getCourseMetadataFromLocalStorage(course.id);
+    const metadata = getCourseMetadataFromLocalStorage(Number(course.id));
     return {
       ...course,
       city: course.city || metadata?.city || '',
