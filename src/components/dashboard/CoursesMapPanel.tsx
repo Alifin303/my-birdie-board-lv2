@@ -1,4 +1,5 @@
 import { courseDisplayName } from "@/lib/course-seo";
+import { continentForCountry } from "@/lib/geo-continents";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,6 +43,8 @@ export interface BucketCourseInput {
   latitude: number | null;
   longitude: number | null;
   api_course_id: string | null;
+  country: string | null;
+  country_code: string | null;
 }
 
 interface CoursesMapPanelProps {
@@ -124,7 +127,7 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
         if (ids.length > 0) {
           const { data, error } = await supabase
             .from("courses")
-            .select("id, name, city, state, latitude, longitude, api_course_id")
+            .select("id, name, city, state, latitude, longitude, api_course_id, country, country_code")
             .in("id", ids);
           if (error) throw error;
           byId = new Map(data?.map((c) => [c.id, c]) || []);
@@ -140,6 +143,8 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
             latitude: c?.latitude ?? null,
             longitude: c?.longitude ?? null,
             api_course_id: c?.api_course_id ?? null,
+            country: c?.country ?? null,
+            country_code: c?.country_code ?? null,
             roundCount: s.count,
             kind: "played",
           };
@@ -153,6 +158,8 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
           latitude: c.latitude,
           longitude: c.longitude,
           api_course_id: c.api_course_id,
+          country: c.country ?? null,
+          country_code: c.country_code ?? null,
           roundCount: 0,
           kind: "bucket",
         }));
