@@ -157,6 +157,9 @@ export async function getCourseDetails(courseId: number | string): Promise<Cours
       signal: AbortSignal.timeout(15000)
     });
     
+    if (response.status === 404) {
+      throw new Error(`Course not found for ID "${courseId}".`);
+    }
     if (!response.ok) {
       throw new Error(`API returned error status: ${response.status}`);
     }
