@@ -90,28 +90,10 @@ export const MainStats = ({
       bestStablefordNet: stats.bestStablefordNet
     });
     
-    if (scoreType === 'net' && filteredRounds.length > 0) {
-      const calculatedRounds = filteredRounds.map(round => {
-        const netScore = Math.round(round.gross_score - handicapIndex);
-        const netToPar = Math.round(round.to_par_gross - handicapIndex);
-        return { 
-          id: round.id, 
-          date: round.date, 
-          gross: round.gross_score, 
-          net: netScore, 
-          toPar: round.to_par_gross,
-          toParNet: netToPar,
-          courseName: round.courses?.courseName,
-          clubName: round.courses?.clubName
-        };
-      });
-      
-      const sortedByNetScore = [...calculatedRounds].sort((a, b) => a.net - b.net);
-      const sortedByToParNet = [...calculatedRounds].sort((a, b) => a.toParNet - b.toParNet);
-      
-      stats.bestNetScore = sortedByNetScore[0]?.net || null;
-      stats.bestToParNet = sortedByToParNet[0]?.toParNet || null;
-    }
+    // Net bests come from calculateStats(), which uses each round's
+    // handicap_at_posting snapshot. Never recompute them from the
+    // current handicap, or historical rounds would shift over time.
+
   }
   
   // Render a loading skeleton if data is loading
