@@ -406,9 +406,10 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       const exportHeight = Math.max(1400, Math.ceil(canvasContainer.scrollHeight + 40));
       (canvasContainer as HTMLElement).style.height = `${exportHeight}px`;
       (canvasContainer as HTMLElement).style.overflow = 'hidden';
+      const exportBackground = window.getComputedStyle(canvasContainer).backgroundColor;
       
       const canvas = await html2canvas(canvasContainer, {
-        backgroundColor: 'hsl(40, 33%, 98%)',
+        backgroundColor: exportBackground,
         scale: 2,
         logging: false,
         allowTaint: true,
