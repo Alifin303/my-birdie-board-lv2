@@ -222,17 +222,20 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       
       // Create container for the image
       const canvasContainer = document.createElement('div');
+      canvasContainer.className = 'always-light';
       (canvasContainer as HTMLElement).style.width = '1080px';
-      (canvasContainer as HTMLElement).style.height = '1400px';
+      (canvasContainer as HTMLElement).style.minHeight = '1400px';
       (canvasContainer as HTMLElement).style.position = 'fixed';
-      (canvasContainer as HTMLElement).style.backgroundColor = '#ffffff';
+      (canvasContainer as HTMLElement).style.backgroundColor = 'hsl(var(--background))';
+      (canvasContainer as HTMLElement).style.color = 'hsl(var(--foreground))';
       (canvasContainer as HTMLElement).style.display = 'flex';
       (canvasContainer as HTMLElement).style.flexDirection = 'column';
       (canvasContainer as HTMLElement).style.justifyContent = 'flex-start';
       (canvasContainer as HTMLElement).style.alignItems = 'center';
-      (canvasContainer as HTMLElement).style.overflow = 'hidden';
+      (canvasContainer as HTMLElement).style.overflow = 'visible';
       (canvasContainer as HTMLElement).style.padding = '20px';
       (canvasContainer as HTMLElement).style.fontFamily = 'Arial, sans-serif';
+      (canvasContainer as HTMLElement).style.boxSizing = 'border-box';
       
       // Add logo
       const logoContainer = document.createElement('div');
@@ -270,7 +273,9 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       (scorecardClone as HTMLElement).style.overflow = 'hidden';
       (scorecardClone as HTMLElement).style.marginTop = '80px';
       (scorecardClone as HTMLElement).style.padding = '20px';
-      (scorecardClone as HTMLElement).style.paddingBottom = '120px';
+      (scorecardClone as HTMLElement).style.paddingBottom = '40px';
+      (scorecardClone as HTMLElement).style.backgroundColor = 'hsl(var(--card))';
+      (scorecardClone as HTMLElement).style.color = 'hsl(var(--card-foreground))';
       
       // Force desktop layout for the downloaded image
       const mobileLayouts = scorecardClone.querySelectorAll('.sm\\:hidden, .md\\:hidden');
@@ -352,7 +357,7 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       if (summarySection) {
         (summarySection as HTMLElement).style.marginTop = '40px';
         (summarySection as HTMLElement).style.paddingTop = '30px';
-        (summarySection as HTMLElement).style.marginBottom = '120px';
+        (summarySection as HTMLElement).style.marginBottom = '40px';
       }
       
       const summaryRows = scorecardClone.querySelectorAll('.flex.justify-between');
@@ -396,15 +401,23 @@ export const RoundScorecard = ({ round, isOpen, onOpenChange, handicapIndex = 0 
       
       (canvasContainer as HTMLElement).style.left = '-9999px';
       document.body.appendChild(canvasContainer);
+
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      const exportHeight = Math.max(1400, Math.ceil(canvasContainer.scrollHeight + 40));
+      (canvasContainer as HTMLElement).style.height = `${exportHeight}px`;
+      (canvasContainer as HTMLElement).style.overflow = 'hidden';
+      const exportBackground = window.getComputedStyle(canvasContainer).backgroundColor;
       
       const canvas = await html2canvas(canvasContainer, {
-        backgroundColor: '#ffffff',
+        backgroundColor: exportBackground,
         scale: 2,
         logging: false,
         allowTaint: true,
         useCORS: true,
         width: 1080,
-        height: 1400,
+        height: exportHeight,
+        windowWidth: 1080,
+        windowHeight: exportHeight,
         imageTimeout: 5000,
         onclone: (clonedDoc) => {
           const logoInClone = clonedDoc.querySelector('img');

@@ -14,3 +14,5 @@
 - [x] Verify all four fixes in the rendered pages.
 - [x] Verify the generic golfer copy on pricing, get-started, and homepage, then publish it live.
 - [x] Add persistent dark-mode toggles to the dashboard and admin pages.
+- [x] Make downloaded scorecards readable regardless of the selected dashboard theme.
+- [x] Size downloaded scorecards to include net scores and all detailed statistics.
