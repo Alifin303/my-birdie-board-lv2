@@ -202,6 +202,7 @@ export const CourseLeaderboard = ({
           user_id,
           tee_name,
           holes_played,
+          handicap_at_posting,
           hole_scores
         `)
         .eq('course_id', courseId);
@@ -309,7 +310,10 @@ export const CourseLeaderboard = ({
       
       roundsData.forEach(round => {
         const username = userMap.get(round.user_id) || 'Unknown Player';
-        const playerHandicap = handicapMap.get(round.user_id) || 0;
+        // Lock net scoring to the handicap the round was posted off, so
+        // historical rounds never move when a handicap changes.
+        const playerHandicap = (round as any).handicap_at_posting ?? (handicapMap.get(round.user_id) || 0);
+
         
         console.log(`Round ID ${round.id} - User: ${username}, holes_played: ${round.holes_played}`);
         
