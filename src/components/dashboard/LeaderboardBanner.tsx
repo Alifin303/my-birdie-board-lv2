@@ -126,6 +126,7 @@ export const LeaderboardBanner = ({ userRounds, handicapIndex }: LeaderboardBann
           open={leaderboardOpen}
           onOpenChange={setLeaderboardOpen}
           handicapIndex={handicapIndex}
+          onBack={handleBackToCourseSelection}
         />
       )}
     </>
