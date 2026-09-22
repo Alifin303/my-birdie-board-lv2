@@ -117,6 +117,7 @@ serve(async (req) => {
                 .update({
                   latitude: loc.latitude,
                   longitude: loc.longitude,
+                  coords_source: "api",
                   ...(apiCountry ? { country: apiCountry } : {}),
                   ...(apiCountryCode ? { country_code: apiCountryCode } : {}),
                 })
@@ -161,6 +162,7 @@ serve(async (req) => {
           .update({
             latitude: hit.latitude,
             longitude: hit.longitude,
+            coords_source: "geocode",
             ...(hit.country ? { country: hit.country } : {}),
             ...(hit.country_code ? { country_code: hit.country_code } : {}),
           })
