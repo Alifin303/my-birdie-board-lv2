@@ -36,7 +36,7 @@ serve(async (req) => {
       .from("courses")
       .select("id, name, api_course_id, latitude, longitude, coords_source")
       .not("api_course_id", "is", null)
-      .neq("coords_source", "api")
+      .or("coords_source.is.null,coords_source.neq.api")
       .limit(limit);
 
     if (onlyMissing) query = supabase
