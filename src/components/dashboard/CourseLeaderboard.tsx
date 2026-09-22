@@ -202,6 +202,7 @@ export const CourseLeaderboard = ({
           user_id,
           tee_name,
           holes_played,
+          handicap_at_posting,
           hole_scores
         `)
         .eq('course_id', courseId);
