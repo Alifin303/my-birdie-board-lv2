@@ -36,6 +36,7 @@ interface CourseLeaderboardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   handicapIndex?: number;
+  onBack?: () => void;
 }
 
 export const CourseLeaderboard = ({ 
@@ -43,7 +44,8 @@ export const CourseLeaderboard = ({
   courseName, 
   open, 
   onOpenChange, 
-  handicapIndex = 0 
+  handicapIndex = 0,
+  onBack
 }: CourseLeaderboardProps) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -582,6 +584,17 @@ export const CourseLeaderboard = ({
   return (
     <Dialog open={open} onOpenChange={handleDialogOpen}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+        {onBack && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="-ml-2 mb-1 w-fit gap-1 text-muted-foreground"
+            onClick={onBack}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Back to course selection
+          </Button>
+        )}
          <DialogHeader>
             <DialogTitle className="text-xl">{courseName} Leaderboards</DialogTitle>
               <DialogDescription>
