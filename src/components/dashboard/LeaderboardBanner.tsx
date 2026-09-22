@@ -59,6 +59,11 @@ export const LeaderboardBanner = ({ userRounds, handicapIndex }: LeaderboardBann
     }
   };
 
+  const handleBackToCourseSelection = () => {
+    setLeaderboardOpen(false);
+    setDialogOpen(true);
+  };
+
   const handleOpenDialog = () => {
     setSelectedCourseId(null);
     setDialogOpen(true);
@@ -121,6 +126,7 @@ export const LeaderboardBanner = ({ userRounds, handicapIndex }: LeaderboardBann
           open={leaderboardOpen}
           onOpenChange={setLeaderboardOpen}
           handicapIndex={handicapIndex}
+          onBack={handleBackToCourseSelection}
         />
       )}
     </>
