@@ -54,24 +54,63 @@ serve(async (req) => {
     let failed = 0;
     const details: Array<Record<string, unknown>> = [];
 
-    for (const course of courses ?? []) {
-      try {
-        const res = await fetch(`${API_BASE_URL}/courses/${course.api_course_id}`, {
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+    // Fetch with retry/backoff on rate limiting (429).
+    const apiFetch = async (url: string) => {
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const res = await fetch(url, {
           headers: { Authorization: `Key ${apiKey}`, Accept: "application/json" },
           signal: AbortSignal.timeout(15000),
         });
-        if (!res.ok) {
-          failed++;
-          details.push({ id: course.id, name: course.name, status: res.status });
-          continue;
+        if (res.status !== 429) return res;
+        await sleep(1500 * (attempt + 1));
+      }
+      return null;
+    };
+
+    // Strip the trailing " - Course" part and any "(12345)" club ids from stored names.
+    const searchName = (name: string) =>
+      (name.split(" - ")[0] || name).replace(/\(\d+\)/g, "").trim();
+
+    for (const course of courses ?? []) {
+      try {
+        let loc: Record<string, unknown> = {};
+        let newApiId: string | null = null;
+
+        const res = await apiFetch(`${API_BASE_URL}/courses/${course.api_course_id}`);
+        if (res && res.ok) {
+          const json = await res.json();
+          loc = (json?.course ?? json)?.location ?? {};
+        } else {
+          // Stale or unknown id — look the course up by name; search now returns coords too.
+          const sres = await apiFetch(
+            `${API_BASE_URL}/search?search_query=${encodeURIComponent(searchName(course.name))}`
+          );
+          if (!sres || !sres.ok) {
+            failed++;
+            details.push({ id: course.id, name: course.name, status: res?.status ?? sres?.status ?? "no-response" });
+            await sleep(400);
+            continue;
+          }
+          const sjson = await sres.json();
+          const hit = Array.isArray(sjson?.courses) ? sjson.courses[0] : null;
+          if (!hit) {
+            failed++;
+            details.push({ id: course.id, name: course.name, status: "not-found" });
+            await sleep(400);
+            continue;
+          }
+          loc = hit.location ?? {};
+          newApiId = hit.id ? String(hit.id) : null;
         }
-        const json = await res.json();
-        const c = json?.course ?? json;
-        const loc = c?.location ?? {};
+
         const lat = typeof loc.latitude === "number" ? loc.latitude : null;
         const lng = typeof loc.longitude === "number" ? loc.longitude : null;
         if (lat === null || lng === null) {
           noCoords++;
+          details.push({ id: course.id, name: course.name, status: "no-coords" });
+          await sleep(400);
           continue;
         }
         const update: Record<string, unknown> = {
@@ -79,6 +118,7 @@ serve(async (req) => {
           longitude: lng,
           coords_source: "api",
         };
+        if (newApiId) update.api_course_id = newApiId;
         if (loc.country && loc.country !== "Unknown") update.country = loc.country;
         if (loc.city && loc.city !== "Unknown") update.city = loc.city;
         if (loc.state && loc.state !== "Unknown") update.state = loc.state;
