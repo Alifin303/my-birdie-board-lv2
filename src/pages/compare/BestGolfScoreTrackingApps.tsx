@@ -19,6 +19,16 @@ const BestGolfScoreTrackingApps = () => {
         </section>
 
         <section>
+          <h2 className="text-2xl font-bold mb-4">Not Just Phone-Free — Actually Distraction-Free</h2>
+          <p className="text-muted-foreground mb-4">
+            Most apps that call themselves "phone-free" still expect you to wear a smartwatch and interact with it mid-round — glancing at GPS distances, tapping in scores hole by hole. MyBirdieBoard works differently: no phone, no watch, no device of any kind during play. Just a scorecard, a pencil, and a proper round of golf. Log everything in one go once you're back at the clubhouse.
+          </p>
+          <p className="text-muted-foreground mb-4">
+            That's not to say smartwatch-based tracking is wrong — it solves a different problem, for golfers who want yardages and live stats during play. But if what you want is to be genuinely unreachable by technology for four hours, those apps only move the distraction from your pocket to your wrist. Post-round tracking removes it entirely.
+          </p>
+        </section>
+
+        <section>
           <h2 className="text-2xl font-bold mb-4">What Makes a Good Golf Score Tracker</h2>
           <p className="text-muted-foreground mb-4">
             A good golf score tracker does three things well: it makes entering scores easy, it calculates meaningful statistics automatically, and it stores your data permanently so you can track progress over time. Everything else is secondary.

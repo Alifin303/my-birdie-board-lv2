@@ -36,7 +36,7 @@ export const MainContent = ({
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-sm sm:text-base text-white/90 mt-6 justify-center items-center">
               <div className="flex items-center gap-1.5">
                 <span className="text-accent-foreground">✓</span>
-                <span>No phone on the course</span>
+                <span>No phone, no watch — nothing during play</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-accent-foreground">✓</span>
