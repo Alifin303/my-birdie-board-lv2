@@ -134,6 +134,7 @@ serve(async (req) => {
         failed++;
         details.push({ id: course.id, error: String(e) });
       }
+      await sleep(400);
     }
 
     return new Response(
