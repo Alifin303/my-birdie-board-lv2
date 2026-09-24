@@ -141,7 +141,7 @@ export const MainContent = ({
           Why I Built MyBirdieBoard
         </h2>
         <div className="text-sm sm:text-base text-white/90 text-center mb-5 bg-black/35 backdrop-blur-sm px-4 py-3 rounded-lg md:text-lg">
-          <p>Built by a golfer who was tired of losing track of his rounds. No club membership, no idea of his real handicap, and a phone battery that died mid-round.</p>
+          <p>No club membership. No idea of my real handicap. A phone that died mid-round, every round. I built MyBirdieBoard to fix all three.</p>
         </div>
         <div className="text-center mb-6">
           <Link to="/about" aria-label="Read the full founder story on the About page" className="inline-flex items-center text-accent-foreground font-semibold hover:underline">
