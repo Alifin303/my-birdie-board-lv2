@@ -18,3 +18,4 @@
 - [x] Size downloaded scorecards to include net scores and all detailed statistics.
 - [x] Keep the bucket-list course dialog above the dashboard map.
 - [x] Show and save complete club and course names in bucket-list search results.
+- [x] Ensure the bucket-list popup background fully contains its fields, buttons, and search results.

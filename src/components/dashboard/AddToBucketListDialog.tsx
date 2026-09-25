@@ -119,7 +119,7 @@ export function AddToBucketListDialog({ open, onOpenChange }: AddToBucketListDia
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="box-border w-[calc(100%-2rem)] max-w-xl overflow-hidden sm:p-7">
           <DialogHeader>
             <DialogTitle>Add a course to your bucket list</DialogTitle>
             <DialogDescription>
@@ -127,7 +127,7 @@ export function AddToBucketListDialog({ open, onOpenChange }: AddToBucketListDia
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3">
+          <div className="min-w-0 space-y-3">
             <div>
               <div className="relative rounded-md bg-background shadow-sm">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -188,7 +188,7 @@ export function AddToBucketListDialog({ open, onOpenChange }: AddToBucketListDia
             {results.length > 0 && (
               <div>
                 <h3 className="text-base sm:text-lg font-medium mb-2">Search Results</h3>
-                <div className="max-h-72 overflow-y-auto rounded-md border divide-y">
+                <div className="max-h-72 min-w-0 overflow-y-auto rounded-md border divide-y">
                   {results.map((course, index) => (
                     <div
                       key={`${course.id}-${index}`}
@@ -205,7 +205,7 @@ export function AddToBucketListDialog({ open, onOpenChange }: AddToBucketListDia
                       <Button
                         size="sm"
                         variant="outline"
-                        className="shrink-0 gap-1.5"
+                        className="h-auto max-w-[45%] shrink-0 gap-1.5 whitespace-normal py-2 text-center leading-tight sm:max-w-none sm:whitespace-nowrap"
                         disabled={pendingId === String(course.id)}
                         onClick={() => handleAdd(course)}
                       >
