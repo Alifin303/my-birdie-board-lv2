@@ -235,7 +235,7 @@ export default function CoursesMapPanel({ userRounds, bucketCourses = [] }: Cour
           </span>
         )}
       </div>
-      <div className="relative h-[420px] sm:h-[520px] w-full overflow-hidden rounded-lg border bg-muted">
+      <div className="relative isolate z-0 h-[420px] sm:h-[520px] w-full overflow-hidden rounded-lg border bg-muted">
         {visibleCourses.length === 0 && !loading ? (
           <div className="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground">
             {filter === "bucket"

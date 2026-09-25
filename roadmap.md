@@ -16,3 +16,5 @@
 - [x] Add persistent dark-mode toggles to the dashboard and admin pages.
 - [x] Make downloaded scorecards readable regardless of the selected dashboard theme.
 - [x] Size downloaded scorecards to include net scores and all detailed statistics.
+- [x] Keep the bucket-list course dialog above the dashboard map.
+- [x] Show and save complete club and course names in bucket-list search results.
