@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, PlusCircle } from "lucide-react";
-import { searchAllCourses, CourseSearchResult } from "@/lib/course-search";
+import { courseSearchDisplayName, searchAllCourses, CourseSearchResult } from "@/lib/course-search";
 import { useToast } from "@/hooks/use-toast";
 import { GolfCourse } from "@/services/golfCourseApi";
 import { courseDisplayName } from "@/lib/course-seo";
@@ -16,11 +16,7 @@ interface AddToBucketListDialogProps {
 }
 
 function resultName(course: CourseSearchResult) {
-  const raw =
-    course.name ||
-    [course.clubName, course.name].filter(Boolean).join(" - ") ||
-    "Unknown course";
-  return courseDisplayName(raw);
+  return courseSearchDisplayName(course);
 }
 
 export function AddToBucketListDialog({ open, onOpenChange }: AddToBucketListDialogProps) {
@@ -69,9 +65,9 @@ export function AddToBucketListDialog({ open, onOpenChange }: AddToBucketListDia
     try {
       await addCourse.mutateAsync({
         id: course.id,
-        name: course.name,
+        name: resultName(course),
         club_name: course.clubName,
-        course_name: course.name,
+        course_name: course.courseName,
         city: course.city,
         state: course.state,
         isApiCourse: course.isApiCourse,

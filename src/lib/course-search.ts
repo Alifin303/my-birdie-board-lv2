@@ -1,15 +1,27 @@
 import { searchCourses } from "@/services/golfCourseApi";
 import { searchCourses as searchDatabaseCourses } from "@/integrations/supabase/course/course-queries";
+import { courseDisplayName } from "@/lib/course-seo";
 
 export interface CourseSearchResult {
   id: number | string;
   name: string;
   clubName: string;
+  courseName: string;
   city: string;
   state: string;
   isUserAdded: boolean;
   isApiCourse: boolean;
   apiCourseId?: string;
+}
+
+export function courseSearchDisplayName(course: Pick<CourseSearchResult, "name" | "clubName" | "courseName">) {
+  const clubName = courseDisplayName(course.clubName || "").trim();
+  const courseName = courseDisplayName(course.courseName || course.name || "").trim();
+
+  if (!clubName) return courseName || "Unknown course";
+  if (!courseName || courseName.toLowerCase() === clubName.toLowerCase()) return clubName;
+  if (courseName.toLowerCase().startsWith(`${clubName.toLowerCase()} - `)) return courseName;
+  return `${clubName} - ${courseName}`;
 }
 
 /**
@@ -26,6 +38,7 @@ export async function searchAllCourses(query: string): Promise<CourseSearchResul
     id: typeof course.id === "string" ? parseInt(course.id, 10) : course.id,
     name: course.name || "",
     clubName: course.name?.split(" - ")[0] || course.name || "",
+    courseName: course.name?.split(" - ").slice(1).join(" - ") || course.name || "",
     city: course.city || "",
     state: course.state || "",
     isUserAdded: !course.api_course_id,
@@ -45,8 +58,13 @@ export async function searchAllCourses(query: string): Promise<CourseSearchResul
       .filter((course: any) => !knownApiIds.has(String(course.id)))
       .map((course: any) => ({
         id: course.id,
-        name: course.course_name || course.name || course.club_name || "",
+        name: courseSearchDisplayName({
+          name: course.course_name || course.name || course.club_name || "",
+          clubName: course.club_name || course.name || "",
+          courseName: course.course_name || course.name || "",
+        }),
         clubName: course.club_name || course.name || "",
+        courseName: course.course_name || course.name || "",
         city: course.location?.city || "",
         state: course.location?.state || "",
         isUserAdded: false,
