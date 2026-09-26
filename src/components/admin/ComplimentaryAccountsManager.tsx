@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { Gift, Trash2, Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { addYears } from "date-fns";
 import {
   Table,
   TableBody,
@@ -79,30 +80,66 @@ export function ComplimentaryAccountsManager() {
 
     try {
       setIsAdding(true);
+      const email = newEmail.trim().toLowerCase();
+      const { data: userData } = await supabase.auth.getUser();
       const { error } = await supabase
         .from('complimentary_accounts')
-        .insert({
-          email: newEmail.trim().toLowerCase(),
-          notes: newNotes.trim() || null
-        });
+        .upsert(
+          {
+            email,
+            notes: newNotes.trim() || null,
+            created_by: userData.user?.id ?? null,
+          },
+          { onConflict: 'email' }
+        );
 
-      if (error) {
-        if (error.code === '23505') {
-          toast.error('This email is already a complimentary account');
+      if (error) throw error;
+
+      // Also grant premium on the member's subscription, same as the user detail page
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .ilike('email', email)
+        .maybeSingle();
+
+      if (profile?.id) {
+        const expiry = addYears(new Date(), 100).toISOString();
+        const { data: existingSub } = await supabase
+          .from('customer_subscriptions')
+          .select('id, status')
+          .eq('user_id', profile.id)
+          .maybeSingle();
+
+        if (existingSub) {
+          if (!['active', 'trialing', 'paid'].includes(existingSub.status)) {
+            const { error: subError } = await supabase
+              .from('customer_subscriptions')
+              .update({ status: 'complimentary', current_period_end: expiry, cancel_at_period_end: false })
+              .eq('user_id', profile.id);
+            if (subError) throw subError;
+          }
         } else {
-          throw error;
+          const { error: subError } = await supabase.from('customer_subscriptions').insert({
+            user_id: profile.id,
+            customer_id: `comp_${profile.id}`,
+            status: 'complimentary',
+            current_period_end: expiry,
+            cancel_at_period_end: false,
+          });
+          if (subError) throw subError;
         }
-        return;
+        toast.success('Complimentary access granted');
+      } else {
+        toast.success('Email added — access applies once they sign up');
       }
 
-      toast.success('Complimentary account added successfully');
       setNewEmail("");
       setNewNotes("");
       setShowAddForm(false);
       fetchAccounts();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding complimentary account:', error);
-      toast.error('Failed to add complimentary account');
+      toast.error(`Failed to add complimentary account${error?.message ? `: ${error.message}` : ''}`);
     } finally {
       setIsAdding(false);
     }
@@ -117,11 +154,27 @@ export function ComplimentaryAccountsManager() {
 
       if (error) throw error;
 
+      // Revoke complimentary subscription for the matching member (paid subs untouched)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .ilike('email', email)
+        .maybeSingle();
+
+      if (profile?.id) {
+        const { error: subError } = await supabase
+          .from('customer_subscriptions')
+          .update({ status: 'canceled', current_period_end: new Date().toISOString() })
+          .eq('user_id', profile.id)
+          .eq('status', 'complimentary');
+        if (subError) throw subError;
+      }
+
       toast.success(`Removed ${email} from complimentary accounts`);
       fetchAccounts();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting complimentary account:', error);
-      toast.error('Failed to remove complimentary account');
+      toast.error(`Failed to remove complimentary account${error?.message ? `: ${error.message}` : ''}`);
     }
   };
 
