@@ -33,6 +33,7 @@ interface User {
   coursesCount: number;
   email: string;
   created_at: string;
+  last_login: string | null;
   plan: UserPlan;
   planEndsAt: string | null;
 }
@@ -442,6 +443,8 @@ function UsersListSkeleton() {
             <TableRow>
               <TableHead>Username</TableHead>
               <TableHead>Name</TableHead>
+              <TableHead className="text-right">Date Joined</TableHead>
+              <TableHead className="text-right">Last Login</TableHead>
               <TableHead className="text-right">Handicap</TableHead>
               <TableHead className="text-right">Rounds</TableHead>
               <TableHead className="text-right">Courses</TableHead>
