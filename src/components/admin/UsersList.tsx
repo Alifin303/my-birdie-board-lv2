@@ -33,6 +33,7 @@ interface User {
   coursesCount: number;
   email: string;
   created_at: string;
+  last_login: string | null;
   plan: UserPlan;
   planEndsAt: string | null;
 }
@@ -195,6 +196,12 @@ export function UsersList({ onUserSelect }: UsersListProps) {
         case 'joined':
           comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
           break;
+        case 'lastlogin': {
+          const aLogin = a.last_login ? new Date(a.last_login).getTime() : 0;
+          const bLogin = b.last_login ? new Date(b.last_login).getTime() : 0;
+          comparison = aLogin - bLogin;
+          break;
+        }
         case 'handicap':
           comparison = (a.handicap || 0) - (b.handicap || 0);
           break;
@@ -294,6 +301,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
               <SelectItem value="username">Username</SelectItem>
               <SelectItem value="name">Full Name</SelectItem>
               <SelectItem value="joined">Date Joined</SelectItem>
+              <SelectItem value="lastlogin">Last Login</SelectItem>
               <SelectItem value="handicap">Handicap</SelectItem>
               <SelectItem value="rounds">Rounds</SelectItem>
               <SelectItem value="courses">Courses</SelectItem>
@@ -340,6 +348,12 @@ export function UsersList({ onUserSelect }: UsersListProps) {
               </TableHead>
               <TableHead 
                 className="cursor-pointer text-right"
+                onClick={() => handleSort('lastlogin')}
+              >
+                Last Login {renderSortIcon('lastlogin')}
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer text-right"
                 onClick={() => handleSort('handicap')}
               >
                 Handicap {renderSortIcon('handicap')}
@@ -368,7 +382,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
           <TableBody>
             {filteredUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-6 text-muted-foreground">
+                <TableCell colSpan={9} className="text-center py-6 text-muted-foreground">
                   {searchTerm ? 'No users match your search.' : 'No users found.'}
                 </TableCell>
               </TableRow>
@@ -383,6 +397,9 @@ export function UsersList({ onUserSelect }: UsersListProps) {
                   </TableCell>
                   <TableCell className="text-right">
                     {new Date(user.created_at).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}
                   </TableCell>
                   <TableCell className="text-right">{user.handicap?.toFixed(1) || 'N/A'}</TableCell>
                   <TableCell className="text-right">{user.roundsCount}</TableCell>
@@ -426,6 +443,8 @@ function UsersListSkeleton() {
             <TableRow>
               <TableHead>Username</TableHead>
               <TableHead>Name</TableHead>
+              <TableHead className="text-right">Date Joined</TableHead>
+              <TableHead className="text-right">Last Login</TableHead>
               <TableHead className="text-right">Handicap</TableHead>
               <TableHead className="text-right">Rounds</TableHead>
               <TableHead className="text-right">Courses</TableHead>
@@ -438,8 +457,12 @@ function UsersListSkeleton() {
                 <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                 <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                 <TableCell className="text-right"><Skeleton className="h-4 w-8 ml-auto" /></TableCell>
+                <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                 <TableCell className="text-right"><Skeleton className="h-4 w-8 ml-auto" /></TableCell>
                 <TableCell className="text-right"><Skeleton className="h-4 w-8 ml-auto" /></TableCell>
+                <TableCell className="text-right"><Skeleton className="h-4 w-8 ml-auto" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-20" /></TableCell>
                 <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto rounded-full" /></TableCell>
               </TableRow>
             ))}
