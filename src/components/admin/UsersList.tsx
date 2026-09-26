@@ -195,6 +195,12 @@ export function UsersList({ onUserSelect }: UsersListProps) {
         case 'joined':
           comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
           break;
+        case 'lastlogin': {
+          const aLogin = a.last_login ? new Date(a.last_login).getTime() : 0;
+          const bLogin = b.last_login ? new Date(b.last_login).getTime() : 0;
+          comparison = aLogin - bLogin;
+          break;
+        }
         case 'handicap':
           comparison = (a.handicap || 0) - (b.handicap || 0);
           break;
@@ -294,6 +300,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
               <SelectItem value="username">Username</SelectItem>
               <SelectItem value="name">Full Name</SelectItem>
               <SelectItem value="joined">Date Joined</SelectItem>
+              <SelectItem value="lastlogin">Last Login</SelectItem>
               <SelectItem value="handicap">Handicap</SelectItem>
               <SelectItem value="rounds">Rounds</SelectItem>
               <SelectItem value="courses">Courses</SelectItem>
@@ -340,6 +347,12 @@ export function UsersList({ onUserSelect }: UsersListProps) {
               </TableHead>
               <TableHead 
                 className="cursor-pointer text-right"
+                onClick={() => handleSort('lastlogin')}
+              >
+                Last Login {renderSortIcon('lastlogin')}
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer text-right"
                 onClick={() => handleSort('handicap')}
               >
                 Handicap {renderSortIcon('handicap')}
@@ -368,7 +381,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
           <TableBody>
             {filteredUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-6 text-muted-foreground">
+                <TableCell colSpan={9} className="text-center py-6 text-muted-foreground">
                   {searchTerm ? 'No users match your search.' : 'No users found.'}
                 </TableCell>
               </TableRow>
@@ -383,6 +396,9 @@ export function UsersList({ onUserSelect }: UsersListProps) {
                   </TableCell>
                   <TableCell className="text-right">
                     {new Date(user.created_at).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}
                   </TableCell>
                   <TableCell className="text-right">{user.handicap?.toFixed(1) || 'N/A'}</TableCell>
                   <TableCell className="text-right">{user.roundsCount}</TableCell>
