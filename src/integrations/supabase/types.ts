@@ -132,6 +132,96 @@ export type Database = {
           },
         ]
       }
+      course_import_candidates: {
+        Row: {
+          api_course_id: string
+          created_at: string
+          label: string | null
+          processed_at: string | null
+          reason: string | null
+          status: string
+        }
+        Insert: {
+          api_course_id: string
+          created_at?: string
+          label?: string | null
+          processed_at?: string | null
+          reason?: string | null
+          status?: string
+        }
+        Update: {
+          api_course_id?: string
+          created_at?: string
+          label?: string | null
+          processed_at?: string | null
+          reason?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      course_import_state: {
+        Row: {
+          id: number
+          lock_until: string | null
+          paused_reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          lock_until?: string | null
+          paused_reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          lock_until?: string | null
+          paused_reason?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      course_import_terms: {
+        Row: {
+          id: number
+          region: string
+          results_found: number | null
+          searched_at: string | null
+          sort_order: number
+          term: string
+        }
+        Insert: {
+          id?: number
+          region: string
+          results_found?: number | null
+          searched_at?: string | null
+          sort_order: number
+          term: string
+        }
+        Update: {
+          id?: number
+          region?: string
+          results_found?: number | null
+          searched_at?: string | null
+          sort_order?: number
+          term?: string
+        }
+        Relationships: []
+      }
+      course_import_usage: {
+        Row: {
+          day: string
+          requests: number
+        }
+        Insert: {
+          day: string
+          requests?: number
+        }
+        Update: {
+          day?: string
+          requests?: number
+        }
+        Relationships: []
+      }
       course_tees: {
         Row: {
           color: string | null
@@ -396,6 +486,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      acquire_course_import_lock: {
+        Args: { _seconds: number }
+        Returns: boolean
+      }
+      add_course_import_usage: { Args: { _n: number }; Returns: number }
       get_public_courses: {
         Args: never
         Returns: {
