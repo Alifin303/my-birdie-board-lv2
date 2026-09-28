@@ -1,0 +1,1 @@
+- Bulk course imports run through the admin-only course-import edge function in small batches driven by the admin page, with a daily request cap and DB lock — keeps within the course service's 10k/day limit and edge time limits.
