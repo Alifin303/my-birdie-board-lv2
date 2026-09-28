@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useAdminActions } from "@/hooks/use-admin-actions";
 import { RefreshCw, Target } from "lucide-react";
 import { TestHandicapUpdate } from "@/components/admin/TestHandicapUpdate";
+import { CourseImporter } from "@/components/admin/CourseImporter";
 
 export function AdminActions() {
   const { 
@@ -84,6 +85,8 @@ export function AdminActions() {
             </Button>
           </CardFooter>
         </Card>
+
+        <CourseImporter />
       </div>
       
       <TestHandicapUpdate />
