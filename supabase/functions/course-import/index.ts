@@ -47,7 +47,28 @@ Deno.serve(async (req) => {
   if (!isAdmin) return json({ error: "Admins only" }, 403);
 
   const body = await req.json().catch(() => ({}));
-  const action = body.action === "run" ? "run" : body.action === "resume" ? "resume" : "status";
+  const action = ["run", "resume", "add_terms"].includes(body.action) ? body.action : "status";
+
+  if (action === "add_terms") {
+    const raw: unknown[] = Array.isArray(body.terms) ? body.terms : [];
+    const cleaned = [...new Set(raw
+      .map((t) => String(t ?? "").trim().replace(/\s+/g, " "))
+      .filter((t) => t.length >= 2 && t.length <= 80))].slice(0, 2000);
+    if (!cleaned.length) return json({ error: "No valid places given" }, 400);
+    const { data: existing } = await db.from("course_import_terms").select("term");
+    const known = new Set((existing ?? []).map((r) => r.term.toLowerCase()));
+    const fresh = cleaned.filter((t) => !known.has(t.toLowerCase()));
+    const { data: maxRow } = await db.from("course_import_terms")
+      .select("sort_order").order("sort_order", { ascending: false }).limit(1).maybeSingle();
+    let order = (maxRow?.sort_order ?? 0) + 1;
+    if (fresh.length) {
+      const { error } = await db.from("course_import_terms").insert(
+        fresh.map((term) => ({ term, region: "custom", sort_order: order++ })),
+      );
+      if (error) return json({ error: error.message }, 500);
+    }
+    return json({ added: fresh.length, alreadyListed: cleaned.length - fresh.length });
+  }
 
   const status = async () => {
     const today = new Date().toISOString().slice(0, 10);

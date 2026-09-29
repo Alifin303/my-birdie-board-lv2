@@ -68,6 +68,21 @@ export function CourseImporter() {
 
   const resume = async () => setStatus(await call("resume"));
   const goal = Number(target);
+  const [placesText, setPlacesText] = useState("");
+  const [adding, setAdding] = useState(false);
+  const addPlaces = async () => {
+    const terms = placesText.split(/[\n,]/).map((s) => s.trim()).filter(Boolean);
+    if (!terms.length) return;
+    setAdding(true);
+    try {
+      const res = await call("add_terms", { terms });
+      setMessage(`Added ${res.added} new places to search${res.alreadyListed ? ` (${res.alreadyListed} were already on the list)` : ""}.`);
+      setPlacesText("");
+      setStatus(await call("status"));
+    } catch (e) {
+      setMessage(`Couldn't add places: ${(e as Error).message}`);
+    } finally { setAdding(false); }
+  };
 
   return (
     <Card className="md:col-span-2 lg:col-span-3">
@@ -100,6 +115,19 @@ export function CourseImporter() {
           </div>
         )}
         {message && <p className="text-sm">{message}</p>}
+        <div className="space-y-2 rounded-md border p-3">
+          <label htmlFor="import-places" className="text-sm font-medium">Add more places to search</label>
+          <p className="text-xs text-muted-foreground">
+            One per line or comma-separated — towns, counties, states, regions or words like "Links" or "Golf Club".
+            Specific places find more courses than broad ones, because each search returns a limited number of results.
+          </p>
+          <textarea id="import-places" value={placesText} onChange={(e) => setPlacesText(e.target.value)}
+            rows={4} disabled={running || adding} placeholder={"Harrogate\nCounty Kerry\nAlgarve\nMyrtle Beach"}
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+          <Button size="sm" variant="outline" onClick={addPlaces} disabled={running || adding || !placesText.trim()}>
+            {adding ? "Adding…" : "Add places"}
+          </Button>
+        </div>
         <p className="text-xs text-muted-foreground">
           New courses appear on the public courses page after the next publish.
         </p>
