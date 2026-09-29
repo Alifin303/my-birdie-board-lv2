@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Head } from "vite-react-ssg";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ModeToggle } from "@/components/ModeToggle";
+
+const CoursesMapAdmin = lazy(() => import("@/components/admin/CoursesMapAdmin"));
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -112,6 +114,7 @@ export default function Admin() {
                 <TabsTrigger value="users">Users</TabsTrigger>
                 <TabsTrigger value="complimentary">Complimentary</TabsTrigger>
                 <TabsTrigger value="courses">Courses</TabsTrigger>
+                <TabsTrigger value="map">Course Map</TabsTrigger>
                 <TabsTrigger value="actions">Admin Actions</TabsTrigger>
               </TabsList>
               
@@ -135,6 +138,14 @@ export default function Admin() {
                 <CourseManagement />
               </TabsContent>
               
+              <TabsContent value="map">
+                {typeof window !== "undefined" && (
+                  <Suspense fallback={null}>
+                    <CoursesMapAdmin />
+                  </Suspense>
+                )}
+              </TabsContent>
+
               <TabsContent value="actions">
                 <AdminActions />
               </TabsContent>
