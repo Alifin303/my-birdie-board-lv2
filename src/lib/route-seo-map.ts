@@ -10,7 +10,7 @@
  * IMPORTANT: Keep this map in sync with the SEOHead props in each page component.
  */
 
-import { getStaticCourse, courseDisplayName, courseLocation, courseTitle, courseDescription } from './course-seo';
+import { getStaticCourse, courseDisplayName, courseLocation, courseTitle, courseDescription, COURSES_TOTAL_PAGES } from './course-seo';
 
 const SITE_URL = 'https://mybirdieboard.com';
 const OG_IMAGE = `${SITE_URL}/og-image.png`;

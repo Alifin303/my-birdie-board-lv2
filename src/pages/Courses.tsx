@@ -1,83 +1,51 @@
-
-
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { SEOHead } from "@/components/SEOHead";
-import { supabase } from "@/integrations/supabase/client";
-import { courseDisplayName, staticCourses } from "@/lib/course-seo";
+import {
+  courseDisplayName,
+  staticCourses,
+  COURSES_PER_PAGE,
+  COURSES_TOTAL_PAGES,
+  coursesPagePath,
+} from "@/lib/course-seo";
 
-interface Course {
-  id: number;
-  displayName: string;
-  city?: string;
-  state?: string;
-}
-
-const initialCourses: Course[] = staticCourses.map((c) => ({
-  id: c.id,
-  displayName: courseDisplayName(c.name),
-  city: c.city ?? undefined,
-  state: c.state ?? undefined,
-}));
+const SITE = "https://mybirdieboard.com";
 
 const Courses = () => {
-  // Rendered from the build-time snapshot so every course link is in the
-  // initial HTML, then refreshed with live data on the client.
-  const [courses, setCourses] = useState<Course[]>(initialCourses);
-  const [loading, setLoading] = useState(false);
+  // Every page is pre-rendered from the build-time snapshot, so each page's
+  // course links are in the initial HTML with no scrolling or JS required.
+  const { page: pageParam } = useParams();
+  const page = pageParam ? parseInt(pageParam, 10) : 1;
 
-  useEffect(() => {
-    let cancelled = false;
+  if (pageParam && (Number.isNaN(page) || page < 2 || page > COURSES_TOTAL_PAGES)) {
+    return <Navigate to="/courses" replace />;
+  }
 
-    const fetchCourses = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await (supabase as any).rpc("get_public_courses");
-        if (error || cancelled || !Array.isArray(data)) return;
+  const start = (page - 1) * COURSES_PER_PAGE;
+  const courses = staticCourses.slice(start, start + COURSES_PER_PAGE);
+  const path = coursesPagePath(page);
+  const suffix = page > 1 ? ` – Page ${page} of ${COURSES_TOTAL_PAGES}` : "";
 
-        setCourses(
-          data.map((c: any) => ({
-            id: c.id,
-            displayName: courseDisplayName(c.name),
-            city: c.city ?? undefined,
-            state: c.state ?? undefined,
-          }))
-        );
-      } catch (error) {
-        console.error("Error fetching courses:", error);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-
-    fetchCourses();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-  
-  
   return (
     <>
       <SEOHead
-        title="Golf Courses Directory | MyBirdieBoard"
-        description="Browse golf courses by location, view course details, and try an interactive scorecard with MyBirdieBoard."
+        title={`Golf Courses Directory${suffix} | MyBirdieBoard`}
+        description={
+          page > 1
+            ? `Browse golf courses (page ${page} of ${COURSES_TOTAL_PAGES}). View course details and scorecards, and track your rounds with MyBirdieBoard.`
+            : "Browse golf courses by location, view course details, and try an interactive scorecard with MyBirdieBoard."
+        }
+        canonicalPath={path}
       >
-        <link rel="alternate" hrefLang="en" href="https://mybirdieboard.com/courses" />
-        <link rel="alternate" hrefLang="en-us" href="https://mybirdieboard.com/courses" />
-        <link rel="alternate" hrefLang="en-gb" href="https://mybirdieboard.com/courses" />
-        <link rel="alternate" hrefLang="x-default" href="https://mybirdieboard.com/courses" />
-        <meta name="geo.region" content="US, GB, AU, CA" />
-        <meta name="geo.position" content="39.8283;-98.5795" />
-        <meta name="ICBM" content="39.8283, -98.5795" />
+        {page > 1 && <link rel="prev" href={`${SITE}${coursesPagePath(page - 1)}`} />}
+        {page < COURSES_TOTAL_PAGES && <link rel="next" href={`${SITE}${coursesPagePath(page + 1)}`} />}
       </SEOHead>
-      
+
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-center mb-6">
-            Golf Courses
+            Golf Courses{page > 1 ? ` – Page ${page}` : ""}
           </h1>
-          
+
           <p className="text-center mb-3 text-muted-foreground max-w-2xl mx-auto">
             Browse golf courses where players have tracked rounds on MyBirdieBoard. Select a course to view its details and scorecard.
           </p>
@@ -88,12 +56,8 @@ const Courses = () => {
             </Link>
             .
           </p>
-          
-          {loading ? (
-            <div className="text-center py-12">
-              <p className="text-lg">Loading courses...</p>
-            </div>
-          ) : courses.length === 0 ? (
+
+          {courses.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-lg">No courses found</p>
             </div>
@@ -102,18 +66,47 @@ const Courses = () => {
               {courses.map((course) => (
                 <div key={course.id} className="bg-card rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                   <Link to={`/courses/${course.id}`} className="block p-6">
-                    <h2 className="text-xl font-semibold mb-2 line-clamp-2">{course.displayName}</h2>
-                    
+                    <h2 className="text-xl font-semibold mb-2 line-clamp-2">{courseDisplayName(course.name)}</h2>
                     {(course.city || course.state) && (
                       <p className="text-muted-foreground">
                         {[course.city, course.state].filter(Boolean).join(", ")}
                       </p>
                     )}
-                    
                   </Link>
                 </div>
               ))}
             </div>
+          )}
+
+          {COURSES_TOTAL_PAGES > 1 && (
+            <nav aria-label="Course directory pages" className="mt-10 flex flex-col items-center gap-4">
+              <div className="flex items-center gap-4">
+                {page > 1 ? (
+                  <Link to={coursesPagePath(page - 1)} rel="prev" className="rounded-md border border-border px-4 py-2 font-medium hover:bg-muted">
+                    ← Previous page
+                  </Link>
+                ) : <span className="px-4 py-2 text-muted-foreground">← Previous page</span>}
+                <span className="text-muted-foreground">Page {page} of {COURSES_TOTAL_PAGES}</span>
+                {page < COURSES_TOTAL_PAGES ? (
+                  <Link to={coursesPagePath(page + 1)} rel="next" className="rounded-md border border-border px-4 py-2 font-medium hover:bg-muted">
+                    Next page →
+                  </Link>
+                ) : <span className="px-4 py-2 text-muted-foreground">Next page →</span>}
+              </div>
+              <ul className="flex flex-wrap justify-center gap-2">
+                {Array.from({ length: COURSES_TOTAL_PAGES }, (_, i) => i + 1).map((n) => (
+                  <li key={n}>
+                    <Link
+                      to={coursesPagePath(n)}
+                      aria-current={n === page ? "page" : undefined}
+                      className={`inline-block min-w-9 rounded-md px-3 py-1 text-center text-sm ${n === page ? "bg-primary text-primary-foreground" : "border border-border hover:bg-muted"}`}
+                    >
+                      {n}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           )}
         </div>
       </div>
