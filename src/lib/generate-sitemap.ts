@@ -33,6 +33,7 @@ function getPriority(route: string): string {
   if (route === '/blog') return '0.6';
   if (['/about', '/faq'].includes(route)) return '0.4';
   if (route === '/courses') return '0.4';
+  if (route.startsWith('/courses/page/')) return '0.4';
   if (route.startsWith('/courses/')) return '0.5';
   if (route === '/privacy') return '0.3';
   return '0.4';

@@ -113,6 +113,7 @@ export const routes: RouteRecord[] = [
   { path: '/about', element: P(<About />), errorElement: <RouteErrorFallback /> },
   { path: '/faq', element: P(<FAQ />), errorElement: <RouteErrorFallback /> },
   { path: '/courses', element: P(<Courses />), errorElement: <RouteErrorFallback /> },
+  { path: '/courses/page/:page', element: P(<Courses />), errorElement: <RouteErrorFallback /> },
   { path: '/guides', element: P(<Guides />), errorElement: <RouteErrorFallback /> },
   { path: '/blog', element: P(<Blog />), errorElement: <RouteErrorFallback /> },
   { path: '/demo', element: P(<Demo />), errorElement: <RouteErrorFallback /> },

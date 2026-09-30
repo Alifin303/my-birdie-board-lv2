@@ -10,7 +10,7 @@
  * IMPORTANT: Keep this map in sync with the SEOHead props in each page component.
  */
 
-import { getStaticCourse, courseDisplayName, courseLocation, courseTitle, courseDescription } from './course-seo';
+import { getStaticCourse, courseDisplayName, courseLocation, courseTitle, courseDescription, COURSES_TOTAL_PAGES } from './course-seo';
 
 const SITE_URL = 'https://mybirdieboard.com';
 const OG_IMAGE = `${SITE_URL}/og-image.png`;
@@ -255,6 +255,15 @@ export const routeSEOMap: Record<string, RouteSEO> = {
  * self-referencing canonical URL.
  */
 function getCourseSEO(routePath: string): RouteSEO | undefined {
+  const pageMatch = routePath.match(/^\/courses\/page\/(\d+)$/);
+  if (pageMatch) {
+    const page = Number(pageMatch[1]);
+    return {
+      title: `Golf Courses Directory – Page ${page} of ${COURSES_TOTAL_PAGES} | MyBirdieBoard`,
+      description: `Browse golf courses (page ${page} of ${COURSES_TOTAL_PAGES}). View course details and scorecards, and track your rounds with MyBirdieBoard.`,
+      keywords: 'golf courses, golf course directory, golf scorecards',
+    };
+  }
   const match = routePath.match(/^\/courses\/(\d+)$/);
   if (!match) return undefined;
   const course = getStaticCourse(match[1]);
