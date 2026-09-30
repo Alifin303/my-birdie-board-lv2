@@ -81,3 +81,9 @@ export function courseDescription(name: string): string {
 
 /** All pre-renderable course routes, e.g. /courses/40 */
 export const courseRoutes = staticCourses.map((c) => `/courses/${c.id}`);
+
+/** Directory pagination: /courses is page 1, /courses/page/N for N >= 2. */
+export const COURSES_PER_PAGE = 100;
+export const COURSES_TOTAL_PAGES = Math.max(1, Math.ceil(staticCourses.length / COURSES_PER_PAGE));
+export const coursesPagePath = (page: number) => (page <= 1 ? '/courses' : `/courses/page/${page}`);
+export const coursePageRoutes = Array.from({ length: COURSES_TOTAL_PAGES - 1 }, (_, i) => coursesPagePath(i + 2));

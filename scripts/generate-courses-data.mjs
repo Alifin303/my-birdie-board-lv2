@@ -76,7 +76,7 @@ async function main() {
     return;
   }
 
-  const courses = await rest('rpc/get_public_courses');
+  const courses = await restAll('rpc/get_public_courses?order=name.asc,id.asc');
   const tees = await restAll('course_tees?select=id,course_id,par');
   const holes = await restAll('course_holes?select=tee_id,hole_number,par&order=hole_number.asc');
   const teesByCourse = new Map();

@@ -4,7 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { replaceMetaTagsInHTML } from "./src/lib/route-seo-map";
 import { sitemapPlugin } from "./src/lib/generate-sitemap";
-import { courseRoutes } from "./src/lib/course-seo";
+import { courseRoutes, coursePageRoutes } from "./src/lib/course-seo";
 
 // List of all public routes to pre-render as static HTML
 const prerenderRoutes = [
@@ -66,6 +66,7 @@ const prerenderRoutes = [
   '/tools/handicap-calculator',
 
   // Individual course pages (generated from the build-time course snapshot)
+  ...coursePageRoutes,
   ...courseRoutes,
 ];
 
