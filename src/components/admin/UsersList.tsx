@@ -34,6 +34,7 @@ interface User {
   email: string;
   created_at: string;
   last_login: string | null;
+  bucketListCount: number;
   plan: UserPlan;
   planEndsAt: string | null;
 }
@@ -117,10 +118,21 @@ export function UsersList({ onUserSelect }: UsersListProps) {
           
         if (compError) throw compError;
         
+        // Fetch all bucket list entries in one go (admins can read every row)
+        const { data: bucketListRows, error: bucketError } = await supabase
+          .from('bucket_list')
+          .select('user_id');
+          
+        if (bucketError) throw bucketError;
+        
         const subsByUser = new Map((subscriptions || []).map((s: any) => [s.user_id, s]));
         const complimentaryEmails = new Set(
           (complimentary || []).map((c: any) => (c.email || '').toLowerCase()).filter(Boolean)
         );
+        const bucketListByUser = new Map<string, number>();
+        (bucketListRows || []).forEach((row: any) => {
+          bucketListByUser.set(row.user_id, (bucketListByUser.get(row.user_id) || 0) + 1);
+        });
         
         // For each user, count their rounds and unique courses
         const usersWithStats = await Promise.all(
@@ -147,6 +159,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
               ...profile,
               roundsCount: roundsCount || 0,
               coursesCount: uniqueCourseIds.size,
+              bucketListCount: bucketListByUser.get(profile.id) || 0,
               ...determinePlan(profile, subsByUser.get(profile.id), complimentaryEmails),
             };
           })
@@ -210,6 +223,9 @@ export function UsersList({ onUserSelect }: UsersListProps) {
           break;
         case 'courses':
           comparison = (a.coursesCount || 0) - (b.coursesCount || 0);
+          break;
+        case 'bucketlist':
+          comparison = (a.bucketListCount || 0) - (b.bucketListCount || 0);
           break;
         case 'plan':
           comparison = PLAN_RANK[a.plan] - PLAN_RANK[b.plan];
@@ -305,6 +321,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
               <SelectItem value="handicap">Handicap</SelectItem>
               <SelectItem value="rounds">Rounds</SelectItem>
               <SelectItem value="courses">Courses</SelectItem>
+              <SelectItem value="bucketlist">Bucket List</SelectItem>
               <SelectItem value="plan">Plan</SelectItem>
             </SelectContent>
           </Select>
@@ -371,6 +388,12 @@ export function UsersList({ onUserSelect }: UsersListProps) {
                 Courses {renderSortIcon('courses')}
               </TableHead>
               <TableHead 
+                className="cursor-pointer text-right"
+                onClick={() => handleSort('bucketlist')}
+              >
+                Bucket List {renderSortIcon('bucketlist')}
+              </TableHead>
+              <TableHead 
                 className="cursor-pointer"
                 onClick={() => handleSort('plan')}
               >
@@ -382,7 +405,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
           <TableBody>
             {filteredUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-6 text-muted-foreground">
+                <TableCell colSpan={10} className="text-center py-6 text-muted-foreground">
                   {searchTerm ? 'No users match your search.' : 'No users found.'}
                 </TableCell>
               </TableRow>
@@ -404,6 +427,7 @@ export function UsersList({ onUserSelect }: UsersListProps) {
                   <TableCell className="text-right">{user.handicap?.toFixed(1) || 'N/A'}</TableCell>
                   <TableCell className="text-right">{user.roundsCount}</TableCell>
                   <TableCell className="text-right">{user.coursesCount}</TableCell>
+                  <TableCell className="text-right">{user.bucketListCount}</TableCell>
                   <TableCell>{getPlanBadge(user.plan, user.planEndsAt)}</TableCell>
                   <TableCell className="text-right">
                     <Button
