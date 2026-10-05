@@ -19,3 +19,4 @@
 - [x] Keep the bucket-list course dialog above the dashboard map.
 - [x] Show and save complete club and course names in bucket-list search results.
 - [x] Ensure the bucket-list popup background fully contains its fields, buttons, and search results.
+- [x] Add a sortable Bucket List column to the admin users table.
