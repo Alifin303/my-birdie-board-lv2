@@ -472,6 +472,8 @@ function UsersListSkeleton() {
               <TableHead className="text-right">Handicap</TableHead>
               <TableHead className="text-right">Rounds</TableHead>
               <TableHead className="text-right">Courses</TableHead>
+              <TableHead className="text-right">Bucket List</TableHead>
+              <TableHead className="text-right">Plan</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -483,6 +485,7 @@ function UsersListSkeleton() {
                 <TableCell className="text-right"><Skeleton className="h-4 w-8 ml-auto" /></TableCell>
                 <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                 <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                <TableCell className="text-right"><Skeleton className="h-4 w-8 ml-auto" /></TableCell>
                 <TableCell className="text-right"><Skeleton className="h-4 w-8 ml-auto" /></TableCell>
                 <TableCell className="text-right"><Skeleton className="h-4 w-8 ml-auto" /></TableCell>
                 <TableCell className="text-right"><Skeleton className="h-4 w-8 ml-auto" /></TableCell>
