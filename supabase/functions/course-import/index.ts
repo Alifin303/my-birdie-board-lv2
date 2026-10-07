@@ -81,6 +81,7 @@ Deno.serve(async (req) => {
       db.from("course_import_candidates").select("api_course_id", { count: "exact", head: true }).eq("status", "skipped"),
       db.from("courses").select("id", { count: "exact", head: true }),
     ]);
+    const areas = await db.from("course_import_points").select("id", { count: "exact", head: true }).is("searched_at", null);
     return {
       requestsToday: usage.data?.requests ?? 0,
       dailyCap: DAILY_CAP,
@@ -90,6 +91,7 @@ Deno.serve(async (req) => {
       importedTotal: imported.count ?? 0,
       skippedTotal: skipped.count ?? 0,
       coursesInDatabase: total.count ?? 0,
+      areasLeft: areas.count ?? 0,
     };
   };
 
@@ -100,6 +102,7 @@ Deno.serve(async (req) => {
   }
 
   // ---- run one bounded batch ----
+  const mode = body.mode === "area" ? "area" : "name";
   const wanted = Math.max(1, Math.min(Number(body.maxNew) || 50, 200));
   const { data: st } = await db.from("course_import_state").select("paused_reason").eq("id", 1).single();
   if (st?.paused_reason) return json({ stop: "paused", reason: st.paused_reason, ...(await status()) });
@@ -181,6 +184,13 @@ Deno.serve(async (req) => {
           coords_source: hasCoords ? "api" : null, user_id: null,
         }).select("id").single();
         if (insErr || !inserted) { await mark("failed", insErr?.message ?? "Insert failed"); continue; }
+        if (hasCoords) {
+          const r = (n: number) => Math.round(n / 0.2) * 0.2;
+          await db.from("course_import_points").upsert(
+            { lat: r(loc.latitude).toFixed(1), lng: r(loc.longitude).toFixed(1) },
+            { onConflict: "lat,lng", ignoreDuplicates: true },
+          );
+        }
 
         for (const { gender, idx, t } of tees) {
           const holes = t.holes!;
@@ -206,20 +216,33 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // No pending candidates: search the next place.
-      const { data: term } = await db
-        .from("course_import_terms").select("id, term")
-        .is("searched_at", null).order("sort_order").limit(1).maybeSingle();
-      if (!term) { stop = "no_more_places"; break; }
-
-      const res = await apiGet(`/search?search_query=${encodeURIComponent(term.term)}`);
+      // No pending candidates: run the next search.
+      let res: any;
+      let finish: () => Promise<unknown>;
+      if (mode === "area") {
+        const { data: pt } = await db
+          .from("course_import_points").select("id, lat, lng")
+          .is("searched_at", null).order("id").limit(1).maybeSingle();
+        if (!pt) { stop = "no_more_areas"; break; }
+        res = await apiGet(`/proximity?latitude=${pt.lat}&longitude=${pt.lng}&radius=15&unit=mi&limit=25`);
+        finish = () => db.from("course_import_points")
+          .update({ searched_at: new Date().toISOString(), results_found: freshCount }).eq("id", pt.id);
+      } else {
+        const { data: term } = await db
+          .from("course_import_terms").select("id, term")
+          .is("searched_at", null).order("sort_order").limit(1).maybeSingle();
+        if (!term) { stop = "no_more_places"; break; }
+        res = await apiGet(`/search?search_query=${encodeURIComponent(term.term)}`);
+        finish = () => db.from("course_import_terms")
+          .update({ searched_at: new Date().toISOString(), results_found: freshCount }).eq("id", term.id);
+      }
       if (res === null) break;
+      let freshCount = 0;
       const results: any[] = res.__error ? [] : res.courses ?? [];
       const ids = results
         .filter((r) => r?.id && r.tees && Object.values(r.tees).some((n) => Number(n) > 0))
         .map((r) => ({ id: String(r.id), label: `${r.club_name ?? ""} ${r.location?.city ? "· " + r.location.city : ""}`.trim() }));
 
-      let fresh: typeof ids = [];
       if (ids.length) {
         const list = ids.map((x) => x.id);
         const [{ data: inCourses }, { data: inCands }] = await Promise.all([
@@ -227,18 +250,17 @@ Deno.serve(async (req) => {
           db.from("course_import_candidates").select("api_course_id").in("api_course_id", list),
         ]);
         const known = new Set([...(inCourses ?? []), ...(inCands ?? [])].map((r) => r.api_course_id));
-        fresh = ids.filter((x, i, arr) => !known.has(x.id) && arr.findIndex((y) => y.id === x.id) === i);
+        const fresh = ids.filter((x, i, arr) => !known.has(x.id) && arr.findIndex((y) => y.id === x.id) === i);
         if (fresh.length) {
           await db.from("course_import_candidates").upsert(
             fresh.map((x) => ({ api_course_id: x.id, label: x.label })),
             { onConflict: "api_course_id", ignoreDuplicates: true },
           );
         }
+        freshCount = fresh.length;
       }
-      found += fresh.length;
-      await db.from("course_import_terms")
-        .update({ searched_at: new Date().toISOString(), results_found: fresh.length })
-        .eq("id", term.id);
+      found += freshCount;
+      await finish();
     }
   } finally {
     await db.from("course_import_state").update({ lock_until: null }).eq("id", 1);
