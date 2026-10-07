@@ -159,6 +159,33 @@ export type Database = {
         }
         Relationships: []
       }
+      course_import_points: {
+        Row: {
+          created_at: string
+          id: number
+          lat: number
+          lng: number
+          results_found: number | null
+          searched_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          lat: number
+          lng: number
+          results_found?: number | null
+          searched_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          lat?: number
+          lng?: number
+          results_found?: number | null
+          searched_at?: string | null
+        }
+        Relationships: []
+      }
       course_import_state: {
         Row: {
           id: number

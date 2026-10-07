@@ -9,13 +9,14 @@ import { Download, Square, RefreshCw } from "lucide-react";
 type Status = {
   requestsToday: number; dailyCap: number; pausedReason: string | null;
   placesLeft: number; pending: number; importedTotal: number; skippedTotal: number;
-  coursesInDatabase: number;
+  coursesInDatabase: number; areasLeft?: number;
 };
 
 const STOP_MESSAGES: Record<string, string> = {
   daily_limit: "Stopped: today's request allowance is used up. Try again tomorrow.",
   rate_limited: "Stopped: the course service asked us to slow down. Try again in a little while.",
-  no_more_places: "Stopped: every place on the search list has been searched.",
+  no_more_places: "Stopped: every place on the search list has been searched. Try \"Search by area\".",
+  no_more_areas: "Stopped: every area has been searched. New areas are added automatically as courses are imported.",
   busy: "Another import is already running.",
   paused: "Import is paused.",
 };
@@ -33,6 +34,7 @@ async function call(action: string, extra: Record<string, unknown> = {}) {
 export function CourseImporter() {
   const [status, setStatus] = useState<Status | null>(null);
   const [target, setTarget] = useState("2000");
+  const [mode, setMode] = useState<"area" | "name">("area");
   const [running, setRunning] = useState(false);
   const [done, setDone] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
@@ -47,7 +49,7 @@ export function CourseImporter() {
     let count = 0;
     try {
       while (count < goal && !cancelRef.current) {
-        const res = await call("run", { maxNew: Math.min(200, goal - count) });
+        const res = await call("run", { mode, maxNew: Math.min(200, goal - count) });
         count += res.imported ?? 0;
         setDone(count);
         setStatus(res);
@@ -90,7 +92,8 @@ export function CourseImporter() {
         <CardTitle>Import Courses</CardTitle>
         <CardDescription>
           Pull new courses from the course service into the public courses directory. Searches UK &amp; Ireland first,
-          then worldwide. Only courses with a complete hole-by-hole scorecard are added.
+          then worldwide. "Search by area" looks around the map positions of courses you already have, and keeps
+          spreading outwards as new courses are added. Only courses with a complete hole-by-hole scorecard are added.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -99,7 +102,8 @@ export function CourseImporter() {
             <Stat label="Courses in database" value={status.coursesInDatabase} />
             <Stat label="Imported so far" value={status.importedTotal} />
             <Stat label="Requests used today" value={`${status.requestsToday} / ${status.dailyCap}`} />
-            <Stat label="Places left to search" value={status.placesLeft} />
+            <Stat label={mode === "area" ? "Areas left to search" : "Places left to search"}
+              value={mode === "area" ? status.areasLeft ?? 0 : status.placesLeft} />
           </div>
         )}
         {running && (
@@ -133,6 +137,13 @@ export function CourseImporter() {
         </p>
       </CardContent>
       <CardFooter className="flex flex-wrap gap-3">
+        <Select value={mode} onValueChange={(v) => setMode(v as "area" | "name")} disabled={running}>
+          <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="area">Search by area</SelectItem>
+            <SelectItem value="name">Search by place name</SelectItem>
+          </SelectContent>
+        </Select>
         <Select value={target} onValueChange={setTarget} disabled={running}>
           <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
           <SelectContent>
