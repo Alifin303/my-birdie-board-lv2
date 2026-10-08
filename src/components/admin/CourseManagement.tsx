@@ -249,11 +249,36 @@ export function CourseManagement() {
           <CardTitle>Search Courses</CardTitle>
         </CardHeader>
         <CardContent>
-          <Input
-            placeholder="Search by name, city, or state..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Input
+              placeholder="Search by name, city, or state..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Select value={sortMode} onValueChange={(v) => setSortMode(v as typeof sortMode)}>
+              <SelectTrigger aria-label="Sort courses">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name">Sort: Name A–Z</SelectItem>
+                <SelectItem value="rounds_desc">Sort: Most rounds</SelectItem>
+                <SelectItem value="rounds_asc">Sort: Fewest rounds</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterMode} onValueChange={(v) => setFilterMode(v as typeof filterMode)}>
+              <SelectTrigger aria-label="Filter courses">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Show: All courses</SelectItem>
+                <SelectItem value="with_rounds">Show: With rounds logged</SelectItem>
+                <SelectItem value="without_rounds">Show: Without rounds</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <p className="text-sm text-muted-foreground mt-3">
+            {courses.length} courses · {totalRoundsLogged} total rounds logged
+          </p>
         </CardContent>
       </Card>
 
@@ -289,6 +314,11 @@ export function CourseManagement() {
                           {course.latitude == null || course.longitude == null ? (
                             <Badge variant="outline" className="text-amber-600 border-amber-600">No pin</Badge>
                           ) : null}
+                          {(roundCounts[course.id] || 0) > 0 && (
+                            <Badge variant="outline" className="text-primary border-primary/40">
+                              {roundCounts[course.id]} {roundCounts[course.id] === 1 ? 'round' : 'rounds'}
+                            </Badge>
+                          )}
                         </div>
                         <p className="text-sm text-muted-foreground">
                           {course.city && course.state
