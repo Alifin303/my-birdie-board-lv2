@@ -48,6 +48,7 @@ export function CourseManagement() {
   const [roundCounts, setRoundCounts] = useState<Record<number, number>>({});
   const [sortMode, setSortMode] = useState<'name' | 'rounds_desc' | 'rounds_asc'>('name');
   const [filterMode, setFilterMode] = useState<'all' | 'with_rounds' | 'without_rounds'>('all');
+  const [pinMode, setPinMode] = useState<'all' | 'with_pin' | 'without_pin'>('all');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -203,6 +204,12 @@ export function CourseManagement() {
       if (filterMode === 'without_rounds') return count === 0;
       return true;
     })
+    .filter(course => {
+      const hasPin = course.latitude != null && course.longitude != null;
+      if (pinMode === 'with_pin') return hasPin;
+      if (pinMode === 'without_pin') return !hasPin;
+      return true;
+    })
     .sort((a, b) => {
       if (sortMode === 'rounds_desc') {
         return (roundCounts[b.id] || 0) - (roundCounts[a.id] || 0) || a.name.localeCompare(b.name);
@@ -214,6 +221,9 @@ export function CourseManagement() {
     });
 
   const totalRoundsLogged = Object.values(roundCounts).reduce((sum, n) => sum + n, 0);
+  const missingPinCount = courses.filter(
+    (c) => c.latitude == null || c.longitude == null
+  ).length;
 
   if (selectedCourse) {
     return (
@@ -256,7 +266,7 @@ export function CourseManagement() {
           <CardTitle>Search Courses</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <Input
               placeholder="Search by name, city, or state..."
               value={searchTerm}
@@ -273,18 +283,29 @@ export function CourseManagement() {
               </SelectContent>
             </Select>
             <Select value={filterMode} onValueChange={(v) => setFilterMode(v as typeof filterMode)}>
-              <SelectTrigger aria-label="Filter courses">
+              <SelectTrigger aria-label="Filter courses by rounds">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Show: All courses</SelectItem>
-                <SelectItem value="with_rounds">Show: With rounds logged</SelectItem>
-                <SelectItem value="without_rounds">Show: Without rounds</SelectItem>
+                <SelectItem value="all">Rounds: All courses</SelectItem>
+                <SelectItem value="with_rounds">Rounds: With rounds logged</SelectItem>
+                <SelectItem value="without_rounds">Rounds: Without rounds</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={pinMode} onValueChange={(v) => setPinMode(v as typeof pinMode)}>
+              <SelectTrigger aria-label="Filter courses by map pin">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Map pin: All courses</SelectItem>
+                <SelectItem value="with_pin">Map pin: With a pin</SelectItem>
+                <SelectItem value="without_pin">Map pin: Without a pin</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <p className="text-sm text-muted-foreground mt-3">
             {courses.length} courses · {totalRoundsLogged} total rounds logged
+            {missingPinCount > 0 ? ` · ${missingPinCount} without a map pin` : ''}
           </p>
         </CardContent>
       </Card>
