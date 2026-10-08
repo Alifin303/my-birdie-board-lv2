@@ -48,6 +48,7 @@ export function CourseManagement() {
   const [roundCounts, setRoundCounts] = useState<Record<number, number>>({});
   const [sortMode, setSortMode] = useState<'name' | 'rounds_desc' | 'rounds_asc'>('name');
   const [filterMode, setFilterMode] = useState<'all' | 'with_rounds' | 'without_rounds'>('all');
+  const [pinMode, setPinMode] = useState<'all' | 'with_pin' | 'without_pin'>('all');
   const { toast } = useToast();
 
   useEffect(() => {
