@@ -221,6 +221,9 @@ export function CourseManagement() {
     });
 
   const totalRoundsLogged = Object.values(roundCounts).reduce((sum, n) => sum + n, 0);
+  const missingPinCount = courses.filter(
+    (c) => c.latitude == null || c.longitude == null
+  ).length;
 
   if (selectedCourse) {
     return (
