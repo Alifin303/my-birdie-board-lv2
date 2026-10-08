@@ -266,7 +266,7 @@ export function CourseManagement() {
           <CardTitle>Search Courses</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <Input
               placeholder="Search by name, city, or state..."
               value={searchTerm}
@@ -283,18 +283,29 @@ export function CourseManagement() {
               </SelectContent>
             </Select>
             <Select value={filterMode} onValueChange={(v) => setFilterMode(v as typeof filterMode)}>
-              <SelectTrigger aria-label="Filter courses">
+              <SelectTrigger aria-label="Filter courses by rounds">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Show: All courses</SelectItem>
-                <SelectItem value="with_rounds">Show: With rounds logged</SelectItem>
-                <SelectItem value="without_rounds">Show: Without rounds</SelectItem>
+                <SelectItem value="all">Rounds: All courses</SelectItem>
+                <SelectItem value="with_rounds">Rounds: With rounds logged</SelectItem>
+                <SelectItem value="without_rounds">Rounds: Without rounds</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={pinMode} onValueChange={(v) => setPinMode(v as typeof pinMode)}>
+              <SelectTrigger aria-label="Filter courses by map pin">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Map pin: All courses</SelectItem>
+                <SelectItem value="with_pin">Map pin: With a pin</SelectItem>
+                <SelectItem value="without_pin">Map pin: Without a pin</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <p className="text-sm text-muted-foreground mt-3">
             {courses.length} courses · {totalRoundsLogged} total rounds logged
+            {missingPinCount > 0 ? ` · ${missingPinCount} without a map pin` : ''}
           </p>
         </CardContent>
       </Card>
