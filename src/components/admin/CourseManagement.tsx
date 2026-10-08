@@ -89,13 +89,20 @@ export function CourseManagement() {
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('courses')
-        .select('*')
-        .order('name');
-
-      if (error) throw error;
-      setCourses(data || []);
+      const all: any[] = [];
+      const pageSize = 1000;
+      for (let offset = 0; ; offset += pageSize) {
+        const { data, error } = await supabase
+          .from('courses')
+          .select('*')
+          .order('name')
+          .order('id')
+          .range(offset, offset + pageSize - 1);
+        if (error) throw error;
+        all.push(...(data || []));
+        if (!data || data.length < pageSize) break;
+      }
+      setCourses(all);
     } catch (error) {
       console.error('Error fetching courses:', error);
     } finally {
