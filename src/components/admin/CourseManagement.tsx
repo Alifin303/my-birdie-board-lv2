@@ -4,6 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Edit, ChevronRight, ChevronDown, Loader2, MapPin } from "lucide-react";
 import { CourseEditor } from "./CourseEditor";
 import { fetchAndStoreCoordsFromApi } from "@/lib/course-coords";
@@ -38,10 +45,14 @@ export function CourseManagement() {
   const [playersLoading, setPlayersLoading] = useState<Record<number, boolean>>({});
   const [backfilling, setBackfilling] = useState(false);
   const [backfillProgress, setBackfillProgress] = useState<{ done: number; total: number; updated: number } | null>(null);
+  const [roundCounts, setRoundCounts] = useState<Record<number, number>>({});
+  const [sortMode, setSortMode] = useState<'name' | 'rounds_desc' | 'rounds_asc'>('name');
+  const [filterMode, setFilterMode] = useState<'all' | 'with_rounds' | 'without_rounds'>('all');
   const { toast } = useToast();
 
   useEffect(() => {
     fetchCourses();
+    fetchAllRoundCounts();
   }, []);
 
   const handleBackfillCoords = async () => {
@@ -150,11 +161,52 @@ export function CourseManagement() {
     }
   };
 
-  const filteredCourses = courses.filter(course =>
-    course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    course.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    course.state?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const fetchAllRoundCounts = async () => {
+    try {
+      const counts: Record<number, number> = {};
+      const pageSize = 1000;
+      let offset = 0;
+      for (;;) {
+        const { data, error } = await supabase
+          .from('rounds')
+          .select('course_id')
+          .range(offset, offset + pageSize - 1);
+        if (error) throw error;
+        (data || []).forEach(r => {
+          counts[r.course_id] = (counts[r.course_id] || 0) + 1;
+        });
+        if (!data || data.length < pageSize) break;
+        offset += pageSize;
+      }
+      setRoundCounts(counts);
+    } catch (err) {
+      console.error('Error fetching round counts:', err);
+    }
+  };
+
+  const filteredCourses = courses
+    .filter(course =>
+      course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.state?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter(course => {
+      const count = roundCounts[course.id] || 0;
+      if (filterMode === 'with_rounds') return count > 0;
+      if (filterMode === 'without_rounds') return count === 0;
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortMode === 'rounds_desc') {
+        return (roundCounts[b.id] || 0) - (roundCounts[a.id] || 0) || a.name.localeCompare(b.name);
+      }
+      if (sortMode === 'rounds_asc') {
+        return (roundCounts[a.id] || 0) - (roundCounts[b.id] || 0) || a.name.localeCompare(b.name);
+      }
+      return a.name.localeCompare(b.name);
+    });
+
+  const totalRoundsLogged = Object.values(roundCounts).reduce((sum, n) => sum + n, 0);
 
   if (selectedCourse) {
     return (
@@ -197,11 +249,36 @@ export function CourseManagement() {
           <CardTitle>Search Courses</CardTitle>
         </CardHeader>
         <CardContent>
-          <Input
-            placeholder="Search by name, city, or state..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Input
+              placeholder="Search by name, city, or state..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Select value={sortMode} onValueChange={(v) => setSortMode(v as typeof sortMode)}>
+              <SelectTrigger aria-label="Sort courses">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name">Sort: Name A–Z</SelectItem>
+                <SelectItem value="rounds_desc">Sort: Most rounds</SelectItem>
+                <SelectItem value="rounds_asc">Sort: Fewest rounds</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterMode} onValueChange={(v) => setFilterMode(v as typeof filterMode)}>
+              <SelectTrigger aria-label="Filter courses">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Show: All courses</SelectItem>
+                <SelectItem value="with_rounds">Show: With rounds logged</SelectItem>
+                <SelectItem value="without_rounds">Show: Without rounds</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <p className="text-sm text-muted-foreground mt-3">
+            {courses.length} courses · {totalRoundsLogged} total rounds logged
+          </p>
         </CardContent>
       </Card>
 
@@ -237,6 +314,11 @@ export function CourseManagement() {
                           {course.latitude == null || course.longitude == null ? (
                             <Badge variant="outline" className="text-amber-600 border-amber-600">No pin</Badge>
                           ) : null}
+                          {(roundCounts[course.id] || 0) > 0 && (
+                            <Badge variant="outline" className="text-primary border-primary/40">
+                              {roundCounts[course.id]} {roundCounts[course.id] === 1 ? 'round' : 'rounds'}
+                            </Badge>
+                          )}
                         </div>
                         <p className="text-sm text-muted-foreground">
                           {course.city && course.state
