@@ -204,6 +204,12 @@ export function CourseManagement() {
       if (filterMode === 'without_rounds') return count === 0;
       return true;
     })
+    .filter(course => {
+      const hasPin = course.latitude != null && course.longitude != null;
+      if (pinMode === 'with_pin') return hasPin;
+      if (pinMode === 'without_pin') return !hasPin;
+      return true;
+    })
     .sort((a, b) => {
       if (sortMode === 'rounds_desc') {
         return (roundCounts[b.id] || 0) - (roundCounts[a.id] || 0) || a.name.localeCompare(b.name);
