@@ -77,12 +77,38 @@ async function main() {
   }
 
   const courses = await restAll('rpc/get_public_courses?order=name.asc,id.asc');
-  const tees = await restAll('course_tees?select=id,course_id,par');
-  const holes = await restAll('course_holes?select=tee_id,hole_number,par&order=hole_number.asc');
+  const tees = [];
+  for (let lastId = null; ; ) {
+    const filter = lastId ? `&id=gt.${lastId}` : '';
+    const page = await rest(`course_tees?select=id,course_id,par&order=id.asc&limit=1000${filter}`);
+    tees.push(...page);
+    if (page.length < 1000) break;
+    lastId = page[page.length - 1].id;
+  }
+  // Only fetch holes for one tee per course (preferring one matching the course par) to keep requests small.
+  const parByCourse = new Map(courses.map((c) => [c.id, c.par]));
+  const chosen = new Map();
+  for (const tee of tees) {
+    const cur = chosen.get(tee.course_id);
+    if (!cur || (tee.par === parByCourse.get(tee.course_id) && cur.par !== tee.par)) chosen.set(tee.course_id, tee);
+  }
+  const chosenIds = [...chosen.values()].map((t) => t.id);
+  const holes = [];
+  const chunks = [];
+  for (let i = 0; i < chosenIds.length; i += 50) chunks.push(chosenIds.slice(i, i + 50));
+  let next = 0;
+  async function worker() {
+    while (next < chunks.length) {
+      const ids = chunks[next++];
+      const rows = await rest(`course_holes?select=tee_id,hole_number,par&tee_id=in.(${ids.join(',')})&limit=1000`);
+      holes.push(...rows);
+    }
+  }
+  await Promise.all(Array.from({ length: 6 }, worker));
   const teesByCourse = new Map();
   const holesByTee = new Map();
 
-  for (const tee of tees) {
+  for (const tee of chosen.values()) {
     const courseTees = teesByCourse.get(tee.course_id) || [];
     courseTees.push(tee);
     teesByCourse.set(tee.course_id, courseTees);
